@@ -1,0 +1,44 @@
+ode-data-logger/target
+cv-data-service-library/target
+ode-wrapper/target
+
+/ode-data-logger/**/*.class
+/cv-data-service-library/**/*.class
+/ode-wrapper/**/*.class
+
+cv-data-logger-library
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+testem.log
+/typings
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db
+
+*.log

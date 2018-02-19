@@ -1,0 +1,136 @@
+{
+    "metadata": {
+      "recordGeneratedBy": "OBU",
+      "receivedMessageDetails": {
+        "locationData": {
+          "elevation": 1494,
+          "heading": "253.6000",
+          "latitude": 40.5720251,
+          "speed": "0.00",
+          "longitude": -105.0469033
+        },
+        "rxSource": "RSU"
+      },
+      "schemaVersion": 3,
+      "securityResultCode": "unknown",
+      "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
+      "serialId": {
+        "recordId": 2,
+        "serialNumber": 0,
+        "streamId": "024193ec-e4b7-4d50-9e30-b80e5e82a164",
+        "bundleSize": 1,
+        "bundleId": 4063
+      },
+      "sanitized": false,
+      "recordGeneratedAt": "2017-10-18T15:32:16.810Z[UTC]",
+      "recordType": "rxMsg",
+      "logFileName": "rxMsg_1508341730_2001_470_11_456_226_adff_fe05_14b1.csv",
+      "odeReceivedAt": "2017-11-21T18:51:29.896Z[UTC]"
+    },
+    "payload": {
+      "data": {
+        "MessageFrame": {
+          "messageId": 31,
+          "value": {
+            "TravelerInformation": {
+              "timeStamp": 408812,
+              "packetID": "000000000000000018",
+              "urlB": null,
+              "dataFrames": {
+                "TravelerDataFrame": {
+                  "regions": {
+                    "GeographicalPath": {
+                      "closedPath": {
+                        "false": ""
+                      },
+                      "anchor": {
+                        "elevation": 15060,
+                        "lat": 405726126,
+                        "long": -1050477579
+                      },
+                      "name": "Testing TIM",
+                      "laneWidth": 32700,
+                      "directionality": {
+                        "both": ""
+                      },
+                      "description": {
+                        "path": {
+                          "offset": {
+                            "xy": {
+                              "nodes": {
+                                "NodeXY": [
+                                  {
+                                    "delta": {
+                                      "node-LatLon": {
+                                        "lon": -1050524251,
+                                        "lat": 405744807
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "delta": {
+                                      "node-LatLon": {
+                                        "lon": -1050500237,
+                                        "lat": 405735393
+                                      }
+                                    }
+                                  }                                                                                                                            
+                                ]
+                              }
+                            }
+                          },
+                          "scale": 0
+                        }
+                      },
+                      "id": {
+                        "id": 33,
+                        "region": 0
+                      },
+                      "direction": 1111111111111111
+                    }
+                  },
+                  "duratonTime": 2000,
+                  "sspMsgRights1": 1,
+                  "sspMsgRights2": 1,
+                  "startYear": 2017,
+                  "msgId": {
+                    "roadSignID": {
+                      "crc": "0000",
+                      "viewAngle": 1111111111111111,
+                      "mutcdCode": {
+                        "warning": ""
+                      },
+                      "position": {
+                        "elevation": 15060,
+                        "lat": 405726126,
+                        "long": -1050477579
+                      }
+                    }
+                  },
+                  "priority": 7,
+                  "content": {
+                    "advisory": {
+                      "SEQUENCE": {
+                        "item": {
+                          "itis": 7991
+                        }
+                      }
+                    }
+                  },
+                  "url": null,
+                  "sspTimRights": 1,
+                  "sspLocationRights": 1,
+                  "frameType": {
+                    "advisory": ""
+                  },
+                  "startTime": 408808
+                }
+              },
+              "msgCnt": 1
+            }
+          }
+        }
+      },
+      "dataType": "TravelerInformation"
+    }
+  }

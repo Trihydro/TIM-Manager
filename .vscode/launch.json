@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [      
+        {
+            "type": "java",
+            "name": "CV Data Service Library (Launch)",
+            "request": "launch",     
+            "args": "",      
+            "cwd": "${workspaceRoot}/cv-data-service-library",
+            "mainClass": "com.trihydro.library.Application"           
+        },
+        {
+            "type": "java",
+            "name": "ODE Data Logger (Launch)",
+            "request": "launch",            
+            "args": "-g logger_group_btim_dev -t topic.OdeTimBroadcastJson -type string",
+            "cwd": "${workspaceRoot}/ode-data-logger",
+            "mainClass": "com.trihydro.cvlogger.app.OdeLoggingConsumer"           
+        },
+        {
+            "type": "java",
+            "name": "Debug (Attach)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 0
+        }
+    ]
+} 

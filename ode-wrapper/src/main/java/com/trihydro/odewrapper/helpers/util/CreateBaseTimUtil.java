@@ -2,7 +2,7 @@ package com.trihydro.odewrapper.helpers.util;
 
 import com.trihydro.odewrapper.model.WydotTimBase;
 import com.google.gson.Gson;
-import com.trihydro.service.milepost.MilepostService;
+import com.trihydro.library.service.milepost.MilepostService;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.text.DateFormat;
@@ -23,7 +23,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.MsgId;
 
 import com.trihydro.odewrapper.model.Milepost;
-import com.trihydro.service.model.WydotRsu;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import java.math.BigDecimal;
 import org.springframework.web.client.RestClientException;

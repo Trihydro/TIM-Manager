@@ -9,14 +9,13 @@
   </parent> -->
 
   <parent>
-    <groupId>org.trihydro.wyocv</groupId>
+    <groupId>com.wyocv</groupId>
     <artifactId>wyo-cv</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <!-- <relativePath />  -->
   </parent>
 
+  <!-- <groupId>com.trihydro</groupId> -->
   <artifactId>ode-data-logger</artifactId>
-  <!-- <version>0.0.1-SNAPSHOT</version> -->
   <name>ode-data-logger</name>
   <packaging>jar</packaging>
 
@@ -40,29 +39,9 @@
       <version>0.10.1.0</version>
     </dependency>
     <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-core</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-plugins</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-common</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-svcs</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.trihydro.wyocv</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>cv-data-service-library</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -72,7 +51,6 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
     </dependency>
-
 
     <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
     <dependency>
@@ -111,14 +89,13 @@
   <build>
     <plugins>
       <plugin>
-        <!-- Build an executable JAR -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.cvlogger.app.CVLogger</mainClass>
+              <mainClass>com.trihydro.cvlogger.app.CVLogger</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
@@ -126,7 +103,7 @@
           </descriptorRefs>
         </configuration>
       </plugin>
-      		<plugin>
+    	<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
@@ -176,7 +153,7 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<groups>com.cvlogger.app.IntegrationTest</groups>
+					<groups>com.trihydro.cvlogger.app.IntegrationTestCVLogger</groups>
 				</configuration>
 				<executions>
 					<execution>
@@ -191,10 +168,10 @@
 					</execution>
 				</executions>
 			</plugin>
-      <plugin>
+      <!-- <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
+      </plugin> -->
     </plugins>
   </build>
 </project>

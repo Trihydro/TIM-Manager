@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
 import java.util.Collections;
-import com.trihydro.service.model.WydotRsu;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.model.TimQuery;
-import com.trihydro.service.model.TimType;
+import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.WydotTimBase;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -18,14 +18,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
 import com.google.gson.Gson;
-import com.trihydro.service.tim.ActiveTimLogger;
-import com.trihydro.service.tim.TimRsuLogger;
-import com.trihydro.service.tim.ActiveTimItisCodeLogger;
-import com.trihydro.service.tim.TimLogger;
-import com.trihydro.service.timtype.TimTypeService;
+import com.trihydro.library.service.tim.ActiveTimLogger;
+import com.trihydro.library.service.tim.TimRsuLogger;
+import com.trihydro.library.service.tim.ActiveTimItisCodeLogger;
+import com.trihydro.library.service.tim.TimService;
+import com.trihydro.library.service.timtype.TimTypeService;
 import com.trihydro.odewrapper.helpers.DBUtility;
 // import com.trihydro.odewrapper.service.J2735TravelerInformationMessageService;
-import com.trihydro.service.model.ActiveTim;
+import com.trihydro.library.model.ActiveTim;
 import org.springframework.http.MediaType;
 
 @Component
@@ -91,7 +91,7 @@ public class WydotTimService
     public static Long updateTimOnRsu(WydotTravelerInputData timToSend, Long activeTimId, Integer rsuId){
 
         // get existing TIM
-        J2735TravelerInformationMessage tim = TimLogger.getTim(activeTimId, dbUtility.getConnection());                    
+        J2735TravelerInformationMessage tim = TimService.getTim(activeTimId, dbUtility.getConnection());                    
         // set TIM packetId 
         timToSend.getTim().setPacketID(tim.getPacketID());
         // get RSU index

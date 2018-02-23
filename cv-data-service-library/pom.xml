@@ -2,34 +2,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
  
-  <!-- <groupId>com.trihydro.service</groupId> -->
- 
-
   <parent>
-    <groupId>org.trihydro.wyocv</groupId>
+    <groupId>com.wyocv</groupId>
     <artifactId>wyo-cv</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <!-- <relativePath />  -->
   </parent>
 
   <artifactId>cv-data-service-library</artifactId>
-  <!-- <version>0.0.1-SNAPSHOT</version> -->
   <name>cv-data-service-library</name>
   <packaging>jar</packaging>
- 
-  <build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.3</version>
-            <configuration>
-                <source>1.8</source>
-                <target>1.8</target>
-            </configuration>
-        </plugin>
-    </plugins>
-  </build>
+  <!-- <version>0.0.1-SNAPSHOT</version> -->
+
   <url>http://maven.apache.org</url>
   <properties>
     <java.version>1.8</java.version>
@@ -42,24 +25,18 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-core</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-plugins</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-common</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-svcs</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+        <groupId>com.oracle</groupId>
+        <artifactId>ojdbc8</artifactId>
+        <version>12.2.0.1.0</version>
     </dependency>
   </dependencies>
 </project>

@@ -8,7 +8,7 @@
     <!-- <version>0.1.0</version> -->
 
     <parent>
-        <groupId>org.trihydro.wyocv</groupId>
+        <groupId>com.wyocv</groupId>
         <artifactId>wyo-cv</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <!-- <relativePath />  -->
@@ -29,9 +29,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.trihydro.wyocv</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>cv-data-service-library</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -55,14 +56,24 @@
     </properties>
 
 
-    <build>
+    <!-- <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                    <configuration>
+                        <classifier>exec</classifier>
+                    </configuration>
+                </execution>
+                </executions>
             </plugin>
         </plugins>
-    </build>
+    </build> -->
 
     <repositories>
         <repository>

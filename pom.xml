@@ -10,15 +10,16 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>org.trihydro.wyocv</groupId>
+    <groupId>com.wyocv</groupId>
     <artifactId>wyo-cv</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>cv-data-service-library</module>
-        <module>ode-data-logger</module>
-        <module>ode-wrapper</module>
+        <module>cv-data-controller</module>
+        <!-- <module>ode-data-logger</module>
+        <module>ode-wrapper</module> -->
     </modules>
 
     <dependencies>
@@ -27,8 +28,26 @@
             <artifactId>gson</artifactId>
             <version>2.8.1</version>
         </dependency>
+        <dependency>
+            <groupId>us.dot.jpo.ode</groupId>
+            <artifactId>jpo-ode-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>us.dot.jpo.ode</groupId>
+            <artifactId>jpo-ode-plugins</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>us.dot.jpo.ode</groupId>
+            <artifactId>jpo-ode-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>us.dot.jpo.ode</groupId>
+            <artifactId>jpo-ode-svcs</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>      
     </dependencies>
-
     
-
 </project>

@@ -95,7 +95,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.trihydro.cvlogger.app.CVLogger</mainClass>
+              <mainClass>com.trihydro.cvlogger.app.OdeLoggingConsumer</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

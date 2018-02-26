@@ -22,7 +22,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.MsgId;
 
-import com.trihydro.odewrapper.model.Milepost;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import java.math.BigDecimal;
@@ -140,7 +140,7 @@ public class CreateBaseTimUtil
         path.setType("xy");
 
         List<Milepost> mileposts;
-        mileposts = MilepostService.selectMilepostRange(timBase.getDirection(), Math.min(timBase.getToRm(), timBase.getFromRm()), Math.max(timBase.getToRm(), timBase.getFromRm()), dbUtility.getConnection());
+        mileposts = MilepostService.selectMilepostRange(timBase.getDirection(), timBase.getRoute(), Math.min(timBase.getToRm(), timBase.getFromRm()), Math.max(timBase.getToRm(), timBase.getFromRm()), dbUtility.getConnection());
         
         OdePosition3D anchorPosition = new OdePosition3D();
         if(mileposts.size() > 0){

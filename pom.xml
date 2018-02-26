@@ -18,8 +18,8 @@
     <modules>
         <module>cv-data-service-library</module>
         <module>cv-data-controller</module>
-        <!-- <module>ode-data-logger</module>
-        <module>ode-wrapper</module> -->
+        <module>ode-data-logger</module>
+        <module>ode-wrapper</module>
     </modules>
 
     <dependencies>

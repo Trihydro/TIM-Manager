@@ -43,16 +43,16 @@ import com.trihydro.odewrapper.helpers.DBUtility;
 @Component
 public class CreateBaseTimUtil
 {    
-    private MilepostService milepostService;
+    //private MilepostService milepostService;
     public static DBUtility dbUtility;
     
     @Autowired
     public Environment env;
 
-	@Autowired
-	CreateBaseTimUtil(MilepostService milepostService) {
-        this.milepostService = milepostService;	
-    }	    
+	// @Autowired
+	// CreateBaseTimUtil(MilepostService milepostService) {
+    //     this.milepostService = milepostService;	
+    // }	    
     
     @Autowired
     public void setDBUtility(DBUtility dbUtilityRh) {
@@ -107,9 +107,9 @@ public class CreateBaseTimUtil
         tim.setTimeStamp(nowAsISO);
         
         J2735TravelerInformationMessage.DataFrame dataFrame = new J2735TravelerInformationMessage.DataFrame();
-        dataFrame.setsspTimRights((short)1);
-        dataFrame.setsspLocationRights((short)1);
-        dataFrame.setsspMsgContent((short)1);
+        dataFrame.setSspTimRights((short)1);
+        dataFrame.setSspLocationRights((short)1);
+        dataFrame.setSspMsgContent((short)1);
         MsgId msgId = new MsgId();
         msgId.setFurtherInfoID("CDEF");
         dataFrame.setMsgId(msgId);
@@ -140,7 +140,7 @@ public class CreateBaseTimUtil
         path.setType("xy");
 
         List<Milepost> mileposts;
-        mileposts = MilepostService.selectMilepostRange(timBase.getDirection(), timBase.getRoute(), Math.min(timBase.getToRm(), timBase.getFromRm()), Math.max(timBase.getToRm(), timBase.getFromRm()), dbUtility.getConnection());
+        mileposts = MilepostService.selectMilepostRange(timBase.getDirection(), "I 80", Math.min(timBase.getToRm(), timBase.getFromRm()), Math.max(timBase.getToRm(), timBase.getFromRm()), dbUtility.getConnection());
         
         OdePosition3D anchorPosition = new OdePosition3D();
         if(mileposts.size() > 0){

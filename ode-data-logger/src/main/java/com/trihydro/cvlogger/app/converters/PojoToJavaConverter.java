@@ -23,9 +23,8 @@ import java.math.BigDecimal;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
-import us.dot.its.jpo.ode.model.OdeDriverAlertMetadata;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
-import us.dot.its.jpo.ode.model.OdeTimMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -44,9 +43,9 @@ public class PojoToJavaConverter {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    public static OdeTimMetadata convertTimMetadataJsonToJava(String value){
+    public static OdeLogMetadataReceived convertTimMetadataJsonToJava(String value){
         
-        OdeTimMetadata odeTimMetadata = null;
+        OdeLogMetadataReceived odeTimMetadata = null;
     
         try {       
             JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");	           
@@ -61,7 +60,7 @@ public class PojoToJavaConverter {
                 }
             }
        
-            odeTimMetadata = mapper.treeToValue(metaDataNode, OdeTimMetadata.class);	            
+            odeTimMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadataReceived.class);	            
 		}
 		catch (IOException e) {
             System.out.println("IOException");

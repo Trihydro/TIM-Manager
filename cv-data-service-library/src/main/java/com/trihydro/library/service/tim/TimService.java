@@ -1,7 +1,7 @@
 package com.trihydro.library.service.tim;
 
 import java.sql.Connection;
-import us.dot.its.jpo.ode.model.OdeTimMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,7 +21,7 @@ public class TimService extends CvDataLoggerLibrary {
 
 	static PreparedStatement preparedStatement = null;
 
-	public static Long insertTim(OdeTimMetadata odeTimMetadata, J2735TravelerInformationMessage j2735TravelerInformationMessage, Connection connection) { 
+	public static Long insertTim(OdeLogMetadataReceived odeTimMetadata, J2735TravelerInformationMessage j2735TravelerInformationMessage, Connection connection) { 
 		try {
 			TimOracleTables timOracleTables = new TimOracleTables();
 			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim", timOracleTables.getTimTable());
@@ -37,42 +37,78 @@ public class TimService extends CvDataLoggerLibrary {
 				else if(col.equals("URL_B"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, j2735TravelerInformationMessage.getUrlB());
 				else if(col.equals("TIME_STAMP")){
-					LocalDateTime timeStampDateTime = LocalDateTime.parse(j2735TravelerInformationMessage.getTimeStamp(), localDateTimeformatter);
-					System.out.println(timeStampDateTime.toString());
-					Timestamp ts = Timestamp.valueOf(timeStampDateTime);					
-					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);	
+					// if(localDateTimeformatter.parse(j2735TravelerInformationMessage.getTimeStamp() == null)){
+					// 	LocalDateTime timeStampDateTime = LocalDateTime.parse(j2735TravelerInformationMessage.getTimeStamp(), localDateTimeformatter);	
+					// } 
+					// else if(localDateTimeformatter.parse(j2735TravelerInformationMessage.getTimeStamp() == null))
+
+					// LocalDateTime timeStampDateTime = LocalDateTime.parse(j2735TravelerInformationMessage.getTimeStamp(), localDateTimeformatter);
+					// System.out.println(timeStampDateTime.toString());
+					// Timestamp ts = Timestamp.valueOf(timeStampDateTime);					
+					// SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
+					preparedStatement.setString(fieldNum, null);																						
 				}		
-				else if(col.equals("RECORD_GENERATED_BY"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getRecordGeneratedBy().toString());											
-				else if(col.equals("RMD_LD_ELEVATION"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getElevation());
-				else if(col.equals("RMD_LD_HEADING"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getHeading());
-				else if(col.equals("RMD_LD_LATITUDE"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getLatitude());
-				else if(col.equals("RMD_LD_LONGITUDE"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getLongitude());
-				else if(col.equals("RMD_LD_SPEED"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getSpeed());
-				else if(col.equals("RMD_RX_SOURCE"))
-					if(odeTimMetadata.getReceivedMessageDetails().getRxSource() != null)					
+				else if(col.equals("RECORD_GENERATED_BY"))	{
+					if(odeTimMetadata.getRecordGeneratedBy() != null)
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getRecordGeneratedBy().toString());											
+					else
+						preparedStatement.setString(fieldNum, null);																
+				}					
+				else if(col.equals("RMD_LD_ELEVATION")){
+					if(odeTimMetadata.getReceivedMessageDetails() != null)
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getElevation());
+					else
+						preparedStatement.setString(fieldNum, null);	
+				}
+				else if(col.equals("RMD_LD_HEADING")){
+					if(odeTimMetadata.getReceivedMessageDetails() != null)
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getHeading());
+					else
+						preparedStatement.setString(fieldNum, null);	
+				}					
+				else if(col.equals("RMD_LD_LATITUDE")){
+					if(odeTimMetadata.getReceivedMessageDetails() != null)
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getLatitude());
+					else
+						preparedStatement.setString(fieldNum, null);	
+				}					
+				else if(col.equals("RMD_LD_LONGITUDE")){
+					if(odeTimMetadata.getReceivedMessageDetails() != null)
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getLongitude());
+					else
+						preparedStatement.setString(fieldNum, null);	
+				}					
+				else if(col.equals("RMD_LD_SPEED")){
+					if(odeTimMetadata.getReceivedMessageDetails() != null)
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getLocationData().getSpeed());
+					else
+						preparedStatement.setString(fieldNum, null);	
+				}					
+				else if(col.equals("RMD_RX_SOURCE")){					
+					if(odeTimMetadata.getReceivedMessageDetails() != null && odeTimMetadata.getReceivedMessageDetails().getRxSource() != null)					
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getReceivedMessageDetails().getRxSource().toString());
 					else
 						preparedStatement.setString(fieldNum, null);
+				}
 				else if(col.equals("SCHEMA_VERSION"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
 				else if(col.equals("SECURITY_RESULT_CODE")) {
-					SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
-					.filter(x -> x.getSecurityResultCodeType().equals(odeTimMetadata.getSecurityResultCode().toString()))
-					.findFirst()
-					.orElse(null);						
-					preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());														
+					if(odeTimMetadata.getSecurityResultCode() != null){
+						SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
+						.filter(x -> x.getSecurityResultCodeType().equals(odeTimMetadata.getSecurityResultCode().toString()))
+						.findFirst()
+						.orElse(null);						
+						preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());	
+					}
+					else
+						preparedStatement.setString(fieldNum, null);																	
 				}												
 				else if(col.equals("LOG_FILE_NAME"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getLogFileName());
 				else if(col.equals("RECORD_GENERATED_AT")){
-					java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());				
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(recordGeneratedAtDate));		
+					// java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());				
+					// SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(recordGeneratedAtDate));	
+					preparedStatement.setString(fieldNum, null);																						
 				}
 				else if(col.equals("SANITIZED")) {
 					if(odeTimMetadata.isSanitized())
@@ -92,7 +128,7 @@ public class TimService extends CvDataLoggerLibrary {
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, odeTimMetadata.getSerialId().getSerialNumber());
 				else if(col.equals("PAYLOAD_TYPE"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
-				else if(col.equals("RECORD_TYPE"))
+				else if(col.equals("RECORD_TYPE") && odeTimMetadata.getRecordType() != null)
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getRecordType().toString());
 				else if(col.equals("ODE_RECEIVED_AT")) {
 					java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());				
@@ -105,6 +141,7 @@ public class TimService extends CvDataLoggerLibrary {
 				fieldNum++;
 			}			
 			// execute insert statement
+			System.out.println(preparedStatement.toString());
 			Long timId = log(preparedStatement, "timID");
 			return timId;
 		} 

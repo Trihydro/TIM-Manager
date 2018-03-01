@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
+import java.util.Arrays;
 import java.util.Collections;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
@@ -165,13 +166,29 @@ public class WydotTimService
         String responseStr = null;
 
         try{           
-            responseStr = restTemplate.postForObject("https://ode.wyoroad.info:8443/tim/queryold", entity, String.class);          
+            responseStr = restTemplate.postForObject("https://ode.wyoroad.info:8443/tim/query", entity, String.class);          
         }
         catch(RestClientException e){
             return submitTimQuery(rsu, counter + 1);
         }
 
-        TimQuery timQuery = gson.fromJson(responseStr, TimQuery.class);
+        String[] items = responseStr.replaceAll("\\\"", "").replaceAll("\\:", "").replaceAll("indicies_set", "").replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\[", "").replaceAll(" ", "").replaceAll("\\]", "").replaceAll("\\s", "").split(",");
+        
+        int[] results = new int[items.length];
+        
+        for (int i = 0; i < items.length; i++) {
+            try {
+                results[i] = Integer.parseInt(items[i]);
+            } catch (NumberFormatException nfe) {
+                //NOTE: write something here if you need to recover from formatting errors
+            };
+        }
+
+        Arrays.sort(results);
+
+        TimQuery timQuery = new TimQuery();
+        timQuery.setIndicies_set(results);
+      //  TimQuery timQuery = gson.fromJson(responseStr, TimQuery.class);
         
         return timQuery;
     }

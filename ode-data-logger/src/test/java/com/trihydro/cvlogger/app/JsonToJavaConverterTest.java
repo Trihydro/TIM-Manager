@@ -12,10 +12,9 @@ import static org.junit.Assert.*;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
-import us.dot.its.jpo.ode.model.OdeDriverAlertMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
 import us.dot.its.jpo.ode.model.OdeLogMsgMetadataLocation;
-import us.dot.its.jpo.ode.model.OdeTimMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.RxSource;
@@ -44,7 +43,7 @@ public class JsonToJavaConverterTest {
         OdeLogMsgMetadataLocation locationData = new OdeLogMsgMetadataLocation();     
         SerialId serialId; 
 
-        OdeTimMetadata odeTimMetadata = new OdeTimMetadata();
+        OdeLogMetadataReceived odeTimMetadata = new OdeLogMetadataReceived();
         odeTimMetadata.setRecordGeneratedBy(GeneratedBy.OBU);
 
         locationData.setElevation("1515");
@@ -75,7 +74,7 @@ public class JsonToJavaConverterTest {
 
         String value = new String(Files.readAllBytes(Paths.get("src/test/resources/rxMsg_TIM_OdeOutput.json")));    
         
-        OdeTimMetadata odeTimMetadataTest = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
+        OdeLogMetadataReceived odeTimMetadataTest = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 
         assertNotNull(odeTimMetadataTest);
         assertEquals(odeTimMetadata, odeTimMetadataTest); 
@@ -84,7 +83,7 @@ public class JsonToJavaConverterTest {
     
     @Test 
 	public void TestConvertTimMetadataNullException() throws IOException {        
-        OdeTimMetadata odeTimMetadataTest = JsonToJavaConverter.convertTimMetadataJsonToJava("");
+        OdeLogMetadataReceived odeTimMetadataTest = JsonToJavaConverter.convertTimMetadataJsonToJava("");
         assertNull(odeTimMetadataTest);    
     }
     
@@ -284,7 +283,7 @@ public class JsonToJavaConverterTest {
         OdeLogMsgMetadataLocation locationData = new OdeLogMsgMetadataLocation();     
         SerialId serialId; 
 
-        OdeDriverAlertMetadata odeDriverAlertMetadata = new OdeDriverAlertMetadata();
+        OdeLogMetadataReceived odeDriverAlertMetadata = new OdeLogMetadataReceived();
         odeDriverAlertMetadata.setRecordGeneratedBy(GeneratedBy.OBU);
 
         locationData.setElevation("1486.0");
@@ -313,7 +312,7 @@ public class JsonToJavaConverterTest {
         odeDriverAlertMetadata.setOdeReceivedAt("2017-11-30T21:37:24.266Z[UTC]");
 
         String value = new String(Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput.json"))); 
-        OdeDriverAlertMetadata odeDriverAlertMetadataTest = JsonToJavaConverter.convertDriverAlertMetadataJsonToJava(value);
+        OdeLogMetadataReceived odeDriverAlertMetadataTest = JsonToJavaConverter.convertDriverAlertMetadataJsonToJava(value);
 
         assertNotNull(odeDriverAlertMetadataTest);
         assertEquals(odeDriverAlertMetadata, odeDriverAlertMetadata);       

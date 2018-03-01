@@ -23,9 +23,8 @@ import java.math.BigDecimal;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
-import us.dot.its.jpo.ode.model.OdeDriverAlertMetadata;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
-import us.dot.its.jpo.ode.model.OdeTimMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -136,9 +135,9 @@ public class JsonToJavaConverter {
         return part2Node;
     }
 
-    public static OdeTimMetadata convertTimMetadataJsonToJava(String value){
+    public static OdeLogMetadataReceived convertTimMetadataJsonToJava(String value){
         
-        OdeTimMetadata odeTimMetadata = null;
+        OdeLogMetadataReceived odeTimMetadata = null;
     
         try {       
             JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");	           
@@ -153,7 +152,7 @@ public class JsonToJavaConverter {
                 }
             }
        
-            odeTimMetadata = mapper.treeToValue(metaDataNode, OdeTimMetadata.class);	            
+            odeTimMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadataReceived.class);	            
 		}
 		catch (IOException e) {
             System.out.println("IOException");
@@ -245,9 +244,10 @@ public class JsonToJavaConverter {
         return odeTimPayload;
     }
 
-    public static OdeTimPayload convertBroadcastTimPayloadJsonToJava(String value){
+    public static J2735TravelerInformationMessage convertBroadcastTimPayloadJsonToJava(String value){
         
         OdeTimPayload odeTimPayload = null;
+        J2735TravelerInformationMessage odeTim = null;
 
         try {
             J2735TravelerInformationMessage.DataFrame[] dataFrames = new J2735TravelerInformationMessage.DataFrame[1];
@@ -258,7 +258,7 @@ public class JsonToJavaConverter {
 
             //JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data");
-            odeTimPayload = mapper.treeToValue(timNode, OdeTimPayload.class);	            
+            odeTim = mapper.treeToValue(timNode, J2735TravelerInformationMessage.class);	            
             
             //JsonNode anchorNode = JsonUtils.getJsonNode(value, "payload").get("data").get("dataframes").get("regions").get("anchorPosition");
             //JsonNode nodeXYArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("dataframes").get("regions").get("path").get("nodes");					
@@ -323,14 +323,14 @@ public class JsonToJavaConverter {
             System.out.println(e.getMessage());
         }
         
-        return odeTimPayload;
+        return odeTim;
     }
 
-    public static OdeDriverAlertMetadata convertDriverAlertMetadataJsonToJava(String value){    
-        OdeDriverAlertMetadata odeDriverAlertMetadata = null;
+    public static OdeLogMetadataReceived convertDriverAlertMetadataJsonToJava(String value){    
+        OdeLogMetadataReceived odeDriverAlertMetadata = null;
         JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");	
         try {
-			odeDriverAlertMetadata = mapper.treeToValue(metaDataNode, OdeDriverAlertMetadata.class);
+			odeDriverAlertMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadataReceived.class);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
         }	

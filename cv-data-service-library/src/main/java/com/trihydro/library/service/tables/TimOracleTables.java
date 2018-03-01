@@ -14,6 +14,7 @@ public class TimOracleTables extends OracleTables {
     private List<String> activeTimTable;
     private List<String> activeTimItisCodeTable;
     private List<String> timRsuTable;
+    private List<String> dataFrameItisCodeTable;
 
     public List<String> getTimTable(){
         if(timTable != null)
@@ -155,6 +156,17 @@ public class TimOracleTables extends OracleTables {
             timRsuTable.add("TIM_ID");
             timRsuTable.add("RSU_ID");
             return timRsuTable;
+        }
+    }
+
+    public List<String> getDataFrameItisCodeTable(){
+        if(dataFrameItisCodeTable != null)
+            return dataFrameItisCodeTable;
+        else {
+            dataFrameItisCodeTable = new ArrayList<String>();
+            dataFrameItisCodeTable.add("ITIS_CODE_ID");
+            dataFrameItisCodeTable.add("DATA_FRAME_ID");
+            return dataFrameItisCodeTable;
         }
     }
     

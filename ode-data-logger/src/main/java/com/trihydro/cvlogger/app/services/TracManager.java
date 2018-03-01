@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import us.dot.its.jpo.ode.model.OdeTimMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import com.trihydro.library.service.tracmessage.TracMessageSentService;
 import com.trihydro.library.service.tracmessage.TracMessageTypeService;
@@ -53,7 +53,7 @@ public class TracManager {
 
     public static void submitDNMsgToTrac(String value, Connection connection) {
 		
-		OdeTimMetadata metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
+		OdeLogMetadataReceived metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 		OdeTimPayload payload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);		
 
 		// check if packetId is in trac message sent table

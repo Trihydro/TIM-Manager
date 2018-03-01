@@ -102,22 +102,24 @@ public class WydotTimVslService extends WydotTimService
                 rsus.get(i).setRsuRetries(Integer.parseInt(env.getProperty("rsuRetries")));     
                 WydotRsu[] timRsus = new WydotRsu[1];
                 timRsus[0] = rsus.get(i);
-                timToSend.setRsus(timRsus);
-                            
+                timToSend.setRsus(timRsus);                               
+
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(wydotTimVsl.getDirection() + "_" + wydotTimVsl.getRoute() + "_VSL_" + wydotTimVsl.getFromRm() + "_" + wydotTimVsl.getToRm());
+
                 System.out.println("active tim size: " + activeTims.size());
                 
                 // send tim to rsu 
                 if(activeTims.size() > 0) {
                     for (ActiveTim activeTim : activeTims) {
                         timId = updateTimOnRsu(timToSend, activeTim.getTimId(), rsus.get(i).getRsuId());
-                        updateActiveTims(activeTim, itisCodeIds, timId, null);    
-                        activeTimIds.add(activeTim.getActiveTimId());
+                        //updateActiveTims(activeTim, itisCodeIds, timId, null);    
+                        //activeTimIds.add(activeTim.getActiveTimId());
                     }                                  
                 }     
                 else {
                     timId = sendNewTimToRsu(timToSend, rsus.get(i)); 
-                    Long activeTimId = addActiveTim(timId, wydotTimVsl, itisCodeIds, timType, timToSend.getTim().getDataframes()[0].getStartDateTime(), null, null);
-                    activeTimIds.add(activeTimId);
+                    //Long activeTimId = addActiveTim(timId, wydotTimVsl, itisCodeIds, timType, timToSend.getTim().getDataframes()[0].getStartDateTime(), null, null);
+                    //activeTimIds.add(activeTimId);
                 }               
             }
 

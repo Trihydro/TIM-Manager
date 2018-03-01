@@ -13,11 +13,10 @@ import org.junit.Ignore;
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
 import us.dot.its.jpo.ode.model.OdeData;
-import us.dot.its.jpo.ode.model.OdeDriverAlertMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
 import us.dot.its.jpo.ode.model.OdeLogMsgMetadataLocation;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
-import us.dot.its.jpo.ode.model.OdeTimMetadata;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TransmissionState;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
@@ -58,7 +57,7 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
          OdeLogMsgMetadataLocation locationData = new OdeLogMsgMetadataLocation();     
          SerialId serialId; 
  
-         OdeTimMetadata odeTimMetadata = new OdeTimMetadata();
+         OdeLogMetadataReceived odeTimMetadata = new OdeLogMetadataReceived();
          odeTimMetadata.setRecordGeneratedBy(GeneratedBy.OBU);
  
          locationData.setElevation("1515");
@@ -133,7 +132,7 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
 
         // call test code
         OdeData odeDataTest = TimLogger.processTimJson(value);
-        OdeTimMetadata odeTimMetadataTest = ((OdeTimMetadata)odeDataTest.getMetadata());
+        OdeLogMetadataReceived odeTimMetadataTest = ((OdeLogMetadataReceived)odeDataTest.getMetadata());
         OdeTimPayload odeTimPayloadTest = (OdeTimPayload)odeDataTest.getPayload();
 
         // assertions
@@ -223,7 +222,7 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
         OdeLogMsgMetadataLocation locationData = new OdeLogMsgMetadataLocation();     
         SerialId serialId; 
 
-        OdeDriverAlertMetadata odeDriverAlertMetadata = new OdeDriverAlertMetadata();
+        OdeLogMetadataReceived odeDriverAlertMetadata = new OdeLogMetadataReceived();
         odeDriverAlertMetadata.setRecordGeneratedBy(GeneratedBy.OBU);
 
         locationData.setElevation("1486.0");
@@ -256,7 +255,7 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
         // call test code
         OdeData odeDataTest = DriverAlertLogger.processDriverAlertJson(value);
 
-        OdeDriverAlertMetadata odeDriverAlertMetadataTest = (OdeDriverAlertMetadata)odeDataTest.getMetadata();
+        OdeLogMetadataReceived odeDriverAlertMetadataTest = (OdeLogMetadataReceived)odeDataTest.getMetadata();
         OdeDriverAlertPayload odeDriverAlertPayloadTest = (OdeDriverAlertPayload)odeDataTest.getPayload();
 
         // assertions

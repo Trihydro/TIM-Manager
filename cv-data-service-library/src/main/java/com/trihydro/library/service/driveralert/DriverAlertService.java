@@ -1,7 +1,7 @@
 package com.trihydro.library.service.driveralert;
 
 import java.sql.Connection;
-import us.dot.its.jpo.ode.model.OdeDriverAlertMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import java.sql.PreparedStatement;
 import com.trihydro.library.service.CvDataLoggerLibrary;
 import com.trihydro.library.service.helpers.SQLNullHandler;
@@ -18,7 +18,7 @@ public class DriverAlertService extends CvDataLoggerLibrary {
     static PreparedStatement preparedStatement = null;
     static List<DriverAlertType> driverAlertTypes;
 
-	public static Long insertDriverAlert(OdeDriverAlertMetadata odeDriverAlertMetadata, String alert, Connection connection) { 
+	public static Long insertDriverAlert(OdeLogMetadataReceived odeDriverAlertMetadata, String alert, Connection connection) { 
 		
 		driverAlertTypes = DriverAlertTypeService.selectAll(connection);
 		

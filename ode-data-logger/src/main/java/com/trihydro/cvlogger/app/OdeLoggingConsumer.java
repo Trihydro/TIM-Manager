@@ -73,6 +73,8 @@ public class OdeLoggingConsumer {
 
   		System.out.println("starting..............");   
 		Connection connection = SqlConnection.makeJDBCConnection();		
+		TimLogger timLogger = new TimLogger(connection);
+
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		//String endpoint = "https://ode.wyoroad.info:9092";		
@@ -169,7 +171,7 @@ public class OdeLoggingConsumer {
 						else if(topic.equals("topic.OdeTimBroadcastJson")){					
 							OdeData odeData = TimLogger.processBroadcastTimJson(record.value());
 							if(odeData != null)
-								TimLogger.addActiveTimToOracleDB(odeData, connection);		
+								timLogger.addActiveTimToOracleDB(odeData);		
 						}
 					}
 				}

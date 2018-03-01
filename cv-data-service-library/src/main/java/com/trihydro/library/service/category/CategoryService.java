@@ -1,15 +1,15 @@
 package com.trihydro.library.service.category;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.trihydro.library.model.Category;
 
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.ArrayList;
-import java.sql.ResultSet;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.sql.Connection;
 
 @Component
 public class CategoryService 

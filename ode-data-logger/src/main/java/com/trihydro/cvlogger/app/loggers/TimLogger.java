@@ -87,20 +87,21 @@ public class TimLogger extends BaseLogger{
 		TimType timType = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>(); 
 
+		// save DataFrame ITIS codes				
+		List<Integer> itisCodeIds = getItisCodeIds(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getItems());
+		
+		for (Integer timItisCodeId : itisCodeIds) 
+			DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, new Long(timItisCodeId), connection); 
+
 		// if true, TIM came from WYDOT
 		if(splitName.length > 2) {       
 
 			timType = getTimType(splitName[2]);   	
 			
-			// save DataFrame ITIS codes		
-			List<Long> itisCodeIds = setItisCodes(timType, timItisCodes);
-		
-			for (Long timItisCodeId : itisCodeIds) 
-				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId, connection); 
-			
 			activeTims = ActiveTimLogger.getActiveTims(Double.parseDouble(splitName[3]), Double.parseDouble(splitName[4]), timType.getTimTypeId(), direction, connection);            		
 
 			Long activeTimId = null;
+			
 			// Active TIM exists
 			if(activeTims.size() == 0)
 				activeTimId = ActiveTimLogger.insertActiveTim(timId, Double.parseDouble(splitName[3]), Double.parseDouble(splitName[4]), direction, timType.getTimTypeId(), ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), null, route, null, connection);		
@@ -109,6 +110,7 @@ public class TimLogger extends BaseLogger{
 					// update Active TIM table TIM Id
 					ActiveTimLogger.updateActiveTimTimId(activeTim.getActiveTimId(), timId, connection);
 
+					// TODO - change to duration
 					// if(endDateTime != null)
 					// 	ActiveTimLogger.updateActiveTimEndDate(activeTim.getActiveTimId(), endDateTime, dbUtility.getConnection());    
 				}      
@@ -116,11 +118,7 @@ public class TimLogger extends BaseLogger{
 		}
 		else{
 			// not from WYDOT application
-			// save DataFrame ITIS codes		
-			List<Long> itisCodeIds = setItisCodes(null, timItisCodes);
 			
-			for (Long timItisCodeId : itisCodeIds) 
-				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId, connection); 
 		}
 
 		// Long activeTimId = ActiveTimLogger.insertActiveTim(timId, 1.0, 1.0, direction, null, ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), null, route, null, connection);
@@ -140,28 +138,24 @@ public class TimLogger extends BaseLogger{
         .orElse(null);
 
         return timType;
-	} 
-	
-	public List<Long> setItisCodes(String timType, String[] timItisCodes){
+	}   
 
-		ItisCode itisCode;
-		List<Long> itisCodeIds = new ArrayList<Long>();
+	public List<Integer> getItisCodeIds(String[] items){
 
-		if(timType.equals("VSL")) {
-			for (String timItisCode : timItisCodes) {
-				itisCode = itisCodes.stream()
-				.filter(x -> x.getItisCode().equals(Integer.parseInt(timItisCode)))
+		List<Integer> itisCodeIds = new ArrayList<Integer>();
+
+		for (String item : items) {
+                
+			ItisCode itisCode = itisCodes.stream()
+				.filter(x -> x.getItisCode().equals(Integer.parseInt(item)))
 				.findFirst()
 				.orElse(null);
-				if(itisCode != null) {
-					itisCodeIds.add(new Long(itisCode.getItisCodeId()));     
-				}	
-			}
-		}
-		// have null option TODO
+			if(itisCode != null)
+				itisCodeIds.add(itisCode.getItisCodeId());                 
+		} 
 
 		return itisCodeIds;
-	}    
+	}
 
 	// private Long addActiveTim(Long timId, WydotTimBase wydotTim, List<Integer> itisCodeIds, TimType timType, String startDateTime, String endDateTime, String clientId, Connection connection){       
 	

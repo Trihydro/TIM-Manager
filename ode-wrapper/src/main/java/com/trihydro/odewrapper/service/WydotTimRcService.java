@@ -85,6 +85,8 @@ public class WydotTimRcService extends WydotTimService
             TimType timType = getTimType("RC");
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 
+            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(wydotTimRc.getDirection() + "_" + wydotTimRc.getRoute() + "_VSL_" + wydotTimRc.getFromRm() + "_" + wydotTimRc.getToRm());
+
             if(timType != null)
                 ActiveTimLogger.getActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection(), dbUtility.getConnection());   
             
@@ -108,13 +110,13 @@ public class WydotTimRcService extends WydotTimService
                         rsu.setRsuRetries(3);     
                         WydotRsu[] rsuArr = new WydotRsu[1];
                         rsuArr[0] = rsu;
-                        timToSend.setRsus(rsuArr);
+                        timToSend.setRsus(rsuArr);                        
 
                         // update TIM rsu
                         timId = updateTimOnRsu(timToSend, activeTim.getTimId(), rsu.getRsuId());
                         // update Active TIM
-                        updateActiveTims(activeTim, itisCodeIds, timId, null);         
-                        activeTimIds.add(activeTim.getActiveTimId());                   
+                       //updateActiveTims(activeTim, itisCodeIds, timId, null);         
+                        //activeTimIds.add(activeTim.getActiveTimId());                   
                     }
                     // else active tim is satellite 
                     else{
@@ -137,8 +139,8 @@ public class WydotTimRcService extends WydotTimService
                     timToSend.setRsus(timRsus);
                                                                               
                     timId = sendNewTimToRsu(timToSend, rsus.get(i));
-                    Long activeTimId = addActiveTim(timId, wydotTimRc, itisCodeIds, timType, timToSend.getTim().getDataframes()[0].getStartDateTime(), null, null);       
-                    activeTimIds.add(activeTimId);                    
+                   // Long activeTimId = addActiveTim(timId, wydotTimRc, itisCodeIds, timType, timToSend.getTim().getDataframes()[0].getStartDateTime(), null, null);       
+                   // activeTimIds.add(activeTimId);                    
                 }            
             }
 

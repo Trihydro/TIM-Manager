@@ -48,5 +48,18 @@ public class MilepostController {
   	public List<Milepost> getMilepostRange(@PathVariable String route, @PathVariable Double lowerMilepost, @PathVariable Double higherMilepost) { 
    		List<Milepost> mileposts = MilepostService.selectMilepostRangeNoDirection(route, lowerMilepost, higherMilepost, dbUtility.getConnection());
    		return mileposts;
-  	}
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{route}/{start}/{end}")
+  	public List<Milepost> getMilepostTestRange(@PathVariable String direction, @PathVariable String route, @PathVariable Double start, @PathVariable Double end) { 
+   		List<Milepost> mileposts = MilepostService.selectMilepostTestRange(direction, route, start, end, dbUtility.getConnection());
+   		return mileposts;
+	}
+
+	@RequestMapping(value="/mileposts-test",method = RequestMethod.GET,headers="Accept=application/json")
+	public List<Milepost> getMilepostsTest() { 
+		 List<Milepost> mileposts = MilepostService.selectAllTest(dbUtility.getConnection());
+		 return mileposts;
+	}
+	  
 }

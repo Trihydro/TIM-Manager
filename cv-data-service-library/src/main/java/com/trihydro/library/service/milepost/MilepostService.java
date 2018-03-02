@@ -102,7 +102,40 @@ public class MilepostService extends CvDataLoggerLibrary {
    			e.printStackTrace();
   		}
   		return mileposts;
-	}	
+	}
+	
+	// select all mileposts within a range in one direction
+	public static List<Milepost> selectMilepostTestRange(String direction, String route, Double lowerMilepost, Double higherMilepost, Connection connection) {
+
+		List<Milepost> mileposts = new ArrayList<Milepost>();		
+		
+		try {
+			// build SQL query
+			Statement statement = connection.createStatement();
+			String statementStr = "select * from MILEPOST_TEST where direction = '" + direction + "' and milepost >= " + lowerMilepost + " and milepost <= "+ higherMilepost + " and route like '%" + route + "%'";
+   		    ResultSet rs;
+   		    if(direction.toLowerCase().equals("southbound"))
+				rs = statement.executeQuery(statementStr + "order by milepost asc");			
+			else
+				return mileposts;
+   			// convert result to milepost objects
+   			while (rs.next()) {   				
+			    Milepost milepost = new Milepost();
+	    	    milepost.setRoute(rs.getString("route"));
+	    	    milepost.setMilepost(rs.getDouble("milepost"));
+			    milepost.setDirection(rs.getString("direction"));	
+			    milepost.setLatitude(rs.getDouble("latitude"));
+			    milepost.setLongitude(rs.getDouble("longitude"));
+			    milepost.setElevation(rs.getDouble("elevation_ft"));	
+			    milepost.setBearing(rs.getDouble("bearing"));
+			    mileposts.add(milepost);
+   			}
+  		} 
+  		catch (SQLException e) {
+   			e.printStackTrace();
+  		}
+  		return mileposts;
+	}
 
 	// select all mileposts within a range in one direction
 	public static List<Milepost> selectMilepostRangeNoDirection(String route, Double lowerMilepost, Double higherMilepost, Connection connection) {
@@ -133,5 +166,35 @@ public class MilepostService extends CvDataLoggerLibrary {
 				e.printStackTrace();
 			}
 			return mileposts;
+	}	
+
+
+	// select all mileposts
+	public static List<Milepost> selectAllTest(Connection connection) {
+
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+
+		try {
+			// build statement SQL query
+				Statement statement = connection.createStatement();
+				ResultSet rs = statement.executeQuery("select * from MILEPOST_TEST order by milepost asc");
+				// convert result to milepost objects
+				while (rs.next()) {   				
+				Milepost milepost = new Milepost();
+				//milepost.setMilepostId(rs.getInt("milepost_id"));
+				milepost.setRoute(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setDirection(rs.getString("direction"));	
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setElevation(rs.getDouble("elevation_ft"));	
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+				}
+			} 
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return mileposts;
 	}	
 }

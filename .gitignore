@@ -2,11 +2,13 @@ ode-data-logger/target
 cv-data-service-library/target
 ode-wrapper/target
 cv-data-controller/target
+cv-data-tasks/target
 
 ode-data-logger/**/*.class
 cv-data-service-library/**/*.class
 ode-wrapper/**/*.class
 cv-data-controller/**/*.class
+cv-data-tasks/**/*.class
 
 # IDEs and editors
 /.idea

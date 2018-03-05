@@ -65,7 +65,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.trihydro.tasks.Tasks</mainClass>
+              <mainClass>com.trihydro.tasks.CvTaskRunner</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

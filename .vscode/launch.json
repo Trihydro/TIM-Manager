@@ -29,6 +29,13 @@
         },
         {
             "type": "java",
+            "name": "CV Data Tasks (Launch)",
+            "request": "launch",                       
+            "cwd": "${workspaceRoot}/cv-data-tasks",
+            "mainClass": "com.trihydro.tasks.CvTaskRunner" 
+        },
+        {
+            "type": "java",
             "name": "Debug (Attach)",
             "request": "attach",
             "hostName": "localhost",

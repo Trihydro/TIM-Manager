@@ -248,5 +248,34 @@ public class ActiveTimLogger extends CvDataLoggerLibrary {
 		}
 		return deleteActiveTimResult;
 	}
+
+	public static boolean deleteExpiredActiveTims(Connection connection){
+		
+		boolean deleteActiveTimResult = false;
+
+		String deleteSQL = "DELETE ACTIVE_TIM where TIM_END < SYSTIMESTAMP;";
+	
+
+		try {					
+			preparedStatement = connection.prepareStatement(deleteSQL);			
+
+			// execute delete SQL stetement
+			deleteActiveTimResult = updateOrDelete(preparedStatement);
+
+			System.out.println("deleteExpiredActiveTims ran");
+
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				preparedStatement.close();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}					
+		}
+		return deleteActiveTimResult;
+	}
 }
 

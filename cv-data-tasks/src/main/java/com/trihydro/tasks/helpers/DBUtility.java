@@ -1,4 +1,4 @@
-package com.trihydro.odewrapper.helpers;
+package com.trihydro.tasks.helpers;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

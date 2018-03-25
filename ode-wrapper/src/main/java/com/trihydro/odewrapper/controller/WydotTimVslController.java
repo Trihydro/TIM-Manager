@@ -29,14 +29,14 @@ public class WydotTimVslController extends WydotTimBaseController {
     }
     
     @RequestMapping(value="/vsl-tim", method = RequestMethod.POST, headers="Accept=application/json")
-    public ResponseEntity<String> createVslTim(@RequestBody WydotTimVslList wydotTimVsls) {        
+    public ResponseEntity<String> createUpdateVslTim(@RequestBody WydotTimVslList wydotTimVsls) {        
         
         // build TIM
-        ArrayList<Long> activeTimIds = wydotTimVslService.createVslTim(wydotTimVsls.getTimVslList());
+        wydotTimVslService.createUpdateVslTim(wydotTimVsls.getTimVslList());
             
-        Long[] activeTimIdsArr = new Long[activeTimIds.size()];
-        activeTimIds.toArray(activeTimIdsArr);
+        // Long[] activeTimIdsArr = new Long[activeTimIds.size()];
+        // activeTimIds.toArray(activeTimIdsArr);
 
-        return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("active_tims", Arrays.toString(activeTimIdsArr)));   
+        return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("Success", "true"));        
     }
 }

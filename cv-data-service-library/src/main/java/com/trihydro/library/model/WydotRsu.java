@@ -6,6 +6,8 @@ public class WydotRsu extends RSU
 	private Double latitude;
 	private Double longitude;
 	private Integer rsuId;
+	private String route;
+	private Double milepost;
 	
 	public Integer getRsuId() 
 	{
@@ -35,5 +37,25 @@ public class WydotRsu extends RSU
 	public void setLongitude(Double longitude) 
 	{
 		this.longitude = longitude;
+	}
+
+	public String getRoute() 
+	{
+		return this.route;
+	}
+
+	public void setRoute(String route) 
+	{
+		this.route = route;
+	}
+
+	public Double getMilepost() 
+	{
+		return this.milepost;
+	}
+
+	public void setMilepost(Double milepost) 
+	{
+		this.milepost = milepost;
 	}
 }

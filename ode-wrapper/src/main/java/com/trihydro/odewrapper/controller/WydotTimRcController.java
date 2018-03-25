@@ -30,17 +30,14 @@ public class WydotTimRcController extends WydotTimBaseController {
     }
    
     @RequestMapping(value="/create-update-rc-tim", method = RequestMethod.POST, headers="Accept=application/json")    
-    public ResponseEntity<String> createRcTim(@RequestBody WydotTimRcList wydotTimRcs) { 
+    public ResponseEntity<String> createUpdateRcTim(@RequestBody WydotTimRcList wydotTimRcs) { 
        
         System.out.println("Create RC TIM");
 
         // build TIM
-        ArrayList<Long> activeTimIds = wydotTimRcService.createRcTim(wydotTimRcs.getTimRcList());        
+        wydotTimRcService.createUpdateRcTim(wydotTimRcs.getTimRcList());              
 
-        Long[] activeTimIdsArr = new Long[activeTimIds.size()];
-        activeTimIds.toArray(activeTimIdsArr);
-
-        return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("active_tims", Arrays.toString(activeTimIdsArr)));           
+        return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("Success", "true"));        
     }
 
     @RequestMapping(value="/submit-rc-ac", method = RequestMethod.PUT, headers="Accept=application/json")

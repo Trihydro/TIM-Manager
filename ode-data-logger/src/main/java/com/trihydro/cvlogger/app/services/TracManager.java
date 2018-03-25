@@ -8,8 +8,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
-import com.trihydro.library.service.tracmessage.TracMessageSentService;
-import com.trihydro.library.service.tracmessage.TracMessageTypeService;
+import com.trihydro.library.service.TracMessageSentService;
+import com.trihydro.library.service.TracMessageTypeService;
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.model.TracMessageType;
@@ -17,9 +17,9 @@ import com.trihydro.library.model.TracMessageType;
 
 public class TracManager {
     
-    public static TracMessageSent isDnMsgInTrac(Connection connection, String packetId){
+    public static TracMessageSent isDnMsgInTrac(String packetId){
         
-        List<TracMessageSent> tracMessagesSent = TracMessageSentService.selectAll(connection);
+        List<TracMessageSent> tracMessagesSent = TracMessageSentService.selectAll();
 
         TracMessageSent tracMessageSent = tracMessagesSent.stream()
             .filter(x -> x.getPacketId().equals(packetId))
@@ -29,10 +29,10 @@ public class TracManager {
         return tracMessageSent;
     }
 
-    public static Long logNewDistressNotification(Connection connection, String packetId, String messageText){
+    public static Long logNewDistressNotification(String packetId, String messageText){
                
         // get trac message types
-        List<TracMessageType> tracMessageTypes = TracMessageTypeService.selectAll(connection);
+        List<TracMessageType> tracMessageTypes = TracMessageTypeService.selectAll();
 
         // get message type equal to distress notification
         TracMessageType tracMessageType = tracMessageTypes.stream()
@@ -47,17 +47,17 @@ public class TracManager {
         tracMessageSent.setPacketId(packetId);
         System.out.println("packet id: " + packetId);
         // log in db
-        Long tracMessageSentId = TracMessageSentService.insertTracMessageSent(tracMessageSent, connection);
+        Long tracMessageSentId = TracMessageSentService.insertTracMessageSent(tracMessageSent);
         return tracMessageSentId;
     }
 
-    public static void submitDNMsgToTrac(String value, Connection connection) {
+    public static void submitDNMsgToTrac(String value) {
 		
 		OdeLogMetadataReceived metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 		OdeTimPayload payload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);		
 
 		// check if packetId is in trac message sent table
-		if(TracManager.isDnMsgInTrac(connection, payload.getTim().getPacketID()) != null ){
+		if(TracManager.isDnMsgInTrac(payload.getTim().getPacketID()) != null ){
 			// if so, return	
 			return;
 		}
@@ -89,7 +89,7 @@ public class TracManager {
 		
 		HttpHeaders responseHeaders = new HttpHeaders();
 		//String result = restTemplate.postForObject(builder.buildAndExpand().toUri(), new HttpEntity<String>(null, responseHeaders), String.class);		
-		TracManager.logNewDistressNotification(connection, payload.getTim().getPacketID(), "Distress Notification Issued at " + latitude + "/" + longitude);
+		TracManager.logNewDistressNotification(payload.getTim().getPacketID(), "Distress Notification Issued at " + latitude + "/" + longitude);
 	}
 
 }

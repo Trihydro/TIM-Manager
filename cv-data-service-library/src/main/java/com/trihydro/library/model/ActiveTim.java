@@ -2,7 +2,8 @@ package com.trihydro.library.model;
 
 public class ActiveTim {
     private Long activeTimId;
-    private Long timId;    
+    private Long timId;
+    private String recordId;    
 
     public Long getActiveTimId() {
         return this.activeTimId;
@@ -18,6 +19,14 @@ public class ActiveTim {
 
     public void setTimId(Long timId) {
         this.timId = timId;
+    }
+
+    public String getRecordId() {
+        return this.recordId;
+    }
+
+    public void setRecordId(String recordId) {
+        this.recordId = recordId;
     }
 
 }

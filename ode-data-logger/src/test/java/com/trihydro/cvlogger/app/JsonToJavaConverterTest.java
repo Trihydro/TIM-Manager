@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,7 +33,6 @@ import us.dot.its.jpo.ode.model.OdeBsmMetadata.BsmSource;
 /**
  * Unit tests for JSON to Java Object Converters.
  */
-@Ignore
 public class JsonToJavaConverterTest {	
 
 	@Test 
@@ -87,7 +87,7 @@ public class JsonToJavaConverterTest {
         assertNull(odeTimMetadataTest);    
     }
     
-    @Test @Ignore
+    @Test
 	public void TestConvertTimPayloadJsonToJava() throws IOException {
         
         // create test objects
@@ -102,7 +102,7 @@ public class JsonToJavaConverterTest {
         J2735TravelerInformationMessage.DataFrame.Region.Path path = new J2735TravelerInformationMessage.DataFrame.Region.Path();
 
         tim.setMsgCnt(0);
-        //tim.setPacketID(4364682555337299984384);
+        tim.setPacketID("EC9C236B0000000000");
         tim.setTimeStamp("2017-10-11T21:32");
 
         OdePosition3D anchorPosition = new OdePosition3D();
@@ -151,6 +151,26 @@ public class JsonToJavaConverterTest {
         assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
         assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());     
     }
+
+    @Test 
+	public void convertBroadcastTimPayloadJsonToJava() throws IOException {
+
+        Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString();
+        System.out.println("Current relative path is: " + s);
+
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/broadcastTim_OdeOutput.json")));   
+       // String value = new String(Files.readAllBytes(Paths.get("broadcastTim_OdeOutput.json")));            
+        J2735TravelerInformationMessage timTest = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
+
+        assertEquals(1, timTest.getMsgCnt());
+        assertEquals(1, timTest.getIndex());
+        assertEquals("2018-03-15T21:18:46.719-07:00", timTest.getTimeStamp());
+        assertEquals("17e610000000000000", timTest.getPacketID());
+        assertEquals("null", timTest.getUrlB());
+        assertEquals("null", timTest.getUrlB());
+    }
+
 
     @Test 
 	public void TestConvertTimPayloadNullException() throws IOException {        

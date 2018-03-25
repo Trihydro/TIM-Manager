@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonToJavaConverter {
 	
-	static Connection connection = null;
 	static PreparedStatement preparedStatement = null;
     static Statement statement = null;
     static ObjectMapper mapper = new ObjectMapper();
@@ -246,7 +245,6 @@ public class JsonToJavaConverter {
 
     public static J2735TravelerInformationMessage convertBroadcastTimPayloadJsonToJava(String value){
         
-        OdeTimPayload odeTimPayload = null;
         J2735TravelerInformationMessage odeTim = null;
 
         try {
@@ -263,58 +261,56 @@ public class JsonToJavaConverter {
             //JsonNode anchorNode = JsonUtils.getJsonNode(value, "payload").get("data").get("dataframes").get("regions").get("anchorPosition");
             //JsonNode nodeXYArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("dataframes").get("regions").get("path").get("nodes");					
             
-            timNode.get("timeStamp").asInt();
+            // timNode.get("timeStamp").asInt();
             
-            LocalDate now = LocalDate.now();
-            LocalDate firstDay = now.with(firstDayOfYear());
-            int timeStampInt = timNode.get("timeStamp").asInt();
-            LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timNode.get("timeStamp").asInt(), ChronoUnit.MINUTES); 
-            J2735TravelerInformationMessage tim = new J2735TravelerInformationMessage();
-            tim.setTimeStamp(timeStampDate.toString());
-            tim.setMsgCnt(timNode.get("msgCnt").asInt());     
+            // LocalDate now = LocalDate.now();
+            // LocalDate firstDay = now.with(firstDayOfYear());
+            // int timeStampInt = timNode.get("timeStamp").asInt();
+            // LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timNode.get("timeStamp").asInt(), ChronoUnit.MINUTES); 
+            // J2735TravelerInformationMessage tim = new J2735TravelerInformationMessage();
+            // tim.setTimeStamp(timeStampDate.toString());
+            // tim.setMsgCnt(timNode.get("msgCnt").asInt());     
             
-            tim.setPacketID(timNode.get("packetID").asText());
+            // tim.setPacketID(timNode.get("packetID").asText());
             
-            // BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
-            // BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
+            // // BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
+            // // BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
             
-            List<J2735TravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<J2735TravelerInformationMessage.NodeXY>();
+            // List<J2735TravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<J2735TravelerInformationMessage.NodeXY>();
 
-            // set region anchor 
-            OdePosition3D anchorPosition = new OdePosition3D();
-            // anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
-            // anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
-            // TODO elevation
+            // // set region anchor 
+            // OdePosition3D anchorPosition = new OdePosition3D();
+            // // anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
+            // // anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
+            // // TODO elevation
 
-            region.setAnchorPosition(anchorPosition);
+            // region.setAnchorPosition(anchorPosition);
 
-            J2735TravelerInformationMessage.NodeXY nodeXY = new J2735TravelerInformationMessage.NodeXY();			
+            // J2735TravelerInformationMessage.NodeXY nodeXY = new J2735TravelerInformationMessage.NodeXY();			
             
-            // if (nodeXYArrNode.isArray()) {
-            //     for (final JsonNode objNode : nodeXYArrNode) {					
-            //         nodeXY = new J2735TravelerInformationMessage.NodeXY();					
-            //         BigDecimal lat = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lat"), BigDecimal.class);
-            //         BigDecimal lon = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lon"), BigDecimal.class);				
-            //         nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
-            //         nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
-            //         nodeXY.setDelta("node-LatLon");	
-            //         nodeXYs.add(nodeXY);		
-            //     }
-            // }
+            // // if (nodeXYArrNode.isArray()) {
+            // //     for (final JsonNode objNode : nodeXYArrNode) {					
+            // //         nodeXY = new J2735TravelerInformationMessage.NodeXY();					
+            // //         BigDecimal lat = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lat"), BigDecimal.class);
+            // //         BigDecimal lon = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lon"), BigDecimal.class);				
+            // //         nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
+            // //         nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
+            // //         nodeXY.setDelta("node-LatLon");	
+            // //         nodeXYs.add(nodeXY);		
+            // //     }
+            // // }
 
-            J2735TravelerInformationMessage.NodeXY[] nodeXYArr = new J2735TravelerInformationMessage.NodeXY[nodeXYs.size()];
-            nodeXYArr = nodeXYs.toArray(nodeXYArr);
+            // J2735TravelerInformationMessage.NodeXY[] nodeXYArr = new J2735TravelerInformationMessage.NodeXY[nodeXYs.size()];
+            // nodeXYArr = nodeXYs.toArray(nodeXYArr);
             
-            path.setNodes(nodeXYArr);
+            // path.setNodes(nodeXYArr);
 
-            region.setPath(path);
+            // region.setPath(path);
 
-            regions[0] = region;
-            dataFrame.setRegions(regions);
-            dataFrames[0] = dataFrame;
-            tim.setDataframes(dataFrames);
-            odeTimPayload = new OdeTimPayload();
-            odeTimPayload.setTim(tim);
+            // regions[0] = region;
+            // dataFrame.setRegions(regions);
+            // dataFrames[0] = dataFrame;
+            // tim.setDataframes(dataFrames);
         }
         catch (IOException e) {
             System.out.println(e.getStackTrace());

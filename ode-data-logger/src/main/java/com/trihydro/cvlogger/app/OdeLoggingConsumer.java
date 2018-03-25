@@ -16,7 +16,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.ParseException;
 
-import com.trihydro.cvlogger.app.helpers.SqlConnection;
 import com.trihydro.cvlogger.app.loggers.BsmLogger;
 import com.trihydro.cvlogger.app.loggers.TimLogger;
 import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
@@ -71,9 +70,8 @@ public class OdeLoggingConsumer {
 		String group = cmd.getOptionValue("group");
 		String type = cmd.getOptionValue("type");
 
-  		System.out.println("starting..............");   
-		Connection connection = SqlConnection.makeJDBCConnection();		
-		TimLogger timLogger = new TimLogger(connection);
+  		System.out.println("starting..............");   		
+		TimLogger timLogger = new TimLogger();
 
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -151,22 +149,22 @@ public class OdeLoggingConsumer {
 						//String payload = JsonUtils.toObjectNode(record.value()).get("metadata").get("payloadType").toString();
 						//payload = payload.substring(1, payload.length() - 1);
 						if(topic.equals("topic.OdeDNMsgJson")){
-							TracManager.submitDNMsgToTrac(record.value(), connection);
+							TracManager.submitDNMsgToTrac(record.value());
 						}
 						else if(topic.equals("topic.OdeTimJson")) {	
 							OdeData odeData = TimLogger.processTimJson(record.value());
 							if(odeData != null)
-								TimLogger.addTimToOracleDB(odeData, connection);				
+								TimLogger.addTimToOracleDB(odeData);				
 						}													
 						else if(topic.equals("topic.OdeBsmJson")){
 							OdeData odeData = BsmLogger.processBsmJson(record.value());
 							if(odeData != null)
-								BsmLogger.addBSMToOracleDB(odeData, record.value(), connection);		
+								BsmLogger.addBSMToOracleDB(odeData, record.value());		
 						}
 						else if(topic.equals("topic.OdeDriverAlertJson")){
 							OdeData odeData = DriverAlertLogger.processDriverAlertJson(record.value());
 							if(odeData != null)
-								DriverAlertLogger.addDriverAlertToOracleDB(odeData, connection);		
+								DriverAlertLogger.addDriverAlertToOracleDB(odeData);		
 						}
 						else if(topic.equals("topic.OdeTimBroadcastJson")){					
 							OdeData odeData = TimLogger.processBroadcastTimJson(record.value());

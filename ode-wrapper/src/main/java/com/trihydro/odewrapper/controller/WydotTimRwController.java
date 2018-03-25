@@ -36,12 +36,10 @@ public class WydotTimRwController extends WydotTimBaseController {
         System.out.println("Create RW TIM");
 
         // build TIM
-        ArrayList<Long> activeTimIds = wydotTimRwService.createRwTim(wydotTimRws.getTimRwList());       
-        
-        Long[] activeTimIdsArr = new Long[activeTimIds.size()];
-        activeTimIds.toArray(activeTimIdsArr);
+        wydotTimRwService.createRwTim(wydotTimRws.getTimRwList());       
 
-        return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("active_tims", Arrays.toString(activeTimIdsArr)));    
+        String responseMessage = "success";
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
     @RequestMapping(value="/update-rw-tim", method = RequestMethod.PUT, headers="Accept=application/json")
@@ -50,12 +48,10 @@ public class WydotTimRwController extends WydotTimBaseController {
         System.out.println("Update RW TIM");
 
         // build TIM
-        ArrayList<Long> activeTimIds = wydotTimRwService.updateRwTim(wydotTimRws.getTimRwList());       
-        
-        Long[] activeTimIdsArr = new Long[activeTimIds.size()];
-        activeTimIds.toArray(activeTimIdsArr);
+        wydotTimRwService.updateRwTim(wydotTimRws.getTimRwList());       
 
-        return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("active_tims", Arrays.toString(activeTimIdsArr)));   
+        String responseMessage = "success";
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
     
     @RequestMapping(value="/delete-rw-tim/{id}", method = RequestMethod.DELETE, headers="Accept=application/json")

@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class PojoToJavaConverter {
 	
-	static Connection connection = null;
 	static PreparedStatement preparedStatement = null;
     static Statement statement = null;
     static ObjectMapper mapper = new ObjectMapper();

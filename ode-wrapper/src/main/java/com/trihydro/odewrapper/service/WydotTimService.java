@@ -4,8 +4,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.model.TimQuery;
@@ -17,16 +23,23 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
+import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
+
 import com.google.gson.Gson;
-import com.trihydro.library.service.tim.ActiveTimLogger;
-import com.trihydro.library.service.tim.TimRsuLogger;
-import com.trihydro.library.service.tim.ActiveTimItisCodeLogger;
-import com.trihydro.library.service.tim.TimService;
-import com.trihydro.library.service.timtype.TimTypeService;
-import com.trihydro.odewrapper.helpers.DBUtility;
-// import com.trihydro.odewrapper.service.J2735TravelerInformationMessageService;
+import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.ItisCodeService;
+import com.trihydro.library.service.RsuService;
+import com.trihydro.library.service.ActiveTimItisCodeService;
+import com.trihydro.library.service.TimService;
+import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.model.Milepost;
 import org.springframework.http.MediaType;
 
 @Component
@@ -34,37 +47,83 @@ public class WydotTimService
 {    
     @Autowired
     public static Environment env;
-    public static DBUtility dbUtility;
-    // private static J2735TravelerInformationMessageService j2735TravelerInformationMessageService;
     public static RestTemplate restTemplate = new RestTemplate();         
     public static Gson gson = new Gson();
+    private List<ItisCode> itisCodes;
+    private List<WydotRsu> rsus;    
+    WydotRsu[] rsuArr = new WydotRsu[1];    
+    DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z[UTC]'");            
+    DateTimeFormatter mdtformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss-06:00");            
 
-    @Autowired
-    public void setDBUtility(DBUtility dbUtilityRh) {
-        dbUtility = dbUtilityRh;
+    public List<ItisCode> getItisCodes(){
+        if(itisCodes != null)
+            return itisCodes;
+        else{
+            itisCodes = ItisCodeService.selectAll(); 
+            return itisCodes;
+        }
     }
 
-    public DBUtility getDBUtility() {
-        return dbUtility;
+    public List<WydotRsu> getRsus(){
+        if(rsus != null)
+            return rsus;
+        else{
+            rsus = RsuService.selectAll(); 
+            for (WydotRsu rsu : rsus) {
+                rsu.setRsuRetries(3);
+                rsu.setRsuTimeout(5000);
+            }
+            return rsus;
+        }
+    }    
+
+    public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost){
+        
+        int buffer = 5;
+
+        List<WydotRsu> rsus = null;
+
+        if(direction.toLowerCase().equals("eastbound")) {		
+            Double startBuffer = lowerMilepost - buffer;	
+
+            rsus = getRsus().stream()
+            .filter(x -> x.getMilepost() >= startBuffer)
+            .filter(x -> x.getMilepost() <= higherMilepost)
+            .filter(x -> x.getRoute().matches(".*80.*"))
+            .collect(Collectors.toList());
+           
+        }
+        else{
+            Double startBuffer = higherMilepost + buffer;		
+
+            rsus = getRsus().stream()
+            .filter(x -> x.getMilepost() >= lowerMilepost)
+            .filter(x -> x.getMilepost() <= startBuffer)
+            .filter(x -> x.getRoute().matches(".*80.*"))
+            .collect(Collectors.toList());
+        }
+
+        return rsus;
     }
 
-    // @Autowired
-    // public void setJ2735TravelerInformationMessageService(J2735TravelerInformationMessageService j2735TravelerInformationMessageServiceRh) {
-    //     j2735TravelerInformationMessageService = j2735TravelerInformationMessageServiceRh;
-    // }
+    public WydotRsu getRsu(Long rsuId){
+                
+        WydotRsu wydotRsu = rsus.stream()
+            .filter(x -> x.getRsuId() == rsuId.intValue())
+            .findFirst()
+            .orElse(null);
 
-    // public J2735TravelerInformationMessageService getJ2735TravelerInformationMessageService() {
-    //     return j2735TravelerInformationMessageService;
-    // }
+        return wydotRsu;
+    }
 
     public static Long sendNewTimToRsu(WydotTravelerInputData timToSend, WydotRsu rsu) {
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
 
         Random rand = new Random();            
-        int randomNum = rand.nextInt(100000) + 10000;            
+        int randomNum = rand.nextInt(1000000) + 100000;            
         String packetIdHexString = Integer.toHexString(randomNum);
-        packetIdHexString = packetIdHexString + String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0"));
+        packetIdHexString = String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0")) + packetIdHexString;
         timToSend.getTim().setPacketID(packetIdHexString);
 
         // set RSU index and send TIM if query is successful 
@@ -78,21 +137,80 @@ public class WydotTimService
         else
             timToSend.getTim().setIndex(0);
                                               
-        // save TIM to DB 
-        
-        // to do 
-        //Long timId = sendTimToDB(timToSend, j2735TravelerInformationMessageService);
-
-        //TimRsuLogger.insertTimRsu(timId, rsu.getRsuId(), dbUtility.getConnection());
-
         Long timId = new Long(0);
         return timId;
     }
 
-    public static Long updateTimOnRsu(WydotTravelerInputData timToSend, Long activeTimId, Integer rsuId){
+    public static void sendNewTimToSdw(WydotTravelerInputData timToSend){
 
+        // set msgCnt to 1 and create new packetId
+        timToSend.getTim().setMsgCnt(1);
+        
+        Random rand = new Random();            
+        int randomNum = rand.nextInt(1000000) + 100000;            
+        String packetIdHexString = Integer.toHexString(randomNum);
+        packetIdHexString = String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0")) + packetIdHexString;
+        timToSend.getTim().setPacketID(packetIdHexString);
+
+        SDW sdw = new SDW();
+
+        // calculate service region
+        sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
+
+        // set time to live
+        sdw.setTtl(TimeToLive.oneyear);
+        // create new record id
+        String recordId = getNewRecordId();
+        sdw.setRecordId(recordId);
+                
+        // update region name to include record id 
+        String regionName = timToSend.getTim().getDataframes()[0].getRegions()[0].getName();
+        regionName += "_SAT-" + recordId;
+        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
+
+        // set sdw block in TIM
+        timToSend.setSdw(sdw);
+
+        // send to ODE
+        String timToSendJson = gson.toJson(timToSend);
+        restTemplate.postForObject("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);
+    }
+
+
+    
+    private static String getNewRecordId() {
+        String hexChars = "ABCDEF1234567890";
+        StringBuilder hexStrB = new StringBuilder();
+        Random rnd = new Random();
+        while (hexStrB.length() < 9) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * hexChars.length());
+            hexStrB.append(hexChars.charAt(index));
+        }
+        String hexStr = hexStrB.toString();
+        return hexStr;
+    }
+
+    public static void updateTimOnRsu(WydotTravelerInputData timToSend, Long activeTimId){
+
+        String timToSendJson = updateTim(timToSend, activeTimId);
+
+        // send TIM to ODE if not a test
+        //if(tim.getIndex() != 0)
+        restTemplate.put("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);        
+    } 
+
+    public static void updateTimOnSdw(WydotTravelerInputData timToSend, Long activeTimId){
+
+        String timToSendJson = updateTim(timToSend, activeTimId);
+
+        // send TIM to ODE if not a test
+        //if(tim.getIndex() != 0)
+        restTemplate.postForObject("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);        
+    } 
+
+    public static String updateTim(WydotTravelerInputData timToSend, Long activeTimId){
         // get existing TIM
-        J2735TravelerInformationMessage tim = TimService.getTim(activeTimId, dbUtility.getConnection());                    
+        J2735TravelerInformationMessage tim = TimService.getTim(activeTimId);                    
         // set TIM packetId 
         timToSend.getTim().setPacketID(tim.getPacketID());
         // get RSU index
@@ -103,49 +221,36 @@ public class WydotTimService
             timToSend.getTim().setMsgCnt(0);
         // else increment msgCnt
         else
-            timToSend.getTim().setMsgCnt(tim.getMsgCnt() + 1);
-
-        String timToSendJson = gson.toJson(timToSend); 
-
-        // send TIM to ODE if not a test
-        if(tim.getIndex() != 0)
-            restTemplate.put("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);   
-
-        // save TIM to DB 
-        // TODO
-
-        //Long timId = sendTimToDB(timToSend, j2735TravelerInformationMessageService);  
-
-        // Update TIM_RSU table
-      //  TimRsuLogger.insertTimRsu(timId, rsuId, dbUtility.getConnection());
+            timToSend.getTim().setMsgCnt(tim.getMsgCnt() + 1);        
         
-        Long timId = new Long(0);
-        return timId;
-    }  
+            
+        String timToSendJson = gson.toJson(timToSend); 
+        return timToSendJson;
+    }
     
     public static void updateActiveTims(ActiveTim activeTim, List<Integer> itisCodeIds, Long timId, String endDateTime){
         // update Active TIM table TIM Id
-        ActiveTimLogger.updateActiveTimTimId(activeTim.getActiveTimId(), timId, dbUtility.getConnection());
+        ActiveTimService.updateActiveTimTimId(activeTim.getActiveTimId(), timId);
 
         if(endDateTime != null)
-            ActiveTimLogger.updateActiveTimEndDate(activeTim.getActiveTimId(), endDateTime, dbUtility.getConnection());        
+            ActiveTimService.updateActiveTimEndDate(activeTim.getActiveTimId(), endDateTime);        
       
         // remove Active TIM ITIS Codes
-        ActiveTimItisCodeLogger.deleteActiveTimItisCodes(activeTim.getActiveTimId(), dbUtility.getConnection());
+        ActiveTimItisCodeService.deleteActiveTimItisCodes(activeTim.getActiveTimId());
 
         // Add new Active TIM ITIS Codes
         for(int j = 0; j < itisCodeIds.size(); j++)
-            ActiveTimItisCodeLogger.insertActiveTimItisCode(activeTim.getActiveTimId(), itisCodeIds.get(j), dbUtility.getConnection());       
+            ActiveTimItisCodeService.insertActiveTimItisCode(activeTim.getActiveTimId(), itisCodeIds.get(j));       
     }
 
     public static Long addActiveTim(Long timId, WydotTimBase wydotTim, List<Integer> itisCodeIds, TimType timType, String startDateTime, String endDateTime, String clientId){       
 
         // Send TIM to Active Tim List        
-        Long activeTimId = ActiveTimLogger.insertActiveTim(timId, wydotTim.getFromRm(), wydotTim.getToRm(), wydotTim.getDirection(), timType.getTimTypeId(), startDateTime, endDateTime, wydotTim.getRoute(), clientId, dbUtility.getConnection());
+        Long activeTimId = ActiveTimService.insertActiveTim(timId, wydotTim.getFromRm(), wydotTim.getToRm(), wydotTim.getDirection(), timType.getTimTypeId(), startDateTime, endDateTime, wydotTim.getRoute(), clientId, null);
 
         // Add ActiveTim ITIS Codes
         for(int j = 0; j < itisCodeIds.size(); j++)
-            ActiveTimItisCodeLogger.insertActiveTimItisCode(activeTimId, itisCodeIds.get(j), dbUtility.getConnection());  
+            ActiveTimItisCodeService.insertActiveTimItisCode(activeTimId, itisCodeIds.get(j));  
             
         return activeTimId;
     }
@@ -221,7 +326,7 @@ public class WydotTimService
 
     public static TimType getTimType(String timTypeName){
         // get tim type
-        List<TimType> timTypes = TimTypeService.selectAll(dbUtility.getConnection());
+        List<TimType> timTypes = TimTypeService.selectAll();
 
         TimType timType = timTypes.stream()
         .filter(x -> x.getType().equals(timTypeName))
@@ -231,14 +336,42 @@ public class WydotTimService
         return timType;
     } 
     
-    public static Long sendTimToDB(WydotTravelerInputData travelerInputData) { 
-        // insert tim	
-        // Long timId = j2735TravelerInformationMessageService.insertTIM(travelerInputData.getTim());
+    protected static OdeGeoRegion getServiceRegion(List<Milepost> mileposts){
+        
+        Comparator<Milepost> compLat = (l1, l2) -> Double.compare( l1.getLatitude(), l2.getLatitude());
+        Comparator<Milepost> compLong = (l1, l2) -> Double.compare( l1.getLongitude(), l2.getLongitude());
 
-        //Long timId = TimLogger.insertTim(travelerInputData.getTim(), J2735TravelerInformationMessage j2735TravelerInformationMessage, Connection connection) { 
-        Long timId = new Long(0);
-        return timId;
-    }    
+        Milepost maxLat = mileposts.stream()
+            .max(compLat)
+            .get();
+
+        Milepost minLat = mileposts.stream()
+            .min(compLat)
+            .get();
+        
+        Milepost maxLong = mileposts.stream()
+            .max(compLong)
+            .get();
+
+        Milepost minLong = mileposts.stream()
+            .min(compLong)
+            .get();
+
+        OdePosition3D nwCorner = new OdePosition3D();
+        nwCorner.setLatitude(new BigDecimal(maxLat.getLatitude()));
+        nwCorner.setLongitude(new BigDecimal(minLong.getLongitude()));
+        
+        OdePosition3D seCorner = new OdePosition3D();
+        seCorner.setLatitude(new BigDecimal(minLat.getLatitude()));
+        seCorner.setLongitude(new BigDecimal(maxLong.getLongitude()));
+
+        OdeGeoRegion serviceRegion = new OdeGeoRegion();
+        serviceRegion.setNwCorner(nwCorner);
+        serviceRegion.setSeCorner(seCorner);
+        System.out.println("nwCorner: " + nwCorner.getLatitude() + ", " + nwCorner.getLongitude());
+        System.out.println("seCorner: " + seCorner.getLatitude() + ", " + seCorner.getLongitude());
+        return serviceRegion;
+    } 
 
     protected static int findFirstAvailableIndex(int[] indicies){
         for (int i = 1; i < 100; i++) {

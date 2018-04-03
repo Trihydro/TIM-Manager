@@ -169,7 +169,7 @@ public class OdeLoggingConsumer {
 						else if(topic.equals("topic.OdeTimBroadcastJson")){					
 							OdeData odeData = TimLogger.processBroadcastTimJson(record.value());
 							if(odeData != null)
-								timLogger.addActiveTimToOracleDB(odeData);		
+								TimLogger.addActiveTimToOracleDB(odeData);		
 						}
 					}
 				}

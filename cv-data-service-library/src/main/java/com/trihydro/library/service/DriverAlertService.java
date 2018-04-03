@@ -49,7 +49,7 @@ public class DriverAlertService extends CvDataServiceLibrary {
 						java.util.Date recordGeneratedAtDate = null;					
 						if(odeDriverAlertMetadata.getRecordGeneratedAt().contains(".")) {
 							try {
-								recordGeneratedAtDate = utcFormatThree.parse(odeDriverAlertMetadata.getRecordGeneratedAt());
+								recordGeneratedAtDate = utcFormatMilliSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());
 							} 
 							catch (ParseException e) {
 								// TODO Auto-generated catch block
@@ -58,7 +58,7 @@ public class DriverAlertService extends CvDataServiceLibrary {
 						}
 						else {
 							try {
-								recordGeneratedAtDate = utcFormatTwo.parse(odeDriverAlertMetadata.getRecordGeneratedAt());
+								recordGeneratedAtDate = utcFormatSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());
 							} catch (ParseException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -94,14 +94,14 @@ public class DriverAlertService extends CvDataServiceLibrary {
 						java.util.Date receivedAtDate = null;
 						if(odeDriverAlertMetadata.getOdeReceivedAt().contains(".")){
 							try {
-								receivedAtDate = utcFormatThree.parse(odeDriverAlertMetadata.getOdeReceivedAt());
+								receivedAtDate = utcFormatMilliSec.parse(odeDriverAlertMetadata.getOdeReceivedAt());
 							} catch (ParseException e1) {
 								e1.printStackTrace();
 							}
 						}
 						else {
 							try {
-								receivedAtDate = utcFormatTwo.parse(odeDriverAlertMetadata.getOdeReceivedAt());
+								receivedAtDate = utcFormatSec.parse(odeDriverAlertMetadata.getOdeReceivedAt());
 							} 
 							catch (ParseException e) {
 								e.printStackTrace();

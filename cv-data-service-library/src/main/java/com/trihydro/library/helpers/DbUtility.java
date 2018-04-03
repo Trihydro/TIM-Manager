@@ -3,6 +3,8 @@ package com.trihydro.library.helpers;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.TimeZone;
+
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.apache.ibatis.io.Resources; 
 
@@ -23,6 +25,11 @@ public class DbUtility {
         // else create the connection
         else {
             try {
+
+                // set timezone
+                TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+                TimeZone.setDefault(timeZone);
+
                 // make connection
                 Class.forName(dbDriver);
                 connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword); 

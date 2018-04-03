@@ -3,13 +3,22 @@ package com.trihydro.library.service;
 import java.sql.*;
 import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
+
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.service.CvDataServiceLibrary;
+import com.trihydro.library.tables.BsmOracleTables;
 
 public class BsmPart2SuveService extends CvDataServiceLibrary {
 
 	public static Long insertBSMPart2SUVE(J2735BsmPart2Content part2Content, J2735SupplementalVehicleExtensions suve, Long bsmCoreDataId) {
+
+		String bsmSuveInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_suve", BsmOracleTables.getBsmPart2SuveTable());        
+		PreparedStatement bsmSuvePreparedStatement  = null;
+		
 		try {
 
+            bsmSuvePreparedStatement = DbUtility.getConnection().prepareStatement(bsmSuveInsertQueryStatement, new String[] {"bsm_part2_suve_id"});
+			
             int fieldNum = 1;
 
             // bsmCoreDataId 1

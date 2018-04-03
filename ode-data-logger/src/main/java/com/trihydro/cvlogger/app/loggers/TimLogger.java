@@ -66,6 +66,13 @@ public class TimLogger extends BaseLogger{
 	}
 
 	public static void addActiveTimToOracleDB(OdeData odeData){
+
+		// variables
+		TimType timType = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>(); 
+		String satRecordId = null;
+		String direction = null;
+		String route = null;
 	
 		// save TIM
 	    System.out.println(((OdeTimPayload)odeData.getPayload()).getTim().getTimeStamp());
@@ -77,18 +84,22 @@ public class TimLogger extends BaseLogger{
 		// save DataFrame
 		Long dataFrameId = DataFrameService.insertDataFrame(timId);
 
-		String[] timItisCodes = ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getItems();			
-
 		// save active tim
 		//Long activeTimId = ActiveTimLogger.insertActiveTim(timId, wydotTim.getFromRm(), wydotTim.getToRm(), wydotTim.getDirection(), timType.getTimTypeId(), startDateTime, endDateTime, wydotTim.getRoute(), clientId, dbUtility.getConnection());
 		String name = ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName();
 		String[] splitName = name.split("_");
-		String direction = splitName[0];
-		String route = splitName[1];		
 
-		TimType timType = null;
-		List<ActiveTim> activeTims = new ArrayList<ActiveTim>(); 
-		String satRecordId = null;
+		// check splitname length
+		if(splitName.length > 1){
+			direction = splitName[0];
+			route = splitName[1];
+		}	
+		else	
+			return;
+
+		// check to see if region name is correct
+		if(splitName.length < 5)
+			return;
 
 		// if this is an RSU TIM 
 		if(splitName[4].split("-")[0].equals("RSU")){
@@ -111,7 +122,7 @@ public class TimLogger extends BaseLogger{
 
 		String endDateTime = null;
 		if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime() != 32000){				
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm-06:00");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'-06:00'");
 			LocalDateTime dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatter);
 			endDateTime = dateTime.plusMinutes(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime()).toString();
 		}
@@ -123,9 +134,12 @@ public class TimLogger extends BaseLogger{
 			
 			if(splitName.length > 6)
 				activeTims = ActiveTimService.getActiveTimsByClientId(splitName[6]);			
-			else
-				activeTims = ActiveTimService.getActiveTims(Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), timType.getTimTypeId(), direction);            		
-			
+			else{
+				if(splitName[4].split("-")[0].equals("RSU"))
+					activeTims = ActiveTimService.getActiveRsuTims(Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), timType.getTimTypeId(), direction);            		
+				else
+					activeTims = ActiveTimService.getActiveSatTims(Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), timType.getTimTypeId(), direction);            		
+			}
 			// Active TIM exists
 			if(activeTims.size() == 0){			
 				if(splitName.length > 6)

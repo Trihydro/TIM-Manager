@@ -51,13 +51,13 @@ public class WydotTimRcService extends WydotTimService
             // get tim type            
             TimType timType = getTimType("RC");
 
-            // build region name for active tim logger to use
-            String regionName = wydotTimRc.getDirection() + "_" + wydotTimRc.getRoute() + "_" + wydotTimRc.getFromRm() + "_" + wydotTimRc.getToRm();           
-                        
+            // build region name for active tim logger to use            
+            String regionNamePrev = wydotTimRc.getDirection() + "_" + wydotTimRc.getRoute() + "_" + wydotTimRc.getFromRm() + "_" + wydotTimRc.getToRm();   
+                                    
             // query for existing active tims for this road segment
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
             if(timType != null)
-                ActiveTimService.getActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());   
+                activeTims = ActiveTimService.getAllActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());   
             
             // if there are active tims for this area
             if(activeTims.size() > 0) {                    
@@ -70,7 +70,7 @@ public class WydotTimRcService extends WydotTimService
                     
                     // look to see if tim is on RSU
                     TimRsu activeTimRsu = timRsus.stream()
-                        .filter(x -> x.getTimId() == activeTim.getTimId())
+                        .filter(x -> x.getTimId().equals(activeTim.getTimId()))
                         .findFirst()
                         .orElse(null);
                                                                 
@@ -88,18 +88,16 @@ public class WydotTimRcService extends WydotTimService
                         timToSend.setRsus(rsuArr);            
                         
                         // update region name for active tim logger
-                        regionName += "_RSU-" + rsu.getRsuTarget();   
-                        regionName += "_RC";                               
-                        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
+                        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_RC");                          
 
                         // update TIM rsu
                         updateTimOnRsu(timToSend, activeTim.getTimId());   
                     }
                     // else active tim is satellite 
                     else{
-                        // TODO - Send to Sat
-
-                        // TODO - Update Active Sat TIM
+                        // update satellite tim                         
+                        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_SAT-" + activeTim.getRecordId() + "_RC");  
+                        updateTimOnSdw(timToSend, activeTim.getTimId(), activeTim.getRecordId());
                     }    
                 }                
             }     
@@ -111,25 +109,24 @@ public class WydotTimRcService extends WydotTimService
                     rsuArr[0] = rsus.get(i);
                     timToSend.setRsus(rsuArr);
 
-                    regionName += "_RSU-" + rsus.get(i).getRsuTarget();   
-                    regionName += "_RC";                               
-                    timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
+                    timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_RSU-" + rsus.get(i).getRsuTarget() + "_RC");    
                                      
-                    // send tim to rsu
+                    // send tim to rsu                    
                     sendNewTimToRsu(timToSend, rsus.get(i));  
-                }            
+                }                           
+                // send TIM to satellite            
+                String recordId = getNewRecordId();         
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_SAT-" + recordId + "_RC");
+                sendNewTimToSdw(timToSend, recordId);
             }
-
-            // TODO: Send to SAT
         }
 	}	
 
     public boolean allClear(List<WydotTimRc> timRcList){        
         
-        for (WydotTimRc wydotTimRc : timRcList) {
+        for (WydotTimRc wydotTimRc : timRcList) {       
 
-            if(!wydotTimRc.getRoute().equals("I80"))
-                return false;            
+            WydotRsu rsu = null;
 
             // get tim type            
             TimType timType = getTimType("RC");
@@ -137,27 +134,35 @@ public class WydotTimRcService extends WydotTimService
             // get all RC active tims
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();            
             if(timType != null)
-                activeTims = ActiveTimService.getActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());            
+                activeTims = ActiveTimService.getAllActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());            
 
             // for each active RC TIM in this area
             for (ActiveTim activeTim : activeTims) {
                 
                 // get the TIM 
-                J2735TravelerInformationMessage tim = TimService.getTim(activeTim.getActiveTimId());          
+                J2735TravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());          
 
                 // get RSU TIM is on
                 List<TimRsu> timRsus = TimRsuService.getTimRsusByTimId(activeTim.getTimId());
                 
                 // get full RSU               
-                WydotRsu rsu = getRsu(timRsus.get(0).getRsuId());
+                if(timRsus.size() == 1){
+                    rsu = getRsu(timRsus.get(0).getRsuId());
+                    // delete tim off rsu           
+                    deleteTimFromRsu(rsu, tim.getIndex());                 
+                }
+                else{
+                    // is satellite tim
+                    WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTimRc);
+                    String[] items = new String[1];
+                    items[0] = "4846";
+                    timToSend.getTim().getDataframes()[0].setItems(items);                    
+                    deleteTimFromSdw(timToSend, activeTim.getRecordId(), activeTim.getTimId());                    
+                }
 
-                // delete tim off rsu           
-                deleteTimFromRsu(rsu, tim.getIndex()); 
-                
                 // delete active tim                
                 ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());                
-            }  
-            // TODO: SATELITTE TIMS
+            }             
         } 
         return true;
     }

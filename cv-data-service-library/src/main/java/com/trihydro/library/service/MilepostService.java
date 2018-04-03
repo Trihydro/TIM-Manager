@@ -18,7 +18,7 @@ public class MilepostService extends CvDataServiceLibrary {
 
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build statement SQL query
 			String sqlQuery = "select * from MILEPOST_VW where MOD(milepost, 1) = 0 order by milepost asc";			
 			ResultSet rs = statement.executeQuery(sqlQuery);
@@ -53,7 +53,7 @@ public class MilepostService extends CvDataServiceLibrary {
 		
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build statement SQL query		
 			String sqlString = "select * from MILEPOST_VW where route like '%" + route + "%'" ;
 
@@ -92,7 +92,7 @@ public class MilepostService extends CvDataServiceLibrary {
 
 		List<Milepost> mileposts = new ArrayList<Milepost>();		
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build SQL query
 			String statementStr = "select * from MILEPOST_VW where direction = '" + direction + "' and milepost between " + Math.min(fromMilepost, toMilepost) + " and "+ Math.max(fromMilepost, toMilepost) + " and route like '%" + route + "%'";
 			ResultSet rs = null;
@@ -131,7 +131,7 @@ public class MilepostService extends CvDataServiceLibrary {
 
 		List<Milepost> mileposts = new ArrayList<Milepost>();		
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build SQL query			
 			String statementStr = "select * from MILEPOST_TEST where direction = '" + direction + "' and milepost between " + Math.min(fromMilepost, toMilepost) + " and "+ Math.max(fromMilepost, toMilepost) + " and route like '%" + route + "%'";
 			ResultSet rs = null;
@@ -170,7 +170,7 @@ public class MilepostService extends CvDataServiceLibrary {
 
 		List<Milepost> mileposts = new ArrayList<Milepost>();		
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build SQL query			
 			String statementStr = "select * from MILEPOST_VW where milepost between " + Math.min(fromMilepost, toMilepost) + " and "+ Math.max(fromMilepost, toMilepost) + " and route like '%" + route + "%'";
 				ResultSet rs = null;
@@ -211,7 +211,7 @@ public class MilepostService extends CvDataServiceLibrary {
 
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build statement SQL query
 				ResultSet rs = statement.executeQuery("select * from MILEPOST_TEST order by milepost asc");
 				// convert result to milepost objects

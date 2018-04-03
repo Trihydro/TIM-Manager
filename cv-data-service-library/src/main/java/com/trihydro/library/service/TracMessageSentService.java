@@ -21,7 +21,7 @@ public class TracMessageSentService extends CvDataServiceLibrary {
 
         List<TracMessageSent> tracMessagesSent = new ArrayList<TracMessageSent>();
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			    // build SQL statement				
 				ResultSet rs = statement.executeQuery("select * from TRAC_MESSAGE_SENT");
 				// convert to TracMessageSent objects   			

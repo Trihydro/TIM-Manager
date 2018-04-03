@@ -5,14 +5,24 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import java.text.ParseException;
 import com.trihydro.library.tables.BsmOracleTables;
+
+import ch.qos.logback.core.joran.conditional.ElseAction;
+
 import com.trihydro.library.service.CvDataServiceLibrary;
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.SecurityResultCodeType;
 
 public class BsmCoreDataService extends CvDataServiceLibrary {
 
 	public static Long insertBSMCoreData(OdeBsmMetadata metadata, J2735Bsm bsm) {
  
+		String bsmCoreInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_core_data", BsmOracleTables.getBsmCoreDataTable());        
+		PreparedStatement bsmPreparedStatement = null;
+		
 		try {
+
+			bsmPreparedStatement = DbUtility.getConnection().prepareStatement(bsmCoreInsertQueryStatement, new String[] { "bsm_core_data_id" });
+			
 			System.out.println("insert into bsm core data...");
 
 			int fieldNum = 1;
@@ -157,10 +167,11 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 					if(metadata.getRecordGeneratedAt() != null){
 						java.util.Date recordGeneratedAtDate;					
 						if(metadata.getRecordGeneratedAt().contains("."))
-							recordGeneratedAtDate = utcFormatThree.parse(metadata.getRecordGeneratedAt());					
+							recordGeneratedAtDate = utcFormatMilliSec.parse(metadata.getRecordGeneratedAt());						
+						else if(metadata.getRecordGeneratedAt().length() == 22)
+							recordGeneratedAtDate = utcFormatMin.parse(metadata.getRecordGeneratedAt());		
 						else
-							recordGeneratedAtDate = utcFormatTwo.parse(metadata.getRecordGeneratedAt());				
-						//bsmPreparedStatement.setTimestamp(fieldNum, java.sql.Timestamp.valueOf(mstFormat.format(recordGeneratedAtDate)));
+							recordGeneratedAtDate = utcFormatSec.parse(metadata.getRecordGeneratedAt());			
 						bsmPreparedStatement.setString(fieldNum, mstFormat.format(recordGeneratedAtDate));
 						
 					}
@@ -199,10 +210,11 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 					if(metadata.getOdeReceivedAt() != null){
 						java.util.Date receivedAtDate;
 						if(metadata.getOdeReceivedAt().contains("."))
-							receivedAtDate = utcFormatThree.parse(metadata.getOdeReceivedAt());						
+							receivedAtDate = utcFormatMilliSec.parse(metadata.getOdeReceivedAt());						
+						else if(metadata.getOdeReceivedAt().length() == 22)
+							receivedAtDate = utcFormatMin.parse(metadata.getOdeReceivedAt());		
 						else
-							receivedAtDate = utcFormatTwo.parse(metadata.getOdeReceivedAt());		
-			
+							receivedAtDate = utcFormatSec.parse(metadata.getOdeReceivedAt());	
 						bsmPreparedStatement.setString(fieldNum, mstFormat.format(receivedAtDate));
 					}
 					else
@@ -243,14 +255,14 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 		catch (ParseException e) {
 			e.printStackTrace();
 		}
-		// finally{
-		// 	try{
-		// 		bsmPreparedStatement.close();
-		// 	}
-		// 	catch(SQLException sqle){
+		finally{
+			try{
+				bsmPreparedStatement.close();
+			}
+			catch(SQLException sqle){
 
-		// 	}
-		// }
+			}
+		}
 		return new Long(0);
 	}
 }

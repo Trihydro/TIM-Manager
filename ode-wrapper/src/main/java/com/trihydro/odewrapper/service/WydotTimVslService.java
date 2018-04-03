@@ -58,13 +58,13 @@ public class WydotTimVslService extends WydotTimService
             // get tim type            
             TimType timType = getTimType("VSL");
 
-            // build region name for active tim logger to use
-            String regionName = wydotTimVsl.getDirection() + "_" + wydotTimVsl.getRoute() + "_" + wydotTimVsl.getFromRm() + "_" + wydotTimVsl.getToRm();           
+            // build region name for active tim logger to use       
+            String regionNamePrev = wydotTimVsl.getDirection() + "_" + wydotTimVsl.getRoute() + "_" + wydotTimVsl.getFromRm() + "_" + wydotTimVsl.getToRm();   
                         
             // query for existing active tims for this road segment
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
             if(timType != null)
-                ActiveTimService.getActiveTims(wydotTimVsl.getFromRm(), wydotTimVsl.getToRm(), timType.getTimTypeId(), wydotTimVsl.getDirection());   
+                activeTims = ActiveTimService.getAllActiveTims(wydotTimVsl.getFromRm(), wydotTimVsl.getToRm(), timType.getTimTypeId(), wydotTimVsl.getDirection());   
             
             // if there are active tims for this area
             if(activeTims.size() > 0) {                    
@@ -77,7 +77,7 @@ public class WydotTimVslService extends WydotTimService
                     
                     // look to see if tim is on RSU
                     TimRsu activeTimRsu = timRsus.stream()
-                        .filter(x -> x.getTimId() == activeTim.getTimId())
+                        .filter(x -> x.getTimId().equals(activeTim.getTimId()))
                         .findFirst()
                         .orElse(null);
                                                                 
@@ -95,39 +95,37 @@ public class WydotTimVslService extends WydotTimService
                         timToSend.setRsus(rsuArr);            
                         
                         // update region name for active tim logger
-                        regionName += "_RSU-" + rsu.getRsuTarget();   
-                        regionName += "_VSL";                               
-                        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
+                        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_VSL");  
 
                         // update TIM rsu
                         updateTimOnRsu(timToSend, activeTim.getTimId());   
                     }
                     // else active tim is satellite 
                     else{
-                        // update satellite tim
-                        timToSend.getSdw().setRecordId(activeTim.getRecordId());
-                        updateTimOnSdw(timToSend, activeTim.getTimId());
+                        // update satellite tim                         
+                        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_SAT-" + activeTim.getRecordId() + "_VSL");  
+                        updateTimOnSdw(timToSend, activeTim.getTimId(), activeTim.getRecordId());
                     }    
                 }                
             }     
             // else add new active tim
             else {
-                // for each rsu 
+                // for each rsu                
                 for(int i = 0; i < rsus.size(); i++) {
                     // add rsu to tim
                     rsuArr[0] = rsus.get(i);
-                    timToSend.setRsus(rsuArr);
-
-                    regionName += "_RSU-" + rsus.get(i).getRsuTarget();   
-                    regionName += "_VSL";                               
-                    timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
+                    timToSend.setRsus(rsuArr); 
                                      
                     // send tim to rsu
-                    sendNewTimToRsu(timToSend, rsus.get(i));  
+                    timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_RSU-" + rsus.get(i).getRsuTarget() + "_VSL");  
+                    sendNewTimToRsu(timToSend, rsus.get(i)); 
+                    
                 }            
-            }
-            // send TIM to satellite
-            sendNewTimToSdw(timToSend);
+                // send TIM to satellite            
+                String recordId = getNewRecordId();         
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_SAT-" + recordId + "_VSL");
+                sendNewTimToSdw(timToSend, recordId);
+            }     
         }
     }	
 

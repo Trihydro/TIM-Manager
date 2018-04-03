@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.CvDataServiceLibrary;
@@ -16,7 +18,7 @@ public class TimTypeService extends CvDataServiceLibrary {
     public static List<TimType> selectAll() {
     	List<TimType> timTypes = new ArrayList<TimType>();
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build SQL statement
 				ResultSet rs = statement.executeQuery("select * from TIM_TYPE");
 				// convert to tim type objects   			

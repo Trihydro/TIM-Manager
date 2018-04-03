@@ -59,8 +59,8 @@ public class WydotTimParkingService extends WydotTimService
                         
             // query for existing active tims for this road segment
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
-            if(timType != null)
-                ActiveTimService.getActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());   
+            // if(timType != null)
+            //     activeTims = ActiveTimService.getActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());   
             
             // if there are active tims for this area
             if(activeTims.size() > 0) {                    
@@ -139,8 +139,8 @@ public class WydotTimParkingService extends WydotTimService
 
             // get all RC active tims
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();            
-            if(timType != null)
-                activeTims = ActiveTimService.getActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());            
+            // if(timType != null)
+            //     activeTims = ActiveTimService.getActiveTims(wydotTimRc.getFromRm(), wydotTimRc.getToRm(), timType.getTimTypeId(), wydotTimRc.getDirection());            
 
             // for each active RC TIM in this area
             for (ActiveTim activeTim : activeTims) {

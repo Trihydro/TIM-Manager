@@ -1,12 +1,12 @@
 package com.trihydro.library.service;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.Category;
 
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class CategoryService extends CvDataServiceLibrary
 
 		List<Category> categories = new ArrayList<Category>();
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build SQL statement   		    
 			ResultSet rs = statement.executeQuery("select * from CATEGORY");
 			try {

@@ -1,6 +1,7 @@
 package com.trihydro.odewrapper.helpers.util;
 
 import com.trihydro.odewrapper.model.WydotTimBase;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.service.MilepostService;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import java.math.BigDecimal;
 import org.springframework.core.env.Environment;
 import us.dot.its.jpo.ode.plugin.SNMP;
+import java.util.stream.Collectors;
 
 @Component
 public class CreateBaseTimUtil
@@ -88,6 +90,35 @@ public class CreateBaseTimUtil
       
         timToSend.setMileposts(MilepostService.selectMilepostRange(timBase.getDirection(), "I 80", timBase.getFromRm(), timBase.getToRm()));
         
+
+        List<Milepost> sizeRestrictedMilepostList =timToSend.getMileposts();
+
+        int mod = 4;
+        while(sizeRestrictedMilepostList.size() > 60){
+            
+            List<Milepost> tempList = new ArrayList<Milepost>(); 
+
+            for (Milepost milepost : sizeRestrictedMilepostList) {          
+                                
+                if(Math.round(milepost.getMilepost() * 10 % mod) == 0){
+                    tempList.add(milepost);
+                }                                 
+            }
+
+            sizeRestrictedMilepostList = tempList;
+            mod += 2;
+        }
+
+        //if(timToSend.getMileposts().size())\
+
+        // List<Milepost> smallerList = timToSend.getMileposts().stream()
+        //     .filter(x -> x.getMilepost() % .4 == 0)
+        //     .collect(Collectors.toList());
+
+
+
+        timToSend.setMileposts(sizeRestrictedMilepostList);
+
         OdePosition3D anchorPosition = new OdePosition3D();
         if(timToSend.getMileposts().size() > 0){
             anchorPosition.setLatitude(new BigDecimal(timToSend.getMileposts().get(0).getLatitude()));
@@ -125,20 +156,7 @@ public class CreateBaseTimUtil
 
         J2735TravelerInformationMessage.DataFrame[] dataFrames = new J2735TravelerInformationMessage.DataFrame[1];
         dataFrames[0] = dataFrame;
-        tim.setDataframes(dataFrames);      
-
-        SNMP snmp = new SNMP();
-        snmp.setChannel(178);
-        snmp.setRsuid("00000083");
-        snmp.setMsgid(31);
-        snmp.setMode(1);
-        snmp.setChannel(178);
-        snmp.setInterval(2);
-        snmp.setDeliverystart("2018-01-01T17:47:11-05:00");
-        snmp.setDeliverystop("2019-01-01T17:47:11-05:15");
-        snmp.setEnable(1);
-        snmp.setStatus(4);
-        timToSend.setSnmp(snmp);
+        tim.setDataframes(dataFrames);           
 
         timToSend.setTim(tim);        
 

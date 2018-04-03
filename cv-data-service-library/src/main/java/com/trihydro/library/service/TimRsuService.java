@@ -50,7 +50,7 @@ public class TimRsuService extends CvDataServiceLibrary {
 		
 		List<TimRsu> timRsus = new ArrayList<TimRsu>();
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build SQL statement
 				ResultSet rs = statement.executeQuery("select * from TIM_RSU where tim_id = " + timId);
 				try {
@@ -81,7 +81,7 @@ public class TimRsuService extends CvDataServiceLibrary {
 		
 		List<TimRsu> timRsus = new ArrayList<TimRsu>();
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// select all RSUs from RSU table
    			ResultSet rs = statement.executeQuery("select * from TIM_RSU");
    			while (rs.next()) {
@@ -102,7 +102,7 @@ public class TimRsuService extends CvDataServiceLibrary {
 		
 		TimRsu timRsu = new TimRsu();
 		
-		try {
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// build SQL statement
 				ResultSet rs = statement.executeQuery("select * from TIM_RSU where tim_rsu_id = " + timRsuId);
 				try {

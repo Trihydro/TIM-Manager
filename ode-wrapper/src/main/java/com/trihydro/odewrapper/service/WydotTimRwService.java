@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.TimType;
 
-import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
-import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
 import org.springframework.core.env.Environment;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
@@ -58,7 +56,9 @@ public class WydotTimRwService extends WydotTimService
 
             // Convert start date time coming from REST call to a local format
             //String startDateTimeLocal = convertUtcDateTimeToLocal(wydotTimRw.getStartDateTime());
-            String startDateTimeLocal = wydotTimRw.getStartDateTime();
+
+            // convert to local time
+            String startDateTimeLocal = convertUtcDateTimeToLocal(wydotTimRw.getStartDateTime());
             timToSend.getTim().getDataframes()[0].setStartDateTime(startDateTimeLocal);
 
             // duration time
@@ -95,10 +95,7 @@ public class WydotTimRwService extends WydotTimService
         Long timId = null;
 
         // discard non-I-80 requests 
-        for (WydotTimRw wydotTimRw : timRwList) {
-                    
-            if(!wydotTimRw.getRoute().equals("I80"))
-                return;
+        for (WydotTimRw wydotTimRw : timRwList) {                         
 
             // FIND ALL RSUS TO SEND TO     
             List<WydotRsu> rsus = getRsusInBuffer(wydotTimRw.getDirection(), Math.min(wydotTimRw.getToRm(), wydotTimRw.getFromRm()), Math.max(wydotTimRw.getToRm(), wydotTimRw.getFromRm()));       
@@ -207,7 +204,7 @@ public class WydotTimRwService extends WydotTimService
 
     public String convertUtcDateTimeToLocal(String utcDateTime){  
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z[UTC]'");            
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");            
         LocalDateTime startDate = LocalDateTime.parse(utcDateTime, formatter);        
         ZoneId mstZoneId = ZoneId.of("America/Denver");              
         ZonedDateTime mstZonedDateTime = startDate.atZone(mstZoneId);      
@@ -218,8 +215,8 @@ public class WydotTimRwService extends WydotTimService
 
     public long getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime){
 
-        LocalDateTime endDate = LocalDateTime.parse(endDateTime, mdtformatter);
-        LocalDateTime startDateTimeLocal = LocalDateTime.parse(startDateTime, mdtformatter);                
+        LocalDateTime endDate = LocalDateTime.parse(endDateTime, utcformatter);
+        LocalDateTime startDateTimeLocal = LocalDateTime.parse(startDateTime, utcformatter);                
         java.time.Duration dateDuration = java.time.Duration.between(startDateTimeLocal, endDate);
         Math.abs(dateDuration.toMinutes());
         long durationTime = Math.abs(dateDuration.toMinutes());

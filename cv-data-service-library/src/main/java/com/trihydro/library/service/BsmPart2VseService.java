@@ -3,6 +3,8 @@ package com.trihydro.library.service;
 import java.sql.*;
 import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
+
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.tables.BsmOracleTables;
 
@@ -10,8 +12,12 @@ public class BsmPart2VseService extends CvDataServiceLibrary {
 
 	public static Long insertBSMPart2VSE(J2735BsmPart2Content part2Content, J2735VehicleSafetyExtensions vse, Long bsmCoreDataId) {
 
+		String bsmVseInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_vse", BsmOracleTables.getBsmPart2VseTable());
+		PreparedStatement bsmVsePreparedStatement = null;
 		try {
 
+			bsmVsePreparedStatement = DbUtility.getConnection().prepareStatement(bsmVseInsertQueryStatement, new String[] {"bsm_part2_vse_id"});
+			
 			int fieldNum = 1;
 			
 			for(String col: BsmOracleTables.getBsmPart2VseTable()) {

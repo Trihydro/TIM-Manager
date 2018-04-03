@@ -17,52 +17,28 @@ import com.trihydro.library.tables.BsmOracleTables;
 
 public class CvDataServiceLibrary {
 
-    public static DateFormat utcFormatThree;
-    public static DateFormat utcFormatTwo;
+    public static DateFormat utcFormatMilliSec;
+    public static DateFormat utcFormatSec;
+    public static DateFormat utcFormatMin;
     public static DateFormat mstFormat;
     public static DateTimeFormatter localDateTimeformatter;
     public static DateFormat mstLocalFormat;
-    public static PreparedStatement bsmPreparedStatement;
-    public static PreparedStatement bsmSuvePreparedStatement;
-    public static PreparedStatement bsmVsePreparedStatement;
+    //public static PreparedStatement bsmPreparedStatement;
+    //public static PreparedStatement bsmSuvePreparedStatement;
+    //public static PreparedStatement bsmVsePreparedStatement;
     public static List<SecurityResultCodeType> securityResultCodeTypes;
-    public static Statement statement; 
 
     static {
-        utcFormatThree = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z[UTC]'");
-        utcFormatTwo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z[UTC]'");
+        utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z[UTC]'");
+        utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z[UTC]'"); //25
+        utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z[UTC]'");
         //mstFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");	
         mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"); 
         mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");   
-         
-        try {
-			statement = DbUtility.getConnection().createStatement();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+                 
         securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());        
 
-        String bsmCoreInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_core_data", BsmOracleTables.getBsmCoreDataTable());        
-                try {
-			bsmPreparedStatement = DbUtility.getConnection().prepareStatement(bsmCoreInsertQueryStatement, new String[] { "bsm_core_data_id" });
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-        
-        String bsmSuveInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_suve", BsmOracleTables.getBsmPart2SuveTable());        
-        try{
-            bsmSuvePreparedStatement = DbUtility.getConnection().prepareStatement(bsmSuveInsertQueryStatement, new String[] {"bsm_part2_suve_id"});
-        } catch (SQLException e) {
-			e.printStackTrace();
-        }
-
-        String bsmVseInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_vse", BsmOracleTables.getBsmPart2VseTable());
-        try{
-            bsmVsePreparedStatement = DbUtility.getConnection().prepareStatement(bsmVseInsertQueryStatement, new String[] {"bsm_part2_vse_id"});
-        } catch (SQLException e) {
-			e.printStackTrace();
-        }        
+        // create Prepared
 
     }
 
@@ -116,7 +92,7 @@ public class CvDataServiceLibrary {
         if(incomingDate != null){
             if(incomingDate.contains(".")){
                 try {
-                    convertedDate = utcFormatThree.parse(incomingDate);
+                    convertedDate = utcFormatMilliSec.parse(incomingDate);
                 } catch (ParseException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -124,7 +100,7 @@ public class CvDataServiceLibrary {
             }
             else {
                 try {
-                    convertedDate = utcFormatTwo.parse(incomingDate);
+                    convertedDate = utcFormatSec.parse(incomingDate);
                 } 
                 catch (ParseException e) {
                     // TODO Auto-generated catch block

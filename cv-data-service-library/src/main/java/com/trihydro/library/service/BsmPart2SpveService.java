@@ -14,9 +14,8 @@ public class BsmPart2SpveService extends CvDataServiceLibrary {
 
 	public static Long insertBSMPart2SPVE(J2735BsmPart2Content part2Content, J2735SpecialVehicleExtensions spve, Long bsmCoreDataId) {
 		try {
-			
-			BsmOracleTables bsmOracleTables = new BsmOracleTables();	
-			String insertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_part2_spve", bsmOracleTables.getBsmPart2SpveTable());
+						
+			String insertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_spve", BsmOracleTables.getBsmPart2SpveTable());
             preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"bsm_part2_spve_id"});
 
             int fieldNum = 1;

@@ -5,6 +5,7 @@ public class WydotTimCc extends WydotTimBase
 	private Integer[] advisory;
 	private String segment;
 	private String district;
+	private String id;
 
 	public Integer[] getAdvisory() 
 	{
@@ -34,5 +35,15 @@ public class WydotTimCc extends WydotTimBase
 	public void setDistrict(String district) 
 	{
 		this.district = district;
+	}
+
+	public String getId() 
+	{
+		return this.id;
+	}
+
+	public void setId(String id) 
+	{
+		this.id = id;
 	}
 }

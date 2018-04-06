@@ -1,6 +1,6 @@
 package com.trihydro.odewrapper.service;
 
-import com.trihydro.odewrapper.model.WydotTimRc;
+import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimService;
@@ -11,54 +11,51 @@ import java.util.ArrayList;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.TimType;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
+import org.springframework.core.env.Environment;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.model.TimRsu;
 
 @Component
-public class WydotTimParkingService extends WydotTimService
+public class WydotTimIncidentService extends WydotTimService
 {    
     private CreateBaseTimUtil createBaseTimUtil;    
 
+    @Autowired
+    public Environment env;
+
 	@Autowired
-	WydotTimParkingService(CreateBaseTimUtil createBaseTimUtil) {
+	WydotTimIncidentService(CreateBaseTimUtil createBaseTimUtil) {
         this.createBaseTimUtil = createBaseTimUtil;
-        timTypeString = "P";
     }	
 
     // creates and updates road condition TIMs based on starting and stopping mileposts
-    public void createParkingTim(List<WydotTimRc> timParkingList) {
-
+    public void createIncidentTim(List<WydotTimIncident> timIncidentList) {
+            
         Long timId = null;
         
         // for each tim in wydot's request
-        for (WydotTimRc wydotTimPark : timParkingList) {
-                 
-            System.out.println("Parking TIM");
-            System.out.println("direction:" + wydotTimPark.getDirection());
-            System.out.println("route:" + wydotTimPark.getRoute());
-            System.out.println("fromRm:" + wydotTimPark.getFromRm());
-            System.out.println("toRm:" + wydotTimPark.getToRm());
-            
+        for (WydotTimIncident wydotTimIncident : timIncidentList) {
+                    
             // FIND ALL RSUS TO SEND TO     
-            List<WydotRsu> rsus = getRsusInBuffer(wydotTimPark.getDirection(), Math.min(wydotTimPark.getToRm(), wydotTimPark.getFromRm()), Math.max(wydotTimPark.getToRm(), wydotTimPark.getFromRm()));       
+            List<WydotRsu> rsus = getRsusInBuffer(wydotTimIncident.getDirection(), Math.min(wydotTimIncident.getToRm(), wydotTimIncident.getFromRm()), Math.max(wydotTimIncident.getToRm(), wydotTimIncident.getFromRm()));       
 
             // build base TIM                
-            WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTimPark);
+            WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTimIncident);
 
             // set duration for two hours
             timToSend.getTim().getDataframes()[0].setDurationTime(120);            
 
             // add Road Conditions itis codes
-            List<String> items = setItisCodes(wydotTimPark);   
+            List<String> items = setItisCodes(wydotTimIncident);   
             timToSend.getTim().getDataframes()[0].setItems(items.toArray(new String[items.size()]));
  
             // get tim type            
-            TimType timType = getTimType(timTypeString);
+            TimType timType = getTimType("I");
 
             // build region name for active tim logger to use
-            String regionName = wydotTimPark.getDirection() + "_" + wydotTimPark.getRoute() + "_" + wydotTimPark.getFromRm() + "_" + wydotTimPark.getToRm();           
+            String regionName = wydotTimIncident.getDirection() + "_" + wydotTimIncident.getRoute() + "_" + wydotTimIncident.getFromRm() + "_" + wydotTimIncident.getToRm();           
                         
             // query for existing active tims for this road segment
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -95,7 +92,7 @@ public class WydotTimParkingService extends WydotTimService
                         
                         // update region name for active tim logger
                         regionName += "_RSU-" + rsu.getRsuTarget();   
-                        regionName += "_" + timTypeString;                               
+                        regionName += "_I";                               
                         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
 
                         // update TIM rsu
@@ -118,7 +115,7 @@ public class WydotTimParkingService extends WydotTimService
                     timToSend.setRsus(rsuArr);
 
                     regionName += "_RSU-" + rsus.get(i).getRsuTarget();   
-                    regionName += "_" + timTypeString;                               
+                    regionName += "_I";                               
                     timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
                                      
                     // send tim to rsu
@@ -130,15 +127,15 @@ public class WydotTimParkingService extends WydotTimService
         }
 	}	
 
-    public boolean allClear(List<WydotTimRc> timRcList){        
+    public boolean allClear(List<WydotTimIncident> timIncidentList){        
         
-        for (WydotTimRc wydotTimRc : timRcList) {
+        for (WydotTimIncident WydotTimIncident : timIncidentList) {
 
-            if(!wydotTimRc.getRoute().equals("I80"))
+            if(!WydotTimIncident.getRoute().equals("I80"))
                 return false;            
 
             // get tim type            
-            TimType timType = getTimType(timTypeString);
+            TimType timType = getTimType("I");
 
             // get all RC active tims
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();            
@@ -169,11 +166,11 @@ public class WydotTimParkingService extends WydotTimService
     }
 
 
-    public List<String> setItisCodes(WydotTimRc wydotTimRc){
+    public List<String> setItisCodes(WydotTimIncident wydotTimIncident){
         
         List<String> items = new ArrayList<String>();               
-        for (Integer item : wydotTimRc.getAdvisory())
-            items.add(item.toString());                       
+        // for (Integer item : wydotTimIncident.getAdvisory())
+        //     items.add(item.toString());                       
                  
         return items;
     }

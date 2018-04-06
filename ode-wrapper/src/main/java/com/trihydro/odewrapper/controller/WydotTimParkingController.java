@@ -26,7 +26,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
     }
     
     @RequestMapping(value="/parking-tim", method = RequestMethod.POST, headers="Accept=application/json")
-    public ResponseEntity<String> createCcTim(@RequestBody WydotTimRcList wydotTimRcs) {        
+    public ResponseEntity<String> createParkingTim(@RequestBody WydotTimRcList wydotTimRcs) {        
         
         // build TIM
         wydotTimParkingService.createParkingTim(wydotTimRcs.getTimRcList());     

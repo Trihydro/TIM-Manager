@@ -72,7 +72,11 @@ public class TimLogger extends BaseLogger{
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>(); 
 		String satRecordId = null;
 		String direction = null;
+		String rsuTarget = null;
+		Double toRm = null;
+		Double fromRm = null;
 		String route = null;
+		String clientId = null;
 	
 		// save TIM
 	    System.out.println(((OdeTimPayload)odeData.getPayload()).getTim().getTimeStamp());
@@ -85,7 +89,6 @@ public class TimLogger extends BaseLogger{
 		Long dataFrameId = DataFrameService.insertDataFrame(timId);
 
 		// save active tim
-		//Long activeTimId = ActiveTimLogger.insertActiveTim(timId, wydotTim.getFromRm(), wydotTim.getToRm(), wydotTim.getDirection(), timType.getTimTypeId(), startDateTime, endDateTime, wydotTim.getRoute(), clientId, dbUtility.getConnection());
 		String name = ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName();
 		String[] splitName = name.split("_");
 
@@ -95,18 +98,21 @@ public class TimLogger extends BaseLogger{
 			route = splitName[1];
 		}	
 		else	
-			return;
+			return;			
 
 		// check to see if region name is correct
 		if(splitName.length < 5)
 			return;
 
+		fromRm = Double.parseDouble(splitName[2]);
+		toRm = Double.parseDouble(splitName[3]);
+
 		// if this is an RSU TIM 
 		if(splitName[4].split("-")[0].equals("RSU")){
 			// save TIM RSU in DB
-			String rsuTarget = splitName[4].split("-")[1];		
+			rsuTarget = splitName[4].split("-")[1];		
 			WydotRsu rsu = rsus.stream()
-				.filter(x -> x.getRsuTarget().equals(rsuTarget))
+				.filter(x -> x.getRsuTarget().equals(splitName[4].split("-")[1]))
 				.findFirst()
 				.orElse(null);
 			TimRsuService.insertTimRsu(timId, rsu.getRsuId());
@@ -132,20 +138,27 @@ public class TimLogger extends BaseLogger{
 		
 			timType = getTimType(splitName[5]);   	
 			
-			if(splitName.length > 6)
-				activeTims = ActiveTimService.getActiveTimsByClientId(splitName[6]);			
+			if(splitName.length > 6){
+				clientId = splitName[6];
+				activeTims = ActiveTimService.getActiveTimsByClientId(clientId);			
+			}
 			else{
-				if(splitName[4].split("-")[0].equals("RSU"))
-					activeTims = ActiveTimService.getActiveRsuTims(Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), timType.getTimTypeId(), direction);            		
+				if(splitName[4].split("-")[0].equals("RSU")){
+					//activeTims = ActiveTimService.getActiveRsuTims(Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), timType.getTimTypeId(), direction);            		
+					if(timType.getType().equals("RC"))
+						activeTims = ActiveTimService.getActiveRCTimsOnRsu(rsuTarget, fromRm, toRm, direction);
+					else if(timType.getType().equals("VSL"))
+						activeTims = ActiveTimService.getActiveVSLTimsOnRsu(rsuTarget, fromRm, toRm, direction);
+				}
 				else
-					activeTims = ActiveTimService.getActiveSatTims(Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), timType.getTimTypeId(), direction);            		
+					activeTims = ActiveTimService.getActiveSatTims(fromRm, toRm, timType.getTimTypeId(), direction);            		
 			}
 			// Active TIM exists
 			if(activeTims.size() == 0){			
 				if(splitName.length > 6)
-					ActiveTimService.insertActiveTim(timId, Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), direction, timType.getTimTypeId(), ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, splitName[6], satRecordId);		
+					ActiveTimService.insertActiveTim(timId, fromRm, toRm, direction, timType.getTimTypeId(), ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, clientId, satRecordId);		
 				else
-					ActiveTimService.insertActiveTim(timId, Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), direction, timType.getTimTypeId(), ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, null, satRecordId);		
+					ActiveTimService.insertActiveTim(timId, fromRm, toRm, direction, timType.getTimTypeId(), ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, null, satRecordId);		
 			}
 			else{
 				for (ActiveTim activeTim : activeTims) {
@@ -163,7 +176,7 @@ public class TimLogger extends BaseLogger{
 		else{
 			// not from WYDOT application
 			// just log for now
-			ActiveTimService.insertActiveTim(timId, Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), direction, null, ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, null, satRecordId);					
+			ActiveTimService.insertActiveTim(timId, fromRm, toRm, direction, null, ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, null, satRecordId);					
 		}			 			
 	}
 

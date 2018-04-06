@@ -16,7 +16,6 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.TimType;
 
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
-import org.springframework.core.env.Environment;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.library.service.TimRsuService;
@@ -28,21 +27,26 @@ import static java.lang.Math.toIntExact;
 public class WydotTimRwService extends WydotTimService
 {    
     private CreateBaseTimUtil createBaseTimUtil;    
-
-    @Autowired
-    public Environment env;
+    private TimType timType;
 
 	@Autowired
 	WydotTimRwService(CreateBaseTimUtil createBaseTimUtil) {      
         this.createBaseTimUtil = createBaseTimUtil;
+        timTypeString = "RW";
+        timType = getTimType(timTypeString);
     }	
 
     public void createRwTim(List<WydotTimRw> timRwList) {
-            
-        Long timId = null;
+      
 
         // discard non-I-80 requests 
-        for (WydotTimRw wydotTimRw : timRwList) {    
+        for (WydotTimRw wydotTimRw : timRwList) { 
+            
+            System.out.println("RW TIM");
+            System.out.println("direction:" + wydotTimRw.getDirection());
+            System.out.println("route:" + wydotTimRw.getRoute());
+            System.out.println("fromRm:" + wydotTimRw.getFromRm());
+            System.out.println("toRm:" + wydotTimRw.getToRm());
 
             // FIND ALL RSUS TO SEND TO     
             List<WydotRsu> rsus = getRsusInBuffer(wydotTimRw.getDirection(), Math.min(wydotTimRw.getToRm(), wydotTimRw.getFromRm()), Math.max(wydotTimRw.getToRm(), wydotTimRw.getFromRm()));       
@@ -66,29 +70,53 @@ public class WydotTimRwService extends WydotTimService
                 long durationTime = getMinutesDurationBetweenTwoDates(wydotTimRw.getStartDateTime(), wydotTimRw.getEndDateTime());
                 timToSend.getTim().getDataframes()[0].setDurationTime(toIntExact(durationTime));
             }            
-                
-            // get tim type            
-            TimType timType = getTimType("RW");
             
-            String regionName = wydotTimRw.getDirection() + "_" + wydotTimRw.getRoute() + "_" + wydotTimRw.getFromRm() + "_" + wydotTimRw.getToRm();           
+            String regionNamePrev = wydotTimRw.getDirection() + "_" + wydotTimRw.getRoute() + "_" + wydotTimRw.getFromRm() + "_" + wydotTimRw.getToRm();           
             
-            // for each rsu
-            for(int i = 0; i < rsus.size(); i++) {
+            // query database for rsus that active tims could be on
+            List<ActiveTim> activeTims = null;
+            // for each rsu in range
+            for (WydotRsu rsu : rsus) {
 
-                // query RSU for indices
-                rsuArr[0] = rsus.get(i);
-                timToSend.setRsus(rsuArr);                 
+                // add rsu to tim
+                rsuArr[0] = rsu;
+                timToSend.setRsus(rsuArr);            
                 
-                regionName += "_RSU-" + rsus.get(i).getRsuTarget();
-                regionName += "_RW_" + wydotTimRw.getClientId();                   
-                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
-                
-                timId = sendNewTimToRsu(timToSend, rsus.get(i));                                                                      
-            }                                           
+                // update region name for active tim logger
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_" + timTypeString);
+              
+                activeTims = ActiveTimService.getActiveRSUTimsByClientId(wydotTimRw.getClientId());
 
-            // TODO: Send to SAT
+                // update tim                       
+                if(activeTims != null && activeTims.size() > 0){                                            
+                    // return error                     
+                }              
+                else{     
+                    // send new tim to rsu                    
+                    sendNewTimToRsu(timToSend, rsu);  
+                }
+            }
+
+            // satellite
+            List<ActiveTim> activeSatTims = ActiveTimService.getActiveSatTims(wydotTimRw.getFromRm(), wydotTimRw.getToRm(), timType.getTimTypeId(), wydotTimRw.getDirection());
+        
+            if(activeSatTims != null && activeSatTims.size() > 0){
+                // return error
+            }
+            else{
+                String recordId = getNewRecordId();    
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_SAT-" + recordId + "_" + timTypeString);
+                sendNewTimToSdw(timToSend, recordId);
+            }                                   
         }
     }	  
+
+    public ActiveTim getRwTim(String clientId){
+
+        ActiveTim activeTim = ActiveTimService.getActiveTimByClientId(clientId, timType.getTimTypeId());
+
+        return activeTim;
+    }
 
     public void updateRwTim(List<WydotTimRw> timRwList) {
         
@@ -117,54 +145,44 @@ public class WydotTimRwService extends WydotTimService
                 timToSend.getTim().getDataframes()[0].setDurationTime(toIntExact(durationTime));
             }    
 
-            // get tim type            
-            TimType timType = getTimType("RW");
-
             // set region name
-            String regionName = wydotTimRw.getDirection() + "_" + wydotTimRw.getRoute() + "_" + wydotTimRw.getFromRm() + "_" + wydotTimRw.getToRm();           
+            String regionNamePrev = wydotTimRw.getDirection() + "_" + wydotTimRw.getRoute() + "_" + wydotTimRw.getFromRm() + "_" + wydotTimRw.getToRm();           
             
-            List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+            // query database for rsus that active tims could be on
+            List<ActiveTim> activeTims = null;
+            // for each rsu in range
+            for (WydotRsu rsu : rsus) {
 
-            // get active TIMs be client ID
-            if(timType != null)
-                activeTims = ActiveTimService.getActiveTimsByClientId(wydotTimRw.getClientId());   
-            
-            // if there are active tims for this area
-            if(activeTims.size() > 0) {                    
-                for (ActiveTim activeTim : activeTims) {                                
-                    // if active tim is RSU tim
-                    List<TimRsu> timRsus =  TimRsuService.getTimRsusByTimId(activeTim.getTimId());     
-                    
-                    // if RSU tim
-                    if(timRsus.size() == 1){
+                // add rsu to tim
+                rsuArr[0] = rsu;
+                timToSend.setRsus(rsuArr);            
+                
+                // update region name for active tim logger
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_" + timTypeString);
+              
+                activeTims = ActiveTimService.getActiveRSUTimsByClientId(wydotTimRw.getClientId());
 
-                        WydotRsu rsu = rsus.stream()
-                        .filter(x -> x.getRsuId().equals(Integer.valueOf(timRsus.get(0).getRsuId().toString())))
-                        .findFirst()
-                        .orElse(null);
+                // update tim                       
+                if(activeTims != null && activeTims.size() > 0){                                            
+                    // return error                     
+                }              
+                else{     
+                    // send new tim to rsu                    
+                    sendNewTimToRsu(timToSend, rsu);  
+                }
+            }
 
-                        // set tim RSU
-                        rsuArr[0] = rsu;
-                        timToSend.setRsus(rsuArr);
-
-                        regionName += "_RSU-" + rsu.getRsuTarget();
-                        regionName += "_RW_" + wydotTimRw.getClientId();                   
-                        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);  
-
-                        // update TIM rsu
-                        updateTimOnRsu(timToSend, activeTim.getTimId());                                               
-                    }
-                    // else active tim is satellite 
-                    else {
-                        // TODO - Send to Sat
-                   
-
-                        // TODO - Update Active Sat TIM
-                    }    
-                }                
-            }          
-
-            // TODO: Send to SAT
+            // satellite
+            List<ActiveTim> activeSatTims = ActiveTimService.getActiveSATTimsByClientId(wydotTimRw.getClientId());
+        
+            if(activeSatTims != null && activeSatTims.size() > 0){
+                // return error
+            }
+            else{
+                String recordId = getNewRecordId();    
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNamePrev + "_SAT-" + recordId + "_" + timTypeString);
+                sendNewTimToSdw(timToSend, recordId);
+            }                
         }
     }
 

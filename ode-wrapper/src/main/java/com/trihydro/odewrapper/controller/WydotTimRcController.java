@@ -30,7 +30,7 @@ public class WydotTimRcController extends WydotTimBaseController {
     }
    
     @RequestMapping(value="/create-update-rc-tim", method = RequestMethod.POST, headers="Accept=application/json")    
-    public ResponseEntity<String> createUpdateRcTim(@RequestBody WydotTimRcList wydotTimRcs) { 
+    public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody WydotTimRcList wydotTimRcs) { 
        
         System.out.println("Create RC TIM");
 
@@ -41,7 +41,7 @@ public class WydotTimRcController extends WydotTimBaseController {
     }
 
     @RequestMapping(value="/submit-rc-ac", method = RequestMethod.PUT, headers="Accept=application/json")
-    public ResponseEntity<String> submitAcRcTim(@RequestBody WydotTimRcList wydotTimRcs) { 
+    public ResponseEntity<String> submitAllClearRoadConditionsTim(@RequestBody WydotTimRcList wydotTimRcs) { 
        
         System.out.println("All clear");
 

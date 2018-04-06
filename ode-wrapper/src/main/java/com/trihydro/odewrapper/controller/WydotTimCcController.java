@@ -27,8 +27,10 @@ public class WydotTimCcController extends WydotTimBaseController {
     }
     
     @RequestMapping(value="/cc-tim", method = RequestMethod.POST, headers="Accept=application/json")
-    public ResponseEntity<String> createCcTim(@RequestBody WydotTimCcList wydotTimCcs) {        
+    public ResponseEntity<String> createChainControlTim(@RequestBody WydotTimCcList wydotTimCcs) {        
         
+        System.out.println("Chain control called");
+
         // build TIM
         wydotTimCcService.createCcTim(wydotTimCcs.getTimCcList());     
 

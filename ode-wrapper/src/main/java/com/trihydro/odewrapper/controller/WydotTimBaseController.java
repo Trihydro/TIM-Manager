@@ -6,7 +6,14 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @ApiIgnore
 public class WydotTimBaseController {
+    
+    static{
+                        
+    }
+    
     public String jsonKeyValue(String key, String value) {
         return "{\"" + key + "\":" + value + "}";
     }
+
+
 }

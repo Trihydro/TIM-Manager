@@ -160,7 +160,6 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTims;
 	}
 
-
 	public static List<ActiveTim> getActiveRsuTims(Double milepostStart, Double milepostStop, Long timTypeId, String direction){
 		
 		ActiveTim activeTim = null;
@@ -229,6 +228,39 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTims;
 	}
 
+	public static ActiveTim getActiveTimByClientId(String clientId, Long timTypeId){
+
+		ActiveTim activeTim = null;
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = " + timTypeId);
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setRecordId(rs.getString("SAT_RECORD_ID"));								
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTim;
+	}
+
+
 	public static ActiveTim getActiveTim(Long activeTimId){
 
 		ActiveTim activeTim = null;
@@ -294,6 +326,268 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 		return activeTims;
 	}		
+
+	public static List<ActiveTim> getActiveRSUTimsByClientId(String clientId){
+		
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and SAT_RECORD_ID is null");
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTims.add(activeTim);												
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}	
+	
+	public static List<ActiveTim> getActiveSATTimsByClientId(String clientId){
+		
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and SAT_RECORD_ID is not null");
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTims.add(activeTim);												
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}	
+
+	public static List<ActiveTim> getActiveTimsOnRsu(String ipv4Address){
+			
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			selectStatement += " inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id";
+			selectStatement += " inner join tim on tim.tim_id = tim_rsu.tim_id";
+			selectStatement += " inner join active_tim on active_tim.tim_id = tim.tim_id";
+			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
+			selectStatement += " where rsu_vw.ipv4_address = '" +  ipv4Address + "'";
+			
+			ResultSet rs = statement.executeQuery(selectStatement);
+
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+					activeTim.setTimType(rs.getString("TYPE"));
+					activeTims.add(activeTim);												
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
+
+	public static List<ActiveTim> getActiveRCTimsOnRsu(String ipv4Address, Double fromRm, Double toRm, String direction){
+			
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			selectStatement += " inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id";
+			selectStatement += " inner join tim on tim.tim_id = tim_rsu.tim_id";
+			selectStatement += " inner join active_tim on active_tim.tim_id = tim.tim_id";
+			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
+			selectStatement += " where rsu_vw.ipv4_address = '" +  ipv4Address + "'";
+			selectStatement += " and milepost_start = " +  fromRm;
+			selectStatement += " and milepost_stop = " +  toRm;
+			selectStatement += " and active_tim.direction = '" +  direction + "'";		
+			selectStatement += " and type = 'RC'";		
+			
+			ResultSet rs = statement.executeQuery(selectStatement);
+
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+					activeTim.setTimType(rs.getString("TYPE"));
+					activeTims.add(activeTim);												
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
+
+	public static List<ActiveTim> getActiveCCTimsOnRsu(String ipv4Address, String clientId){
+			
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			selectStatement += " inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id";
+			selectStatement += " inner join tim on tim.tim_id = tim_rsu.tim_id";
+			selectStatement += " inner join active_tim on active_tim.tim_id = tim.tim_id";
+			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
+			selectStatement += " where rsu_vw.ipv4_address = '" +  ipv4Address + "'";
+			selectStatement += " and active_tim.clientId = '" +  clientId + "'";		
+			selectStatement += " and type = 'CC'";		
+			
+			ResultSet rs = statement.executeQuery(selectStatement);
+
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+					activeTim.setTimType(rs.getString("TYPE"));
+					activeTims.add(activeTim);												
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
+
+	public static List<ActiveTim> getActiveVSLTimsOnRsu(String ipv4Address, Double fromRm, Double toRm, String direction){
+			
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			selectStatement += " inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id";
+			selectStatement += " inner join tim on tim.tim_id = tim_rsu.tim_id";
+			selectStatement += " inner join active_tim on active_tim.tim_id = tim.tim_id";
+			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
+			selectStatement += " where rsu_vw.ipv4_address = '" +  ipv4Address + "'";
+			selectStatement += " and milepost_start = " +  fromRm;
+			selectStatement += " and milepost_stop = " +  toRm;
+			selectStatement += " and active_tim.direction = '" +  direction + "'";		
+			selectStatement += " and type = 'VSL'";		
+			
+			ResultSet rs = statement.executeQuery(selectStatement);
+
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+					activeTim.setTimType(rs.getString("TYPE"));
+					activeTims.add(activeTim);												
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
 
 	public static boolean deleteActiveTim(Long activeTimId){
 		

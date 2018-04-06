@@ -57,7 +57,8 @@ public class WydotTimService
     private List<TimType> timTypes;    
     WydotRsu[] rsuArr = new WydotRsu[1];    
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");            
-    DateTimeFormatter mdtformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss-06:00");            
+    DateTimeFormatter mdtformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss-06:00");        
+    String timTypeString;    
 
     public List<ItisCode> getItisCodes(){
         if(itisCodes != null)
@@ -159,6 +160,7 @@ public class WydotTimService
         if(timQuery != null){
             timToSend.getTim().setIndex(findFirstAvailableIndex(timQuery.getIndicies_set()));
             String timToSendJson = gson.toJson(timToSend); 
+            System.out.println(timToSendJson);
             // send TIM if not a test
             restTemplate.postForObject("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);
         }

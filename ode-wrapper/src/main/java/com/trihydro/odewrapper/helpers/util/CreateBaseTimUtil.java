@@ -90,8 +90,7 @@ public class CreateBaseTimUtil
       
         timToSend.setMileposts(MilepostService.selectMilepostRange(timBase.getDirection(), "I 80", timBase.getFromRm(), timBase.getToRm()));
         
-
-        List<Milepost> sizeRestrictedMilepostList =timToSend.getMileposts();
+        List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();
 
         int mod = 4;
         while(sizeRestrictedMilepostList.size() > 60){
@@ -108,14 +107,6 @@ public class CreateBaseTimUtil
             sizeRestrictedMilepostList = tempList;
             mod += 2;
         }
-
-        //if(timToSend.getMileposts().size())\
-
-        // List<Milepost> smallerList = timToSend.getMileposts().stream()
-        //     .filter(x -> x.getMilepost() % .4 == 0)
-        //     .collect(Collectors.toList());
-
-
 
         timToSend.setMileposts(sizeRestrictedMilepostList);
 

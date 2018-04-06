@@ -32,11 +32,9 @@ public class WydotTimVslController extends WydotTimBaseController {
     public ResponseEntity<String> createUpdateVslTim(@RequestBody WydotTimVslList wydotTimVsls) {        
         
         // build TIM
-        wydotTimVslService.createUpdateVslTim(wydotTimVsls.getTimVslList());
-            
-        // Long[] activeTimIdsArr = new Long[activeTimIds.size()];
-        // activeTimIds.toArray(activeTimIdsArr);
-
+        wydotTimVslService.createUpdateVslTim(wydotTimVsls.getTimVslList());    
+        
+        // return success
         return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("Success", "true"));        
     }
 }

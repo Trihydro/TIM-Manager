@@ -6,6 +6,7 @@ public class WydotTimRw extends WydotTimBase
 	private String endDateTime;
 	private Integer[] advisory;
 	private String clientId;
+	private String route;
 
 	public String getClientId() 
 	{
@@ -45,6 +46,16 @@ public class WydotTimRw extends WydotTimBase
 	public void setAdvisory(Integer[] advisory) 
 	{
 		this.advisory = advisory;
+	}
+
+	public String getRoute() 
+	{
+		return this.route;
+	}
+
+	public void setRoute(String route) 
+	{
+		this.route = route;
 	}
 
 }

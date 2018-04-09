@@ -55,7 +55,7 @@ public class WydotTimIncidentService extends WydotTimService
             TimType timType = getTimType("I");
 
             // build region name for active tim logger to use
-            String regionName = wydotTimIncident.getDirection() + "_" + wydotTimIncident.getRoute() + "_" + wydotTimIncident.getFromRm() + "_" + wydotTimIncident.getToRm();           
+            String regionName = wydotTimIncident.getDirection() + "_" + wydotTimIncident.getHighway() + "_" + wydotTimIncident.getFromRm() + "_" + wydotTimIncident.getToRm();           
                         
             // query for existing active tims for this road segment
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -131,7 +131,7 @@ public class WydotTimIncidentService extends WydotTimService
         
         for (WydotTimIncident WydotTimIncident : timIncidentList) {
 
-            if(!WydotTimIncident.getRoute().equals("I80"))
+            if(!WydotTimIncident.getHighway().equals("I80"))
                 return false;            
 
             // get tim type            

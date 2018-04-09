@@ -33,6 +33,7 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
 /**
  * Unit test for simple App.
  */
+@Ignore
  public class CVLoggerTest 
 {
 

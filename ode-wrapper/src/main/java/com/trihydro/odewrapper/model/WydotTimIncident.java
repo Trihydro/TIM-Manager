@@ -9,7 +9,8 @@ public class WydotTimIncident extends WydotTimBase
     private String problemOtherText;
     private String ts;
     private String incidentId;
-	
+	private String highway;
+
 	public String getImpact() 
 	{
 		return this.impact;
@@ -78,5 +79,15 @@ public class WydotTimIncident extends WydotTimBase
     public void setIncidentId(String incidentId) 
 	{
 		this.incidentId = incidentId;
+	}
+
+	public String getHighway() 
+	{
+		return this.highway;
+	}
+
+    public void setHighway(String highway) 
+	{
+		this.highway = highway;
 	}
 }

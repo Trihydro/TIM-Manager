@@ -2,20 +2,9 @@ package com.trihydro.odewrapper.model;
 
 public class WydotTimBase
 {
-	private String route;
 	private String direction;
 	private Double fromRm;
 	private Double toRm;
-
-	public String getRoute() 
-	{
-		return this.route;
-	}
-
-	public void setRoute(String route) 
-	{
-		this.route = route;
-	}
 
 	public String getDirection() 
 	{

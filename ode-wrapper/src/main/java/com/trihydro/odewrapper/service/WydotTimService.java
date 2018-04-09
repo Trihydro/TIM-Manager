@@ -286,10 +286,10 @@ public class WydotTimService
             ActiveTimService.updateActiveTimEndDate(activeTim.getActiveTimId(), endDateTime);        
     }
 
-    public static Long addActiveTim(Long timId, WydotTimBase wydotTim, List<Integer> itisCodeIds, TimType timType, String startDateTime, String endDateTime, String clientId){       
+    public static Long addActiveTim(Long timId, WydotTimBase wydotTim, List<Integer> itisCodeIds, TimType timType, String startDateTime, String endDateTime, String clientId, String routeOrHighway){       
 
         // Send TIM to Active Tim List        
-        Long activeTimId = ActiveTimService.insertActiveTim(timId, wydotTim.getFromRm(), wydotTim.getToRm(), wydotTim.getDirection(), timType.getTimTypeId(), startDateTime, endDateTime, wydotTim.getRoute(), clientId, null);
+        Long activeTimId = ActiveTimService.insertActiveTim(timId, wydotTim.getFromRm(), wydotTim.getToRm(), wydotTim.getDirection(), timType.getTimTypeId(), startDateTime, endDateTime, routeOrHighway, clientId, null);
             
         return activeTimId;
     }

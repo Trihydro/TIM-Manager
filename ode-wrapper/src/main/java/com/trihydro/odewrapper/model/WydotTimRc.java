@@ -3,6 +3,7 @@ package com.trihydro.odewrapper.model;
 public class WydotTimRc extends WydotTimBase
 {
 	private String roadCode;
+	private String route;
 	private Integer[] advisory;
 
 	public String getRoadCode() 
@@ -23,6 +24,16 @@ public class WydotTimRc extends WydotTimBase
 	public void setAdvisory(Integer[] advisory) 
 	{
 		this.advisory = advisory;
+	}
+
+	public String getRoute() 
+	{
+		return this.route;
+	}
+
+	public void setRoute(String route) 
+	{
+		this.route = route;
 	}
 
 }

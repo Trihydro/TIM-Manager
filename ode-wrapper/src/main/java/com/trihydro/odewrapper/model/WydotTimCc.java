@@ -6,6 +6,8 @@ public class WydotTimCc extends WydotTimBase
 	private String segment;
 	private String district;
 	private String id;
+	private String route;
+
 
 	public Integer[] getAdvisory() 
 	{
@@ -45,5 +47,15 @@ public class WydotTimCc extends WydotTimBase
 	public void setId(String id) 
 	{
 		this.id = id;
+	}
+
+	public String getRoute() 
+	{
+		return this.route;
+	}
+
+	public void setRoute(String route) 
+	{
+		this.route = route;
 	}
 }

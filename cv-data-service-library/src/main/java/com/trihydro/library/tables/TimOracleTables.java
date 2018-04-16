@@ -134,6 +134,7 @@ public class TimOracleTables extends OracleTables {
             activeTimTable.add("ROUTE");
             activeTimTable.add("CLIENT_ID");
             activeTimTable.add("SAT_RECORD_ID");
+            activeTimTable.add("PK");
             return activeTimTable;
         }
     }

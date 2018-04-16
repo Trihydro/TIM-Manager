@@ -49,7 +49,7 @@ public class RsuService extends CvDataServiceLibrary {
 		try {
 			// select all RSUs that are labeled as 'Existing' in the WYDOT view
    		    Statement statement = DbUtility.getConnection().createStatement();
-   			ResultSet rs = statement.executeQuery("select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address, from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing'");
+   			ResultSet rs = statement.executeQuery("select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing'");
 			try{   
 				while (rs.next()) {
 					WydotRsu rsu = new WydotRsu();

@@ -1,6 +1,6 @@
 package com.trihydro.odewrapper.helpers.util;
 
-import com.trihydro.odewrapper.model.WydotTimBase;
+import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.service.MilepostService;
 import org.springframework.stereotype.Component;
@@ -20,19 +20,12 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame
 
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import java.math.BigDecimal;
-import org.springframework.core.env.Environment;
-import us.dot.its.jpo.ode.plugin.SNMP;
-import java.util.stream.Collectors;
 
 @Component
 public class CreateBaseTimUtil
 {    
-    //private MilepostService milepostService;
-    
-    @Autowired
-    public Environment env;
-	        
-	public WydotTravelerInputData buildTim(WydotTimBase timBase) {                
+ 
+	public static WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, String route) {                
 
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
@@ -88,7 +81,7 @@ public class CreateBaseTimUtil
         path.setScale(0);
         path.setType("xy");
       
-        timToSend.setMileposts(MilepostService.selectMilepostRange(timBase.getDirection(), "I 80", timBase.getFromRm(), timBase.getToRm()));
+        timToSend.setMileposts(MilepostService.selectMilepostRange(direction, route, wydotTim.getFromRm(), wydotTim.getToRm()));
         
         List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();
 

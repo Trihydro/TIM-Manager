@@ -68,58 +68,36 @@ public class TimLogger extends BaseLogger{
 	public static void addActiveTimToOracleDB(OdeData odeData){
 
 		// variables
-		TimType timType = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>(); 
-		String satRecordId = null;
-		String direction = null;
-		String rsuTarget = null;
-		Double toRm = null;
-		Double fromRm = null;
-		String route = null;
-		String clientId = null;
+		ActiveTim activeTim;
 	
 		// save TIM
-	    System.out.println(((OdeTimPayload)odeData.getPayload()).getTim().getTimeStamp());
-	    // 2018-03-08T21:45:08.453-07:00
-	 	
+	    System.out.println(((OdeTimPayload)odeData.getPayload()).getTim().getTimeStamp());	
 
 		Long timId = TimService.insertTim((OdeLogMetadataReceived)odeData.getMetadata(), ((OdeTimPayload)odeData.getPayload()).getTim());	
 
 		// save DataFrame
 		Long dataFrameId = DataFrameService.insertDataFrame(timId);
+		
+		// get information from the region name, first check splitname length
+		activeTim = setActiveTimByRegionName(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName());
 
-		// save active tim
-		String name = ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName();
-		String[] splitName = name.split("_");
-
-		// check splitname length
-		if(splitName.length > 1){
-			direction = splitName[0];
-			route = splitName[1];
-		}	
-		else	
-			return;			
-
-		// check to see if region name is correct
-		if(splitName.length < 5)
+		if(activeTim == null)
 			return;
 
-		fromRm = Double.parseDouble(splitName[2]);
-		toRm = Double.parseDouble(splitName[3]);
+		activeTim.setStartDateTime(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime());
+		activeTim.setTimId(timId);
 
 		// if this is an RSU TIM 
-		if(splitName[4].split("-")[0].equals("RSU")){
-			// save TIM RSU in DB
-			rsuTarget = splitName[4].split("-")[1];		
+		if(activeTim.getRsuTarget() != null){
+			// save TIM RSU in DB		
 			WydotRsu rsu = rsus.stream()
-				.filter(x -> x.getRsuTarget().equals(splitName[4].split("-")[1]))
+				.filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
 				.findFirst()
 				.orElse(null);
 			TimRsuService.insertTimRsu(timId, rsu.getRsuId());
 		}
-		else {  // Satellite TIM
-			satRecordId = splitName[4].split("-")[1];	
-		}
+		
 		// save DataFrame ITIS codes				
 		List<Integer> itisCodeIds = getItisCodeIds(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getItems());
 		
@@ -131,41 +109,35 @@ public class TimLogger extends BaseLogger{
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'-06:00'");
 			LocalDateTime dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatter);
 			endDateTime = dateTime.plusMinutes(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime()).toString();
+			activeTim.setEndDateTime(endDateTime);
 		}
 
 		// if true, TIM came from WYDOT
-		if(splitName.length > 5) {       
+		if(activeTim.getTimType() != null) {       
 		
-			timType = getTimType(splitName[5]);   	
-			
-			if(splitName.length > 6){
-				clientId = splitName[6];
-				activeTims = ActiveTimService.getActiveTimsByClientId(clientId);			
+			if(activeTim.getClientId() != null){
+				activeTims = ActiveTimService.getActiveTimsByClientIdDirection(activeTim.getClientId(), activeTim.getDirection());			
 			}
 			else{
-				if(splitName[4].split("-")[0].equals("RSU")){
-					//activeTims = ActiveTimService.getActiveRsuTims(Double.parseDouble(splitName[2]), Double.parseDouble(splitName[3]), timType.getTimTypeId(), direction);            		
-					if(timType.getType().equals("RC"))
-						activeTims = ActiveTimService.getActiveRCTimsOnRsu(rsuTarget, fromRm, toRm, direction);
-					else if(timType.getType().equals("VSL"))
-						activeTims = ActiveTimService.getActiveVSLTimsOnRsu(rsuTarget, fromRm, toRm, direction);
+				if(activeTim.getRsuTarget() != null){
+					if(activeTim.getTimType().equals("RC") || activeTim.getTimType().equals("VSL"))
+						activeTims = ActiveTimService.getActiveTimsOnRsuByRoadSegment(activeTim.getRsuTarget(), activeTim.getTimTypeId(), activeTim.getMilepostStart(), activeTim.getMilepostStop(), activeTim.getDirection());
+					else
+						activeTims = ActiveTimService.getActiveRSUTimsByClientId(activeTim.getTimTypeId(), activeTim.getClientId());
 				}
 				else
-					activeTims = ActiveTimService.getActiveSatTims(fromRm, toRm, timType.getTimTypeId(), direction);            		
+					activeTims = ActiveTimService.getActiveSatTims(activeTim.getMilepostStart(), activeTim.getMilepostStop(), activeTim.getTimTypeId(), activeTim.getDirection());            		
 			}
 			// Active TIM exists
-			if(activeTims.size() == 0){			
-				if(splitName.length > 6)
-					ActiveTimService.insertActiveTim(timId, fromRm, toRm, direction, timType.getTimTypeId(), ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, clientId, satRecordId);		
-				else
-					ActiveTimService.insertActiveTim(timId, fromRm, toRm, direction, timType.getTimTypeId(), ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, null, satRecordId);		
+			if(activeTims.size() == 0){						
+				ActiveTimService.insertActiveTim(activeTim);			
 			}
 			else{
-				for (ActiveTim activeTim : activeTims) {
+				for (ActiveTim ac : activeTims) {
 					// update Active TIM table TIM Id
-					ActiveTimService.updateActiveTimTimId(activeTim.getActiveTimId(), timId);
+					ActiveTimService.updateActiveTimTimId(ac.getActiveTimId(), timId);
 					if(endDateTime != null)
-						ActiveTimService.updateActiveTimEndDate(activeTim.getActiveTimId(), endDateTime);
+						ActiveTimService.updateActiveTimEndDate(ac.getActiveTimId(), endDateTime);
 
 					// TODO - change to duration
 					// if(endDateTime != null)
@@ -176,8 +148,65 @@ public class TimLogger extends BaseLogger{
 		else{
 			// not from WYDOT application
 			// just log for now
-			ActiveTimService.insertActiveTim(timId, fromRm, toRm, direction, null, ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), endDateTime, route, null, satRecordId);					
+			ActiveTimService.insertActiveTim(activeTim);					
 		}			 			
+	}
+
+	private static ActiveTim setActiveTimByRegionName(String regionName){
+
+		ActiveTim activeTim = new ActiveTim();
+
+		String[] splitName = regionName.split("_");
+
+		if(splitName.length == 0)
+			return null;
+		
+		if(splitName.length > 0)
+			activeTim.setDirection(splitName[0]);
+		else
+			return activeTim;
+		if(splitName.length > 1)
+			activeTim.setRoute(splitName[1]);
+		else
+			return activeTim;
+		if(splitName.length > 2)
+			activeTim.setMilepostStart(Double.parseDouble(splitName[2]));
+		else
+			return activeTim;
+		if(splitName.length > 3)
+			activeTim.setMilepostStop(Double.parseDouble(splitName[3]));
+		else
+			return activeTim;
+		if(splitName.length > 4){
+			// if this is an RSU TIM 
+			if(splitName[4].split("-")[0].equals("SAT")){
+				activeTim.setSatRecordId(splitName[4].split("-")[1]);	
+			}
+			else{
+				activeTim.setRsuTarget(splitName[4].split("-")[1]);	
+			}
+		}	
+		else
+			return activeTim;
+		if(splitName.length > 5){
+			TimType timType = getTimType((splitName[5]));
+			activeTim.setTimType(timType.getType());
+			activeTim.setTimTypeId(timType.getTimTypeId()); 
+		}
+		else
+			return activeTim;
+
+		if(splitName.length > 6)
+			activeTim.setClientId(splitName[6]);
+		else
+			return activeTim;
+
+		if(splitName.length > 7)
+			activeTim.setPk(Integer.valueOf(splitName[7]));
+		else
+			return activeTim;
+
+		return activeTim;
 	}
 
 

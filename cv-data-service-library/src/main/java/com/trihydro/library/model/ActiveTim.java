@@ -1,12 +1,21 @@
 package com.trihydro.library.model;
 
 public class ActiveTim {
+
     private Long activeTimId;
     private Long timId;
-    private String recordId;    
     private Double milepostStart;
     private Double milepostStop;
     private String timType;
+    private Long timTypeId;
+    private String direction;
+    private String startDateTime;
+    private String endDateTime;
+    private String route;
+    private String clientId;
+    private String satRecordId;
+    private Integer pk;
+    private String rsuTarget;
 
     public Long getActiveTimId() {
         return this.activeTimId;
@@ -22,14 +31,6 @@ public class ActiveTim {
 
     public void setTimId(Long timId) {
         this.timId = timId;
-    }
-
-    public String getRecordId() {
-        return this.recordId;
-    }
-
-    public void setRecordId(String recordId) {
-        this.recordId = recordId;
     }
 
     public Double getMilepostStart() {
@@ -56,4 +57,75 @@ public class ActiveTim {
         this.timType = timType;
     }
 
+    public String getDirection() {
+        return this.direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
+    public String getStartDateTime() {
+        return this.startDateTime;
+    }
+
+    public void setStartDateTime(String startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+
+    public String getEndDateTime() {
+        return this.endDateTime;
+    }
+
+    public void setEndDateTime(String endDateTime) {
+        this.endDateTime = endDateTime;
+    }
+
+    public Long getTimTypeId() {
+        return this.timTypeId;
+    }
+
+    public void setTimTypeId(Long timTypeId) {
+        this.timTypeId = timTypeId;
+    }
+
+    public String getRoute() {
+        return this.route;
+    }
+
+    public void setRoute(String route) {
+        this.route = route;
+    }
+
+    public String getClientId() {
+        return this.clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getSatRecordId() {
+        return this.satRecordId;
+    }
+
+    public void setSatRecordId(String satRecordId) {
+        this.satRecordId = satRecordId;
+    }
+
+    public Integer getPk() {
+        return this.pk;
+    }
+
+    public void setPk(Integer pk) {
+        this.pk = pk;
+    }
+
+    public String getRsuTarget() {
+        return this.rsuTarget;
+    }
+
+    public void setRsuTarget(String rsuTarget) {
+        this.rsuTarget = rsuTarget;
+    }
 }

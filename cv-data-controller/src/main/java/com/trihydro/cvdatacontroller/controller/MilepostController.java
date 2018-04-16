@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import org.springframework.beans.factory.annotation.Autowired;
 
 @CrossOrigin
 @RestController
@@ -24,7 +23,7 @@ public class MilepostController {
    		return mileposts;
   	}
 
-  	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range/{direction}/{route}/{fromMilepost}/{toMilepost}")
+  	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
   	public List<Milepost> getMilepostRange(@PathVariable String direction, @PathVariable String route, @PathVariable Double fromMilepost, @PathVariable Double toMilepost) { 
    		List<Milepost> mileposts = MilepostService.selectMilepostRange(direction, route, fromMilepost, toMilepost);
    		return mileposts;
@@ -36,13 +35,13 @@ public class MilepostController {
 		 return mileposts;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range-no-direction/{route}/{fromMilepost}/{toMilepost}")
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range-no-direction/{fromMilepost}/{toMilepost}/{route}")
   	public List<Milepost> getMilepostRange(@PathVariable String route, @PathVariable Double fromMilepost, @PathVariable Double toMilepost) { 
    		List<Milepost> mileposts = MilepostService.selectMilepostRangeNoDirection(route, fromMilepost, toMilepost);
    		return mileposts;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{route}/{start}/{end}")
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{start}/{end}/{route}")
   	public List<Milepost> getMilepostTestRange(@PathVariable String direction, @PathVariable String route, @PathVariable Double start, @PathVariable Double end) { 
    		List<Milepost> mileposts = MilepostService.selectMilepostTestRange(direction, route, start, end);
    		return mileposts;

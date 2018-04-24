@@ -15,6 +15,7 @@ public class TimOracleTables extends OracleTables {
     private List<String> activeTimItisCodeTable;
     private List<String> timRsuTable;
     private List<String> dataFrameItisCodeTable;
+    private List<String> driverAlertItisCodeTable;
 
     public List<String> getTimTable(){
         if(timTable != null)
@@ -169,6 +170,17 @@ public class TimOracleTables extends OracleTables {
             dataFrameItisCodeTable.add("ITIS_CODE_ID");
             dataFrameItisCodeTable.add("DATA_FRAME_ID");
             return dataFrameItisCodeTable;
+        }
+    }
+
+    public List<String> getDriverAlertItisCodeTable(){
+        if(driverAlertItisCodeTable != null)
+            return driverAlertItisCodeTable;
+        else {
+            driverAlertItisCodeTable = new ArrayList<String>();
+            driverAlertItisCodeTable.add("ITIS_CODE_ID");
+            driverAlertItisCodeTable.add("DRIVER_ALERT_ID");
+            return driverAlertItisCodeTable;
         }
     }
     

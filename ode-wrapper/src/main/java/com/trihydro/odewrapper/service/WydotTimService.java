@@ -163,12 +163,12 @@ public class WydotTimService
             if(activeTims != null && activeTims.size() > 0){                                            
                 // update TIM rsu
                 updateTimOnRsu(timToSend, activeTims.get(0).getTimId());                                
-                returnMessage += "RSU TIM updated";
+                returnMessage += "success";
             }              
             else{     
                 // send new tim to rsu                    
                 sendNewTimToRsu(timToSend, rsu);  
-                returnMessage += "New RSU TIM sent";
+                returnMessage += "success";
             }
         }
 
@@ -183,7 +183,7 @@ public class WydotTimService
                 regionNameTemp += "_" + wydotTim.getIncidentId() + "_" + wydotTim.getPk();
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);  
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId());
-            returnMessage += "Satellite TIM updated";
+            returnMessage += "success";
         }
         else{
             String recordId = getNewRecordId();    
@@ -194,7 +194,7 @@ public class WydotTimService
                 regionNameTemp += "_" + wydotTim.getIncidentId() + "_" + wydotTim.getPk();
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             sendNewTimToSdw(timToSend, recordId);
-            returnMessage += "New satellite TIM sent";
+            returnMessage += "success";
         }        
 
         return returnMessage;   
@@ -291,6 +291,15 @@ public class WydotTimService
         TimType timType = getTimType(timTypeStr);
         
         List<ActiveTim> activeTims = ActiveTimService.getActivesTimByClientId(clientId, timType.getTimTypeId());
+
+        return activeTims;
+    }
+
+    public List<ActiveTim> selectTimsByType(String timTypeStr){
+
+        TimType timType = getTimType(timTypeStr);
+        
+        List<ActiveTim> activeTims = ActiveTimService.getActivesTimByType(timType.getTimTypeId());
 
         return activeTims;
     }

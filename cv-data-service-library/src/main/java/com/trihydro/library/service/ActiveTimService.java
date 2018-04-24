@@ -128,6 +128,41 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	}
 
+	public static boolean updateActiveTim(ActiveTim activeTim){
+		boolean activeTimIdResult = false;
+		String updateTableSQL = "UPDATE ACTIVE_TIM SET TIM_ID = ?, MILEPOST_START = ?, MILEPOST_STOP = ?, TIM_START = ?, TIM_END = ?, PK = ?"
+		+ " WHERE ACTIVE_TIM_ID = ?";
+
+		try {
+			
+			preparedStatement = DbUtility.getConnection().prepareStatement(updateTableSQL);
+			SQLNullHandler.setLongOrNull(preparedStatement, 1, activeTim.getTimId());
+			SQLNullHandler.setDoubleOrNull(preparedStatement, 2, activeTim.getMilepostStart());	
+			SQLNullHandler.setDoubleOrNull(preparedStatement, 3, activeTim.getMilepostStop());
+			SQLNullHandler.setTimestampOrNull(preparedStatement, 4, java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));										
+			if(activeTim.getEndDateTime() == null)
+				preparedStatement.setString(5, null);
+			else
+				SQLNullHandler.setTimestampOrNull(preparedStatement, 5, java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));										
+			SQLNullHandler.setIntegerOrNull(preparedStatement, 6, activeTim.getPk());										
+			SQLNullHandler.setLongOrNull(preparedStatement, 7, activeTim.getActiveTimId());										
+			activeTimIdResult = updateOrDelete(preparedStatement);							
+
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				preparedStatement.close();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}					
+		}
+
+		return activeTimIdResult;
+	}
+
 	public static List<ActiveTim> getAllActiveTims(Double milepostStart, Double milepostStop, Long timTypeId, String direction){
 		
 		ActiveTim activeTim = null;
@@ -250,8 +285,52 @@ public class ActiveTimService extends CvDataServiceLibrary {
 					activeTim.setEndDateTime(rs.getString("TIM_END"));
 					activeTim.setStartDateTime(rs.getString("TIM_START"));						
 					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-					activeTim.setMilepostStart(rs.getDouble("MILEPOST_STOP"));		
+					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));	
+					activeTim.setRoute(rs.getString("ROUTE"));	
 					activeTim.setPk(rs.getInt("PK"));		
+					activeTims.add(activeTim);					
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
+
+	public static List<ActiveTim> getActivesTimByType(Long timTypeId){
+
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim where TIM_TYPE_ID = " + timTypeId);
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTim.setClientId(rs.getString("CLIENT_ID"));
+					activeTim.setDirection(rs.getString("DIRECTION"));		
+					activeTim.setEndDateTime(rs.getString("TIM_END"));
+					activeTim.setStartDateTime(rs.getString("TIM_START"));						
+					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));	
+					activeTim.setRoute(rs.getString("ROUTE"));	
+					activeTim.setPk(rs.getInt("PK"));		
+					activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));		
 					activeTims.add(activeTim);					
 				}
 			}
@@ -586,7 +665,6 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 		return activeTims;
 	}
-
 
 	public static boolean deleteActiveTim(Long activeTimId){
 		

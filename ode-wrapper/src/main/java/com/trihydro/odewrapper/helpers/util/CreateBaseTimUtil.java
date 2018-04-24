@@ -4,7 +4,6 @@ import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.service.MilepostService;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -52,6 +51,7 @@ public class CreateBaseTimUtil
         dataFrame.setSspTimRights((short)1);
         dataFrame.setSspLocationRights((short)1);
         dataFrame.setSspMsgContent((short)1);
+        dataFrame.setSspMsgTypes((short)1);
         MsgId msgId = new MsgId();
         msgId.setFurtherInfoID("CDEF");
         dataFrame.setMsgId(msgId);
@@ -59,7 +59,6 @@ public class CreateBaseTimUtil
         // duration time set to 22 days worth of minutes
         dataFrame.setDurationTime(32000);
         
-
         dataFrame.setPriority(5);
         dataFrame.setContent("Advisory");
         dataFrame.setFrameType(us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType.advisory);
@@ -67,7 +66,7 @@ public class CreateBaseTimUtil
 
         List<J2735TravelerInformationMessage.DataFrame.Region> regions = new ArrayList<J2735TravelerInformationMessage.DataFrame.Region>();
         J2735TravelerInformationMessage.DataFrame.Region region = new J2735TravelerInformationMessage.DataFrame.Region();
-        region.setName("Testing TIM");
+        region.setName("Temp");
         region.setRegulatorID(0);
         //region.setSegmentID(timBase.getDistrict());
 
@@ -114,11 +113,14 @@ public class CreateBaseTimUtil
             anchorPosition.setLongitude(new BigDecimal(0));
             anchorPosition.setElevation(new BigDecimal(0));
         }
+
+        System.out.println(anchorPosition.getLatitude());
+        System.out.println(anchorPosition.getLongitude());
+        System.out.println(anchorPosition.getElevation());
+
         region.setAnchorPosition(anchorPosition);
 
-        ArrayList<J2735TravelerInformationMessage.NodeXY> nodes = new ArrayList<J2735TravelerInformationMessage.NodeXY>();
-        
-        // add circle later for paths over 12 miles
+        ArrayList<J2735TravelerInformationMessage.NodeXY> nodes = new ArrayList<J2735TravelerInformationMessage.NodeXY>();        
 
         // path list - change later
         for(int j = 1; j < timToSend.getMileposts().size(); j++) {
@@ -161,16 +163,4 @@ public class CreateBaseTimUtil
         else
             return "node-LL6";
     }
-
-    public static boolean contains(final int[] array, final int v) {
-        boolean result = false;
-        for(int i : array){
-            if(i == v){
-                result = true;
-                break;
-            }
-        }
-        return result;
-    }
-
 }

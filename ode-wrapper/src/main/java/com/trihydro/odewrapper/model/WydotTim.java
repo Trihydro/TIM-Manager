@@ -241,7 +241,7 @@ public class WydotTim
 		return this.pk;
 	}
 
-    public void setHighway(Integer pk) 
+    public void setPk(Integer pk) 
 	{
 		this.pk = pk;
 	}

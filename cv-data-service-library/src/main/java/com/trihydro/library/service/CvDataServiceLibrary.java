@@ -89,24 +89,18 @@ public class CvDataServiceLibrary {
         
         Date convertedDate = null;
         
-        if(incomingDate != null){
-            if(incomingDate.contains(".")){
-                try {
-                    convertedDate = utcFormatMilliSec.parse(incomingDate);
-                } catch (ParseException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
+        try{        
+            if(incomingDate != null){
+                if(incomingDate.contains("."))               
+                    convertedDate = utcFormatMilliSec.parse(incomingDate);                                   
+                else if(incomingDate.length() == 22)
+                    convertedDate = utcFormatMin.parse(incomingDate);                
+                else                   
+                    convertedDate = utcFormatSec.parse(incomingDate);                                              	           									
             }
-            else {
-                try {
-                    convertedDate = utcFormatSec.parse(incomingDate);
-                } 
-                catch (ParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }		           										
+        }
+        catch (ParseException e1) {
+            e1.printStackTrace();
         }
         return convertedDate;
     }

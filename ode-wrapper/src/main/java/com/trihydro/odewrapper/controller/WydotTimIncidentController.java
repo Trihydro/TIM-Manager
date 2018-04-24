@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 
@@ -31,28 +32,46 @@ public class WydotTimIncidentController extends WydotTimBaseController {
        
         String result;
 
-        List<WydotTim> resultList = new ArrayList<WydotTim>();
-        WydotTim resultTim = null;
+        List<ControllerResult> resultList = new ArrayList<ControllerResult>();
+        ControllerResult resultTim = null;
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
             if(wydotTim.getDirection().equals("both")) {
+                
+                // first TIM - eastbound
                 result = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");
-                resultTim = new WydotTim();
+                
+                resultTim = new ControllerResult();
                 resultTim.setDirection("eastbound");
                 resultTim.setResultMessage(result);
+                if(result.equals("success"))
+                    resultTim.setResultCode(0);
+                else
+                    resultTim.setResultCode(1);
                 resultList.add(resultTim);
+
+                // second TIM - westbound
                 result = wydotTimService.createUpdateTim("I", wydotTim, "westbound");  
-                resultTim = new WydotTim();
+                resultTim = new ControllerResult();
                 resultTim.setDirection("westbound");
                 resultTim.setResultMessage(result);
+                if(result.equals("success"))
+                    resultTim.setResultCode(0);
+                else
+                    resultTim.setResultCode(1);
                 resultList.add(resultTim);    
             }
             else {
+                // single direction TIM
                 result = wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection());   
-                resultTim = new WydotTim();
+                resultTim = new ControllerResult();
                 resultTim.setDirection(wydotTim.getDirection());
                 resultTim.setResultMessage(result);
+                if(result.equals("success"))
+                    resultTim.setResultCode(0);
+                else
+                    resultTim.setResultCode(1);
                 resultList.add(resultTim);  
             }
         }                
@@ -91,15 +110,21 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
+    @RequestMapping(value="/incident-tim", method = RequestMethod.GET, headers="Accept=application/json")
+    public Collection<ActiveTim> getIncidentTims() { 
+       
+        // clear TIM
+        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("I");        
+
+        return activeTims;
+    }
+
     @RequestMapping(value="/incident-tim/{incidentId}", method = RequestMethod.GET, headers="Accept=application/json")
-    public Collection<ActiveTim> getIncidentTim(@PathVariable String incidentId) { 
+    public Collection<ActiveTim> getIncidentTimById(@PathVariable String incidentId) { 
        
         // clear TIM
         List<ActiveTim> activeTims = wydotTimService.selectTimById("I", incidentId);        
 
         return activeTims;
-
-        // String responseMessage = "success";
-        // return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 }

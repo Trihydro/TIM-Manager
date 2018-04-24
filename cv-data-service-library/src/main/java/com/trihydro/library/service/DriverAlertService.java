@@ -9,18 +9,22 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 import com.trihydro.library.model.DriverAlertType;
+import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.service.SecurityResultCodeTypeService;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.tables.DriverAlertOracleTables;
 
+
 public class DriverAlertService extends CvDataServiceLibrary {
 
     static PreparedStatement preparedStatement = null;
-    static List<DriverAlertType> driverAlertTypes;
+	static List<DriverAlertType> driverAlertTypes;
+	static List<ItisCode> itisCodes;
 
 	public static Long insertDriverAlert(OdeLogMetadataReceived odeDriverAlertMetadata, String alert) { 
 		
 		driverAlertTypes = DriverAlertTypeService.selectAll();
+		itisCodes = ItisCodeService.selectAll();
 		
 		try {
 			
@@ -45,29 +49,25 @@ public class DriverAlertService extends CvDataServiceLibrary {
 				else if(col.equals("LOG_FILE_NAME"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getLogFileName());
 				else if(col.equals("RECORD_GENERATED_AT")){
-					if(odeDriverAlertMetadata.getRecordGeneratedAt() != null) {
-						java.util.Date recordGeneratedAtDate = null;					
-						if(odeDriverAlertMetadata.getRecordGeneratedAt().contains(".")) {
-							try {
-								recordGeneratedAtDate = utcFormatMilliSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());
-							} 
-							catch (ParseException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						else {
-							try {
-								recordGeneratedAtDate = utcFormatSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());
-							} catch (ParseException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}																
-						}
-						preparedStatement.setString(fieldNum, mstFormat.format(recordGeneratedAtDate));	
+					if(odeDriverAlertMetadata.getRecordGeneratedAt() != null){
+						java.util.Date recordGeneratedAtDate = convertDate(odeDriverAlertMetadata.getRecordGeneratedAt());				
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(recordGeneratedAtDate));	
 					}
 					else
-						preparedStatement.setString(fieldNum, null);
+						preparedStatement.setString(fieldNum, null);																							
+				
+					// if(odeDriverAlertMetadata.getRecordGeneratedAt() != null) {
+					// 	java.util.Date recordGeneratedAtDate = null;					
+					// 	if(odeDriverAlertMetadata.getRecordGeneratedAt().contains(".")) 
+					// 		recordGeneratedAtDate = utcFormatMilliSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());																								
+					// 	else if(odeDriverAlertMetadata.getRecordGeneratedAt().length() == 22)
+					// 		recordGeneratedAtDate = utcFormatMin.parse(odeDriverAlertMetadata.getRecordGeneratedAt());		
+					// 	else 						
+					// 		recordGeneratedAtDate = utcFormatSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());																												
+					// 	preparedStatement.setString(fieldNum, mstFormat.format(recordGeneratedAtDate));	
+					// }
+					// else
+					// 	preparedStatement.setString(fieldNum, null);
 				}
 				else if(col.equals("SANITIZED")) {
 					if(odeDriverAlertMetadata.isSanitized())
@@ -91,24 +91,12 @@ public class DriverAlertService extends CvDataServiceLibrary {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getRecordType().toString());
 				else if(col.equals("ODE_RECEIVED_AT")) {
 					if(odeDriverAlertMetadata.getOdeReceivedAt() != null){
-						java.util.Date receivedAtDate = null;
-						if(odeDriverAlertMetadata.getOdeReceivedAt().contains(".")){
-							try {
-								receivedAtDate = utcFormatMilliSec.parse(odeDriverAlertMetadata.getOdeReceivedAt());
-							} catch (ParseException e1) {
-								e1.printStackTrace();
-							}
-						}
-						else {
-							try {
-								receivedAtDate = utcFormatSec.parse(odeDriverAlertMetadata.getOdeReceivedAt());
-							} 
-							catch (ParseException e) {
-								e.printStackTrace();
-							}
-						}		
-						preparedStatement.setString(fieldNum, mstFormat.format(receivedAtDate));												
+						java.util.Date odeReceivedAt = convertDate(odeDriverAlertMetadata.getOdeReceivedAt());				
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(odeReceivedAt));	
 					}
+					else{
+						preparedStatement.setString(fieldNum, null);																							
+					}				
                 }                
                 else if(col.equals("LATITUDE")) 
                     SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLatitude());                
@@ -121,11 +109,21 @@ public class DriverAlertService extends CvDataServiceLibrary {
                 else if(col.equals("SPEED")) 
                     SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getSpeed());                
                 else if(col.equals("DRIVER_ALERT_TYPE_ID")) {
-                    for(DriverAlertType dat : driverAlertTypes){
-                        if(dat.getShortName().equals(alert)){
-                            SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dat.getDriverAlertTypeId());
-                        }
-                    }
+					// check for TIMs
+					if(alert.split(",").length > 1){																
+						DriverAlertType driverAlertType = driverAlertTypes.stream()
+							.filter(x -> x.getShortName().equals("TIM"))
+							.findFirst()
+							.orElse(null);
+						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, driverAlertType.getDriverAlertTypeId());
+					}
+					else{
+						for(DriverAlertType dat : driverAlertTypes) {
+							if(dat.getShortName().equals(alert)) {
+								SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dat.getDriverAlertTypeId());
+							}
+						}				
+					}
                 }
 				else
 					preparedStatement.setString(fieldNum, null);											
@@ -133,6 +131,19 @@ public class DriverAlertService extends CvDataServiceLibrary {
 			}			
 			// execute insert statement
 			Long driverAlertId = log(preparedStatement, "driverAlertId");
+
+			// add driver_alert_itis_codes
+			if(alert.split(",").length > 1){
+				for (String code : alert.split(",")) {
+					if(code.chars().allMatch( Character::isDigit )){
+						for(ItisCode itisCode : itisCodes) {
+							if(itisCode.getItisCode() == Integer.parseInt(code)) {
+								DriverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId, itisCode.getItisCodeId());
+							}
+						}
+					}
+				}				
+			}
 			return driverAlertId;
 		} 
 		catch (SQLException e) {

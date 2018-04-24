@@ -135,9 +135,11 @@ public class TimLogger extends BaseLogger{
 			else{
 				for (ActiveTim ac : activeTims) {
 					// update Active TIM table TIM Id
-					ActiveTimService.updateActiveTimTimId(ac.getActiveTimId(), timId);
-					if(endDateTime != null)
-						ActiveTimService.updateActiveTimEndDate(ac.getActiveTimId(), endDateTime);
+					// ActiveTimService.updateActiveTimTimId(ac.getActiveTimId(), timId);
+					// if(endDateTime != null)
+					// 	ActiveTimService.updateActiveTimEndDate(ac.getActiveTimId(), endDateTime);
+					activeTim.setActiveTimId(ac.getActiveTimId());
+					ActiveTimService.updateActiveTim(activeTim);
 
 					// TODO - change to duration
 					// if(endDateTime != null)

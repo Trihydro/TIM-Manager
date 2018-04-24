@@ -10,6 +10,7 @@ import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
 
 public class BsmCoreDataService extends CvDataServiceLibrary {
@@ -165,18 +166,11 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 				}
 				else if(col.equals("RECORD_GENERATED_AT")) {						
 					if(metadata.getRecordGeneratedAt() != null){
-						java.util.Date recordGeneratedAtDate;					
-						if(metadata.getRecordGeneratedAt().contains("."))
-							recordGeneratedAtDate = utcFormatMilliSec.parse(metadata.getRecordGeneratedAt());						
-						else if(metadata.getRecordGeneratedAt().length() == 22)
-							recordGeneratedAtDate = utcFormatMin.parse(metadata.getRecordGeneratedAt());		
-						else
-							recordGeneratedAtDate = utcFormatSec.parse(metadata.getRecordGeneratedAt());			
-						bsmPreparedStatement.setString(fieldNum, mstFormat.format(recordGeneratedAtDate));
-						
+						java.util.Date recordGeneratedAtDate = convertDate(metadata.getRecordGeneratedAt());				
+						SQLNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum, mstFormat.format(recordGeneratedAtDate));	
 					}
 					else
-						bsmPreparedStatement.setString(fieldNum, null);
+						bsmPreparedStatement.setString(fieldNum, null);									
 				}
 				else if(col.equals("SECURITY_RESULT_CODE")) {
 					SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
@@ -206,19 +200,13 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 				else if(col.equals("SERIAL_ID_SERIAL_NUMBER")) {										
 					bsmPreparedStatement.setLong(fieldNum, metadata.getSerialId().getSerialNumber());			
 				}
-				else if(col.equals("ODE_RECEIVED_AT")) {										
+				else if(col.equals("ODE_RECEIVED_AT")) {					
 					if(metadata.getOdeReceivedAt() != null){
-						java.util.Date receivedAtDate;
-						if(metadata.getOdeReceivedAt().contains("."))
-							receivedAtDate = utcFormatMilliSec.parse(metadata.getOdeReceivedAt());						
-						else if(metadata.getOdeReceivedAt().length() == 22)
-							receivedAtDate = utcFormatMin.parse(metadata.getOdeReceivedAt());		
-						else
-							receivedAtDate = utcFormatSec.parse(metadata.getOdeReceivedAt());	
-						bsmPreparedStatement.setString(fieldNum, mstFormat.format(receivedAtDate));
+						java.util.Date receivedAtDate = convertDate(metadata.getOdeReceivedAt());				
+						SQLNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum, mstFormat.format(receivedAtDate));	
 					}
 					else
-						bsmPreparedStatement.setString(fieldNum, null);						
+						bsmPreparedStatement.setString(fieldNum, null);	
 				}
 				else if(col.equals("RECORD_TYPE")) {															
 					bsmPreparedStatement.setString(fieldNum, metadata.getRecordType().toString());
@@ -251,10 +239,7 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 		} 
 		catch (SQLException e) {
 			e.printStackTrace();
-		}
-		catch (ParseException e) {
-			e.printStackTrace();
-		}
+		}		
 		finally{
 			try{
 				bsmPreparedStatement.close();

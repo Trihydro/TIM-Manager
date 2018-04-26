@@ -3,48 +3,65 @@ package com.trihydro.odewrapper;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.odewrapper.controller.WydotTimIncidentController;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.context.junit4.SpringRunner;
+
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletContext;
+import com.trihydro.odewrapper.spring.WebConfig;
+import com.trihydro.odewrapper.spring.ApplicationConfig;
 
-/**
- * Unit tests for JSON to Java Object Converters.
- */
-public class WydotTimIncidentControllerTest {	
-
-	// @Test 
-	// public void testCreateIncidentTim() {
-        
-	// 	WydotTimList wydotTimList = new WydotTimList();
-	// 	List<WydotTim> incidentList = new ArrayList<WydotTim>();
-	// 	WydotTim wydotTim1 = new WydotTim();
-
-	// 	wydotTim1.setToRm(260.0);
-	// 	wydotTim1.setFromRm(250.0);
-	// 	wydotTim1.setImpact("L");
-	// 	wydotTim1.setProblem("mudslide");
-	// 	wydotTim1.setEffect("leftClosed");
-	// 	wydotTim1.setAction("caution");
-	// 	wydotTim1.setPk(3622);
-	// 	wydotTim1.setHighway("I-80");
-	// 	wydotTim1.setIncidentId("IN49251");
-	// 	wydotTim1.setDirection("both");
-	// 	wydotTim1.setTs("2018-04-16T19:30:05.000Z");
-
-	// 	incidentList.add(wydotTim1);
-	// 	wydotTimList.setTimIncidentList(incidentList);
-
-
-
-	// }
+ @RunWith(SpringRunner.class)
+ @WebAppConfiguration
+ @SpringBootTest(classes = Application.class)
+ public class WydotTimIncidentControllerTest {	
 	
+	@Autowired
+    private WebApplicationContext wac;
+	private MockMvc mockMvc;
+	private static final String CONTENT_TYPE = "application/json;charset=UTF-8";
+
+	@Before
+    public void setup() throws Exception {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		DbUtility.changeConnection("test");			
+    }
+
+	@Test
+	public void givenWac_whenServletContext_thenItProvidesGreetController() {
+		ServletContext servletContext = wac.getServletContext();
+		
+		Assert.assertNotNull(servletContext);
+		Assert.assertTrue(servletContext instanceof MockServletContext);
+		Assert.assertNotNull(wac.getBean("wydotTimIncidentController"));
+	}
+
 	@Test 
 	public void testBuildTim() {
 
@@ -52,8 +69,8 @@ public class WydotTimIncidentControllerTest {
 		List<WydotTim> incidentList = new ArrayList<WydotTim>();
 		WydotTim wydotTim = new WydotTim();
 
-		wydotTim.setToRm(260.0);
-		wydotTim.setFromRm(250.0);
+		wydotTim.setToRm(365.0);
+		wydotTim.setFromRm(370.0);
 		wydotTim.setImpact("L");
 		wydotTim.setProblem("mudslide");
 		wydotTim.setEffect("leftClosed");
@@ -89,8 +106,31 @@ public class WydotTimIncidentControllerTest {
 		assertEquals(0, wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getPath().getScale());
 		assertEquals("xy", wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getPath().getType());
 		
-	    assertEquals(51, wydotTravelerInputData.getMileposts().size());
+	    assertEquals(6, wydotTravelerInputData.getMileposts().size());
 		assertEquals("1111111111111111", wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getDirection());
-		assertEquals(50, wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes().length);
+		assertEquals(5, wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes().length);
 	}
+
+	@Test
+	public void testCreateIncidentTim() throws Exception {
+	
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 350, \"impact\": \"L\", \"fromRm\": 340, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		  
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(incidentJson))
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("successs"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0));
+	}
+
+	@Test @Ignore
+	public void testGetIncidentTims() throws Exception {
+		
+		this.mockMvc.perform(MockMvcRequestBuilders.get("/incident-tim"))
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].activeTimId").value(582));
+	}
+	
 }

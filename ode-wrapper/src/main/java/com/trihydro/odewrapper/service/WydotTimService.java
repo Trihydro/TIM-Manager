@@ -200,7 +200,7 @@ public class WydotTimService
         return returnMessage;   
     }
 
-    public boolean clearTimsByRoadSegment(String timTypeStr, WydotTim wydotTim, String direction){        
+    public void clearTimsByRoadSegment(String timTypeStr, WydotTim wydotTim, String direction){        
         
         WydotRsu rsu = null;
 
@@ -241,9 +241,7 @@ public class WydotTimService
 
             // delete active tim                
             ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());                
-        }             
-        
-        return true;
+        }                
     }
 
     public boolean clearTimsById(String timTypeStr, String clientId){                

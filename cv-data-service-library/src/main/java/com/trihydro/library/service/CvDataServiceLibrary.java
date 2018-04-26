@@ -23,6 +23,7 @@ public class CvDataServiceLibrary {
     public static DateFormat mstFormat;
     public static DateTimeFormatter localDateTimeformatter;
     public static DateFormat mstLocalFormat;
+   
     //public static PreparedStatement bsmPreparedStatement;
     //public static PreparedStatement bsmSuvePreparedStatement;
     //public static PreparedStatement bsmVsePreparedStatement;
@@ -36,11 +37,10 @@ public class CvDataServiceLibrary {
         mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"); 
         mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");   
                  
-        securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());        
+        //securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());        
 
-        // create Prepared
 
-    }
+    }    
 
     public static Long log(PreparedStatement preparedStatement, String type) {       
         Long id = null;		

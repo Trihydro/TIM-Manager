@@ -11,10 +11,19 @@ import org.apache.ibatis.io.Resources;
 public class DbUtility {
     
     private static Connection connection = null;
+    public static String connectionEnvironment = "dev";
     private static String dbDriver = "oracle.jdbc.driver.OracleDriver";
     private static String dbUrl = "jdbc:oracle:thin:@10.145.9.22:1521/cvdev.gisits.local";
     private static String dbUsername = "CVCOMMS";
     private static String dbPassword = "C0ll1s10n";
+
+    private static String dbDriverTest = "org.h2.Driver";
+    private static String dbUrlTest = "jdbc:h2:mem:db";
+
+    public static void changeConnection(String connectionEnvironmentInput){
+        connectionEnvironment = connectionEnvironmentInput;
+        connection = null;
+    } 
 
     // database connection, dependent on the application.properties variables                 
     public static Connection getConnection() {
@@ -31,15 +40,21 @@ public class DbUtility {
                 TimeZone.setDefault(timeZone);
 
                 // make connection
-                Class.forName(dbDriver);
-                connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword); 
+                if(connectionEnvironment == "test"){
+                    Class.forName(dbDriverTest);
+                    connection = DriverManager.getConnection(dbUrlTest, dbUsername, null); 
+                }
+                else{
+                    Class.forName(dbDriver);
+                    connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword); 
+                }
                 
                 // connection successful
                 if (connection != null) {
                     System.out.println("Connection Successful! Enjoy. Now it's time to push data");
 
                     // if using an in memory database for unit tests                        
-                     if(dbDriver.equals("org.h2.Driver")) {               
+                     if(connectionEnvironment.equals("test")) {               
                         // Initialize object for ScriptRunner to read in a script to create tables and insert data
                         ScriptRunner scriptRunner = new ScriptRunner(connection);
                         try {

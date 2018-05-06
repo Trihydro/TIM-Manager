@@ -25,6 +25,10 @@ public class DbUtility {
         connection = null;
     } 
 
+    public static String getConnectionEnvironment(){
+        return connectionEnvironment;
+    } 
+
     // database connection, dependent on the application.properties variables                 
     public static Connection getConnection() {
         // return the connection if its already created

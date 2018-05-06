@@ -141,8 +141,13 @@ public class TimService extends CvDataServiceLibrary {
 				else if(col.equals("RECORD_TYPE") && odeTimMetadata.getRecordType() != null)
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getRecordType().toString());
 				else if(col.equals("ODE_RECEIVED_AT")) {
-					java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());				
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(receivedAtDate));				
+					if(odeTimMetadata.getOdeReceivedAt() != null) {
+						java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());				
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(receivedAtDate));				
+					}
+					else{
+						preparedStatement.setString(fieldNum, null);	
+					}
 				}
 				else if(col.equals("RSU_INDEX"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, j2735TravelerInformationMessage.getIndex());

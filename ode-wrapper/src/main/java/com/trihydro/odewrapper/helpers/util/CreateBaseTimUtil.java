@@ -34,7 +34,6 @@ public class CreateBaseTimUtil
         LocalDateTime ldt = LocalDateTime.now();
        
         ZoneId mstZoneId = ZoneId.of("America/Denver");
-        System.out.println("TimeZone : " + mstZoneId);
        
         //LocalDateTime + ZoneId = ZonedDateTime
         ZonedDateTime mstZonedDateTime = ldt.atZone(mstZoneId);      
@@ -113,10 +112,6 @@ public class CreateBaseTimUtil
             anchorPosition.setLongitude(new BigDecimal(0));
             anchorPosition.setElevation(new BigDecimal(0));
         }
-
-        System.out.println(anchorPosition.getLatitude());
-        System.out.println(anchorPosition.getLongitude());
-        System.out.println(anchorPosition.getElevation());
 
         region.setAnchorPosition(anchorPosition);
 

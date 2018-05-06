@@ -37,7 +37,7 @@ public class CvDataServiceLibrary {
         mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"); 
         mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");   
                  
-        //securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());        
+        securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());        
 
 
     }    

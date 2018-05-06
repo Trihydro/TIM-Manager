@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 
@@ -21,18 +25,27 @@ public class WydotTimVslController extends WydotTimBaseController {
     
     @RequestMapping(value="/vsl-tim", method = RequestMethod.POST, headers="Accept=application/json")
     public ResponseEntity<String> createUpdateVslTim(@RequestBody WydotTimList wydotTimList) {        
-                
+        
+        System.out.println("Create/Update VSL TIM");
+
+        List<ControllerResult> resultList = new ArrayList<ControllerResult>();
+        ControllerResult resultTim = null;
+
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimVslList()) {
             if(wydotTim.getDirection().equals("both")) {
-                wydotTimService.createUpdateTim("VSL", wydotTim, "eastbound");
-                wydotTimService.createUpdateTim("VSL", wydotTim, "westbound");      
+                resultTim = wydotTimService.createUpdateTim("VSL", wydotTim, "eastbound");
+                resultList.add(resultTim);  
+
+                resultTim = wydotTimService.createUpdateTim("VSL", wydotTim, "westbound");      
+                resultList.add(resultTim);  
             }
             else
-                wydotTimService.createUpdateTim("VSL", wydotTim, wydotTim.getDirection());      
+                resultTim = wydotTimService.createUpdateTim("VSL", wydotTim, wydotTim.getDirection());  
+                resultList.add(resultTim);      
         }
         
-        // return success
-        return ResponseEntity.status(HttpStatus.OK).body(jsonKeyValue("Success", "true"));        
+        String responseMessage = gson.toJson(resultList);         
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);    
     }
 }

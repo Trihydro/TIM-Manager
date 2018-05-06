@@ -18,6 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Categories.IncludeCategory;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,7 +49,7 @@ import javax.servlet.ServletContext;
  @FixMethodOrder(MethodSorters.NAME_ASCENDING)
  @WebAppConfiguration
  @SpringBootTest(classes = Application.class)
- public class WydotTimIncidentControllerTest {	
+ public class WydotTimVslControllerTest {	
 	
 	@Autowired
     private WebApplicationContext wac;
@@ -71,7 +72,7 @@ import javax.servlet.ServletContext;
 		List<TimType> timTypes = TimTypeService.selectAll();		
 
 		TimType timType = timTypes.stream()
-		.filter(x -> x.getType().equals("I"))
+		.filter(x -> x.getType().equals("VSL"))
 		.findFirst()
 		.orElse(null);	
 
@@ -84,15 +85,15 @@ import javax.servlet.ServletContext;
 		
 		Assert.assertNotNull(servletContext);
 		Assert.assertTrue(servletContext instanceof MockServletContext);
-		Assert.assertNotNull(wac.getBean("wydotTimIncidentController"));
+		Assert.assertNotNull(wac.getBean("wydotTimVslController"));
 	}
 
 	@Test
-	public void testCreateIncidentTim_bothDirections_success() throws Exception {
-	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+	public void testCreateVSLTim_bothDirections_success() throws Exception {
+     
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"both\", \"speed\": 45  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -104,12 +105,12 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
 	}
 
-	@Test
+	@Test 
 	public void testCreateIncidentTim_bothDirections_NoMileposts() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-70\", \"direction\": \"both\", \"speed\": 45  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -122,11 +123,11 @@ import javax.servlet.ServletContext;
 	}
 
 	@Test
-	public void testCreateIncidentTim_bothDirections_NoItisCodes() throws Exception {
+	public void testCreateVSLTim_bothDirections_NoSpeedItisCode() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"both\", \"speed\": 100  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -139,11 +140,11 @@ import javax.servlet.ServletContext;
 	}
 
 	@Test
-	public void testCreateIncidentTim_oneDirection_success() throws Exception {
+	public void testCreateVSLTim_oneDirection_success() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"OD49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"both\", \"speed\": 45  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -151,13 +152,13 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
-
-	@Test
-	public void testCreateIncidentTim_oneDirection_NoMileposts() throws Exception {
+ 
+	@Test 
+	public void testCreateVSLTim_oneDirection_NoMileposts() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\": \"IN49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-60\", \"direction\": \"eastbound\", \"speed\": 45  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -167,11 +168,11 @@ import javax.servlet.ServletContext;
 	}
 
 	@Test
-	public void testCreateIncidentTim_oneDirection_NoItisCodes() throws Exception {
+	public void testCreateVSLTim_oneDirection_NoItisCodes() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"eastbound\", \"speed\": 100  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -180,46 +181,12 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
-	@Test
-	public void testGetIncidentTims() throws Exception {
-		
-		makeTims();
-
-		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/incident-tim"))
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].pk").value(3622))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].pk").value(3622))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+	@Test 
+	public void testUpdateVSLTim_oneDirection_success() throws Exception {
 	
-		MvcResult mvcResult = resultActions.andReturn();
-		String result = mvcResult.getResponse().getContentAsString();
-		System.out.println(result);
-	}
-
-	@Test
-	public void testGetIncidentTimsByClientId() throws Exception {
-		
-		makeTims();
-
-		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/incident-tim/IN49251"))
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].pk").value(3622))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].pk").value(3622))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
-	
-		MvcResult mvcResult = resultActions.andReturn();
-		String result = mvcResult.getResponse().getContentAsString();
-		System.out.println(result);
-	}
-
-	@Test
-	public void testUpdateIncidentTim_oneDirection_success() throws Exception {
-	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"OD49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"eastbound\", \"speed\": 40  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.put("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -228,12 +195,12 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
-	@Test
-	public void testUpdateIncidentTim_bothDirections_success() throws Exception {
+	@Test 
+	public void testUpdateVSLTim_bothDirections_success() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"both\", \"speed\": 40  }]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.put("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -243,65 +210,6 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("success"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(0))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
-	}
-
-	@Test
-	public void testDeleteIncidentTimsByClientId() throws Exception {
-		
-		makeTims();
-
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
-		assertEquals(1, activeTimsBeforeDelete.size());	
-
-		this.mockMvc.perform(MockMvcRequestBuilders.delete("/incident-tim/IN49251"))
-			.andExpect(MockMvcResultMatchers.status().isOk());
-
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
-		assertEquals(0, activeTimsAfterDelete.size());	
-	}
-	
-	private void makeTims(){
-
-		WydotTimList wydotTimList = new WydotTimList();
-		List<WydotTim> incidentList = new ArrayList<WydotTim>();
-		WydotTim wydotTim = new WydotTim();
-
-		wydotTim.setToRm(370.0);
-		wydotTim.setFromRm(360.0);
-		wydotTim.setImpact("L");
-		wydotTim.setProblem("mudslide");
-		wydotTim.setEffect("leftClosed");
-		wydotTim.setAction("caution");
-		wydotTim.setPk(3622);
-		wydotTim.setHighway("I-80");
-		wydotTim.setIncidentId("IN49251");
-		wydotTim.setDirection("both");
-		wydotTim.setTs("2018-04-16T19:30:05.000Z");
-
-		incidentList.add(wydotTim);
-		wydotTimList.setTimIncidentList(incidentList);
-
-		WydotTravelerInputData wydotTravelerInputData = CreateBaseTimUtil.buildTim(wydotTim, "westbound", "80");
-
-		OdeLogMetadataReceived odeTimMetadata = new OdeLogMetadataReceived();
-		odeTimMetadata.setOdeReceivedAt(null);
-
-		Long timId = TimService.insertTim(odeTimMetadata, wydotTravelerInputData.getTim());
-
-		TimRsuService.insertTimRsu(timId, 1);
-
-		ActiveTim activeTim = new ActiveTim();
-		activeTim.setTimId(timId);
-		activeTim.setClientId(wydotTim.getIncidentId());
-		activeTim.setDirection("westbound");
-		activeTim.setMilepostStart(wydotTim.getFromRm());
-		activeTim.setMilepostStop(wydotTim.getToRm());
-		activeTim.setStartDateTime(wydotTravelerInputData.getTim().getDataframes()[0].getStartDateTime());
-		activeTim.setPk(wydotTim.getPk());
-		activeTim.setRoute(wydotTim.getRoute());
-		activeTim.setTimTypeId(timTypeId);
-
-		ActiveTimService.insertActiveTim(activeTim);		
 	}
 
 }

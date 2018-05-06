@@ -25,6 +25,8 @@ public class WydotTim
 	private String highway;
 	private Integer pk;
 	private String resultMessage;
+	private String availability;
+	private Double mileMarker;
 
 	public String getSegment() 
 	{
@@ -254,5 +256,25 @@ public class WydotTim
     public void setResultMessage(String resultMessage) 
 	{
 		this.resultMessage = resultMessage;
+	}
+
+	public Double getMileMarker() 
+	{
+		return this.mileMarker;
+	}
+
+    public void setMileMarker(Double mileMarker) 
+	{
+		this.mileMarker = mileMarker;
+	}
+
+	public String getAvailability() 
+	{
+		return this.availability;
+	}
+
+    public void setAvailability(String availability) 
+	{
+		this.availability = availability;
 	}
 }

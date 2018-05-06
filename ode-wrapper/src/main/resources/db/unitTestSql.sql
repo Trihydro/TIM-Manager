@@ -26,7 +26,16 @@ CREATE TABLE IF NOT EXISTS TIM
     ODE_RECEIVED_AT TIMESTAMP (6), 
     PACKET_ID VARCHAR2(50), 
     RSU_INDEX NUMBER(10,0), 
-    PRIMARY KEY (TIM_ID) 
+    PRIMARY KEY (TIM_ID),
+    SECURITY_RESULT_CODE NUMBER(10,0),
+    IS_SATELLITE NUMBER(1)
+);
+
+CREATE TABLE IF NOT EXISTS SECURITY_RESULT_CODE_TYPE
+( 
+    SECURITY_RESULT_CODE_TYPE_ID NUMBER(10,0) NOT NULL AUTO_INCREMENT, 
+    SECURITY_RESULT_CODE_TYPE VARCHAR2(255), 
+    PRIMARY KEY (SECURITY_RESULT_CODE_TYPE_ID)
 );
 
 CREATE TABLE IF NOT EXISTS CATEGORY
@@ -249,11 +258,14 @@ insert into category (category) values ('exitService');
 
 insert into itis_code (description, category_id, itis_code) values ('Speed Limit', 1, 268);
 insert into itis_code (description, category_id, itis_code) values ('45', 1, 12589);
+insert into itis_code (description, category_id, itis_code) values ('40', 1, 12584);
 insert into itis_code (description, category_id, itis_code) values ('mph', 1, 8720);
 insert into itis_code (description, category_id, itis_code) values ('Winter Storm', 1, 4871);
 insert into itis_code (description, category_id, itis_code) values ('Fog', 1, 5378);
 insert into itis_code (description, category_id, itis_code) values ('Mudslide', 1, 1307);
 insert into itis_code (description, category_id, itis_code) values ('Fire', 1, 3200);
+insert into itis_code (description, category_id, itis_code) values ('Spaces available', 1, 4105);
+insert into itis_code (description, category_id, itis_code) values ('No parking spaces available', 1, 4103);
 
 insert into tim_type (type, description) values ('VSL', 'Varaible Speed Limit');
 insert into tim_type (type, description) values ('RC', 'Road Condition');
@@ -291,3 +303,6 @@ CREATE TABLE IF NOT EXISTS INCIDENT_ACTION_LUT
     INCIDENT_ACTION_LUT_ID NUMBER(10,0) NOT NULL AUTO_INCREMENT,
     PRIMARY KEY (INCIDENT_ACTION_LUT_ID)
 );
+
+insert into SECURITY_RESULT_CODE_TYPE (SECURITY_RESULT_CODE_TYPE) values ('success');
+insert into SECURITY_RESULT_CODE_TYPE (SECURITY_RESULT_CODE_TYPE) values ('unknown');

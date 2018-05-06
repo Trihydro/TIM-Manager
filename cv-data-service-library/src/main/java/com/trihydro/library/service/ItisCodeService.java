@@ -24,7 +24,7 @@ public class ItisCodeService extends CvDataServiceLibrary {
 					ItisCode itisCode = new ItisCode();
 					itisCode.setItisCodeId(rs.getInt("itis_code_id"));
 					itisCode.setItisCode(rs.getInt("itis_code"));
-					itisCode.setDescription(rs.getString("description"));    
+					itisCode.setDescription(rs.getString("description").toLowerCase());    
 					itisCode.setCategoryId(rs.getInt("category_id"));
 					itisCodes.add(itisCode);
 				}

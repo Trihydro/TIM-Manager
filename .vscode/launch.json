@@ -24,7 +24,7 @@
             "type": "java",
             "name": "ODE Data Logger (Launch)",
             "request": "launch",            
-            "args": "-g logger_group_btim_dev -t topic.OdeTimBroadcastJson -type string",
+            "args": "-g logger_group_btim_dev -t topic.OdeBsmJson -type string",
             "cwd": "${workspaceRoot}/ode-data-logger",
             "mainClass": "com.trihydro.cvlogger.app.OdeLoggingConsumer"           
         },

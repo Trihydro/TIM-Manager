@@ -30,7 +30,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     @RequestMapping(value="/incident-tim", method = RequestMethod.POST, headers="Accept=application/json")
     public ResponseEntity<String> createIncidentTim(@RequestBody WydotTimList wydotTimList) { 
        
-        String result;
+        System.out.println("Create Incident TIM");
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -40,44 +40,21 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             if(wydotTim.getDirection().equals("both")) {
                 
                 // first TIM - eastbound
-                result = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");
-                
-                resultTim = new ControllerResult();
-                resultTim.setDirection("eastbound");
-                resultTim.setResultMessage(result);
-                if(result.equals("success"))
-                    resultTim.setResultCode(0);
-                else
-                    resultTim.setResultCode(1);
-                resultList.add(resultTim);
+                resultTim = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");
+                resultList.add(resultTim);  
 
                 // second TIM - westbound
-                result = wydotTimService.createUpdateTim("I", wydotTim, "westbound");  
-                resultTim = new ControllerResult();
-                resultTim.setDirection("westbound");
-                resultTim.setResultMessage(result);
-                if(result.equals("success"))
-                    resultTim.setResultCode(0);
-                else
-                    resultTim.setResultCode(1);
+                resultTim = wydotTimService.createUpdateTim("I", wydotTim, "westbound");                  
                 resultList.add(resultTim);    
             }
             else {
                 // single direction TIM
-                result = wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection());   
-                resultTim = new ControllerResult();
-                resultTim.setDirection(wydotTim.getDirection());
-                resultTim.setResultMessage(result);
-                if(result.equals("success"))
-                    resultTim.setResultCode(0);
-                else
-                    resultTim.setResultCode(1);
+                resultTim = wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection());   
                 resultList.add(resultTim);  
             }
         }                
 
-        String responseMessage = gson.toJson(resultList); 
-        
+        String responseMessage = gson.toJson(resultList);         
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
@@ -86,17 +63,26 @@ public class WydotTimIncidentController extends WydotTimBaseController {
        
         System.out.println("Update Incident TIM");
 
+        List<ControllerResult> resultList = new ArrayList<ControllerResult>();
+        ControllerResult resultTim = null;
+
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
             if(wydotTim.getDirection().equals("both")) {
-                wydotTimService.createUpdateTim("I", wydotTim, "eastbound");
-                wydotTimService.createUpdateTim("I", wydotTim, "westbound");      
+                
+                resultTim = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");
+                resultList.add(resultTim);
+
+                resultTim = wydotTimService.createUpdateTim("I", wydotTim, "westbound");  
+                resultList.add(resultTim);    
             }
-            else
-                wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection());      
+            else {
+                resultTim = wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection());  
+                resultList.add(resultTim);   
+            }
         }
 
-        String responseMessage = "{\"message\": \"success\"}";
+        String responseMessage = gson.toJson(resultList);         
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
     

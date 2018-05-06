@@ -19,6 +19,7 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.library.model.IncidentChoice;
+import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.WydotTim;
@@ -45,6 +46,7 @@ import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.Milepost;
@@ -66,14 +68,14 @@ public class WydotTimService
     private List<IncidentChoice> incidentActions;
     private List<WydotRsu> rsus;    
     private List<TimType> timTypes;    
+    private static String odeUrl = "https://ode.wyoroad.info:8443";
     WydotRsu[] rsuArr = new WydotRsu[1];    
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");            
     DateTimeFormatter mdtformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss-06:00");        
 
-    public String createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction){
+    public ControllerResult createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction){
                  
-        // for each tim in wydot's request      
-        String returnMessage = "";      
+        // for each tim in wydot's request        
         System.out.println(timTypeStr + " TIM");
         System.out.println("direction: " + wydotTim.getDirection());
         String route = (wydotTim.getRoute() != null ? wydotTim.getRoute() : wydotTim.getHighway());
@@ -81,6 +83,8 @@ public class WydotTimService
         System.out.println("route: " + route);
         System.out.println("fromRm: " + wydotTim.getFromRm());
         System.out.println("toRm: " + wydotTim.getToRm());
+        ControllerResult result = new ControllerResult();
+        result.setDirection(direction);
 
         // FIND ALL RSUS TO SEND TO     
         List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()), Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), route);       
@@ -89,20 +93,26 @@ public class WydotTimService
         WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route);
 
         if(timToSend.getMileposts().size() == 0){
-            return "No mileposts found";
+            result.setResultCode(1);
+            result.setResultMessage("No mileposts found");
+            return result;
         }
 
         List<String> items = null;
         // add Road Conditions itis codes
-        if(timTypeStr.equals("RC") || timTypeStr.equals("RW") || timTypeStr.equals("CC") || timTypeStr.equals("P") )
+        if(timTypeStr.equals("RC") || timTypeStr.equals("RW") || timTypeStr.equals("CC"))
             items = setItisCodesFromArray(wydotTim);   
         else if(timTypeStr.equals("VSL"))
             items = setItisCodesVsl(wydotTim);   
         else if(timTypeStr.equals("I"))
             items = setItisCodesIncident(wydotTim);   
-        
+        else if(timTypeStr.equals("P"))
+            items = setItisCodesParking(wydotTim);   
+
         if(items.size() == 0){
-            return "No ITIS codes found, TIM not sent";
+            result.setResultCode(2);
+            result.setResultMessage("No ITIS codes found, TIM not sent");
+            return result;           
         }
         timToSend.getTim().getDataframes()[0].setItems(items.toArray(new String[items.size()]));
 
@@ -162,13 +172,15 @@ public class WydotTimService
             // update tim                       
             if(activeTims != null && activeTims.size() > 0){                                            
                 // update TIM rsu
-                updateTimOnRsu(timToSend, activeTims.get(0).getTimId());                                
-                returnMessage += "success";
+                updateTimOnRsu(timToSend, activeTims.get(0).getTimId());                                            
+                result.setResultMessage("success");
+                result.setResultCode(0);
             }              
             else{     
                 // send new tim to rsu                    
                 sendNewTimToRsu(timToSend, rsu);  
-                returnMessage += "success";
+                result.setResultMessage("success");
+                result.setResultCode(0);
             }
         }
 
@@ -183,7 +195,8 @@ public class WydotTimService
                 regionNameTemp += "_" + wydotTim.getIncidentId() + "_" + wydotTim.getPk();
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);  
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId());
-            returnMessage += "success";
+            result.setResultMessage("success");
+            result.setResultCode(0);
         }
         else{
             String recordId = getNewRecordId();    
@@ -194,15 +207,19 @@ public class WydotTimService
                 regionNameTemp += "_" + wydotTim.getIncidentId() + "_" + wydotTim.getPk();
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             sendNewTimToSdw(timToSend, recordId);
-            returnMessage += "success";
+            result.setResultMessage("success");
+            result.setResultCode(0);
         }        
 
-        return returnMessage;   
+        return result;   
     }
 
-    public void clearTimsByRoadSegment(String timTypeStr, WydotTim wydotTim, String direction){        
+    public ControllerResult clearTimsByRoadSegment(String timTypeStr, WydotTim wydotTim, String direction){        
         
         WydotRsu rsu = null;
+
+        ControllerResult result = new ControllerResult();
+        result.setDirection(direction);
 
         String route = (wydotTim.getRoute() != null ? wydotTim.getRoute() : wydotTim.getHighway());
         route = route.replaceAll("\\D+","");
@@ -214,6 +231,16 @@ public class WydotTimService
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();            
         if(timType != null)
             activeTims = ActiveTimService.getAllActiveTims(wydotTim.getFromRm(), wydotTim.getToRm(), timType.getTimTypeId(), direction);            
+
+
+        if(activeTims.size() == 0){
+            result.setResultMessage("No active TIMs found");
+            result.setResultCode(3);
+        }
+        else{
+            result.setResultMessage("success");
+            result.setResultCode(0);
+        }        
 
         // for each active RC TIM in this area
         for (ActiveTim activeTim : activeTims) {
@@ -241,7 +268,9 @@ public class WydotTimService
 
             // delete active tim                
             ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());                
-        }                
+        }
+        
+        return result;
     }
 
     public boolean clearTimsById(String timTypeStr, String clientId){                
@@ -302,10 +331,20 @@ public class WydotTimService
         return activeTims;
     }
 
-    public List<String> setItisCodesFromArray(WydotTim wydotTim){        
+    public List<String> setItisCodesFromArray(WydotTim wydotTim){    
+        
+        // check to see if code exists
+        
         List<String> items = new ArrayList<String>();               
         for (Integer item : wydotTim.getAdvisory()){
-            items.add(item.toString());                       
+
+            ItisCode code = getItisCodes().stream()
+            .filter(x -> x.getItisCode().equals(item))
+            .findFirst()
+            .orElse(null);
+
+            if(code != null)
+                items.add(item.toString());                       
         }                            
         return items;
     }
@@ -350,6 +389,16 @@ public class WydotTimService
         
         List<String> items = new ArrayList<String>();        
         
+        ItisCode speed = getItisCodes().stream()
+            .filter(x -> x.getDescription().equals(wydotTim.getSpeed().toString()))
+            .findFirst()
+            .orElse(null);
+        if(speed != null) {
+            items.add(speed.getItisCode().toString());   
+        }
+        else
+            return items;
+
         ItisCode speedLimit = getItisCodes().stream()
             .filter(x -> x.getDescription().equals("Speed Limit"))
             .findFirst()
@@ -358,20 +407,27 @@ public class WydotTimService
             items.add(speedLimit.getItisCode().toString());           
         }
 
-        ItisCode speed = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals(wydotTim.getSpeed().toString()))
-            .findFirst()
-            .orElse(null);
-        if(speed != null) {
-            items.add(speed.getItisCode().toString());   
-        }
-
         ItisCode mph = getItisCodes().stream()
             .filter(x -> x.getDescription().equals("mph"))
             .findFirst()
             .orElse(null);
         if(mph != null){
             items.add(mph.getItisCode().toString());  
+        }
+
+        return items;
+    }
+
+    public List<String> setItisCodesParking(WydotTim wydotTim){
+        
+        List<String> items = new ArrayList<String>();        
+        
+        ItisCode availability = getItisCodes().stream()
+            .filter(x -> x.getDescription().equals(wydotTim.getAvailability().toLowerCase()))
+            .findFirst()
+            .orElse(null);
+        if(availability != null) {
+            items.add(availability.getItisCode().toString());           
         }
 
         return items;
@@ -505,7 +561,7 @@ public class WydotTimService
         return wydotRsu;
     }
 
-    public static Long sendNewTimToRsu(WydotTravelerInputData timToSend, WydotRsu rsu) {
+    public static void sendNewTimToRsu(WydotTravelerInputData timToSend, WydotRsu rsu) {
         
         // add snmp
         SNMP snmp = new SNMP();
@@ -531,19 +587,20 @@ public class WydotTimService
         timToSend.getTim().setPacketID(packetIdHexString);
 
         // set RSU index and send TIM if query is successful 
+        if(DbUtility.getConnectionEnvironment().equals("test")){
+            timToSend.getTim().setIndex(0);
+            return;
+        }                  
+
         TimQuery timQuery = submitTimQuery(rsu, 0);
         if(timQuery != null){
             timToSend.getTim().setIndex(findFirstAvailableIndex(timQuery.getIndicies_set()));
             String timToSendJson = gson.toJson(timToSend); 
-            System.out.println(timToSendJson);
             // send TIM if not a test
-            restTemplate.postForObject("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);
+            restTemplate.postForObject(odeUrl + "/tim", timToSendJson, String.class);
         }
         else
-            timToSend.getTim().setIndex(0);
-                                              
-        Long timId = new Long(0);
-        return timId;
+            timToSend.getTim().setIndex(0);                                            
     }
 
     public static void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId){
@@ -572,7 +629,9 @@ public class WydotTimService
 
         // send to ODE
         String timToSendJson = gson.toJson(timToSend);
-        restTemplate.postForObject("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);
+
+        if(!DbUtility.getConnectionEnvironment().equals("test"))
+            restTemplate.postForObject(odeUrl + "/tim", timToSendJson, String.class);
     }
     
     protected static String getNewRecordId() {
@@ -617,9 +676,8 @@ public class WydotTimService
 
         String timToSendJson = gson.toJson(updatedTim); 
 
-        // send TIM to ODE if not a test
-        //if(tim.getIndex() != 0)
-        restTemplate.put("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);        
+        if(!DbUtility.getConnectionEnvironment().equals("test"))
+            restTemplate.put(odeUrl + "/tim", timToSendJson, String.class);        
     } 
 
     public static void updateTimOnSdw(WydotTravelerInputData timToSend, Long timId, String recordId){
@@ -642,8 +700,8 @@ public class WydotTimService
         String timToSendJson = gson.toJson(updatedTim); 
 
         // send TIM to ODE if not a test
-        //if(tim.getIndex() != 0)
-        restTemplate.postForObject("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);        
+        if(!DbUtility.getConnectionEnvironment().equals("test"))
+            restTemplate.postForObject(odeUrl + "/tim", timToSendJson, String.class);        
     } 
 
     public static WydotTravelerInputData updateTim(WydotTravelerInputData timToSend, Long timId){
@@ -688,7 +746,7 @@ public class WydotTimService
         String responseStr = null;
 
         try{           
-            responseStr = restTemplate.postForObject("https://ode.wyoroad.info:8443/tim/query", entity, String.class);          
+            responseStr = restTemplate.postForObject(odeUrl + "/tim/query", entity, String.class);          
         }
         catch(RestClientException e){
             return submitTimQuery(rsu, counter + 1);
@@ -718,15 +776,16 @@ public class WydotTimService
     public static void deleteTimFromRsu(WydotRsu rsu, Integer index){
 
         String rsuJson = gson.toJson(rsu);
-        
-        System.out.println(rsuJson);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);                
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
+        if(DbUtility.getConnectionEnvironment().equals("test"))
+            return;
+
         try{
-            restTemplate.exchange("https://ode.wyoroad.info:8443/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);              
+            restTemplate.exchange(odeUrl + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);              
         }        
         catch(HttpClientErrorException e ){
             System.out.println(e.getMessage());
@@ -752,8 +811,8 @@ public class WydotTimService
 
         String timToSendJson = gson.toJson(updatedTim); 
        
-        restTemplate.postForObject("https://ode.wyoroad.info:8443/tim", timToSendJson, String.class);        
-       
+        if(!DbUtility.getConnectionEnvironment().equals("test"))
+            restTemplate.postForObject(odeUrl + "/tim", timToSendJson, String.class);               
     }
 
     public TimType getTimType(String timTypeName){
@@ -799,8 +858,6 @@ public class WydotTimService
         OdeGeoRegion serviceRegion = new OdeGeoRegion();
         serviceRegion.setNwCorner(nwCorner);
         serviceRegion.setSeCorner(seCorner);
-        System.out.println("nwCorner: " + nwCorner.getLatitude() + ", " + nwCorner.getLongitude());
-        System.out.println("seCorner: " + seCorner.getLatitude() + ", " + seCorner.getLongitude());
         return serviceRegion;
     } 
 

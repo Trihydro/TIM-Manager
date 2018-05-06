@@ -134,8 +134,12 @@ public class BsmPart2SpveService extends CvDataServiceLibrary {
 			fieldNum++;
 
 			// tr_conn_pivots 18
-			if(spve.getTrailers() != null && spve.getTrailers().getConnection() != null && spve.getTrailers().getConnection().getPivots() != null)
-				preparedStatement.setString(fieldNum, spve.getTrailers().getConnection().getPivots().toString());
+			if(spve.getTrailers() != null && spve.getTrailers().getConnection() != null && spve.getTrailers().getConnection().getPivots() != null){
+				if(spve.getTrailers().getConnection().getPivots())
+					preparedStatement.setString(fieldNum, "1");				
+				else
+					preparedStatement.setString(fieldNum, "0");				
+			}
 			else
 				preparedStatement.setString(fieldNum, null);
 			fieldNum++;

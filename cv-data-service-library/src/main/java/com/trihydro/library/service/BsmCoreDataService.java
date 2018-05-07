@@ -227,7 +227,10 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 						bsmPreparedStatement.setString(fieldNum, null);
 				}
 				else if(col.equals("BSM_SOURCE")) {																				
-					bsmPreparedStatement.setString(fieldNum, metadata.getBsmSource().toString());
+					if(metadata.getBsmSource() != null)
+						bsmPreparedStatement.setString(fieldNum, metadata.getBsmSource().toString());
+					else
+						bsmPreparedStatement.setString(fieldNum, null);
 				}
 				
 				fieldNum++;

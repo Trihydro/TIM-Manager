@@ -231,7 +231,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTims;
 	}
 
-	public static List<ActiveTim> getActiveSatTims(Double milepostStart, Double milepostStop, Long timTypeId, String direction){
+	public static List<ActiveTim> getActiveSatTimsBySegmentDirection(Double milepostStart, Double milepostStop, Long timTypeId, String direction){
 		
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -265,6 +265,40 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTims;
 	}
 
+	public static List<ActiveTim> getActiveSatTimsByClientIdDirection(String clientId, Long timTypeId, String direction){
+		
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim where (CLIENT_ID = '" + clientId + "' or CLIENT_ID like '" + clientId + "-b%') and TIM_TYPE_ID = " + timTypeId + " and DIRECTION = '" + direction + "' and SAT_RECORD_ID is not null");
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));	
+					activeTims.add(activeTim);				
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
+
 	public static List<ActiveTim> getActivesTimByClientId(String clientId, Long timTypeId){
 
 		ActiveTim activeTim = null;
@@ -272,7 +306,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		
 		try {
 			Statement statement = DbUtility.getConnection().createStatement();
-			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = " + timTypeId);
+			ResultSet rs = statement.executeQuery("select * from active_tim where (CLIENT_ID = '" + clientId + "' or CLIENT_ID like '" + clientId + "-b%') and TIM_TYPE_ID = " + timTypeId);
 			try {
 				// convert to ActiveTim object  				
 				while (rs.next()) {   	
@@ -389,7 +423,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		
 		try {
 			Statement statement = DbUtility.getConnection().createStatement();
-			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "'");
+			ResultSet rs = statement.executeQuery("select * from active_tim where (CLIENT_ID = '" + clientId + "' or CLIENT_ID like '" + clientId + "-b%')");
 			try {
 				// convert to ActiveTim object  				
 				while (rs.next()) {   	
@@ -462,6 +496,40 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		try {
 			Statement statement = DbUtility.getConnection().createStatement();
 			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and SAT_RECORD_ID is null and TIM_TYPE_ID = " + timTypeId);
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTims.add(activeTim);												
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}	
+
+	public static List<ActiveTim> getActiveRSUTimsByClientIdDirection(Long timTypeId, String clientId, String direction){
+		
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and SAT_RECORD_ID is null and TIM_TYPE_ID = " + timTypeId + " and DIRECTION = '" + direction + "'");
 			try {
 				// convert to ActiveTim object  				
 				while (rs.next()) {   	

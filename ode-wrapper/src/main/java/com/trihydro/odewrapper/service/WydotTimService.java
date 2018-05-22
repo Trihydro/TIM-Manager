@@ -1,6 +1,7 @@
 package com.trihydro.odewrapper.service;
 
 import org.springframework.stereotype.Component;
+import org.hibernate.validator.internal.constraintvalidators.bv.MaxValidatorForNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
@@ -66,7 +67,7 @@ public class WydotTimService
     private List<IncidentChoice> incidentProblems;
     private List<IncidentChoice> incidentEffects;
     private List<IncidentChoice> incidentActions;
-    private List<WydotRsu> rsus;    
+    private ArrayList<WydotRsu> rsus;    
     private List<TimType> timTypes;    
     private static String odeUrl = "https://ode.wyoroad.info:8443";
     WydotRsu[] rsuArr = new WydotRsu[1];    
@@ -100,7 +101,7 @@ public class WydotTimService
 
         List<String> items = null;
         // add Road Conditions itis codes
-        if(timTypeStr.equals("RC") || timTypeStr.equals("RW") || timTypeStr.equals("CC"))
+        if(timTypeStr.equals("RC") || timTypeStr.equals("CC"))
             items = setItisCodesFromArray(wydotTim);   
         else if(timTypeStr.equals("VSL"))
             items = setItisCodesVsl(wydotTim);   
@@ -108,6 +109,8 @@ public class WydotTimService
             items = setItisCodesIncident(wydotTim);   
         else if(timTypeStr.equals("P"))
             items = setItisCodesParking(wydotTim);   
+        else if(timTypeStr.equals("RW"))
+            items = setItisCodesRw(wydotTim);   
 
         if(items.size() == 0){
             result.setResultCode(2);
@@ -162,12 +165,13 @@ public class WydotTimService
             
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             
-            if(timTypeStr.equals("RC") || timTypeStr.equals("VSL"))
+            if(wydotTim.getClientId() != null)
+                activeTims = ActiveTimService.getActiveRSUTimsByClientId(timType.getTimTypeId(), wydotTim.getClientId());    
+            else 
                 activeTims = ActiveTimService.getActiveTimsOnRsuByRoadSegment(rsu.getRsuTarget(), timType.getTimTypeId(), wydotTim.getFromRm(), wydotTim.getToRm(), direction);       
-            else if(timTypeStr.equals("RW") || timTypeStr.equals("CC") || timTypeStr.equals("P"))                
-                activeTims = ActiveTimService.getActiveRSUTimsByClientId(timType.getTimTypeId(), wydotTim.getClientId());
-            else if(timTypeStr.equals("I"))
-                activeTims = ActiveTimService.getActiveRSUTimsByClientId(timType.getTimTypeId(), wydotTim.getIncidentId());
+               
+            // else if(timTypeStr.equals("RW"))
+            //     activeTims = ActiveTimService.getActiveRSUTimsByClientId(timType.getTimTypeId(), wydotTim.getId());
 
             // update tim                       
             if(activeTims != null && activeTims.size() > 0){                                            
@@ -418,6 +422,16 @@ public class WydotTimService
         return items;
     }
 
+    public List<String> setItisCodesRw(WydotTim wydotTim){
+
+        List<String> items = new ArrayList<String>();  
+        
+        
+        items.add("1025");           
+       
+        return items;
+    }
+
     public List<String> setItisCodesParking(WydotTim wydotTim){
         
         List<String> items = new ArrayList<String>();        
@@ -487,6 +501,9 @@ public class WydotTimService
             }
         }
 
+        if(items.size() == 0)
+            items.add("531");
+
         return items;
     }
 
@@ -500,11 +517,24 @@ public class WydotTimService
         return durationTime;
     }
 
-    public List<WydotRsu> getRsus(){
+    public ArrayList<WydotRsu> getRsus(){
         if(rsus != null)
             return rsus;
         else{
             rsus = RsuService.selectAll(); 
+            for (WydotRsu rsu : rsus) {
+                rsu.setRsuRetries(3);
+                rsu.setRsuTimeout(5000);
+            }
+            return rsus;
+        }
+    }    
+
+    public ArrayList<WydotRsu> getRsusByRoute(String route){
+        if(rsus != null)
+            return rsus;
+        else{
+            rsus = RsuService.selectRsusByRoute(route); 
             for (WydotRsu rsu : rsus) {
                 rsu.setRsuRetries(3);
                 rsu.setRsuTimeout(5000);
@@ -523,31 +553,35 @@ public class WydotTimService
     }    
 
     public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost, String route){
-        
-        int buffer = 5;
 
-        List<WydotRsu> rsus = null;
+        List<WydotRsu> rsus = new ArrayList<>();
 
-        if(direction.toLowerCase().equals("eastbound")) {		
-            Double startBuffer = lowerMilepost - buffer;	
+        int closestIndexOutsideRange = 0;
+        int i;
 
-            rsus = getRsus().stream()
-            .filter(x -> x.getMilepost() >= startBuffer)
-            .filter(x -> x.getMilepost() <= higherMilepost)
-            .filter(x -> x.getRoute().matches(".*" + route + ".*"))
-            .collect(Collectors.toList());
-           
+        // if there are no rsus on this route
+        if(getRsusByRoute(route).size() == 0)
+            return rsus;            
+
+        if(direction.equals("eastbound")){
+            for(i = 0; i < getRsusByRoute(route).size(); i++)
+                if(getRsusByRoute(route).get(i).getMilepost() < lowerMilepost)
+                    closestIndexOutsideRange = i;                            
         }
         else{
-            Double startBuffer = higherMilepost + buffer;		
-
-            rsus = getRsus().stream()
-            .filter(x -> x.getMilepost() >= lowerMilepost)
-            .filter(x -> x.getMilepost() <= startBuffer)
-            .filter(x -> x.getRoute().matches(".*" + route + ".*"))
-            .collect(Collectors.toList());
+            for(i = getRsusByRoute(route).size() - 1; i >= 0; i--)
+                if(getRsusByRoute(route).get(i).getMilepost() > higherMilepost)
+                    closestIndexOutsideRange = i;                    
         }
 
+        for(i = 0; i < getRsusByRoute(route).size(); i++){                   
+            if(getRsusByRoute(route).get(i).getMilepost() >= lowerMilepost && getRsusByRoute(route).get(i).getMilepost() <= higherMilepost)     
+                rsus.add(getRsusByRoute(route).get(i));                
+        }
+
+        // add RSU closest in range
+        rsus.add(getRsusByRoute(route).get(closestIndexOutsideRange));
+        
         return rsus;
     }
 

@@ -1,6 +1,8 @@
 package com.trihydro.odewrapper.model;
 
-public class WydotTim
+import java.util.ArrayList;
+
+public class WydotTim implements Cloneable
 {
 	private String direction;
 	private Double fromRm;
@@ -27,6 +29,13 @@ public class WydotTim
 	private String resultMessage;
 	private String availability;
 	private Double mileMarker;
+	private String surface;
+	private ArrayList<Buffer> buffers; 
+
+	@Override
+	public WydotTim clone() throws CloneNotSupportedException {
+    	return (WydotTim)super.clone();
+	}
 
 	public String getSegment() 
 	{
@@ -276,5 +285,25 @@ public class WydotTim
     public void setAvailability(String availability) 
 	{
 		this.availability = availability;
+	}
+
+	public String getSurface() 
+	{
+		return this.surface;
+	}
+
+    public void setSurface(String surface) 
+	{
+		this.surface = surface;
+	}
+
+	public ArrayList<Buffer> getBuffers() 
+	{
+		return this.buffers;
+	}
+
+    public void setBuffers(ArrayList<Buffer> buffers) 
+	{
+		this.buffers = buffers;
 	}
 }

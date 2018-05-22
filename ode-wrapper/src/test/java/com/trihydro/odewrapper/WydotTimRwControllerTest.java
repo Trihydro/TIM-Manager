@@ -44,7 +44,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
- @Ignore
+ 
  @RunWith(SpringRunner.class)
  @FixMethodOrder(MethodSorters.NAME_ASCENDING)
  @WebAppConfiguration
@@ -72,34 +72,34 @@ import javax.servlet.ServletContext;
 		List<TimType> timTypes = TimTypeService.selectAll();		
 
 		TimType timType = timTypes.stream()
-		.filter(x -> x.getType().equals("P"))
+		.filter(x -> x.getType().equals("RW"))
 		.findFirst()
 		.orElse(null);	
 
 		timTypeId = timType.getTimTypeId();
 	}
 	
-	@Test @Ignore
+	@Test
 	public void givenWac_whenServletContext_thenItProvidesGreetController() {
 		ServletContext servletContext = wac.getServletContext();
 		
 		Assert.assertNotNull(servletContext);
 		Assert.assertTrue(servletContext instanceof MockServletContext);
-		Assert.assertNotNull(wac.getBean("wydotTimParkingController"));
+		Assert.assertNotNull(wac.getBean("wydotTimRwController"));
 	}
 
-	@Test @Ignore
-	public void testCreateParkingTim_oneDirection_success() throws Exception {
-	
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": \"spaces available\", \"clientId\": \"Parking49251\" }]}";
+	@Test
+	public void testCreateRwTim_oneDirection_success() throws Exception {
+
+		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\": 370,\"direction\": \"eastbound\",\"surface\": \"G\",\"buffers\": [{\"distance\": 1,\"action\": \"inform\",\"units\": \"miles\"},{\"distance\": 0.5,\"action\": \"warn\",\"units\": \"miles\"}],\"startTs\": \"2016-06-23T14:31:52.404Z\",\"delays\": [{\"code\": 19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\": 8399},\"firstDay\": \"20130228\",\"lastDay\": \"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\": \"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\": 8359,\"highway\": \"I-80\"}]}";
 		  
-        ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.post("/parking-tim")
+        ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(parkingJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
             
         MvcResult mvcResult = resultActions.andReturn();
 		String result = mvcResult.getResponse().getContentAsString();
@@ -109,11 +109,11 @@ import javax.servlet.ServletContext;
 	@Test @Ignore
 	public void testCreateParkingTim_bothDirections_NoMileposts() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(incidentJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(1))
@@ -126,11 +126,11 @@ import javax.servlet.ServletContext;
 	@Test @Ignore
 	public void testCreateIncidentTim_bothDirections_NoItisCodes() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(incidentJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
@@ -143,11 +143,11 @@ import javax.servlet.ServletContext;
 	@Test @Ignore
 	public void testCreateIncidentTim_oneDirection_success() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"OD49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(incidentJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
@@ -157,11 +157,11 @@ import javax.servlet.ServletContext;
 	@Test @Ignore
 	public void testCreateIncidentTim_oneDirection_NoMileposts() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\": \"IN49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(incidentJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(1))
@@ -171,11 +171,11 @@ import javax.servlet.ServletContext;
 	@Test @Ignore
 	public void testCreateIncidentTim_oneDirection_NoItisCodes() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(incidentJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
@@ -185,11 +185,11 @@ import javax.servlet.ServletContext;
 	@Test @Ignore
 	public void testUpdateIncidentTim_oneDirection_success() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"OD49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.put("/incident-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(incidentJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
@@ -199,11 +199,11 @@ import javax.servlet.ServletContext;
 	@Test @Ignore
 	public void testUpdateIncidentTim_bothDirections_success() throws Exception {
 	
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.put("/incident-tim")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(incidentJson))
+			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
@@ -215,7 +215,6 @@ import javax.servlet.ServletContext;
 
 	@Test @Ignore
 	public void testDeleteIncidentTimsByClientId() throws Exception {
-		
 		makeTims();
 
 		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
@@ -265,12 +264,20 @@ import javax.servlet.ServletContext;
 		WydotTim wydotTim = new WydotTim();
 
 		wydotTim.setMileMarker(370.0);
-		wydotTim.setRoute("I-80");
-		wydotTim.setClientId("Parking49251");
-        wydotTim.setDirection("westbound");
+	
+		
+       
         wydotTim.setAvailability("spaces available");
-        wydotTim.setFromRm(370.0);
+		
+		wydotTim.setSurface("P");
+		wydotTim.setDirection("westbound");
+		wydotTim.setClientId("15917");
+		wydotTim.setPk(15917);
+		wydotTim.setHighway("I-80");
+		wydotTim.setFromRm(370.0);
         wydotTim.setToRm(380.0);
+
+		
 
 		incidentList.add(wydotTim);
 		wydotTimList.setTimIncidentList(incidentList);

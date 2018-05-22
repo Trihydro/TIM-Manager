@@ -68,6 +68,9 @@ public class TimLogger extends BaseLogger{
 	public static void addActiveTimToOracleDB(OdeData odeData){
 
 		// variables
+		DateTimeFormatter formatterMilli = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'-06:00'");
+		DateTimeFormatter formatterSec = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'-06:00'");
+		DateTimeFormatter formatterMin = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'-06:00'");
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>(); 
 		ActiveTim activeTim;
 	
@@ -105,28 +108,39 @@ public class TimLogger extends BaseLogger{
 			DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, new Long(timItisCodeId)); 
 
 		String endDateTime = null;
-		if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime() != 32000){				
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'-06:00'");
-			LocalDateTime dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatter);
+		LocalDateTime dateTime = null;
+		if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime() != 32000){
+			
+			if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime().contains("."))				
+				dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatterMilli);
+			else if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime().length() > 22)
+				dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatterSec);
+			else 
+				dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatterMin);
+
 			endDateTime = dateTime.plusMinutes(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime()).toString();
 			activeTim.setEndDateTime(endDateTime);
 		}
 
 		// if true, TIM came from WYDOT
 		if(activeTim.getTimType() != null) {       
-		
+			// if there is a client ID
 			if(activeTim.getClientId() != null){
-				activeTims = ActiveTimService.getActiveTimsByClientIdDirection(activeTim.getClientId(), activeTim.getDirection());			
+				// if its an RSU TIM
+				if(activeTim.getRsuTarget() != null)
+					activeTims = ActiveTimService.getActiveRSUTimsByClientIdDirection(activeTim.getTimTypeId(), activeTim.getClientId(), activeTim.getDirection());
+				// if its a SAT TIM
+				else
+					activeTims = ActiveTimService.getActiveSatTimsByClientIdDirection(activeTim.getClientId(), activeTim.getTimTypeId(), activeTim.getDirection());
 			}
+			// else find by road segment
 			else{
-				if(activeTim.getRsuTarget() != null){
-					if(activeTim.getTimType().equals("RC") || activeTim.getTimType().equals("VSL"))
-						activeTims = ActiveTimService.getActiveTimsOnRsuByRoadSegment(activeTim.getRsuTarget(), activeTim.getTimTypeId(), activeTim.getMilepostStart(), activeTim.getMilepostStop(), activeTim.getDirection());
-					else
-						activeTims = ActiveTimService.getActiveRSUTimsByClientId(activeTim.getTimTypeId(), activeTim.getClientId());
+				// if its an RSU TIM
+				if(activeTim.getRsuTarget() != null){ 					
+					activeTims = ActiveTimService.getActiveTimsOnRsuByRoadSegment(activeTim.getRsuTarget(), activeTim.getTimTypeId(), activeTim.getMilepostStart(), activeTim.getMilepostStop(), activeTim.getDirection());
 				}
 				else
-					activeTims = ActiveTimService.getActiveSatTims(activeTim.getMilepostStart(), activeTim.getMilepostStop(), activeTim.getTimTypeId(), activeTim.getDirection());            		
+					activeTims = ActiveTimService.getActiveSatTimsBySegmentDirection(activeTim.getMilepostStart(), activeTim.getMilepostStop(), activeTim.getTimTypeId(), activeTim.getDirection());            		
 			}
 			// Active TIM exists
 			if(activeTims.size() == 0){						

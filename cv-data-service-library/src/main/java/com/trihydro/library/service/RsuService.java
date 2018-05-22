@@ -15,11 +15,40 @@ import org.springframework.stereotype.Component;
 @Component
 public class RsuService extends CvDataServiceLibrary {
 	
-	public static List<WydotRsu> selectAll(){
-		List<WydotRsu> rsus = new ArrayList<WydotRsu>();
+	public static ArrayList<WydotRsu> selectAll(){
+		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
 		try (Statement statement = DbUtility.getConnection().createStatement()) {
 			// select all RSUs from RSU table
-   			ResultSet rs = statement.executeQuery("select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid");
+   			ResultSet rs = statement.executeQuery("select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid order by milepost asc");
+			try{   
+				while (rs.next()) {
+					WydotRsu rsu = new WydotRsu();
+					rsu.setRsuId(rs.getInt("rsu_id"));
+					rsu.setRsuTarget(rs.getString("ipv4_address"));
+					rsu.setRsuUsername(rs.getString("rsu_username"));    
+					rsu.setRsuPassword(rs.getString("rsu_password"));
+					rsu.setLatitude(rs.getDouble("latitude"));
+					rsu.setLongitude(rs.getDouble("longitude"));
+					rsu.setRoute(rs.getString("route"));
+					rsu.setMilepost(rs.getDouble("milepost"));
+					rsus.add(rsu);
+				}
+			}
+			finally {
+				try { rs.close(); } catch (Exception ignore) { }
+			}
+  		} 
+  		catch (SQLException e) {
+   			e.printStackTrace();
+  		}
+  		return rsus;
+	}
+
+	public static ArrayList<WydotRsu> selectRsusByRoute(String route){
+		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
+		try (Statement statement = DbUtility.getConnection().createStatement()) {
+			// select all RSUs from RSU table
+   			ResultSet rs = statement.executeQuery("select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.route like '%" + route + "%' order by milepost asc");
 			try{   
 				while (rs.next()) {
 					WydotRsu rsu = new WydotRsu();

@@ -20,10 +20,16 @@ public class WydotTimCcController extends WydotTimBaseController {
     
     @RequestMapping(value="/cc-tim", method = RequestMethod.POST, headers="Accept=application/json")
     public ResponseEntity<String> createChainControlTim(@RequestBody WydotTimList wydotTimList) {        
-                      
+        
+        System.out.println("CHAIN CONTROL TIM");
+
         // build TIM        
-        for (WydotTim wydotTim : wydotTimList.getTimCcList()) {
-            if(wydotTim.getDirection().equals("both")) {
+        for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
+
+            // set client id
+            wydotTim.setClientId(wydotTim.getSegment());
+
+            if(wydotTim.getDirection().equals("both")) {                
                 wydotTimService.createUpdateTim("CC", wydotTim, "eastbound");
                 wydotTimService.createUpdateTim("CC", wydotTim, "westbound");      
             }

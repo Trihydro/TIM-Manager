@@ -37,6 +37,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
+            // set client ID
+            wydotTim.setClientId(wydotTim.getIncidentId());
             if(wydotTim.getDirection().equals("both")) {
                 
                 // first TIM - eastbound
@@ -68,6 +70,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
+            // set client ID
+            wydotTim.setClientId(wydotTim.getIncidentId());
             if(wydotTim.getDirection().equals("both")) {
                 
                 resultTim = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");

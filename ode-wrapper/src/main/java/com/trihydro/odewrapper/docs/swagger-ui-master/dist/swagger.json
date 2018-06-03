@@ -1,847 +1,903 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "description": "API Endpoints to create and manage CV TIMs from WYDOT Applications.",
-      "version": "1.0.0",
-      "title": "WYDOT Connected Vehicle REST API",
-      "termsOfService": "http://swagger.io/terms/",
-      "contact": {
-        "email": "kperry@trihydro.com"
-      },
-      "license": {
-        "name": "Apache 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-      }
+  "swagger": "2.0",
+  "info": {
+    "description": "API Endpoints to create and manage CV TIMs from WYDOT Applications.",
+    "version": "1.0.0",
+    "title": "WYDOT Connected Vehicle REST API",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "kperry@trihydro.com"
     },
-    "host": "localhost:7777",
-    "tags": [
-      {
-        "name": "Chain Controls",
-        "description": "Chain control controller"
-      },
-      {
-        "name": "Incidents",
-        "description": "Incident controller"
-      },
-      {
-        "name": "Parking",
-        "description": "Parking TIMs"
-      },
-      {
-        "name": "Road Conditions",
-        "description": "Road Condition TIMs"
-      },
-      {
-        "name": "Road Construction",
-        "description": "Road Construction TIMs"
-      },
-      {
-        "name": "VSL",
-        "description": "Variable Speed Limit TIMs"
-      }
-    ],
-    "schemes": [
-      "http"
-    ],
-    "paths": {
-      "/cc-tim": {
-        "post": {
-          "tags": [
-            "Chain Controls"
-          ],
-          "summary": "Add and Update Chain control TIMs",
-          "description": "",
-          "operationId": "addChainControlTim",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Chain control fields from WTI",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/ChainControlObj"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        }
-      },
-      "/vsl-tim": {
-        "post": {
-          "tags": [
-            "VSL"
-          ],
-          "summary": "Add and Update VSL TIMs",
-          "description": "",
-          "operationId": "addUpdateVSLTim",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "VSL fields from WTI",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/VSLObj"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        }
-      },
-      "/incident-tim": {
-        "get": {
-          "tags": [
-            "Incidents"
-          ],
-          "summary": "Returns all incident active TIMs",
-          "operationId": "getIncidentTims",
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-  
-          ],
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            }
-          }
-        },
-        "post": {
-          "tags": [
-            "Incidents"
-          ],
-          "summary": "Add Incident TIMs",
-          "description": "",
-          "operationId": "addIncident",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Incident fields",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/IncidentObj"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        },
-        "put": {
-          "tags": [
-            "Incidents"
-          ],
-          "summary": "Add and Update Chain control TIMs",
-          "description": "",
-          "operationId": "updateIncident",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Incident fields",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/IncidentObj"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        }
-      },
-      "/incident-tim{incidentId}": {
-        "get": {
-          "tags": [
-            "Incidents"
-          ],
-          "summary": "Find incidents by ID",
-          "operationId": "getIncidentById",
-          "produces": [
-            "application/xml",
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "incidentId",
-              "in": "path",
-              "description": "ID of Incidenct",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "schema": {
-                "$ref": "#/definitions/Incident"
-              }
-            },
-            "400": {
-              "description": "Invalid ID supplied"
-            },
-            "404": {
-              "description": "Incident not found"
-            }
-          }
-        },
-        "delete": {
-          "tags": [
-            "Incidents"
-          ],
-          "summary": "Delete purchase order by ID",
-          "description": "For valid response try integer IDs with positive integer value.         Negative or non-integer values will generate API errors",
-          "operationId": "deleteIncident",
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "incidentId",
-              "in": "path",
-              "description": "ID of the Incident that needs to be deleted",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "400": {
-              "description": "Invalid ID supplied"
-            },
-            "404": {
-              "description": "Incident not found"
-            }
-          }
-        }
-      },
-      "/parking-tim": {
-        "post": {
-          "tags": [
-            "Parking"
-          ],
-          "summary": "Create and Update Parking TIMs",
-          "operationId": "createUpdateParking",
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Created parking object",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/ParkingObj"
-              }
-            }
-          ],
-          "responses": {
-            "default": {
-              "description": "successful operation"
-            }
-          }
-        }
-      },
-      "/create-update-rc-tim": {
-        "post": {
-          "tags": [
-            "Road Conditions"
-          ],
-          "summary": "Add and Update Road Condition TIMs",
-          "operationId": "addUpdateRoadCondition",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Road Condition Fields",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/RoadCondition"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        }
-      },
-      "/submit-rc-ac": {
-        "put": {
-          "tags": [
-            "Road Conditions"
-          ],
-          "summary": "Add and Update Chain control TIMs",
-          "description": "",
-          "operationId": "clearRoadConditions",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Incident fields",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/RoadCondition"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        }
-      },
-      "/rw-tim": {
-        "get": {
-          "tags": [
-            "Road Construction"
-          ],
-          "summary": "Returns all road construction active TIMs",
-          "operationId": "getRoadConstructionTims",
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-  
-          ],
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            }
-          }
-        },
-        "post": {
-          "tags": [
-            "Road Construction"
-          ],
-          "summary": "Add road construction TIMs",
-          "operationId": "addRoadConstructionTim",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Road Construction fields",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/RoadConstructionObj"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        },
-        "put": {
-          "tags": [
-            "Road Construction"
-          ],
-          "summary": "Update Road Construction TIMs",
-          "operationId": "updateRoadConstructionTim",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Road Construction fields",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/RoadConstructionObj"
-              }
-            }
-          ],
-          "responses": {
-            "405": {
-              "description": "Invalid input"
-            }
-          }
-        }
-      },
-      "/rw-tim{clientId}": {
-        "get": {
-          "tags": [
-            "Road Construction"
-          ],
-          "summary": "Find road construction tim by ID",
-          "operationId": "getRWById",
-          "produces": [
-            "application/xml",
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "clientId",
-              "in": "path",
-              "description": "ID of Road Consttuction TIM",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful operation",
-              "schema": {
-                "$ref": "#/definitions/RoadConstruction"
-              }
-            },
-            "400": {
-              "description": "Invalid ID supplied"
-            },
-            "404": {
-              "description": "RoadConstruction not found"
-            }
-          }
-        },
-        "delete": {
-          "tags": [
-            "Road Construction"
-          ],
-          "summary": "Delete road construction tim by ID",
-          "operationId": "deleteRW",
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "clientId",
-              "in": "path",
-              "description": "ID of the Road Construction that needs to be deleted",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "400": {
-              "description": "Invalid ID supplied"
-            },
-            "404": {
-              "description": "Road Construction not found"
-            }
-          }
-        }
-      }
-    },
-    "definitions": {
-      "ChainControlObj": {
-        "properties": {
-          "timCcList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/ChainControl"
-            }
-          }
-        }
-      },
-      "ChainControl": {
-        "type": "object",
-        "required": [
-          "fromRm",
-          "toRm",
-          "route",
-          "advisory",
-          "clientId",
-          "direction"
-        ],
-        "properties": {
-          "fromRm": {
-            "type": "number",
-            "example": 350
-          },
-          "toRm": {
-            "type": "number",
-            "example": 360
-          },
-          "route": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "clientId": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "direction": {
-            "type": "string",
-            "example": "westbound"
-          },
-          "advisory": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "VSLObj": {
-        "properties": {
-          "timVslList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/VSL"
-            }
-          }
-        }
-      },
-      "VSL": {
-        "type": "object",
-        "required": [
-          "fromRm",
-          "toRm",
-          "route",
-          "speed",
-          "direction"
-        ],
-        "properties": {
-          "fromRm": {
-            "type": "number",
-            "example": 350
-          },
-          "toRm": {
-            "type": "number",
-            "example": 360
-          },
-          "speed": {
-            "type": "number",
-            "example": 55
-          },
-          "route": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "direction": {
-            "type": "string",
-            "example": "westbound"
-          }
-        }
-      },
-      "RoadCondition": {
-        "type": "object",
-        "required": [
-          "fromRm",
-          "toRm",
-          "route",
-          "advisory",
-          "clientId",
-          "direction"
-        ],
-        "properties": {
-          "fromRm": {
-            "type": "number",
-            "example": 350
-          },
-          "toRm": {
-            "type": "number",
-            "example": 360
-          },
-          "route": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "clientId": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "direction": {
-            "type": "string",
-            "example": "westbound"
-          },
-          "advisory": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "RoadConstructionObj": {
-        "properties": {
-          "timRwList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/RoadConstruction"
-            }
-          }
-        }
-      },
-      "RoadConstruction": {
-        "type": "object",
-        "required": [
-          "fromRm",
-          "toRm",
-          "highway",
-          "pk",
-          "clientId",
-          "direction",
-          "surface",
-          "startDateTime",
-          "endDateTime"
-        ],
-        "properties": {
-          "fromRm": {
-            "type": "number",
-            "example": 350
-          },
-          "toRm": {
-            "type": "number",
-            "example": 360
-          },
-          "highway": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "pk": {
-            "type": "string",
-            "example": "15917"
-          },
-          "clientId": {
-            "type": "string",
-            "example": "15917"
-          },
-          "direction": {
-            "type": "string",
-            "example": "westbound"
-          },
-          "surface": {
-            "type": "string",
-            "example": "P"
-          },
-          "startDateTime": {
-            "type": "string",
-            "example": "2018-04-16T19:30:05.000Z"
-          },
-          "endDateTime": {
-            "type": "string",
-            "example": "2018-04-17T19:30:05.000Z"
-          }
-        }
-      },
-      "ParkingObj": {
-        "properties": {
-          "timParkingList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/Parking"
-            }
-          }
-        }
-      },
-      "Parking": {
-        "type": "object",
-        "required": [
-          "mileMarker",
-          "route",
-          "advisory",
-          "clientId",
-          "direction"
-        ],
-        "properties": {
-          "mileMarker": {
-            "type": "number",
-            "example": 350
-          },
-          "route": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "clientId": {
-            "type": "string",
-            "example": "P1234"
-          },
-          "direction": {
-            "type": "string",
-            "example": "westbound"
-          },
-          "availability": {
-            "type": "string",
-            "example": "Spaces available"
-          }
-        }
-      },
-      "IncidentObj": {
-        "properties": {
-          "timIncidentList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/Incident"
-            }
-          }
-        }
-      },
-      "Incident": {
-        "type": "object",
-        "required": [
-          "fromRm",
-          "toRm",
-          "route",
-          "advisory",
-          "incidentId",
-          "direction",
-          "highway",
-          "impact",
-          "problem",
-          "effect",
-          "action",
-          "pk",
-          "ts"
-        ],
-        "properties": {
-          "fromRm": {
-            "type": "number",
-            "example": 350
-          },
-          "toRm": {
-            "type": "number",
-            "example": 360
-          },
-          "route": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "incidentId": {
-            "type": "string",
-            "example": "IN1234"
-          },
-          "direction": {
-            "type": "string",
-            "example": "westbound"
-          },
-          "highway": {
-            "type": "string",
-            "example": "I-80"
-          },
-          "effect": {
-            "type": "string",
-            "example": "leftClosed"
-          },
-          "action": {
-            "type": "string",
-            "example": "caution"
-          },
-          "problem": {
-            "type": "string",
-            "example": "crash"
-          },
-          "pk": {
-            "type": "string",
-            "example": "1234"
-          },
-          "ts": {
-            "type": "string",
-            "example": "2018-04-16T19:30:05.000Z"
-          },
-          "advisory": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "impact": {
-            "type": "string",
-            "enum": [
-              "L",
-              "M",
-              "H",
-              "C",
-              "P"
-            ]
-          }
-        }
-      },
-      "ApiResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "type": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "externalDocs": {
-      "description": "Find out more about Swagger",
-      "url": "http://swagger.io"
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
+  },
+  "host": "localhost:3000",
+  "tags": [
+    {
+      "name": "Chain Controls",
+      "description": "Chain control controller"
+    },
+    {
+      "name": "Incidents",
+      "description": "Incident controller"
+    },
+    {
+      "name": "Parking",
+      "description": "Parking TIMs"
+    },
+    {
+      "name": "Road Conditions",
+      "description": "Road Condition TIMs"
+    },
+    {
+      "name": "Road Construction",
+      "description": "Road Construction TIMs"
+    },
+    {
+      "name": "VSL",
+      "description": "Variable Speed Limit TIMs"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/cc-tim": {
+      "post": {
+        "tags": [
+          "Chain Controls"
+        ],
+        "summary": "Add and Update Chain control TIMs",
+        "description": "",
+        "operationId": "addChainControlTim",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Chain control fields from WTI",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChainControlObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/vsl-tim": {
+      "post": {
+        "tags": [
+          "VSL"
+        ],
+        "summary": "Add and Update VSL TIMs",
+        "description": "",
+        "operationId": "addUpdateVSLTim",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "VSL fields from WTI",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VSLObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/incident-tim": {
+      "get": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Returns all incident active TIMs",
+        "operationId": "getIncidentTims",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/GetResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Add Incident TIMs",
+        "description": "",
+        "operationId": "addIncident",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Incident fields",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IncidentObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Add and Update Chain control TIMs",
+        "description": "",
+        "operationId": "updateIncident",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Incident fields",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IncidentObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/incident-tim/{incidentId}": {
+      "get": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Find incidents by ID",
+        "operationId": "getIncidentById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "incidentId",
+            "in": "path",
+            "description": "ID of Incidenct",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/GetResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Incident not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Delete purchase order by ID",
+        "description": "For valid response try integer IDs with positive integer value.         Negative or non-integer values will generate API errors",
+        "operationId": "deleteIncident",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "incidentId",
+            "in": "path",
+            "description": "ID of the Incident that needs to be deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Incident not found"
+          }
+        }
+      }
+    },
+    "/parking-tim": {
+      "post": {
+        "tags": [
+          "Parking"
+        ],
+        "summary": "Create and Update Parking TIMs",
+        "operationId": "createUpdateParking",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Created parking object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ParkingObj"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/create-update-rc-tim": {
+      "post": {
+        "tags": [
+          "Road Conditions"
+        ],
+        "summary": "Add and Update Road Condition TIMs",
+        "operationId": "addUpdateRoadCondition",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Road Condition Fields",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RoadConditionObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/submit-rc-ac": {
+      "put": {
+        "tags": [
+          "Road Conditions"
+        ],
+        "summary": "Add and Update Chain control TIMs",
+        "description": "",
+        "operationId": "clearRoadConditions",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Incident fields",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RoadConditionObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/rw-tim": {
+      "get": {
+        "tags": [
+          "Road Construction"
+        ],
+        "summary": "Returns all road construction active TIMs",
+        "operationId": "getRoadConstructionTims",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/GetResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Road Construction"
+        ],
+        "summary": "Add road construction TIMs",
+        "operationId": "addRoadConstructionTim",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Road Construction fields",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RoadConstructionObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Road Construction"
+        ],
+        "summary": "Update Road Construction TIMs",
+        "operationId": "updateRoadConstructionTim",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Road Construction fields",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RoadConstructionObj"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/rw-tim/{clientId}": {
+      "get": {
+        "tags": [
+          "Road Construction"
+        ],
+        "summary": "Find road construction tim by ID",
+        "operationId": "getRWById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "ID of Road Consttuction TIM",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/GetResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "RoadConstruction not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Road Construction"
+        ],
+        "summary": "Delete road construction tim by ID",
+        "operationId": "deleteRW",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "ID of the Road Construction that needs to be deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Road Construction not found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "RoadConditionObj": {
+      "properties": {
+        "timRcList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChainControl"
+          }
+        }
+      }
+    },
+    "ChainControlObj": {
+      "properties": {
+        "timRcList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChainControl"
+          }
+        }
+      }
+    },
+    "ChainControl": {
+      "type": "object",
+      "required": [
+        "fromRm",
+        "toRm",
+        "route",
+        "advisory",
+        "segment",
+        "direction"
+      ],
+      "properties": {
+        "fromRm": {
+          "type": "number",
+          "example": 350
+        },
+        "toRm": {
+          "type": "number",
+          "example": 360
+        },
+        "route": {
+          "type": "string",
+          "example": "I-80"
+        },
+        "segment": {
+          "type": "string",
+          "example": "TC313D"
+        },
+        "direction": {
+          "type": "string",
+          "example": "westbound"
+        },
+        "advisory": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "example": 6156
+          }
+        }
+      }
+    },
+    "VSLObj": {
+      "properties": {
+        "timVslList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/VSL"
+          }
+        }
+      }
+    },
+    "VSL": {
+      "type": "object",
+      "required": [
+        "fromRm",
+        "toRm",
+        "route",
+        "speed",
+        "direction"
+      ],
+      "properties": {
+        "fromRm": {
+          "type": "number",
+          "example": 350
+        },
+        "toRm": {
+          "type": "number",
+          "example": 360
+        },
+        "speed": {
+          "type": "number",
+          "example": 55
+        },
+        "route": {
+          "type": "string",
+          "example": "I-80"
+        },
+        "direction": {
+          "type": "string",
+          "example": "westbound"
+        }
+      }
+    },
+    "RoadCondition": {
+      "type": "object",
+      "required": [
+        "fromRm",
+        "toRm",
+        "route",
+        "advisory",
+        "roadCode",
+        "direction"
+      ],
+      "properties": {
+        "fromRm": {
+          "type": "number",
+          "example": 350
+        },
+        "toRm": {
+          "type": "number",
+          "example": 360
+        },
+        "route": {
+          "type": "string",
+          "example": "I-80"
+        },
+        "roadCode": {
+          "type": "string",
+          "example": "LARI80ECHEYI"
+        },
+        "direction": {
+          "type": "string",
+          "example": "westbound"
+        },
+        "advisory": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "example": 6011
+          }
+        }
+      }
+    },
+    "RoadConstructionObj": {
+      "properties": {
+        "timRwList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RoadConstruction"
+          }
+        }
+      }
+    },
+    "RoadConstruction": {
+      "type": "object",
+      "required": [
+        "fromRm",
+        "toRm",
+        "highway",
+        "pk",
+        "clientId",
+        "direction",
+        "surface",
+        "startDateTime",
+        "endDateTime"
+      ],
+      "properties": {
+        "fromRm": {
+          "type": "number",
+          "example": 350
+        },
+        "toRm": {
+          "type": "number",
+          "example": 360
+        },
+        "highway": {
+          "type": "string",
+          "example": "I-80"
+        },
+        "pk": {
+          "type": "string",
+          "example": "15917"
+        },
+        "clientId": {
+          "type": "string",
+          "example": "15917"
+        },
+        "direction": {
+          "type": "string",
+          "example": "westbound"
+        },
+        "surface": {
+          "type": "string",
+          "example": "P"
+        },
+        "startDateTime": {
+          "type": "string",
+          "example": "2018-04-16T19:30:05.000Z"
+        },
+        "endDateTime": {
+          "type": "string",
+          "example": "2018-04-17T19:30:05.000Z"
+        }
+      }
+    },
+    "ParkingObj": {
+      "properties": {
+        "timParkingList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Parking"
+          }
+        }
+      }
+    },
+    "Parking": {
+      "type": "object",
+      "required": [
+        "mileMarker",
+        "route",
+        "advisory",
+        "clientId",
+        "direction"
+      ],
+      "properties": {
+        "mileMarker": {
+          "type": "number",
+          "example": 350
+        },
+        "route": {
+          "type": "string",
+          "example": "I-80"
+        },
+        "clientId": {
+          "type": "string",
+          "example": "P1234"
+        },
+        "direction": {
+          "type": "string",
+          "example": "westbound"
+        },
+        "availability": {
+          "type": "string",
+          "example": "Spaces available"
+        }
+      }
+    },
+    "IncidentObj": {
+      "properties": {
+        "timIncidentList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Incident"
+          }
+        }
+      }
+    },
+    "Incident": {
+      "type": "object",
+      "required": [
+        "fromRm",
+        "toRm",
+        "route",
+        "advisory",
+        "incidentId",
+        "direction",
+        "highway",
+        "impact",
+        "problem",
+        "effect",
+        "action",
+        "pk",
+        "ts"
+      ],
+      "properties": {
+        "fromRm": {
+          "type": "number",
+          "example": 350
+        },
+        "toRm": {
+          "type": "number",
+          "example": 360
+        },
+        "route": {
+          "type": "string",
+          "example": "I-80"
+        },
+        "incidentId": {
+          "type": "string",
+          "example": "IN1234"
+        },
+        "direction": {
+          "type": "string",
+          "example": "westbound"
+        },
+        "highway": {
+          "type": "string",
+          "example": "I-80"
+        },
+        "effect": {
+          "type": "string",
+          "example": "leftClosed"
+        },
+        "action": {
+          "type": "string",
+          "example": "caution"
+        },
+        "problem": {
+          "type": "string",
+          "example": "crash"
+        },
+        "pk": {
+          "type": "string",
+          "example": "1234"
+        },
+        "ts": {
+          "type": "string",
+          "example": "2018-04-16T19:30:05.000Z"
+        },
+        "advisory": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "example": 6156
+          }
+        },
+        "impact": {
+          "type": "string",
+          "enum": [
+            "L",
+            "M",
+            "H",
+            "C",
+            "P"
+          ]
+        }
+      }
+    },
+    "GetResponse": {
+      "type": "object",
+      "properties": {
+        "activeTimId": {
+          "type": "integer",
+          "format": "int32",
+          "example": 884
+        },
+        "timId": {
+          "type": "integer",
+          "format": "int32",
+          "example": 1642778
+        },
+        "milepostStart": {
+          "type": "integer",
+          "format": "int32",
+          "example": 355
+        },
+        "milepostStop": {
+          "type": "integer",
+          "format": "int32",
+          "example": 360
+        },
+        "direction": {
+          "type": "string",
+          "example": "westbound"
+        },
+        "startDateTime": {
+          "type": "string",
+          "example": "2018-04-16 19:30:05"
+        },
+        "endDateTime": {
+          "type": "string",
+          "example": "2018-04-17 19:30:05"
+        },
+        "route": {
+          "type": "string",
+          "example": "80"
+        },
+        "clientId": {
+          "type": "string",
+          "example": "IN1234"
+        },
+        "satRecordId": {
+          "type": "string",
+          "example": "01ACDA1A"
+        },
+        "pk": {
+          "type": "string",
+          "example": 123
+        }
+      }
+    },
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
   }
+}

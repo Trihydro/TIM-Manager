@@ -160,8 +160,10 @@ public class WydotTimService
             String regionNameTemp = regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_" + timTypeStr;
             if(wydotTim.getClientId() != null)
                 regionNameTemp += "_" + wydotTim.getClientId();
-            else if(wydotTim.getIncidentId() != null)
-                regionNameTemp += "_" + wydotTim.getIncidentId() + "_" + wydotTim.getPk();
+            
+            // add on wydot primary key if it exists
+            if(wydotTim.getPk() != null)
+                regionNameTemp += "_" + wydotTim.getPk();
             
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             
@@ -189,14 +191,17 @@ public class WydotTimService
         }
 
         // satellite
-        List<ActiveTim> activeSatTims = ActiveTimService.getActiveSatTims(wydotTim.getFromRm(), wydotTim.getToRm(), timType.getTimTypeId(), direction);                
+        List<ActiveTim> activeSatTims = ActiveTimService.getActiveSatTimsBySegmentDirection(wydotTim.getFromRm(), wydotTim.getToRm(), timType.getTimTypeId(), direction);                
 
         if(activeSatTims != null && activeSatTims.size() > 0){
             String regionNameTemp = regionNamePrev + "_SAT-" + activeSatTims.get(0).getSatRecordId() + "_" + timTypeStr;
             if(wydotTim.getClientId() != null)
                 regionNameTemp += "_" + wydotTim.getClientId();
-            else if(wydotTim.getIncidentId() != null)
-                regionNameTemp += "_" + wydotTim.getIncidentId() + "_" + wydotTim.getPk();
+            
+            // add on wydot primary key if it exists
+            if(wydotTim.getPk() != null)
+                regionNameTemp += "_" + wydotTim.getPk();
+
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);  
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId());
             result.setResultMessage("success");
@@ -207,8 +212,11 @@ public class WydotTimService
             String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timTypeStr;
             if(wydotTim.getClientId() != null)
                 regionNameTemp += "_" + wydotTim.getClientId();
-            else if(wydotTim.getIncidentId() != null)
-                regionNameTemp += "_" + wydotTim.getIncidentId() + "_" + wydotTim.getPk();
+
+            // add on wydot primary key if it exists
+            if(wydotTim.getPk() != null)
+                regionNameTemp += "_" + wydotTim.getPk();
+            
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             sendNewTimToSdw(timToSend, recordId);
             result.setResultMessage("success");

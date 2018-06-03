@@ -653,7 +653,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			selectStatement += " and milepost_start = " +  fromRm;
 			selectStatement += " and milepost_stop = " +  toRm;
 			selectStatement += " and active_tim.direction = '" +  direction + "'";		
-			selectStatement += " and type = '" + timTypeId + "'";		
+			selectStatement += " and active_tim.tim_type_id = " + timTypeId;		
 			
 			ResultSet rs = statement.executeQuery(selectStatement);
 

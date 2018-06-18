@@ -60,5 +60,10 @@
             <version>1.4.194</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ucp</artifactId>
+            <version>12.2.0.1.0</version>
+        </dependency> 
     </dependencies>    
 </project>

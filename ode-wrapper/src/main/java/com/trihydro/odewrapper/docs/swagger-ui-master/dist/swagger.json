@@ -652,8 +652,8 @@
         "clientId",
         "direction",
         "surface",
-        "startDateTime",
-        "endDateTime"
+        "buffers",
+        "startTs"
       ],
       "properties": {
         "fromRm": {
@@ -684,13 +684,32 @@
           "type": "string",
           "example": "P"
         },
-        "startDateTime": {
+        "startTs": {
           "type": "string",
           "example": "2018-04-16T19:30:05.000Z"
         },
-        "endDateTime": {
+        "buffers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Buffer"
+          }
+        }
+      }
+    },
+    "Buffer": {
+      "type": "object",
+      "required": [
+        "distance",
+        "action"
+      ],
+      "properties": {
+        "distance": {
+          "type": "number",
+          "example": 1
+        },
+        "action": {
           "type": "string",
-          "example": "2018-04-17T19:30:05.000Z"
+          "example": "inform"
         }
       }
     },

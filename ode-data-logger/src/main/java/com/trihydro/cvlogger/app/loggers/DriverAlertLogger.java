@@ -3,13 +3,16 @@ package com.trihydro.cvlogger.app.loggers;
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
 import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
+
+import java.sql.SQLException;
+
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.trihydro.library.service.DriverAlertService;
 
 public class DriverAlertLogger {
     
 	
-	public static void addDriverAlertToOracleDB(OdeData odeData) {
+	public static void addDriverAlertToOracleDB(OdeData odeData) throws SQLException {
 		Long driverAlertId = DriverAlertService.insertDriverAlert((OdeLogMetadataReceived)odeData.getMetadata(), ((OdeDriverAlertPayload)odeData.getPayload()).getAlert());	
 	}	
 

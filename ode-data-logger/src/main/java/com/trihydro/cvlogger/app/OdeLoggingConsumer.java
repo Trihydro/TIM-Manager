@@ -37,7 +37,7 @@ public class OdeLoggingConsumer {
 	static Statement statement = null;
 	static ObjectMapper mapper;
 
-	public static void main( String[] args ) throws IOException
+	public static void main( String[] args ) throws IOException, SQLException
 	 {
 		Options options = new Options();
 

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class RsuController {
 
 	@RequestMapping(value="/rsus", method = RequestMethod.GET, headers="Accept=application/json")
-	public List<WydotRsu> selectAllRsus() { 
+	public List<WydotRsu> selectAllRsus() throws Exception { 
  		List<WydotRsu> rsus = RsuService.selectAll();
  		return rsus;      
 	}

@@ -23,9 +23,11 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	static PreparedStatement preparedStatement = null;
 	
     public static Long insertActiveTim(ActiveTim activeTim){
+		Connection connection = null;
 		try {
-			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("active_tim", TimOracleTables.getActiveTimTable());			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"active_tim_id"});
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("active_tim", TimOracleTables.getActiveTimTable());		
+			connection = DbUtility.getConnection();
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"active_tim_id"});
 			int fieldNum = 1;
 			for(String col: TimOracleTables.getActiveTimTable()) {
 				if(col.equals("TIM_ID")) 
@@ -66,6 +68,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		finally {			
 			try {
 				preparedStatement.close();
+				connection.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -163,7 +166,40 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTimIdResult;
 	}
 
-	public static List<ActiveTim> getAllActiveTims(Double milepostStart, Double milepostStop, Long timTypeId, String direction){
+	public static List<ActiveTim> getActiveTims(){
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim");
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));	
+					activeTims.add(activeTim);				
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
+
+	public static List<ActiveTim> getAllActiveTimsBySegment(Double milepostStart, Double milepostStop, Long timTypeId, String direction){
 		
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -265,7 +301,69 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTims;
 	}
 
+	public static void addItisCodesToActiveTim(ActiveTim activeTim){
+	
+		List<Integer> itisCodes = new ArrayList<>();
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim inner join tim on tim.tim_id = active_tim.tim_id inner join data_frame on tim.tim_id = data_frame.tim_id inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id where active_tim_id = " + activeTim.getActiveTimId() );
+
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   					
+					itisCodes.add(rs.getInt("ITIS_CODE"));
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		activeTim.setItisCodes(itisCodes);
+		
+	}
+
 	public static List<ActiveTim> getActiveSatTimsByClientIdDirection(String clientId, Long timTypeId, String direction){
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+
+		try {
+			Statement statement = DbUtility.getConnection().createStatement();
+			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = " + timTypeId + " and DIRECTION = '" + direction + "' and SAT_RECORD_ID is not null");
+			try {
+				// convert to ActiveTim object  				
+				while (rs.next()) {   	
+					activeTim = new ActiveTim();		
+					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+					activeTim.setTimId(rs.getLong("TIM_ID"));	
+					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));	
+					activeTims.add(activeTim);				
+				}
+			}
+			finally {
+				try {
+					rs.close();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}					
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return activeTims;
+	}
+
+	public static List<ActiveTim> getActiveSatTimsByClientIdDirectionWithBuffers(String clientId, Long timTypeId, String direction){
 		
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -488,39 +586,39 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTims;
 	}		
 
-	public static List<ActiveTim> getActiveRSUTimsByClientId(Long timTypeId, String clientId){
+	// public static List<ActiveTim> getActiveTimsOnRsuByClientId(Long timTypeId, String clientId){
 		
-		ActiveTim activeTim = null;
-		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+	// 	ActiveTim activeTim = null;
+	// 	List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		
-		try {
-			Statement statement = DbUtility.getConnection().createStatement();
-			ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and SAT_RECORD_ID is null and TIM_TYPE_ID = " + timTypeId);
-			try {
-				// convert to ActiveTim object  				
-				while (rs.next()) {   	
-					activeTim = new ActiveTim();		
-					activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-					activeTim.setTimId(rs.getLong("TIM_ID"));	
-					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-					activeTims.add(activeTim);												
-				}
-			}
-			finally {
-				try {
-					rs.close();
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}					
-			}
-		}
-		catch (SQLException e) {
-			e.printStackTrace();
-		}
+	// 	try {
+	// 		Statement statement = DbUtility.getConnection().createStatement();
+	// 		ResultSet rs = statement.executeQuery("select * from active_tim where CLIENT_ID = '" + clientId + "' and SAT_RECORD_ID is null and TIM_TYPE_ID = " + timTypeId);
+	// 		try {
+	// 			// convert to ActiveTim object  				
+	// 			while (rs.next()) {   	
+	// 				activeTim = new ActiveTim();		
+	// 				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+	// 				activeTim.setTimId(rs.getLong("TIM_ID"));	
+	// 				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+	// 				activeTims.add(activeTim);												
+	// 			}
+	// 		}
+	// 		finally {
+	// 			try {
+	// 				rs.close();
+	// 			}
+	// 			catch (Exception e) {
+	// 				e.printStackTrace();
+	// 			}					
+	// 		}
+	// 	}
+	// 	catch (SQLException e) {
+	// 		e.printStackTrace();
+	// 	}
 
-		return activeTims;
-	}	
+	// 	return activeTims;
+	// }	
 
 	public static List<ActiveTim> getActiveRSUTimsByClientIdDirection(Long timTypeId, String clientId, String direction){
 		
@@ -686,7 +784,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return activeTims;
 	}
 
-	public static List<ActiveTim> getActiveTimsOnRsuByClientId(String ipv4Address, String clientId, Long timTypeId){
+	public static List<ActiveTim> getActiveTimsOnRsuByClientId(String ipv4Address, String clientId, Long timTypeId, String direction){
 			
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -700,7 +798,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			selectStatement += " inner join active_tim on active_tim.tim_id = tim.tim_id";
 			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
 			selectStatement += " where rsu_vw.ipv4_address = '" +  ipv4Address + "'";
-			selectStatement += " and active_tim.clientId = '" +  clientId + "'";		
+			selectStatement += " and active_tim.client_Id = '" +  clientId + "'";	
+			selectStatement += " and active_tim.direction = '" +  direction + "'";	
 			selectStatement += " and type = '" + timTypeId + "'";		
 			
 			ResultSet rs = statement.executeQuery(selectStatement);

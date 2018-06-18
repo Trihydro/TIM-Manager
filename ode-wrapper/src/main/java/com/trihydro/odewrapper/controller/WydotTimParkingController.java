@@ -57,7 +57,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public Collection<ActiveTim> getParkingTimById(@PathVariable String clientId) { 
        
         // clear TIM
-        List<ActiveTim> activeTims = wydotTimService.selectTimById("P", clientId);        
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", clientId);        
 
         return activeTims;
     }

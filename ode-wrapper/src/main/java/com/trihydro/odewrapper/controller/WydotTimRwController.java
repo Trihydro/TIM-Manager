@@ -56,11 +56,12 @@ public class WydotTimRwController extends WydotTimBaseController {
                     // update start and stopping mileposts
                     WydotTim wydotTimBuffer = wydotTim.clone();
                     wydotTimBuffer.setFromRm(bufferStart);
+                    wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
                     wydotTimBuffer.setToRm(bufferEnd); 
                     wydotTimBuffer.setClientId(wydotTim.getId() + "-b" + i);                   
 
                     // send buffer tim
-                    wydotTim.setAdvisory(new Integer[] {1025});
+                    wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                     resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound");
                     resultList.add(resultTim);  
 
@@ -73,10 +74,11 @@ public class WydotTimRwController extends WydotTimBaseController {
                     // update start and stopping mileposts
                     wydotTimBuffer = wydotTim.clone();
                     wydotTimBuffer.setFromRm(bufferStart);
+                    wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
                     wydotTimBuffer.setToRm(bufferEnd);
 
                     // send buffer tim
-                    wydotTim.setAdvisory(new Integer[] {1025});
+                    wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                     resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound");
                     resultList.add(resultTim);  
 
@@ -106,10 +108,11 @@ public class WydotTimRwController extends WydotTimBaseController {
                         wydotTimBuffer = wydotTim.clone();						
                         wydotTimBuffer.setFromRm(bufferStart);
                         wydotTimBuffer.setToRm(bufferEnd);
+                        wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
                         wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);
 
                         // send buffer tim
-                        wydotTim.setAdvisory(new Integer[] {1025});
+                        wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                         resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound");
                         resultList.add(resultTim);  
                         // update running buffer distance
@@ -132,10 +135,11 @@ public class WydotTimRwController extends WydotTimBaseController {
                         WydotTim wydotTimBuffer = wydotTim.clone();
                         wydotTimBuffer.setFromRm(bufferStart);
                         wydotTimBuffer.setToRm(bufferEnd);
+                        wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
                         wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);
 
-                        // send buffer tim
-                        wydotTim.setAdvisory(new Integer[] {1025});
+                        // send buffer tim                        
+                        wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                         resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound");
                         resultList.add(resultTim);  
                         // update running buffer distance
@@ -184,7 +188,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     public Collection<ActiveTim> getRoadContructionTimById(@PathVariable String id) { 
                
         // get tims              
-        List<ActiveTim> activeTims = wydotTimService.selectTimById("RW", id);  
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("RW", id);  
 
         return activeTims;
     }
@@ -197,4 +201,6 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         return activeTims;
     }
+
+
 }

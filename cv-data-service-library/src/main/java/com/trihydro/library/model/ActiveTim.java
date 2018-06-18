@@ -1,5 +1,7 @@
 package com.trihydro.library.model;
 
+import java.util.List;
+
 public class ActiveTim {
 
     private Long activeTimId;
@@ -16,6 +18,15 @@ public class ActiveTim {
     private String satRecordId;
     private Integer pk;
     private String rsuTarget;
+    private List<Integer> itisCodes;
+
+    public List<Integer> getItisCodes(){
+        return itisCodes;
+    }
+
+    public void setItisCodes(List<Integer> itisCodes){
+        this.itisCodes = itisCodes;
+    }
 
     public Long getActiveTimId() {
         return this.activeTimId;

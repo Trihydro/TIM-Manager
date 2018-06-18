@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
@@ -37,8 +38,12 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
+            
             // set client ID
             wydotTim.setClientId(wydotTim.getIncidentId());
+            // set start time
+            wydotTim.setStartDateTime(wydotTim.getTs());
+
             if(wydotTim.getDirection().equals("both")) {
                 
                 // first TIM - eastbound
@@ -67,11 +72,15 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
-
+       
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
+            
             // set client ID
             wydotTim.setClientId(wydotTim.getIncidentId());
+            // set start time
+            wydotTim.setStartDateTime(wydotTim.getTs());
+ 
             if(wydotTim.getDirection().equals("both")) {
                 
                 resultTim = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");
@@ -103,8 +112,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     @RequestMapping(value="/incident-tim", method = RequestMethod.GET, headers="Accept=application/json")
     public Collection<ActiveTim> getIncidentTims() { 
        
-        // clear TIM
-        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("I");        
+        // get active TIMs
+        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("I");   
+        
+        // add ITIS codes to TIMs
+        for (ActiveTim activeTim : activeTims) {
+            ActiveTimService.addItisCodesToActiveTim(activeTim);
+        }
 
         return activeTims;
     }
@@ -112,8 +126,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     @RequestMapping(value="/incident-tim/{incidentId}", method = RequestMethod.GET, headers="Accept=application/json")
     public Collection<ActiveTim> getIncidentTimById(@PathVariable String incidentId) { 
        
-        // clear TIM
-        List<ActiveTim> activeTims = wydotTimService.selectTimById("I", incidentId);        
+        // get active TIMs
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("I", incidentId);    
+
+        // add ITIS codes to TIMs
+        for (ActiveTim activeTim : activeTims) {
+            ActiveTimService.addItisCodesToActiveTim(activeTim);
+        }
 
         return activeTims;
     }

@@ -75,8 +75,6 @@ public class TimLogger extends BaseLogger{
 		ActiveTim activeTim;
 	
 		// save TIM
-	    System.out.println(((OdeTimPayload)odeData.getPayload()).getTim().getTimeStamp());	
-
 		Long timId = TimService.insertTim((OdeLogMetadataReceived)odeData.getMetadata(), ((OdeTimPayload)odeData.getPayload()).getTim());	
 
 		// save DataFrame
@@ -128,7 +126,7 @@ public class TimLogger extends BaseLogger{
 			if(activeTim.getClientId() != null){
 				// if its an RSU TIM
 				if(activeTim.getRsuTarget() != null)
-					activeTims = ActiveTimService.getActiveRSUTimsByClientIdDirection(activeTim.getTimTypeId(), activeTim.getClientId(), activeTim.getDirection());
+					activeTims = ActiveTimService.getActiveTimsOnRsuByClientId(activeTim.getRsuTarget(), activeTim.getClientId(), activeTim.getTimTypeId(), activeTim.getDirection());
 				// if its a SAT TIM
 				else
 					activeTims = ActiveTimService.getActiveSatTimsByClientIdDirection(activeTim.getClientId(), activeTim.getTimTypeId(), activeTim.getDirection());

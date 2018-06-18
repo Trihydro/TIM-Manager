@@ -9,13 +9,15 @@ import java.util.List;
 import java.util.ArrayList;
 import com.trihydro.library.service.CvDataServiceLibrary;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 
 public class ItisCodeService extends CvDataServiceLibrary {
 
-	public static List<ItisCode> selectAll(){
+	public static List<ItisCode> selectAll() {
 		List<ItisCode> itisCodes = new ArrayList<ItisCode>();
-		try (Statement statement = DbUtility.getConnection().createStatement()) {
+		Connection connection = DbUtility.getConnection();
+		try (Statement statement = connection.createStatement()) {
 			// select all Itis Codes from ItisCode table   			   		    
 			ResultSet rs = statement.executeQuery("select * from itis_code");
 			try {
@@ -35,7 +37,13 @@ public class ItisCodeService extends CvDataServiceLibrary {
   		} 
   		catch (SQLException e) {
    			e.printStackTrace();
-  		}
+		  }
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
   		return itisCodes;
 	}
 

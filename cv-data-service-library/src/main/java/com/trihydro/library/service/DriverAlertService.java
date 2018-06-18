@@ -21,7 +21,7 @@ public class DriverAlertService extends CvDataServiceLibrary {
 	static List<DriverAlertType> driverAlertTypes;
 	static List<ItisCode> itisCodes;
 
-	public static Long insertDriverAlert(OdeLogMetadataReceived odeDriverAlertMetadata, String alert) { 
+	public static Long insertDriverAlert(OdeLogMetadataReceived odeDriverAlertMetadata, String alert) throws SQLException { 
 		
 		driverAlertTypes = DriverAlertTypeService.selectAll();
 		itisCodes = ItisCodeService.selectAll();

@@ -15,9 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class RsuService extends CvDataServiceLibrary {
 	
-	public static ArrayList<WydotRsu> selectAll(){
+	public static ArrayList<WydotRsu> selectAll() {
 		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
-		try (Statement statement = DbUtility.getConnection().createStatement()) {
+		Connection connection = DbUtility.getConnection();
+		try (Statement statement = connection.createStatement()) {
 			// select all RSUs from RSU table
    			ResultSet rs = statement.executeQuery("select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid order by milepost asc");
 			try{   
@@ -40,7 +41,13 @@ public class RsuService extends CvDataServiceLibrary {
   		} 
   		catch (SQLException e) {
    			e.printStackTrace();
-  		}
+		}
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
   		return rsus;
 	}
 

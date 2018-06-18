@@ -24,6 +24,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
+
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -87,7 +90,12 @@ import com.trihydro.odewrapper.spring.ApplicationConfig;
 		assertEquals(1, wydotTravelerInputData.getTim().getDataframes()[0].getSspLocationRights());
 		assertEquals(1, wydotTravelerInputData.getTim().getDataframes()[0].getSspTimRights());
 		assertEquals(1, wydotTravelerInputData.getTim().getDataframes()[0].getSspMsgContent());
-		assertEquals("CDEF", wydotTravelerInputData.getTim().getDataframes()[0].getMsgId().getFurtherInfoID());
+		assertNotNull(wydotTravelerInputData.getTim().getDataframes()[0].getMsgId().getRoadSignID());
+		assertEquals("1111111111111111", wydotTravelerInputData.getTim().getDataframes()[0].getMsgId().getRoadSignID().getViewAngle());
+		assertEquals(MutcdCodeEnum.warning, wydotTravelerInputData.getTim().getDataframes()[0].getMsgId().getRoadSignID().getMutcdCode());
+		assertNotNull(wydotTravelerInputData.getTim().getDataframes()[0].getMsgId().getRoadSignID().getPosition());
+		assertNotNull(wydotTravelerInputData.getTim().getDataframes()[0].getMsgId().getRoadSignID().getPosition().getLatitude());
+		assertNotNull(wydotTravelerInputData.getTim().getDataframes()[0].getMsgId().getRoadSignID().getPosition().getLongitude());
 		assertEquals(32000, wydotTravelerInputData.getTim().getDataframes()[0].getDurationTime());
 		assertEquals(5, wydotTravelerInputData.getTim().getDataframes()[0].getPriority());
 		assertEquals("null", wydotTravelerInputData.getTim().getUrlB());

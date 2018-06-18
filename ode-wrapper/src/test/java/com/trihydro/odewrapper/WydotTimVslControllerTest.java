@@ -11,6 +11,7 @@ import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import javax.ws.rs.core.Response;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -120,6 +121,7 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("No mileposts found"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(1))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
+		
 	}
 
 	@Test

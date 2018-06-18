@@ -6,6 +6,7 @@ import com.trihydro.library.service.MilepostService;
 import org.springframework.stereotype.Component;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.MsgId;
+import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.RoadSignID;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import java.math.BigDecimal;
@@ -39,9 +42,12 @@ public class CreateBaseTimUtil
         ZonedDateTime mstZonedDateTime = ldt.atZone(mstZoneId);      
         //String startDateTime = mstZonedDateTime.toLocalDateTime().toString() + "-07:00";
         TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-06:00"); // Quoted "Z" to indicate UTC, no timezone offset
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"); // Quoted "Z" to indicate UTC, no timezone offset
         df.setTimeZone(tz);
-        String nowAsISO = df.format(new Date());
+        //String nowAsISO = df.format(new Date());
+
+        String nowAsISO = Instant.now().toString();
 
         // current time - UTC?
         tim.setTimeStamp(nowAsISO);
@@ -51,10 +57,13 @@ public class CreateBaseTimUtil
         dataFrame.setSspLocationRights((short)1);
         dataFrame.setSspMsgContent((short)1);
         dataFrame.setSspMsgTypes((short)1);
-        MsgId msgId = new MsgId();
-        msgId.setFurtherInfoID("CDEF");
-        dataFrame.setMsgId(msgId);
-        dataFrame.setStartDateTime(nowAsISO);
+        
+       String startTimeHardCode = "2018-06-14T10:00:00.000-06:00";
+       dataFrame.setStartDateTime(startTimeHardCode);
+        
+        // change back to this after BAH fix
+        //dataFrame.setStartDateTime(nowAsISO);
+
         // duration time set to 22 days worth of minutes
         dataFrame.setDurationTime(32000);
         
@@ -105,13 +114,24 @@ public class CreateBaseTimUtil
         if(timToSend.getMileposts().size() > 0){
             anchorPosition.setLatitude(new BigDecimal(timToSend.getMileposts().get(0).getLatitude()));
             anchorPosition.setLongitude(new BigDecimal(timToSend.getMileposts().get(0).getLongitude()));
-            anchorPosition.setElevation(new BigDecimal(timToSend.getMileposts().get(0).getElevation() * 0.3048));
+            //anchorPosition.setElevation(new BigDecimal(timToSend.getMileposts().get(0).getElevation() * 0.3048));
         }
         else{
             anchorPosition.setLatitude(new BigDecimal(0));
             anchorPosition.setLongitude(new BigDecimal(0));
             anchorPosition.setElevation(new BigDecimal(0));
         }
+
+        MsgId msgId = new MsgId();
+        RoadSignID roadSignID = new RoadSignID();
+        OdePosition3D position = new OdePosition3D();
+        position.setLatitude(anchorPosition.getLatitude());
+        position.setLongitude(anchorPosition.getLongitude());
+        roadSignID.setPosition(position);
+        roadSignID.setMutcdCode(MutcdCodeEnum.warning);
+        roadSignID.setViewAngle("1111111111111111");
+        msgId.setRoadSignID(roadSignID);
+        dataFrame.setMsgId(msgId);
 
         region.setAnchorPosition(anchorPosition);
 

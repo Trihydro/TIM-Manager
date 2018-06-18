@@ -22,8 +22,13 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 		
 		try {
 
-			bsmPreparedStatement = DbUtility.getConnection().prepareStatement(bsmCoreInsertQueryStatement, new String[] { "bsm_core_data_id" });
-			
+			try{
+				bsmPreparedStatement = DbUtility.getConnection().prepareStatement(bsmCoreInsertQueryStatement, new String[] { "bsm_core_data_id" });
+			}
+			catch(SQLRecoverableException e){
+				DbUtility.resetConnection();
+			}
+
 			System.out.println("insert into bsm core data...");
 
 			int fieldNum = 1;

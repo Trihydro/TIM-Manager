@@ -2,10 +2,21 @@ package com.trihydro.library.helpers;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.TimeZone;
 
+import javax.sql.PooledConnection;
+
 import org.apache.ibatis.jdbc.ScriptRunner;
+
+import oracle.jdbc.pool.OracleConnectionPoolDataSource;
+import oracle.jdbc.pool.OracleDataSource;
+
+import oracle.ucp.jdbc.PoolDataSource;
+import oracle.ucp.jdbc.PoolDataSourceFactory;
+
 import org.apache.ibatis.io.Resources; 
 
 public class DbUtility {
@@ -29,8 +40,12 @@ public class DbUtility {
         return connectionEnvironment;
     } 
 
+    public static void resetConnection(){
+        connection = null;
+    }
+
     // database connection, dependent on the application.properties variables                 
-    public static Connection getConnection() {
+    public static Connection getConnectionDep() {
         // return the connection if its already created
         if (connection != null) {
             return connection;
@@ -85,4 +100,113 @@ public class DbUtility {
             return connection;
         }
     }
+
+    public static Connection getPooledConnection() throws Exception{
+        
+        OracleConnectionPoolDataSource ocpds = new OracleConnectionPoolDataSource();
+        ocpds.setURL(dbUrl);
+        ocpds.setUser(dbUsername);
+        ocpds.setPassword(dbPassword);
+    
+        PooledConnection pc_1 = ocpds.getPooledConnection();
+    
+        Connection conn_1 = pc_1.getConnection();
+       // Statement stmt = conn_1.createStatement();
+    
+        // ResultSet rs = stmt.executeQuery("SELECT count(*) FROM v$session WHERE username = 'SYS'");
+        // rs.next();
+        // String msg = "Total connections after ";
+        // System.out.println(msg + "conn_1: " + rs.getString(1));
+        
+        return conn_1;
+    
+        // Connection conn_2 = pc_1.getConnection();
+        // stmt = conn_2.createStatement();
+        // rs = stmt.executeQuery("SELECT count(*) FROM v$session WHERE username = 'SYS'");
+        // rs.next();
+        // System.out.println(msg + "conn_2: " + rs.getString(1));
+    
+        // PooledConnection pc_2 = ocpds.getPooledConnection();
+        // rs = stmt.executeQuery("SELECT count(*) FROM v$session WHERE username = 'SYS'");
+        // rs.next();
+        // System.out.println(msg + "pc_2: " + rs.getString(1));
+    
+        // conn_1.close();
+        // conn_2.close();
+        // pc_1.close();
+        // pc_2.close();
+
+    }
+
+    public static Connection getConnection() {
+
+        PoolDataSource pds = PoolDataSourceFactory.getPoolDataSource();
+        
+        try {
+            pds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");		
+            pds.setURL(dbUrl);		       
+            pds.setUser(dbUsername);    		     
+            pds.setPassword(dbPassword);		        
+            pds.setInitialPoolSize(20);
+        }
+        catch (SQLException e1) {        
+            e1.printStackTrace();
+        }	
+
+        // return the connection if its already created
+        if (connection != null) {
+            return connection;
+        }
+        // else create the connection
+        else {
+            try {
+
+                // set timezone
+                TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+                TimeZone.setDefault(timeZone);
+
+                // make connection
+                if(connectionEnvironment == "test"){
+                    Class.forName(dbDriverTest);
+                    connection = DriverManager.getConnection(dbUrlTest, dbUsername, null); 
+                }
+                else{
+                    Class.forName(dbDriver);
+                    connection = pds.getConnection();
+                }
+                
+                // connection successful
+                if (connection != null) {
+                    System.out.println("Connection Successful! Enjoy. Now it's time to push data");
+
+                    // if using an in memory database for unit tests                        
+                     if(connectionEnvironment.equals("test")) {               
+                        // Initialize object for ScriptRunner to read in a script to create tables and insert data
+                        ScriptRunner scriptRunner = new ScriptRunner(connection);
+                        try {
+                            // run script
+                            scriptRunner.runScript(Resources.getResourceAsReader("db/unitTestSql.sql"));
+                            connection.commit();
+                        } 
+                        catch (Exception e) {
+                            throw new IllegalStateException("ScriptRunner failed", e);
+                        }                               
+                    }                                        
+                } 
+                // else connection failed
+                else {
+                    System.out.println("Failed to make connection!");
+                }
+            } 
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } 
+            catch (SQLException e) {
+                e.printStackTrace();            
+            } 
+            return connection;
+        }
+    }
+    
+
 }

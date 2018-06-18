@@ -1,5 +1,6 @@
 package com.trihydro.cvlogger.app.loggers;
 
+import java.sql.SQLException;
 import java.util.List;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TimType;
@@ -15,9 +16,16 @@ public class BaseLogger {
     protected static List<WydotRsu> rsus;
 
     static{
-        itisCodes = ItisCodeService.selectAll(); 
+        
+		itisCodes = ItisCodeService.selectAll();
+
         timTypes = TimTypeService.selectAll();
-        rsus = RsuService.selectAll(); 
+        try {
+			rsus = RsuService.selectAll();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
     }    
 	
 }

@@ -21,6 +21,9 @@ import com.trihydro.library.service.PathService;
 import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.TimService;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.trihydro.library.service.TimRsuService;
 
 public class TimLogger extends BaseLogger{
@@ -53,12 +56,37 @@ public class TimLogger extends BaseLogger{
 			Long dataFrameId = DataFrameService.insertDataFrame(timId);
 			Long pathId = PathService.insertPath();
 			Long regionId = RegionService.insertRegion(dataFrameId, pathId, ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());		
+			String regionName = ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName();
+
+			ActiveTim activeTim = setActiveTimByRegionName(regionName);
+
+			// if this is an RSU TIM 
+			if(activeTim.getRsuTarget() != null){
+				// save TIM RSU in DB		
+				WydotRsu rsu = rsus.stream()
+				.filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
+				.findFirst()
+				.orElse(null);
+				if(rsu != null)
+					TimRsuService.insertTimRsu(timId, rsu.getRsuId());
+			}
+
 			Long nodeXYId;
 
 			for (J2735TravelerInformationMessage.NodeXY nodeXY : ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()) {
 				nodeXYId = NodeXYService.insertNodeXY(nodeXY);
 				PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
-			}							
+			}	
+
+			// save DataFrame ITIS codes				
+			for (String timItisCodeId : ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getItems()) {
+				if(StringUtils.isNumeric(timItisCodeId)){
+					if(getItisCodeId(timItisCodeId) != null)
+						DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, getItisCodeId(timItisCodeId)); 	
+				}
+				else								
+					DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId); 	
+			}
 		}
 		catch(NullPointerException e){
 			System.out.println(e.getMessage());
@@ -100,10 +128,10 @@ public class TimLogger extends BaseLogger{
 		}
 		
 		// save DataFrame ITIS codes				
-		List<Integer> itisCodeIds = getItisCodeIds(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getItems());
-		
-		for (Integer timItisCodeId : itisCodeIds) 
-			DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, new Long(timItisCodeId)); 
+		// save DataFrame ITIS codes				
+		for (String timItisCodeId : ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getItems()) 
+		if(StringUtils.isNumeric(timItisCodeId))
+			DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, getItisCodeId(timItisCodeId)); 		
 
 		String endDateTime = null;
 		LocalDateTime dateTime = null;
@@ -249,5 +277,19 @@ public class TimLogger extends BaseLogger{
 		} 
 
 		return itisCodeIds;
+	}
+
+	public static String getItisCodeId(String item){
+
+		String itisCodeId = null;
+                
+		ItisCode itisCode = itisCodes.stream()
+			.filter(x -> x.getItisCode().equals(Integer.parseInt(item)))
+			.findFirst()
+			.orElse(null);
+		if(itisCode != null)
+			itisCodeId = itisCode.getItisCodeId().toString();                 
+
+		return itisCodeId;
 	}
 }

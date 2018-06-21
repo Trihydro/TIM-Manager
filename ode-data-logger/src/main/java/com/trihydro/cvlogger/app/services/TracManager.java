@@ -3,6 +3,8 @@ package com.trihydro.cvlogger.app.services;
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.List;
+
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -88,7 +90,7 @@ public class TracManager {
 		System.out.println(builder.buildAndExpand().toUri());
 		
 		HttpHeaders responseHeaders = new HttpHeaders();
-		//String result = restTemplate.postForObject(builder.buildAndExpand().toUri(), new HttpEntity<String>(null, responseHeaders), String.class);		
+		String result = restTemplate.postForObject(builder.buildAndExpand().toUri(), new HttpEntity<String>(null, responseHeaders), String.class);		
 		TracManager.logNewDistressNotification(payload.getTim().getPacketID(), "Distress Notification Issued at " + latitude + "/" + longitude);
 	}
 

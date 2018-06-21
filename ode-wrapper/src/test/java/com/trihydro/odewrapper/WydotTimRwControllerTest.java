@@ -214,7 +214,7 @@ import javax.servlet.ServletContext;
 	}
 
 	@Test @Ignore
-	public void testDeleteIncidentTimsByClientId() throws Exception {
+	public void testDeleteRwTimsByClientId() throws Exception {
 		makeTims();
 
 		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);

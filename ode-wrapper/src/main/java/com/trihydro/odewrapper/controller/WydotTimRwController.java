@@ -42,6 +42,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             
             wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
             double bufferBefore = 0;
+            wydotTim.setClientId(wydotTim.getId());
 
             if(wydotTim.getDirection().equals("both")) {                                
 
@@ -58,7 +59,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTimBuffer.setFromRm(bufferStart);
                     wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
                     wydotTimBuffer.setToRm(bufferEnd); 
-                    wydotTimBuffer.setClientId(wydotTim.getId() + "-b" + i);                   
+                    wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);                   
 
                     // send buffer tim
                     wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
@@ -76,6 +77,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTimBuffer.setFromRm(bufferStart);
                     wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
                     wydotTimBuffer.setToRm(bufferEnd);
+                    wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);                   
 
                     // send buffer tim
                     wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
@@ -145,7 +147,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                         // update running buffer distance
                         bufferBefore = wydotTim.getBuffers().get(i).getDistance();
                     }
-                    // send road construction TIM
+                    // send road construction TIM                   
                     wydotTim.setAdvisory(new Integer[] {1025});
                     resultTim = wydotTimService.createUpdateTim("RW", wydotTim, "westbound");
                     resultList.add(resultTim);  

@@ -3,6 +3,8 @@ package com.trihydro.odewrapper.helpers.util;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.service.MilepostService;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -93,7 +95,7 @@ public class CreateBaseTimUtil
         List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();
 
         int mod = 4;
-        while(sizeRestrictedMilepostList.size() > 60){
+        while(sizeRestrictedMilepostList.size() > 26){
             
             List<Milepost> tempList = new ArrayList<Milepost>(); 
 
@@ -137,6 +139,7 @@ public class CreateBaseTimUtil
 
         ArrayList<J2735TravelerInformationMessage.NodeXY> nodes = new ArrayList<J2735TravelerInformationMessage.NodeXY>();        
 
+        int timDirection = 0;
         // path list - change later
         for(int j = 1; j < timToSend.getMileposts().size(); j++) {
             J2735TravelerInformationMessage.NodeXY node = new J2735TravelerInformationMessage.NodeXY();            
@@ -144,13 +147,23 @@ public class CreateBaseTimUtil
             node.setNodeLong(new BigDecimal(timToSend.getMileposts().get(j).getLongitude()));            
             node.setDelta("node-LatLon");   
             nodes.add(node);         
+            timDirection |= getDirection(timToSend.getMileposts().get(j).getBearing());
         }
+
+        String dirTest = Integer.toBinaryString(timDirection);
+
+        dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
+
+        dirTest = StringUtils.reverse(dirTest);
+
+        region.setDirection(dirTest); // heading slice	
 
         path.setNodes(nodes.toArray(new J2735TravelerInformationMessage.NodeXY[nodes.size()]));
         region.setPath(path);
         
         // direction - change later
-        region.setDirection("1111111111111111");
+
+        //region.setDirection("1111111111111111");
 
         regions.add(region);
         dataFrame.setRegions(regions.toArray(new J2735TravelerInformationMessage.DataFrame.Region[regions.size()]));
@@ -178,4 +191,44 @@ public class CreateBaseTimUtil
         else
             return "node-LL6";
     }
+
+    protected static int getDirection(Double bearing){
+
+		int direction = 0;
+
+		if(bearing >= 0 && bearing <= 22.5)
+			direction = 1;
+		else if(bearing > 22.5 && bearing <= 45)
+			direction = 2;
+		else if(bearing > 45 && bearing <= 67.5)
+			direction = 4;
+		else if(bearing > 67.5 && bearing <= 90)
+			direction = 8;
+		else if(bearing > 90 && bearing <= 112.5)
+			direction = 16;
+		else if(bearing > 112.5 && bearing <= 135)
+			direction = 32;
+		else if(bearing > 135 && bearing <= 157.5)
+			direction = 64;
+		else if(bearing > 157.5 && bearing <= 180)
+			direction = 128;
+		else if(bearing > 180 && bearing <= 202.5)
+			direction = 256;		
+		else if(bearing > 202.5 && bearing <= 225)
+			direction = 512;
+		else if(bearing > 225 && bearing <= 247.5)
+			direction = 1024;
+		else if(bearing > 247.5 && bearing <= 270)
+			direction = 2048;
+		else if(bearing > 270 && bearing <= 292.5)
+			direction = 4096;
+		else if(bearing > 292.5 && bearing <= 315)
+			direction = 8192;
+		else if(bearing > 315 && bearing <= 337.5)
+			direction = 16384;
+		else if(bearing > 337.5 && bearing <= 360)
+			direction = 32768;
+
+		return direction;
+	}
 }

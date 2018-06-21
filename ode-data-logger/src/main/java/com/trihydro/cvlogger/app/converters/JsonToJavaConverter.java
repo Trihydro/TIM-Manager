@@ -178,8 +178,10 @@ public class JsonToJavaConverter {
             //JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
 			JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value").get("TravelerInformation");
 			JsonNode anchorNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions").get("GeographicalPath").get("anchor");
-			JsonNode nodeXYArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions").get("GeographicalPath").get("description").get("path").get("offset").get("xy").get("nodes").get("NodeXY");					
-            
+            JsonNode nodeXYArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions").get("GeographicalPath").get("description").get("path").get("offset").get("xy").get("nodes").get("NodeXY");					
+            JsonNode sequenceArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("content").get("advisory").get("SEQUENCE");					
+            JsonNode regionNameNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions").get("GeographicalPath").get("name");
+
             timNode.get("timeStamp").asInt();
             
             LocalDate now = LocalDate.now();
@@ -224,10 +226,41 @@ public class JsonToJavaConverter {
             
             path.setNodes(nodeXYArr);
 
+            if(regionNameNode != null)
+                region.setName(mapper.treeToValue(regionNameNode, String.class));
+
             region.setPath(path);
+
+            // if ITIS codes are in an array
+            List<String> itemsList = new ArrayList<String>();
+            String item = null;
+            if (sequenceArrNode.isArray()) {
+				for (final JsonNode objNode : sequenceArrNode) {								                    
+                    if(objNode.get("item").get("itis") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);	
+                    else if(objNode.get("item").get("text") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("text"), String.class);	
+                    		                             					
+                    itemsList.add(item);
+				}
+            }
+
+            // ADD NON ARRAY ELEMENT
+            if (!sequenceArrNode.isArray()) {						                    
+                    if(sequenceArrNode.get("item").get("itis") != null)
+                        item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);	
+                    else if(sequenceArrNode.get("item").get("text") != null)
+                        item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);	
+                    		                             					
+                    itemsList.add(item);				
+            }
+
+            String[] items = new String[itemsList.size()];
+            items = itemsList.toArray(items);
 
             regions[0] = region;
             dataFrame.setRegions(regions);
+            dataFrame.setItems(items);
             dataFrames[0] = dataFrame;
             tim.setDataframes(dataFrames);
             odeTimPayload = new OdeTimPayload();

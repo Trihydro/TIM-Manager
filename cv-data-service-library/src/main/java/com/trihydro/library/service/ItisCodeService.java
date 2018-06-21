@@ -32,18 +32,19 @@ public class ItisCodeService extends CvDataServiceLibrary {
 				}
 			}
 			finally {
-				try { rs.close(); } catch (Exception ignore) { }
+				try { 
+					rs.close(); 
+				} catch (Exception ignore) { }
 			}
   		} 
   		catch (SQLException e) {
    			e.printStackTrace();
 		  }
-		try {
-			connection.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// try {
+		// 	connection.close();
+		// } catch (SQLException e) {
+		// 	e.printStackTrace();
+		// }
   		return itisCodes;
 	}
 

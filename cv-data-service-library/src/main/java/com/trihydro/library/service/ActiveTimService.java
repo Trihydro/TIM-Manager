@@ -66,13 +66,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			e.printStackTrace();
 		}
 		finally {			
-			try {
-				preparedStatement.close();
-				connection.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			// try {
+			// 	preparedStatement.close();
+			// 	connection.close();
+			// } catch (SQLException e) {
+			// 	// TODO Auto-generated catch block
+			// 	e.printStackTrace();
+			// }
 		}
 		return new Long(0);
 	}

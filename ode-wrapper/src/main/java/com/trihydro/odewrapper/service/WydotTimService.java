@@ -727,7 +727,7 @@ public class WydotTimService
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(TimeToLive.oneweek);
+        sdw.setTtl(TimeToLive.thirtyminutes);
         // set new record id
         sdw.setRecordId(recordId);
 
@@ -969,7 +969,7 @@ public class WydotTimService
     } 
 
     protected static int findFirstAvailableIndex(int[] indicies){
-        for (int i = 1; i < 100; i++) {
+        for (int i = 2; i < 100; i++) {
             if(!contains(indicies, i)) {
                 return i;
             }

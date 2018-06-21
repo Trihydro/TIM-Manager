@@ -112,12 +112,7 @@ import com.trihydro.odewrapper.spring.ApplicationConfig;
 		assertEquals("xy", wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getPath().getType());
 		
 	    assertEquals(11, wydotTravelerInputData.getMileposts().size());
-		assertEquals("1111111111111111", wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getDirection());
+		assertEquals("0000000000010000", wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getDirection());
 		assertEquals(10, wydotTravelerInputData.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes().length);
-	}
-
-
-
-
-	
+	}	
 }

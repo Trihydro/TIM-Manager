@@ -148,7 +148,7 @@ import javax.servlet.ServletContext;
 	}
 
 	@Test
-	public void testDeleteIncidentTimsByClientId() throws Exception {
+	public void testDeleteParkingTimsByClientId() throws Exception {
 		
 		makeTims();
 

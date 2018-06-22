@@ -80,8 +80,7 @@ public class WydotTimService
         // for each tim in wydot's request        
         System.out.println(timTypeStr + " TIM");
         System.out.println("direction: " + wydotTim.getDirection());
-        String route = (wydotTim.getRoute() != null ? wydotTim.getRoute() : wydotTim.getHighway());
-        route = route.replaceAll("\\D+","");
+        String route = wydotTim.getRoute().replaceAll("\\D+","");
         System.out.println("route: " + route);
         System.out.println("fromRm: " + wydotTim.getFromRm());
         System.out.println("toRm: " + wydotTim.getToRm());
@@ -149,7 +148,7 @@ public class WydotTimService
         }
 
         // build region name for active tim logger to use            
-        String regionNamePrev = direction + "_" + route + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();   
+        String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();   
                                 
         // query database for rsus that active tims could be on
         List<ActiveTim> activeTims = null;
@@ -247,8 +246,7 @@ public class WydotTimService
         ControllerResult result = new ControllerResult();
         result.setDirection(direction);
 
-        String route = (wydotTim.getRoute() != null ? wydotTim.getRoute() : wydotTim.getHighway());
-        route = route.replaceAll("\\D+","");
+        String route = wydotTim.getRoute().replaceAll("\\D+","");
 
         // get tim type            
         TimType timType = getTimType(timTypeStr);

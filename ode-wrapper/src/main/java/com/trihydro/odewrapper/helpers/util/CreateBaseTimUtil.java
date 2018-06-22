@@ -95,7 +95,7 @@ public class CreateBaseTimUtil
         List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();
 
         int mod = 4;
-        while(sizeRestrictedMilepostList.size() > 26){
+        while(sizeRestrictedMilepostList.size() > 60){
             
             List<Milepost> tempList = new ArrayList<Milepost>(); 
 

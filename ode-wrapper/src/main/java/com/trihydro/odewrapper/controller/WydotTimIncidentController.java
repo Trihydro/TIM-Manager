@@ -35,6 +35,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        Double timPoint = null;
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
@@ -43,19 +44,39 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             wydotTim.setClientId(wydotTim.getIncidentId());
             // set start time
             wydotTim.setStartDateTime(wydotTim.getTs());
-
+            // set route
+            wydotTim.setRoute(wydotTim.getHighway());            
+            // check if this is a point TIM
+            if(wydotTim.getFromRm().equals(wydotTim.getToRm()))
+                timPoint = wydotTim.getFromRm();
+            
             if(wydotTim.getDirection().equals("both")) {
                 
-                // first TIM - eastbound
+                // first TIM - eastbound - add buffer for point TIMs             
+                if(timPoint != null)
+                    wydotTim.setFromRm(timPoint - 1);                
+
                 resultTim = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");
                 resultList.add(resultTim);  
 
-                // second TIM - westbound
+                // second TIM - westbound - add buffer for point TIMs 
+                if(timPoint != null)
+                    wydotTim.setFromRm(timPoint + 1);
+                
                 resultTim = wydotTimService.createUpdateTim("I", wydotTim, "westbound");                  
                 resultList.add(resultTim);    
             }
             else {
                 // single direction TIM
+
+                // eastbound - add buffer for point TIMs       
+                if(wydotTim.getDirection().equals("eastbound") && timPoint != null)
+                    wydotTim.setFromRm(timPoint - 1);    
+
+                 // westbound - add buffer for point TIMs         
+                if(wydotTim.getDirection().equals("westbound") && timPoint != null)
+                    wydotTim.setFromRm(timPoint + 1); 
+                
                 resultTim = wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection());   
                 resultList.add(resultTim);  
             }
@@ -80,7 +101,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             wydotTim.setClientId(wydotTim.getIncidentId());
             // set start time
             wydotTim.setStartDateTime(wydotTim.getTs());
- 
+            // set route
+            wydotTim.setRoute(wydotTim.getHighway());
+
             if(wydotTim.getDirection().equals("both")) {
                 
                 resultTim = wydotTimService.createUpdateTim("I", wydotTim, "eastbound");

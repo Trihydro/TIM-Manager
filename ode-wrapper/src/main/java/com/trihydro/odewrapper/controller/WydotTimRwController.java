@@ -3,9 +3,7 @@ package com.trihydro.odewrapper.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,19 +34,30 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        Double timPoint = null;
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimRwList()) {
             
             wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
             double bufferBefore = 0;
-            wydotTim.setClientId(wydotTim.getId());
+            wydotTim.setClientId(wydotTim.getId());        
+             // set route
+             wydotTim.setRoute(wydotTim.getHighway());   
+
+            // if its a point TIM                    
+            if(wydotTim.getFromRm().equals(wydotTim.getToRm())){
+                timPoint = wydotTim.getFromRm();
+            }
 
             if(wydotTim.getDirection().equals("both")) {                                
 
                 for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
                 
-                    // eastbound                    
+                    // eastbound - add buffer for point TIMs           
+                    if(timPoint != null)
+                        wydotTim.setFromRm(timPoint - 1);                    
+
                     // starts at lower milepost minus the buffer distance
                     double bufferStart = Math.min(wydotTim.getToRm(), wydotTim.getFromRm()) - wydotTim.getBuffers().get(i).getDistance();
                     // ends at lower milepost minus previous buffers
@@ -66,7 +75,10 @@ public class WydotTimRwController extends WydotTimBaseController {
                     resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound");
                     resultList.add(resultTim);  
 
-                    // westbound
+                    // westbound - add buffer for point TIMs       
+                    if(timPoint != null)
+                        wydotTim.setFromRm(timPoint + 1);
+
                     // starts at higher milepost plus buffer distance
                     bufferStart = Math.max(wydotTim.getToRm(), wydotTim.getFromRm()) + wydotTim.getBuffers().get(i).getDistance();
                     // ends at higher milepost plus previous buffers
@@ -96,7 +108,12 @@ public class WydotTimRwController extends WydotTimBaseController {
                 resultList.add(resultTim);  
             }
             else{
-                if(wydotTim.getDirection().equals("eastbound")){                                
+                if(wydotTim.getDirection().equals("eastbound")) {                  
+                    
+                    // eastbound - add buffer for point TIMs                     
+                    if(timPoint != null)
+                        wydotTim.setFromRm(timPoint - 1);                    
+                    
                     for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
                         // eastbound                    
                         // starts at lower milepost minus the buffer distance
@@ -126,6 +143,11 @@ public class WydotTimRwController extends WydotTimBaseController {
                     resultList.add(resultTim);  
                 }
                 else{
+
+                    // westbound - add buffer for point TIMs                         
+                    if(timPoint != null)
+                        wydotTim.setFromRm(timPoint + 1);                    
+
                     for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
                         // westbound
                         // starts at higher milepost plus buffer distance
@@ -164,6 +186,8 @@ public class WydotTimRwController extends WydotTimBaseController {
         
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimRwList()) {
+            // set route
+            wydotTim.setRoute(wydotTim.getHighway());
             if(wydotTim.getDirection().equals("both")) {
                 wydotTimService.createUpdateTim("RW", wydotTim, "eastbound");
                 wydotTimService.createUpdateTim("RW", wydotTim, "westbound");      

@@ -183,7 +183,7 @@ import javax.servlet.ServletContext;
 	@Test 
 	public void testUpdateRcTim_oneDirection_success() throws Exception {
 	
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350, \"toRm\": 360, \"direction\": \"eastbound\",\"advisory\": [3200]} ]} }]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350, \"toRm\": 360, \"direction\": \"eastbound\",\"advisory\": [5378]} ]} }]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/create-update-rc-tim")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -197,7 +197,7 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testUpdateRcTim_bothDirections_success() throws Exception {
 	
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350, \"toRm\": 360, \"direction\": \"both\",\"advisory\": [3200]} ]} }]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350, \"toRm\": 360, \"direction\": \"both\",\"advisory\": [5378]} ]} }]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/create-update-rc-tim")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -216,7 +216,7 @@ import javax.servlet.ServletContext;
 		
         makeTims();
         
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 360, \"toRm\": 370, \"direction\": \"westbound\",\"advisory\": [3200]} ]} }]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 360, \"toRm\": 370, \"direction\": \"westbound\",\"advisory\": [5378]} ]} }]}";
 
 		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByType(timTypeId);
 		assertEquals(1, activeTimsBeforeDelete.size());	

@@ -91,7 +91,7 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateRwTim_oneDirection_success() throws Exception {
 
-		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\": 370,\"direction\": \"eastbound\",\"surface\": \"G\",\"buffers\": [{\"distance\": 1,\"action\": \"leftClosed\",\"units\": \"miles\"},{\"distance\": 0.5,\"action\": \"prepareStop\",\"units\": \"miles\"}],\"startTs\": \"2016-06-23T14:31:52.404Z\",\"delays\": [{\"code\": 19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\": 8399},\"firstDay\": \"20130228\",\"lastDay\": \"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\": \"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\": 8359,\"highway\": \"I-80\"}]}";
+		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\": 370,\"direction\": \"eastbound\",\"surface\": \"G\",\"buffers\": [{\"distance\": 1,\"action\": \"leftClosed\",\"units\": \"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\": \"miles\"}],\"startTs\": \"2016-06-23T14:31:52.404Z\",\"delays\": [{\"code\": 19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\": 8399},\"firstDay\": \"20130228\",\"lastDay\": \"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\": \"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\": 8359,\"highway\": \"I-80\"}]}";
 		  
         ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)

@@ -1,13 +1,11 @@
 package com.trihydro.odewrapper.service;
 
 import org.springframework.stereotype.Component;
-import org.hibernate.validator.internal.constraintvalidators.bv.MaxValidatorForNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -72,8 +70,7 @@ public class WydotTimService
     private List<TimType> timTypes;    
     private static String odeUrl = "https://ode.wyoroad.info:8443";
     WydotRsu[] rsuArr = new WydotRsu[1];    
-    DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");            
-    DateTimeFormatter mdtformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss-06:00");        
+    DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");      
 
     public ControllerResult createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction) {
                  
@@ -113,7 +110,7 @@ public class WydotTimService
         else if(timTypeStr.equals("P"))
             items = setItisCodesParking(wydotTim);   
         else if(timTypeStr.equals("RW"))
-            items = setItisCodesRw(wydotTim);   
+            items = setItisCodesFromArray(wydotTim);   
 
         // if none found, don't send tim
         if(items.size() == 0){
@@ -127,13 +124,11 @@ public class WydotTimService
 
         // get tim type            
         TimType timType = getTimType(timTypeStr);
-
-        // UNCOMMENT THIS AFTER BAH FIX!!!!!
+        
         // overwrite start date/time if one is provided (start date/time has been set to the current time in base tim creation)
-        // if(wydotTim.getStartDateTime() != null){
-        //     String startDateTimeLocal = convertUtcDateTimeToLocal(wydotTim.getStartDateTime());
-        //     timToSend.getTim().getDataframes()[0].setStartDateTime(startDateTimeLocal);
-        // }      
+        if(wydotTim.getStartDateTime() != null){          
+            timToSend.getTim().getDataframes()[0].setStartDateTime(wydotTim.getStartDateTime());
+        }      
 
         // set the duration if there is an enddate
         if(wydotTim.getEndDateTime() != null){               
@@ -322,7 +317,8 @@ public class WydotTimService
             }
             else{
                 // is satellite tim
-                WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, activeTim.getDirection(), activeTim.getRoute());
+                String route = activeTim.getRoute().replaceAll("\\D+","");
+                WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, activeTim.getDirection(), route);
                 String[] items = new String[1];
                 items[0] = "4868";
                 timToSend.getTim().getDataframes()[0].setItems(items);                    
@@ -556,11 +552,13 @@ public class WydotTimService
 
     public long getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime){
 
-        LocalDateTime endDate = LocalDateTime.parse(endDateTime, utcformatter);
-        LocalDateTime startDateTimeLocal = LocalDateTime.parse(startDateTime, utcformatter);                
-        java.time.Duration dateDuration = java.time.Duration.between(startDateTimeLocal, endDate);
+        ZonedDateTime zdtStart = ZonedDateTime.parse(startDateTime);
+        ZonedDateTime zdtEnd = ZonedDateTime.parse(endDateTime);
+
+        java.time.Duration dateDuration = java.time.Duration.between(zdtStart, zdtEnd);
         Math.abs(dateDuration.toMinutes());
         long durationTime = Math.abs(dateDuration.toMinutes());
+       
         return durationTime;
     }
 

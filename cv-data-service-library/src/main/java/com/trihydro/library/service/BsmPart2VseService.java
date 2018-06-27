@@ -14,9 +14,11 @@ public class BsmPart2VseService extends CvDataServiceLibrary {
 
 		String bsmVseInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_vse", BsmOracleTables.getBsmPart2VseTable());
 		PreparedStatement bsmVsePreparedStatement = null;
-		try {
+		Connection connection = null;
 
-			bsmVsePreparedStatement = DbUtility.getConnection().prepareStatement(bsmVseInsertQueryStatement, new String[] {"bsm_part2_vse_id"});
+		try {
+			connection = DbUtility.getConnectionPool();
+			bsmVsePreparedStatement = connection.prepareStatement(bsmVseInsertQueryStatement, new String[] {"bsm_part2_vse_id"});
 			
 			int fieldNum = 1;
 			
@@ -206,13 +208,19 @@ public class BsmPart2VseService extends CvDataServiceLibrary {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		finally{
-			try{
-				bsmVsePreparedStatement.close();
-			}
-			catch(SQLException sqle){				
+		finally {			
+			try {
+				// close prepared statement
+				if(bsmVsePreparedStatement != null)
+					bsmVsePreparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 		}
+		
 		return new Long(0);
 	}	
 }

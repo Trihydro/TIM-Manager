@@ -11,15 +11,19 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
 public class RegionService extends CvDataServiceLibrary {
 
-	static PreparedStatement preparedStatement = null;
-
     public static Long insertRegion(Long dataFrameId, Long pathId, OdePosition3D anchor) { 
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
         try {
-			TimOracleTables timOracleTables = new TimOracleTables();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("region", timOracleTables.getRegionTable());			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"region_id"});
+		
+			connection = DbUtility.getConnectionPool();
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("region", TimOracleTables.getRegionTable());			
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"region_id"});
 			int fieldNum = 1;
-			for(String col: timOracleTables.getRegionTable()) {
+
+			for(String col: TimOracleTables.getRegionTable()) {
                 if(col.equals("DATA_FRAME_ID"))
                     SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, dataFrameId);	
                 else if(col.equals("PATH_ID"))
@@ -38,9 +42,13 @@ public class RegionService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

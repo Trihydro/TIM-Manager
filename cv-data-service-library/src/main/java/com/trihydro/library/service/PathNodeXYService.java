@@ -8,17 +8,21 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
 import com.trihydro.library.tables.TimOracleTables;
 
-public class PathNodeXYService extends CvDataServiceLibrary {
-
-	static PreparedStatement preparedStatement = null;
+public class PathNodeXYService extends CvDataServiceLibrary {	
 
     public static Long insertPathNodeXY(Long nodeXYId, Long pathId) { 
+
+		PreparedStatement preparedStatement = null;
+		Connection connection = null; 
+
         try {
-			TimOracleTables timOracleTables = new TimOracleTables();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path_node_xy", timOracleTables.getPathNodeXYTable());			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"path_node_xy_id"});
+
+			connection = DbUtility.getConnectionPool();
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("path_node_xy", TimOracleTables.getPathNodeXYTable());			
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"path_node_xy_id"});			
 			int fieldNum = 1;
-			for(String col: timOracleTables.getPathNodeXYTable()) {
+
+			for(String col: TimOracleTables.getPathNodeXYTable()) {
                 if(col.equals("NODE_XY_ID"))
                     SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, nodeXYId);	
                 else if(col.equals("PATH_ID"))
@@ -34,14 +38,17 @@ public class PathNodeXYService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-	   return new Long(0);
-     }
-
+		return new Long(0);
+	}
 }
 

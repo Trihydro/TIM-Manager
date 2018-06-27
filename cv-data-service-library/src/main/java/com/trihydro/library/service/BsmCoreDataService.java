@@ -3,11 +3,7 @@ package com.trihydro.library.service;
 import java.sql.*;
 import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
-import java.text.ParseException;
 import com.trihydro.library.tables.BsmOracleTables;
-
-import ch.qos.logback.core.joran.conditional.ElseAction;
-
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -19,15 +15,11 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
  
 		String bsmCoreInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_core_data", BsmOracleTables.getBsmCoreDataTable());        
 		PreparedStatement bsmPreparedStatement = null;
-		
-		try {
+		Connection connection = null;
 
-			try{
-				bsmPreparedStatement = DbUtility.getConnection().prepareStatement(bsmCoreInsertQueryStatement, new String[] { "bsm_core_data_id" });
-			}
-			catch(SQLRecoverableException e){
-				DbUtility.resetConnection();
-			}
+		try {
+			connection = DbUtility.getConnectionPool();			
+			bsmPreparedStatement = connection.prepareStatement(bsmCoreInsertQueryStatement, new String[] { "bsm_core_data_id" });			
 
 			System.out.println("insert into bsm core data...");
 
@@ -248,14 +240,19 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}		
-		finally{
-			try{
-				bsmPreparedStatement.close();
+		finally {			
+			try {
+				// close prepared statement
+				if(bsmPreparedStatement != null)
+					bsmPreparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-			catch(SQLException sqle){
+		}		
 
-			}
-		}
 		return new Long(0);
 	}
 }

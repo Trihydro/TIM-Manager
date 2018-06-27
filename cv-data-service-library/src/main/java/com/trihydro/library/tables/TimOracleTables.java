@@ -4,20 +4,20 @@ import java.util.*;
 
 public class TimOracleTables extends OracleTables {
     
-    private List<String> timTable;
-    private List<String> dataFrameTable;
-    private List<String> pathTable;
-    private List<String> regionTable;
-    private List<String> nodeXYTable;
-    private List<String> pathNodeXYTable;
+    private static List<String> timTable;
+    private static List<String> dataFrameTable;
+    private static List<String> pathTable;
+    private static List<String> regionTable;
+    private static List<String> nodeXYTable;
+    private static List<String> pathNodeXYTable;
     private List<String> timTypeTable;
     private static List<String> activeTimTable;
     private List<String> activeTimItisCodeTable;
-    private List<String> timRsuTable;
-    private List<String> dataFrameItisCodeTable;
-    private List<String> driverAlertItisCodeTable;
+    private static List<String> timRsuTable;
+    private static List<String> dataFrameItisCodeTable;
+    private static List<String> driverAlertItisCodeTable;
 
-    public List<String> getTimTable(){
+    public static List<String> getTimTable(){
         if(timTable != null)
             return timTable;
         else {
@@ -53,7 +53,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getDataFrameTable(){
+    public static List<String> getDataFrameTable(){
         if(dataFrameTable != null)
             return dataFrameTable;
         else {
@@ -63,7 +63,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getPathTable(){
+    public static List<String> getPathTable(){
         if(pathTable != null)
             return pathTable;
         else {
@@ -73,7 +73,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getRegionTable(){
+    public static List<String> getRegionTable(){
         if(regionTable != null)
             return regionTable;
         else {
@@ -86,7 +86,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getPathNodeXYTable(){
+    public static List<String> getPathNodeXYTable(){
         if(pathNodeXYTable != null)
             return pathNodeXYTable;
         else {
@@ -97,7 +97,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getNodeXYTable(){
+    public static List<String> getNodeXYTable(){
         if(nodeXYTable != null)
             return nodeXYTable;
         else {
@@ -151,7 +151,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getTimRsuTable(){
+    public static List<String> getTimRsuTable(){
         if(timRsuTable != null)
             return timRsuTable;
         else {
@@ -162,7 +162,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getDataFrameItisCodeTable(){
+    public static List<String> getDataFrameItisCodeTable(){
         if(dataFrameItisCodeTable != null)
             return dataFrameItisCodeTable;
         else {
@@ -174,7 +174,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getDriverAlertItisCodeTable(){
+    public static List<String> getDriverAlertItisCodeTable(){
         if(driverAlertItisCodeTable != null)
             return driverAlertItisCodeTable;
         else {

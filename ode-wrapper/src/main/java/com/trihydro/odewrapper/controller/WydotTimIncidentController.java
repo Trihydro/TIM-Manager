@@ -137,11 +137,6 @@ public class WydotTimIncidentController extends WydotTimBaseController {
        
         // get active TIMs
         List<ActiveTim> activeTims = wydotTimService.selectTimsByType("I");   
-        
-        // add ITIS codes to TIMs
-        for (ActiveTim activeTim : activeTims) {
-            ActiveTimService.addItisCodesToActiveTim(activeTim);
-        }
 
         return activeTims;
     }
@@ -152,10 +147,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         // get active TIMs
         List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("I", incidentId);    
 
-        // add ITIS codes to TIMs
-        for (ActiveTim activeTim : activeTims) {
-            ActiveTimService.addItisCodesToActiveTim(activeTim);
-        }
+        // // add ITIS codes to TIMs
+        // for (ActiveTim activeTim : activeTims) {
+        //     ActiveTimService.addItisCodesToActiveTim(activeTim);
+        // }
 
         return activeTims;
     }

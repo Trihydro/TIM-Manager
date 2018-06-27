@@ -71,7 +71,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);                   
 
                     // send buffer tim
-                    wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
+                    wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                     resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound");
                     resultList.add(resultTim);  
 
@@ -92,7 +92,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);                   
 
                     // send buffer tim
-                    wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
+                    wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                     resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound");
                     resultList.add(resultTim);  
 
@@ -131,7 +131,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                         wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);
 
                         // send buffer tim
-                        wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
+                        wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                         resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound");
                         resultList.add(resultTim);  
                         // update running buffer distance
@@ -163,7 +163,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                         wydotTimBuffer.setClientId(wydotTim.getClientId() + "-b" + i);
 
                         // send buffer tim                        
-                        wydotTim.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
+                        wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
                         resultTim = wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound");
                         resultList.add(resultTim);  
                         // update running buffer distance
@@ -180,25 +180,6 @@ public class WydotTimRwController extends WydotTimBaseController {
         String responseMessage = gson.toJson(resultList);         
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);    
     }
-
-    @RequestMapping(value="/rw-tim", method = RequestMethod.PUT, headers="Accept=application/json")
-    public ResponseEntity<String> updateRoadContructionTim(@RequestBody WydotTimList wydotTimList) { 
-        
-        // build TIM        
-        for (WydotTim wydotTim : wydotTimList.getTimRwList()) {
-            // set route
-            wydotTim.setRoute(wydotTim.getHighway());
-            if(wydotTim.getDirection().equals("both")) {
-                wydotTimService.createUpdateTim("RW", wydotTim, "eastbound");
-                wydotTimService.createUpdateTim("RW", wydotTim, "westbound");      
-            }
-            else
-                wydotTimService.createUpdateTim("RW", wydotTim, wydotTim.getDirection());      
-        }   
-
-        String responseMessage = "success";
-        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
-    }
     
     @RequestMapping(value="/rw-tim/{id}", method = RequestMethod.DELETE, headers="Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) { 
@@ -214,7 +195,12 @@ public class WydotTimRwController extends WydotTimBaseController {
     public Collection<ActiveTim> getRoadContructionTimById(@PathVariable String id) { 
                
         // get tims              
-        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("RW", id);  
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("RW", id); 
+
+        // // add ITIS codes to TIMs
+        // for (ActiveTim activeTim : activeTims) {
+        //     ActiveTimService.addItisCodesToActiveTim(activeTim);
+        // }
 
         return activeTims;
     }

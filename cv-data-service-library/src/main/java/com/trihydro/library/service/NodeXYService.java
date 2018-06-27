@@ -11,15 +11,19 @@ import com.trihydro.library.tables.TimOracleTables;
 
 public class NodeXYService extends CvDataServiceLibrary {
 
-	static PreparedStatement preparedStatement = null;
-
     public static Long insertNodeXY(J2735TravelerInformationMessage.NodeXY nodeXY) { 
+        
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
         try {
-			TimOracleTables timOracleTables = new TimOracleTables();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("node_xy", timOracleTables.getNodeXYTable());			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"node_xy_id"});
+            
+            connection = DbUtility.getConnectionPool();
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("node_xy", TimOracleTables.getNodeXYTable());			
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"node_xy_id"});
             int fieldNum = 1;
-			for(String col: timOracleTables.getNodeXYTable()) {
+
+			for(String col: TimOracleTables.getNodeXYTable()) {
                 if(col.equals("DELTA"))
                     SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, nodeXY.getDelta());	
                 else if(col.equals("NODE_LAT"))
@@ -48,13 +52,17 @@ public class NodeXYService extends CvDataServiceLibrary {
             e.printStackTrace();
         }
         finally {			
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+			try {
+				// close prepared statement
+				if(preparedStatement != null)
+                    preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();			
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	   return new Long(0);
      }
 

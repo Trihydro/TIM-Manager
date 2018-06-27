@@ -15,41 +15,64 @@ import com.trihydro.library.helpers.SQLNullHandler;
 
 public class TracMessageSentService extends CvDataServiceLibrary {
     
-    static PreparedStatement preparedStatement = null;
-    
     public static List<TracMessageSent> selectAll(){
 
         List<TracMessageSent> tracMessagesSent = new ArrayList<TracMessageSent>();
 		
-		try (Statement statement = DbUtility.getConnection().createStatement()) {
-			    // build SQL statement				
-				ResultSet rs = statement.executeQuery("select * from TRAC_MESSAGE_SENT");
-				// convert to TracMessageSent objects   			
-				while (rs.next()) {   			
-					TracMessageSent tracMessageSent = new TracMessageSent();
-					tracMessageSent.setTracMessageSentId(rs.getInt("trac_message_sent_id"));
-					tracMessageSent.setTracMessageTypeId(rs.getInt("trac_message_type_id"));	
-                    tracMessageSent.setDateTimeSent(rs.getTimestamp("date_time_sent"));			
-                    tracMessageSent.setMessageText(rs.getString("message_text"));			
-                    tracMessageSent.setPacketId(rs.getString("packet_id"));				   
-					tracMessagesSent.add(tracMessageSent);
-				}
-			} 
-			catch (SQLException e) {
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement statement = null;
+		
+		try {
+			connection = DbUtility.getConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL statement				
+			rs = statement.executeQuery("select * from TRAC_MESSAGE_SENT");
+			// convert to TracMessageSent objects   			
+			while (rs.next()) {   			
+				TracMessageSent tracMessageSent = new TracMessageSent();
+				tracMessageSent.setTracMessageSentId(rs.getInt("trac_message_sent_id"));
+				tracMessageSent.setTracMessageTypeId(rs.getInt("trac_message_type_id"));	
+				tracMessageSent.setDateTimeSent(rs.getTimestamp("date_time_sent"));			
+				tracMessageSent.setMessageText(rs.getString("message_text"));			
+				tracMessageSent.setPacketId(rs.getString("packet_id"));				   
+				tracMessagesSent.add(tracMessageSent);
+			}
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {			
+			try {
+				// close prepared statement
+				if(statement != null)
+					statement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+				// close result set
+				if(rs != null)
+					rs.close();
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			return tracMessagesSent;
+		}
+		return tracMessagesSent;
     }
 
     public static Long insertTracMessageSent(TracMessageSent tracMessageSent){
-        
-		try {
-			
-			TracMessageOracleTables tracMessageOracleTables = new TracMessageOracleTables();
-			String insertQueryStatement = tracMessageOracleTables.buildInsertQueryStatement("TRAC_MESSAGE_SENT", tracMessageOracleTables.getTracMessageSentTable());
 		
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"trac_message_sent_id"});
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();			
+			TracMessageOracleTables tracMessageOracleTables = new TracMessageOracleTables();
+			String insertQueryStatement = TracMessageOracleTables.buildInsertQueryStatement("TRAC_MESSAGE_SENT", tracMessageOracleTables.getTracMessageSentTable());
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"trac_message_sent_id"});
 			int fieldNum = 1;
+			
 			for(String col: tracMessageOracleTables.getTracMessageSentTable()) {				
 				if(col.equals("trac_message_type_id"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, tracMessageSent.getTracMessageTypeId());														
@@ -70,9 +93,13 @@ public class TracMessageSentService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

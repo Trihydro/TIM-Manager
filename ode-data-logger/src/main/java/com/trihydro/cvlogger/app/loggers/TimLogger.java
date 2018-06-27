@@ -1,7 +1,7 @@
 package com.trihydro.cvlogger.app.loggers;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import us.dot.its.jpo.ode.model.OdeData;
@@ -95,10 +95,7 @@ public class TimLogger extends BaseLogger{
 
 	public static void addActiveTimToOracleDB(OdeData odeData){
 
-		// variables
-		DateTimeFormatter formatterMilli = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'-06:00'");
-		DateTimeFormatter formatterSec = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'-06:00'");
-		DateTimeFormatter formatterMin = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'-06:00'");
+		// variables	
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>(); 
 		ActiveTim activeTim;
 	
@@ -126,28 +123,19 @@ public class TimLogger extends BaseLogger{
 				.orElse(null);
 			TimRsuService.insertTimRsu(timId, rsu.getRsuId());
 		}
-		
-		// save DataFrame ITIS codes				
+						
 		// save DataFrame ITIS codes				
 		for (String timItisCodeId : ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getItems()) 
-		if(StringUtils.isNumeric(timItisCodeId))
-			DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, getItisCodeId(timItisCodeId)); 		
+			if(StringUtils.isNumeric(timItisCodeId))
+				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, getItisCodeId(timItisCodeId)); 		
 
-		String endDateTime = null;
-		LocalDateTime dateTime = null;
+		// set end time if duration is not indefinite
 		if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime() != 32000){
-			
-			if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime().contains("."))				
-				dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatterMilli);
-			else if(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime().length() > 22)
-				dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatterSec);
-			else 
-				dateTime = LocalDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime(), formatterMin);
-
-			endDateTime = dateTime.plusMinutes(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime()).toString();
-			activeTim.setEndDateTime(endDateTime);
+			ZonedDateTime zdt = ZonedDateTime.parse(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime());
+			zdt = zdt.plus(((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getDurationTime(), ChronoUnit.MINUTES);
+			activeTim.setEndDateTime(zdt.toString());
 		}
-
+	
 		// if true, TIM came from WYDOT
 		if(activeTim.getTimType() != null) {       
 			// if there is a client ID

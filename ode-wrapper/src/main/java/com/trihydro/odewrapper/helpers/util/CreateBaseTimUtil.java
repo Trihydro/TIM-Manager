@@ -36,35 +36,17 @@ public class CreateBaseTimUtil
         J2735TravelerInformationMessage tim = new J2735TravelerInformationMessage();     
         tim.setUrlB("null");                                              
 
-        LocalDateTime ldt = LocalDateTime.now();
-       
-        ZoneId mstZoneId = ZoneId.of("America/Denver");
-       
-        //LocalDateTime + ZoneId = ZonedDateTime
-        ZonedDateTime mstZonedDateTime = ldt.atZone(mstZoneId);      
-        //String startDateTime = mstZonedDateTime.toLocalDateTime().toString() + "-07:00";
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"); // Quoted "Z" to indicate UTC, no timezone offset
-        df.setTimeZone(tz);
-        //String nowAsISO = df.format(new Date());
-
-        String nowAsISO = Instant.now().toString();
-
-        // current time - UTC?
-        tim.setTimeStamp(nowAsISO);
-        
+        // set TIM Properties
         J2735TravelerInformationMessage.DataFrame dataFrame = new J2735TravelerInformationMessage.DataFrame();
         dataFrame.setSspTimRights((short)1);
         dataFrame.setSspLocationRights((short)1);
         dataFrame.setSspMsgContent((short)1);
         dataFrame.setSspMsgTypes((short)1);
-        
-       String startTimeHardCode = "2018-06-14T10:00:00.000-06:00";
-       dataFrame.setStartDateTime(startTimeHardCode);
-        
-        // change back to this after BAH fix
-        //dataFrame.setStartDateTime(nowAsISO);
+
+        // set TIM TimeStamp and StartDateTime to current time in UTC
+        String nowAsISO = Instant.now().toString();
+        tim.setTimeStamp(nowAsISO);
+        dataFrame.setStartDateTime(nowAsISO);
 
         // duration time set to 22 days worth of minutes
         dataFrame.setDurationTime(32000);
@@ -150,21 +132,16 @@ public class CreateBaseTimUtil
             timDirection |= getDirection(timToSend.getMileposts().get(j).getBearing());
         }
 
+        // set direction based on bearings
         String dirTest = Integer.toBinaryString(timDirection);
-
         dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
-
         dirTest = StringUtils.reverse(dirTest);
-
         region.setDirection(dirTest); // heading slice	
 
+        // set path nodes
         path.setNodes(nodes.toArray(new J2735TravelerInformationMessage.NodeXY[nodes.size()]));
         region.setPath(path);
-        
-        // direction - change later
-
-        //region.setDirection("1111111111111111");
-
+    
         regions.add(region);
         dataFrame.setRegions(regions.toArray(new J2735TravelerInformationMessage.DataFrame.Region[regions.size()]));
 

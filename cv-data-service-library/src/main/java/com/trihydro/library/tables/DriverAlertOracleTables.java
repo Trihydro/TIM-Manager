@@ -4,10 +4,10 @@ import java.util.*;
 
 public class DriverAlertOracleTables extends OracleTables {
     
-    private List<String> driverAlertTable;
+    private static List<String> driverAlertTable;
     private List<String> dataFrameTable;
 
-    public List<String> getDriverAlertTable(){
+    public static List<String> getDriverAlertTable(){
         if(driverAlertTable != null)
             return driverAlertTable;
         else {

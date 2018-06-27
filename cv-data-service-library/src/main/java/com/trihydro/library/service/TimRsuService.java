@@ -13,17 +13,20 @@ import java.util.List;
 import com.trihydro.library.tables.TimOracleTables;
 import com.trihydro.library.model.TimRsu;
 
-public class TimRsuService extends CvDataServiceLibrary {
-
-	static PreparedStatement preparedStatement = null;
+public class TimRsuService extends CvDataServiceLibrary {	
 	
     public static Long insertTimRsu(Long timId, Integer rsuId) { 
+
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
+
 		try {
-            TimOracleTables timOracleTables = new TimOracleTables();
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("TIM_RSU", timOracleTables.getTimRsuTable());		
-            preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"TIM_RSU_ID"});
-            int fieldNum = 1;            
-			for(String col: timOracleTables.getTimRsuTable()) {
+            connection = DbUtility.getConnectionPool();
+            String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("TIM_RSU", TimOracleTables.getTimRsuTable());		
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"TIM_RSU_ID"});
+			int fieldNum = 1;            
+			
+			for(String col: TimOracleTables.getTimRsuTable()) {
 				if(col.equals("TIM_ID")) 
                     SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);														
                 else if(col.equals("RSU_ID"))
@@ -37,54 +40,78 @@ public class TimRsuService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		
 		return new Long(0);
 	}
 
 	public static List<TimRsu> getTimRsusByTimId(Long timId){
 		
+		Statement statement = null;
+		Connection connection = null;
+		ResultSet rs = null;
 		List<TimRsu> timRsus = new ArrayList<TimRsu>();
 		
-		try (Statement statement = DbUtility.getConnection().createStatement()) {
+		try  {
+
+			connection = DbUtility.getConnectionPool();
+			statement = connection.createStatement();
 			// build SQL statement
-				ResultSet rs = statement.executeQuery("select * from TIM_RSU where tim_id = " + timId);
-				try {
-					// convert to DriverAlertType objects   			
-					while (rs.next()) {   			
-						TimRsu timRsu = new TimRsu();
-						timRsu.setTimId(rs.getLong("TIM_ID"));
-						timRsu.setRsuId(rs.getLong("RSU_ID"));							
-						timRsus.add(timRsu);
-					}
-				}
-				finally {
-					try {
-						rs.close();
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}					
-				}
-			} 
+			rs = statement.executeQuery("select * from TIM_RSU where tim_id = " + timId);
+			
+			// convert to DriverAlertType objects   			
+			while (rs.next()) {   			
+				TimRsu timRsu = new TimRsu();
+				timRsu.setTimId(rs.getLong("TIM_ID"));
+				timRsu.setRsuId(rs.getLong("RSU_ID"));							
+				timRsus.add(timRsu);
+			}				
+		} 
 		catch (SQLException e) {
 			e.printStackTrace();
+		}
+		finally {			
+			try {
+				// close prepared statement
+				if(statement != null)
+					statement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+				// close result set
+				if(rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		return timRsus;
 	}
 
 	public static List<TimRsu> selectAll(){
 		
+		Statement statement = null;
+		Connection connection = null;
+		ResultSet rs = null;
 		List<TimRsu> timRsus = new ArrayList<TimRsu>();
 		
-		try (Statement statement = DbUtility.getConnection().createStatement()) {
+		try {
+
+			connection = DbUtility.getConnectionPool();
+			statement = connection.createStatement();
 			// select all RSUs from RSU table
-   			ResultSet rs = statement.executeQuery("select * from TIM_RSU");
-   			while (rs.next()) {
+   			rs = statement.executeQuery("select * from TIM_RSU");
+			   
+			while (rs.next()) {
 				TimRsu timRsu = new TimRsu();
 				timRsu.setTimId(rs.getLong("TIM_ID"));
 				timRsu.setRsuId(rs.getLong("RSU_ID"));							
@@ -93,37 +120,62 @@ public class TimRsuService extends CvDataServiceLibrary {
   		} 
   		catch (SQLException e) {
    			e.printStackTrace();
-  		}
+		}
+		finally {			
+			try {
+				// close prepared statement
+				if(statement != null)
+					statement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+				// close result set
+				if(rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
   		return timRsus;
 	}
 	
-
 	public static TimRsu getTimRsu(Long timRsuId){
 		
+		Statement statement = null;
+		Connection connection = null;
+		ResultSet rs = null;
 		TimRsu timRsu = new TimRsu();
 		
-		try (Statement statement = DbUtility.getConnection().createStatement()) {
+		try {
+			connection = DbUtility.getConnectionPool();
+			statement = connection.createStatement();
 			// build SQL statement
-				ResultSet rs = statement.executeQuery("select * from TIM_RSU where tim_rsu_id = " + timRsuId);
-				try {
-					// convert to DriverAlertType objects   			
-					while (rs.next()) {   			
-						timRsu.setTimRsuId(rs.getLong("TIM_RSU_ID"));												
-						timRsu.setTimId(rs.getLong("TIM_ID"));
-						timRsu.setRsuId(rs.getLong("RSU_ID"));																		
-					}
-				}
-				finally {
-					try {
-						rs.close();
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}					
-				}
-			} 
+			rs = statement.executeQuery("select * from TIM_RSU where tim_rsu_id = " + timRsuId);
+			
+			// convert to DriverAlertType objects   			
+			while (rs.next()) {   			
+				timRsu.setTimRsuId(rs.getLong("TIM_RSU_ID"));												
+				timRsu.setTimId(rs.getLong("TIM_ID"));
+				timRsu.setRsuId(rs.getLong("RSU_ID"));																		
+			}			
+		} 
 		catch (SQLException e) {
 			e.printStackTrace();
+		}
+		finally {			
+			try {
+				// close prepared statement
+				if(statement != null)
+					statement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+				// close result set
+				if(rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		return timRsu;
 	}
@@ -131,12 +183,15 @@ public class TimRsuService extends CvDataServiceLibrary {
 	public static boolean deleteTimRsu(Long timRsuId){
 		
 		boolean deleteTimRsuResult = false;
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
+		ResultSet rs = null;
 
 		String deleteSQL = "DELETE FROM TIM_RSU WHERE TIM_RSU_ID = ?";
 
 		try {			
-		
-			preparedStatement = DbUtility.getConnection().prepareStatement(deleteSQL);			
+			connection = DbUtility.getConnectionPool();
+			preparedStatement = connection.prepareStatement(deleteSQL);			
 			preparedStatement.setLong(1, timRsuId);
 
 			// execute delete SQL stetement
@@ -147,13 +202,17 @@ public class TimRsuService extends CvDataServiceLibrary {
 		}catch (SQLException e) {
 			e.printStackTrace();
 		}
-		finally {
+		finally {			
 			try {
-				preparedStatement.close();
-			}
-			catch (Exception e) {
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();			
+			} catch (SQLException e) {
 				e.printStackTrace();
-			}					
+			}
 		}
 		return deleteTimRsuResult;
 	}

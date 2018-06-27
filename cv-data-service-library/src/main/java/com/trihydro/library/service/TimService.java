@@ -2,6 +2,8 @@ package com.trihydro.library.service;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
+
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import com.trihydro.library.service.CvDataServiceLibrary;
@@ -10,8 +12,6 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.sql.Timestamp;
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import com.trihydro.library.service.SecurityResultCodeTypeService;
@@ -20,17 +20,20 @@ import com.trihydro.library.tables.TimOracleTables;
 
 public class TimService extends CvDataServiceLibrary {
 
-	static PreparedStatement preparedStatement = null;
-
 	public static Long insertTim(OdeLogMetadataReceived odeTimMetadata, J2735TravelerInformationMessage j2735TravelerInformationMessage) { 
+
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
+
 		try {
-			TimOracleTables timOracleTables = new TimOracleTables();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim", timOracleTables.getTimTable());
-			List<SecurityResultCodeType> securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());		
 			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"tim_id"});
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("tim", TimOracleTables.getTimTable());
+			connection = DbUtility.getConnectionPool();
+			List<SecurityResultCodeType> securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);	
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_id"});
 			int fieldNum = 1;
-			for(String col: timOracleTables.getTimTable()) {
+
+			for(String col: TimOracleTables.getTimTable()) {
 				if(col.equals("MSG_CNT")) 
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, j2735TravelerInformationMessage.getMsgCnt());
 				else if(col.equals("PACKET_ID"))
@@ -165,9 +168,13 @@ public class TimService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -177,32 +184,43 @@ public class TimService extends CvDataServiceLibrary {
 	public static J2735TravelerInformationMessage getTim(Long timId) { 
 		
 		J2735TravelerInformationMessage tim = new J2735TravelerInformationMessage();
+		Statement statement = null;
+		ResultSet rs = null;
+		Connection connection = null;
 		
 		try {
 			// build SQL statement
-				Statement statement = DbUtility.getConnection().createStatement();
-				ResultSet rs = statement.executeQuery("select * from tim where tim_id = " + timId);
-				try {
-					// convert to DriverAlertType objects   			
-					while (rs.next()) {   			
-						tim.setPacketID(rs.getString("PACKET_ID"));
-						tim.setMsgCnt(rs.getInt("MSG_CNT"));
-						tim.setTimeStamp(rs.getString("TIME_STAMP"));
-						tim.setUrlB(rs.getString("URL_B"));
-						tim.setIndex(rs.getInt("RSU_INDEX"));
-					}
-				}
-				finally {
-					try {
-						rs.close();
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}					
-				}
-			} 
+			connection = DbUtility.getConnectionPool();
+			statement = connection.createStatement();
+			rs = statement.executeQuery("select * from tim where tim_id = " + timId);
+		
+			// convert to DriverAlertType objects   			
+			while (rs.next()) {   			
+				tim.setPacketID(rs.getString("PACKET_ID"));
+				tim.setMsgCnt(rs.getInt("MSG_CNT"));
+				tim.setTimeStamp(rs.getString("TIME_STAMP"));
+				tim.setUrlB(rs.getString("URL_B"));
+				tim.setIndex(rs.getInt("RSU_INDEX"));
+			}
+				
+		} 
 		catch (SQLException e) {
 			e.printStackTrace();
+		}
+		finally {			
+			try {
+				// close prepared statement
+				if(statement != null)
+				statement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();	
+				// close result set
+				if(rs != null)
+					rs.close();			
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		return tim;
 	}
@@ -210,12 +228,13 @@ public class TimService extends CvDataServiceLibrary {
 	public static boolean deleteTim(Long timId){
 		
 		boolean deleteTimResult = false;
-
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
 		String deleteSQL = "DELETE FROM TIM WHERE TIM_ID = ?";
 
 		try {			
-		
-			preparedStatement = DbUtility.getConnection().prepareStatement(deleteSQL);			
+			connection = DbUtility.getConnectionPool();
+			preparedStatement = connection.prepareStatement(deleteSQL);			
 			preparedStatement.setLong(1, timId);
 
 			// execute delete SQL stetement
@@ -226,13 +245,17 @@ public class TimService extends CvDataServiceLibrary {
 		}catch (SQLException e) {
 			e.printStackTrace();
 		}
-		finally {
+		finally {			
 			try {
-				preparedStatement.close();
-			}
-			catch (Exception e) {
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();						
+			} catch (SQLException e) {
 				e.printStackTrace();
-			}					
+			}
 		}
 		return deleteTimResult;
 	}

@@ -266,6 +266,10 @@ insert into itis_code (description, category_id, itis_code) values ('Mudslide', 
 insert into itis_code (description, category_id, itis_code) values ('Fire', 1, 3200);
 insert into itis_code (description, category_id, itis_code) values ('Spaces available', 1, 4105);
 insert into itis_code (description, category_id, itis_code) values ('No parking spaces available', 1, 4103);
+insert into itis_code (description, category_id, itis_code) values ('Reduced to one lane', 1, 777);
+insert into itis_code (description, category_id, itis_code) values ('left', 1, 13580);
+insert into itis_code (description, category_id, itis_code) values ('workers', 1, 224);
+insert into itis_code (description, category_id, itis_code) values ('Road Construction', 1, 1025);
 
 insert into tim_type (type, description) values ('VSL', 'Varaible Speed Limit');
 insert into tim_type (type, description) values ('RC', 'Road Condition');

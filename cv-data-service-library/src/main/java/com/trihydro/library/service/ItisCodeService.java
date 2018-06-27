@@ -16,7 +16,7 @@ public class ItisCodeService extends CvDataServiceLibrary {
 
 	public static List<ItisCode> selectAll() {
 		List<ItisCode> itisCodes = new ArrayList<ItisCode>();
-		Connection connection = DbUtility.getConnection();
+		Connection connection = DbUtility.getConnectionPool();
 		try (Statement statement = connection.createStatement()) {
 			// select all Itis Codes from ItisCode table   			   		    
 			ResultSet rs = statement.executeQuery("select * from itis_code");
@@ -40,11 +40,11 @@ public class ItisCodeService extends CvDataServiceLibrary {
   		catch (SQLException e) {
    			e.printStackTrace();
 		  }
-		// try {
-		// 	connection.close();
-		// } catch (SQLException e) {
-		// 	e.printStackTrace();
-		// }
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
   		return itisCodes;
 	}
 

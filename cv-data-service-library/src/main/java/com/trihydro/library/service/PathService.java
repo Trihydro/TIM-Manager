@@ -9,16 +9,19 @@ import java.sql.SQLException;
 import com.trihydro.library.tables.TimOracleTables;
 
 public class PathService extends CvDataServiceLibrary {
-
-	static PreparedStatement preparedStatement = null;
-
+	
     public static Long insertPath() { 
-        try {
-			TimOracleTables timOracleTables = new TimOracleTables();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path", timOracleTables.getPathTable());			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"path_id"});
+		
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("path", TimOracleTables.getPathTable());			
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"path_id"});
 			int fieldNum = 1;
-			for(String col: timOracleTables.getPathTable()) {
+
+			for(String col: TimOracleTables.getPathTable()) {
 				if(col.equals("SCALE")) 
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, 0);														
 				fieldNum++;
@@ -31,9 +34,13 @@ public class PathService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

@@ -3,7 +3,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,7 +12,6 @@ import java.util.List;
 
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.SecurityResultCodeType;
-import com.trihydro.library.tables.BsmOracleTables;
 
 public class CvDataServiceLibrary {
 
@@ -23,10 +21,7 @@ public class CvDataServiceLibrary {
     public static DateFormat mstFormat;
     public static DateTimeFormatter localDateTimeformatter;
     public static DateFormat mstLocalFormat;
-   
-    //public static PreparedStatement bsmPreparedStatement;
-    //public static PreparedStatement bsmSuvePreparedStatement;
-    //public static PreparedStatement bsmVsePreparedStatement;
+    
     public static List<SecurityResultCodeType> securityResultCodeTypes;
 
     static {
@@ -37,8 +32,17 @@ public class CvDataServiceLibrary {
         mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"); 
         mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");   
               
-        securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());
-		    
+        Connection connection = DbUtility.getConnectionPool();
+        
+        try {
+            if(connection != null) {
+                securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);
+                connection.close();
+            }
+        } 
+        catch (SQLException e) {			
+			e.printStackTrace();
+		}		    
     }    
 
     public static Long log(PreparedStatement preparedStatement, String type) {       
@@ -62,7 +66,6 @@ public class CvDataServiceLibrary {
             }
         }
 		    } catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}       
 	   return id;

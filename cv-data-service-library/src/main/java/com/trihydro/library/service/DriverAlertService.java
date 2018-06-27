@@ -1,12 +1,13 @@
 package com.trihydro.library.service;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
+
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
@@ -14,10 +15,9 @@ import com.trihydro.library.service.SecurityResultCodeTypeService;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.tables.DriverAlertOracleTables;
 
-
 public class DriverAlertService extends CvDataServiceLibrary {
 
-    static PreparedStatement preparedStatement = null;
+  
 	static List<DriverAlertType> driverAlertTypes;
 	static List<ItisCode> itisCodes;
 
@@ -25,27 +25,29 @@ public class DriverAlertService extends CvDataServiceLibrary {
 		
 		driverAlertTypes = DriverAlertTypeService.selectAll();
 		itisCodes = ItisCodeService.selectAll();
-		
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
+
 		try {
-			
-			DriverAlertOracleTables driverAlertOracleTables = new DriverAlertOracleTables();
-			String insertQueryStatement = driverAlertOracleTables.buildInsertQueryStatement("driver_alert", driverAlertOracleTables.getDriverAlertTable());
-			List<SecurityResultCodeType> securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(DbUtility.getConnection());		
-			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"driver_alert_id"});
+						
+			connection = DbUtility.getConnectionPool();
+			String insertQueryStatement = DriverAlertOracleTables.buildInsertQueryStatement("driver_alert", DriverAlertOracleTables.getDriverAlertTable());
+			List<SecurityResultCodeType> securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);		
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"driver_alert_id"});
 			int fieldNum = 1;
-			for(String col: driverAlertOracleTables.getDriverAlertTable()) {				
+
+			for(String col: DriverAlertOracleTables.getDriverAlertTable()) {				
 				if(col.equals("RECORD_GENERATED_BY"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getRecordGeneratedBy().toString());														
 				else if(col.equals("SCHEMA_VERSION"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getSchemaVersion());
-				// else if(col.equals("SECURITY_RESULT_CODE")) {
-				// 	SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
-				// 	.filter(x -> x.getSecurityResultCodeType().equals(odeDriverAlertMetadata.getSecurityResultCode().toString()))
-				// 	.findFirst()
-				// 	.orElse(null);					
-				// 	preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());														
-				// }													
+				else if(col.equals("SECURITY_RESULT_CODE")) {
+					SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
+					.filter(x -> x.getSecurityResultCodeType().equals(odeDriverAlertMetadata.getSecurityResultCode().toString()))
+					.findFirst()
+					.orElse(null);					
+					preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());														
+				}													
 				else if(col.equals("LOG_FILE_NAME"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getLogFileName());
 				else if(col.equals("RECORD_GENERATED_AT")){
@@ -54,20 +56,7 @@ public class DriverAlertService extends CvDataServiceLibrary {
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(recordGeneratedAtDate));	
 					}
 					else
-						preparedStatement.setString(fieldNum, null);																							
-				
-					// if(odeDriverAlertMetadata.getRecordGeneratedAt() != null) {
-					// 	java.util.Date recordGeneratedAtDate = null;					
-					// 	if(odeDriverAlertMetadata.getRecordGeneratedAt().contains(".")) 
-					// 		recordGeneratedAtDate = utcFormatMilliSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());																								
-					// 	else if(odeDriverAlertMetadata.getRecordGeneratedAt().length() == 22)
-					// 		recordGeneratedAtDate = utcFormatMin.parse(odeDriverAlertMetadata.getRecordGeneratedAt());		
-					// 	else 						
-					// 		recordGeneratedAtDate = utcFormatSec.parse(odeDriverAlertMetadata.getRecordGeneratedAt());																												
-					// 	preparedStatement.setString(fieldNum, mstFormat.format(recordGeneratedAtDate));	
-					// }
-					// else
-					// 	preparedStatement.setString(fieldNum, null);
+						preparedStatement.setString(fieldNum, null);																										
 				}
 				else if(col.equals("SANITIZED")) {
 					if(odeDriverAlertMetadata.isSanitized())
@@ -151,9 +140,13 @@ public class DriverAlertService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

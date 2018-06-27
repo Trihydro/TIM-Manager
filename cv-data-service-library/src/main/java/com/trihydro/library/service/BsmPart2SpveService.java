@@ -10,13 +10,17 @@ import com.trihydro.library.tables.BsmOracleTables;
 
 public class BsmPart2SpveService extends CvDataServiceLibrary {
 	
-	static PreparedStatement preparedStatement = null;
-
+	
 	public static Long insertBSMPart2SPVE(J2735BsmPart2Content part2Content, J2735SpecialVehicleExtensions spve, Long bsmCoreDataId) {
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
 		try {
-						
+				
+			connection = DbUtility.getConnectionPool();
 			String insertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_spve", BsmOracleTables.getBsmPart2SpveTable());
-            preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"bsm_part2_spve_id"});
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"bsm_part2_spve_id"});
 
             int fieldNum = 1;
 
@@ -166,14 +170,19 @@ public class BsmPart2SpveService extends CvDataServiceLibrary {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		finally{
-			try{
-				preparedStatement.close();
+		finally {			
+			try {
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-			catch(SQLException sqle){
-				
-			}
-		}
+		}	
+			
 		return new Long(0);
 	}
 

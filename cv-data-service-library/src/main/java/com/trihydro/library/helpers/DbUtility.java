@@ -11,9 +11,6 @@ import javax.sql.PooledConnection;
 
 import org.apache.ibatis.jdbc.ScriptRunner;
 
-import oracle.jdbc.pool.OracleConnectionPoolDataSource;
-import oracle.jdbc.pool.OracleDataSource;
-
 import oracle.ucp.jdbc.PoolDataSource;
 import oracle.ucp.jdbc.PoolDataSourceFactory;
 
@@ -32,9 +29,72 @@ public class DbUtility {
     private static String dbUrlTest = "jdbc:h2:mem:db";
     private static boolean first = true;
 
+    private static PoolDataSource pds;
+
+    // constructor 
+    static {
+        if(connectionEnvironment == "test"){
+            // Class.forName(dbDriverTest);
+            // connection = DriverManager.getConnection(dbUrlTest, dbUsername, null); 
+            System.out.println("test");
+
+            
+        }
+        
+        pds = PoolDataSourceFactory.getPoolDataSource();
+        try {
+			pds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");				
+            pds.setURL(dbUrl);		       
+            pds.setUser(dbUsername);    		     
+            pds.setPassword(dbPassword);		        
+            pds.setInitialPoolSize(5);
+            pds.setValidateConnectionOnBorrow(true);
+            pds.setSQLForValidateConnection("select * from rsu");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Connection getConnectionPool(){
+        
+        if(connectionEnvironment.equals("test")){
+            return connection;
+        }
+        
+        try {
+			return pds.getConnection();
+		} catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+		}
+    }
+
     public static void changeConnection(String connectionEnvironmentInput){
         connectionEnvironment = connectionEnvironmentInput;
         connection = null;
+        
+        TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+        TimeZone.setDefault(timeZone);
+
+        if(connectionEnvironmentInput.equals("test")){
+        
+            try {
+				Class.forName(dbDriverTest);			
+                connection = DriverManager.getConnection(dbUrlTest, dbUsername, null); 
+                ScriptRunner scriptRunner = new ScriptRunner(connection);
+                scriptRunner.runScript(Resources.getResourceAsReader("db/unitTestSql.sql"));
+                connection.commit();
+            } 
+            catch (ClassNotFoundException e) {           
+                e.printStackTrace();
+            } 
+            catch (SQLException e) {				
+				e.printStackTrace();
+            }
+            catch (Exception e) {
+                throw new IllegalStateException("ScriptRunner failed", e);
+            }             
+        }
     } 
 
     public static String getConnectionEnvironment(){
@@ -45,99 +105,64 @@ public class DbUtility {
         connection = null;
     }
 
-    public static Connection getConnection() {
+    public static Connection getConnectionDep() {
         // return the connection if its already created
         if (connection != null) {
             return connection;
         }
+        return null;
         // else create the connection
-        else {
-            try {
+        // else {
+        //     try {
 
-                // set timezone
-                TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
-                TimeZone.setDefault(timeZone);
+        //         // set timezone
+        //         TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+        //         TimeZone.setDefault(timeZone);
 
-                // make connection
-                if(connectionEnvironment == "test"){
-                    Class.forName(dbDriverTest);
-                    connection = DriverManager.getConnection(dbUrlTest, dbUsername, null); 
-                }
-                else{
-                    Class.forName(dbDriver);
-                    connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword); 
-                }
+        //         // make connection
+        //         if(connectionEnvironmenverTest);t == "test"){
+        //             Class.forName(dbDri
+        //             connection = DriverManager.getConnection(dbUrlTest, dbUsername, null); 
+        //         }
+        //         else{
+        //             Class.forName(dbDriver);
+        //             connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword); 
+        //         }
                 
-                // connection successful
-                if (connection != null) {
-                    System.out.println("Connection Successful! Enjoy. Now it's time to push data");
+        //         // connection successful
+        //         if (connection != null) {
+        //             System.out.println("Connection Successful! Enjoy. Now it's time to push data");
 
-                    // if using an in memory database for unit tests                        
-                     if(connectionEnvironment.equals("test")) {               
-                        // Initialize object for ScriptRunner to read in a script to create tables and insert data
-                        ScriptRunner scriptRunner = new ScriptRunner(connection);
-                        try {
-                            // run script
-                            scriptRunner.runScript(Resources.getResourceAsReader("db/unitTestSql.sql"));
-                            connection.commit();
-                        } 
-                        catch (Exception e) {
-                            throw new IllegalStateException("ScriptRunner failed", e);
-                        }                               
-                    }                                        
-                } 
-                // else connection failed
-                else {
-                    System.out.println("Failed to make connection!");
-                }
-            } 
-            catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } 
-            catch (SQLException e) {
-                e.printStackTrace();            
-            } 
-            return connection;
-        }
+        //             // if using an in memory database for unit tests                        
+        //              if(connectionEnvironment.equals("test")) {               
+        //                 // Initialize object for ScriptRunner to read in a script to create tables and insert data
+        //                 ScriptRunner scriptRunner = new ScriptRunner(connection);
+        //                 try {
+        //                     // run script
+        //                     scriptRunner.runScript(Resources.getResourceAsReader("db/unitTestSql.sql"));
+        //                     connection.commit();
+        //                 } 
+        //                 catch (Exception e) {
+        //                     throw new IllegalStateException("ScriptRunner failed", e);
+        //                 }                               
+        //             }                                        
+        //         } 
+        //         // else connection failed
+        //         else {
+        //             System.out.println("Failed to make connection!");
+        //         }
+        //     } 
+        //     catch (ClassNotFoundException e) {
+        //         e.printStackTrace();
+        //     } 
+        //     catch (SQLException e) {
+        //         e.printStackTrace();            
+        //     } 
+        //     return connection;
+        // }
     }
-    // public static Connection getPooledConnection() throws Exception{
-        
-    //     OracleConnectionPoolDataSource ocpds = new OracleConnectionPoolDataSource();
-    //     ocpds.setURL(dbUrl);
-    //     ocpds.setUser(dbUsername);
-    //     ocpds.setPassword(dbPassword);
-    
-    //     PooledConnection pc_1 = ocpds.getPooledConnection();
-    
-    //     Connection conn_1 = pc_1.getConnection();
-    //    // Statement stmt = conn_1.createStatement();
-    
-    //     // ResultSet rs = stmt.executeQuery("SELECT count(*) FROM v$session WHERE username = 'SYS'");
-    //     // rs.next();
-    //     // String msg = "Total connections after ";
-    //     // System.out.println(msg + "conn_1: " + rs.getString(1));
-        
-    //     return conn_1;
-    
-    //     // Connection conn_2 = pc_1.getConnection();
-    //     // stmt = conn_2.createStatement();
-    //     // rs = stmt.executeQuery("SELECT count(*) FROM v$session WHERE username = 'SYS'");
-    //     // rs.next();
-    //     // System.out.println(msg + "conn_2: " + rs.getString(1));
-    
-    //     // PooledConnection pc_2 = ocpds.getPooledConnection();
-    //     // rs = stmt.executeQuery("SELECT count(*) FROM v$session WHERE username = 'SYS'");
-    //     // rs.next();
-    //     // System.out.println(msg + "pc_2: " + rs.getString(1));
-    
-    //     // conn_1.close();
-    //     // conn_2.close();
-    //     // pc_1.close();
-    //     // pc_2.close();
 
-    // }
-
-    public static Connection getConnectionPool() {
+    public static Connection getConnectionPoolTest() {
 
         PoolDataSource pds = PoolDataSourceFactory.getPoolDataSource();
         
@@ -197,7 +222,7 @@ public class DbUtility {
                 pds.setURL(dbUrl);		       
                 pds.setUser(dbUsername);    		     
                 pds.setPassword(dbPassword);		        
-                pds.setInitialPoolSize(20);
+                pds.setInitialPoolSize(5);
             }
             catch (SQLException e1) {        
                 e1.printStackTrace();

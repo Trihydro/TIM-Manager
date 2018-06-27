@@ -10,15 +10,19 @@ import com.trihydro.library.tables.TimOracleTables;
 
 public class DataFrameService extends CvDataServiceLibrary {
 
-	static PreparedStatement preparedStatement = null;
-
     public static Long insertDataFrame(Long timID) { 
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
 		try {
-			TimOracleTables timOracleTables = new TimOracleTables();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("data_frame", timOracleTables.getDataFrameTable());			
-			preparedStatement = DbUtility.getConnection().prepareStatement(insertQueryStatement, new String[] {"data_frame_id"});
+
+			connection = DbUtility.getConnectionPool();
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("data_frame", TimOracleTables.getDataFrameTable());			
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"data_frame_id"});
 			int fieldNum = 1;
-			for(String col: timOracleTables.getDataFrameTable()) {
+			
+			for(String col: TimOracleTables.getDataFrameTable()) {
 				if(col.equals("TIM_ID")) 
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, timID);														
 				fieldNum++;
@@ -31,14 +35,17 @@ public class DataFrameService extends CvDataServiceLibrary {
 		}
 		finally {			
 			try {
-				preparedStatement.close();
+				// close prepared statement
+				if(preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		return new Long(0);
     }
-
 }
 

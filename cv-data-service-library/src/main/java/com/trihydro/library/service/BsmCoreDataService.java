@@ -170,7 +170,7 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 						bsmPreparedStatement.setString(fieldNum, null);									
 				}
 				else if(col.equals("SECURITY_RESULT_CODE")) {
-					SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
+					SecurityResultCodeType securityResultCodeType = getSecurityResultCodeTypes().stream()
                     .filter(x -> x.getSecurityResultCodeType().equals(metadata.getSecurityResultCode().toString()))
                     .findFirst()
                     .orElse(null);					

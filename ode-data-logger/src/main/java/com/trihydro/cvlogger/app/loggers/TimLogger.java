@@ -53,7 +53,12 @@ public class TimLogger extends BaseLogger{
 		
 		try {
 			Long timId = TimService.insertTim((OdeLogMetadataReceived)odeData.getMetadata(), ((OdeTimPayload)odeData.getPayload()).getTim());
-			Long dataFrameId = DataFrameService.insertDataFrame(timId);
+			
+			// return if TIM is not inserted
+			if(timId == null)
+				return;
+			
+				Long dataFrameId = DataFrameService.insertDataFrame(timId);
 			Long pathId = PathService.insertPath();
 			Long regionId = RegionService.insertRegion(dataFrameId, pathId, ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());		
 			String regionName = ((OdeTimPayload)odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName();
@@ -139,7 +144,7 @@ public class TimLogger extends BaseLogger{
 		// if true, TIM came from WYDOT
 		if(activeTim.getTimType() != null) {       
 			// if there is a client ID
-			if(activeTim.getClientId() != null){
+			if(activeTim.getClientId() != null && !activeTim.getTimType().equals("P")){
 				// if its an RSU TIM
 				if(activeTim.getRsuTarget() != null)
 					activeTims = ActiveTimService.getActiveTimsOnRsuByClientId(activeTim.getRsuTarget(), activeTim.getClientId(), activeTim.getTimTypeId(), activeTim.getDirection());

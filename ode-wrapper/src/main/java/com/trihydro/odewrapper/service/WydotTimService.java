@@ -83,6 +83,7 @@ public class WydotTimService
         System.out.println("toRm: " + wydotTim.getToRm());
         ControllerResult result = new ControllerResult();
         result.setDirection(direction);
+        result.setClientId(wydotTim.getClientId());
 
         // FIND ALL RSUS TO SEND TO     
         List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()), Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), route);       
@@ -100,7 +101,7 @@ public class WydotTimService
         // set itis codes
         List<String> items = null;
         if(timTypeStr.equals("CC"))
-            items = setItisCodesFromArray(wydotTim);   
+            items = setItisCodesFromAdvisoryArray(wydotTim);   
         else if(timTypeStr.equals("RC"))
             items = setItisCodesRc(wydotTim);  
         else if(timTypeStr.equals("VSL"))
@@ -108,9 +109,9 @@ public class WydotTimService
         else if(timTypeStr.equals("I"))
             items = setItisCodesIncident(wydotTim);   
         else if(timTypeStr.equals("P"))
-            items = setItisCodesParking(wydotTim);   
+            items = setItisCodesFromAvailability(wydotTim);   
         else if(timTypeStr.equals("RW"))
-            items = setItisCodesFromArray(wydotTim);   
+            items = setItisCodesFromAdvisoryArray(wydotTim);   
 
         // if none found, don't send tim
         if(items.size() == 0){
@@ -170,7 +171,7 @@ public class WydotTimService
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             
             // if client ID exists, get all active tims of same type with that client id
-            if(wydotTim.getClientId() != null)
+            if(wydotTim.getClientId() != null && !timTypeStr.equals("P"))
                 activeTims = ActiveTimService.getActiveTimsOnRsuByClientId(rsu.getRsuTarget(), wydotTim.getClientId(), timType.getTimTypeId(), direction);    
             // if not, query active tims by road segment
             else 
@@ -194,7 +195,7 @@ public class WydotTimService
         // satellite
         List<ActiveTim> activeSatTims = null;
         // if client ID exists, get all active tims of same type with that client id
-        if(wydotTim.getClientId() != null)
+        if(wydotTim.getClientId() != null && !timTypeStr.equals("P"))
             activeSatTims = ActiveTimService.getActiveSatTimsByClientIdDirection(wydotTim.getClientId(), timType.getTimTypeId(), direction);    
         // if not, query active tims by road segment
         else 
@@ -350,7 +351,7 @@ public class WydotTimService
         return activeTims;
     }
 
-    public List<String> setItisCodesFromArray(WydotTim wydotTim) {    
+    public List<String> setItisCodesFromAdvisoryArray(WydotTim wydotTim) {    
         
         // check to see if code exists
         
@@ -365,6 +366,22 @@ public class WydotTimService
             if(code != null)
                 items.add(item.toString());                       
         }                            
+        return items;
+    }
+
+    public List<String> setItisCodesFromAvailability(WydotTim wydotTim) {    
+        
+        // check to see if code exists        
+        List<String> items = new ArrayList<String>();               
+        
+        ItisCode code = getItisCodes().stream()
+        .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
+        .findFirst()
+        .orElse(null);
+
+        if(code != null)
+            items.add(wydotTim.getAvailability().toString());                       
+                               
         return items;
     }
 
@@ -480,7 +497,7 @@ public class WydotTimService
         List<String> items = new ArrayList<String>();        
         
         ItisCode availability = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals(wydotTim.getAvailability().toLowerCase()))
+            .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
             .findFirst()
             .orElse(null);
         if(availability != null) {
@@ -723,7 +740,7 @@ public class WydotTimService
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(TimeToLive.thirtyminutes);
+        sdw.setTtl(TimeToLive.oneday);
         // set new record id
         sdw.setRecordId(recordId);
 
@@ -793,7 +810,7 @@ public class WydotTimService
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(TimeToLive.thirtyminutes);
+        sdw.setTtl(TimeToLive.oneday);
         // set new record id
         sdw.setRecordId(recordId);
 

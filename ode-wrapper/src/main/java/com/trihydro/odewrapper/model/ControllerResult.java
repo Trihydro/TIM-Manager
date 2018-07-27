@@ -4,7 +4,8 @@ public class ControllerResult {
 
     public int resultCode;
     public String resultMessage;
-    public String direction;
+	public String direction;
+	public String clientId;
 
 	public void setResultCode(int resultCode){
 		this.resultCode = resultCode;
@@ -28,5 +29,13 @@ public class ControllerResult {
 
 	public String getDirection(){
 		return this.direction;
+	}
+
+	public void setClientId(String clientId){
+		this.clientId = clientId;
+	}
+
+	public String getClientId(){
+		return this.clientId;
 	}
 }

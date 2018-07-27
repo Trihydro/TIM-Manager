@@ -90,7 +90,7 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateParkingTim_oneDirection_success() throws Exception {
 	
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": \"spaces available\", \"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 4103, \"clientId\": \"Parking49251\" }]}";
 		  
         ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.post("/parking-tim")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -108,7 +108,7 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateParkingTimTim_oneDirection_NoMileposts() throws Exception {
 	
-		String incidentJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-70\", \"direction\": \"westbound\", \"availability\": \"spaces available\", \"clientId\": \"Parking49251\" }]}";
+		String incidentJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-70\", \"direction\": \"westbound\", \"availability\": 4103, \"clientId\": \"Parking49251\" }]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/parking-tim")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +122,7 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateParkingTim_oneDirection_NoItisCodes() throws Exception {
 	
-		String incidentJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": \"foo\", \"clientId\": \"Parking49251\" }]}";
+		String incidentJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 345678, \"clientId\": \"Parking49251\" }]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/parking-tim")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +136,7 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testUpdateParkingTim_oneDirection_success() throws Exception {
 	
-		String incidentJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": \"No parking spaces available\", \"clientId\": \"Parking49251\" }]}";
+		String incidentJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 4103, \"clientId\": \"Parking49251\" }]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/parking-tim")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -202,7 +202,7 @@ import javax.servlet.ServletContext;
 		wydotTim.setRoute("I-80");
 		wydotTim.setClientId("Parking49251");
         wydotTim.setDirection("westbound");
-        wydotTim.setAvailability("spaces available");
+        wydotTim.setAvailability(4103);
         wydotTim.setFromRm(370.0);
         wydotTim.setToRm(380.0);
 

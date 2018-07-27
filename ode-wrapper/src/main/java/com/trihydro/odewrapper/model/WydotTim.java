@@ -27,7 +27,7 @@ public class WydotTim implements Cloneable
 	private String highway;
 	private Integer pk;
 	private String resultMessage;
-	private String availability;
+	private Integer availability;
 	private Double mileMarker;
 	private String surface;
 	private ArrayList<Buffer> buffers; 
@@ -277,12 +277,12 @@ public class WydotTim implements Cloneable
 		this.mileMarker = mileMarker;
 	}
 
-	public String getAvailability() 
+	public Integer getAvailability() 
 	{
 		return this.availability;
 	}
 
-    public void setAvailability(String availability) 
+    public void setAvailability(Integer availability) 
 	{
 		this.availability = availability;
 	}

@@ -1,5 +1,4 @@
 package com.trihydro.library.service;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,8 +8,8 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-
-import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.model.DriverAlertType;
+import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
 
 public class CvDataServiceLibrary {
@@ -22,7 +21,9 @@ public class CvDataServiceLibrary {
     public static DateTimeFormatter localDateTimeformatter;
     public static DateFormat mstLocalFormat;
     
-    public static List<SecurityResultCodeType> securityResultCodeTypes;
+    private static List<SecurityResultCodeType> securityResultCodeTypes;
+    private static List<DriverAlertType> driverAlertTypes;
+	private static List<ItisCode> itisCodes;
 
     static {
         utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z[UTC]'");
@@ -30,20 +31,29 @@ public class CvDataServiceLibrary {
         utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z[UTC]'");
         //mstFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");	
         mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"); 
-        mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");   
-              
-        Connection connection = DbUtility.getConnectionPool();
-        
-        try {
-            if(connection != null) {
-                securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);
-                connection.close();
-            }
-        } 
-        catch (SQLException e) {			
-			e.printStackTrace();
-		}		    
+        mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");           	    
     }    
+
+    public static List<DriverAlertType> getDriverAlertTypes(){
+        if(driverAlertTypes == null){
+            driverAlertTypes = DriverAlertTypeService.selectAll(); 
+        }
+        return driverAlertTypes;
+    }
+
+    public static List<ItisCode> getItisCodes(){
+        if(itisCodes == null){
+            itisCodes = ItisCodeService.selectAll();
+        }
+        return itisCodes;
+    }
+
+    public static List<SecurityResultCodeType> getSecurityResultCodeTypes(){
+        if(securityResultCodeTypes == null){
+            securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes();               
+        }
+        return securityResultCodeTypes;
+    }
 
     public static Long log(PreparedStatement preparedStatement, String type) {       
         Long id = null;		

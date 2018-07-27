@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
@@ -30,14 +31,34 @@ public class WydotTimParkingController extends WydotTimBaseController {
         System.out.println("Create Parking TIM");
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
-        ControllerResult resultTim = null;
+        ControllerResult resultTim = null;      
 
         // build TIM        
-        for (WydotTim wydotTim : wydotTimList.getTimParkingList()) {   
-            wydotTim.setFromRm(wydotTim.getMileMarker());     
-            wydotTim.setToRm(wydotTim.getMileMarker() + 10);     
-            resultTim = wydotTimService.createUpdateTim("P", wydotTim, wydotTim.getDirection()); 
-            resultList.add(resultTim);
+        for (WydotTim wydotTim : wydotTimList.getTimParkingList()) {
+            if(wydotTim.getDirection().equals("both")) {
+
+                wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
+                wydotTim.setToRm(wydotTim.getMileMarker());    
+                resultTim = wydotTimService.createUpdateTim("P", wydotTim, "eastbound");
+                resultList.add(resultTim);
+
+                wydotTim.setFromRm(wydotTim.getMileMarker());     
+                wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
+                resultTim = wydotTimService.createUpdateTim("P", wydotTim, "westbound");      
+                resultList.add(resultTim);
+            }
+            else{
+                if(wydotTim.getDirection().equals("eastbound")){
+                    wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
+                    wydotTim.setToRm(wydotTim.getMileMarker());    
+                }
+                else{
+                    wydotTim.setFromRm(wydotTim.getMileMarker());     
+                    wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
+                }
+                resultTim = wydotTimService.createUpdateTim("P", wydotTim, wydotTim.getDirection());      
+                resultList.add(resultTim);
+            }
         }
 
         String responseMessage = gson.toJson(resultList);         
@@ -58,6 +79,20 @@ public class WydotTimParkingController extends WydotTimBaseController {
        
         // clear TIM
         List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", clientId);        
+
+        return activeTims;
+    }
+
+    @RequestMapping(value="/parking-tim/itis-codes/{id}", method = RequestMethod.GET, headers="Accept=application/json")
+    public Collection<ActiveTim> getParkingTimByIdWithItisCodes(@PathVariable String id) { 
+               
+        // get tims              
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", id); 
+
+        // add ITIS codes to TIMs
+        for (ActiveTim activeTim : activeTims) {
+            ActiveTimService.addItisCodesToActiveTim(activeTim);
+        }
 
         return activeTims;
     }

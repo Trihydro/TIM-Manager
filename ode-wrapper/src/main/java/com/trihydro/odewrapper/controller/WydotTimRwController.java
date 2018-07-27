@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
@@ -201,6 +202,20 @@ public class WydotTimRwController extends WydotTimBaseController {
         // for (ActiveTim activeTim : activeTims) {
         //     ActiveTimService.addItisCodesToActiveTim(activeTim);
         // }
+
+        return activeTims;
+    }
+
+    @RequestMapping(value="/rw-tim/itis-codes/{id}", method = RequestMethod.GET, headers="Accept=application/json")
+    public Collection<ActiveTim> getRoadContructionTimByIdWithItisCodes(@PathVariable String id) { 
+               
+        // get tims              
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("RW", id); 
+
+        // add ITIS codes to TIMs
+        for (ActiveTim activeTim : activeTims) {
+            ActiveTimService.addItisCodesToActiveTim(activeTim);
+        }
 
         return activeTims;
     }

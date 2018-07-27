@@ -1052,7 +1052,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		
 		boolean deleteActiveTimResult = false;
 
-		String deleteSQL = "DELETE ACTIVE_TIM where TIM_END < SYSTIMESTAMP";
+		String deleteSQL = "DELETE FROM ACTIVE_TIM where TIM_END < SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 

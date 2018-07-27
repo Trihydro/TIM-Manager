@@ -267,7 +267,7 @@ import javax.servlet.ServletContext;
 	
 		
        
-        wydotTim.setAvailability("spaces available");
+        wydotTim.setAvailability(4223);
 		
 		wydotTim.setSurface("P");
 		wydotTim.setDirection("westbound");

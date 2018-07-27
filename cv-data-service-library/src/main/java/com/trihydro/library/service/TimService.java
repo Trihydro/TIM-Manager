@@ -28,8 +28,7 @@ public class TimService extends CvDataServiceLibrary {
 		try {
 			
 			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("tim", TimOracleTables.getTimTable());
-			connection = DbUtility.getConnectionPool();
-			List<SecurityResultCodeType> securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);	
+			connection = DbUtility.getConnectionPool();		
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_id"});
 			int fieldNum = 1;
 
@@ -102,7 +101,7 @@ public class TimService extends CvDataServiceLibrary {
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
 				else if(col.equals("SECURITY_RESULT_CODE")) {
 					if(odeTimMetadata.getSecurityResultCode() != null){
-						SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
+						SecurityResultCodeType securityResultCodeType = getSecurityResultCodeTypes().stream()
 						.filter(x -> x.getSecurityResultCodeType().equals(odeTimMetadata.getSecurityResultCode().toString()))
 						.findFirst()
 						.orElse(null);						

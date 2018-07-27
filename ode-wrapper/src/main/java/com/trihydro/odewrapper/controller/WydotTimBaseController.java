@@ -14,9 +14,11 @@ public class WydotTimBaseController {
      protected final WydotTimService wydotTimService;
      protected static Gson gson = new Gson();
     
-     WydotTimBaseController() {
+    WydotTimBaseController() {
          this.wydotTimService = new WydotTimService();
-     }
+    }
+
+    
     
     public String jsonKeyValue(String key, String value) {
         return "{\"" + key + "\":" + value + "}";

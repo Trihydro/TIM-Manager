@@ -11,8 +11,6 @@ import java.sql.SQLException;
 import java.util.List;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
-import com.trihydro.library.service.SecurityResultCodeTypeService;
-import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.tables.DriverAlertOracleTables;
 
 public class DriverAlertService extends CvDataServiceLibrary {
@@ -23,8 +21,8 @@ public class DriverAlertService extends CvDataServiceLibrary {
 
 	public static Long insertDriverAlert(OdeLogMetadataReceived odeDriverAlertMetadata, String alert) throws SQLException { 
 		
-		driverAlertTypes = DriverAlertTypeService.selectAll();
-		itisCodes = ItisCodeService.selectAll();
+		driverAlertTypes = getDriverAlertTypes();
+		itisCodes = getItisCodes();
 		PreparedStatement preparedStatement = null;
 		Connection connection = null;
 
@@ -32,7 +30,7 @@ public class DriverAlertService extends CvDataServiceLibrary {
 						
 			connection = DbUtility.getConnectionPool();
 			String insertQueryStatement = DriverAlertOracleTables.buildInsertQueryStatement("driver_alert", DriverAlertOracleTables.getDriverAlertTable());
-			List<SecurityResultCodeType> securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);		
+			//List<SecurityResultCodeType> securityResultCodeTypes = SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);		
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"driver_alert_id"});
 			int fieldNum = 1;
 
@@ -41,13 +39,13 @@ public class DriverAlertService extends CvDataServiceLibrary {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getRecordGeneratedBy().toString());														
 				else if(col.equals("SCHEMA_VERSION"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getSchemaVersion());
-				else if(col.equals("SECURITY_RESULT_CODE")) {
-					SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
-					.filter(x -> x.getSecurityResultCodeType().equals(odeDriverAlertMetadata.getSecurityResultCode().toString()))
-					.findFirst()
-					.orElse(null);					
-					preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());														
-				}													
+				// else if(col.equals("SECURITY_RESULT_CODE")) {
+				// 	SecurityResultCodeType securityResultCodeType = securityResultCodeTypes.stream()
+				// 	.filter(x -> x.getSecurityResultCodeType().equals(odeDriverAlertMetadata.getSecurityResultCode().toString()))
+				// 	.findFirst()
+				// 	.orElse(null);					
+				// 	preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());														
+				// }													
 				else if(col.equals("LOG_FILE_NAME"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeDriverAlertMetadata.getLogFileName());
 				else if(col.equals("RECORD_GENERATED_AT")){

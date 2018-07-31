@@ -96,4 +96,14 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
         return activeTims;
     }
+
+    @RequestMapping(value="/parking-tim/{id}", method = RequestMethod.DELETE, headers="Accept=application/json")
+    public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) { 
+
+        // clear TIM
+        wydotTimService.clearTimsById("P", id);
+        
+        String responseMessage = "success";
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
 }

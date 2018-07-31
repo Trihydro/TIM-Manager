@@ -197,12 +197,6 @@ public class WydotTimRwController extends WydotTimBaseController {
                
         // get tims              
         List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("RW", id); 
-
-        // // add ITIS codes to TIMs
-        // for (ActiveTim activeTim : activeTims) {
-        //     ActiveTimService.addItisCodesToActiveTim(activeTim);
-        // }
-
         return activeTims;
     }
 

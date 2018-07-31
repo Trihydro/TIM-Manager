@@ -26,6 +26,7 @@ import com.trihydro.odewrapper.model.WydotTim;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -260,46 +261,16 @@ public class WydotTimService
             result.setResultMessage("success");
             result.setResultCode(0);
         }        
-
-        // for each active RC TIM in this area
-        for (ActiveTim activeTim : activeTims) {
-            
-            // get the TIM 
-            J2735TravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());          
-
-            // get RSU TIM is on
-            List<TimRsu> timRsus = TimRsuService.getTimRsusByTimId(activeTim.getTimId());
-            
-            // get full RSU               
-            if(timRsus.size() == 1){
-                rsu = getRsu(timRsus.get(0).getRsuId());
-                // delete tim off rsu           
-                deleteTimFromRsu(rsu, tim.getIndex());                 
-            }
-            else{
-                // is satellite tim
-                WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route);
-                String[] items = new String[1];
-                items[0] = "4868";
-                timToSend.getTim().getDataframes()[0].setItems(items);                    
-                deleteTimFromSdw(timToSend, activeTim.getSatRecordId(), activeTim.getTimId());                    
-            }
-
-            // delete active tim                
-            ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());                
-        }
-        
+        deleteTimsFromRsusAndSdw(activeTims);
+       
         return result;
     }
 
-    public boolean clearTimsById(String timTypeStr, String clientId){                
-     
-        WydotTim wydotTim = new WydotTim();
-     
-        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+    public void deleteTimsFromRsusAndSdw(List<ActiveTim> activeTims){
+
         WydotRsu rsu = null;
-        activeTims = ActiveTimService.getActiveTimsByClientId(clientId);   
-        
+        WydotTim wydotTim = new WydotTim();
+
         for (ActiveTim activeTim : activeTims) {
 
             wydotTim.setFromRm(activeTim.getMilepostStart());
@@ -329,7 +300,18 @@ public class WydotTimService
             // delete active tim                
             ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());           
         }  
-    
+    }
+
+    public boolean clearTimsById(String timTypeStr, String clientId){                
+     
+        WydotTim wydotTim = new WydotTim();
+     
+        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+        WydotRsu rsu = null;
+        activeTims = ActiveTimService.getActiveTimsByClientId(clientId);   
+      
+        deleteTimsFromRsusAndSdw(activeTims);
+      
         return true;
     }
 

@@ -1048,6 +1048,60 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return deleteActiveTimResult;
 	}
 
+	public static List<ActiveTim> getExpiredActiveTims(){
+
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+		
+			statement = connection.createStatement();
+
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID from active_tim";
+			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
+			selectStatement += "  WHERE TIM_END < SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+
+			rs = statement.executeQuery(selectStatement);
+
+			// convert to ActiveTim object  				
+			while (rs.next()) {   	
+				activeTim = new ActiveTim();		
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));	
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setTimType(rs.getString("TYPE"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTims.add(activeTim);												
+			}			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {			
+			try {
+				// close prepared statement
+				if(statement != null)
+					statement.close();
+				// return connection back to pool
+				if(connection != null)
+					connection.close();
+				// close result set
+				if(rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return activeTims;
+	}
+
 	public static boolean deleteExpiredActiveTims(){
 		
 		boolean deleteActiveTimResult = false;

@@ -1,26 +1,20 @@
 package com.trihydro.odewrapper.model;
 
+import java.util.List;
+
 public class ControllerResult {
 
-    public int resultCode;
-    public String resultMessage;
+    public List<String> resultMessages;
 	public String direction;
 	public String clientId;
+	public String route;
 
-	public void setResultCode(int resultCode){
-		this.resultCode = resultCode;
+    public void setResultMessages(List<String> resultMessages){
+		this.resultMessages = resultMessages;
 	}
 
-	public int getResultCode(){
-		return this.resultCode;
-	}
-
-    public void setResultMessage(String resultMessage){
-		this.resultMessage = resultMessage;
-	}
-
-	public String getResultMessage(){
-		return this.resultMessage;
+	public List<String> getResultMessages(){
+		return this.resultMessages;
     }
     
     public void setDirection(String direction){
@@ -37,5 +31,13 @@ public class ControllerResult {
 
 	public String getClientId(){
 		return this.clientId;
+	}
+
+	public void setRoute(String route){
+		this.route = route;
+	}
+
+	public String getRoute(){
+		return this.route;
 	}
 }

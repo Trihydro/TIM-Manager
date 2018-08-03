@@ -12,6 +12,7 @@ public class WydotTim implements Cloneable
 	private Integer speed;
 	private Integer[] advisory;
 	private String startDateTime;
+	private String startTs;
 	private String endDateTime;
 	private String clientId;	
 	private String segment;
@@ -31,6 +32,7 @@ public class WydotTim implements Cloneable
 	private Double mileMarker;
 	private String surface;
 	private ArrayList<Buffer> buffers; 
+	private String exit;
 
 	@Override
 	public WydotTim clone() throws CloneNotSupportedException {
@@ -75,6 +77,16 @@ public class WydotTim implements Cloneable
 	public void setStartDateTime(String startDateTime) 
 	{
 		this.startDateTime = startDateTime;
+	}
+
+	public String getStartTs() 
+	{
+		return this.startTs;
+	}
+
+	public void setStartTs(String startTs) 
+	{
+		this.startTs = startTs;
 	}
 
 	public String getEndDateTime() 
@@ -305,5 +317,15 @@ public class WydotTim implements Cloneable
     public void setBuffers(ArrayList<Buffer> buffers) 
 	{
 		this.buffers = buffers;
+	}
+
+	public String getExit() 
+	{
+		return this.exit;
+	}
+
+    public void setExit(String exit) 
+	{
+		this.exit = exit;
 	}
 }

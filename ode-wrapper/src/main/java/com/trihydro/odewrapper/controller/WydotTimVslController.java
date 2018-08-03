@@ -85,15 +85,11 @@ public class WydotTimVslController extends WydotTimBaseController {
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimVslList()) {
             if(wydotTim.getDirection().equals("both")) {
-                resultTim = wydotTimService.createUpdateTim("VSL", wydotTim, "eastbound");
-                resultList.add(resultTim);  
-
-                resultTim = wydotTimService.createUpdateTim("VSL", wydotTim, "westbound");      
-                resultList.add(resultTim);  
+                wydotTimService.createUpdateTim("VSL", wydotTim, "eastbound");            
+                wydotTimService.createUpdateTim("VSL", wydotTim, "westbound");
             }
             else
-                resultTim = wydotTimService.createUpdateTim("VSL", wydotTim, wydotTim.getDirection());  
-                resultList.add(resultTim);      
+                wydotTimService.createUpdateTim("VSL", wydotTim, wydotTim.getDirection());                 
         }
         
         String responseMessage = gson.toJson(resultList);         

@@ -34,15 +34,11 @@ public class WydotTimRcController extends WydotTimBaseController {
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
             if(wydotTim.getDirection().equals("both")) {
-                resultTim = wydotTimService.createUpdateTim("RC", wydotTim, "eastbound");
-                resultList.add(resultTim);
-
-                resultTim = wydotTimService.createUpdateTim("RC", wydotTim, "westbound");      
-                resultList.add(resultTim);
+                wydotTimService.createUpdateTim("RC", wydotTim, "eastbound");            
+                wydotTimService.createUpdateTim("RC", wydotTim, "westbound");      
             }
             else
-                resultTim = wydotTimService.createUpdateTim("RC", wydotTim, wydotTim.getDirection());      
-                resultList.add(resultTim);
+                wydotTimService.createUpdateTim("RC", wydotTim, wydotTim.getDirection());
         }
 
         String responseMessage = gson.toJson(resultList);         

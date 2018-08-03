@@ -14,18 +14,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import com.trihydro.odewrapper.model.ControllerResult;
 
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.library.model.IncidentChoice;
-import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.WydotTim;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.apache.commons.lang3.StringUtils;
 
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -73,7 +74,7 @@ public class WydotTimService
     WydotRsu[] rsuArr = new WydotRsu[1];    
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");      
 
-    public ControllerResult createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction) {
+    public void createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction) {
                  
         // for each tim in wydot's request        
         System.out.println(timTypeStr + " TIM");
@@ -82,22 +83,12 @@ public class WydotTimService
         System.out.println("route: " + route);
         System.out.println("fromRm: " + wydotTim.getFromRm());
         System.out.println("toRm: " + wydotTim.getToRm());
-        ControllerResult result = new ControllerResult();
-        result.setDirection(direction);
-        result.setClientId(wydotTim.getClientId());
 
         // FIND ALL RSUS TO SEND TO     
         List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()), Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), route);       
 
         // build base TIM                
         WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route);
-
-        // if no mileposts found
-        if(timToSend.getMileposts().size() == 0){
-            result.setResultCode(1);
-            result.setResultMessage("No mileposts found");
-            return result;
-        }
 
         // set itis codes
         List<String> items = null;
@@ -113,13 +104,6 @@ public class WydotTimService
             items = setItisCodesFromAvailability(wydotTim);   
         else if(timTypeStr.equals("RW"))
             items = setItisCodesFromAdvisoryArray(wydotTim);   
-
-        // if none found, don't send tim
-        if(items.size() == 0){
-            result.setResultCode(2);
-            result.setResultMessage("No ITIS codes found, TIM not sent");
-            return result;           
-        }
 
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0].setItems(items.toArray(new String[items.size()]));
@@ -181,15 +165,11 @@ public class WydotTimService
             // if active tims exist, update tim        
             if(activeTims != null && activeTims.size() > 0){                                            
                 // update TIM rsu
-                updateTimOnRsu(timToSend, activeTims.get(0).getTimId());                                            
-                result.setResultMessage("success");
-                result.setResultCode(0);
+                updateTimOnRsu(timToSend, activeTims.get(0).getTimId());  
             }              
             else{     
                 // send new tim to rsu                    
                 sendNewTimToRsu(timToSend, rsu);  
-                result.setResultMessage("success");
-                result.setResultCode(0);
             }
         }
 
@@ -212,9 +192,7 @@ public class WydotTimService
                 regionNameTemp += "_" + wydotTim.getPk();
 
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);  
-            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId());
-            result.setResultMessage("success");
-            result.setResultCode(0);
+            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId());         
         }
         else{
             String recordId = getNewRecordId();    
@@ -229,11 +207,8 @@ public class WydotTimService
             
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             sendNewTimToSdw(timToSend, recordId);
-            result.setResultMessage("success");
-            result.setResultCode(0);
         }        
 
-        return result;   
     }
 
     public ControllerResult clearTimsByRoadSegment(String timTypeStr, WydotTim wydotTim, String direction){        
@@ -241,6 +216,7 @@ public class WydotTimService
         WydotRsu rsu = null;
 
         ControllerResult result = new ControllerResult();
+        List<String> resultsMessages = new ArrayList<String>();
         result.setDirection(direction);
 
         String route = wydotTim.getRoute().replaceAll("\\D+","");
@@ -254,15 +230,14 @@ public class WydotTimService
             activeTims = ActiveTimService.getAllActiveTimsBySegment(wydotTim.getFromRm(), wydotTim.getToRm(), timType.getTimTypeId(), direction);            
 
         if(activeTims.size() == 0){
-            result.setResultMessage("No active TIMs found");
-            result.setResultCode(3);
+            resultsMessages.add("No active TIMs found");
         }
         else{
-            result.setResultMessage("success");
-            result.setResultCode(0);
+            resultsMessages.add("success");
         }        
         deleteTimsFromRsusAndSdw(activeTims);
        
+        result.setResultMessages(resultsMessages);
         return result;
     }
 
@@ -277,7 +252,7 @@ public class WydotTimService
             wydotTim.setToRm(activeTim.getMilepostStop());
 
             // get all tims
-            J2735TravelerInformationMessage tim = TimService.getTim(activeTim.getActiveTimId());                    
+            J2735TravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());                    
             // get RSU TIM is on
             List<TimRsu> timRsus = TimRsuService.getTimRsusByTimId(activeTim.getTimId());
                 // get full RSU
@@ -359,11 +334,19 @@ public class WydotTimService
         ItisCode code = getItisCodes().stream()
         .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
         .findFirst()
-        .orElse(null);
+        .orElse(null);        
 
         if(code != null)
             items.add(wydotTim.getAvailability().toString());                       
-                               
+
+        if(wydotTim.getExit() != null){
+            items.add("11794");
+            items.add(wydotTim.getExit());
+        }
+        else{
+            items.add("7986");
+        }
+
         return items;
     }
 
@@ -476,17 +459,51 @@ public class WydotTimService
 
     public List<String> setItisCodesParking(WydotTim wydotTim) {
         
-        List<String> items = new ArrayList<String>();        
-        
-        ItisCode availability = getItisCodes().stream()
-            .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
-            .findFirst()
-            .orElse(null);
-        if(availability != null) {
-            items.add(availability.getItisCode().toString());           
+        // check to see if code exists        
+        List<String> items = new ArrayList<String>();               
+    
+        ItisCode code = getItisCodes().stream()
+        .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
+        .findFirst()
+        .orElse(null);        
+
+        if(code != null)
+            items.add(wydotTim.getAvailability().toString());                       
+
+        if(wydotTim.getExit() != null){
+            items.add("11794");
+            List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
+            int exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
+            items.add(String.valueOf(exitItisCodeNumber));
+            if(list.size() > 1)
+                items.add(list.get(1));
+        }
+        else{
+            items.add("7986");
         }
 
         return items;
+    }
+
+    public List<String> splitExitNumberFromLetter(String exit){
+        
+        List<String> list = new ArrayList<String>();
+        String exitNumber = ""; 
+        String exitLetter = "";
+        for (int i = 0; i < exit.length(); i++) {
+            if(StringUtils.isNumeric(String.valueOf(exit.charAt(i)))){
+                exitNumber += exit.charAt(i);
+            }
+            else {
+                exitLetter += exit.charAt(i);
+            }
+        }
+
+        list.add(exitNumber);
+        if(exitLetter.length() > 0)
+            list.add(exitLetter);
+
+        return list;
     }
 
     public List<String> setItisCodesIncident(WydotTim wydotTim) {        
@@ -1027,5 +1044,10 @@ public class WydotTimService
         }
                
         return codes;
+    }
+
+    private int convertNumberToItisCode(int number){
+        int itisCode = 1 + 12544;
+        return itisCode;
     }
 }

@@ -35,30 +35,17 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimParkingList()) {
-            if(wydotTim.getDirection().equals("both")) {
+            resultTim = validateInputParking(wydotTim);
 
-                wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
-                wydotTim.setToRm(wydotTim.getMileMarker());    
-                resultTim = wydotTimService.createUpdateTim("P", wydotTim, "eastbound");
+            if(resultTim.getResultMessages().size() > 0){
                 resultList.add(resultTim);
-
-                wydotTim.setFromRm(wydotTim.getMileMarker());     
-                wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
-                resultTim = wydotTimService.createUpdateTim("P", wydotTim, "westbound");      
-                resultList.add(resultTim);
+                continue;
             }
-            else{
-                if(wydotTim.getDirection().equals("eastbound")){
-                    wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
-                    wydotTim.setToRm(wydotTim.getMileMarker());    
-                }
-                else{
-                    wydotTim.setFromRm(wydotTim.getMileMarker());     
-                    wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
-                }
-                resultTim = wydotTimService.createUpdateTim("P", wydotTim, wydotTim.getDirection());      
-                resultList.add(resultTim);
-            }
+                
+            createTims(wydotTim);
+            
+            resultTim.getResultMessages().add("success");
+            resultList.add(resultTim);     
         }
 
         String responseMessage = gson.toJson(resultList);         
@@ -105,5 +92,36 @@ public class WydotTimParkingController extends WydotTimBaseController {
         
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    // asynchronous TIM creation
+    public void createTims(WydotTim wydotTim) 
+    {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+                if(wydotTim.getDirection().equals("both")) {
+
+                    wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
+                    wydotTim.setToRm(wydotTim.getMileMarker());    
+                    wydotTimService.createUpdateTim("P", wydotTim, "eastbound");        
+    
+                    wydotTim.setFromRm(wydotTim.getMileMarker());     
+                    wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
+                    wydotTimService.createUpdateTim("P", wydotTim, "westbound");                   
+                }
+                else{
+                    if(wydotTim.getDirection().equals("eastbound")){
+                        wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
+                        wydotTim.setToRm(wydotTim.getMileMarker());    
+                    }
+                    else{
+                        wydotTim.setFromRm(wydotTim.getMileMarker());     
+                        wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
+                    }
+                    wydotTimService.createUpdateTim("P", wydotTim, wydotTim.getDirection());                     
+                }
+            }
+        }).start();
     }
 }

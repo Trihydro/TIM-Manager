@@ -16,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +88,7 @@ import javax.servlet.ServletContext;
 	}
 
 	@Test
-	public void testCreateRwTim_oneDirection_success() throws Exception {
+	public void testCreateRwTim_oneDirection_success2() throws Exception {
 
 		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\": 370,\"direction\": \"eastbound\",\"surface\": \"G\",\"buffers\": [{\"distance\": 1,\"action\": \"leftClosed\",\"units\": \"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\": \"miles\"}],\"startTs\": \"2016-06-23T14:31:52.404Z\",\"delays\": [{\"code\": 19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\": 8399},\"firstDay\": \"20130228\",\"lastDay\": \"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\": \"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\": 8359,\"highway\": \"I-80\"}]}";
 		  
@@ -97,69 +96,65 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("8359"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
             
         MvcResult mvcResult = resultActions.andReturn();
 		String result = mvcResult.getResponse().getContentAsString();
         System.out.println(result);        
 	}
 
-	@Test @Ignore
-	public void testCreateParkingTim_bothDirections_NoMileposts() throws Exception {
+	@Test
+	public void testCreateRwTim_bothDirections_NoMileposts() throws Exception {
 	
 		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
-	}
-
-	@Test @Ignore
-	public void testCreateIncidentTim_bothDirections_NoItisCodes() throws Exception {
-	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
-		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(rwJson))
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("No ITIS codes found, TIM not sent"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(2))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
-	}
-
-	@Test @Ignore
-	public void testCreateIncidentTim_oneDirection_success() throws Exception {
-	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
-		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(rwJson))
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
-	@Test @Ignore
-	public void testCreateIncidentTim_oneDirection_NoMileposts() throws Exception {
+	@Test
+	public void testCreateRwTim_bothDirections_NoItisCodes() throws Exception {
 	
 		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(rwJson))
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("15917"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+	}
+
+	@Test
+	public void testCreateRwTim_oneDirection_success() throws Exception {
+	
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
+		  
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(rwJson))
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("15917"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+	}
+
+	@Test
+	public void testCreateRwTim_oneDirection_NoMileposts() throws Exception {
+	
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
+		  
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -168,12 +163,12 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
-	@Test @Ignore
-	public void testCreateIncidentTim_oneDirection_NoItisCodes() throws Exception {
+	@Test
+	public void testCreateRwTim_oneDirection_NoItisCodes() throws Exception {
 	
 		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.post("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -182,12 +177,12 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
-	@Test @Ignore
-	public void testUpdateIncidentTim_oneDirection_success() throws Exception {
+	@Test 
+	public void testUpdateRwTim_oneDirection_success() throws Exception {
 	
 		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.put("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.put("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -196,12 +191,12 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
-	@Test @Ignore
-	public void testUpdateIncidentTim_bothDirections_success() throws Exception {
+	@Test
+	public void testUpdateRwTim_bothDirections_success() throws Exception {
 	
 		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
-		this.mockMvc.perform(MockMvcRequestBuilders.put("/incident-tim")
+		this.mockMvc.perform(MockMvcRequestBuilders.put("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
@@ -213,26 +208,26 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testDeleteRwTimsByClientId() throws Exception {
 		makeTims();
 
 		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
 		assertEquals(1, activeTimsBeforeDelete.size());	
 
-		this.mockMvc.perform(MockMvcRequestBuilders.delete("/incident-tim/IN49251"))
+		this.mockMvc.perform(MockMvcRequestBuilders.delete("/rw-tim/IN49251"))
 			.andExpect(MockMvcResultMatchers.status().isOk());
 
 		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
 		assertEquals(0, activeTimsAfterDelete.size());	
 	}
     
-    @Test @Ignore
-	public void testGetParkingTims() throws Exception {
+    @Test
+	public void testGetRwTims() throws Exception {
 		
 		makeTims();
 
-		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/parking-tim"))
+		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/rw-tim"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
@@ -242,12 +237,12 @@ import javax.servlet.ServletContext;
 		System.out.println(result);
 	}
 
-	@Test @Ignore
-	public void testGetParkingTimsByClientId() throws Exception {
+	@Test 
+	public void testGetRwTimsByClientId() throws Exception {
 		
 		makeTims();
 
-		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/parking-tim/Parking49251"))
+		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/rw-tim/Parking49251"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE));
 			//.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
@@ -260,7 +255,7 @@ import javax.servlet.ServletContext;
 	private void makeTims(){
 
 		WydotTimList wydotTimList = new WydotTimList();
-		List<WydotTim> incidentList = new ArrayList<WydotTim>();
+		List<WydotTim> rwList = new ArrayList<WydotTim>();
 		WydotTim wydotTim = new WydotTim();
 
 		wydotTim.setMileMarker(370.0);
@@ -279,8 +274,8 @@ import javax.servlet.ServletContext;
 
 		
 
-		incidentList.add(wydotTim);
-		wydotTimList.setTimIncidentList(incidentList);
+		rwList.add(wydotTim);
+		wydotTimList.setTimRwList(rwList);
 
 		WydotTravelerInputData wydotTravelerInputData = CreateBaseTimUtil.buildTim(wydotTim, "westbound", "80");
 
@@ -293,7 +288,7 @@ import javax.servlet.ServletContext;
 
 		ActiveTim activeTim = new ActiveTim();
 		activeTim.setTimId(timId);
-		activeTim.setClientId(wydotTim.getIncidentId());
+		activeTim.setClientId(wydotTim.getId());
 		activeTim.setDirection("westbound");
 		activeTim.setMilepostStart(wydotTim.getFromRm());
 		activeTim.setMilepostStop(wydotTim.getToRm());

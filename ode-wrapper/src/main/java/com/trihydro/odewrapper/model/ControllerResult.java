@@ -4,7 +4,8 @@ import java.util.List;
 
 public class ControllerResult {
 
-    public List<String> resultMessages;
+	public List<String> resultMessages;
+	public List<String> itisCodes;
 	public String direction;
 	public String clientId;
 	public String route;
@@ -15,6 +16,14 @@ public class ControllerResult {
 
 	public List<String> getResultMessages(){
 		return this.resultMessages;
+	}
+	
+	public void setItisCodes(List<String> itisCodes){
+		this.itisCodes = itisCodes;
+	}
+
+	public List<String> getItisCodes(){
+		return this.itisCodes;
     }
     
     public void setDirection(String direction){

@@ -10,6 +10,8 @@ import com.trihydro.odewrapper.service.WydotTimService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
 
@@ -20,8 +22,7 @@ public class WydotTimBaseController {
     // services   
     protected final WydotTimService wydotTimService;
     protected static Gson gson = new Gson();
-  
-    
+
     WydotTimBaseController() {
          this.wydotTimService = new WydotTimService();
     }
@@ -34,8 +35,8 @@ public class WydotTimBaseController {
         // get route number
         if(tim.getDirection() != null)
             result.setDirection(tim.getDirection());
-        if(tim.getClientId() != null)
-            result.setClientId(tim.getId());
+        
+        result.setClientId(tim.getClientId());
 
         String route = null;
         if(tim.getRoute() != null){
@@ -63,11 +64,67 @@ public class WydotTimBaseController {
             resultMessages.add("Null value for clientId");           
         }    
 
+        // set itis codes
+        List<String> itisCodes = SetItisCodes.setItisCodesFromAvailability(tim);
+        if(itisCodes.size() == 0)
+            resultMessages.add("No ITIS codes found");           
+        result.setItisCodes(itisCodes);
+
         result.setResultMessages(resultMessages);
         return result;
     }
 
-    protected ControllerResult validateInputRW(WydotTim tim){
+    protected ControllerResult validateInputIncident(WydotTim tim){
+        
+        ControllerResult result = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // get route number
+        if(tim.getDirection() != null)
+            result.setDirection(tim.getDirection());
+        if(tim.getIncidentId() != null)
+            result.setClientId(tim.getIncidentId());
+
+        String route = null;
+        if(tim.getHighway() != null){
+            route = tim.getHighway().replaceAll("\\D+","");    
+            result.setRoute(tim.getHighway());
+        }
+        else{            
+            resultMessages.add("route not supported");   
+        }
+        // if route is not 80 fail
+        if(!route.equals("80")){
+            resultMessages.add("route not supported");            
+        }
+        // if direction is not eastbound/westbound/both fail
+        if(!tim.getDirection().toLowerCase().equals("eastbound") && !tim.getDirection().toLowerCase().equals("westbound") && !tim.getDirection().toLowerCase().equals("both")){
+            resultMessages.add("direction not supported");            
+        }  
+        if(tim.getIncidentId() == null){
+            resultMessages.add("Null value for incidentId");           
+        }    
+        if(tim.getToRm() != null && tim.getToRm() < 0){
+            resultMessages.add("Invalid toRm");       
+        }
+        if(tim.getFromRm() < 0){
+            resultMessages.add("Invalid fromRm");           
+        }              
+        if(tim.getFromRm() == null){
+            resultMessages.add("Null value for fromRm");
+        }        
+        
+        // set itis codes
+        List<String> itisCodes = SetItisCodes.setItisCodesIncident(tim); 
+        if(itisCodes.size() == 0)
+            resultMessages.add("No ITIS codes found");           
+        result.setItisCodes(itisCodes);
+
+        result.setResultMessages(resultMessages);
+        return result;
+    }
+
+    protected ControllerResult validateInputRw(WydotTim tim){
         
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -136,6 +193,184 @@ public class WydotTimBaseController {
             }            
         }      
         
+        // set itis codes
+        List<String> itisCodes = SetItisCodes.setItisCodesRw(tim); 
+        if(itisCodes.size() == 0)
+            resultMessages.add("No ITIS codes found");           
+        result.setItisCodes(itisCodes);
+
+        result.setResultMessages(resultMessages);
+        return result;
+    }
+
+    protected ControllerResult validateInputRc(WydotTim tim){
+        
+        ControllerResult result = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // get route number
+        if(tim.getDirection() != null)
+            result.setDirection(tim.getDirection());
+     
+        String route = null;
+        if(tim.getRoute() != null){
+            route = tim.getRoute().replaceAll("\\D+","");    
+            result.setRoute(tim.getRoute());
+        }
+        else{            
+            resultMessages.add("route not supported");   
+        }
+        
+        // if route is not 80 fail
+        if(!route.equals("80")){
+            resultMessages.add("route not supported");            
+        }
+        // if direction is not eastbound/westbound/both fail
+        if(!tim.getDirection().toLowerCase().equals("eastbound") && !tim.getDirection().toLowerCase().equals("westbound") && !tim.getDirection().toLowerCase().equals("both")){
+            resultMessages.add("direction not supported");            
+        }
+        if(tim.getToRm() != null && tim.getToRm() < 0){
+            resultMessages.add("Invalid toRm");       
+        }
+        if(tim.getFromRm() < 0){
+            resultMessages.add("Invalid fromRm");           
+        }              
+        if(tim.getFromRm() == null){
+            resultMessages.add("Null value for fromRm");
+        }     
+        if(tim.getToRm() == null){
+            resultMessages.add("Null value for toRm");
+        }                           
+        if(tim.getRoute() == null){
+            resultMessages.add("Null value for route");
+        }      
+        if(tim.getDirection() == null){
+            resultMessages.add("Null value for direction");
+        }           
+     
+        // set itis codes
+        List<String> itisCodes = SetItisCodes.setItisCodesRc(tim); 
+        if(itisCodes.size() == 0)
+            resultMessages.add("No ITIS codes found");           
+        result.setItisCodes(itisCodes);
+
+        result.setResultMessages(resultMessages);
+        return result;
+    }
+
+    protected ControllerResult validateInputVsl(WydotTim tim){
+        
+        ControllerResult result = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // get route number
+        if(tim.getDirection() != null)
+            result.setDirection(tim.getDirection());
+     
+        String route = null;
+        if(tim.getRoute() != null){
+            route = tim.getRoute().replaceAll("\\D+","");    
+            result.setRoute(tim.getRoute());
+        }
+        else{            
+            resultMessages.add("route not supported");   
+        }
+        
+        // if route is not 80 fail
+        if(!route.equals("80")){
+            resultMessages.add("route not supported");            
+        }
+        // if direction is not eastbound/westbound/both fail
+        if(!tim.getDirection().toLowerCase().equals("eastbound") && !tim.getDirection().toLowerCase().equals("westbound") && !tim.getDirection().toLowerCase().equals("both")){
+            resultMessages.add("direction not supported");            
+        }
+        if(tim.getToRm() != null && tim.getToRm() < 0){
+            resultMessages.add("Invalid toRm");       
+        }
+        if(tim.getFromRm() < 0){
+            resultMessages.add("Invalid fromRm");           
+        }              
+        if(tim.getFromRm() == null){
+            resultMessages.add("Null value for fromRm");
+        }     
+        if(tim.getToRm() == null){
+            resultMessages.add("Null value for toRm");
+        }                           
+        if(tim.getRoute() == null){
+            resultMessages.add("Null value for route");
+        }      
+        if(tim.getDirection() == null){
+            resultMessages.add("Null value for direction");
+        }           
+     
+        // set itis codes
+        List<String> itisCodes = SetItisCodes.setItisCodesVsl(tim); 
+        if(itisCodes.size() == 0)
+            resultMessages.add("No ITIS codes found");           
+        result.setItisCodes(itisCodes);
+
+        result.setResultMessages(resultMessages);
+        return result;
+    }
+
+    protected ControllerResult validateInputCc(WydotTim tim){
+        
+        ControllerResult result = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // get route number
+        if(tim.getDirection() != null)
+            result.setDirection(tim.getDirection());
+     
+        
+        if(tim.getSegment() != null)
+            result.setClientId(tim.getSegment());
+
+        String route = null;
+        if(tim.getRoute() != null){
+            route = tim.getRoute().replaceAll("\\D+","");    
+            result.setRoute(tim.getRoute());
+        }
+        else{            
+            resultMessages.add("route not supported");   
+        }
+        
+        // if route is not 80 fail
+        if(!route.equals("80")){
+            resultMessages.add("route not supported");            
+        }
+        // if direction is not eastbound/westbound/both fail
+        if(!tim.getDirection().toLowerCase().equals("eastbound") && !tim.getDirection().toLowerCase().equals("westbound") && !tim.getDirection().toLowerCase().equals("both")){
+            resultMessages.add("direction not supported");            
+        }
+        if(tim.getToRm() != null && tim.getToRm() < 0){
+            resultMessages.add("Invalid toRm");       
+        }
+        if(tim.getFromRm() < 0){
+            resultMessages.add("Invalid fromRm");           
+        }              
+        if(tim.getFromRm() == null){
+            resultMessages.add("Null value for fromRm");
+        }     
+        if(tim.getToRm() == null){
+            resultMessages.add("Null value for toRm");
+        }                           
+        if(tim.getRoute() == null){
+            resultMessages.add("Null value for route");
+        } 
+        if(tim.getSegment() == null){
+            resultMessages.add("Null value for segment");
+        }      
+        if(tim.getDirection() == null){
+            resultMessages.add("Null value for direction");
+        }           
+     
+        // set itis codes
+        List<String> itisCodes = SetItisCodes.setItisCodesFromAdvisoryArray(tim); 
+        if(itisCodes.size() == 0)
+            resultMessages.add("No ITIS codes found");           
+        result.setItisCodes(itisCodes);
+
         result.setResultMessages(resultMessages);
         return result;
     }
@@ -193,4 +428,5 @@ public class WydotTimBaseController {
     public String jsonKeyValue(String key, String value) {
         return "{\"" + key + "\":" + value + "}";
     }
+  
 }

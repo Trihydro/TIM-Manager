@@ -96,9 +96,10 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(parkingJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("Parking49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
             
         MvcResult mvcResult = resultActions.andReturn();
 		String result = mvcResult.getResponse().getContentAsString();
@@ -114,8 +115,8 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(1))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("route not supported"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-70"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
 
@@ -128,9 +129,10 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("Parking49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
 	}
 
 	@Test
@@ -142,8 +144,9 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("Parking49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
 

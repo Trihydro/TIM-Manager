@@ -33,12 +33,17 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
-            if(wydotTim.getDirection().equals("both")) {
-                wydotTimService.createUpdateTim("RC", wydotTim, "eastbound");            
-                wydotTimService.createUpdateTim("RC", wydotTim, "westbound");      
+            
+            resultTim = validateInputRc(wydotTim);
+
+            if(resultTim.getResultMessages().size() > 0){
+                resultList.add(resultTim);
+                continue;
             }
-            else
-                wydotTimService.createUpdateTim("RC", wydotTim, wydotTim.getDirection());
+                
+            createTims(wydotTim);
+            resultTim.getResultMessages().add("success");
+            resultList.add(resultTim);   
         }
 
         String responseMessage = gson.toJson(resultList);         
@@ -67,4 +72,23 @@ public class WydotTimRcController extends WydotTimBaseController {
         String responseMessage = gson.toJson(resultList);         
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
+
+    // asynchronous TIM creation
+    public void createTims(WydotTim wydotTim) 
+    {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+            if(wydotTim.getDirection().equals("both")) {
+                wydotTimService.createUpdateTim("RC", wydotTim, "eastbound");            
+                wydotTimService.createUpdateTim("RC", wydotTim, "westbound");      
+            }
+            else
+                wydotTimService.createUpdateTim("RC", wydotTim, wydotTim.getDirection());
+            }
+        }).start();
+    }
+
+
+
 }

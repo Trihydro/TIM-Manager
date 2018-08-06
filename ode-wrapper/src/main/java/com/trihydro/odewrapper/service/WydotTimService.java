@@ -65,16 +65,13 @@ public class WydotTimService
     public static RestTemplate restTemplate = new RestTemplate();         
     public static Gson gson = new Gson();
     private List<ItisCode> itisCodes;
-    private List<IncidentChoice> incidentProblems;
-    private List<IncidentChoice> incidentEffects;
-    private List<IncidentChoice> incidentActions;
     private ArrayList<WydotRsu> rsus;    
     private List<TimType> timTypes;    
     private static String odeUrl = "https://ode.wyoroad.info:8443";
     WydotRsu[] rsuArr = new WydotRsu[1];    
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");      
 
-    public void createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction) {
+    public void createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction, List<String> itisCodes) {
                  
         // for each tim in wydot's request        
         System.out.println(timTypeStr + " TIM");
@@ -90,23 +87,8 @@ public class WydotTimService
         // build base TIM                
         WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route);
 
-        // set itis codes
-        List<String> items = null;
-        if(timTypeStr.equals("CC"))
-            items = setItisCodesFromAdvisoryArray(wydotTim);   
-        else if(timTypeStr.equals("RC"))
-            items = setItisCodesRc(wydotTim);  
-        else if(timTypeStr.equals("VSL"))
-            items = setItisCodesVsl(wydotTim);   
-        else if(timTypeStr.equals("I"))
-            items = setItisCodesIncident(wydotTim);   
-        else if(timTypeStr.equals("P"))
-            items = setItisCodesFromAvailability(wydotTim);   
-        else if(timTypeStr.equals("RW"))
-            items = setItisCodesFromAdvisoryArray(wydotTim);   
-
         // add itis codes to tim
-        timToSend.getTim().getDataframes()[0].setItems(items.toArray(new String[items.size()]));
+        timToSend.getTim().getDataframes()[0].setItems(itisCodes.toArray(new String[itisCodes.size()]));
 
         // get tim type            
         TimType timType = getTimType(timTypeStr);
@@ -308,264 +290,6 @@ public class WydotTimService
         return activeTims;
     }
 
-    public List<String> setItisCodesFromAdvisoryArray(WydotTim wydotTim) {    
-        
-        // check to see if code exists
-        
-        List<String> items = new ArrayList<String>();               
-        for (Integer item : wydotTim.getAdvisory()){
-
-            ItisCode code = getItisCodes().stream()
-            .filter(x -> x.getItisCode().equals(item))
-            .findFirst()
-            .orElse(null);
-
-            if(code != null)
-                items.add(item.toString());                       
-        }                            
-        return items;
-    }
-
-    public List<String> setItisCodesFromAvailability(WydotTim wydotTim) {    
-        
-        // check to see if code exists        
-        List<String> items = new ArrayList<String>();               
-        
-        ItisCode code = getItisCodes().stream()
-        .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
-        .findFirst()
-        .orElse(null);        
-
-        if(code != null)
-            items.add(wydotTim.getAvailability().toString());                       
-
-        if(wydotTim.getExit() != null){
-            items.add("11794");
-            items.add(wydotTim.getExit());
-        }
-        else{
-            items.add("7986");
-        }
-
-        return items;
-    }
-
-    public List<ItisCode> getItisCodes() {
-        if(itisCodes != null)
-            return itisCodes;
-        else{
-            itisCodes = ItisCodeService.selectAll(); 
-            return itisCodes;
-        }
-    }
-
-    public List<IncidentChoice> getIncidentProblems(){
-        if(incidentProblems != null)
-            return incidentProblems;
-        else{
-            incidentProblems = IncidentChoicesService.selectAllIncidentProblems(); 
-            return incidentProblems;
-        }
-    }
-
-    public List<IncidentChoice> getIncidentEffects(){
-        if(incidentEffects != null)
-            return incidentEffects;
-        else{
-            incidentEffects = IncidentChoicesService.selectAllIncidentEffects(); 
-            return incidentEffects;
-        }
-    }
-
-    public List<IncidentChoice> getIncidentActions(){
-        if(incidentActions != null)
-            return incidentActions;
-        else{
-            incidentActions = IncidentChoicesService.selectAllIncidentActions(); 
-            return incidentActions;
-        }
-    }
-
-    public List<String> setItisCodesRc(WydotTim wydotTim) {
-        
-        List<String> items = new ArrayList<String>();   
-
-        ItisCode code = null;
-
-        for (Integer item : wydotTim.getAdvisory()){
-
-            // map "closed" itis code
-            if(item == 769){
-                code = getItisCodes().stream()
-                .filter(x -> x.getItisCode().equals(770))
-                .findFirst()
-                .orElse(null);
-            }
-            else{
-                code = getItisCodes().stream()
-                .filter(x -> x.getItisCode().equals(item))
-                .findFirst()
-                .orElse(null);                        
-            }
-
-            if(code != null)
-                items.add(code.getItisCode().toString());    
-        }                   
-
-        return items;
-    }
-
-    public List<String> setItisCodesVsl(WydotTim wydotTim) {
-        
-        List<String> items = new ArrayList<String>();        
-        
-        ItisCode speed = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals(wydotTim.getSpeed().toString()))
-            .findFirst()
-            .orElse(null);
-        if(speed != null) {
-            items.add(speed.getItisCode().toString());   
-        }
-        else
-            return items;
-
-        ItisCode speedLimit = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals("speed limit"))
-            .findFirst()
-            .orElse(null);
-        if(speedLimit != null) {
-            items.add(speedLimit.getItisCode().toString());           
-        }
-
-        ItisCode mph = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals("mph"))
-            .findFirst()
-            .orElse(null);
-        if(mph != null){
-            items.add(mph.getItisCode().toString());  
-        }
-
-        return items;
-    }
-
-    public List<String> setItisCodesRw(WydotTim wydotTim){
-
-        List<String> items = new ArrayList<String>();      
-        
-        items.add("1025");           
-       
-        return items;
-    }
-
-    public List<String> setItisCodesParking(WydotTim wydotTim) {
-        
-        // check to see if code exists        
-        List<String> items = new ArrayList<String>();               
-    
-        ItisCode code = getItisCodes().stream()
-        .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
-        .findFirst()
-        .orElse(null);        
-
-        if(code != null)
-            items.add(wydotTim.getAvailability().toString());                       
-
-        if(wydotTim.getExit() != null){
-            items.add("11794");
-            List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
-            int exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
-            items.add(String.valueOf(exitItisCodeNumber));
-            if(list.size() > 1)
-                items.add(list.get(1));
-        }
-        else{
-            items.add("7986");
-        }
-
-        return items;
-    }
-
-    public List<String> splitExitNumberFromLetter(String exit){
-        
-        List<String> list = new ArrayList<String>();
-        String exitNumber = ""; 
-        String exitLetter = "";
-        for (int i = 0; i < exit.length(); i++) {
-            if(StringUtils.isNumeric(String.valueOf(exit.charAt(i)))){
-                exitNumber += exit.charAt(i);
-            }
-            else {
-                exitLetter += exit.charAt(i);
-            }
-        }
-
-        list.add(exitNumber);
-        if(exitLetter.length() > 0)
-            list.add(exitLetter);
-
-        return list;
-    }
-
-    public List<String> setItisCodesIncident(WydotTim wydotTim) {        
-        List<String> items = new ArrayList<String>(); 
-
-        // action
-        IncidentChoice incidentAction = getIncidentActions().stream()
-            .filter(x -> x.getCode().equals(wydotTim.getAction()))
-            .findFirst()
-            .orElse(null);
-        
-        // if action is not null and action itis code exists
-        if(incidentAction != null && incidentAction.getItisCodeId() != null){
-            ItisCode actionItisCode = getItisCodes().stream()
-                .filter(x -> x.getItisCodeId().equals(incidentAction.getItisCodeId()))
-                .findFirst()
-                .orElse(null);
-            if(actionItisCode != null){
-                items.add(actionItisCode.getItisCode().toString());  
-            }
-        }
-
-        // effect
-        IncidentChoice incidentEffect = getIncidentEffects().stream()
-            .filter(x -> x.getCode().equals(wydotTim.getEffect()))
-            .findFirst()
-            .orElse(null);
-        
-        // if effect is not null and effect itis code exists
-        if(incidentEffect != null && incidentEffect.getItisCodeId() != null){
-            ItisCode effectItisCode = getItisCodes().stream()
-                .filter(x -> x.getItisCodeId().equals(incidentEffect.getItisCodeId()))
-                .findFirst()
-                .orElse(null);
-            if(effectItisCode != null){
-                items.add(effectItisCode.getItisCode().toString());  
-            }
-        }
-
-        // problem
-        IncidentChoice incidentProblem = getIncidentProblems().stream()
-            .filter(x -> x.getCode().equals(wydotTim.getProblem()))
-            .findFirst()
-            .orElse(null);
-        
-        // if problem is not null and problem itis code exists
-        if(incidentProblem != null && incidentProblem.getItisCodeId() != null){
-            ItisCode problemItisCode = getItisCodes().stream()
-                .filter(x -> x.getItisCodeId().equals(incidentProblem.getItisCodeId()))
-                .findFirst()
-                .orElse(null);
-            if(problemItisCode != null){
-                items.add(problemItisCode.getItisCode().toString());  
-            }
-        }
-
-        if(items.size() == 0)
-            items.add("531");
-
-        return items;
-    }
-
     public long getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime){
 
         ZonedDateTime zdtStart = ZonedDateTime.parse(startDateTime);
@@ -616,40 +340,68 @@ public class WydotTimService
     public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost, String route){
 
         List<WydotRsu> rsus = new ArrayList<>();
-
         int closestIndexOutsideRange = 0;
         int i;
+        Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
+        WydotRsu rsuLower = null;
+        WydotRsu rsuHigher;
 
         // if there are no rsus on this route
         if(getRsusByRoute(route).size() == 0)
             return rsus;            
-
+        
         if(direction.equals("eastbound")){
+
             // get rsus at mileposts less than your milepost 
             List<WydotRsu> rsusLower =  getRsusByRoute(route).stream()
                 .filter(x -> x.getMilepost() < lowerMilepost)
                 .collect(Collectors.toList());
+                     
+            if(rsusLower.size() == 0){
+                // if no rsus found farther west than lowerMilepost  
+                // example: higherMilepost = 12, lowerMilepost = 2, no RSUs at mileposts < 2
+                // find milepost furthest west than milepost of TIM location 
+                rsusLower =  getRsusByRoute(route).stream()
+                    .filter(x -> x.getMilepost() < higherMilepost)
+                    .collect(Collectors.toList());
 
-            // get max from that list
-            Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
-            WydotRsu rsuLower =  rsusLower.stream()
-                .max(compMilepost)
-                .get();
-                
+                // example: RSU at milepost 7.5 found
+                rsuLower =  rsusLower.stream()
+                    .min(compMilepost)
+                    .get();
+            }
+            // else find milepost closest to lowerMilepost
+            else{
+                // get max from that list
+                rsuLower = rsusLower.stream()
+                    .max(compMilepost)
+                    .get();                
+            }            
             closestIndexOutsideRange = getRsusByRoute(route).indexOf(rsuLower);                        
         }
         else{
-             // get rsus at mileposts greater than your milepost 
-             List<WydotRsu> rsusLower =  getRsusByRoute(route).stream()
-                .filter(x -> x.getMilepost() > lowerMilepost)
+
+            // get rsus at mileposts greater than your milepost 
+            List<WydotRsu> rsusHigher =  getRsusByRoute(route).stream()
+                .filter(x -> x.getMilepost() > higherMilepost)
                 .collect(Collectors.toList());
  
-             // get min from that list
-             Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
-             WydotRsu rsuHigher =  rsusLower.stream()
-                .min(compMilepost)
-                .get();
-             
+            if(rsusHigher.size() == 0){
+                rsusHigher =  getRsusByRoute(route).stream()
+                    .filter(x -> x.getMilepost() > lowerMilepost)
+                    .collect(Collectors.toList());
+                  
+                // get min from that list             
+                rsuHigher =  rsusHigher.stream()
+                    .max(compMilepost)
+                    .get();    
+            }
+            else{
+                rsuHigher =  rsusHigher.stream()
+                    .min(compMilepost)
+                    .get(); 
+            }
+             // get min from that list             
              closestIndexOutsideRange = getRsusByRoute(route).indexOf(rsuHigher);         
         }
 
@@ -1046,8 +798,5 @@ public class WydotTimService
         return codes;
     }
 
-    private int convertNumberToItisCode(int number){
-        int itisCode = 1 + 12544;
-        return itisCode;
-    }
+    
 }

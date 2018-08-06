@@ -16,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,12 +95,10 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("IN49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("both"));
 	}
 
 	@Test
@@ -113,15 +110,13 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("route not supported"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("both"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("IN49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-25"));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testCreateIncidentTim_bothDirections_NoItisCodes() throws Exception {
 	
 		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
@@ -132,10 +127,7 @@ import javax.servlet.ServletContext;
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("No ITIS codes found, TIM not sent"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(2))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
 	@Test
@@ -147,9 +139,10 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("OD49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
 	}
 
 	@Test
@@ -161,12 +154,13 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("route not supported"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("IN49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-25"));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testCreateIncidentTim_oneDirection_NoItisCodes() throws Exception {
 	
 		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"eastbound\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
@@ -223,9 +217,10 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("OD49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
 	}
 
 	@Test
@@ -237,12 +232,10 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("both"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("IN49251"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
 	}
 
 	@Test

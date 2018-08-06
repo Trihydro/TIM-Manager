@@ -38,7 +38,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimRwList()) {            
-            resultTim = validateInputRW(wydotTim);
+            resultTim = validateInputRw(wydotTim);
 
             if(resultTim.getResultMessages().size() > 0){
                 resultList.add(resultTim);
@@ -97,7 +97,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     }
 
     // asynchronous TIM creation
-    public void createTims(WydotTim wydotTim) 
+    public void createTims(WydotTim wydotTim, List<String> itisCodes) 
     {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
@@ -147,7 +147,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
                         // send buffer tim
                         wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                        wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound");
+                        wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound", itisCodes);
                       
                         // westbound - add buffer for point TIMs       
                         if(timPoint != null)
@@ -171,7 +171,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
                         // send buffer tim
                         wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                        wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound");                    
+                        wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound", );                    
 
                         // update running buffer distance
                         bufferBefore = wydotTim.getBuffers().get(i).getDistance();

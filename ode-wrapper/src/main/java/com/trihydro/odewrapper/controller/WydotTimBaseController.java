@@ -17,7 +17,7 @@ import com.trihydro.odewrapper.model.ControllerResult;
 
 @RestController
 @ApiIgnore
-public class WydotTimBaseController {
+public abstract class WydotTimBaseController {
     
     // services   
     protected final WydotTimService wydotTimService;
@@ -428,5 +428,7 @@ public class WydotTimBaseController {
     public String jsonKeyValue(String key, String value) {
         return "{\"" + key + "\":" + value + "}";
     }
-  
+
+    public abstract void createTims(WydotTim wydotTim, List<String> itisCodes);
+
 }

@@ -125,9 +125,8 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("both"));
 	}
 
 	@Test
@@ -169,8 +168,7 @@ import javax.servlet.ServletContext;
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 

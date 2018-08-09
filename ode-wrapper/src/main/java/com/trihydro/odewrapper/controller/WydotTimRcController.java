@@ -7,9 +7,11 @@ import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.WydotTravelerInputData;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +25,8 @@ import org.springframework.http.HttpStatus;
 @Api(description="Road Conditions")
 public class WydotTimRcController extends WydotTimBaseController {
    
+    private static String type = "RC";
+
     @RequestMapping(value="/create-update-rc-tim", method = RequestMethod.POST, headers="Accept=application/json")    
     public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody WydotTimList wydotTimList) { 
        
@@ -41,7 +45,7 @@ public class WydotTimRcController extends WydotTimBaseController {
                 continue;
             }
                 
-            createTims(wydotTim);
+            createTims(wydotTim, resultTim.getItisCodes());
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);   
         }
@@ -74,21 +78,38 @@ public class WydotTimRcController extends WydotTimBaseController {
     }
 
     // asynchronous TIM creation
-    public void createTims(WydotTim wydotTim) 
+    public void createTims(WydotTim wydotTim, List<String> itisCodes) 
     {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-            if(wydotTim.getDirection().equals("both")) {
-                wydotTimService.createUpdateTim("RC", wydotTim, "eastbound");            
-                wydotTimService.createUpdateTim("RC", wydotTim, "westbound");      
-            }
-            else
-                wydotTimService.createUpdateTim("RC", wydotTim, wydotTim.getDirection());
+                // get tim type            
+                TimType timType = getTimType(type);
+                
+                if(wydotTim.getDirection().equals("both")) {
+                    // eastbound
+                    createSendTims(wydotTim, itisCodes, "eastbound", timType);                                         
+
+                    // westbound
+                    createSendTims(wydotTim, itisCodes, "westbound", timType);
+                }
+                else{
+                    createSendTims(wydotTim, itisCodes, wydotTim.getDirection(), timType);
+                }       
             }
         }).start();
     }
 
 
+    private void createSendTims(WydotTim wydotTim, List<String> itisCodes, String direction, TimType timType){
+        // build region name for active tim logger to use            
+        String regionNamePrevWB = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
+        // create TIM
+        WydotTravelerInputData timToSendWB = wydotTimService.createTim(wydotTim, direction, type, itisCodes);
+        // send TIM to RSUs
+        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
+        // send TIM to SDW
+        wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
+    }
 
 }

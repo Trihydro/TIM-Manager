@@ -13,6 +13,7 @@ public class WydotTim implements Cloneable
 	private Integer[] advisory;
 	private String startDateTime;
 	private String startTs;
+	private String endTs;
 	private String endDateTime;
 	private String clientId;	
 	private String segment;
@@ -87,6 +88,16 @@ public class WydotTim implements Cloneable
 	public void setStartTs(String startTs) 
 	{
 		this.startTs = startTs;
+	}
+
+	public String getEndTs() 
+	{
+		return this.endTs;
+	}
+
+	public void setEndTs(String endTs) 
+	{
+		this.endTs = endTs;
 	}
 
 	public String getEndDateTime() 

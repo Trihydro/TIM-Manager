@@ -43,7 +43,7 @@ public class Application {
 
 			// send to tim type endpoint to delete from RSUs and SDWs
 			for (ActiveTim activeTim : activeTims) {     
-				restTemplate.exchange("http://localhost:7777" + "/parking-tim/" + activeTim.getClientId(), HttpMethod.DELETE, entity, String.class);              							
+				restTemplate.exchange("http://cvodedp01:7777" + "/parking-tim/" + activeTim.getClientId(), HttpMethod.DELETE, entity, String.class);              							
 			}  		
 
 			// delete expired tims from database

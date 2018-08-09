@@ -92,18 +92,14 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateVSLTim_bothDirections_success() throws Exception {
      
-		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"both\", \"speed\": 45  }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"eastbound\", \"speed\": 45  }]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/vsl-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(incidentJson))
-			.andExpect(MockMvcResultMatchers.status().isOk());
-			// .andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			// .andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-			// .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			// .andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("success"))
-			// .andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(0))
-			// .andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
 	@Test 

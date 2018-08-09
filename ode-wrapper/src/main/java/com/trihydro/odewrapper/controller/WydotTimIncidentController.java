@@ -9,9 +9,12 @@ import java.util.Collection;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.TimType;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.WydotTravelerInputData;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,6 +28,8 @@ import org.springframework.http.HttpStatus;
 @RestController
 @Api(description="Incidents")
 public class WydotTimIncidentController extends WydotTimBaseController {
+
+    private static String type = "I";
 
     @RequestMapping(value="/incident-tim", method = RequestMethod.POST, headers="Accept=application/json")
     public ResponseEntity<String> createIncidentTim(@RequestBody WydotTimList wydotTimList) { 
@@ -42,9 +47,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             if(resultTim.getResultMessages().size() > 0){
                 resultList.add(resultTim);
                 continue;
-            }             
+            }            
+   
+            createTims(wydotTim, resultTim.getItisCodes());   
 
-            
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);                
         }                
@@ -70,6 +76,20 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 resultList.add(resultTim);
                 continue;
             }             
+
+            // find tims to update
+            List<ActiveTim> activeTims = ActiveTimService.getRsusWithActiveTim(wydotTim.getIncidentId(), wydotTim.getDirection(), "I");
+
+            //  for each TIM, delete off RSUs
+
+            // delete off active tim table
+
+            // recreate RSU TIMs
+            
+            //update SAT TIM
+
+            createTims(wydotTim, resultTim.getItisCodes());   
+            
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);                
         }                
@@ -125,6 +145,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 wydotTim.setStartDateTime(wydotTim.getTs());
                 // set route
                 wydotTim.setRoute(wydotTim.getHighway());     
+                // get tim type            
+                TimType timType = getTimType("I");
 
                 // check if this is a point TIM
                 if(wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null){
@@ -138,6 +160,17 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         wydotTim.setFromRm(timPoint - 1);                
 
                     wydotTimService.createUpdateTim("I", wydotTim, "eastbound", itisCodes);
+
+
+                    // build region name for active tim logger to use            
+                    String regionNamePrev = "eastbound" + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
+
+                    // create TIM
+                    WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, "eastbound", "I");
+                    // send TIM to RSUs
+                    wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
+                    // send TIM to SDW
+                    wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
 
                     // second TIM - westbound - add buffer for point TIMs 
                     if(timPoint != null)

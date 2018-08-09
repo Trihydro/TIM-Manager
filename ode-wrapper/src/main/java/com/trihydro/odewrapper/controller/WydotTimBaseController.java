@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import com.trihydro.library.model.TimType;
+import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
@@ -22,6 +24,8 @@ public abstract class WydotTimBaseController {
     // services   
     protected final WydotTimService wydotTimService;
     protected static Gson gson = new Gson();
+    private List<TimType> timTypes;    
+     
 
     WydotTimBaseController() {
          this.wydotTimService = new WydotTimService();
@@ -424,11 +428,27 @@ public abstract class WydotTimBaseController {
         }
         return false;
     }
-    
-    public String jsonKeyValue(String key, String value) {
-        return "{\"" + key + "\":" + value + "}";
-    }
 
     public abstract void createTims(WydotTim wydotTim, List<String> itisCodes);
+
+    public TimType getTimType(String timTypeName){
+        
+        // get tim type       
+        TimType timType = getTimTypes().stream()
+        .filter(x -> x.getType().equals(timTypeName))
+        .findFirst()
+        .orElse(null);
+
+        return timType;
+    } 
+
+    public List<TimType> getTimTypes(){
+        if(timTypes != null)
+            return timTypes;
+        else{
+            timTypes = TimTypeService.selectAll();            
+            return timTypes;
+        }
+    }    
 
 }

@@ -7,10 +7,13 @@ import java.util.Collection;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.WydotTravelerInputData;
+
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,6 +27,8 @@ import org.springframework.http.HttpStatus;
 @RestController
 @Api(description="Parking")
 public class WydotTimParkingController extends WydotTimBaseController {
+
+    private static String type = "P";
     
     @RequestMapping(value="/parking-tim", method = RequestMethod.POST, headers="Accept=application/json")
     public ResponseEntity<String> createParkingTim(@RequestBody WydotTimList wydotTimList) {        
@@ -35,6 +40,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
         // build TIM        
         for (WydotTim wydotTim : wydotTimList.getTimParkingList()) {
+            
             resultTim = validateInputParking(wydotTim);
 
             if(resultTim.getResultMessages().size() > 0){
@@ -42,7 +48,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
                 continue;
             }
                 
-            createTims(wydotTim);
+            createTims(wydotTim, resultTim.getItisCodes());
             
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);     
@@ -95,20 +101,24 @@ public class WydotTimParkingController extends WydotTimBaseController {
     }
 
     // asynchronous TIM creation
-    public void createTims(WydotTim wydotTim) 
+    public void createTims(WydotTim wydotTim, List<String> itisCodes) 
     {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
+
+                 // get tim type            
+                TimType timType = getTimType(type);
+
                 if(wydotTim.getDirection().equals("both")) {
 
                     wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
                     wydotTim.setToRm(wydotTim.getMileMarker());    
-                    wydotTimService.createUpdateTim("P", wydotTim, "eastbound");        
+                    createSendTims(wydotTim, itisCodes, "eastbound", timType);  
     
                     wydotTim.setFromRm(wydotTim.getMileMarker());     
                     wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
-                    wydotTimService.createUpdateTim("P", wydotTim, "westbound");                   
+                    createSendTims(wydotTim, itisCodes, "westbound", timType);               
                 }
                 else{
                     if(wydotTim.getDirection().equals("eastbound")){
@@ -119,9 +129,20 @@ public class WydotTimParkingController extends WydotTimBaseController {
                         wydotTim.setFromRm(wydotTim.getMileMarker());     
                         wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
                     }
-                    wydotTimService.createUpdateTim("P", wydotTim, wydotTim.getDirection());                     
+                    createSendTims(wydotTim, itisCodes, wydotTim.getDirection(), timType);           
                 }
             }
         }).start();
+    }
+
+    private void createSendTims(WydotTim wydotTim, List<String> itisCodes, String direction, TimType timType){
+        // build region name for active tim logger to use            
+        String regionNamePrevWB = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
+        // create TIM
+        WydotTravelerInputData timToSendWB = wydotTimService.createTim(wydotTim, direction, type, itisCodes);
+        // send TIM to RSUs
+        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
+        // send TIM to SDW
+        wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
     }
 }

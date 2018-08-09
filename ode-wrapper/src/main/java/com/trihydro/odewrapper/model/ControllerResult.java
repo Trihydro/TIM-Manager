@@ -9,6 +9,8 @@ public class ControllerResult {
 	public String direction;
 	public String clientId;
 	public String route;
+	public Double fromRm;
+	public Double toRm;
 
     public void setResultMessages(List<String> resultMessages){
 		this.resultMessages = resultMessages;
@@ -48,5 +50,21 @@ public class ControllerResult {
 
 	public String getRoute(){
 		return this.route;
+	}
+
+	public void setFromRm(Double fromRm){
+		this.fromRm = fromRm;
+	}
+
+	public Double getFromRm(){
+		return this.fromRm;
+	}
+
+	public void setToRm(Double toRm){
+		this.toRm = toRm;
+	}
+
+	public Double getToRm(){
+		return this.toRm;
 	}
 }

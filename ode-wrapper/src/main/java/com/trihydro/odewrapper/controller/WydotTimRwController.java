@@ -28,6 +28,8 @@ import org.springframework.http.HttpStatus;
 @Api(description="Road Construction")
 public class WydotTimRwController extends WydotTimBaseController {
 
+    private static String type = "RW";
+
     @RequestMapping(value="/rw-tim", method = RequestMethod.POST, headers="Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody WydotTimList wydotTimList)  {                 
 
@@ -37,7 +39,10 @@ public class WydotTimRwController extends WydotTimBaseController {
         ControllerResult resultTim = null;
 
         // build TIM        
-        for (WydotTim wydotTim : wydotTimList.getTimRwList()) {            
+        for (WydotTim wydotTim : wydotTimList.getTimRwList()) {          
+            System.out.println(wydotTim.getEndDateTime());
+            System.out.println(wydotTim.getEndTs());
+            
             resultTim = validateInputRw(wydotTim);
 
             if(resultTim.getResultMessages().size() > 0){
@@ -45,7 +50,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                 continue;
             }
                 
-            createTims(wydotTim);
+            createTims(wydotTim, resultTim.getItisCodes());
             
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);         
@@ -171,16 +176,16 @@ public class WydotTimRwController extends WydotTimBaseController {
 
                         // send buffer tim
                         wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                        wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound", );                    
+                        wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound", itisCodes);                    
 
                         // update running buffer distance
                         bufferBefore = wydotTim.getBuffers().get(i).getDistance();
                     }
                     // send road construction TIM
                     wydotTim.setAdvisory(new Integer[] {1025});
-                    wydotTimService.createUpdateTim("RW", wydotTim, "eastbound");                
+                    wydotTimService.createUpdateTim("RW", wydotTim, "eastbound", itisCodes);                
                     wydotTim.setAdvisory(new Integer[] {1025});
-                    wydotTimService.createUpdateTim("RW", wydotTim, "westbound");                    
+                    wydotTimService.createUpdateTim("RW", wydotTim, "westbound", itisCodes);                    
                 }
                 else{
                     if(wydotTim.getDirection().equals("eastbound")) {                  
@@ -211,14 +216,14 @@ public class WydotTimRwController extends WydotTimBaseController {
 
                             // send buffer tim
                             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                            wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound");
+                            wydotTimService.createUpdateTim("RW", wydotTimBuffer, "eastbound", itisCodes);
                            
                             // update running buffer distance
                             bufferBefore = wydotTim.getBuffers().get(i).getDistance();
                         }
                         // send road construction TIM
                         wydotTim.setAdvisory(new Integer[] {1025});
-                        wydotTimService.createUpdateTim("RW", wydotTim, "eastbound");
+                        wydotTimService.createUpdateTim("RW", wydotTim, "eastbound", itisCodes);
                     }
                     else{
 
@@ -247,14 +252,14 @@ public class WydotTimRwController extends WydotTimBaseController {
 
                             // send buffer tim                        
                             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                            wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound");
+                            wydotTimService.createUpdateTim("RW", wydotTimBuffer, "westbound", itisCodes);
                           
                             // update running buffer distance
                             bufferBefore = wydotTim.getBuffers().get(i).getDistance();
                         }
                         // send road construction TIM                   
                         wydotTim.setAdvisory(new Integer[] {1025});
-                        wydotTimService.createUpdateTim("RW", wydotTim, "westbound");                  
+                        wydotTimService.createUpdateTim("RW", wydotTim, "westbound", itisCodes);                  
                     }
                 }                
             }

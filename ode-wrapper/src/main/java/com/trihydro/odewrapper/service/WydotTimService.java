@@ -64,35 +64,21 @@ public class WydotTimService
     public static Environment env;
     public static RestTemplate restTemplate = new RestTemplate();         
     public static Gson gson = new Gson();
-    private List<ItisCode> itisCodes;
     private ArrayList<WydotRsu> rsus;    
     private List<TimType> timTypes;    
     private static String odeUrl = "https://ode.wyoroad.info:8443";
     WydotRsu[] rsuArr = new WydotRsu[1];    
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");      
 
-    public void createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction, List<String> itisCodes) {
-                 
-        // for each tim in wydot's request        
-        System.out.println(timTypeStr + " TIM");
-        System.out.println("direction: " + wydotTim.getDirection());
+    public WydotTravelerInputData createTim(WydotTim wydotTim, String direction, String timTypeStr, List<String> itisCodes){
+
         String route = wydotTim.getRoute().replaceAll("\\D+","");
-        System.out.println("route: " + route);
-        System.out.println("fromRm: " + wydotTim.getFromRm());
-        System.out.println("toRm: " + wydotTim.getToRm());
-
-        // FIND ALL RSUS TO SEND TO     
-        List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()), Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), route);       
-
         // build base TIM                
         WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route);
 
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0].setItems(itisCodes.toArray(new String[itisCodes.size()]));
-
-        // get tim type            
-        TimType timType = getTimType(timTypeStr);
-        
+    
         // overwrite start date/time if one is provided (start date/time has been set to the current time in base tim creation)
         if(wydotTim.getStartDateTime() != null){          
             timToSend.getTim().getDataframes()[0].setStartDateTime(wydotTim.getStartDateTime());
@@ -110,12 +96,110 @@ public class WydotTimService
             timToSend.getTim().getDataframes()[0].setDurationTime(120);      
         }
 
-        // build region name for active tim logger to use            
-        String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();   
-                                
+        return timToSend;
+    }
+
+    // public void createUpdateTim(String timTypeStr, WydotTim wydotTim, String direction, List<String> itisCodes) {
+                 
+    //     // for each tim in wydot's request        
+    //     System.out.println(timTypeStr + " TIM");
+    //     System.out.println("direction: " + wydotTim.getDirection());
+    //     String route = wydotTim.getRoute().replaceAll("\\D+","");
+    //     System.out.println("route: " + route);
+    //     System.out.println("fromRm: " + wydotTim.getFromRm());
+    //     System.out.println("toRm: " + wydotTim.getToRm());
+
+    //     // FIND ALL RSUS TO SEND TO     
+    //     List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()), Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), route);       
+
+    //     // build base TIM                
+    //     WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route);
+
+    //     // add itis codes to tim
+    //     timToSend.getTim().getDataframes()[0].setItems(itisCodes.toArray(new String[itisCodes.size()]));
+
+    //     // get tim type            
+    //     TimType timType = getTimType(timTypeStr);
+        
+    //     // overwrite start date/time if one is provided (start date/time has been set to the current time in base tim creation)
+    //     if(wydotTim.getStartDateTime() != null){          
+    //         timToSend.getTim().getDataframes()[0].setStartDateTime(wydotTim.getStartDateTime());
+    //     }      
+
+    //     // set the duration if there is an enddate
+    //     if(wydotTim.getEndDateTime() != null){               
+    //         long durationTime = getMinutesDurationBetweenTwoDates(wydotTim.getStartDateTime(), wydotTim.getEndDateTime());
+    //         timToSend.getTim().getDataframes()[0].setDurationTime(toIntExact(durationTime));
+    //     }    
+
+    //     // if parking TIM
+    //     if(timTypeStr.equals("P")){
+    //         // set duration for two hours
+    //         timToSend.getTim().getDataframes()[0].setDurationTime(120);      
+    //     }
+
+    //     // build region name for active tim logger to use            
+    //     String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();                                     
+
+    //     // // send TIMs to RSUs if there are RSUs
+    //     // if(rsus.size() > 0)
+    //     //     sendTimToRsus(wydotTim, timToSend, regionNamePrev, timTypeStr, direction, timType);
+
+    //     // send TIM to satellite
+    //     //sendTimToSDW(wydotTim, timToSend, regionNamePrev, direction, timType);
+
+    // }
+
+    public void sendTimToSDW(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev, String direction, TimType timType){
+
+        List<ActiveTim> activeSatTims = null;
+        // if client ID exists, get all active tims of same type with that client id
+        if(wydotTim.getClientId() != null && !timType.getType().equals("P"))
+            activeSatTims = ActiveTimService.getActiveSatTimsByClientIdDirection(wydotTim.getClientId(), timType.getTimTypeId(), direction);    
+        // if not, query active tims by road segment
+        else 
+            activeSatTims = ActiveTimService.getActiveSatTimsBySegmentDirection(wydotTim.getFromRm(), wydotTim.getToRm(), timType.getTimTypeId(), direction);                
+
+        if(activeSatTims != null && activeSatTims.size() > 0){
+            String regionNameTemp = regionNamePrev + "_SAT-" + activeSatTims.get(0).getSatRecordId() + "_" + timType.getType();
+            if(wydotTim.getClientId() != null)
+                regionNameTemp += "_" + wydotTim.getClientId();
+            
+            // add on wydot primary key if it exists
+            if(wydotTim.getPk() != null)
+                regionNameTemp += "_" + wydotTim.getPk();
+
+            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);  
+            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId());         
+        }
+        else{
+            String recordId = getNewRecordId();    
+            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
+
+            if(wydotTim.getClientId() != null)
+                regionNameTemp += "_" + wydotTim.getClientId();
+
+            // add on wydot primary key if it exists
+            if(wydotTim.getPk() != null)
+                regionNameTemp += "_" + wydotTim.getPk();
+            
+            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
+            sendNewTimToSdw(timToSend, recordId);
+        }   
+    }
+
+    public void sendTimToRsus(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev, String direction, TimType timType){    
+
+        // FIND ALL RSUS TO SEND TO     
+        List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()), Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), "80");       
+
+        // if no RSUs found
+        if(rsus.size() == 0)
+            return;   
+
         // query database for rsus that active tims could be on
         List<ActiveTim> activeTims = null;
-
+        
         // for each rsu in range
         for (WydotRsu rsu : rsus) {
 
@@ -124,7 +208,7 @@ public class WydotTimService
             timToSend.setRsus(rsuArr);            
             
             // update region name for active tim logger
-            String regionNameTemp = regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_" + timTypeStr;
+            String regionNameTemp = regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_" + timType.getType();
 
             // add clientId to region name
             if(wydotTim.getClientId() != null)
@@ -138,7 +222,7 @@ public class WydotTimService
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             
             // if client ID exists, get all active tims of same type with that client id
-            if(wydotTim.getClientId() != null && !timTypeStr.equals("P"))
+            if(wydotTim.getClientId() != null && !timType.getType().equals("P"))
                 activeTims = ActiveTimService.getActiveTimsOnRsuByClientId(rsu.getRsuTarget(), wydotTim.getClientId(), timType.getTimTypeId(), direction);    
             // if not, query active tims by road segment
             else 
@@ -154,43 +238,6 @@ public class WydotTimService
                 sendNewTimToRsu(timToSend, rsu);  
             }
         }
-
-        // satellite
-        List<ActiveTim> activeSatTims = null;
-        // if client ID exists, get all active tims of same type with that client id
-        if(wydotTim.getClientId() != null && !timTypeStr.equals("P"))
-            activeSatTims = ActiveTimService.getActiveSatTimsByClientIdDirection(wydotTim.getClientId(), timType.getTimTypeId(), direction);    
-        // if not, query active tims by road segment
-        else 
-            activeSatTims = ActiveTimService.getActiveSatTimsBySegmentDirection(wydotTim.getFromRm(), wydotTim.getToRm(), timType.getTimTypeId(), direction);                
-
-        if(activeSatTims != null && activeSatTims.size() > 0){
-            String regionNameTemp = regionNamePrev + "_SAT-" + activeSatTims.get(0).getSatRecordId() + "_" + timTypeStr;
-            if(wydotTim.getClientId() != null)
-                regionNameTemp += "_" + wydotTim.getClientId();
-            
-            // add on wydot primary key if it exists
-            if(wydotTim.getPk() != null)
-                regionNameTemp += "_" + wydotTim.getPk();
-
-            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);  
-            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId());         
-        }
-        else{
-            String recordId = getNewRecordId();    
-            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timTypeStr;
-
-            if(wydotTim.getClientId() != null)
-                regionNameTemp += "_" + wydotTim.getClientId();
-
-            // add on wydot primary key if it exists
-            if(wydotTim.getPk() != null)
-                regionNameTemp += "_" + wydotTim.getPk();
-            
-            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
-            sendNewTimToSdw(timToSend, recordId);
-        }        
-
     }
 
     public ControllerResult clearTimsByRoadSegment(String timTypeStr, WydotTim wydotTim, String direction){        
@@ -265,7 +312,7 @@ public class WydotTimService
      
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         WydotRsu rsu = null;
-        activeTims = ActiveTimService.getActiveTimsByClientId(clientId);   
+        activeTims = ActiveTimService.getActiveTimsByClientId(clientId, timTypeStr);   
       
         deleteTimsFromRsusAndSdw(activeTims);
       
@@ -276,7 +323,7 @@ public class WydotTimService
 
         TimType timType = getTimType(timTypeStr);
         
-        List<ActiveTim> activeTims = ActiveTimService.getActivesTimByClientId(clientId, timType.getTimTypeId());
+        List<ActiveTim> activeTims = ActiveTimService.getActivesTimByClientIdTimType(clientId, timType.getTimTypeId());
 
         return activeTims;
     }
@@ -340,7 +387,7 @@ public class WydotTimService
     public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost, String route){
 
         List<WydotRsu> rsus = new ArrayList<>();
-        int closestIndexOutsideRange = 0;
+        Integer closestIndexOutsideRange = null;
         int i;
         Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
         WydotRsu rsuLower = null;
@@ -369,6 +416,11 @@ public class WydotTimService
                 rsuLower =  rsusLower.stream()
                     .min(compMilepost)
                     .get();
+                
+                if((lowerMilepost - rsuLower.getMilepost()) > 20){
+                    // don't send to RSU if its further that X amount of miles away
+                    rsuLower = null;
+                }
             }
             // else find milepost closest to lowerMilepost
             else{
@@ -377,7 +429,8 @@ public class WydotTimService
                     .max(compMilepost)
                     .get();                
             }            
-            closestIndexOutsideRange = getRsusByRoute(route).indexOf(rsuLower);                        
+            if(rsuLower == null)
+                closestIndexOutsideRange = getRsusByRoute(route).indexOf(rsuLower);                        
         }
         else{
 
@@ -395,14 +448,20 @@ public class WydotTimService
                 rsuHigher =  rsusHigher.stream()
                     .max(compMilepost)
                     .get();    
+                
+                if((rsuHigher.getMilepost() - higherMilepost) > 20){
+                    // don't send to RSU if its further that X amount of miles away
+                    rsuHigher = null;
+                }
             }
             else{
                 rsuHigher =  rsusHigher.stream()
                     .min(compMilepost)
                     .get(); 
             }
-             // get min from that list             
-             closestIndexOutsideRange = getRsusByRoute(route).indexOf(rsuHigher);         
+             // get min from that list        
+             if(rsuHigher == null)     
+                closestIndexOutsideRange = getRsusByRoute(route).indexOf(rsuHigher);         
         }
 
         for(i = 0; i < getRsusByRoute(route).size(); i++){                   
@@ -411,7 +470,8 @@ public class WydotTimService
         }
 
         // add RSU closest in range
-        rsus.add(getRsusByRoute(route).get(closestIndexOutsideRange));
+        if(closestIndexOutsideRange != null)
+            rsus.add(getRsusByRoute(route).get(closestIndexOutsideRange));
         
         return rsus;
     }

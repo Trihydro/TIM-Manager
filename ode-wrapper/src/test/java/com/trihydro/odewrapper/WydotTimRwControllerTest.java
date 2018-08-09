@@ -109,20 +109,20 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateRwTim_bothDirections_NoMileposts() throws Exception {
 	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startTs\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
 
 	@Test
 	public void testCreateRwTim_bothDirections_NoItisCodes() throws Exception {
 	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startTs\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -137,14 +137,13 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateRwTim_oneDirection_success() throws Exception {
 	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startTs\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("15917"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
@@ -152,73 +151,40 @@ import javax.servlet.ServletContext;
 	@Test
 	public void testCreateRwTim_oneDirection_NoMileposts() throws Exception {
 	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startTs\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No mileposts found"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
 
 	@Test
 	public void testCreateRwTim_oneDirection_NoItisCodes() throws Exception {
 	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startTs\": \"2018-04-16T19:30:05.000Z\"}]}";
 		  
 		this.mockMvc.perform(MockMvcRequestBuilders.post("/rw-tim")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(rwJson))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("No ITIS codes found, TIM not sent"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(2))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
-	}
-
-	@Test 
-	public void testUpdateRwTim_oneDirection_success() throws Exception {
-	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
-		  
-		this.mockMvc.perform(MockMvcRequestBuilders.put("/rw-tim")
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(rwJson))
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
-	}
-
-	@Test
-	public void testUpdateRwTim_bothDirections_success() throws Exception {
-	
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"clientId\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"startDateTime\": \"2018-04-16T19:30:05.000Z\"}]}";
-		  
-		this.mockMvc.perform(MockMvcRequestBuilders.put("/rw-tim")
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(rwJson))
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultMessage").value("success"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].resultCode").value(0))
-			.andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))			
+			.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
 
 	@Test
 	public void testDeleteRwTimsByClientId() throws Exception {
 		makeTims();
 
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
+		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("15917", timTypeId);
 		assertEquals(1, activeTimsBeforeDelete.size());	
 
-		this.mockMvc.perform(MockMvcRequestBuilders.delete("/rw-tim/IN49251"))
+		this.mockMvc.perform(MockMvcRequestBuilders.delete("/rw-tim/15917"))
 			.andExpect(MockMvcResultMatchers.status().isOk());
 
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
+		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActivesTimByClientId("15917", timTypeId);
 		assertEquals(0, activeTimsAfterDelete.size());	
 	}
     
@@ -266,13 +232,11 @@ import javax.servlet.ServletContext;
 		
 		wydotTim.setSurface("P");
 		wydotTim.setDirection("westbound");
-		wydotTim.setClientId("15917");
+		wydotTim.setId("15917");
 		wydotTim.setPk(15917);
 		wydotTim.setHighway("I-80");
 		wydotTim.setFromRm(370.0);
-        wydotTim.setToRm(380.0);
-
-		
+        wydotTim.setToRm(380.0);		
 
 		rwList.add(wydotTim);
 		wydotTimList.setTimRwList(rwList);

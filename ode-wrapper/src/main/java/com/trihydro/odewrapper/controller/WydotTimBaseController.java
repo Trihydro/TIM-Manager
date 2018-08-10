@@ -429,7 +429,7 @@ public abstract class WydotTimBaseController {
         return false;
     }
 
-    public abstract void createTims(WydotTim wydotTim, List<String> itisCodes);
+    public abstract void processRequest(WydotTim wydotTim, List<String> itisCodes);
 
     public TimType getTimType(String timTypeName){
         

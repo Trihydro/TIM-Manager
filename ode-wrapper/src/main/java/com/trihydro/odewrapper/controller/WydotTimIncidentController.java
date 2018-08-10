@@ -49,7 +49,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 continue;
             }            
    
-            createTims(wydotTim, resultTim.getItisCodes());   
+            processRequest(wydotTim, resultTim.getItisCodes());   
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);                
@@ -88,7 +88,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             
             //update SAT TIM
 
-            createTims(wydotTim, resultTim.getItisCodes());   
+            processRequest(wydotTim, resultTim.getItisCodes());   
             
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);                
@@ -132,65 +132,65 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     }
 
     // asynchronous TIM creation
-    public void createTims(WydotTim wydotTim, List<String> itisCodes) 
+    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
     {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
 
-                Double timPoint = null;
-                // set client ID
-                wydotTim.setClientId(wydotTim.getIncidentId());
-                // set start time
-                wydotTim.setStartDateTime(wydotTim.getTs());
-                // set route
-                wydotTim.setRoute(wydotTim.getHighway());     
-                // get tim type            
-                TimType timType = getTimType("I");
+        //         Double timPoint = null;
+        //         // set client ID
+        //         wydotTim.setClientId(wydotTim.getIncidentId());
+        //         // set start time
+        //         wydotTim.setStartDateTime(wydotTim.getTs());
+        //         // set route
+        //         wydotTim.setRoute(wydotTim.getHighway());     
+        //         // get tim type            
+        //         TimType timType = getTimType("I");
 
-                // check if this is a point TIM
-                if(wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null){
-                    timPoint = wydotTim.getFromRm();
-                }
+        //         // check if this is a point TIM
+        //         if(wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null){
+        //             timPoint = wydotTim.getFromRm();
+        //         }
                 
-                if(wydotTim.getDirection().equals("both")) {
+        //         if(wydotTim.getDirection().equals("both")) {
                     
-                    // first TIM - eastbound - add buffer for point TIMs             
-                    if(timPoint != null)
-                        wydotTim.setFromRm(timPoint - 1);                
+        //             // first TIM - eastbound - add buffer for point TIMs             
+        //             if(timPoint != null)
+        //                 wydotTim.setFromRm(timPoint - 1);                
 
-                    wydotTimService.createUpdateTim("I", wydotTim, "eastbound", itisCodes);
+        //             wydotTimService.createUpdateTim("I", wydotTim, "eastbound", itisCodes);
 
 
-                    // build region name for active tim logger to use            
-                    String regionNamePrev = "eastbound" + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
+        //             // build region name for active tim logger to use            
+        //             String regionNamePrev = "eastbound" + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
 
-                    // create TIM
-                    WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, "eastbound", "I");
-                    // send TIM to RSUs
-                    wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
-                    // send TIM to SDW
-                    wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
+        //             // create TIM
+        //             WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, "eastbound", "I");
+        //             // send TIM to RSUs
+        //             wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
+        //             // send TIM to SDW
+        //             wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
 
-                    // second TIM - westbound - add buffer for point TIMs 
-                    if(timPoint != null)
-                        wydotTim.setFromRm(timPoint + 1);
+        //             // second TIM - westbound - add buffer for point TIMs 
+        //             if(timPoint != null)
+        //                 wydotTim.setFromRm(timPoint + 1);
                     
-                    wydotTimService.createUpdateTim("I", wydotTim, "westbound", itisCodes);                  
-                }
-                else {
-                    // single direction TIM
+        //             wydotTimService.createUpdateTim("I", wydotTim, "westbound", itisCodes);                  
+        //         }
+        //         else {
+        //             // single direction TIM
 
-                    // eastbound - add buffer for point TIMs       
-                    if(wydotTim.getDirection().equals("eastbound") && timPoint != null)
-                        wydotTim.setFromRm(timPoint - 1);    
+        //             // eastbound - add buffer for point TIMs       
+        //             if(wydotTim.getDirection().equals("eastbound") && timPoint != null)
+        //                 wydotTim.setFromRm(timPoint - 1);    
 
-                    // westbound - add buffer for point TIMs         
-                    if(wydotTim.getDirection().equals("westbound") && timPoint != null)
-                        wydotTim.setFromRm(timPoint + 1); 
+        //             // westbound - add buffer for point TIMs         
+        //             if(wydotTim.getDirection().equals("westbound") && timPoint != null)
+        //                 wydotTim.setFromRm(timPoint + 1); 
                     
-                    wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection(), itisCodes);   
-                }
+        //             wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection(), itisCodes);   
+        //         }
             }
         }).start();
     }

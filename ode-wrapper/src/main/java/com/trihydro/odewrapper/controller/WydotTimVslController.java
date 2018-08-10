@@ -48,7 +48,7 @@ public class WydotTimVslController extends WydotTimBaseController {
                 continue;
             }
                 
-            createTims(wydotTim, resultTim.getItisCodes());
+            processRequest(wydotTim, resultTim.getItisCodes());
             
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);     
@@ -73,12 +73,11 @@ public class WydotTimVslController extends WydotTimBaseController {
     }
 
     // asynchronous TIM creation
-    public void createTims(WydotTim wydotTim, List<String> itisCodes) 
+    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
     {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-
                 // get tim type            
                 TimType timType = getTimType(type);
                 

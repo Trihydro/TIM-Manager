@@ -40,53 +40,70 @@ public class WydotTimCcController extends WydotTimBaseController {
              
             resultTim = validateInputIncident(wydotTim);
 
-            // check to see if its an update
-
-            // get Active RSU TIMs based on route/clientId/direction
-            // ActiveTimService.getActiveRsuTims(milepostStart, milepostStop, timTypeId, direction)
-            // List<ActiveTim> activeTims = ActiveTimService.getRsusWithActiveTim(wydotTim.getClientId(), );                
-
             if(resultTim.getResultMessages().size() > 0){
                 resultList.add(resultTim);
                 continue;
             }          
             
-            createTims(wydotTim, resultTim.getItisCodes());   
+            processRequest(wydotTim, resultTim.getItisCodes());   
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim); 
         }
         
         String responseMessage = gson.toJson(resultList);         
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
-    }
+    }   
 
     // asynchronous TIM creation
-    public void createTims(WydotTim wydotTim, List<String> itisCodes) 
+    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
     {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                // set client id
-                wydotTim.setClientId(wydotTim.getSegment());
-
-                if(wydotTim.getDirection().equals("both")) {                
-                    wydotTimService.createUpdateTim("CC", wydotTim, "eastbound", itisCodes);
-                    wydotTimService.createUpdateTim("CC", wydotTim, "westbound", itisCodes);      
+                // if direction == both
+                if(wydotTim.getDirection().equals("both")){
+                    // eastbound
+                    handleTims(wydotTim, itisCodes, "eastbound");              
+                                        
+                    // westbound
+                    handleTims(wydotTim, itisCodes, "westbound");
                 }
-                else
-                    wydotTimService.createUpdateTim("CC", wydotTim, wydotTim.getDirection(), itisCodes);                     
+                    
+                // else handle one direction
+                handleTims(wydotTim, itisCodes, wydotTim.getDirection());         
             }
         }).start();
     }
 
+    private void removeRsuTims(List<ActiveTim> activeTims){
+        if(activeTims.size() > 0){                                
+            for (ActiveTim activeTim : activeTims) {
+                ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());
+            }              
+        }    
+    }
+
+    private void handleTims(WydotTim wydotTim, List<String> itisCodes, String direction){
+        // get tim type            
+        TimType timType = getTimType(type);
+        List<ActiveTim> activeTims = null;
+        // else handle one direction
+        // check if update
+        activeTims = ActiveTimService.getActiveRsuTimsByClientIdDirection(wydotTim.getSegment(), timType.getTimTypeId(), direction);
+        // if update delete old tims
+        removeRsuTims(activeTims);                                                      
+        // then create new tims
+        createSendTims(wydotTim, itisCodes, direction, timType);
+    }
+
     private void createSendTims(WydotTim wydotTim, List<String> itisCodes, String direction, TimType timType){
         // build region name for active tim logger to use            
-        String regionNamePrevWB = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
+        String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
         // create TIM
         WydotTravelerInputData timToSendWB = wydotTimService.createTim(wydotTim, direction, type, itisCodes);
         // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
-        // send TIM to SDW
-        wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
+        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrev, wydotTim.getDirection(), timType);
+         // update or send new SDW TIM
+         wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrev, wydotTim.getDirection(), timType);
     }
 }

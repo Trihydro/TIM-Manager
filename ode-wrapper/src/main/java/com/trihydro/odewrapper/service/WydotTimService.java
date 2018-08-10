@@ -264,6 +264,7 @@ public class WydotTimService
         else{
             resultsMessages.add("success");
         }        
+
         deleteTimsFromRsusAndSdw(activeTims);
        
         result.setResultMessages(resultsMessages);
@@ -308,11 +309,9 @@ public class WydotTimService
 
     public boolean clearTimsById(String timTypeStr, String clientId){                
      
-        WydotTim wydotTim = new WydotTim();
-     
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         WydotRsu rsu = null;
-        activeTims = ActiveTimService.getActiveTimsByClientId(clientId, timTypeStr);   
+        //activeTims = ActiveTimService.get(clientId, timTypeStr);   
       
         deleteTimsFromRsusAndSdw(activeTims);
       
@@ -323,7 +322,7 @@ public class WydotTimService
 
         TimType timType = getTimType(timTypeStr);
         
-        List<ActiveTim> activeTims = ActiveTimService.getActivesTimByClientIdTimType(clientId, timType.getTimTypeId());
+        List<ActiveTim> activeTims = ActiveTimService.getActiveTimsByClientIdTimId(clientId, timType.getTimTypeId());
 
         return activeTims;
     }

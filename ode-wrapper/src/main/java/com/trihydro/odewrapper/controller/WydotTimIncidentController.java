@@ -26,171 +26,175 @@ import org.springframework.http.HttpStatus;
 
 @CrossOrigin
 @RestController
-@Api(description="Incidents")
+@Api(description = "Incidents")
 public class WydotTimIncidentController extends WydotTimBaseController {
 
     private static String type = "I";
 
-    @RequestMapping(value="/incident-tim", method = RequestMethod.POST, headers="Accept=application/json")
-    public ResponseEntity<String> createIncidentTim(@RequestBody WydotTimList wydotTimList) { 
-       
+    @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
+    public ResponseEntity<String> createIncidentTim(@RequestBody WydotTimList wydotTimList) {
+
         System.out.println("Create Incident TIM");
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
-        // build TIM        
+        // build TIM
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
-            
+
             resultTim = validateInputIncident(wydotTim);
 
-            if(resultTim.getResultMessages().size() > 0){
+            if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
-            }            
-   
-            processRequest(wydotTim, resultTim.getItisCodes());   
+            }
+
+            // add valid TIM to list to be sent
+            validTims.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
-            resultList.add(resultTim);                
-        }                
+            resultList.add(resultTim);
+        }
 
-        String responseMessage = gson.toJson(resultList);         
+        processRequest(validTims);
+
+        String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    @RequestMapping(value="/incident-tim", method = RequestMethod.PUT, headers="Accept=application/json")
-    public ResponseEntity<String> updateIncidentTim(@RequestBody WydotTimList wydotTimList) { 
-       
+    @RequestMapping(value = "/incident-tim", method = RequestMethod.PUT, headers = "Accept=application/json")
+    public ResponseEntity<String> updateIncidentTim(@RequestBody WydotTimList wydotTimList) {
+
         System.out.println("Update Incident TIM");
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
-        // build TIM        
+        // build TIM
         for (WydotTim wydotTim : wydotTimList.getTimIncidentList()) {
-            
+
             resultTim = validateInputIncident(wydotTim);
 
-            if(resultTim.getResultMessages().size() > 0){
+            if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
-            }             
+            }
+
+            // add valid TIM to list to be sent
+            validTims.add(wydotTim);
 
             // find tims to update
-            List<ActiveTim> activeTims = ActiveTimService.getRsusWithActiveTim(wydotTim.getIncidentId(), wydotTim.getDirection(), "I");
+            List<ActiveTim> activeTims = ActiveTimService.getRsusWithActiveTim(wydotTim.getIncidentId(),
+                    wydotTim.getDirection(), "I");
 
-            //  for each TIM, delete off RSUs
+            // for each TIM, delete off RSUs
 
             // delete off active tim table
 
             // recreate RSU TIMs
-            
-            //update SAT TIM
 
-            processRequest(wydotTim, resultTim.getItisCodes());   
-            
+            // update SAT TIM
+
             resultTim.getResultMessages().add("success");
-            resultList.add(resultTim);                
-        }                
+            resultList.add(resultTim);
+        }
 
-        String responseMessage = gson.toJson(resultList);         
+        processRequest(validTims);
+
+        String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
-    
-    @RequestMapping(value="/incident-tim/{incidentId}", method = RequestMethod.DELETE, headers="Accept=application/json")
-    public ResponseEntity<String> deleteIncidentTim(@PathVariable String incidentId) { 
-       
+
+    @RequestMapping(value = "/incident-tim/{incidentId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    public ResponseEntity<String> deleteIncidentTim(@PathVariable String incidentId) {
+
         // clear TIM
-        wydotTimService.clearTimsById("I", incidentId);        
+        wydotTimService.clearTimsById("I", incidentId);
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    @RequestMapping(value="/incident-tim", method = RequestMethod.GET, headers="Accept=application/json")
-    public Collection<ActiveTim> getIncidentTims() { 
-       
+    @RequestMapping(value = "/incident-tim", method = RequestMethod.GET, headers = "Accept=application/json")
+    public Collection<ActiveTim> getIncidentTims() {
+
         // get active TIMs
-        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("I");   
+        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("I");
 
         return activeTims;
     }
 
-    @RequestMapping(value="/incident-tim/{incidentId}", method = RequestMethod.GET, headers="Accept=application/json")
-    public Collection<ActiveTim> getIncidentTimById(@PathVariable String incidentId) { 
-       
+    @RequestMapping(value = "/incident-tim/{incidentId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public Collection<ActiveTim> getIncidentTimById(@PathVariable String incidentId) {
+
         // get active TIMs
-        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("I", incidentId);    
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("I", incidentId);
 
         // // add ITIS codes to TIMs
         // for (ActiveTim activeTim : activeTims) {
-        //     ActiveTimService.addItisCodesToActiveTim(activeTim);
+        // ActiveTimService.addItisCodesToActiveTim(activeTim);
         // }
 
         return activeTims;
     }
 
     // asynchronous TIM creation
-    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
-    {
+    public void processRequest(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
 
-        //         Double timPoint = null;
-        //         // set client ID
-        //         wydotTim.setClientId(wydotTim.getIncidentId());
-        //         // set start time
-        //         wydotTim.setStartDateTime(wydotTim.getTs());
-        //         // set route
-        //         wydotTim.setRoute(wydotTim.getHighway());     
-        //         // get tim type            
-        //         TimType timType = getTimType("I");
+                // get tim type
+                TimType timType = getTimType(type);
 
-        //         // check if this is a point TIM
-        //         if(wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null){
-        //             timPoint = wydotTim.getFromRm();
-        //         }
-                
-        //         if(wydotTim.getDirection().equals("both")) {
-                    
-        //             // first TIM - eastbound - add buffer for point TIMs             
-        //             if(timPoint != null)
-        //                 wydotTim.setFromRm(timPoint - 1);                
+                for (WydotTim wydotTim : wydotTims) {
 
-        //             wydotTimService.createUpdateTim("I", wydotTim, "eastbound", itisCodes);
+                    Double timPoint = null;
+                    // set client ID
+                    wydotTim.setClientId(wydotTim.getIncidentId());
+                    // set start time
+                    wydotTim.setStartDateTime(wydotTim.getTs());
+                    // set route
+                    wydotTim.setRoute(wydotTim.getHighway());
 
+                    // check if this is a point TIM
+                    if (wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null) {
+                        timPoint = wydotTim.getFromRm();
+                    }
 
-        //             // build region name for active tim logger to use            
-        //             String regionNamePrev = "eastbound" + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
+                    if (wydotTim.getDirection().equals("both")) {
 
-        //             // create TIM
-        //             WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, "eastbound", "I");
-        //             // send TIM to RSUs
-        //             wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
-        //             // send TIM to SDW
-        //             wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, "eastbound", timType);
+                        // first TIM - eastbound - add buffer for point TIMs
+                        if (timPoint != null)
+                            wydotTim.setFromRm(timPoint - 1);
 
-        //             // second TIM - westbound - add buffer for point TIMs 
-        //             if(timPoint != null)
-        //                 wydotTim.setFromRm(timPoint + 1);
-                    
-        //             wydotTimService.createUpdateTim("I", wydotTim, "westbound", itisCodes);                  
-        //         }
-        //         else {
-        //             // single direction TIM
+                        // wydotTimService.createUpdateTim("I", wydotTim, "eastbound", itisCodes);
+                        createSendTims(wydotTim, "eastbound", timType);
 
-        //             // eastbound - add buffer for point TIMs       
-        //             if(wydotTim.getDirection().equals("eastbound") && timPoint != null)
-        //                 wydotTim.setFromRm(timPoint - 1);    
+                        // second TIM - westbound - add buffer for point TIMs
+                        if (timPoint != null)
+                            wydotTim.setFromRm(timPoint + 1);
 
-        //             // westbound - add buffer for point TIMs         
-        //             if(wydotTim.getDirection().equals("westbound") && timPoint != null)
-        //                 wydotTim.setFromRm(timPoint + 1); 
-                    
-        //             wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection(), itisCodes);   
-        //         }
+                        // wydotTimService.createUpdateTim("I", wydotTim, "westbound", itisCodes);
+                        createSendTims(wydotTim, "westbound", timType);
+                    } else {
+                        // single direction TIM
+
+                        // eastbound - add buffer for point TIMs
+                        if (wydotTim.getDirection().equals("eastbound") && timPoint != null)
+                            wydotTim.setFromRm(timPoint - 1);
+
+                        // westbound - add buffer for point TIMs
+                        if (wydotTim.getDirection().equals("westbound") && timPoint != null)
+                            wydotTim.setFromRm(timPoint + 1);
+
+                        // wydotTimService.createUpdateTim("I", wydotTim, wydotTim.getDirection(),
+                        // itisCodes);
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
+                    }
+                }
             }
         }).start();
     }

@@ -241,13 +241,13 @@ import javax.servlet.ServletContext;
 		
 		makeTims();
 
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
+		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientIdTimId("IN49251", timTypeId);
 		assertEquals(1, activeTimsBeforeDelete.size());	
 
 		this.mockMvc.perform(MockMvcRequestBuilders.delete("/incident-tim/IN49251"))
 			.andExpect(MockMvcResultMatchers.status().isOk());
 
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActivesTimByClientId("IN49251", timTypeId);
+		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientIdTimId("IN49251", timTypeId);
 		assertEquals(0, activeTimsAfterDelete.size());	
 	}
 	

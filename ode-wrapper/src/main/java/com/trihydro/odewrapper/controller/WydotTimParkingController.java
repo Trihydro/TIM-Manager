@@ -25,62 +25,66 @@ import org.springframework.http.HttpStatus;
 
 @CrossOrigin
 @RestController
-@Api(description="Parking")
+@Api(description = "Parking")
 public class WydotTimParkingController extends WydotTimBaseController {
 
     private static String type = "P";
-    
-    @RequestMapping(value="/parking-tim", method = RequestMethod.POST, headers="Accept=application/json")
-    public ResponseEntity<String> createParkingTim(@RequestBody WydotTimList wydotTimList) {        
-        
+
+    @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")
+    public ResponseEntity<String> createParkingTim(@RequestBody WydotTimList wydotTimList) {
+
         System.out.println("Create Parking TIM");
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
-        ControllerResult resultTim = null;      
+        ControllerResult resultTim = null;
+        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
-        // build TIM        
+        // build TIM
         for (WydotTim wydotTim : wydotTimList.getTimParkingList()) {
-            
+
             resultTim = validateInputParking(wydotTim);
 
-            if(resultTim.getResultMessages().size() > 0){
+            if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
             }
-                
-            processRequest(wydotTim, resultTim.getItisCodes());
-            
+
+            // add valid TIM to list to be sent
+            validTims.add(wydotTim);
+
             resultTim.getResultMessages().add("success");
-            resultList.add(resultTim);     
+            resultList.add(resultTim);
         }
 
-        String responseMessage = gson.toJson(resultList);         
-        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);       
+        processRequest(validTims);
+
+        String responseMessage = gson.toJson(resultList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    @RequestMapping(value="/parking-tim", method = RequestMethod.GET, headers="Accept=application/json")
-    public Collection<ActiveTim> getParkingTims() { 
-       
+    @RequestMapping(value = "/parking-tim", method = RequestMethod.GET, headers = "Accept=application/json")
+    public Collection<ActiveTim> getParkingTims() {
+
         // clear TIM
-        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("P");        
+        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("P");
 
         return activeTims;
     }
 
-    @RequestMapping(value="/parking-tim/{clientId}", method = RequestMethod.GET, headers="Accept=application/json")
-    public Collection<ActiveTim> getParkingTimById(@PathVariable String clientId) { 
-       
+    @RequestMapping(value = "/parking-tim/{clientId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public Collection<ActiveTim> getParkingTimById(@PathVariable String clientId) {
+
         // clear TIM
-        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", clientId);        
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", clientId);
 
         return activeTims;
     }
 
-    @RequestMapping(value="/parking-tim/itis-codes/{id}", method = RequestMethod.GET, headers="Accept=application/json")
-    public Collection<ActiveTim> getParkingTimByIdWithItisCodes(@PathVariable String id) { 
-               
-        // get tims              
-        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", id); 
+    @RequestMapping(value = "/parking-tim/itis-codes/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public Collection<ActiveTim> getParkingTimByIdWithItisCodes(@PathVariable String id) {
+
+        // get tims
+        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", id);
 
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
@@ -90,59 +94,47 @@ public class WydotTimParkingController extends WydotTimBaseController {
         return activeTims;
     }
 
-    @RequestMapping(value="/parking-tim/{id}", method = RequestMethod.DELETE, headers="Accept=application/json")
-    public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) { 
+    @RequestMapping(value = "/parking-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
 
         // clear TIM
         wydotTimService.clearTimsById("P", id);
-        
+
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
     // asynchronous TIM creation
-    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
-    {
+    public void processRequest(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
 
-                 // get tim type            
+                // get tim type
                 TimType timType = getTimType(type);
 
-                if(wydotTim.getDirection().equals("both")) {
+                for (WydotTim wydotTim : wydotTims) {
+                    if (wydotTim.getDirection().equals("both")) {
 
-                    wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
-                    wydotTim.setToRm(wydotTim.getMileMarker());    
-                    createSendTims(wydotTim, itisCodes, "eastbound", timType);  
-    
-                    wydotTim.setFromRm(wydotTim.getMileMarker());     
-                    wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
-                    createSendTims(wydotTim, itisCodes, "westbound", timType);               
-                }
-                else{
-                    if(wydotTim.getDirection().equals("eastbound")){
-                        wydotTim.setFromRm(wydotTim.getMileMarker() - 10);     
-                        wydotTim.setToRm(wydotTim.getMileMarker());    
+                        wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
+                        wydotTim.setToRm(wydotTim.getMileMarker());
+                        createSendTims(wydotTim, "eastbound", timType);
+
+                        wydotTim.setFromRm(wydotTim.getMileMarker());
+                        wydotTim.setToRm(wydotTim.getMileMarker() + 10);
+                        createSendTims(wydotTim, "westbound", timType);
+                    } else {
+                        if (wydotTim.getDirection().equals("eastbound")) {
+                            wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
+                            wydotTim.setToRm(wydotTim.getMileMarker());
+                        } else {
+                            wydotTim.setFromRm(wydotTim.getMileMarker());
+                            wydotTim.setToRm(wydotTim.getMileMarker() + 10);
+                        }
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
                     }
-                    else{
-                        wydotTim.setFromRm(wydotTim.getMileMarker());     
-                        wydotTim.setToRm(wydotTim.getMileMarker() + 10);   
-                    }
-                    createSendTims(wydotTim, itisCodes, wydotTim.getDirection(), timType);           
                 }
             }
         }).start();
-    }
-
-    private void createSendTims(WydotTim wydotTim, List<String> itisCodes, String direction, TimType timType){
-        // build region name for active tim logger to use            
-        String regionNamePrevWB = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
-        // create TIM
-        WydotTravelerInputData timToSendWB = wydotTimService.createTim(wydotTim, direction, type, itisCodes);
-        // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
-        // send TIM to SDW
-        wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
     }
 }

@@ -178,13 +178,13 @@ import javax.servlet.ServletContext;
 	public void testDeleteRwTimsByClientId() throws Exception {
 		makeTims();
 
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActivesTimByClientId("15917", timTypeId);
+		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientIdTimId("15917", timTypeId);
 		assertEquals(1, activeTimsBeforeDelete.size());	
 
 		this.mockMvc.perform(MockMvcRequestBuilders.delete("/rw-tim/15917"))
 			.andExpect(MockMvcResultMatchers.status().isOk());
 
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActivesTimByClientId("15917", timTypeId);
+		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientIdTimId("15917", timTypeId);
 		assertEquals(0, activeTimsAfterDelete.size());	
 	}
     

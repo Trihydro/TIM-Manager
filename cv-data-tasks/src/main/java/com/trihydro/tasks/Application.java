@@ -19,35 +19,43 @@ import org.springframework.http.HttpHeaders;
 @SpringBootApplication
 public class Application {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
 	}
 
 	public Application() {
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
-		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(), 0, 1, TimeUnit.HOURS);	
-    }
+		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(), 0, 1, TimeUnit.HOURS);
+	}
 
 	public static class RemoveExpiredActiveTims implements Runnable {
 		public void run() {
+			try {
+				// select active tims
+				List<ActiveTim> activeTims = ActiveTimService.getExpiredActiveTims();
 
-			// select active tims
-			List<ActiveTim> activeTims = ActiveTimService.getExpiredActiveTims();
+				// delete active tims from rsus
 
-			// delete active tims from rsus		
-				
-			RestTemplate restTemplate = new RestTemplate();   
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);                
-			HttpEntity<String> entity = new HttpEntity<String>(null, headers);      
+				RestTemplate restTemplate = new RestTemplate();
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_JSON);
+				HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 
-			// send to tim type endpoint to delete from RSUs and SDWs
-			for (ActiveTim activeTim : activeTims) {     
-				restTemplate.exchange("http://cvodedp01:7777" + "/parking-tim/" + activeTim.getClientId(), HttpMethod.DELETE, entity, String.class);              							
-			}  		
+				// send to tim type endpoint to delete from RSUs and SDWs
+				for (ActiveTim activeTim : activeTims) {
+					restTemplate.exchange("http://cvodedp01:7777" + "/parking-tim/" + activeTim.getClientId(),
+							HttpMethod.DELETE, entity, String.class);
+				}
 
-			// delete expired tims from database
-			ActiveTimService.deleteExpiredActiveTims();
+				// delete expired tims from database
+				ActiveTimService.deleteExpiredActiveTims();
+			} catch (Exception e) {
+				e.printStackTrace();
+				// and re throw it so that the Executor also gets this error so that it can do
+				// what it would
+				// usually do
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }

@@ -22,94 +22,84 @@ import org.springframework.http.HttpStatus;
 
 @CrossOrigin
 @RestController
-@Api(description="Road Conditions")
+@Api(description = "Road Conditions")
 public class WydotTimRcController extends WydotTimBaseController {
-   
+
     private static String type = "RC";
 
-    @RequestMapping(value="/create-update-rc-tim", method = RequestMethod.POST, headers="Accept=application/json")    
-    public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody WydotTimList wydotTimList) { 
-       
+    @RequestMapping(value = "/create-update-rc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
+    public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody WydotTimList wydotTimList) {
+
         System.out.println("Create Update RC TIM");
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
-        // build TIM        
+        // build TIM
         for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
-            
+
             resultTim = validateInputRc(wydotTim);
 
-            if(resultTim.getResultMessages().size() > 0){
+            if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
             }
-                
-            processRequest(wydotTim, resultTim.getItisCodes());
+
+            // add valid TIM to list to be sent
+            validTims.add(wydotTim);
+
             resultTim.getResultMessages().add("success");
-            resultList.add(resultTim);   
+            resultList.add(resultTim);
         }
 
-        String responseMessage = gson.toJson(resultList);         
+        processRequest(validTims);
+
+        String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    @RequestMapping(value="/submit-rc-ac", method = RequestMethod.PUT, headers="Accept=application/json")
-    public ResponseEntity<String> submitAllClearRoadConditionsTim(@RequestBody WydotTimList wydotTimList) {        
+    @RequestMapping(value = "/submit-rc-ac", method = RequestMethod.PUT, headers = "Accept=application/json")
+    public ResponseEntity<String> submitAllClearRoadConditionsTim(@RequestBody WydotTimList wydotTimList) {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
 
         // clear TIMs
-        for (WydotTim wydotTim : wydotTimList.getTimRcList()) {  
-            if(wydotTim.getDirection().equals("both")) {
+        for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
+            if (wydotTim.getDirection().equals("both")) {
                 resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, "eastbound");
                 resultList.add(resultTim);
-                resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, "westbound");   
+                resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, "westbound");
                 resultList.add(resultTim);
-            }  
-            else
-            resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, wydotTim.getDirection());   
+            } else
+                resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, wydotTim.getDirection());
             resultList.add(resultTim);
         }
 
-        String responseMessage = gson.toJson(resultList);         
+        String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
     // asynchronous TIM creation
-    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
-    {
+    public void processRequest(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                // get tim type            
+                // get tim type
                 TimType timType = getTimType(type);
-                
-                if(wydotTim.getDirection().equals("both")) {
-                    // eastbound
-                    createSendTims(wydotTim, itisCodes, "eastbound", timType);                                         
+                for (WydotTim wydotTim : wydotTims) {
+                    if (wydotTim.getDirection().equals("both")) {
+                        // eastbound
+                        createSendTims(wydotTim, "eastbound", timType);
 
-                    // westbound
-                    createSendTims(wydotTim, itisCodes, "westbound", timType);
+                        // westbound
+                        createSendTims(wydotTim, "westbound", timType);
+                    } else {
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
+                    }
                 }
-                else{
-                    createSendTims(wydotTim, itisCodes, wydotTim.getDirection(), timType);
-                }       
             }
         }).start();
     }
-
-
-    private void createSendTims(WydotTim wydotTim, List<String> itisCodes, String direction, TimType timType){
-        // build region name for active tim logger to use            
-        String regionNamePrevWB = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
-        // create TIM
-        WydotTravelerInputData timToSendWB = wydotTimService.createTim(wydotTim, direction, type, itisCodes);
-        // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
-        // send TIM to SDW
-        wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
-    }
-
 }

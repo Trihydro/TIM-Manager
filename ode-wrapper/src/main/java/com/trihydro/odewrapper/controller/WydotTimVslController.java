@@ -26,83 +26,78 @@ import org.springframework.http.HttpStatus;
 
 @CrossOrigin
 @RestController
-@Api(description="Variable Speed Limits")
+@Api(description = "Variable Speed Limits")
 public class WydotTimVslController extends WydotTimBaseController {
 
     private static String type = "VSL";
-    
-    @RequestMapping(value="/vsl-tim", method = RequestMethod.POST, headers="Accept=application/json")
-    public ResponseEntity<String> createUpdateVslTim(@RequestBody WydotTimList wydotTimList) {        
-        
+
+    @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")
+    public ResponseEntity<String> createUpdateVslTim(@RequestBody WydotTimList wydotTimList) {
+
         System.out.println("Create/Update VSL TIM");
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
-        // build TIM        
+        // build TIM
         for (WydotTim wydotTim : wydotTimList.getTimVslList()) {
             resultTim = validateInputVsl(wydotTim);
 
-            if(resultTim.getResultMessages().size() > 0){
+            if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
             }
-                
-            processRequest(wydotTim, resultTim.getItisCodes());
-            
+
+            // add valid TIM to list to be sent
+            validTims.add(wydotTim);
+
             resultTim.getResultMessages().add("success");
-            resultList.add(resultTim);     
+            resultList.add(resultTim);
         }
-        
-        String responseMessage = gson.toJson(resultList);         
-        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);    
+
+        // send TIMs
+        processRequest(validTims);
+
+        String responseMessage = gson.toJson(resultList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
-    
-    @RequestMapping(value="/vsl-tim", method = RequestMethod.GET, headers="Accept=application/json")
-    public Collection<ActiveTim> getVslTims() { 
-       
+
+    @RequestMapping(value = "/vsl-tim", method = RequestMethod.GET, headers = "Accept=application/json")
+    public Collection<ActiveTim> getVslTims() {
+
         // get active TIMs
-        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("VSL");   
-        
+        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("VSL");
+
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
             ActiveTimService.addItisCodesToActiveTim(activeTim);
         }
-          
+
         return activeTims;
     }
 
     // asynchronous TIM creation
-    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
-    {
+    public void processRequest(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                // get tim type            
+                // get tim type
                 TimType timType = getTimType(type);
-                
-                if(wydotTim.getDirection().equals("both")) {
-                    // eastbound
-                    createSendTims(wydotTim, itisCodes, "eastbound", timType);                                         
 
-                    // westbound
-                    createSendTims(wydotTim, itisCodes, "westbound", timType);
+                for (WydotTim wydotTim : wydotTims) {
+                    if (wydotTim.getDirection().equals("both")) {
+                        // eastbound
+                        createSendTims(wydotTim, "eastbound", timType);
+
+                        // westbound
+                        createSendTims(wydotTim, "westbound", timType);
+                    } else {
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
+                    }
                 }
-                else{
-                    createSendTims(wydotTim, itisCodes, wydotTim.getDirection(), timType);
-                }                         
             }
         }).start();
     }
 
-    private void createSendTims(WydotTim wydotTim, List<String> itisCodes, String direction, TimType timType){
-        // build region name for active tim logger to use            
-        String regionNamePrevWB = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
-        // create TIM
-        WydotTravelerInputData timToSendWB = wydotTimService.createTim(wydotTim, direction, type, itisCodes);
-        // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
-        // send TIM to SDW
-        wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrevWB, wydotTim.getDirection(), timType);
-    }
 }

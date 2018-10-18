@@ -23,87 +23,83 @@ import java.util.ArrayList;
 
 @CrossOrigin
 @RestController
-@Api(description="Chain Controls")
+@Api(description = "Chain Controls")
 public class WydotTimCcController extends WydotTimBaseController {
-    
+
     private static String type = "CC";
 
-    @RequestMapping(value="/cc-tim", method = RequestMethod.POST, headers="Accept=application/json")
-    public ResponseEntity<String> createChainControlTim(@RequestBody WydotTimList wydotTimList) {        
-        
+    @RequestMapping(value = "/cc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
+    public ResponseEntity<String> createChainControlTim(@RequestBody WydotTimList wydotTimList) {
+
         System.out.println("CHAIN CONTROL TIM");
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
-        // build TIM        
+        // build TIM
         for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
-             
+
             resultTim = validateInputIncident(wydotTim);
 
-            if(resultTim.getResultMessages().size() > 0){
+            if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
-            }          
-            
-            processRequest(wydotTim, resultTim.getItisCodes());   
+            }
+
+            // add valid TIM to list to be sent
+            validTims.add(wydotTim);
+
             resultTim.getResultMessages().add("success");
-            resultList.add(resultTim); 
+            resultList.add(resultTim);
         }
-        
-        String responseMessage = gson.toJson(resultList);         
+
+        processRequest(validTims);
+
+        String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
-    }   
+    }
 
     // asynchronous TIM creation
-    public void processRequest(WydotTim wydotTim, List<String> itisCodes) 
-    {
+    public void processRequest(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                // if direction == both
-                if(wydotTim.getDirection().equals("both")){
-                    // eastbound
-                    handleTims(wydotTim, itisCodes, "eastbound");              
-                                        
-                    // westbound
-                    handleTims(wydotTim, itisCodes, "westbound");
+                for (WydotTim wydotTim : wydotTims) {
+                    // if direction == both
+                    if (wydotTim.getDirection().equals("both")) {
+                        // eastbound
+                        handleTims(wydotTim, "eastbound");
+
+                        // westbound
+                        handleTims(wydotTim, "westbound");
+                    }
+                    // else handle one direction
+                    handleTims(wydotTim, wydotTim.getDirection());
                 }
-                    
-                // else handle one direction
-                handleTims(wydotTim, itisCodes, wydotTim.getDirection());         
             }
         }).start();
     }
 
-    private void removeRsuTims(List<ActiveTim> activeTims){
-        if(activeTims.size() > 0){                                
+    private void removeRsuTims(List<ActiveTim> activeTims) {
+        if (activeTims.size() > 0) {
             for (ActiveTim activeTim : activeTims) {
                 ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());
-            }              
-        }    
+            }
+        }
     }
 
-    private void handleTims(WydotTim wydotTim, List<String> itisCodes, String direction){
-        // get tim type            
+    private void handleTims(WydotTim wydotTim, String direction) {
+        // get tim type
         TimType timType = getTimType(type);
         List<ActiveTim> activeTims = null;
         // else handle one direction
         // check if update
-        activeTims = ActiveTimService.getActiveRsuTimsByClientIdDirection(wydotTim.getSegment(), timType.getTimTypeId(), direction);
+        activeTims = ActiveTimService.getActiveRsuTimsByClientIdDirection(wydotTim.getSegment(), timType.getTimTypeId(),
+                direction);
         // if update delete old tims
-        removeRsuTims(activeTims);                                                      
+        removeRsuTims(activeTims);
         // then create new tims
-        createSendTims(wydotTim, itisCodes, direction, timType);
+        createSendTims(wydotTim, direction, timType);
     }
 
-    private void createSendTims(WydotTim wydotTim, List<String> itisCodes, String direction, TimType timType){
-        // build region name for active tim logger to use            
-        String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_" + wydotTim.getToRm();  
-        // create TIM
-        WydotTravelerInputData timToSendWB = wydotTimService.createTim(wydotTim, direction, type, itisCodes);
-        // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSendWB, regionNamePrev, wydotTim.getDirection(), timType);
-         // update or send new SDW TIM
-         wydotTimService.sendTimToSDW(wydotTim, timToSendWB, regionNamePrev, wydotTim.getDirection(), timType);
-    }
 }

@@ -1,12 +1,12 @@
 package com.trihydro.odewrapper.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class WydotTim implements Cloneable
-{
+public class WydotTim implements Cloneable {
 	private String direction;
 	private Double fromRm;
-	private Double toRm;	
+	private Double toRm;
 	private String roadCode;
 	private String route;
 	private Integer speed;
@@ -15,328 +15,277 @@ public class WydotTim implements Cloneable
 	private String startTs;
 	private String endTs;
 	private String endDateTime;
-	private String clientId;	
+	private String clientId;
 	private String segment;
 	private String district;
 	private String id;
 	private String impact;
-    private String problem;
-    private String effect;
-    private String action;
-    private String problemOtherText;
-    private String ts;
-    private String incidentId;
+	private String problem;
+	private String effect;
+	private String action;
+	private String problemOtherText;
+	private String ts;
+	private String incidentId;
 	private String highway;
 	private Integer pk;
 	private String resultMessage;
 	private Integer availability;
 	private Double mileMarker;
 	private String surface;
-	private ArrayList<Buffer> buffers; 
+	private ArrayList<Buffer> buffers;
 	private String exit;
+	private List<String> itisCodes;
 
 	@Override
 	public WydotTim clone() throws CloneNotSupportedException {
-    	return (WydotTim)super.clone();
+		return (WydotTim) super.clone();
 	}
 
-	public String getSegment() 
-	{
+	public String getSegment() {
 		return this.segment;
 	}
 
-	public void setSegment(String segment) 
-	{
+	public void setSegment(String segment) {
 		this.segment = segment;
 	}
 
-	public String getDistrict() 
-	{
+	public List<String> getItisCodes() {
+		return this.itisCodes;
+	}
+
+	public void setItisCodes(List<String> itisCodes) {
+		this.itisCodes = itisCodes;
+	}
+
+	public String getDistrict() {
 		return this.district;
 	}
 
-	public void setDistrict(String district) 
-	{
+	public void setDistrict(String district) {
 		this.district = district;
 	}
 
-	public String getId() 
-	{
+	public String getId() {
 		return this.id;
 	}
 
-	public void setId(String id) 
-	{
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public String getStartDateTime() 
-	{
+	public String getStartDateTime() {
 		return this.startDateTime;
 	}
 
-	public void setStartDateTime(String startDateTime) 
-	{
+	public void setStartDateTime(String startDateTime) {
 		this.startDateTime = startDateTime;
 	}
 
-	public String getStartTs() 
-	{
+	public String getStartTs() {
 		return this.startTs;
 	}
 
-	public void setStartTs(String startTs) 
-	{
+	public void setStartTs(String startTs) {
 		this.startTs = startTs;
 	}
 
-	public String getEndTs() 
-	{
+	public String getEndTs() {
 		return this.endTs;
 	}
 
-	public void setEndTs(String endTs) 
-	{
+	public void setEndTs(String endTs) {
 		this.endTs = endTs;
 	}
 
-	public String getEndDateTime() 
-	{
+	public String getEndDateTime() {
 		return this.endDateTime;
 	}
 
-	public void setEndDateTime(String endDateTime) 
-	{
+	public void setEndDateTime(String endDateTime) {
 		this.endDateTime = endDateTime;
 	}
 
-	public String getClientId()
-	{
+	public String getClientId() {
 		return this.clientId;
 	}
 
-	public void setClientId(String clientId) 
-	{
+	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
 
-	public String getDirection() 
-	{
+	public String getDirection() {
 		return this.direction;
 	}
 
-	public void setDirection(String direction) 
-	{
+	public void setDirection(String direction) {
 		this.direction = direction;
 	}
 
-	public Double getFromRm() 
-	{
+	public Double getFromRm() {
 		return this.fromRm;
 	}
 
-	public void setFromRm(Double fromRm) 
-	{
+	public void setFromRm(Double fromRm) {
 		this.fromRm = fromRm;
 	}
 
-	public Double getToRm() 
-	{
+	public Double getToRm() {
 		return this.toRm;
 	}
 
-	public void setToRm(Double toRm) 
-	{
+	public void setToRm(Double toRm) {
 		this.toRm = toRm;
 	}
 
-	public String getRoadCode() 
-	{
+	public String getRoadCode() {
 		return this.roadCode;
 	}
 
-	public void setRoadCode(String roadCode) 
-	{
+	public void setRoadCode(String roadCode) {
 		this.roadCode = roadCode;
 	}
 
-	public Integer[] getAdvisory() 
-	{
+	public Integer[] getAdvisory() {
 		return this.advisory;
 	}
 
-	public void setAdvisory(Integer[] advisory) 
-	{
+	public void setAdvisory(Integer[] advisory) {
 		this.advisory = advisory;
 	}
 
-	public String getRoute() 
-	{
+	public String getRoute() {
 		return this.route;
 	}
 
-	public void setRoute(String route) 
-	{
+	public void setRoute(String route) {
 		this.route = route;
 	}
 
-	public Integer getSpeed() 
-	{
+	public Integer getSpeed() {
 		return this.speed;
 	}
 
-	public void setSpeed(Integer speed) 
-	{
+	public void setSpeed(Integer speed) {
 		this.speed = speed;
 	}
 
-	public String getImpact() 
-	{
+	public String getImpact() {
 		return this.impact;
 	}
 
-	public void setImpact(String impact) 
-	{
+	public void setImpact(String impact) {
 		this.impact = impact;
 	}
 
-	public String getProblem() 
-	{
+	public String getProblem() {
 		return this.problem;
 	}
 
-	public void setProblem(String problem) 
-	{
+	public void setProblem(String problem) {
 		this.problem = problem;
-    }
-    
-    public String getEffect() 
-	{
+	}
+
+	public String getEffect() {
 		return this.effect;
 	}
 
-	public void setEffect(String effect) 
-	{
+	public void setEffect(String effect) {
 		this.effect = effect;
-    }
-    
-    public String getAction() 
-	{
+	}
+
+	public String getAction() {
 		return this.action;
 	}
 
-	public void setAction(String action) 
-	{
+	public void setAction(String action) {
 		this.action = action;
-    }
-    
-    public String getProblemOtherText() 
-	{
+	}
+
+	public String getProblemOtherText() {
 		return this.problemOtherText;
 	}
 
-    public void setProblemOtherText(String problemOtherText) 
-	{
+	public void setProblemOtherText(String problemOtherText) {
 		this.problemOtherText = problemOtherText;
-    }
-    
-    public String getTs() 
-	{
+	}
+
+	public String getTs() {
 		return this.ts;
 	}
 
-    public void setTs(String ts) 
-	{
+	public void setTs(String ts) {
 		this.ts = ts;
-    }
-    
-    public String getIncidentId() 
-	{
+	}
+
+	public String getIncidentId() {
 		return this.incidentId;
 	}
 
-    public void setIncidentId(String incidentId) 
-	{
+	public void setIncidentId(String incidentId) {
 		this.incidentId = incidentId;
 	}
 
-	public String getHighway() 
-	{
+	public String getHighway() {
 		return this.highway;
 	}
 
-    public void setHighway(String highway) 
-	{
+	public void setHighway(String highway) {
 		this.highway = highway;
 	}
 
-	public Integer getPk() 
-	{
+	public Integer getPk() {
 		return this.pk;
 	}
 
-    public void setPk(Integer pk) 
-	{
+	public void setPk(Integer pk) {
 		this.pk = pk;
 	}
 
-	public String getResultMessage() 
-	{
+	public String getResultMessage() {
 		return this.resultMessage;
 	}
 
-    public void setResultMessage(String resultMessage) 
-	{
+	public void setResultMessage(String resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 
-	public Double getMileMarker() 
-	{
+	public Double getMileMarker() {
 		return this.mileMarker;
 	}
 
-    public void setMileMarker(Double mileMarker) 
-	{
+	public void setMileMarker(Double mileMarker) {
 		this.mileMarker = mileMarker;
 	}
 
-	public Integer getAvailability() 
-	{
+	public Integer getAvailability() {
 		return this.availability;
 	}
 
-    public void setAvailability(Integer availability) 
-	{
+	public void setAvailability(Integer availability) {
 		this.availability = availability;
 	}
 
-	public String getSurface() 
-	{
+	public String getSurface() {
 		return this.surface;
 	}
 
-    public void setSurface(String surface) 
-	{
+	public void setSurface(String surface) {
 		this.surface = surface;
 	}
 
-	public ArrayList<Buffer> getBuffers() 
-	{
+	public ArrayList<Buffer> getBuffers() {
 		return this.buffers;
 	}
 
-    public void setBuffers(ArrayList<Buffer> buffers) 
-	{
+	public void setBuffers(ArrayList<Buffer> buffers) {
 		this.buffers = buffers;
 	}
 
-	public String getExit() 
-	{
+	public String getExit() {
 		return this.exit;
 	}
 
-    public void setExit(String exit) 
-	{
+	public void setExit(String exit) {
 		this.exit = exit;
 	}
 }

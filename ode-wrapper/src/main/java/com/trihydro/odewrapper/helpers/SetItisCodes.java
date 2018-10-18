@@ -30,8 +30,7 @@ import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import java.math.BigDecimal;
 
 @Component
-public class SetItisCodes
-{    
+public class SetItisCodes {
     private static List<IncidentChoice> incidentProblems;
     private static List<IncidentChoice> incidentEffects;
     private static List<IncidentChoice> incidentActions;
@@ -39,266 +38,237 @@ public class SetItisCodes
     private static List<ItisCode> itisCodes;
 
     public static List<ItisCode> getItisCodes() {
-        if(itisCodes != null)
+        if (itisCodes != null)
             return itisCodes;
-        else{
-            itisCodes = ItisCodeService.selectAll(); 
+        else {
+            itisCodes = ItisCodeService.selectAll();
             return itisCodes;
         }
     }
 
-    public static List<String> setItisCodesFromAdvisoryArray(WydotTim wydotTim) {    
-        
+    public static List<String> setItisCodesFromAdvisoryArray(WydotTim wydotTim) {
+
         // check to see if code exists
-        
-        List<String> items = new ArrayList<String>();               
-        for (Integer item : wydotTim.getAdvisory()){
 
-            ItisCode code = getItisCodes().stream()
-            .filter(x -> x.getItisCode().equals(item))
-            .findFirst()
-            .orElse(null);
+        List<String> items = new ArrayList<String>();
+        for (Integer item : wydotTim.getAdvisory()) {
 
-            if(code != null)
-                items.add(item.toString());                       
-        }                            
+            ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(item)).findFirst().orElse(null);
+
+            if (code != null)
+                items.add(item.toString());
+        }
         return items;
     }
 
     public static List<String> setItisCodesRc(WydotTim wydotTim) {
-        
-        List<String> items = new ArrayList<String>();   
+
+        List<String> items = new ArrayList<String>();
 
         ItisCode code = null;
 
-        for (Integer item : wydotTim.getAdvisory()){
+        for (Integer item : wydotTim.getAdvisory()) {
 
             // map "closed" itis code
-            if(item == 769){
-                code = getItisCodes().stream()
-                .filter(x -> x.getItisCode().equals(770))
-                .findFirst()
-                .orElse(null);
-            }
-            else{
-                code = getItisCodes().stream()
-                .filter(x -> x.getItisCode().equals(item))
-                .findFirst()
-                .orElse(null);                        
+            if (item == 769) {
+                code = getItisCodes().stream().filter(x -> x.getItisCode().equals(770)).findFirst().orElse(null);
+            } else {
+                code = getItisCodes().stream().filter(x -> x.getItisCode().equals(item)).findFirst().orElse(null);
             }
 
-            if(code != null)
-                items.add(code.getItisCode().toString());    
-        }                   
+            if (code != null)
+                items.add(code.getItisCode().toString());
+        }
 
         return items;
     }
 
     public static List<String> setItisCodesVsl(WydotTim wydotTim) {
-        
-        List<String> items = new ArrayList<String>();        
-        
-        ItisCode speed = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals(wydotTim.getSpeed().toString()))
-            .findFirst()
-            .orElse(null);
-        if(speed != null) {
-            items.add(speed.getItisCode().toString());   
-        }
-        else
-            return items;
 
-        ItisCode speedLimit = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals("speed limit"))
-            .findFirst()
-            .orElse(null);
-        if(speedLimit != null) {
-            items.add(speedLimit.getItisCode().toString());           
+        List<String> items = new ArrayList<String>();
+
+        // speed limit itis code
+        ItisCode speedLimit = getItisCodes().stream().filter(x -> x.getDescription().equals("speed limit")).findFirst()
+                .orElse(null);
+        if (speedLimit != null) {
+            items.add(speedLimit.getItisCode().toString());
         }
 
-        ItisCode mph = getItisCodes().stream()
-            .filter(x -> x.getDescription().equals("mph"))
-            .findFirst()
-            .orElse(null);
-        if(mph != null){
-            items.add(mph.getItisCode().toString());  
+        // number e.g 50, convert to ITIS code
+        Integer speed = wydotTim.getSpeed() + 12544;
+        items.add(speed.toString());
+
+        // mph itis code
+        ItisCode mph = getItisCodes().stream().filter(x -> x.getDescription().equals("mph")).findFirst().orElse(null);
+        if (mph != null) {
+            items.add(mph.getItisCode().toString());
         }
 
         return items;
     }
 
     public static List<String> setItisCodesParking(WydotTim wydotTim) {
-        
-        // check to see if code exists        
-        List<String> items = new ArrayList<String>();               
-    
-        ItisCode code = getItisCodes().stream()
-        .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
-        .findFirst()
-        .orElse(null);        
 
-        if(code != null)
-            items.add(wydotTim.getAvailability().toString());                       
+        // check to see if code exists
+        List<String> items = new ArrayList<String>();
 
-        if(wydotTim.getExit() != null){
+        ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
+                .findFirst().orElse(null);
+
+        System.out.println("Availablity : " + wydotTim.getAvailability());
+        System.out.println("Exit : " + wydotTim.getExit());
+
+        if (code != null)
+            items.add(wydotTim.getAvailability().toString());
+
+        if (wydotTim.getExit() != null) {
             items.add("11794");
             List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
             int exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
+            System.out.println("exitItisCodeNumber : " + exitItisCodeNumber);
             items.add(String.valueOf(exitItisCodeNumber));
-            if(list.size() > 1)
+            if (list.size() > 1) {
                 items.add(list.get(1));
-        }
-        else{
+                System.out.println("list: " + list.get(1));
+            }
+        } else {
             items.add("7986");
+            System.out.println("rest area");
         }
 
         return items;
     }
 
-    public static List<String> splitExitNumberFromLetter(String exit){
-        
+    public static List<String> splitExitNumberFromLetter(String exit) {
+
         List<String> list = new ArrayList<String>();
-        String exitNumber = ""; 
+        String exitNumber = "";
         String exitLetter = "";
         for (int i = 0; i < exit.length(); i++) {
-            if(StringUtils.isNumeric(String.valueOf(exit.charAt(i)))){
+            if (StringUtils.isNumeric(String.valueOf(exit.charAt(i)))) {
                 exitNumber += exit.charAt(i);
-            }
-            else {
+            } else {
                 exitLetter += exit.charAt(i);
             }
         }
 
         list.add(exitNumber);
-        if(exitLetter.length() > 0)
+        if (exitLetter.length() > 0)
             list.add(exitLetter);
 
         return list;
     }
 
-    public static List<String> setItisCodesFromAvailability(WydotTim wydotTim) {    
-        
-        // check to see if code exists        
-        List<String> items = new ArrayList<String>();               
-        
-        ItisCode code = getItisCodes().stream()
-        .filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
-        .findFirst()
-        .orElse(null);        
+    public static List<String> setItisCodesFromAvailability(WydotTim wydotTim) {
 
-        if(code != null)
-            items.add(wydotTim.getAvailability().toString());                       
+        // check to see if code exists
+        List<String> items = new ArrayList<String>();
 
-        if(wydotTim.getExit() != null){
+        System.out.println("availability:" + wydotTim.getAvailability());
+
+        ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
+                .findFirst().orElse(null);
+
+        if (code != null)
+            items.add(wydotTim.getAvailability().toString());
+
+        if (wydotTim.getExit() != null) {
             items.add("11794");
             items.add(wydotTim.getExit());
-        }
-        else{
+        } else {
             items.add("7986");
         }
 
         return items;
     }
 
-    private static int convertNumberToItisCode(int number){
-        int itisCode = 1 + 12544;
+    private static int convertNumberToItisCode(int number) {
+        int itisCode = number + 12544;
         return itisCode;
     }
 
-    public static List<String> setItisCodesIncident(WydotTim wydotTim) {        
-        List<String> items = new ArrayList<String>(); 
+    public static List<String> setItisCodesIncident(WydotTim wydotTim) {
+        List<String> items = new ArrayList<String>();
 
         // action
         IncidentChoice incidentAction = getIncidentActions().stream()
-            .filter(x -> x.getCode().equals(wydotTim.getAction()))
-            .findFirst()
-            .orElse(null);
-        
+                .filter(x -> x.getCode().equals(wydotTim.getAction())).findFirst().orElse(null);
+
         // if action is not null and action itis code exists
-        if(incidentAction != null && incidentAction.getItisCodeId() != null){
+        if (incidentAction != null && incidentAction.getItisCodeId() != null) {
             ItisCode actionItisCode = getItisCodes().stream()
-                .filter(x -> x.getItisCodeId().equals(incidentAction.getItisCodeId()))
-                .findFirst()
-                .orElse(null);
-            if(actionItisCode != null){
-                items.add(actionItisCode.getItisCode().toString());  
+                    .filter(x -> x.getItisCodeId().equals(incidentAction.getItisCodeId())).findFirst().orElse(null);
+            if (actionItisCode != null) {
+                items.add(actionItisCode.getItisCode().toString());
             }
         }
 
         // effect
         IncidentChoice incidentEffect = getIncidentEffects().stream()
-            .filter(x -> x.getCode().equals(wydotTim.getEffect()))
-            .findFirst()
-            .orElse(null);
-        
+                .filter(x -> x.getCode().equals(wydotTim.getEffect())).findFirst().orElse(null);
+
         // if effect is not null and effect itis code exists
-        if(incidentEffect != null && incidentEffect.getItisCodeId() != null){
+        if (incidentEffect != null && incidentEffect.getItisCodeId() != null) {
             ItisCode effectItisCode = getItisCodes().stream()
-                .filter(x -> x.getItisCodeId().equals(incidentEffect.getItisCodeId()))
-                .findFirst()
-                .orElse(null);
-            if(effectItisCode != null){
-                items.add(effectItisCode.getItisCode().toString());  
+                    .filter(x -> x.getItisCodeId().equals(incidentEffect.getItisCodeId())).findFirst().orElse(null);
+            if (effectItisCode != null) {
+                items.add(effectItisCode.getItisCode().toString());
             }
         }
 
         // problem
         IncidentChoice incidentProblem = getIncidentProblems().stream()
-            .filter(x -> x.getCode().equals(wydotTim.getProblem()))
-            .findFirst()
-            .orElse(null);
-        
+                .filter(x -> x.getCode().equals(wydotTim.getProblem())).findFirst().orElse(null);
+
         // if problem is not null and problem itis code exists
-        if(incidentProblem != null && incidentProblem.getItisCodeId() != null){
+        if (incidentProblem != null && incidentProblem.getItisCodeId() != null) {
             ItisCode problemItisCode = getItisCodes().stream()
-                .filter(x -> x.getItisCodeId().equals(incidentProblem.getItisCodeId()))
-                .findFirst()
-                .orElse(null);
-            if(problemItisCode != null){
-                items.add(problemItisCode.getItisCode().toString());  
+                    .filter(x -> x.getItisCodeId().equals(incidentProblem.getItisCodeId())).findFirst().orElse(null);
+            if (problemItisCode != null) {
+                items.add(problemItisCode.getItisCode().toString());
             }
         }
 
-        if(items.size() == 0)
+        if (items.size() == 0)
             items.add("531");
 
         return items;
     }
 
-    public static List<IncidentChoice> getIncidentProblems(){
-        if(incidentProblems != null)
+    public static List<IncidentChoice> getIncidentProblems() {
+        if (incidentProblems != null)
             return incidentProblems;
-        else{
-            incidentProblems = IncidentChoicesService.selectAllIncidentProblems(); 
+        else {
+            incidentProblems = IncidentChoicesService.selectAllIncidentProblems();
             return incidentProblems;
         }
     }
 
-    public static List<IncidentChoice> getIncidentEffects(){
-        if(incidentEffects != null)
+    public static List<IncidentChoice> getIncidentEffects() {
+        if (incidentEffects != null)
             return incidentEffects;
-        else{
-            incidentEffects = IncidentChoicesService.selectAllIncidentEffects(); 
+        else {
+            incidentEffects = IncidentChoicesService.selectAllIncidentEffects();
             return incidentEffects;
         }
     }
 
-    public static List<IncidentChoice> getIncidentActions(){
-        if(incidentActions != null)
+    public static List<IncidentChoice> getIncidentActions() {
+        if (incidentActions != null)
             return incidentActions;
-        else{
-            incidentActions = IncidentChoicesService.selectAllIncidentActions(); 
+        else {
+            incidentActions = IncidentChoicesService.selectAllIncidentActions();
             return incidentActions;
         }
     }
 
-    public static List<String> setItisCodesRw(WydotTim wydotTim){
+    public static List<String> setItisCodesRw(WydotTim wydotTim) {
 
-        List<String> items = new ArrayList<String>();      
-        
-        items.add("1025");           
-       
+        List<String> items = new ArrayList<String>();
+
+        items.add("1025");
+
         return items;
     }
-	
+
 }

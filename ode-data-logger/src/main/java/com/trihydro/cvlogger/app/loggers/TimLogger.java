@@ -5,9 +5,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import us.dot.its.jpo.ode.model.OdeData;
-import us.dot.its.jpo.ode.model.OdeLogMetadataReceived;
+import us.dot.its.jpo.ode.model.OdeLogMetadata;
+import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
@@ -29,9 +30,8 @@ import com.trihydro.library.service.TimRsuService;
 public class TimLogger extends BaseLogger {
 
 	public static OdeData processTimJson(String value) {
-		System.out.println(value);
 		OdeData odeData = null;
-		OdeLogMetadataReceived odeTimMetadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
+		OdeLogMetadata odeTimMetadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 		OdeTimPayload odeTimPayload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
 		if (odeTimMetadata != null && odeTimPayload != null)
 			odeData = new OdeData(odeTimMetadata, odeTimPayload);
@@ -39,10 +39,9 @@ public class TimLogger extends BaseLogger {
 	}
 
 	public static OdeData processBroadcastTimJson(String value) {
-		System.out.println(value);
 		OdeData odeData = null;
-		OdeLogMetadataReceived odeTimMetadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
-		J2735TravelerInformationMessage odeTim = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
+		OdeLogMetadata odeTimMetadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
+		OdeTravelerInformationMessage odeTim = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
 		OdeTimPayload odeTimPayload = new OdeTimPayload(odeTim);
 		if (odeTimMetadata != null && odeTimPayload != null)
 			odeData = new OdeData(odeTimMetadata, odeTimPayload);
@@ -52,9 +51,10 @@ public class TimLogger extends BaseLogger {
 	public static void addTimToOracleDB(OdeData odeData) {
 
 		try {
-			Long timId = TimService.insertTim((OdeLogMetadataReceived) odeData.getMetadata(),
+			Long timId = TimService.insertTim((OdeLogMetadata) odeData.getMetadata(),
 					((OdeTimPayload) odeData.getPayload()).getTim());
 
+			// odeData.getMetadata().get
 			// return if TIM is not inserted
 			if (timId == null)
 				return;
@@ -80,7 +80,7 @@ public class TimLogger extends BaseLogger {
 
 			Long nodeXYId;
 
-			for (J2735TravelerInformationMessage.NodeXY nodeXY : ((OdeTimPayload) odeData.getPayload()).getTim()
+			for (OdeTravelerInformationMessage.NodeXY nodeXY : ((OdeTimPayload) odeData.getPayload()).getTim()
 					.getDataframes()[0].getRegions()[0].getPath().getNodes()) {
 				nodeXYId = NodeXYService.insertNodeXY(nodeXY);
 				PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
@@ -106,8 +106,10 @@ public class TimLogger extends BaseLogger {
 		ActiveTim activeTim;
 
 		// save TIM
-		Long timId = TimService.insertTim((OdeLogMetadataReceived) odeData.getMetadata(),
+		Long timId = TimService.insertTim((OdeLogMetadata) odeData.getMetadata(),
 				((OdeTimPayload) odeData.getPayload()).getTim());
+
+		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 
 		// save DataFrame
 		Long dataFrameId = DataFrameService.insertDataFrame(timId);
@@ -118,6 +120,14 @@ public class TimLogger extends BaseLogger {
 
 		if (activeTim == null)
 			return;
+
+		// TODO : Change to loop through RSU array
+		if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
+				&& metaData.getRequest().getRsus().length > 0)
+			activeTim.setRsuTarget(metaData.getRequest().getRsus()[0].getRsuTarget());
+
+		if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null)
+			activeTim.setSatRecordId(metaData.getRequest().getSdw().getRecordId());
 
 		activeTim.setStartDateTime(
 				((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime());
@@ -148,8 +158,7 @@ public class TimLogger extends BaseLogger {
 		// if true, TIM came from WYDOT
 		if (activeTim.getTimType() != null) {
 			// if there is a client ID
-			if (activeTim.getClientId() != null && !activeTim.getTimType().equals("P")
-					&& !activeTim.getTimType().equals("RW")) {
+			if (activeTim.getClientId() != null && !activeTim.getTimType().equals("P")) {
 				// if its an RSU TIM
 				if (activeTim.getRsuTarget() != null)
 					activeTims = ActiveTimService.getActiveTimsOnRsuByClientId(activeTim.getRsuTarget(),
@@ -159,17 +168,7 @@ public class TimLogger extends BaseLogger {
 					activeTims = ActiveTimService.getActiveSatTimsByClientIdDirection(activeTim.getClientId(),
 							activeTim.getTimTypeId(), activeTim.getDirection());
 			}
-			// else find by road segment
-			else {
-				// if its an RSU TIM
-				if (activeTim.getRsuTarget() != null) {
-					activeTims = ActiveTimService.getActiveTimsOnRsuByRoadSegment(activeTim.getRsuTarget(),
-							activeTim.getTimTypeId(), activeTim.getMilepostStart(), activeTim.getMilepostStop(),
-							activeTim.getDirection());
-				} else
-					activeTims = ActiveTimService.getActiveSatTimsBySegmentDirection(activeTim.getMilepostStart(),
-							activeTim.getMilepostStop(), activeTim.getTimTypeId(), activeTim.getDirection());
-			}
+
 			// Active TIM exists
 			if (activeTims.size() == 0) {
 				ActiveTimService.insertActiveTim(activeTim);
@@ -220,29 +219,29 @@ public class TimLogger extends BaseLogger {
 			activeTim.setMilepostStop(Double.parseDouble(splitName[3]));
 		else
 			return activeTim;
+		// if (splitName.length > 4) {
+		// // if this is an RSU TIM
+		// if (splitName[4].split("-")[0].equals("SAT")) {
+		// activeTim.setSatRecordId(splitName[4].split("-")[1]);
+		// } else {
+		// activeTim.setRsuTarget(splitName[4].split("-")[1]);
+		// }
+		// } else
+		// return activeTim;
 		if (splitName.length > 4) {
-			// if this is an RSU TIM
-			if (splitName[4].split("-")[0].equals("SAT")) {
-				activeTim.setSatRecordId(splitName[4].split("-")[1]);
-			} else {
-				activeTim.setRsuTarget(splitName[4].split("-")[1]);
-			}
-		} else
-			return activeTim;
-		if (splitName.length > 5) {
-			TimType timType = getTimType((splitName[5]));
+			TimType timType = getTimType((splitName[4]));
 			activeTim.setTimType(timType.getType());
 			activeTim.setTimTypeId(timType.getTimTypeId());
 		} else
 			return activeTim;
 
-		if (splitName.length > 6)
-			activeTim.setClientId(splitName[6]);
+		if (splitName.length > 5)
+			activeTim.setClientId(splitName[5]);
 		else
 			return activeTim;
 
-		if (splitName.length > 7)
-			activeTim.setPk(Integer.valueOf(splitName[7]));
+		if (splitName.length > 6)
+			activeTim.setPk(Integer.valueOf(splitName[6]));
 		else
 			return activeTim;
 

@@ -10,7 +10,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-host: cvodedp01:7777
+host: cvodepp01:7777
 tags:
 - name: Chain Controls
   description: Chain control controller

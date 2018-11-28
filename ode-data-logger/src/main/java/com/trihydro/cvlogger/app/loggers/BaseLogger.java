@@ -10,22 +10,21 @@ import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.TimTypeService;
 
 public class BaseLogger {
-    
+
     protected static List<ItisCode> itisCodes;
     protected static List<TimType> timTypes;
     protected static List<WydotRsu> rsus;
 
-    static{
-        
-		itisCodes = ItisCodeService.selectAll();
+    static {
+
+        itisCodes = ItisCodeService.selectAll();
 
         timTypes = TimTypeService.selectAll();
         try {
-			rsus = RsuService.selectAll();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-    }    
-	
+            rsus = RsuService.selectAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -9,9 +9,12 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
+import com.trihydro.library.model.TestConfig;
 
 public class CvDataServiceLibrary {
 
@@ -33,6 +36,10 @@ public class CvDataServiceLibrary {
         // mstFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
         mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");
+    }
+
+    public static void setConfig(TestConfig config) {
+        DbUtility.setConfig(config);
     }
 
     public static List<DriverAlertType> getDriverAlertTypes() {
@@ -89,7 +96,6 @@ public class CvDataServiceLibrary {
                 result = true;
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

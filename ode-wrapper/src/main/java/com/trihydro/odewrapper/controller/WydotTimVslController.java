@@ -18,9 +18,8 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
-import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.odewrapper.model.WydotTimVsl;
 
 import org.springframework.http.HttpStatus;
 
@@ -30,18 +29,21 @@ import org.springframework.http.HttpStatus;
 public class WydotTimVslController extends WydotTimBaseController {
 
     private static String type = "VSL";
+    // get tim type
+    TimType timType = getTimType(type);
 
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createUpdateVslTim(@RequestBody WydotTimList wydotTimList) {
 
         System.out.println("Create/Update VSL TIM");
+        String post = gson.toJson(wydotTimList);
+        System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
-        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
         // build TIM
-        for (WydotTim wydotTim : wydotTimList.getTimVslList()) {
+        for (WydotTimVsl wydotTim : wydotTimList.getTimVslList()) {
             resultTim = validateInputVsl(wydotTim);
 
             if (resultTim.getResultMessages().size() > 0) {
@@ -49,15 +51,12 @@ public class WydotTimVslController extends WydotTimBaseController {
                 continue;
             }
 
-            // add valid TIM to list to be sent
-            validTims.add(wydotTim);
+            // send TIM
+            processRequest(wydotTim, timType, null, null, null);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
-
-        // send TIMs
-        processRequest(validTims);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -67,7 +66,7 @@ public class WydotTimVslController extends WydotTimBaseController {
     public Collection<ActiveTim> getVslTims() {
 
         // get active TIMs
-        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("VSL");
+        List<ActiveTim> activeTims = wydotTimService.selectTimsByType(type);
 
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
@@ -75,29 +74,6 @@ public class WydotTimVslController extends WydotTimBaseController {
         }
 
         return activeTims;
-    }
-
-    // asynchronous TIM creation
-    public void processRequest(List<WydotTim> wydotTims) {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                // get tim type
-                TimType timType = getTimType(type);
-
-                for (WydotTim wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equals("both")) {
-                        // eastbound
-                        createSendTims(wydotTim, "eastbound", timType);
-
-                        // westbound
-                        createSendTims(wydotTim, "westbound", timType);
-                    } else {
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
-                    }
-                }
-            }
-        }).start();
     }
 
 }

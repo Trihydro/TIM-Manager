@@ -1,6 +1,11 @@
 package com.trihydro.odewrapper.helpers;
 
 import com.trihydro.odewrapper.model.WydotTim;
+import com.trihydro.odewrapper.model.WydotTimCc;
+import com.trihydro.odewrapper.model.WydotTimIncident;
+import com.trihydro.odewrapper.model.WydotTimParking;
+import com.trihydro.odewrapper.model.WydotTimRc;
+import com.trihydro.odewrapper.model.WydotTimVsl;
 import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.Milepost;
@@ -20,10 +25,10 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.List;
 import java.util.ArrayList;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.MsgId;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.RoadSignID;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
@@ -46,7 +51,7 @@ public class SetItisCodes {
         }
     }
 
-    public static List<String> setItisCodesFromAdvisoryArray(WydotTim wydotTim) {
+    public static List<String> setItisCodesFromAdvisoryArray(WydotTimCc wydotTim) {
 
         // check to see if code exists
 
@@ -61,7 +66,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesRc(WydotTim wydotTim) {
+    public static List<String> setItisCodesRc(WydotTimRc wydotTim) {
 
         List<String> items = new ArrayList<String>();
 
@@ -83,7 +88,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesVsl(WydotTim wydotTim) {
+    public static List<String> setItisCodesVsl(WydotTimVsl wydotTim) {
 
         List<String> items = new ArrayList<String>();
 
@@ -107,7 +112,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesParking(WydotTim wydotTim) {
+    public static List<String> setItisCodesParking(WydotTimParking wydotTim) {
 
         // check to see if code exists
         List<String> items = new ArrayList<String>();
@@ -159,7 +164,7 @@ public class SetItisCodes {
         return list;
     }
 
-    public static List<String> setItisCodesFromAvailability(WydotTim wydotTim) {
+    public static List<String> setItisCodesFromAvailability(WydotTimParking wydotTim) {
 
         // check to see if code exists
         List<String> items = new ArrayList<String>();
@@ -187,7 +192,7 @@ public class SetItisCodes {
         return itisCode;
     }
 
-    public static List<String> setItisCodesIncident(WydotTim wydotTim) {
+    public static List<String> setItisCodesIncident(WydotTimIncident wydotTim) {
         List<String> items = new ArrayList<String>();
 
         // action

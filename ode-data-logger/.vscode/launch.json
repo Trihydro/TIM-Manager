@@ -8,7 +8,7 @@
             "type": "java",
             "name": "Debug (Launch)",
             "request": "launch",            
-            "args": "-g logger_group_tim_dev -t topic.OdeTimJson -type string",
+            "args": "-g logger_group_tim_dev -t topic.OdeTimJson -type string -c config.properties",
             "mainClass": "com.cvlogger.app.CVLogger"           
         },
         {

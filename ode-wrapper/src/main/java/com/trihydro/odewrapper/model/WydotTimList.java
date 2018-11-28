@@ -2,72 +2,59 @@ package com.trihydro.odewrapper.model;
 
 import java.util.List;
 
-public class WydotTimList
-{
-	private List<WydotTim> timVslList;
-	private List<WydotTim> timCcList;
-	private List<WydotTim> timRcList;
-	private List<WydotTim> timRwList;
-	private List<WydotTim> timParkingList;
-	private List<WydotTim> timIncidentList;
+public class WydotTimList {
+	private List<WydotTimVsl> timVslList;
+	private List<WydotTimCc> timCcList;
+	private List<WydotTimRc> timRcList;
+	private List<WydotTimRw> timRwList;
+	private List<WydotTimParking> timParkingList;
+	private List<WydotTimIncident> timIncidentList;
 
-	public List<WydotTim> getTimVslList() 
-	{
+	public List<WydotTimVsl> getTimVslList() {
 		return this.timVslList;
 	}
 
-	public void setTimVslList(List<WydotTim> timVslList) 
-	{
+	public void setTimVslList(List<WydotTimVsl> timVslList) {
 		this.timVslList = timVslList;
 	}
 
-	public List<WydotTim> getTimCcList() 
-	{
+	public List<WydotTimCc> getTimCcList() {
 		return this.timCcList;
 	}
 
-	public void setTimCcList(List<WydotTim> timCcList) 
-	{
+	public void setTimCcList(List<WydotTimCc> timCcList) {
 		this.timCcList = timCcList;
 	}
 
-	public List<WydotTim> getTimRcList() 
-	{
+	public List<WydotTimRc> getTimRcList() {
 		return this.timRcList;
 	}
 
-	public void setTimRcList(List<WydotTim> timRcList) 
-	{
+	public void setTimRcList(List<WydotTimRc> timRcList) {
 		this.timRcList = timRcList;
 	}
 
-	public List<WydotTim> getTimRwList() 
-	{
+	public List<WydotTimRw> getTimRwList() {
 		return this.timRwList;
 	}
 
-	public void setTimRwList(List<WydotTim> timRwList) 
-	{
+	public void setTimRwList(List<WydotTimRw> timRwList) {
 		this.timRwList = timRwList;
 	}
 
-	public List<WydotTim> getTimParkingList() 
-	{
+	public List<WydotTimParking> getTimParkingList() {
 		return this.timParkingList;
 	}
 
-	public void setTimParkingList(List<WydotTim> timParkingList) 
-	{
+	public void setTimParkingList(List<WydotTimParking> timParkingList) {
 		this.timParkingList = timParkingList;
 	}
 
-	public List<WydotTim> getTimIncidentList() 
-	{
+	public List<WydotTimIncident> getTimIncidentList() {
 		return this.timIncidentList;
 	}
 
-	public void setTimIncidentList(List<WydotTim> timIncidentList) 
-	{
+	public void setTimIncidentList(List<WydotTimIncident> timIncidentList) {
 		this.timIncidentList = timIncidentList;
 	}
 }

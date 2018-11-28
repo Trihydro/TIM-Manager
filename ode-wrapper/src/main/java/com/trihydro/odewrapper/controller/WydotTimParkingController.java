@@ -12,7 +12,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.odewrapper.model.WydotTimParking;
 
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,18 +29,22 @@ import org.springframework.http.HttpStatus;
 public class WydotTimParkingController extends WydotTimBaseController {
 
     private static String type = "P";
+    // get tim type
+    TimType timType = getTimType(type);
 
     @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createParkingTim(@RequestBody WydotTimList wydotTimList) {
 
         System.out.println("Create Parking TIM");
+        String post = gson.toJson(wydotTimList);
+        System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
-        List<WydotTim> validTims = new ArrayList<WydotTim>();
+        List<WydotTimParking> validTims = new ArrayList<WydotTimParking>();
 
         // build TIM
-        for (WydotTim wydotTim : wydotTimList.getTimParkingList()) {
+        for (WydotTimParking wydotTim : wydotTimList.getTimParkingList()) {
 
             resultTim = validateInputParking(wydotTim);
 
@@ -98,43 +102,33 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
 
         // clear TIM
-        wydotTimService.clearTimsById("P", id);
+        wydotTimService.clearTimsById("P", id, null);
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    // asynchronous TIM creation
-    public void processRequest(List<WydotTim> wydotTims) {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
+    public void processRequest(List<WydotTimParking> wydotTims) {
+        for (WydotTimParking wydotTim : wydotTims) {
+            if (wydotTim.getDirection().equals("both")) {
 
-                // get tim type
-                TimType timType = getTimType(type);
+                wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
+                wydotTim.setToRm(wydotTim.getMileMarker());
+                createSendTims(wydotTim, "eastbound", timType, null, null, null);
 
-                for (WydotTim wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equals("both")) {
-
-                        wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
-                        wydotTim.setToRm(wydotTim.getMileMarker());
-                        createSendTims(wydotTim, "eastbound", timType);
-
-                        wydotTim.setFromRm(wydotTim.getMileMarker());
-                        wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        createSendTims(wydotTim, "westbound", timType);
-                    } else {
-                        if (wydotTim.getDirection().equals("eastbound")) {
-                            wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
-                            wydotTim.setToRm(wydotTim.getMileMarker());
-                        } else {
-                            wydotTim.setFromRm(wydotTim.getMileMarker());
-                            wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        }
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
-                    }
+                wydotTim.setFromRm(wydotTim.getMileMarker());
+                wydotTim.setToRm(wydotTim.getMileMarker() + 10);
+                createSendTims(wydotTim, "westbound", timType, null, null, null);
+            } else {
+                if (wydotTim.getDirection().equals("eastbound")) {
+                    wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
+                    wydotTim.setToRm(wydotTim.getMileMarker());
+                } else {
+                    wydotTim.setFromRm(wydotTim.getMileMarker());
+                    wydotTim.setToRm(wydotTim.getMileMarker() + 10);
                 }
+                createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, null);
             }
-        }).start();
+        }
     }
 }

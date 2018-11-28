@@ -3,26 +3,26 @@ package com.trihydro.library.tables;
 import java.util.*;
 
 public class TimOracleTables extends OracleTables {
-    
+
     private static List<String> timTable;
     private static List<String> dataFrameTable;
     private static List<String> pathTable;
     private static List<String> regionTable;
     private static List<String> nodeXYTable;
     private static List<String> pathNodeXYTable;
+    private static List<String> rsuIndexTable;
     private List<String> timTypeTable;
     private static List<String> activeTimTable;
-    private List<String> activeTimItisCodeTable;
     private static List<String> timRsuTable;
     private static List<String> dataFrameItisCodeTable;
     private static List<String> driverAlertItisCodeTable;
 
-    public static List<String> getTimTable(){
-        if(timTable != null)
+    public static List<String> getTimTable() {
+        if (timTable != null)
             return timTable;
         else {
             timTable = new ArrayList<String>();
-           
+
             timTable.add("MSG_CNT");
             timTable.add("PACKET_ID");
             timTable.add("URL_B");
@@ -47,14 +47,14 @@ public class TimOracleTables extends OracleTables {
             timTable.add("PAYLOAD_TYPE");
             timTable.add("RECORD_TYPE");
             timTable.add("ODE_RECEIVED_AT");
-            timTable.add("RSU_INDEX");            
+            timTable.add("RSU_INDEX");
 
             return timTable;
         }
     }
 
-    public static List<String> getDataFrameTable(){
-        if(dataFrameTable != null)
+    public static List<String> getDataFrameTable() {
+        if (dataFrameTable != null)
             return dataFrameTable;
         else {
             dataFrameTable = new ArrayList<String>();
@@ -63,8 +63,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getPathTable(){
-        if(pathTable != null)
+    public static List<String> getPathTable() {
+        if (pathTable != null)
             return pathTable;
         else {
             pathTable = new ArrayList<String>();
@@ -73,8 +73,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getRegionTable(){
-        if(regionTable != null)
+    public static List<String> getRegionTable() {
+        if (regionTable != null)
             return regionTable;
         else {
             regionTable = new ArrayList<String>();
@@ -86,8 +86,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getPathNodeXYTable(){
-        if(pathNodeXYTable != null)
+    public static List<String> getPathNodeXYTable() {
+        if (pathNodeXYTable != null)
             return pathNodeXYTable;
         else {
             pathNodeXYTable = new ArrayList<String>();
@@ -97,8 +97,19 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getNodeXYTable(){
-        if(nodeXYTable != null)
+    public static List<String> getRsuIndexTable() {
+        if (rsuIndexTable != null)
+            return rsuIndexTable;
+        else {
+            rsuIndexTable = new ArrayList<String>();
+            rsuIndexTable.add("RSU_ID");
+            rsuIndexTable.add("RSU_INDEX");
+            return rsuIndexTable;
+        }
+    }
+
+    public static List<String> getNodeXYTable() {
+        if (nodeXYTable != null)
             return nodeXYTable;
         else {
             nodeXYTable = new ArrayList<String>();
@@ -109,8 +120,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getTimTypeTable(){
-        if(timTypeTable != null)
+    public List<String> getTimTypeTable() {
+        if (timTypeTable != null)
             return timTypeTable;
         else {
             timTypeTable = new ArrayList<String>();
@@ -120,8 +131,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getActiveTimTable(){
-        if(activeTimTable != null)
+    public static List<String> getActiveTimTable() {
+        if (activeTimTable != null)
             return activeTimTable;
         else {
             activeTimTable = new ArrayList<String>();
@@ -140,19 +151,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public List<String> getActiveTimItisCodeTable(){
-        if(activeTimItisCodeTable != null)
-            return activeTimItisCodeTable;
-        else {
-            activeTimItisCodeTable = new ArrayList<String>();
-            activeTimItisCodeTable.add("ACTIVE_TIM_ID");
-            activeTimItisCodeTable.add("ITIS_CODE_ID");
-            return activeTimItisCodeTable;
-        }
-    }
-
-    public static List<String> getTimRsuTable(){
-        if(timRsuTable != null)
+    public static List<String> getTimRsuTable() {
+        if (timRsuTable != null)
             return timRsuTable;
         else {
             timRsuTable = new ArrayList<String>();
@@ -162,8 +162,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getDataFrameItisCodeTable(){
-        if(dataFrameItisCodeTable != null)
+    public static List<String> getDataFrameItisCodeTable() {
+        if (dataFrameItisCodeTable != null)
             return dataFrameItisCodeTable;
         else {
             dataFrameItisCodeTable = new ArrayList<String>();
@@ -174,8 +174,8 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getDriverAlertItisCodeTable(){
-        if(driverAlertItisCodeTable != null)
+    public static List<String> getDriverAlertItisCodeTable() {
+        if (driverAlertItisCodeTable != null)
             return driverAlertItisCodeTable;
         else {
             driverAlertItisCodeTable = new ArrayList<String>();
@@ -184,7 +184,5 @@ public class TimOracleTables extends OracleTables {
             return driverAlertItisCodeTable;
         }
     }
-    
-    
-}
 
+}

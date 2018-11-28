@@ -25,7 +25,7 @@ public class Application {
 
 	public Application() {
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
-		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(), 0, 1, TimeUnit.HOURS);
+		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(), 0, 5, TimeUnit.MINUTES);
 	}
 
 	public static class RemoveExpiredActiveTims implements Runnable {
@@ -43,7 +43,7 @@ public class Application {
 
 				// send to tim type endpoint to delete from RSUs and SDWs
 				for (ActiveTim activeTim : activeTims) {
-					restTemplate.exchange("http://cvodedp01:7777" + "/parking-tim/" + activeTim.getClientId(),
+					restTemplate.exchange("http://cvodepp01:7777" + "/parking-tim/" + activeTim.getClientId(),
 							HttpMethod.DELETE, entity, String.class);
 				}
 

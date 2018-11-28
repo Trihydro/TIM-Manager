@@ -11,10 +11,10 @@ import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.CvDataServiceLibrary;
 
-public class TimTypeService extends CvDataServiceLibrary { 
+public class TimTypeService extends CvDataServiceLibrary {
 
-    public static List<TimType> selectAll() {
-    	List<TimType> timTypes = new ArrayList<TimType>();
+	public static List<TimType> selectAll() {
+		List<TimType> timTypes = new ArrayList<TimType>();
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement statement = null;
@@ -24,34 +24,32 @@ public class TimTypeService extends CvDataServiceLibrary {
 			statement = connection.createStatement();
 
 			// build SQL statement
-				rs = statement.executeQuery("select * from TIM_TYPE");
-				// convert to tim type objects   			
-				while (rs.next()) {   			
-					TimType timType = new TimType();
-					timType.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
-					timType.setType(rs.getString("TYPE"));	
-					timType.setDescription(rs.getString("DESCRIPTION"));			   
-					timTypes.add(timType);					
-				}
-			} 
-        catch (SQLException e) {
-            e.printStackTrace();
-		}
-		finally {			
+			rs = statement.executeQuery("select * from TIM_TYPE");
+			// convert to tim type objects
+			while (rs.next()) {
+				TimType timType = new TimType();
+				timType.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
+				timType.setType(rs.getString("TYPE"));
+				timType.setDescription(rs.getString("DESCRIPTION"));
+				timTypes.add(timType);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
 			try {
 				// close prepared statement
-				if(statement != null)
+				if (statement != null)
 					statement.close();
 				// return connection back to pool
-				if(connection != null)
+				if (connection != null)
 					connection.close();
 				// close result set
-				if(rs != null)
+				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
-        return timTypes;
-    }
+		return timTypes;
+	}
 }

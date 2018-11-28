@@ -13,8 +13,7 @@ import com.trihydro.library.model.Category;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CategoryService extends CvDataServiceLibrary
-{	
+public class CategoryService extends CvDataServiceLibrary {
 
 	// select all ITIS Codes from the database
 	public static List<Category> selectAll() {
@@ -29,35 +28,33 @@ public class CategoryService extends CvDataServiceLibrary
 			connection = DbUtility.getConnectionPool();
 			statement = connection.createStatement();
 
-			// build SQL statement   		    
-			rs = statement.executeQuery("select * from CATEGORY");			
-			
-			// convert to Category objects   			
-			while (rs.next()) {   			
+			// build SQL statement
+			rs = statement.executeQuery("select * from CATEGORY");
+
+			// convert to Category objects
+			while (rs.next()) {
 				Category category = new Category();
 				category.setCategoryId(rs.getInt("category_id"));
-				category.setCategory(rs.getString("category"));			   
+				category.setCategory(rs.getString("category"));
 				categories.add(category);
-			}						
-  		} 
-  		catch (SQLException e) {
-   			e.printStackTrace();
-		}
-		finally {			
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
 			try {
 				// close prepared statement
-				if(statement != null)
+				if (statement != null)
 					statement.close();
 				// return connection back to pool
-				if(connection != null)
+				if (connection != null)
 					connection.close();
 				// close result set
-				if(rs != null)
+				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
-  		return categories;
+		return categories;
 	}
 }

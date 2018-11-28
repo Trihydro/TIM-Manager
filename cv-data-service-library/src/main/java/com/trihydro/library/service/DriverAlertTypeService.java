@@ -12,10 +12,10 @@ import com.trihydro.library.model.DriverAlertType;
 public class DriverAlertTypeService extends CvDataServiceLibrary {
 
 	public static List<DriverAlertType> selectAll() {
-		
+
 		List<DriverAlertType> driverAlertTypes = new ArrayList<DriverAlertType>();
 		Connection connection = null;
-		Statement statement = null;		
+		Statement statement = null;
 		ResultSet rs = null;
 
 		try {
@@ -23,37 +23,34 @@ public class DriverAlertTypeService extends CvDataServiceLibrary {
 			connection = DbUtility.getConnectionPool();
 			statement = connection.createStatement();
 
-			// build SQL statement			
+			// build SQL statement
 			rs = statement.executeQuery("select * from DRIVER_ALERT_TYPE");
-		
-			// convert to DriverAlertType objects   			
-			while (rs.next()) {   			
+
+			// convert to DriverAlertType objects
+			while (rs.next()) {
 				DriverAlertType driverAlertType = new DriverAlertType();
 				driverAlertType.setDriverAlertTypeId(rs.getInt("DRIVER_ALERT_TYPE_ID"));
-				driverAlertType.setShortName(rs.getString("SHORT_NAME"));	
-				driverAlertType.setDescription(rs.getString("DESCRIPTION"));			   
+				driverAlertType.setShortName(rs.getString("SHORT_NAME"));
+				driverAlertType.setDescription(rs.getString("DESCRIPTION"));
 				driverAlertTypes.add(driverAlertType);
-			}								
-		} 
-		catch (SQLException e) {
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		finally {			
+		} finally {
 			try {
 				// close prepared statement
-				if(statement != null)
+				if (statement != null)
 					statement.close();
 				// return connection back to pool
-				if(connection != null)
+				if (connection != null)
 					connection.close();
 				// close result set
-				if(rs != null)
+				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
 		return driverAlertTypes;
-	}	 
+	}
 }
-

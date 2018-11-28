@@ -9,7 +9,12 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import us.dot.its.jpo.ode.util.*;
+
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.CommandLine;
@@ -20,25 +25,27 @@ import com.trihydro.cvlogger.app.loggers.BsmLogger;
 import com.trihydro.cvlogger.app.loggers.TimLogger;
 import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
 
-import us.dot.its.jpo.ode.model.OdeBsmData;
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeTimData;
-import us.dot.its.jpo.ode.model.OdeTimPayload;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import com.trihydro.cvlogger.app.services.TracManager;
+import com.trihydro.library.model.TestConfig;
+import com.trihydro.library.service.CvDataServiceLibrary;
+
+import java.net.URLClassLoader;
 
 public class OdeLoggingConsumer {
-	
+
 	static PreparedStatement preparedStatement = null;
 	static Statement statement = null;
 	static ObjectMapper mapper;
 
-	public static void main( String[] args ) throws IOException, SQLException
-	 {
+	public static void main(String[] args) throws IOException, SQLException {
+
 		Options options = new Options();
 
 		Option topic_option = new Option("t", "topic", true, "Topic Name");
@@ -52,6 +59,10 @@ public class OdeLoggingConsumer {
 		Option type_option = new Option("type", "type", true, "string|byte message type");
 		type_option.setRequired(true);
 		options.addOption(type_option);
+
+		Option config_option = new Option("p", "configFile", true, "Properties file");
+		group_option.setRequired(true);
+		options.addOption(config_option);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -69,17 +80,29 @@ public class OdeLoggingConsumer {
 		String topic = cmd.getOptionValue("topic");
 		String group = cmd.getOptionValue("group");
 		String type = cmd.getOptionValue("type");
+		String configFile = cmd.getOptionValue("configFile");
 
-  		System.out.println("starting..............");   		
-		TimLogger timLogger = new TimLogger();
+		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+		String appConfigPath = rootPath + configFile;
+
+		Properties appProps = new Properties();
+		appProps.load(new FileInputStream(appConfigPath));
+
+		TestConfig config = new TestConfig();
+
+		config.setDbDriver(appProps.getProperty("dbDriver"));
+		config.setDbUrl(appProps.getProperty("dbUrl"));
+		config.setDbUsername(appProps.getProperty("dbUsername"));
+		config.setDbPassword(appProps.getProperty("dbPassword"));
+		config.setEnv(appProps.getProperty("env"));
+
+		CvDataServiceLibrary.setConfig(config);
+
+		System.out.println("starting..............");
 
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		//String endpoint = "https://ode.wyoroad.info:9092";		
-		String endpoint = "10.145.9.204:9092";
-	
-		List<String> topics = new ArrayList<String>();
-		topics.add("topic.OdeBsmJson");
+		String endpoint = appProps.getProperty("hostname") + ":9092";
 
 		// Properties for the kafka topic
 		Properties props = new Properties();
@@ -90,93 +113,47 @@ public class OdeLoggingConsumer {
 		props.put("session.timeout.ms", "30000");
 		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
-		if (type.equals("byte")){ 
+		if (type.equals("byte")) {
 			props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
 		} else {
 			props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		}
 
-		if (type.equals("byte")) {
-			KafkaConsumer<String, byte[]> byteArrayConsumer = new KafkaConsumer<String, byte[]>(props);
+		if (!type.equals("byte")) {
 
-			byteArrayConsumer.subscribe(Arrays.asList(topic));
-			System.out.println("Subscribed to topic " + topic);
-			while (true) {
-				ConsumerRecords<String, byte[]> records = byteArrayConsumer.poll(100);
-				for (ConsumerRecord<String, byte[]> record : records) {
-					// Serialize the record value
-
-					if(topic.equals("topic.OdeTimBroadcastPojo")){					
-						// SerializationUtils<OdeData> serializer = new SerializationUtils<OdeData>();
-						// OdeData odeData =  serializer.deserialize(record.value());
-						// System.out.println(odeData.toString());
-						// if(odeData != null)
-						// 	TimLogger.addActiveTimToOracleDB(odeData, connection);		
-
-						SerializationUtils<OdeTimData> serializer = new SerializationUtils<OdeTimData>();
-						// OdeTimData odeData =  serializer.deserialize(record.value());
-						// OdeTimPayload pl = odeData.getPayload();
-						// odeData.getPayload();
-						// System.out.println(odeData.toString());
-					}
-
-					try{	
-
-				    	// SerializationUtils<OdeBsmData> serializer = new SerializationUtils<OdeBsmData>();
-						// OdeBsmData bsm = serializer.deserialize(record.value());
-						// System.out.println(bsm.getMetadata().getPayloadType());
-						//SerializationUtils<OdeTimData> serializer = new SerializationUtils<OdeTimData>();
-						//Object tim = serializer.deserialize(record.value());
-			   			//System.out.print(record.value()); 
-						//System.out.println("adding to db...");
-						//addDataToOracleDB((OdeBsmMetadata)bsm.getMetadata(), (J2735Bsm)bsm.getPayload().getData());
-					}
-					catch(Exception e){
-						System.out.print(e);
-					}
-				}
-			}
-		} else {
 			KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
 
 			stringConsumer.subscribe(Arrays.asList(topic));
 			System.out.println("Subscribed to topic " + topic);
-			try{
-				
-			    while (true) {						
+			try {
+
+				while (true) {
 					ConsumerRecords<String, String> records = stringConsumer.poll(100);
-					for (ConsumerRecord<String, String> record : records) {						
-						//String payload = JsonUtils.toObjectNode(record.value()).get("metadata").get("payloadType").toString();
-						//payload = payload.substring(1, payload.length() - 1);
-						if(topic.equals("topic.OdeDNMsgJson")){
+					for (ConsumerRecord<String, String> record : records) {
+						if (topic.equals("topic.OdeDNMsgJson")) {
 							TracManager.submitDNMsgToTrac(record.value());
-						}
-						else if(topic.equals("topic.OdeTimJson")) {	
+						} else if (topic.equals("topic.OdeTimJson")) {
 							OdeData odeData = TimLogger.processTimJson(record.value());
-							if(odeData != null)
-								TimLogger.addTimToOracleDB(odeData);				
-						}													
-						else if(topic.equals("topic.OdeBsmJson")){
+							if (odeData != null)
+								TimLogger.addTimToOracleDB(odeData);
+						} else if (topic.equals("topic.OdeBsmJson")) {
 							OdeData odeData = BsmLogger.processBsmJson(record.value());
-							if(odeData != null)
-								BsmLogger.addBSMToOracleDB(odeData, record.value());		
-						}
-						else if(topic.equals("topic.OdeDriverAlertJson")){
+							if (odeData != null)
+								BsmLogger.addBSMToOracleDB(odeData, record.value());
+						} else if (topic.equals("topic.OdeDriverAlertJson")) {
 							OdeData odeData = DriverAlertLogger.processDriverAlertJson(record.value());
-							if(odeData != null)
-								DriverAlertLogger.addDriverAlertToOracleDB(odeData);		
-						}
-						else if(topic.equals("topic.OdeTimBroadcastJson")){					
+							if (odeData != null)
+								DriverAlertLogger.addDriverAlertToOracleDB(odeData);
+						} else if (topic.equals("topic.OdeTimBroadcastJson")) {
 							OdeData odeData = TimLogger.processBroadcastTimJson(record.value());
-							if(odeData != null)
-								TimLogger.addActiveTimToOracleDB(odeData);		
+							if (odeData != null)
+								TimLogger.addActiveTimToOracleDB(odeData);
 						}
 					}
 				}
-			}
-			finally{
+			} finally {
 				stringConsumer.close();
-			}		
+			}
 		}
 	}
 }

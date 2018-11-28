@@ -86,11 +86,19 @@ CREATE TABLE IF NOT EXISTS ACTIVE_TIM_ITIS_CODE
 CREATE TABLE IF NOT EXISTS RSU
 ( 
     RSU_ID NUMBER(10,0) NOT NULL AUTO_INCREMENT, 
-    URL VARCHAR2(255) NOT NULL, 
     RSU_USERNAME VARCHAR2(255) NOT NULL, 
     RSU_PASSWORD VARCHAR2(255) NOT NULL, 
     DEVICEID NUMBER(6,0), 
     PRIMARY KEY (RSU_ID)
+);
+
+CREATE TABLE IF NOT EXISTS RSU_INDEX
+( 
+    RSU_INDEX_ID NUMBER(10,0) NOT NULL AUTO_INCREMENT, 
+    RSU_ID NUMBER(10,0), 
+    RSU_INDEX NUMBER(10,0),
+    PRIMARY KEY (RSU_INDEX_ID),
+    FOREIGN KEY(RSU_ID) REFERENCES RSU(RSU_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS TIM_RSU
@@ -147,25 +155,26 @@ CREATE TABLE IF NOT EXISTS TIM_TYPE
     PRIMARY KEY (TIM_TYPE_ID)
 );
 
-insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4600, 'Existing', 369.8, '0.0.0.0', 'I80');
--- insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS) values (4693, 'Existing', NULL, '10.145.1.109');
--- insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS) values (4490, 'Existing', 1.25, '10.145.1.15');
--- insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS) values (4494, 'Existing', 324.9, NULL);
+
+insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4499, 'Existing', 317.2, '0.0.0.0', 'I80');
+insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4497, 'Existing', 322.6, '0.0.0.0', 'I80');
+insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4495, 'Existing', 323.05, '0.0.0.0', 'I80');
+insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4494, 'Existing', 324.9, '0.0.0.0', 'I80');
 insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4493, 'Existing', 341.6, '0.0.0.0', 'I80');
 insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4492, 'Existing', 343.24, '0.0.0.0', 'I80');
--- insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS) values (4497, 'Existing', 322.6, '10.145.11.24');
--- insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS) values (4498, 'Existing', 401.8, '10.145.246.17');
--- insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS) values (4500, 'Existing', 401.96, '10.145.10.200');
+insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4491, 'Existing', 345.56, '0.0.0.0', 'I80');
+insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4600, 'Existing', 369.8, '0.0.0.0', 'I80');
+insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4487, 'Existing', 401.8, '0.0.0.0', 'I80');
 
--- insert into rsu (URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values (NULL, 'v3user', 'password', 4494);
--- insert into rsu (URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('10.145.11.37', 'v3user', 'password', NULL);
-insert into rsu (URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('0.0.0.0', 'v3user', 'password', 4600);
--- insert into rsu (URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('10.145.1.15', 'v3user', 'password', 4490);
--- insert into rsu (URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('10.145.11.37', 'v3user', 'password', 4500);
-insert into rsu (URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('0.0.0.0', 'v3user', 'password', 4493);
-insert into rsu (URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('0.0.0.0', 'v3user', 'password', 4492);
--- insert into rsu (RSU_ID, URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values (83, '10.145.11.37', 'v3user', 'password', 4487);
--- insert into rsu (RSU_ID, URL, RSU_USERNAME, RSU_PASSWORD, DEVICEID) values (84, '10.145.11.37', 'v3user', 'password', 4497);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4499);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4497);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4495);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4494);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4493);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4492);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4491);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4600);
+insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4487);
 
 insert into milepost_vw (ROUTE, MILEPOST, DIRECTION, LATITUDE, LONGITUDE, ELEVATION_FT, BEARING) values ('I 80', 340, 'westbound', 41.12438849, -104.75521179, 5973.51133383, 268.81053377);
 insert into milepost_vw (ROUTE, MILEPOST, DIRECTION, LATITUDE, LONGITUDE, ELEVATION_FT, BEARING) values ('I 80', 341, 'westbound', 41.12438849, -104.75521179, 5973.51133383, 268.81053377);

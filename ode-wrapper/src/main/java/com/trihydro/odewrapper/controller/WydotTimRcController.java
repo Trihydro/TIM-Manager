@@ -7,11 +7,16 @@ import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.model.RsuIndex;
 import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.service.RsuIndexService;
+import com.trihydro.library.service.RsuService;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.odewrapper.model.WydotTimRc;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,18 +31,21 @@ import org.springframework.http.HttpStatus;
 public class WydotTimRcController extends WydotTimBaseController {
 
     private static String type = "RC";
+    // get tim type
+    TimType timType = getTimType(type);
 
     @RequestMapping(value = "/create-update-rc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody WydotTimList wydotTimList) {
 
         System.out.println("Create Update RC TIM");
+        String post = gson.toJson(wydotTimList);
+        System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
-        List<WydotTim> validTims = new ArrayList<WydotTim>();
 
         // build TIM
-        for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
+        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
 
             resultTim = validateInputRc(wydotTim);
 
@@ -46,14 +54,12 @@ public class WydotTimRcController extends WydotTimBaseController {
                 continue;
             }
 
-            // add valid TIM to list to be sent
-            validTims.add(wydotTim);
+            // send TIM
+            processRequest(wydotTim, timType, null, null, null);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
-
-        processRequest(validTims);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -63,43 +69,18 @@ public class WydotTimRcController extends WydotTimBaseController {
     public ResponseEntity<String> submitAllClearRoadConditionsTim(@RequestBody WydotTimList wydotTimList) {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
-        ControllerResult resultTim = null;
 
-        // clear TIMs
-        for (WydotTim wydotTim : wydotTimList.getTimRcList()) {
-            if (wydotTim.getDirection().equals("both")) {
-                resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, "eastbound");
-                resultList.add(resultTim);
-                resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, "westbound");
-                resultList.add(resultTim);
-            } else
-                resultTim = wydotTimService.clearTimsByRoadSegment("RC", wydotTim, wydotTim.getDirection());
-            resultList.add(resultTim);
+        System.out.println("All Clear");
+        String post = gson.toJson(wydotTimList);
+        System.out.println(post.toString());
+
+        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
+            validateInputRc(wydotTim);
+            wydotTimService.clearTimsById(timType.getType(), wydotTim.getClientId(), wydotTim.getDirection());
         }
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    // asynchronous TIM creation
-    public void processRequest(List<WydotTim> wydotTims) {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                // get tim type
-                TimType timType = getTimType(type);
-                for (WydotTim wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equals("both")) {
-                        // eastbound
-                        createSendTims(wydotTim, "eastbound", timType);
-
-                        // westbound
-                        createSendTims(wydotTim, "westbound", timType);
-                    } else {
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
-                    }
-                }
-            }
-        }).start();
-    }
 }

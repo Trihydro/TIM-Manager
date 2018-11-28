@@ -16,10 +16,11 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.List;
 import java.util.ArrayList;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.MsgId;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage.DataFrame.RoadSignID;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
@@ -32,11 +33,11 @@ public class CreateBaseTimUtil {
 
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
-        J2735TravelerInformationMessage tim = new J2735TravelerInformationMessage();
+        OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
         tim.setUrlB("null");
 
         // set TIM Properties
-        J2735TravelerInformationMessage.DataFrame dataFrame = new J2735TravelerInformationMessage.DataFrame();
+        OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
         dataFrame.setSspTimRights((short) 1);
         dataFrame.setSspLocationRights((short) 1);
         dataFrame.setSspMsgContent((short) 1);
@@ -55,8 +56,8 @@ public class CreateBaseTimUtil {
         dataFrame.setFrameType(us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType.advisory);
         dataFrame.setUrl("null");
 
-        List<J2735TravelerInformationMessage.DataFrame.Region> regions = new ArrayList<J2735TravelerInformationMessage.DataFrame.Region>();
-        J2735TravelerInformationMessage.DataFrame.Region region = new J2735TravelerInformationMessage.DataFrame.Region();
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
+        OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
         region.setName("Temp");
         region.setRegulatorID(0);
         // region.setSegmentID(timBase.getDistrict());
@@ -67,7 +68,7 @@ public class CreateBaseTimUtil {
 
         // path
         region.setDescription("path");
-        J2735TravelerInformationMessage.DataFrame.Region.Path path = new J2735TravelerInformationMessage.DataFrame.Region.Path();
+        OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
         path.setScale(0);
         path.setType("xy");
 
@@ -139,12 +140,12 @@ public class CreateBaseTimUtil {
 
         region.setAnchorPosition(anchorPosition);
 
-        ArrayList<J2735TravelerInformationMessage.NodeXY> nodes = new ArrayList<J2735TravelerInformationMessage.NodeXY>();
+        ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
 
         int timDirection = 0;
         // path list - change later
         for (int j = 1; j < timToSend.getMileposts().size(); j++) {
-            J2735TravelerInformationMessage.NodeXY node = new J2735TravelerInformationMessage.NodeXY();
+            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
             node.setNodeLat(new BigDecimal(timToSend.getMileposts().get(j).getLatitude()));
             node.setNodeLong(new BigDecimal(timToSend.getMileposts().get(j).getLongitude()));
             node.setDelta("node-LatLon");
@@ -159,17 +160,18 @@ public class CreateBaseTimUtil {
         region.setDirection(dirTest); // heading slice
 
         // set path nodes
-        path.setNodes(nodes.toArray(new J2735TravelerInformationMessage.NodeXY[nodes.size()]));
+        path.setNodes(nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]));
         region.setPath(path);
 
         regions.add(region);
-        dataFrame.setRegions(regions.toArray(new J2735TravelerInformationMessage.DataFrame.Region[regions.size()]));
+        dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
 
-        J2735TravelerInformationMessage.DataFrame[] dataFrames = new J2735TravelerInformationMessage.DataFrame[1];
+        OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
         dataFrames[0] = dataFrame;
         tim.setDataframes(dataFrames);
 
         timToSend.setTim(tim);
+        timToSend.setRequest(new ServiceRequest());
 
         return timToSend;
     }

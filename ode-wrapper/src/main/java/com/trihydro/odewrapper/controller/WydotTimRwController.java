@@ -14,7 +14,7 @@ import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.odewrapper.model.WydotTimRw;
 
 import io.swagger.annotations.Api;
 
@@ -32,21 +32,21 @@ import org.springframework.http.HttpStatus;
 public class WydotTimRwController extends WydotTimBaseController {
 
     private static String type = "RW";
-
-    List<WydotTim> validTims;
+    // get tim type
+    TimType timType = getTimType(type);
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody WydotTimList wydotTimList) {
 
         System.out.println("Create/Update RW TIM");
-
-        validTims = new ArrayList<WydotTim>();
+        String post = gson.toJson(wydotTimList);
+        System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
 
         // build TIM
-        for (WydotTim wydotTim : wydotTimList.getTimRwList()) {
+        for (WydotTimRw wydotTim : wydotTimList.getTimRwList()) {
 
             // validate input
             resultTim = validateInputRw(wydotTim);
@@ -60,12 +60,13 @@ public class WydotTimRwController extends WydotTimBaseController {
             // if valid
 
             // sort buffers by distance
-            wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
+            if (wydotTim.getBuffers() != null)
+                wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
 
             // adjust input
-            wydotTim.setClientId(wydotTim.getId());
             wydotTim.setRoute(wydotTim.getHighway());
-            wydotTim.setStartDateTime(wydotTim.getStartTs());
+            System.out.println("SchedStart: " + wydotTim.getSchedStart());
+            System.out.println("SchedEnd: " + wydotTim.getSchedEnd());
 
             Double timPoint = null;
 
@@ -92,228 +93,35 @@ public class WydotTimRwController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-        // send TIMs
-        processRequest(validTims);
-
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    // asynchronous TIM creation
-    public void processRequest(List<WydotTim> wydotTims) {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                // get tim type
-                TimType timType = getTimType(type);
-
-                for (WydotTim wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equals("both")) {
-                        // eastbound
-                        createSendTims(wydotTim, "eastbound", timType);
-
-                        // westbound
-                        createSendTims(wydotTim, "westbound", timType);
-                    } else {
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType);
-                    }
-                }
-            }
-        }).start();
-    }
-
-    public void makeEastboundTims(WydotTim wydotTim, Double timPoint) {
+    public void makeEastboundTims(WydotTimRw wydotTim, Double timPoint) {
 
         // eastbound - add buffer for point TIMs
         if (timPoint != null)
             wydotTim.setFromRm(timPoint - 1);
 
-        validTims.add(wydotTim);
-        makeEastboundBufferTim(wydotTim);
+        // validTims.add(wydotTim);
+        processRequest(wydotTim, timType, wydotTim.getSchedStart(), wydotTim.getSchedEnd(), null);
+        if (wydotTim.getBuffers() != null)
+            makeEastboundBufferTim(wydotTim);
     }
 
-    public void makeWestboundTims(WydotTim wydotTim, Double timPoint) {
+    public void makeWestboundTims(WydotTimRw wydotTim, Double timPoint) {
 
         // westbound - add buffer for point TIMs
         if (timPoint != null)
             wydotTim.setFromRm(timPoint + 1);
 
-        validTims.add(wydotTim);
-
-        makeWestboundBufferTim(wydotTim);
+        // validTims.add(wydotTim);
+        processRequest(wydotTim, timType, wydotTim.getSchedStart(), wydotTim.getSchedEnd(), null);
+        if (wydotTim.getBuffers() != null)
+            makeWestboundBufferTim(wydotTim);
     }
 
-    // asynchronous TIM creation
-    public void processRequestOld(WydotTim wydotTim) {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                Double timPoint = null;
-                // get tim type
-                TimType timType = getTimType(type);
-
-                // perform any operation
-                System.out.println("Performing operation in Asynchronous Task");
-
-                wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
-                double bufferBefore = 0;
-                wydotTim.setClientId(wydotTim.getId());
-                // set route
-                wydotTim.setRoute(wydotTim.getHighway());
-                wydotTim.setStartDateTime(wydotTim.getStartTs());
-
-                // if its a point TIM
-                if (wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null) {
-                    timPoint = wydotTim.getFromRm();
-                }
-
-                if (wydotTim.getDirection().equals("both")) {
-
-                    for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
-
-                        // eastbound - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setFromRm(timPoint - 1);
-
-                        // starts at lower milepost minus the buffer distance
-                        double bufferStart = Math.min(wydotTim.getToRm(), wydotTim.getFromRm())
-                                - wydotTim.getBuffers().get(i).getDistance();
-                        // ends at lower milepost minus previous buffers
-                        double bufferEnd = Math.min(wydotTim.getToRm(), wydotTim.getFromRm()) - bufferBefore;
-
-                        // update start and stopping mileposts
-                        WydotTim wydotTimBuffer = null;
-                        try {
-                            wydotTimBuffer = wydotTim.clone();
-                        } catch (CloneNotSupportedException e) {
-                            e.printStackTrace();
-                        }
-                        wydotTimBuffer.setFromRm(bufferStart);
-                        wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-                        wydotTimBuffer.setToRm(bufferEnd);
-                        wydotTimBuffer.setClientId(wydotTim.getClientId());
-
-                        // send buffer tim
-                        wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                        // wydotTimService.createTim(wydotTimBuffer, "eastbound", type, itisCodes);
-                        createSendTims(wydotTimBuffer, "eastbound", timType);
-
-                        // westbound - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setFromRm(timPoint + 1);
-
-                        // starts at higher milepost plus buffer distance
-                        bufferStart = Math.max(wydotTim.getToRm(), wydotTim.getFromRm())
-                                + wydotTim.getBuffers().get(i).getDistance();
-                        // ends at higher milepost plus previous buffers
-                        bufferEnd = Math.max(wydotTim.getToRm(), wydotTim.getFromRm()) + bufferBefore;
-
-                        // update start and stopping mileposts
-                        try {
-                            wydotTimBuffer = wydotTim.clone();
-                        } catch (CloneNotSupportedException e) {
-                            e.printStackTrace();
-                        }
-                        wydotTimBuffer.setFromRm(bufferStart);
-                        wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-                        wydotTimBuffer.setToRm(bufferEnd);
-                        wydotTimBuffer.setClientId(wydotTim.getClientId());
-                        // send buffer tim
-                        wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                        // wydotTimService.createTim(wydotTimBuffer, "westbound", type, itisCodes);
-                        createSendTims(wydotTimBuffer, "westbound", timType);
-
-                        // update running buffer distance
-                        bufferBefore = wydotTim.getBuffers().get(i).getDistance();
-                    }
-                    // send road construction TIM
-                    // wydotTimService.createTim(wydotTim, "eastbound", type, itisCodes);
-                    createSendTims(wydotTim, "eastbound", timType);
-                    // wydotTimService.createTim(wydotTim, "westbound", type, itisCodes);
-                    createSendTims(wydotTim, "westbound", timType);
-                } else {
-                    if (wydotTim.getDirection().equals("eastbound")) {
-
-                        // eastbound - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setFromRm(timPoint - 1);
-
-                        for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
-                            // eastbound
-                            // starts at lower milepost minus the buffer distance
-                            double bufferStart = Math.min(wydotTim.getToRm(), wydotTim.getFromRm())
-                                    - wydotTim.getBuffers().get(i).getDistance();
-                            // ends at lower milepost minus previous buffers
-                            double bufferEnd = Math.min(wydotTim.getToRm(), wydotTim.getFromRm()) - bufferBefore;
-
-                            // update start and stopping mileposts
-                            WydotTim wydotTimBuffer = null;
-
-                            try {
-                                wydotTimBuffer = wydotTim.clone();
-                            } catch (CloneNotSupportedException e) {
-                                e.printStackTrace();
-                            }
-                            wydotTimBuffer.setFromRm(bufferStart);
-                            wydotTimBuffer.setToRm(bufferEnd);
-                            wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-                            wydotTimBuffer.setClientId(wydotTim.getClientId());
-
-                            // send buffer tim
-                            wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                            // wydotTimService.createTim(wydotTimBuffer, "eastbound", type, itisCodes);
-                            createSendTims(wydotTimBuffer, "eastbound", timType);
-
-                            // update running buffer distance
-                            bufferBefore = wydotTim.getBuffers().get(i).getDistance();
-                        }
-                        // send road construction TIM
-                        // wydotTimService.createTim(wydotTim, "eastbound", type, itisCodes);
-                        createSendTims(wydotTim, "eastbound", timType);
-                    } else {
-
-                        // westbound - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setFromRm(timPoint + 1);
-
-                        for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
-                            // westbound
-                            // starts at higher milepost plus buffer distance
-                            double bufferStart = Math.max(wydotTim.getToRm(), wydotTim.getFromRm())
-                                    + wydotTim.getBuffers().get(i).getDistance();
-                            // ends at higher milepost plus previous buffers
-                            double bufferEnd = Math.max(wydotTim.getToRm(), wydotTim.getFromRm()) + bufferBefore;
-
-                            // update start and stopping mileposts
-                            WydotTim wydotTimBuffer = null;
-                            try {
-                                wydotTimBuffer = wydotTim.clone();
-                            } catch (CloneNotSupportedException e) {
-                                e.printStackTrace();
-                            }
-                            wydotTimBuffer.setFromRm(bufferStart);
-                            wydotTimBuffer.setToRm(bufferEnd);
-                            wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-                            wydotTimBuffer.setClientId(wydotTim.getClientId());
-
-                            // send buffer tim
-                            wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-                            // wydotTimService.createTim(wydotTimBuffer, "westbound", type, itisCodes);
-                            createSendTims(wydotTimBuffer, "westbound", timType);
-
-                            // update running buffer distance
-                            bufferBefore = wydotTim.getBuffers().get(i).getDistance();
-                        }
-                        // send road construction TIM
-                        // wydotTimService.createTim(wydotTim, "westbound", type, itisCodes);
-                        createSendTims(wydotTim, "westbound", timType);
-                    }
-                }
-            }
-        }).start();
-    }
-
-    public void makeEastboundBufferTim(WydotTim wydotTim) {
+    public void makeEastboundBufferTim(WydotTimRw wydotTim) {
 
         double bufferBefore = 0;
 
@@ -326,7 +134,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             double bufferEnd = Math.min(wydotTim.getToRm(), wydotTim.getFromRm()) - bufferBefore;
 
             // update start and stopping mileposts
-            WydotTim wydotTimBuffer = null;
+            WydotTimRw wydotTimBuffer = null;
 
             try {
                 wydotTimBuffer = wydotTim.clone();
@@ -340,16 +148,20 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-            // wydotTimService.createTim(wydotTimBuffer, "eastbound", type, itisCodes);
-            // createSendTims(wydotTimBuffer, itisCodes, "eastbound", timType);
-            validTims.add(wydotTimBuffer);
+            List<String> tempList = new ArrayList<String>(wydotTimBuffer.getAdvisory().length);
+            for (Integer code : wydotTimBuffer.getAdvisory()) {
+                tempList.add(code.toString());
+            }
+            wydotTimBuffer.setItisCodes(tempList);
+            // validTims.add(wydotTimBuffer);
+            processRequest(wydotTimBuffer, timType, wydotTimBuffer.getSchedStart(), wydotTimBuffer.getSchedEnd(), null);
 
             // update running buffer distance
             bufferBefore = wydotTim.getBuffers().get(i).getDistance();
         }
     }
 
-    public void makeWestboundBufferTim(WydotTim wydotTim) {
+    public void makeWestboundBufferTim(WydotTimRw wydotTim) {
 
         double bufferBefore = 0;
 
@@ -362,7 +174,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             double bufferEnd = Math.max(wydotTim.getToRm(), wydotTim.getFromRm()) + bufferBefore;
 
             // update start and stopping mileposts
-            WydotTim wydotTimBuffer = null;
+            WydotTimRw wydotTimBuffer = null;
             try {
                 wydotTimBuffer = wydotTim.clone();
             } catch (CloneNotSupportedException e) {
@@ -375,8 +187,14 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-            // createSendTims(wydotTimBuffer, itisCodes, "westbound", timType);
-            validTims.add(wydotTimBuffer);
+            List<String> tempList = new ArrayList<String>(wydotTimBuffer.getAdvisory().length);
+            for (Integer code : wydotTimBuffer.getAdvisory()) {
+                tempList.add(code.toString());
+            }
+            wydotTimBuffer.setItisCodes(tempList);
+            // validTims.add(wydotTimBuffer);
+            processRequest(wydotTimBuffer, timType, wydotTimBuffer.getSchedStart(), wydotTimBuffer.getSchedEnd(), null);
+
             // update running buffer distance
             bufferBefore = wydotTim.getBuffers().get(i).getDistance();
         }
@@ -386,7 +204,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
 
         // clear TIM
-        wydotTimService.clearTimsById(type, id);
+        wydotTimService.clearTimsById(type, id, null);
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -415,7 +233,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     }
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.GET, headers = "Accept=application/json")
-    public Collection<ActiveTim> getRoadContructionTim() {
+    public Collection<ActiveTim> getRoadConstructionTim() {
 
         // get tims
         List<ActiveTim> activeTims = wydotTimService.selectTimsByType(type);

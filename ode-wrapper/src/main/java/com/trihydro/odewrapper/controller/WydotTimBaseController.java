@@ -1,26 +1,59 @@
 package com.trihydro.odewrapper.controller;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.trihydro.odewrapper.model.WydotTim;
+import com.trihydro.odewrapper.model.WydotTimCc;
+import com.trihydro.odewrapper.model.WydotTimIncident;
+import com.trihydro.odewrapper.model.WydotTimParking;
+import com.trihydro.odewrapper.model.WydotTimRc;
+import com.trihydro.odewrapper.model.WydotTimRw;
+import com.trihydro.odewrapper.model.WydotTimVsl;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
 import springfox.documentation.annotations.ApiIgnore;
 
 import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.TimQuery;
 
 @RestController
 @ApiIgnore
 public abstract class WydotTimBaseController {
+
+    protected static BasicConfiguration configuration;
+
+    @Autowired
+    public void setConfiguration(BasicConfiguration configurationRhs) {
+        configuration = configurationRhs;
+    }
 
     // services
     protected final WydotTimService wydotTimService;
@@ -31,7 +64,7 @@ public abstract class WydotTimBaseController {
         this.wydotTimService = new WydotTimService();
     }
 
-    protected ControllerResult validateInputParking(WydotTim tim) {
+    protected ControllerResult validateInputParking(WydotTimParking tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -80,7 +113,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputIncident(WydotTim tim) {
+    protected ControllerResult validateInputIncident(WydotTimIncident tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -88,8 +121,10 @@ public abstract class WydotTimBaseController {
         // get route number
         if (tim.getDirection() != null)
             result.setDirection(tim.getDirection());
-        if (tim.getIncidentId() != null)
+        if (tim.getIncidentId() != null) {
             result.setClientId(tim.getIncidentId());
+            tim.setClientId(tim.getIncidentId());
+        }
 
         String route = null;
         if (tim.getHighway() != null) {
@@ -132,7 +167,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputRw(WydotTim tim) {
+    protected ControllerResult validateInputRw(WydotTimRw tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -140,8 +175,10 @@ public abstract class WydotTimBaseController {
         // get route number
         if (tim.getDirection() != null)
             result.setDirection(tim.getDirection());
-        if (tim.getId() != null)
+        if (tim.getId() != null) {
             result.setClientId(tim.getId());
+            tim.setClientId(tim.getId());
+        }
 
         String route = null;
         if (tim.getHighway() != null) {
@@ -179,11 +216,25 @@ public abstract class WydotTimBaseController {
         if (tim.getDirection() == null) {
             resultMessages.add("Null value for direction");
         }
-        if (tim.getId() == null) {
-            resultMessages.add("Null value for id");
+        if (tim.getSchedStart() == null) {
+            resultMessages.add("Null value for schedStart");
+        } else {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                Date convertedDate = dateFormat.parse(tim.getSchedStart());
+                tim.setSchedStart(convertedDate.toInstant().toString());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
-        if (tim.getStartTs() == null) {
-            resultMessages.add("Null value for startTs");
+        if (tim.getSchedEnd() != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                Date convertedDate = dateFormat.parse(tim.getSchedEnd());
+                tim.setSchedEnd(convertedDate.toInstant().toString());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
         if (tim.getBuffers() != null) {
             for (Buffer buffer : tim.getBuffers()) {
@@ -213,7 +264,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputRc(WydotTim tim) {
+    protected ControllerResult validateInputRc(WydotTimRc tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -243,7 +294,7 @@ public abstract class WydotTimBaseController {
         if (tim.getToRm() != null && tim.getToRm() < 0) {
             resultMessages.add("Invalid toRm");
         }
-        if (tim.getFromRm() < 0) {
+        if (tim.getFromRm() != null && tim.getFromRm() < 0) {
             resultMessages.add("Invalid fromRm");
         }
         if (tim.getFromRm() == null) {
@@ -257,6 +308,11 @@ public abstract class WydotTimBaseController {
         }
         if (tim.getDirection() == null) {
             resultMessages.add("Null value for direction");
+        }
+        if (tim.getRoadCode() == null) {
+            resultMessages.add("Null value for roadCode");
+        } else {
+            tim.setClientId(tim.getRoadCode());
         }
 
         // set itis codes
@@ -270,7 +326,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputVsl(WydotTim tim) {
+    protected ControllerResult validateInputVsl(WydotTimVsl tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -315,6 +371,11 @@ public abstract class WydotTimBaseController {
         if (tim.getDirection() == null) {
             resultMessages.add("Null value for direction");
         }
+        if (tim.getDeviceId() == null) {
+            resultMessages.add("Null value for deviceId");
+        } else {
+            tim.setClientId(tim.getDeviceId());
+        }
 
         // set itis codes
         List<String> itisCodes = SetItisCodes.setItisCodesVsl(tim);
@@ -327,7 +388,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputCc(WydotTim tim) {
+    protected ControllerResult validateInputCc(WydotTimCc tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -336,8 +397,12 @@ public abstract class WydotTimBaseController {
         if (tim.getDirection() != null)
             result.setDirection(tim.getDirection());
 
-        if (tim.getSegment() != null)
+        if (tim.getSegment() != null) {
             result.setClientId(tim.getSegment());
+            tim.setClientId(tim.getSegment());
+        } else {
+            resultMessages.add("Null value for segment");
+        }
 
         String route = null;
         if (tim.getRoute() != null) {
@@ -432,7 +497,18 @@ public abstract class WydotTimBaseController {
         return false;
     }
 
-    public abstract void processRequest(List<WydotTim> wydotTims);
+    public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
+            Integer pk) {
+
+        if (wydotTim.getDirection().equals("both")) {
+            // eastbound
+            createSendTims(wydotTim, "eastbound", timType, startDateTime, endDateTime, pk);
+            // westbound
+            createSendTims(wydotTim, "westbound", timType, startDateTime, endDateTime, pk);
+        } else {
+            createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk);
+        }
+    }
 
     public TimType getTimType(String timTypeName) {
 
@@ -452,16 +528,63 @@ public abstract class WydotTimBaseController {
     }
 
     // creates a TIM and sends it to RSUs and Satellite
-    protected void createSendTims(WydotTim wydotTim, String direction, TimType timType) {
+    protected void createSendTims(WydotTim wydotTim, String direction, TimType timType, String startDateTime,
+            String endDateTime, Integer pk) {
         // build region name for active tim logger to use
         String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_"
                 + wydotTim.getToRm();
         // create TIM
-        WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType());
+        WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
+                startDateTime, endDateTime);
         // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType);
+        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);
         // send TIM to SDW
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);
+    }
+
+    protected static TimQuery submitTimQuery(WydotRsu rsu, int counter) {
+
+        // stop if this fails twice
+        if (counter == 1)
+            return null;
+
+        // tim query to ODE
+        String rsuJson = gson.toJson(rsu);
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
+
+        String responseStr = null;
+
+        try {
+            responseStr = restTemplate.postForObject(configuration.getOdeUrl() + "/tim/query", entity, String.class);
+        } catch (RestClientException e) {
+            return submitTimQuery(rsu, counter + 1);
+        }
+
+        String[] items = responseStr.replaceAll("\\\"", "").replaceAll("\\:", "").replaceAll("indicies_set", "")
+                .replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\[", "").replaceAll(" ", "")
+                .replaceAll("\\]", "").replaceAll("\\s", "").split(",");
+
+        int[] results = new int[items.length];
+
+        for (int i = 0; i < items.length; i++) {
+            try {
+                results[i] = Integer.parseInt(items[i]);
+            } catch (NumberFormatException nfe) {
+                // NOTE: write something here if you need to recover from formatting errors
+            }
+        }
+
+        Arrays.sort(results);
+
+        TimQuery timQuery = new TimQuery();
+        timQuery.setIndicies_set(results);
+        // TimQuery timQuery = gson.fromJson(responseStr, TimQuery.class);
+
+        return timQuery;
     }
 
 }

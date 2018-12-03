@@ -117,9 +117,9 @@ public class TimService extends CvDataServiceLibrary {
 								odeTimMetadata.getReceivedMessageDetails().getRxSource().toString());
 					else
 						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("SCHEMA_VERSION"))
+				} else if (col.equals("SCHEMA_VERSION")) {
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
-				else if (col.equals("SECURITY_RESULT_CODE")) {
+				} else if (col.equals("SECURITY_RESULT_CODE")) {
 					if (odeTimMetadata.getSecurityResultCode() != null) {
 						SecurityResultCodeType securityResultCodeType = getSecurityResultCodeTypes().stream()
 								.filter(x -> x.getSecurityResultCodeType()
@@ -128,9 +128,9 @@ public class TimService extends CvDataServiceLibrary {
 						preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());
 					} else
 						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("LOG_FILE_NAME"))
+				} else if (col.equals("LOG_FILE_NAME")) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getLogFileName());
-				else if (col.equals("RECORD_GENERATED_AT")) {
+				} else if (col.equals("RECORD_GENERATED_AT")) {
 					if (odeTimMetadata.getRecordGeneratedAt() != null) {
 						java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
@@ -161,22 +161,18 @@ public class TimService extends CvDataServiceLibrary {
 				else if (col.equals("SERIAL_ID_SERIAL_NUMBER"))
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
 							odeTimMetadata.getSerialId().getSerialNumber());
-				else if (col.equals("PAYLOAD_TYPE"))
+				else if (col.equals("PAYLOAD_TYPE")) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
-				else if (col.equals("RECORD_TYPE") && odeTimMetadata.getRecordType() != null)
+				} else if (col.equals("RECORD_TYPE") && odeTimMetadata.getRecordType() != null) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
 							odeTimMetadata.getRecordType().toString());
-				else if (col.equals("ODE_RECEIVED_AT")) {
+				} else if (col.equals("ODE_RECEIVED_AT")) {
 					if (odeTimMetadata.getOdeReceivedAt() != null) {
 						java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(receivedAtDate));
 					} else {
 						preparedStatement.setString(fieldNum, null);
 					}
-				} else if (col.equals("RSU_INDEX")) {
-					// TODO
-					// SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-					// request.getOde().getRsuIndex());
 				} else
 					preparedStatement.setString(fieldNum, null);
 				fieldNum++;
@@ -222,7 +218,6 @@ public class TimService extends CvDataServiceLibrary {
 				tim.setMsgCnt(rs.getInt("MSG_CNT"));
 				tim.setTimeStamp(rs.getString("TIME_STAMP"));
 				tim.setUrlB(rs.getString("URL_B"));
-				tim.setRsuIndex(rs.getInt("RSU_INDEX"));
 			}
 
 		} catch (SQLException e) {

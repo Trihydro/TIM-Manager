@@ -14,7 +14,7 @@ import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
-import com.trihydro.library.model.TestConfig;
+import com.trihydro.library.model.ConfigProperties;
 
 public class CvDataServiceLibrary {
 
@@ -31,14 +31,14 @@ public class CvDataServiceLibrary {
 
     static {
         utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z[UTC]'"); // 25
-        utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z[UTC]'");
+        utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); // 25
+        utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
         // mstFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
         mstLocalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");
     }
 
-    public static void setConfig(TestConfig config) {
+    public static void setConfig(ConfigProperties config) {
         DbUtility.setConfig(config);
     }
 

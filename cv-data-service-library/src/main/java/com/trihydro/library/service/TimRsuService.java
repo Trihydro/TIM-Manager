@@ -15,7 +15,7 @@ import com.trihydro.library.model.TimRsu;
 
 public class TimRsuService extends CvDataServiceLibrary {
 
-	public static Long insertTimRsu(Long timId, Integer rsuId) {
+	public static Long insertTimRsu(Long timId, Integer rsuId, Integer rsuIndex) {
 
 		PreparedStatement preparedStatement = null;
 		Connection connection = null;
@@ -31,6 +31,8 @@ public class TimRsuService extends CvDataServiceLibrary {
 				if (col.equals("TIM_ID"))
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
 				else if (col.equals("RSU_ID"))
+					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuId);
+				else if (col.equals("RSU_INDEX"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuId);
 				fieldNum++;
 			}

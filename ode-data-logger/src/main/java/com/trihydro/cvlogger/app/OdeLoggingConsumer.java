@@ -2,18 +2,13 @@ package com.trihydro.cvlogger.app;
 
 import java.sql.*;
 import java.util.Properties;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import us.dot.its.jpo.ode.util.*;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Option;
@@ -26,17 +21,14 @@ import com.trihydro.cvlogger.app.loggers.TimLogger;
 import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
 
 import us.dot.its.jpo.ode.model.OdeData;
-import us.dot.its.jpo.ode.model.OdeTimData;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import com.trihydro.cvlogger.app.services.TracManager;
-import com.trihydro.library.model.TestConfig;
+import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.service.CvDataServiceLibrary;
 
-import java.net.URLClassLoader;
 
 public class OdeLoggingConsumer {
 
@@ -82,13 +74,12 @@ public class OdeLoggingConsumer {
 		String type = cmd.getOptionValue("type");
 		String configFile = cmd.getOptionValue("configFile");
 
-		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-		String appConfigPath = rootPath + configFile;
+		InputStream inputStream = OdeLoggingConsumer.class.getClassLoader().getResourceAsStream(configFile);
 
 		Properties appProps = new Properties();
-		appProps.load(new FileInputStream(appConfigPath));
+		appProps.load(inputStream);
 
-		TestConfig config = new TestConfig();
+		ConfigProperties config = new ConfigProperties();
 
 		config.setDbDriver(appProps.getProperty("dbDriver"));
 		config.setDbUrl(appProps.getProperty("dbUrl"));

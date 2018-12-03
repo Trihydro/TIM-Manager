@@ -117,8 +117,8 @@ public class WydotTimService {
 
             WydotOdeTravelerInformationMessage tim = TimService.getTim(activeSatTims.get(0).getTimId());
 
-            String regionNameTemp = regionNamePrev + "_" + timType.getType();
-
+            String regionNameTemp = regionNamePrev + "_SAT-" + activeSatTims.get(0).getSatRecordId() + "_"
+                    + timType.getType();
             if (wydotTim.getClientId() != null)
                 regionNameTemp += "_" + wydotTim.getClientId();
 
@@ -130,7 +130,7 @@ public class WydotTimService {
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
         } else {
             String recordId = getNewRecordId();
-            String regionNameTemp = regionNamePrev + "_" + timType.getType();
+            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
 
             if (wydotTim.getClientId() != null)
                 regionNameTemp += "_" + wydotTim.getClientId();
@@ -162,7 +162,7 @@ public class WydotTimService {
         for (WydotRsu rsu : rsus) {
 
             // update region name for active tim logger
-            String regionNameTemp = regionNamePrev + "_" + timType.getType();
+            String regionNameTemp = regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_" + timType.getType();
 
             // add clientId to region name
             if (wydotTim.getClientId() != null)
@@ -469,6 +469,7 @@ public class WydotTimService {
         List<RsuIndex> indiciesInUse = submitTimQueryRiDb(rsu.getRsuId());
 
         timToSend.getRequest().getRsus()[0].setRsuIndex(findFirstAvailableIndexWithRsuIndex(indiciesInUse));
+        rsu.setRsuIndex(findFirstAvailableIndexWithRsuIndex(indiciesInUse));
 
         // log index in use
         RsuIndexService.insertRsuIndex(rsu.getRsuId(), rsu.getRsuIndex());

@@ -16,24 +16,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.apache.ibatis.io.Resources;
 
-import com.trihydro.library.model.TestConfig;
+import com.trihydro.library.model.ConfigProperties;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @ComponentScan
-@EnableConfigurationProperties(TestConfig.class)
+@EnableConfigurationProperties(ConfigProperties.class)
 public class DbUtility {
 
     private static HikariDataSource hds = null;
     private static HikariConfig config = new HikariConfig();
-    private static TestConfig dbConfig;
+    private static ConfigProperties dbConfig;
 
-    public static void setConfig(TestConfig testConfig) {
-        dbConfig = testConfig;
+    public static void setConfig(ConfigProperties configProperties) {
+        dbConfig = configProperties;
     }
 
-    public static TestConfig getConfig() {
+    public static ConfigProperties getConfig() {
         return dbConfig;
     }
 

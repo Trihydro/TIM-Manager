@@ -9,6 +9,7 @@ public class WydotTimList {
 	private List<WydotTimRw> timRwList;
 	private List<WydotTimParking> timParkingList;
 	private List<WydotTimIncident> timIncidentList;
+	private List<WydotTim> timList;
 
 	public List<WydotTimVsl> getTimVslList() {
 		return this.timVslList;
@@ -56,5 +57,13 @@ public class WydotTimList {
 
 	public void setTimIncidentList(List<WydotTimIncident> timIncidentList) {
 		this.timIncidentList = timIncidentList;
+	}
+
+	public List<WydotTim> getTimList() {
+		return this.timList;
+	}
+
+	public void setTimList(List<WydotTim> timList) {
+		this.timList = timList;
 	}
 }

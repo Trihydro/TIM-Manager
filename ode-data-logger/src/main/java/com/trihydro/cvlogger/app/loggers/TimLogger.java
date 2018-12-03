@@ -75,7 +75,7 @@ public class TimLogger extends BaseLogger {
 				WydotRsu rsu = rsus.stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
 						.orElse(null);
 				if (rsu != null)
-					TimRsuService.insertTimRsu(timId, rsu.getRsuId());
+					TimRsuService.insertTimRsu(timId, rsu.getRsuId(), null);
 			}
 
 			Long nodeXYId;
@@ -138,7 +138,7 @@ public class TimLogger extends BaseLogger {
 			// save TIM RSU in DB
 			WydotRsu rsu = rsus.stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
 					.orElse(null);
-			TimRsuService.insertTimRsu(timId, rsu.getRsuId());
+			TimRsuService.insertTimRsu(timId, rsu.getRsuId(), metaData.getRequest().getRsus()[0].getRsuIndex());
 		}
 
 		// save DataFrame ITIS codes
@@ -219,29 +219,29 @@ public class TimLogger extends BaseLogger {
 			activeTim.setMilepostStop(Double.parseDouble(splitName[3]));
 		else
 			return activeTim;
-		// if (splitName.length > 4) {
-		// // if this is an RSU TIM
-		// if (splitName[4].split("-")[0].equals("SAT")) {
-		// activeTim.setSatRecordId(splitName[4].split("-")[1]);
-		// } else {
-		// activeTim.setRsuTarget(splitName[4].split("-")[1]);
-		// }
-		// } else
-		// return activeTim;
 		if (splitName.length > 4) {
-			TimType timType = getTimType((splitName[4]));
+			// if this is an RSU TIM
+			if (splitName[4].split("-")[0].equals("SAT")) {
+				activeTim.setSatRecordId(splitName[4].split("-")[1]);
+			} else {
+				activeTim.setRsuTarget(splitName[4].split("-")[1]);
+			}
+		} else
+			return activeTim;
+		if (splitName.length > 5) {
+			TimType timType = getTimType((splitName[5]));
 			activeTim.setTimType(timType.getType());
 			activeTim.setTimTypeId(timType.getTimTypeId());
 		} else
 			return activeTim;
 
-		if (splitName.length > 5)
-			activeTim.setClientId(splitName[5]);
+		if (splitName.length > 6)
+			activeTim.setClientId(splitName[6]);
 		else
 			return activeTim;
 
-		if (splitName.length > 6)
-			activeTim.setPk(Integer.valueOf(splitName[6]));
+		if (splitName.length > 7)
+			activeTim.setPk(Integer.valueOf(splitName[7]));
 		else
 			return activeTim;
 

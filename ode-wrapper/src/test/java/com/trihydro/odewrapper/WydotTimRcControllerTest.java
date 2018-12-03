@@ -234,7 +234,7 @@ public class WydotTimRcControllerTest {
 
 		Long timId = TimService.insertTim(odeTimMetadata, wydotTravelerInputData.getTim());
 
-		TimRsuService.insertTimRsu(timId, 1);
+		TimRsuService.insertTimRsu(timId, 1, 1);
 
 		ActiveTim activeTim = new ActiveTim();
 		activeTim.setTimId(timId);

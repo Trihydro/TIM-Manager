@@ -1,6 +1,6 @@
 package com.trihydro.library.model;
 
-public class TestConfig {
+public class ConfigProperties {
 
     private String odeUrl;
     private String dbDriver;

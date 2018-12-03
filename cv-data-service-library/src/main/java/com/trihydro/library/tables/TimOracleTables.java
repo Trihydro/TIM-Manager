@@ -47,7 +47,6 @@ public class TimOracleTables extends OracleTables {
             timTable.add("PAYLOAD_TYPE");
             timTable.add("RECORD_TYPE");
             timTable.add("ODE_RECEIVED_AT");
-            timTable.add("RSU_INDEX");
 
             return timTable;
         }
@@ -158,6 +157,7 @@ public class TimOracleTables extends OracleTables {
             timRsuTable = new ArrayList<String>();
             timRsuTable.add("TIM_ID");
             timRsuTable.add("RSU_ID");
+            timRsuTable.add("RSU_INDEX");
             return timRsuTable;
         }
     }

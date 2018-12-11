@@ -9,7 +9,7 @@
             "name": "CV Data Controller (Launch)",
             "request": "launch",
             "args": "--spring.profiles.active=dev",
-            "cwd": "${workspaceRoot}/cv-data-controller",
+            "cwd": "${workspaceRoot}/cv-data-controller",            
             "mainClass": "com.trihydro.cvdatacontroller.Application"
         },
         {

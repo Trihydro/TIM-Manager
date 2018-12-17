@@ -25,6 +25,7 @@ import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
+import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -147,6 +148,35 @@ public class JsonToJavaConverter {
             }
 
             odeTimMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadata.class);
+        } catch (IOException e) {
+            System.out.println("IOException");
+            System.out.println(e.getStackTrace());
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return odeTimMetadata;
+    }
+
+    public static OdeRequestMsgMetadata convertBroadcastTimMetadataJsonToJava(String value) {
+
+        OdeRequestMsgMetadata odeTimMetadata = null;
+
+        try {
+            JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");
+            // JsonNode receivedMessageDetailsNode = JsonUtils.getJsonNode(value, "metadata")
+            //         .get("receivedMessageDetails");
+
+            // // check for null rxSource for Distress Notifications
+            // if (receivedMessageDetailsNode != null) {
+            //     String rxSource = mapper.treeToValue(receivedMessageDetailsNode.get("rxSource"), String.class);
+            //     if (rxSource.equals("")) {
+            //         ((ObjectNode) receivedMessageDetailsNode).remove("rxSource");
+            //         ((ObjectNode) metaDataNode).replace("receivedMessageDetails", receivedMessageDetailsNode);
+            //     }
+            // }
+
+            odeTimMetadata = mapper.treeToValue(metaDataNode, OdeRequestMsgMetadata.class);
         } catch (IOException e) {
             System.out.println("IOException");
             System.out.println(e.getStackTrace());

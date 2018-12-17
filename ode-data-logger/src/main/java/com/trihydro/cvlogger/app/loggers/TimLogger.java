@@ -40,7 +40,7 @@ public class TimLogger extends BaseLogger {
 
 	public static OdeData processBroadcastTimJson(String value) {
 		OdeData odeData = null;
-		OdeLogMetadata odeTimMetadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
+		OdeRequestMsgMetadata odeTimMetadata = JsonToJavaConverter.convertBroadcastTimMetadataJsonToJava(value);
 		OdeTravelerInformationMessage odeTim = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
 		OdeTimPayload odeTimPayload = new OdeTimPayload(odeTim);
 		if (odeTimMetadata != null && odeTimPayload != null)
@@ -51,8 +51,8 @@ public class TimLogger extends BaseLogger {
 	public static void addTimToOracleDB(OdeData odeData) {
 
 		try {
-			Long timId = TimService.insertTim((OdeLogMetadata) odeData.getMetadata(),
-					((OdeTimPayload) odeData.getPayload()).getTim());
+			Long timId = TimService.insertTim(odeData.getMetadata(), ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
+					((OdeTimPayload) odeData.getPayload()).getTim(), ((OdeLogMetadata) odeData.getMetadata()).getRecordType(), ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(), ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode());
 
 			// odeData.getMetadata().get
 			// return if TIM is not inserted
@@ -106,8 +106,8 @@ public class TimLogger extends BaseLogger {
 		ActiveTim activeTim;
 
 		// save TIM
-		Long timId = TimService.insertTim((OdeLogMetadata) odeData.getMetadata(),
-				((OdeTimPayload) odeData.getPayload()).getTim());
+		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null,
+				((OdeTimPayload) odeData.getPayload()).getTim(), null, null, null);
 
 		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 

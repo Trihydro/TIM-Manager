@@ -8,8 +8,8 @@
             "type": "java",
             "name": "CV Data Controller (Launch)",
             "request": "launch",
-            "args": "--spring.profiles.active=dev",
-            "cwd": "${workspaceRoot}/cv-data-controller",            
+            "cwd": "${workspaceRoot}/cv-data-controller",      
+            "args": "--spring.profiles.active=dev",     
             "mainClass": "com.trihydro.cvdatacontroller.Application"
         },
         {
@@ -24,7 +24,7 @@
             "type": "java",
             "name": "ODE Data Logger (Launch)",
             "request": "launch",
-            "args": "-g logger_group_btim_dev -t topic.OdeDriverAlertJson -type string -p config.properties",
+            "args": "-g logger_group_btim_dev -t topic.OdeTimJson -type string -p config-dev.properties",
             "cwd": "${workspaceRoot}/ode-data-logger",
             "mainClass": "com.trihydro.cvlogger.app.OdeLoggingConsumer"
         },

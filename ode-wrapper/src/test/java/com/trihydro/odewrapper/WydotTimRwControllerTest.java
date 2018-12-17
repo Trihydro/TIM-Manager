@@ -228,7 +228,7 @@ public class WydotTimRwControllerTest {
 		OdeLogMetadata odeTimMetadata = new OdeLogMetadata();
 		odeTimMetadata.setOdeReceivedAt(null);
 
-		Long timId = TimService.insertTim(odeTimMetadata, wydotTravelerInputData.getTim());
+		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null);
 
 		TimRsuService.insertTimRsu(timId, 1, 1);
 

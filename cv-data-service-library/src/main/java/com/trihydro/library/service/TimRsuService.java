@@ -33,7 +33,7 @@ public class TimRsuService extends CvDataServiceLibrary {
 				else if (col.equals("RSU_ID"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuId);
 				else if (col.equals("RSU_INDEX"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuId);
+					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuIndex);
 				fieldNum++;
 			}
 			Long timRsuId = log(preparedStatement, "tim rsu");

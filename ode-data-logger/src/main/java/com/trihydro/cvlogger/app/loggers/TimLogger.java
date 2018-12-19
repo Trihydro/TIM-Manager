@@ -4,6 +4,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
@@ -21,6 +23,7 @@ import com.trihydro.library.service.NodeXYService;
 import com.trihydro.library.service.PathService;
 import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.service.RegionService;
+import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.TimService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -75,7 +78,7 @@ public class TimLogger extends BaseLogger {
 				WydotRsu rsu = rsus.stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
 						.orElse(null);
 				if (rsu != null)
-					TimRsuService.insertTimRsu(timId, rsu.getRsuId(), null);
+					TimRsuService.insertTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
 			}
 
 			Long nodeXYId;
@@ -99,10 +102,10 @@ public class TimLogger extends BaseLogger {
 		}
 	}
 
+	// only does one TIM at a time ***
 	public static void addActiveTimToOracleDB(OdeData odeData) {
 
 		// variables
-		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		ActiveTim activeTim;
 
 		// save TIM
@@ -121,7 +124,7 @@ public class TimLogger extends BaseLogger {
 		if (activeTim == null)
 			return;
 
-		// TODO : Change to loop through RSU array
+		// TODO : Change to loop through RSU array - doing one rsu for now
 		if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
 				&& metaData.getRequest().getRsus().length > 0)
 			activeTim.setRsuTarget(metaData.getRequest().getRsus()[0].getRsuTarget());
@@ -157,36 +160,24 @@ public class TimLogger extends BaseLogger {
 
 		// if true, TIM came from WYDOT
 		if (activeTim.getTimType() != null) {
-			// if there is a client ID
-			if (activeTim.getClientId() != null && !activeTim.getTimType().equals("P")) {
-				// if its an RSU TIM
-				if (activeTim.getRsuTarget() != null)
-					activeTims = ActiveTimService.getActiveTimsOnRsuByClientId(activeTim.getRsuTarget(),
-							activeTim.getClientId(), activeTim.getTimTypeId(), activeTim.getDirection());
-				// if its a SAT TIM
-				else
-					activeTims = ActiveTimService.getActiveSatTimsByClientIdDirection(activeTim.getClientId(),
-							activeTim.getTimTypeId(), activeTim.getDirection());
-			}
+		
+			ActiveTim activeTimDb = null;
 
-			// Active TIM exists
-			if (activeTims.size() == 0) {
+			// if RSU TIM
+			if(activeTim.getRsuTarget() != null) // look for active RSU tim that matches incoming TIM
+				activeTimDb = ActiveTimService.getActiveRsuTim(activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget());
+			else // else look for active SAT tim that matches incoming TIM
+				activeTimDb = ActiveTimService.getActiveSatTim(activeTim.getClientId(), activeTim.getDirection());
+
+			// if there is no active TIM, insert new one
+			if(activeTimDb == null){
 				ActiveTimService.insertActiveTim(activeTim);
-			} else {
-				for (ActiveTim ac : activeTims) {
-					// update Active TIM table TIM Id
-					// ActiveTimService.updateActiveTimTimId(ac.getActiveTimId(), timId);
-					// if(endDateTime != null)
-					// ActiveTimService.updateActiveTimEndDate(ac.getActiveTimId(), endDateTime);
-					activeTim.setActiveTimId(ac.getActiveTimId());
-					ActiveTimService.updateActiveTim(activeTim);
-
-					// TODO - change to duration
-					// if(endDateTime != null)
-					// ActiveTimLogger.updateActiveTimEndDate(activeTim.getActiveTimId(),
-					// endDateTime, dbUtility.getConnection());
-				}
 			}
+			else{ // else update active TIM
+				activeTim.setActiveTimId(activeTimDb.getActiveTimId());
+				ActiveTimService.updateActiveTim(activeTim);
+			}
+		
 		} else {
 			// not from WYDOT application
 			// just log for now

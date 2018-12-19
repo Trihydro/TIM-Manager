@@ -166,14 +166,14 @@ public class WydotTimRwControllerTest {
 	public void testDeleteRwTimsByClientId() throws Exception {
 		makeTims();
 
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientId("15917", getTimTypeId(),
+		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientIdDirection("15917", getTimTypeId(),
 				null);
 		assertEquals(1, activeTimsBeforeDelete.size());
 
 		this.mockMvc.perform(MockMvcRequestBuilders.delete("/rw-tim/15917"))
 				.andExpect(MockMvcResultMatchers.status().isOk());
 
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientId("15917", getTimTypeId(), null);
+		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientIdDirection("15917", getTimTypeId(), null);
 		assertEquals(0, activeTimsAfterDelete.size());
 	}
 

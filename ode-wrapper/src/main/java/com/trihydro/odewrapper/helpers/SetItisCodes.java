@@ -51,7 +51,7 @@ public class SetItisCodes {
         }
     }
 
-    public static List<String> setItisCodesFromAdvisoryArray(WydotTimCc wydotTim) {
+    public static List<String> setItisCodesFromAdvisoryArray(WydotTimRc wydotTim) {
 
         // check to see if code exists
 

@@ -236,14 +236,14 @@ public class WydotTimIncidentControllerTest {
 
 		makeTims();
 
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientId("IN49251", getTimTypeId(),
+		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientIdDirection("IN49251", getTimTypeId(),
 				null);
 		assertEquals(1, activeTimsBeforeDelete.size());
 
 		this.mockMvc.perform(MockMvcRequestBuilders.delete("/incident-tim/IN49251"))
 				.andExpect(MockMvcResultMatchers.status().isOk());
 
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientId("IN49251", getTimTypeId(),
+		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientIdDirection("IN49251", getTimTypeId(),
 				null);
 		assertEquals(0, activeTimsAfterDelete.size());
 	}

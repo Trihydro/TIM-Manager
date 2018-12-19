@@ -150,6 +150,49 @@ public class RsuService extends CvDataServiceLibrary {
 		return rsus;
 	}
 
+	public static List<WydotRsu> getRsusTimIsOn(Long timId){
+		List<WydotRsu> rsus = new ArrayList<WydotRsu>();
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement statement = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			statement = connection.createStatement();
+
+			// select all RSUs that are labeled as 'Existing' in the WYDOT view
+			rs = statement.executeQuery(
+					"select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id where tim_rsu.tim_id = " + timId);
+
+			while (rs.next()) {
+				WydotRsu rsu = new WydotRsu();
+				// rsu.setRsuId(rs.getInt("rsu_id"));
+				rsu.setRsuTarget(rs.getString("ipv4_address"));
+				rsu.setLatitude(rs.getDouble("latitude"));
+				rsu.setLongitude(rs.getDouble("longitude"));
+				rsus.add(rsu);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return rsus;
+
+	}
+
 	public static List<WydotRsu> selectRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost) {
 
 		Connection connection = null;

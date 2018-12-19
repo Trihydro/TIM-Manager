@@ -151,14 +151,14 @@ public class WydotTimParkingControllerTest {
 
 		makeTims();
 
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientId("Parking49251",
+		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientIdDirection("Parking49251",
 				getTimTypeId(), null);
 		assertEquals(1, activeTimsBeforeDelete.size());
 
 		this.mockMvc.perform(MockMvcRequestBuilders.delete("/parking-tim/Parking49251"))
 				.andExpect(MockMvcResultMatchers.status().isOk());
 
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientId("Parking49251", getTimTypeId(),
+		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientIdDirection("Parking49251", getTimTypeId(),
 				null);
 		assertEquals(0, activeTimsAfterDelete.size());
 	}

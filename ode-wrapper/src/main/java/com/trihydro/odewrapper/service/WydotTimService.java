@@ -110,8 +110,11 @@ public class WydotTimService {
         List<ActiveTim> activeSatTims = null;
 
         // find active TIMs by client Id and direction
-        activeSatTims = ActiveTimService.getActiveSatTimsByClientIdDirection(wydotTim.getClientId(),
+        activeSatTims = ActiveTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
                 timType.getTimTypeId(), direction);
+
+        // filter by SAT TIMs
+        activeSatTims = activeSatTims.stream().filter(x -> x.getSatRecordId() != null).collect(Collectors.toList());
 
         if (activeSatTims != null && activeSatTims.size() > 0) {
 
@@ -176,8 +179,11 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // get active TIMs by clientId and direction
-            activeTims = ActiveTimService.getActiveTimsOnRsuByClientId(rsu.getRsuTarget(), wydotTim.getClientId(),
+            activeTims = ActiveTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
                     timType.getTimTypeId(), direction);
+
+            // filter by RSU TIMs
+            activeTims = activeTims.stream().filter(x -> x.getRsuTarget() != null).collect(Collectors.toList());
 
             // if active tims exist, update tim
             if (activeTims != null && activeTims.size() > 0) {
@@ -198,35 +204,6 @@ public class WydotTimService {
             }
         }
     }
-
-    // public ControllerResult clearTimsByRoadSegment(String timTypeStr, WydotTim
-    // wydotTim, String direction) {
-
-    // ControllerResult result = new ControllerResult();
-    // List<String> resultsMessages = new ArrayList<String>();
-    // result.setDirection(direction);
-
-    // // get tim type
-    // TimType timType = getTimType(timTypeStr);
-
-    // // get all RC active tims
-    // List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
-    // if (timType != null)
-    // activeTims = ActiveTimService.getAllActiveTimsBySegment(wydotTim.getFromRm(),
-    // wydotTim.getToRm(),
-    // timType.getTimTypeId(), direction);
-
-    // if (activeTims.size() == 0) {
-    // resultsMessages.add("No active TIMs found");
-    // } else {
-    // resultsMessages.add("success");
-    // }
-
-    // deleteTimsFromRsusAndSdw(activeTims);
-
-    // result.setResultMessages(resultsMessages);
-    // return result;
-    // }
 
     public void deleteTimsFromRsusAndSdw(List<ActiveTim> activeTims) {
 
@@ -269,7 +246,7 @@ public class WydotTimService {
 
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
-        activeTims = ActiveTimService.getActiveTimsByClientId(clientId, timType.getTimTypeId(), direction);
+        activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction);
 
         deleteTimsFromRsusAndSdw(activeTims);
 
@@ -280,7 +257,7 @@ public class WydotTimService {
 
         TimType timType = getTimType(timTypeStr);
 
-        List<ActiveTim> activeTims = ActiveTimService.getActiveTimsByClientId(clientId, timType.getTimTypeId(), null);
+        List<ActiveTim> activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), null);
 
         return activeTims;
     }
@@ -327,6 +304,9 @@ public class WydotTimService {
             for (WydotRsu rsu : rsus) {
                 rsu.setRsuRetries(3);
                 rsu.setRsuTimeout(5000);
+                // TODO: REMOVE when passwordless SNMP is ready
+                rsu.setRsuUsername("v3user");
+                rsu.setRsuPassword("Loc#123@Lear");
             }
             return rsus;
         }
@@ -466,13 +446,15 @@ public class WydotTimService {
                 + packetIdHexString;
         timToSend.getTim().setPacketID(packetIdHexString);
 
-        List<RsuIndex> indiciesInUse = submitTimQueryRiDb(rsu.getRsuId());
+        //List<RsuIndex> indiciesInUse = submitTimQueryRiDb(rsu.getRsuId());
+
+        List<Integer> indiciesInUse = ActiveTimService.getIndiciesInUseForRsu(rsu.getRsuTarget());
 
         timToSend.getRequest().getRsus()[0].setRsuIndex(findFirstAvailableIndexWithRsuIndex(indiciesInUse));
         rsu.setRsuIndex(findFirstAvailableIndexWithRsuIndex(indiciesInUse));
 
         // log index in use
-        RsuIndexService.insertRsuIndex(rsu.getRsuId(), rsu.getRsuIndex());
+        // RsuIndexService.insertRsuIndex(rsu.getRsuId(), rsu.getRsuIndex());
 
         String timToSendJson = gson.toJson(timToSend);
 
@@ -502,7 +484,7 @@ public class WydotTimService {
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(TimeToLive.oneday);
+        sdw.setTtl(TimeToLive.thirtyminutes);
         // set new record id
         sdw.setRecordId(recordId);
 
@@ -618,15 +600,6 @@ public class WydotTimService {
         return timToSend;
     }
 
-    public static void updateActiveTims(ActiveTim activeTim, List<Integer> itisCodeIds, Long timId,
-            String endDateTime) {
-        // update Active TIM table TIM Id
-        ActiveTimService.updateActiveTimTimId(activeTim.getActiveTimId(), timId);
-
-        if (endDateTime != null)
-            ActiveTimService.updateActiveTimEndDate(activeTim.getActiveTimId(), endDateTime);
-    }
-
     // protected static TimQuery submitTimQuery(WydotRsu rsu, int counter) {
 
     // // stop if this fails twice
@@ -673,11 +646,6 @@ public class WydotTimService {
 
     // return timQuery;
     // }
-
-    protected static List<Integer> submitTimQueryAtDb(String rsuIpv4Address) {
-        List<Integer> indexes = ActiveTimService.getTakenRsuIndexs(rsuIpv4Address);
-        return indexes;
-    }
 
     protected static List<RsuIndex> submitTimQueryRiDb(int rsuId) {
         List<RsuIndex> indexes = RsuIndexService.selectByRsuId(rsuId);
@@ -779,12 +747,12 @@ public class WydotTimService {
         return 0;
     }
 
-    protected static int findFirstAvailableIndexWithRsuIndex(List<RsuIndex> indicies) {
+    protected static int findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
 
         List<Integer> setIndexList = new ArrayList<Integer>();
 
-        for (RsuIndex setIndex : indicies) {
-            setIndexList.add(setIndex.getRsuIndex());
+        for (Integer index : indicies) {
+            setIndexList.add(index);
         }
 
         for (int i = 2; i < 100; i++) {

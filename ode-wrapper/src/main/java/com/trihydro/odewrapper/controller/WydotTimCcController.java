@@ -7,6 +7,7 @@ import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,13 +42,13 @@ public class WydotTimCcController extends WydotTimBaseController {
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
 
-        for (WydotTimCc wydotTim : wydotTimList.getTimCcList()) {
+        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
             validateInputCc(wydotTim);
             wydotTimService.clearTimsById(type, wydotTim.getClientId(), null);
         }
 
         // build TIM
-        for (WydotTimCc wydotTim : wydotTimList.getTimCcList()) {
+        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
 
             resultTim = validateInputCc(wydotTim);
 

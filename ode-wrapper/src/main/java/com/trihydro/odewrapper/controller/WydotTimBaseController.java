@@ -388,7 +388,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputCc(WydotTimCc tim) {
+    protected ControllerResult validateInputCc(WydotTimRc tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -537,8 +537,10 @@ public abstract class WydotTimBaseController {
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
                 startDateTime, endDateTime);
         // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);
+        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);        
         // send TIM to SDW
+        // remove rsus from TIM
+        timToSend.getRequest().setRsus(null);
         wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);
     }
 

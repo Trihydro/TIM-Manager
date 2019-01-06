@@ -41,6 +41,7 @@ public class WydotTimCcController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTimRc> timsToSend = new ArrayList<WydotTimRc>();
 
         for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
             validateInputCc(wydotTim);
@@ -55,17 +56,29 @@ public class WydotTimCcController extends WydotTimBaseController {
             if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
-            }
+            }        
 
-            // sent new TIM
-            processRequest(wydotTim, timType, null, null, null);
+            // add TIM to list for processing later
+            timsToSend.add(wydotTim);          
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
 
+        processRequestTest(timsToSend);
+
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
+    public void processRequestTest(List<WydotTimRc> wydotTims) {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+                for (WydotTim tim : wydotTims) {
+                    processRequest(tim, timType, null, null, null);
+                }
+            }
+        }).start();
+    }
 }

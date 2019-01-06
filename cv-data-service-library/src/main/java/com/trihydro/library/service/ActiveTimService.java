@@ -259,7 +259,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			connection = DbUtility.getConnectionPool();
 			statement = connection.createStatement();
 
-			String selectStatement = "select rsu_index from active_tim";
+			String selectStatement = "select tim_rsu.rsu_index from active_tim";
 			selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
 			selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
 			selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
@@ -305,7 +305,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		try {
 			connection = DbUtility.getConnectionPool();
 			statement = connection.createStatement();
-			String query = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
+			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "%' and TIM_TYPE_ID = "
 					+ timTypeId;
 
 			if (direction != null) {
@@ -364,7 +364,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID from active_tim";
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID, ROUTE from active_tim";
 			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
 			selectStatement += "  WHERE TIM_END < SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 
@@ -380,6 +380,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
 				activeTim.setTimType(rs.getString("TYPE"));
 				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
 				activeTims.add(activeTim);
 			}
 		} catch (SQLException e) {
@@ -550,8 +552,6 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return indicies;
 	}
 
-
-
 	// get Active TIMs by client ID direction
 	public static ActiveTim getActiveRsuTim(String clientId, String direction, String ipv4Address) {
 
@@ -658,6 +658,5 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 		return activeTim;
 	}
-
 
 }

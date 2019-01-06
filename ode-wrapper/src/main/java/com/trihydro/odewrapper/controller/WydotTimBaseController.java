@@ -5,10 +5,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.trihydro.odewrapper.model.WydotTim;
@@ -184,6 +187,7 @@ public abstract class WydotTimBaseController {
         if (tim.getHighway() != null) {
             route = tim.getHighway().replaceAll("\\D+", "");
             result.setRoute(tim.getHighway());
+            tim.setRoute(tim.getHighway());
         } else {
             resultMessages.add("route not supported");
         }
@@ -541,7 +545,7 @@ public abstract class WydotTimBaseController {
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);       
     }
 
     protected static TimQuery submitTimQuery(WydotRsu rsu, int counter) {
@@ -570,17 +574,17 @@ public abstract class WydotTimBaseController {
                 .replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\[", "").replaceAll(" ", "")
                 .replaceAll("\\]", "").replaceAll("\\s", "").split(",");
 
-        int[] results = new int[items.length];
+        List<Integer> results = new ArrayList<Integer>();
 
         for (int i = 0; i < items.length; i++) {
             try {
-                results[i] = Integer.parseInt(items[i]);
+                results.add(Integer.parseInt(items[i]));
             } catch (NumberFormatException nfe) {
                 // NOTE: write something here if you need to recover from formatting errors
             }
         }
 
-        Arrays.sort(results);
+        Collections.sort(results);
 
         TimQuery timQuery = new TimQuery();
         timQuery.setIndicies_set(results);

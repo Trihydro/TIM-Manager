@@ -33,6 +33,7 @@
             "name": "CV Data Tasks (Launch)",
             "request": "launch",
             "cwd": "${}/cv-data-tasks",
+            "args": "--spring.profiles.active=dev",
             "mainClass": "com.trihydro.tasks.Application"
         },
         {

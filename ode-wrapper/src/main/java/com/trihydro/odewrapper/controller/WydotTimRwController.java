@@ -34,6 +34,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     private static String type = "RW";
     // get tim type
     TimType timType = getTimType(type);
+    List<WydotTimRw> timsToSend;
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody WydotTimList wydotTimList) {
@@ -44,6 +45,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        timsToSend = new ArrayList<WydotTimRw>();
 
         // build TIM
         for (WydotTimRw wydotTim : wydotTimList.getTimRwList()) {
@@ -63,11 +65,6 @@ public class WydotTimRwController extends WydotTimBaseController {
             if (wydotTim.getBuffers() != null)
                 wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
 
-            // adjust input
-            wydotTim.setRoute(wydotTim.getHighway());
-            System.out.println("SchedStart: " + wydotTim.getSchedStart());
-            System.out.println("SchedEnd: " + wydotTim.getSchedEnd());
-
             Double timPoint = null;
 
             // check if its a point TIM
@@ -83,7 +80,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                 makeWestboundTims(wydotTim, timPoint);
             }
             // else make one direction TIMs
-            if (wydotTim.getDirection().equals("eastbound"))
+            else if (wydotTim.getDirection().equals("eastbound"))
                 makeEastboundTims(wydotTim, timPoint);
             else
                 makeWestboundTims(wydotTim, timPoint);
@@ -93,6 +90,8 @@ public class WydotTimRwController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
+        processRequestTest();
+
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
@@ -100,25 +99,43 @@ public class WydotTimRwController extends WydotTimBaseController {
     public void makeEastboundTims(WydotTimRw wydotTim, Double timPoint) {
 
         // eastbound - add buffer for point TIMs
-        if (timPoint != null)
-            wydotTim.setFromRm(timPoint - 1);
+        WydotTimRw timOneWay = null;
 
-        // validTims.add(wydotTim);
-        processRequest(wydotTim, timType, wydotTim.getSchedStart(), wydotTim.getSchedEnd(), null);
-        if (wydotTim.getBuffers() != null)
-            makeEastboundBufferTim(wydotTim);
+        try {
+            timOneWay = wydotTim.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+        if (timPoint != null)
+        timOneWay.setFromRm(timPoint - 1);
+
+        timOneWay.setDirection("eastbound");
+        timsToSend.add(timOneWay);
+
+        if (timOneWay.getBuffers() != null)
+            makeEastboundBufferTim(timOneWay);
     }
 
     public void makeWestboundTims(WydotTimRw wydotTim, Double timPoint) {
 
         // westbound - add buffer for point TIMs
-        if (timPoint != null)
-            wydotTim.setFromRm(timPoint + 1);
 
-        // validTims.add(wydotTim);
-        processRequest(wydotTim, timType, wydotTim.getSchedStart(), wydotTim.getSchedEnd(), null);
-        if (wydotTim.getBuffers() != null)
-            makeWestboundBufferTim(wydotTim);
+        WydotTimRw timOneWay = null;
+
+        try {
+            timOneWay = wydotTim.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+        if (timPoint != null)
+        timOneWay.setFromRm(timPoint + 1);
+
+        timOneWay.setDirection("westbound");
+        timsToSend.add(timOneWay);
+        if (timOneWay.getBuffers() != null)
+            makeWestboundBufferTim(timOneWay);
     }
 
     public void makeEastboundBufferTim(WydotTimRw wydotTim) {
@@ -129,7 +146,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             // eastbound
             // starts at lower milepost minus the buffer distance
             double bufferStart = Math.min(wydotTim.getToRm(), wydotTim.getFromRm())
-                    - wydotTim.getBuffers().get(i).getDistance();
+                    - wydotTim.getBuffers().get(i).getDistance() - bufferBefore;
             // ends at lower milepost minus previous buffers
             double bufferEnd = Math.min(wydotTim.getToRm(), wydotTim.getFromRm()) - bufferBefore;
 
@@ -144,7 +161,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             wydotTimBuffer.setFromRm(bufferStart);
             wydotTimBuffer.setToRm(bufferEnd);
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-            wydotTimBuffer.setClientId(wydotTim.getClientId());
+            wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int)bufferBefore));
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
@@ -153,12 +170,22 @@ public class WydotTimRwController extends WydotTimBaseController {
                 tempList.add(code.toString());
             }
             wydotTimBuffer.setItisCodes(tempList);
-            // validTims.add(wydotTimBuffer);
-            processRequest(wydotTimBuffer, timType, wydotTimBuffer.getSchedStart(), wydotTimBuffer.getSchedEnd(), null);
+            timsToSend.add(wydotTimBuffer);
 
             // update running buffer distance
             bufferBefore = wydotTim.getBuffers().get(i).getDistance();
         }
+    }
+
+    public void processRequestTest() {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+                for (WydotTimRw tim : timsToSend) {
+                    processRequest(tim, timType, tim.getSchedStart(), tim.getSchedEnd(), null);
+                }
+            }
+        }).start();
     }
 
     public void makeWestboundBufferTim(WydotTimRw wydotTim) {
@@ -169,7 +196,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             // westbound
             // starts at higher milepost plus buffer distance
             double bufferStart = Math.max(wydotTim.getToRm(), wydotTim.getFromRm())
-                    + wydotTim.getBuffers().get(i).getDistance();
+                    + wydotTim.getBuffers().get(i).getDistance() + bufferBefore;
             // ends at higher milepost plus previous buffers
             double bufferEnd = Math.max(wydotTim.getToRm(), wydotTim.getFromRm()) + bufferBefore;
 
@@ -183,7 +210,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             wydotTimBuffer.setFromRm(bufferStart);
             wydotTimBuffer.setToRm(bufferEnd);
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-            wydotTimBuffer.setClientId(wydotTim.getClientId());
+            wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int)bufferBefore));
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
@@ -192,8 +219,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                 tempList.add(code.toString());
             }
             wydotTimBuffer.setItisCodes(tempList);
-            // validTims.add(wydotTimBuffer);
-            processRequest(wydotTimBuffer, timType, wydotTimBuffer.getSchedStart(), wydotTimBuffer.getSchedEnd(), null);
+            timsToSend.add(wydotTimBuffer);
 
             // update running buffer distance
             bufferBefore = wydotTim.getBuffers().get(i).getDistance();

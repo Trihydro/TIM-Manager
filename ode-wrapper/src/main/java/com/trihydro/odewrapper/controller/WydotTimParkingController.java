@@ -98,7 +98,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
     }
 
     @RequestMapping(value = "/parking-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
-    public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
+    public ResponseEntity<String> deleteParkingTim(@PathVariable String id) {
 
         // clear TIM
         wydotTimService.clearTimsById("P", id, null);
@@ -108,26 +108,30 @@ public class WydotTimParkingController extends WydotTimBaseController {
     }
 
     public void processRequest(List<WydotTimParking> wydotTims) {
-        for (WydotTimParking wydotTim : wydotTims) {
-            if (wydotTim.getDirection().equals("both")) {
+        new Thread(new Runnable() {
+            public void run() {
+                for (WydotTimParking wydotTim : wydotTims) {
+                    if (wydotTim.getDirection().equals("both")) {
 
-                wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
-                wydotTim.setToRm(wydotTim.getMileMarker());
-                createSendTims(wydotTim, "eastbound", timType, null, null, null);
+                        wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
+                        wydotTim.setToRm(wydotTim.getMileMarker());
+                        createSendTims(wydotTim, "eastbound", timType, null, null, null);
 
-                wydotTim.setFromRm(wydotTim.getMileMarker());
-                wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                createSendTims(wydotTim, "westbound", timType, null, null, null);
-            } else {
-                if (wydotTim.getDirection().equals("eastbound")) {
-                    wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
-                    wydotTim.setToRm(wydotTim.getMileMarker());
-                } else {
-                    wydotTim.setFromRm(wydotTim.getMileMarker());
-                    wydotTim.setToRm(wydotTim.getMileMarker() + 10);
+                        wydotTim.setFromRm(wydotTim.getMileMarker());
+                        wydotTim.setToRm(wydotTim.getMileMarker() + 10);
+                        createSendTims(wydotTim, "westbound", timType, null, null, null);
+                    } else {
+                        if (wydotTim.getDirection().equals("eastbound")) {
+                            wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
+                            wydotTim.setToRm(wydotTim.getMileMarker());
+                        } else {
+                            wydotTim.setFromRm(wydotTim.getMileMarker());
+                            wydotTim.setToRm(wydotTim.getMileMarker() + 10);
+                        }
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, null);
+                    }
                 }
-                createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, null);
             }
-        }
+        }).start();
     }
 }

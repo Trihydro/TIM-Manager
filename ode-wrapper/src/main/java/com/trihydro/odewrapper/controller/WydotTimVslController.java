@@ -18,6 +18,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
@@ -41,6 +42,7 @@ public class WydotTimVslController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTim> timsToSend = new ArrayList<WydotTim>();
 
         // build TIM
         for (WydotTimVsl wydotTim : wydotTimList.getTimVslList()) {
@@ -51,15 +53,27 @@ public class WydotTimVslController extends WydotTimBaseController {
                 continue;
             }
 
-            // send TIM
-            processRequest(wydotTim, timType, null, null, null);
+            // add TIM to list for processing later
+            timsToSend.add(wydotTim);            
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
 
+        processRequestTest(timsToSend);
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    public void processRequestTest(List<WydotTim> wydotTims) {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+                for (WydotTim tim : wydotTims) {
+                    processRequest(tim, timType, null, null, null);
+                }
+            }
+        }).start();
     }
 
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.GET, headers = "Accept=application/json")

@@ -91,43 +91,43 @@ public class RsuIndexService extends CvDataServiceLibrary {
         return rsuIndicies;
     }
 
-    public static boolean deleteRsuIndex(Integer rsuId, Integer rsuIndex) {
+    // public static boolean deleteRsuIndex(Integer rsuId, Integer rsuIndex) {
 
-        boolean deleteRsuIndexResult = false;
+    //     boolean deleteRsuIndexResult = false;
 
-        String deleteSQL = "DELETE FROM RSU_INDEX WHERE RSU_ID = ? and RSU_INDEX = ?";
+    //     String deleteSQL = "DELETE FROM RSU_INDEX WHERE RSU_ID = ? and RSU_INDEX = ?";
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
+    //     Connection connection = null;
+    //     PreparedStatement preparedStatement = null;
 
-        try {
+    //     try {
 
-            connection = DbUtility.getConnectionPool();
-            preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setInt(1, rsuId);
-            preparedStatement.setInt(2, rsuIndex);
+    //         connection = DbUtility.getConnectionPool();
+    //         preparedStatement = connection.prepareStatement(deleteSQL);
+    //         preparedStatement.setInt(1, rsuId);
+    //         preparedStatement.setInt(2, rsuIndex);
 
-            // execute delete SQL stetement
-            deleteRsuIndexResult = updateOrDelete(preparedStatement);
+    //         // execute delete SQL stetement
+    //         deleteRsuIndexResult = updateOrDelete(preparedStatement);
 
-            System.out.println("RSU Index is deleted!");
+    //         System.out.println("RSU Index is deleted!");
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     } finally {
+    //         try {
+    //             // close prepared statement
+    //             if (preparedStatement != null)
+    //                 preparedStatement.close();
+    //             // return connection back to pool
+    //             if (connection != null)
+    //                 connection.close();
+    //         } catch (SQLException e) {
+    //             e.printStackTrace();
+    //         }
+    //     }
 
-        return deleteRsuIndexResult;
-    }
+    //     return deleteRsuIndexResult;
+    // }
 
 }

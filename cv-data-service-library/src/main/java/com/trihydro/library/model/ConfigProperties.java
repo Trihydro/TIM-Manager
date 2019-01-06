@@ -55,5 +55,5 @@ public class ConfigProperties {
 
     public void setEnv(String env) {
         this.env = env;
-    }
+    }    
 }

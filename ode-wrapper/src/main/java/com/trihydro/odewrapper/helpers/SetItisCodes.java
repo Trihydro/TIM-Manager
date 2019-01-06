@@ -128,14 +128,20 @@ public class SetItisCodes {
 
         if (wydotTim.getExit() != null) {
             items.add("11794");
-            List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
-            int exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
-            System.out.println("exitItisCodeNumber : " + exitItisCodeNumber);
-            items.add(String.valueOf(exitItisCodeNumber));
-            if (list.size() > 1) {
-                items.add(list.get(1));
-                System.out.println("list: " + list.get(1));
+            int exitItisCodeNumber;
+            if(wydotTim.getExit().toLowerCase().equals("turnout")){
+                exitItisCodeNumber = convertNumberToItisCode((int)Math.round(wydotTim.getMileMarker()));
+                items.add(String.valueOf(exitItisCodeNumber));
             }
+            else{
+                List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
+                exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
+                items.add(String.valueOf(exitItisCodeNumber));
+                if (list.size() > 1) {
+                    items.add(list.get(1));
+                    System.out.println("list: " + list.get(1));
+                }
+            }                                  
         } else {
             items.add("7986");
             System.out.println("rest area");

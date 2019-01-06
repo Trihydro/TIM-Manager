@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
@@ -12,10 +13,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import com.trihydro.odewrapper.model.ControllerResult;
-
+import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.config.BasicConfiguration;
@@ -24,6 +26,7 @@ import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.odewrapper.model.WydotTim;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.core.env.Environment;
@@ -41,7 +44,6 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
 import com.google.gson.Gson;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.RsuIndexService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
@@ -158,9 +160,6 @@ public class WydotTimService {
         if (rsus.size() == 0)
             return;
 
-        // query database for rsus that active tims could be on
-        List<ActiveTim> activeTims = null;
-
         // for each rsu in range
         for (WydotRsu rsu : rsus) {
 
@@ -178,23 +177,19 @@ public class WydotTimService {
             // set region name -- used for active tim logging
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
-            // get active TIMs by clientId and direction
-            activeTims = ActiveTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
-                    timType.getTimTypeId(), direction);
-
-            // filter by RSU TIMs
-            activeTims = activeTims.stream().filter(x -> x.getRsuTarget() != null).collect(Collectors.toList());
+            // look for active tim on this rsu
+            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(wydotTim.getClientId(), wydotTim.getDirection(), rsu.getRsuTarget());
 
             // if active tims exist, update tim
-            if (activeTims != null && activeTims.size() > 0) {
+            if (activeTim != null) {
 
-                WydotOdeTravelerInformationMessage tim = TimService.getTim(activeTims.get(0).getTimId());
+                WydotOdeTravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());
 
                 // update TIM rsu
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                updateTimOnRsu(timToSend, activeTims.get(0).getTimId(), tim);
+                updateTimOnRsu(timToSend, activeTim.getTimId(), tim, rsu.getRsuId());
             } else {
                 // send new tim to rsu
                 // add rsu to tim
@@ -224,7 +219,7 @@ public class WydotTimService {
             if (timRsus.size() == 1) {
                 rsu = getRsu(timRsus.get(0).getRsuId());
                 // delete tim off rsu
-                deleteTimFromRsu(rsu, tim.getRsuIndex());
+                deleteTimFromRsu(rsu, timRsus.get(0).getRsuIndex());
             } else {
                 // is satellite tim
                 String route = activeTim.getRoute().replaceAll("\\D+", "");
@@ -257,7 +252,8 @@ public class WydotTimService {
 
         TimType timType = getTimType(timTypeStr);
 
-        List<ActiveTim> activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), null);
+        List<ActiveTim> activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(),
+                null);
 
         return activeTims;
     }
@@ -304,9 +300,6 @@ public class WydotTimService {
             for (WydotRsu rsu : rsus) {
                 rsu.setRsuRetries(3);
                 rsu.setRsuTimeout(5000);
-                // TODO: REMOVE when passwordless SNMP is ready
-                rsu.setRsuUsername("v3user");
-                rsu.setRsuPassword("Loc#123@Lear");
             }
             return rsus;
         }
@@ -431,7 +424,7 @@ public class WydotTimService {
         snmp.setChannel(178);
         snmp.setInterval(2);
         snmp.setDeliverystart("2018-01-01T00:00:00-06:00");
-        snmp.setDeliverystop("2019-01-01T00:00:00-06:00");
+        snmp.setDeliverystop("2020-01-01T00:00:00-06:00");
         snmp.setEnable(1);
         snmp.setStatus(4);
         timToSend.getRequest().setSnmp(snmp);
@@ -446,21 +439,27 @@ public class WydotTimService {
                 + packetIdHexString;
         timToSend.getTim().setPacketID(packetIdHexString);
 
-        //List<RsuIndex> indiciesInUse = submitTimQueryRiDb(rsu.getRsuId());
+        TimQuery timQuery = submitTimQuery(rsu, 0);
 
-        List<Integer> indiciesInUse = ActiveTimService.getIndiciesInUseForRsu(rsu.getRsuTarget());
+        // query failed, don't send TIM
+        if(timQuery == null){
+            return;
+        }
 
-        timToSend.getRequest().getRsus()[0].setRsuIndex(findFirstAvailableIndexWithRsuIndex(indiciesInUse));
-        rsu.setRsuIndex(findFirstAvailableIndexWithRsuIndex(indiciesInUse));
-
-        // log index in use
-        // RsuIndexService.insertRsuIndex(rsu.getRsuId(), rsu.getRsuIndex());
+        timToSend.getRequest().getRsus()[0].setRsuIndex(findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set()));
+        rsu.setRsuIndex(timToSend.getRequest().getRsus()[0].getRsuIndex());
 
         String timToSendJson = gson.toJson(timToSend);
 
         // send TIM if not a test
         try {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         } catch (RuntimeException targetException) {
             System.out.println("exception");
         }
@@ -484,7 +483,7 @@ public class WydotTimService {
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(TimeToLive.thirtyminutes);
+        sdw.setTtl(configuration.getSdwTtl());
         // set new record id
         sdw.setRecordId(recordId);
 
@@ -500,7 +499,6 @@ public class WydotTimService {
         } catch (RuntimeException targetException) {
             System.out.println("exception");
         }
-
     }
 
     protected static String getNewRecordId() {
@@ -527,14 +525,13 @@ public class WydotTimService {
     }
 
     public static void updateTimOnRsu(WydotTravelerInputData timToSend, Long timId,
-            WydotOdeTravelerInformationMessage tim) {
-
-        // set rsu index here
-
+            WydotOdeTravelerInformationMessage tim, Integer rsuId) {
+       
         WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);
 
-        // get RSU index
-        timToSend.getRequest().getRsus()[0].setRsuIndex(tim.getRsuIndex());
+        // set rsu index here
+        TimRsu timRsu = TimRsuService.getTimRsu(timId, rsuId);
+        timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
 
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
@@ -544,14 +541,13 @@ public class WydotTimService {
         snmp.setChannel(178);
         snmp.setInterval(2);
         snmp.setDeliverystart("2018-01-01T00:00:00-06:00");
-        snmp.setDeliverystop("2019-01-01T00:00:00-06:00");
+        snmp.setDeliverystop("2020-01-01T00:00:00-06:00");
         snmp.setEnable(1);
         snmp.setStatus(4);
         timToSend.getRequest().setSnmp(snmp);
 
         String timToSendJson = gson.toJson(updatedTim);
 
-        // if (!DbUtility.getConnectionEnvironment().equals("test"))
         restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
     }
 
@@ -566,7 +562,7 @@ public class WydotTimService {
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(TimeToLive.oneday);
+        sdw.setTtl(configuration.getSdwTtl());
         // set new record id
         sdw.setRecordId(recordId);
 
@@ -575,8 +571,7 @@ public class WydotTimService {
 
         String timToSendJson = gson.toJson(updatedTim);
 
-        // send TIM to ODE if not a test
-        // if (!DbUtility.getConnectionEnvironment().equals("test"))
+        // send TIM
         try {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
@@ -590,9 +585,9 @@ public class WydotTimService {
         // set TIM packetId
         timToSend.getTim().setPacketID(tim.getPacketID());
 
-        // roll msgCnt over to 0 if at 127
+        // roll msgCnt over to 1 if at 127
         if (tim.getMsgCnt() == 127)
-            timToSend.getTim().setMsgCnt(0);
+            timToSend.getTim().setMsgCnt(1);
         // else increment msgCnt
         else
             timToSend.getTim().setMsgCnt(tim.getMsgCnt() + 1);
@@ -600,56 +595,48 @@ public class WydotTimService {
         return timToSend;
     }
 
-    // protected static TimQuery submitTimQuery(WydotRsu rsu, int counter) {
+    protected static TimQuery submitTimQuery(WydotRsu rsu, int counter) {
 
-    // // stop if this fails twice
-    // if (counter == 2)
-    // return null;
+        // stop if this fails twice
+        if (counter == 2)
+            return null;
 
-    // // tim query to ODE
-    // String rsuJson = gson.toJson(rsu);
+        // tim query to ODE
+        String rsuJson = gson.toJson(rsu);
 
-    // HttpHeaders headers = new HttpHeaders();
-    // headers.setContentType(MediaType.APPLICATION_JSON);
-    // HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-    // String responseStr = null;
+        String responseStr = null;
 
-    // try {
-    // responseStr = restTemplate.postForObject(odeUrl + "/tim/query", entity,
-    // String.class);
-    // } catch (RestClientException e) {
-    // return submitTimQuery(rsu, counter + 1);
-    // }
+        try {
+            responseStr = restTemplate.postForObject(configuration.getOdeUrl() + "/tim/query", entity, String.class);
+        } catch (RestClientException e) {
+            return submitTimQuery(rsu, counter + 1);
+        }
 
-    // String[] items = responseStr.replaceAll("\\\"", "").replaceAll("\\:",
-    // "").replaceAll("indicies_set", "")
-    // .replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\[",
-    // "").replaceAll(" ", "")
-    // .replaceAll("\\]", "").replaceAll("\\s", "").split(",");
+        String[] items = responseStr.replaceAll("\\\"", "").replaceAll("\\:", "").replaceAll("indicies_set", "")
+                .replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\[", "").replaceAll(" ", "")
+                .replaceAll("\\]", "").replaceAll("\\s", "").split(",");
 
-    // int[] results = new int[items.length];
+        List<Integer> results = new ArrayList<Integer>();
 
-    // for (int i = 0; i < items.length; i++) {
-    // try {
-    // results[i] = Integer.parseInt(items[i]);
-    // } catch (NumberFormatException nfe) {
-    // // NOTE: write something here if you need to recover from formatting errors
-    // }
-    // }
+        for (int i = 0; i < items.length; i++) {
+            try {
+                results.add(Integer.parseInt(items[i]));
+            } catch (NumberFormatException nfe) {
+                // NOTE: write something here if you need to recover from formatting errors
+            }
+        }
 
-    // Arrays.sort(results);
+        Collections.sort(results);
 
-    // TimQuery timQuery = new TimQuery();
-    // timQuery.setIndicies_set(results);
-    // // TimQuery timQuery = gson.fromJson(responseStr, TimQuery.class);
+        TimQuery timQuery = new TimQuery();
+        timQuery.setIndicies_set(results);
+        // TimQuery timQuery = gson.fromJson(responseStr, TimQuery.class);
 
-    // return timQuery;
-    // }
-
-    protected static List<RsuIndex> submitTimQueryRiDb(int rsuId) {
-        List<RsuIndex> indexes = RsuIndexService.selectByRsuId(rsuId);
-        return indexes;
+        return timQuery;
     }
 
     public static void deleteTimFromRsu(WydotRsu rsu, Integer index) {
@@ -660,12 +647,8 @@ public class WydotTimService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        // if (DbUtility.getConnectionEnvironment().equals("test"))
-        // return;
-
         try {
-            System.out.println("deleting TIM " + index.toString() + " from rsu");
-            RsuIndexService.deleteRsuIndex(rsu.getRsuId(), index);
+            System.out.println("deleting TIM " + index.toString() + " from rsu");            
             restTemplate.exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
                     entity, String.class);
         } catch (HttpClientErrorException e) {
@@ -689,13 +672,14 @@ public class WydotTimService {
         sdw.setTtl(TimeToLive.oneminute);
         // set new record id
         sdw.setRecordId(recordId);
+        // increment msgCnt
+        updatedTim.getTim().setMsgCnt(updatedTim.getTim().getMsgCnt() + 1);
 
         // set sdw block in TIM
         updatedTim.getRequest().setSdw(sdw);
 
         String timToSendJson = gson.toJson(updatedTim);
 
-        // if (!DbUtility.getConnectionEnvironment().equals("test"))
         try {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {

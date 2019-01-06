@@ -7,13 +7,8 @@ import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.library.model.RsuIndex;
 import com.trihydro.library.model.TimType;
-import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.service.RsuIndexService;
-import com.trihydro.library.service.RsuService;
 import com.trihydro.odewrapper.model.ControllerResult;
-import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimRc;
@@ -43,6 +38,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTim> timsToSend = new ArrayList<WydotTim>();
 
         // build TIM
         for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
@@ -57,10 +53,14 @@ public class WydotTimRcController extends WydotTimBaseController {
             // send TIM
             processRequest(wydotTim, timType, null, null, null);
 
+             // add TIM to list for processing later
+             timsToSend.add(wydotTim);        
+
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
 
+        processRequestTest(timsToSend);
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
@@ -83,4 +83,14 @@ public class WydotTimRcController extends WydotTimBaseController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
+    public void processRequestTest(List<WydotTim> wydotTims) {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+                for (WydotTim tim : wydotTims) {
+                    processRequest(tim, timType, null, null, null);
+                }
+            }
+        }).start();
+    }
 }

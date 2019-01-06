@@ -75,6 +75,7 @@ public class TimRsuService extends CvDataServiceLibrary {
 				TimRsu timRsu = new TimRsu();
 				timRsu.setTimId(rs.getLong("TIM_ID"));
 				timRsu.setRsuId(rs.getLong("RSU_ID"));
+				timRsu.setRsuIndex(rs.getInt("RSU_INDEX"));
 				timRsus.add(timRsu);
 			}
 		} catch (SQLException e) {
@@ -137,7 +138,7 @@ public class TimRsuService extends CvDataServiceLibrary {
 		return timRsus;
 	}
 
-	public static TimRsu getTimRsu(Long timRsuId) {
+	public static TimRsu getTimRsu(Long timId, Integer rsuId) {
 
 		Statement statement = null;
 		Connection connection = null;
@@ -148,13 +149,14 @@ public class TimRsuService extends CvDataServiceLibrary {
 			connection = DbUtility.getConnectionPool();
 			statement = connection.createStatement();
 			// build SQL statement
-			rs = statement.executeQuery("select * from TIM_RSU where tim_rsu_id = " + timRsuId);
+			rs = statement.executeQuery("select * from TIM_RSU where rsu_id = " + rsuId + " and tim_id = " + timId);
 
 			// convert to DriverAlertType objects
 			while (rs.next()) {
 				timRsu.setTimRsuId(rs.getLong("TIM_RSU_ID"));
 				timRsu.setTimId(rs.getLong("TIM_ID"));
 				timRsu.setRsuId(rs.getLong("RSU_ID"));
+				timRsu.setRsuIndex(rs.getInt("RSU_INDEX"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

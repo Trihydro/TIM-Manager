@@ -5,16 +5,17 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.RsuIndex;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.RsuIndexService;
-import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
@@ -75,37 +76,26 @@ public class UtilityController extends WydotTimBaseController {
 
         // get all RSUs
         for (WydotRsu rsu : wydotTimService.getRsus()) {
+            
+            List<Integer> activeTimIndicies = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
+            Collections.sort(activeTimIndicies);
 
             RsuCheckResults rsuCheckResults = new RsuCheckResults();
-            rsuCheckResults.queryList = new ArrayList<Integer>();
-            rsuCheckResults.rsuIndexList = new ArrayList<Integer>();
-            rsuCheckResults.activeTimIndicesList = new ArrayList<Integer>();
-
-            System.out.println(rsu.getRsuTarget());
+            rsuCheckResults.activeTimIndicesList = activeTimIndicies;
             rsuCheckResults.rsuTarget = rsu.getRsuTarget();
-
+            
             TimQuery timQuery = submitTimQuery(rsu, 0);
-
-            if (timQuery != null && timQuery.getIndicies_set().length > 0) {
-                for (int index : timQuery.getIndicies_set()) {
-                    if (index != 0)
-                        rsuCheckResults.queryList.add(index);
-                }
-            }
-
-            List<RsuIndex> rsuIndicies = RsuIndexService.selectByRsuId(rsu.getRsuId());
-
-            for (RsuIndex rsuIndex : rsuIndicies) {
-                rsuCheckResults.rsuIndexList.add(rsuIndex.getRsuIndex());
-            }
-
-            rsuCheckResults.activeTimIndicesList = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
-
-            if (rsuCheckResults.queryList.size() != 0 || rsuCheckResults.rsuIndexList.size() != 0
-                    || rsuCheckResults.activeTimIndicesList.size() != 0) {
+            if(timQuery == null || timQuery.getIndicies_set() == null){
                 rsuCheckResultsList.add(rsuCheckResults);
+                continue;
             }
+                
+            Collections.sort(timQuery.getIndicies_set());           
 
+            if(!activeTimIndicies.equals(timQuery.getIndicies_set())){                
+                rsuCheckResults.queryList = timQuery.getIndicies_set();            
+                rsuCheckResultsList.add(rsuCheckResults);
+            }           
         }
 
         String responseMessage = gson.toJson(rsuCheckResultsList);
@@ -134,18 +124,18 @@ public class UtilityController extends WydotTimBaseController {
 
         TimQuery timQuery = submitTimQuery(rsu, 0);
 
-        if (timQuery != null && timQuery.getIndicies_set().length > 0) {
+        if (timQuery != null && timQuery.getIndicies_set().size() > 0) {
             for (int index : timQuery.getIndicies_set()) {
                 if (index != 0)
                     rsuCheckResults.queryList.add(index);
             }
         }
 
-        List<RsuIndex> rsuIndicies = RsuIndexService.selectByRsuId(rsu.getRsuId());
+   //     List<RsuIndex> rsuIndicies = RsuIndexService.selectByRsuId(rsu.getRsuId());
 
-        for (RsuIndex rsuIndex : rsuIndicies) {
-            rsuCheckResults.rsuIndexList.add(rsuIndex.getRsuIndex());
-        }
+        // for (RsuIndex rsuIndex : rsuIndicies) {
+        //     rsuCheckResults.rsuIndexList.add(rsuIndex.getRsuIndex());
+        // }
 
         rsuCheckResults.activeTimIndicesList = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
 
@@ -155,6 +145,15 @@ public class UtilityController extends WydotTimBaseController {
         }
 
         String responseMessage = gson.toJson(rsuCheckResultsList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    @RequestMapping(value = "/delete-tim", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    public ResponseEntity<String> deleteTim(@RequestBody ActiveTim activeTim) {
+
+        wydotTimService.deleteTimsFromRsusAndSdw(Stream.of(activeTim).collect(Collectors.toList()));
+
+        String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 }

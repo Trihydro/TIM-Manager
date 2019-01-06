@@ -39,6 +39,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         String post = gson.toJson(wydotTimList);
         System.out.println(post.toString());
 
+        List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
+
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
 
@@ -53,11 +55,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             }
 
             // make tims
-            makeTims(wydotTim);
+            timsToSend.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
+
+        makeTims(timsToSend);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -72,6 +76,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
+        List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
 
         // delete TIMs
         for (WydotTimIncident wydotTim : wydotTimList.getTimIncidentList()) {
@@ -85,55 +90,65 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
             wydotTimService.clearTimsById(type, wydotTim.getClientId(), null);
 
-            // make tims and send them
-            makeTims(wydotTim);
+            // make tims
+            timsToSend.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
 
+            // make tims and send them
+            makeTims(timsToSend);
+
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void makeTims(WydotTimIncident wydotTim) {
+    public void makeTims(List<WydotTimIncident> wydotTims) {
 
-        Double timPoint = null;
+        new Thread(new Runnable() {
+            public void run() {
+                for (WydotTimIncident wydotTim : wydotTims) {
 
-        // set route
-        wydotTim.setRoute(wydotTim.getHighway());
+                    Double timPoint = null;
 
-        // check if this is a point TIM
-        if (wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null) {
-            timPoint = wydotTim.getFromRm();
-        }
+                    // set route
+                    wydotTim.setRoute(wydotTim.getHighway());
 
-        if (wydotTim.getDirection().equals("both")) {
+                    // check if this is a point TIM
+                    if (wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null) {
+                        timPoint = wydotTim.getFromRm();
+                    }
 
-            // first TIM - eastbound - add buffer for point TIMs
-            if (timPoint != null)
-                wydotTim.setFromRm(timPoint - 1);
+                    if (wydotTim.getDirection().equals("both")) {
 
-            createSendTims(wydotTim, "eastbound", timType, null, null, wydotTim.getPk());
+                        // first TIM - eastbound - add buffer for point TIMs
+                        if (timPoint != null)
+                            wydotTim.setToRm(timPoint - 1);
 
-            // second TIM - westbound - add buffer for point TIMs
-            if (timPoint != null)
-                wydotTim.setFromRm(timPoint + 1);
+                        createSendTims(wydotTim, "eastbound", timType, null, null, wydotTim.getPk());
 
-            createSendTims(wydotTim, "westbound", timType, null, null, wydotTim.getPk());
-        } else {
-            // single direction TIM
+                        // second TIM - westbound - add buffer for point TIMs
+                        if (timPoint != null)
+                            wydotTim.setToRm(timPoint + 1);
 
-            // eastbound - add buffer for point TIMs
-            if (wydotTim.getDirection().equals("eastbound") && timPoint != null)
-                wydotTim.setFromRm(timPoint - 1);
+                        createSendTims(wydotTim, "westbound", timType, null, null, wydotTim.getPk());
+                    } else {
+                        // single direction TIM
 
-            // westbound - add buffer for point TIMs
-            if (wydotTim.getDirection().equals("westbound") && timPoint != null)
-                wydotTim.setFromRm(timPoint + 1);
+                        // eastbound - add buffer for point TIMs
+                        if (wydotTim.getDirection().equals("eastbound") && timPoint != null)
+                            wydotTim.setToRm(timPoint - 1);
 
-            createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, wydotTim.getPk());
-        }
+                        // westbound - add buffer for point TIMs
+                        if (wydotTim.getDirection().equals("westbound") && timPoint != null)
+                            wydotTim.setToRm(timPoint + 1);
+
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, wydotTim.getPk());
+                    }
+                }
+            }
+        }).start();
     }
 
     @RequestMapping(value = "/incident-tim/{incidentId}", method = RequestMethod.DELETE, headers = "Accept=application/json")

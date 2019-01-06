@@ -76,7 +76,7 @@ public class RsuService extends CvDataServiceLibrary {
 			// select all RSUs from RSU table
 			rs = statement.executeQuery(
 					"select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.route like '%"
-							+ route + "%' order by milepost asc");
+							+ route + "%' and rsu_vw.status = 'Existing' order by milepost asc");
 
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();

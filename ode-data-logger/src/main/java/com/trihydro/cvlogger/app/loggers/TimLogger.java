@@ -11,6 +11,11 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.util.JsonUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
@@ -33,6 +38,27 @@ import com.trihydro.library.service.TimRsuService;
 public class TimLogger extends BaseLogger {
 
 	public static OdeData processTimJson(String value) {
+
+		JsonNode recordGeneratedBy = JsonUtils.getJsonNode(value, "metadata").get("recordGeneratedBy");
+		
+		ObjectMapper mapper = new ObjectMapper();
+
+		String recordGeneratedByStr = null;
+
+		try {
+			recordGeneratedByStr = mapper.treeToValue(recordGeneratedBy, String.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+		
+		// if broadcast tim, translate accordingly, else translate as received TIM
+		if(recordGeneratedByStr.equals("TMC"))
+			return translateBroadcastTimJson(value);	
+		else
+			return translateTimJson(value);
+	}
+
+	public static OdeData translateTimJson(String value) {
 		OdeData odeData = null;
 		OdeLogMetadata odeTimMetadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 		OdeTimPayload odeTimPayload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
@@ -41,15 +67,18 @@ public class TimLogger extends BaseLogger {
 		return odeData;
 	}
 
-	public static OdeData processBroadcastTimJson(String value) {
+	public static OdeData translateBroadcastTimJson(String value) {
 		OdeData odeData = null;
 		OdeRequestMsgMetadata odeTimMetadata = JsonToJavaConverter.convertBroadcastTimMetadataJsonToJava(value);
-		OdeTravelerInformationMessage odeTim = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
-		OdeTimPayload odeTimPayload = new OdeTimPayload(odeTim);
+		//OdeTravelerInformationMessage odeTim = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
+		OdeTimPayload odeTimPayload = JsonToJavaConverter.convertTmcTimTopicJsonToJava(value);
+		//OdeTimPayload odeTimPayload = new OdeTimPayload(odeTim);
 		if (odeTimMetadata != null && odeTimPayload != null)
 			odeData = new OdeData(odeTimMetadata, odeTimPayload);
 		return odeData;
 	}
+
+
 
 	public static void addTimToOracleDB(OdeData odeData) {
 

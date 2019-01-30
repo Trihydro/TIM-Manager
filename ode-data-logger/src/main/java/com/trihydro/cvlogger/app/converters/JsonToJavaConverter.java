@@ -310,6 +310,138 @@ public class JsonToJavaConverter {
         return odeTimPayload;
     }
 
+    public static OdeTimPayload convertTmcTimTopicJsonToJava(String value) {
+
+        OdeTimPayload odeTimPayload = null;
+
+        try {
+            OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
+            OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
+            OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
+            OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
+            OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
+
+            // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
+            JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
+                    .get("TravelerInformation");
+            JsonNode anchorNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
+                    .get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
+                    .get("GeographicalPath").get("anchor");
+            JsonNode nodeXYArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame")
+                    .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
+                    .get("GeographicalPath").get("description").get("path").get("offset").get("xy").get("nodes")
+                    .get("NodeXY");
+            JsonNode sequenceArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame")
+                    .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("content")
+                    .get("advisory").get("SEQUENCE");
+            JsonNode regionNameNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame")
+                    .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
+                    .get("GeographicalPath").get("name");
+
+            timNode.get("timeStamp").asInt();
+
+            LocalDate now = LocalDate.now();
+            LocalDate firstDay = now.with(firstDayOfYear());
+
+            OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
+
+            LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timNode.get("timeStamp").asInt(),
+                    ChronoUnit.MINUTES);
+            tim.setTimeStamp(timeStampDate.toString());
+
+            LocalDateTime startDate = firstDay.atStartOfDay().plus(timNode.get("startTime").asInt(),
+                    ChronoUnit.MINUTES);
+
+            dataFrame.setStartDateTime(startDate.toString());
+            dataFrame.setDurationTime(timNode.get("duratonTime").asInt());
+
+            tim.setMsgCnt(timNode.get("msgCnt").asInt());
+
+            tim.setPacketID(timNode.get("packetID").asText());
+
+            BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
+            BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
+
+            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+
+            // set region anchor
+            OdePosition3D anchorPosition = new OdePosition3D();
+            anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
+            anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
+            // TODO elevation
+
+            region.setAnchorPosition(anchorPosition);
+
+            OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
+
+            if (nodeXYArrNode.isArray()) {
+                for (final JsonNode objNode : nodeXYArrNode) {
+                    nodeXY = new OdeTravelerInformationMessage.NodeXY();
+                    BigDecimal lat = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lat"),
+                            BigDecimal.class);
+                    BigDecimal lon = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lon"),
+                            BigDecimal.class);
+                    nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
+                    nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
+                    nodeXY.setDelta("node-LatLon");
+                    nodeXYs.add(nodeXY);
+                }
+            }
+
+            OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[nodeXYs.size()];
+            nodeXYArr = nodeXYs.toArray(nodeXYArr);
+
+            path.setNodes(nodeXYArr);
+
+            if (regionNameNode != null)
+                region.setName(mapper.treeToValue(regionNameNode, String.class));
+
+            region.setPath(path);
+
+            // if ITIS codes are in an array
+            List<String> itemsList = new ArrayList<String>();
+            String item = null;
+            if (sequenceArrNode.isArray()) {
+                for (final JsonNode objNode : sequenceArrNode) {
+                    if (objNode.get("item").get("itis") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
+                    else if (objNode.get("item").get("text") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
+
+                    itemsList.add(item);
+                }
+            }
+
+            // ADD NON ARRAY ELEMENT
+            if (!sequenceArrNode.isArray()) {
+                if (sequenceArrNode.get("item").get("itis") != null)
+                    item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
+                else if (sequenceArrNode.get("item").get("text") != null)
+                    item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+
+                itemsList.add(item);
+            }
+
+            String[] items = new String[itemsList.size()];
+            items = itemsList.toArray(items);
+
+            regions[0] = region;
+            dataFrame.setRegions(regions);
+            dataFrame.setItems(items);
+            dataFrames[0] = dataFrame;
+            tim.setDataframes(dataFrames);
+            odeTimPayload = new OdeTimPayload();
+            odeTimPayload.setTim(tim);
+        } catch (IOException e) {
+            System.out.println(e.getStackTrace());
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return odeTimPayload;
+
+    }
+
     public static OdeTravelerInformationMessage convertBroadcastTimPayloadJsonToJava(String value) {
 
         OdeTravelerInformationMessage odeTim = null;

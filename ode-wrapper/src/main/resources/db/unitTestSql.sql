@@ -85,9 +85,7 @@ CREATE TABLE IF NOT EXISTS ACTIVE_TIM_ITIS_CODE
 
 CREATE TABLE IF NOT EXISTS RSU
 ( 
-    RSU_ID NUMBER(10,0) NOT NULL AUTO_INCREMENT, 
-    RSU_USERNAME VARCHAR2(255) NOT NULL, 
-    RSU_PASSWORD VARCHAR2(255) NOT NULL, 
+    RSU_ID NUMBER(10,0) NOT NULL AUTO_INCREMENT,
     DEVICEID NUMBER(6,0), 
     PRIMARY KEY (RSU_ID)
 );
@@ -167,15 +165,15 @@ insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (449
 insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4600, 'Existing', 369.8, '0.0.0.0', 'I80');
 insert into rsu_vw (DEVICEID, STATUS, MILEPOST, IPV4_ADDRESS, ROUTE) values (4487, 'Existing', 401.8, '0.0.0.0', 'I80');
 
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4499);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4497);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4495);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4494);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4493);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4492);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4491);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4600);
-insert into rsu (RSU_USERNAME, RSU_PASSWORD, DEVICEID) values ('user', 'password', 4487);
+insert into rsu (DEVICEID) values (4499);
+insert into rsu (DEVICEID) values (4497);
+insert into rsu (DEVICEID) values (4495);
+insert into rsu (DEVICEID) values (4494);
+insert into rsu (DEVICEID) values (4493);
+insert into rsu (DEVICEID) values (4492);
+insert into rsu (DEVICEID) values (4491);
+insert into rsu (DEVICEID) values (4600);
+insert into rsu (DEVICEID) values (4487);
 
 insert into milepost_vw (ROUTE, MILEPOST, DIRECTION, LATITUDE, LONGITUDE, ELEVATION_FT, BEARING) values ('I 80', 340, 'westbound', 41.12438849, -104.75521179, 5973.51133383, 268.81053377);
 insert into milepost_vw (ROUTE, MILEPOST, DIRECTION, LATITUDE, LONGITUDE, ELEVATION_FT, BEARING) values ('I 80', 341, 'westbound', 41.12438849, -104.75521179, 5973.51133383, 268.81053377);

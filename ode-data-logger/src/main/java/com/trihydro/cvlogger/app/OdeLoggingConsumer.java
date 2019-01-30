@@ -124,9 +124,14 @@ public class OdeLoggingConsumer {
 						if (topic.equals("topic.OdeDNMsgJson")) {
 							TracManager.submitDNMsgToTrac(record.value());
 						} else if (topic.equals("topic.OdeTimJson")) {
+							System.out.println(record.value());
 							OdeData odeData = TimLogger.processTimJson(record.value());
-							if (odeData != null)
-								TimLogger.addTimToOracleDB(odeData);
+							if (odeData != null) {
+								if(odeData.getMetadata().getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC)
+									TimLogger.addActiveTimToOracleDB(odeData);								
+								else
+									TimLogger.addTimToOracleDB(odeData);								
+							}								
 						} else if (topic.equals("topic.OdeBsmJson")) {
 							OdeData odeData = BsmLogger.processBsmJson(record.value());
 							if (odeData != null)
@@ -135,11 +140,12 @@ public class OdeLoggingConsumer {
 							OdeData odeData = DriverAlertLogger.processDriverAlertJson(record.value());
 							if (odeData != null)
 								DriverAlertLogger.addDriverAlertToOracleDB(odeData);
-						} else if (topic.equals("topic.OdeTimBroadcastJson")) {
-							OdeData odeData = TimLogger.processBroadcastTimJson(record.value());
-							if (odeData != null)
-								TimLogger.addActiveTimToOracleDB(odeData);
-						}
+						} 
+						// else if (topic.equals("topic.OdeTimBroadcastJson")) {
+						// 	OdeData odeData = TimLogger.processBroadcastTimJson(record.value());
+						// 	if (odeData != null)
+						// 		TimLogger.addActiveTimToOracleDB(odeData);
+						// }
 					}
 				}
 			} finally {

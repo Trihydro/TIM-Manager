@@ -51,7 +51,7 @@ public class WydotTimRcController extends WydotTimBaseController {
             }
 
             // send TIM
-            processRequest(wydotTim, timType, null, null, null);
+            //processRequest(wydotTim, timType, null, null, null);
 
              // add TIM to list for processing later
              timsToSend.add(wydotTim);        

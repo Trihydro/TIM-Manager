@@ -129,7 +129,7 @@ public class SetItisCodes {
         if (wydotTim.getExit() != null) {
             items.add("11794");
             int exitItisCodeNumber;
-            if(wydotTim.getExit().toLowerCase().equals("turnout")){
+            if(wydotTim.getExit().toLowerCase().equals("turnout") || wydotTim.getExit().toLowerCase().equals("parking")){
                 exitItisCodeNumber = convertNumberToItisCode((int)Math.round(wydotTim.getMileMarker()));
                 items.add(String.valueOf(exitItisCodeNumber));
             }

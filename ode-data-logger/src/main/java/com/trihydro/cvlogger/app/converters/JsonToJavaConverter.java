@@ -338,6 +338,11 @@ public class JsonToJavaConverter {
                     .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
                     .get("GeographicalPath").get("name");
 
+            JsonNode startTimeNode = timNode.get("dataFrames").get("TravelerDataFrame").get("startTime");
+            System.out.println(startTimeNode);
+            JsonNode durationNode = timNode.get("dataFrames").get("TravelerDataFrame").get("duratonTime");
+            System.out.println(durationNode);
+
             timNode.get("timeStamp").asInt();
 
             LocalDate now = LocalDate.now();
@@ -347,13 +352,13 @@ public class JsonToJavaConverter {
 
             LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timNode.get("timeStamp").asInt(),
                     ChronoUnit.MINUTES);
-            tim.setTimeStamp(timeStampDate.toString());
+            tim.setTimeStamp(timeStampDate.toString() + "Z");
 
-            LocalDateTime startDate = firstDay.atStartOfDay().plus(timNode.get("startTime").asInt(),
+            LocalDateTime startDate = firstDay.atStartOfDay().plus(startTimeNode.asInt(),
                     ChronoUnit.MINUTES);
 
-            dataFrame.setStartDateTime(startDate.toString());
-            dataFrame.setDurationTime(timNode.get("duratonTime").asInt());
+            dataFrame.setStartDateTime(startDate.toString() + "Z");
+            dataFrame.setDurationTime(durationNode.asInt());
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 
@@ -439,7 +444,6 @@ public class JsonToJavaConverter {
         }
 
         return odeTimPayload;
-
     }
 
     public static OdeTravelerInformationMessage convertBroadcastTimPayloadJsonToJava(String value) {

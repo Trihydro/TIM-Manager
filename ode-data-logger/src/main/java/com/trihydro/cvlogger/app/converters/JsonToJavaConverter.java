@@ -352,12 +352,12 @@ public class JsonToJavaConverter {
 
             LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timNode.get("timeStamp").asInt(),
                     ChronoUnit.MINUTES);
-            tim.setTimeStamp(timeStampDate.toString());
+            tim.setTimeStamp(timeStampDate.toString() + "Z");
 
             LocalDateTime startDate = firstDay.atStartOfDay().plus(startTimeNode.asInt(),
                     ChronoUnit.MINUTES);
 
-            dataFrame.setStartDateTime(startDate.toString());
+            dataFrame.setStartDateTime(startDate.toString() + "Z");
             dataFrame.setDurationTime(durationNode.asInt());
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());

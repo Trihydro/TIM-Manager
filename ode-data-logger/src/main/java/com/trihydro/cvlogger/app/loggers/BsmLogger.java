@@ -25,6 +25,8 @@ public class BsmLogger {
 
     public static void addBSMToOracleDB(OdeData odeData, String value) {		
         
+        System.out.println("Logging: " + ((OdeBsmMetadata)odeData.getMetadata()).getLogFileName());
+
         Long bsmCoreDataId = BsmCoreDataService.insertBSMCoreData((OdeBsmMetadata)odeData.getMetadata(), ((OdeBsmPayload)odeData.getPayload()).getBsm());
 
         if(bsmCoreDataId != null && !bsmCoreDataId.equals(new Long(0))){

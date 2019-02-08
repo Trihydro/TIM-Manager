@@ -12,6 +12,9 @@ import com.trihydro.library.service.DriverAlertService;
 public class DriverAlertLogger {
 
 	public static void addDriverAlertToOracleDB(OdeData odeData) throws SQLException {
+		
+		System.out.println("Logging: " + ((OdeLogMetadata)odeData.getMetadata()).getLogFileName());
+
 		Long driverAlertId = DriverAlertService.insertDriverAlert((OdeLogMetadata) odeData.getMetadata(),
 				((OdeDriverAlertPayload) odeData.getPayload()).getAlert());
 	}

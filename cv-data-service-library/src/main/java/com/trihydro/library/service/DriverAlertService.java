@@ -8,6 +8,7 @@ import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.List;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
@@ -134,14 +135,19 @@ public class DriverAlertService extends CvDataServiceLibrary {
 			Long driverAlertId = log(preparedStatement, "driverAlertId");
 
 			// add driver_alert_itis_codes
-			if (alert.split(",").length > 1) {
+			if (driverAlertId != null && alert.split(",").length > 1) {
 				for (String code : alert.split(",")) {
 					if (code.chars().allMatch(Character::isDigit)) {
 						for (ItisCode itisCode : itisCodes) {
-							if (itisCode.getItisCode() == Integer.parseInt(code)) {
-								DriverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
-										itisCode.getItisCodeId());
+							try{								
+								if (itisCode.getItisCode() == Integer.parseInt(code)) {
+									DriverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
+											itisCode.getItisCodeId());
+								}
 							}
+							catch(NumberFormatException e){
+								e.printStackTrace();
+							}							
 						}
 					}
 				}

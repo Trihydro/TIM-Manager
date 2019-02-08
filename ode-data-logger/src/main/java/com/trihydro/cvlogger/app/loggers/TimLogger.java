@@ -83,10 +83,12 @@ public class TimLogger extends BaseLogger {
 	public static void addTimToOracleDB(OdeData odeData) {
 
 		try {
+
+			System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
+
 			Long timId = TimService.insertTim(odeData.getMetadata(), ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
 					((OdeTimPayload) odeData.getPayload()).getTim(), ((OdeLogMetadata) odeData.getMetadata()).getRecordType(), ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(), ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode());
 
-			// odeData.getMetadata().get
 			// return if TIM is not inserted
 			if (timId == null)
 				return;

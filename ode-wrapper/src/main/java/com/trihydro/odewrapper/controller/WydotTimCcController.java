@@ -4,11 +4,8 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 
 import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimCc;
-import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimRc;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

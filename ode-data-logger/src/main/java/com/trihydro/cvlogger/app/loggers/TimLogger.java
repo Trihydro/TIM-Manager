@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
@@ -28,7 +27,6 @@ import com.trihydro.library.service.NodeXYService;
 import com.trihydro.library.service.PathService;
 import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.service.RegionService;
-import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.TimService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -87,7 +85,7 @@ public class TimLogger extends BaseLogger {
 			System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
 
 			Long timId = TimService.insertTim(odeData.getMetadata(), ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
-					((OdeTimPayload) odeData.getPayload()).getTim(), ((OdeLogMetadata) odeData.getMetadata()).getRecordType(), ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(), ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode());
+					((OdeTimPayload) odeData.getPayload()).getTim(), ((OdeLogMetadata) odeData.getMetadata()).getRecordType(), ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(), ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null);
 
 			// return if TIM is not inserted
 			if (timId == null)
@@ -95,7 +93,7 @@ public class TimLogger extends BaseLogger {
 
 			Long dataFrameId = DataFrameService.insertDataFrame(timId);
 			Long pathId = PathService.insertPath();
-			Long regionId = RegionService.insertRegion(dataFrameId, pathId,
+			RegionService.insertRegion(dataFrameId, pathId,
 					((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
 							.getAnchorPosition());
 			String regionName = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
@@ -106,7 +104,7 @@ public class TimLogger extends BaseLogger {
 			// if this is an RSU TIM
 			if (activeTim.getRsuTarget() != null) {
 				// save TIM RSU in DB
-				WydotRsu rsu = rsus.stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
+				WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
 						.orElse(null);
 				if (rsu != null)
 					TimRsuService.insertTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
@@ -139,18 +137,18 @@ public class TimLogger extends BaseLogger {
 		// variables
 		ActiveTim activeTim;
 
+		// get information from the region name, first check splitname length
+		activeTim = setActiveTimByRegionName(
+				((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName());
+
 		// save TIM
 		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null,
-				((OdeTimPayload) odeData.getPayload()).getTim(), null, null, null);
+				((OdeTimPayload) odeData.getPayload()).getTim(), null, null, null, activeTim.getSatRecordId());
 
 		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 
 		// save DataFrame
 		Long dataFrameId = DataFrameService.insertDataFrame(timId);
-
-		// get information from the region name, first check splitname length
-		activeTim = setActiveTimByRegionName(
-				((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName());
 
 		if (activeTim == null)
 			return;
@@ -170,7 +168,7 @@ public class TimLogger extends BaseLogger {
 		// if this is an RSU TIM
 		if (activeTim.getRsuTarget() != null) {
 			// save TIM RSU in DB
-			WydotRsu rsu = rsus.stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
+			WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
 					.orElse(null);
 			TimRsuService.insertTimRsu(timId, rsu.getRsuId(), metaData.getRequest().getRsus()[0].getRsuIndex());
 		}
@@ -272,7 +270,7 @@ public class TimLogger extends BaseLogger {
 
 	public static TimType getTimType(String timTypeName) {
 
-		TimType timType = timTypes.stream().filter(x -> x.getType().equals(timTypeName)).findFirst().orElse(null);
+		TimType timType = getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst().orElse(null);
 
 		return timType;
 	}
@@ -283,7 +281,7 @@ public class TimLogger extends BaseLogger {
 
 		for (String item : items) {
 
-			ItisCode itisCode = itisCodes.stream().filter(x -> x.getItisCode().equals(Integer.parseInt(item)))
+			ItisCode itisCode = getItisCodes().stream().filter(x -> x.getItisCode().equals(Integer.parseInt(item)))
 					.findFirst().orElse(null);
 			if (itisCode != null)
 				itisCodeIds.add(itisCode.getItisCodeId());
@@ -296,7 +294,7 @@ public class TimLogger extends BaseLogger {
 
 		String itisCodeId = null;
 
-		ItisCode itisCode = itisCodes.stream().filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst()
+		ItisCode itisCode = getItisCodes().stream().filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst()
 				.orElse(null);
 		if (itisCode != null)
 			itisCodeId = itisCode.getItisCodeId().toString();

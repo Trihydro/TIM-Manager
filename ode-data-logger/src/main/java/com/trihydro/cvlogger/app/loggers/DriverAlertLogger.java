@@ -15,7 +15,7 @@ public class DriverAlertLogger {
 		
 		System.out.println("Logging: " + ((OdeLogMetadata)odeData.getMetadata()).getLogFileName());
 
-		Long driverAlertId = DriverAlertService.insertDriverAlert((OdeLogMetadata) odeData.getMetadata(),
+	    DriverAlertService.insertDriverAlert((OdeLogMetadata) odeData.getMetadata(),
 				((OdeDriverAlertPayload) odeData.getPayload()).getAlert());
 	}
 

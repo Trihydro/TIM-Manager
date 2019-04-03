@@ -8,6 +8,9 @@ public class ConfigProperties {
     private String dbUsername;
     private String dbPassword;
     private String env;
+    private String mongoDatabase;
+    private String mongoUsername;
+    private String mongoPassword;
 
     public String getOdeUrl() {
         return odeUrl;
@@ -55,5 +58,29 @@ public class ConfigProperties {
 
     public void setEnv(String env) {
         this.env = env;
+    }    
+
+    public String getMongoDatabase() {
+        return mongoDatabase;
+    }
+
+    public void setMongoDatabase(String mongoDatabase) {
+        this.mongoDatabase = mongoDatabase;
+    }    
+
+    public String getMongoUsername() {
+        return mongoUsername;
+    }
+
+    public void setMongoUsername(String mongoUsername) {
+        this.mongoUsername = mongoUsername;
+    }    
+
+    public String getMongoPassword() {
+        return mongoPassword;
+    }
+
+    public void setMongoPassword(String mongoPassword) {
+        this.mongoPassword = mongoPassword;
     }    
 }

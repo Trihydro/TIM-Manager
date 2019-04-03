@@ -1,6 +1,5 @@
 package com.trihydro.odewrapper;
 
-import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
@@ -8,17 +7,12 @@ import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
-import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimIncident;
-import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,7 +207,7 @@ public class WydotTimParkingControllerTest {
 		OdeLogMetadata odeTimMetadata = new OdeLogMetadata();
 		odeTimMetadata.setOdeReceivedAt(null);
 
-		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null);
+		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null, null);
 
 		TimRsuService.insertTimRsu(timId, 1, 1);
 

@@ -183,7 +183,6 @@ public class TimRsuService extends CvDataServiceLibrary {
 		boolean deleteTimRsuResult = false;
 		PreparedStatement preparedStatement = null;
 		Connection connection = null;
-		ResultSet rs = null;
 
 		String deleteSQL = "DELETE FROM TIM_RSU WHERE TIM_RSU_ID = ?";
 

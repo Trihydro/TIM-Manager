@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,10 +12,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
@@ -29,16 +26,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 import us.dot.its.jpo.ode.plugin.SNMP;
-import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
@@ -48,10 +42,8 @@ import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
-import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Milepost;
-import com.trihydro.library.model.RsuIndex;
 import com.trihydro.library.model.TimRsu;
 
 import org.springframework.http.MediaType;
@@ -102,6 +94,13 @@ public class WydotTimService {
             // set duration for two hours
             timToSend.getTim().getDataframes()[0].setDurationTime(120);
         }
+
+        Random rand = new Random();
+        int randomNum = rand.nextInt(1000000) + 100000;
+        String packetIdHexString = Integer.toHexString(randomNum);
+        packetIdHexString = String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0"))
+                + packetIdHexString;
+        timToSend.getTim().setPacketID(packetIdHexString);
 
         return timToSend;
     }
@@ -318,7 +317,6 @@ public class WydotTimService {
 
         List<WydotRsu> rsus = new ArrayList<>();
         Integer closestIndexOutsideRange = null;
-        int i;
         Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
         WydotRsu entryRsu = null;
         // WydotRsu rsuHigher;
@@ -432,13 +430,6 @@ public class WydotTimService {
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
 
-        Random rand = new Random();
-        int randomNum = rand.nextInt(1000000) + 100000;
-        String packetIdHexString = Integer.toHexString(randomNum);
-        packetIdHexString = String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0"))
-                + packetIdHexString;
-        timToSend.getTim().setPacketID(packetIdHexString);
-
         TimQuery timQuery = submitTimQuery(rsu, 0);
 
         // query failed, don't send TIM
@@ -469,13 +460,6 @@ public class WydotTimService {
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
-
-        Random rand = new Random();
-        int randomNum = rand.nextInt(1000000) + 100000;
-        String packetIdHexString = Integer.toHexString(randomNum);
-        packetIdHexString = String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0"))
-                + packetIdHexString;
-        timToSend.getTim().setPacketID(packetIdHexString);
 
         SDW sdw = new SDW();
 

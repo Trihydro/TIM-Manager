@@ -3,18 +3,12 @@ package com.trihydro.cvdatacontroller.controller;
 import org.springframework.web.bind.annotation.RestController;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.model.WydotRsu;
-//import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import java.net.URI;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import springfox.documentation.annotations.ApiIgnore;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @CrossOrigin

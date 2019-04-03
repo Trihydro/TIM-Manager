@@ -4,14 +4,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trihydro.library.service.CategoryService;
 import com.trihydro.library.model.Category;
 
-import io.swagger.annotations.Api;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @CrossOrigin
 @RestController

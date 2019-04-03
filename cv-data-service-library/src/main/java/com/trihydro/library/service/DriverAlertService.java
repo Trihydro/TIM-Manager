@@ -8,7 +8,6 @@ import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;

@@ -1,6 +1,5 @@
 package com.trihydro.odewrapper;
 
-import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
@@ -8,25 +7,18 @@ import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
-import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimIncident;
-import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -42,7 +34,6 @@ import org.junit.runners.MethodSorters;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -57,7 +48,6 @@ public class WydotTimRcControllerTest {
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mockMvc;
-	private static final String CONTENT_TYPE = "application/json;charset=UTF-8";
 
 	@Before
 	public void setup() throws Exception {
@@ -232,7 +222,7 @@ public class WydotTimRcControllerTest {
 		OdeLogMetadata odeTimMetadata = new OdeLogMetadata();
 		odeTimMetadata.setOdeReceivedAt(null);
 
-		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null);
+		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null, null);
 
 		TimRsuService.insertTimRsu(timId, 1, 1);
 

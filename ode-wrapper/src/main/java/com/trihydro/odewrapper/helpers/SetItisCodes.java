@@ -1,38 +1,19 @@
 package com.trihydro.odewrapper.helpers;
 
 import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.library.model.ItisCode;
-import com.trihydro.library.model.Milepost;
 import com.trihydro.library.service.IncidentChoicesService;
 import com.trihydro.library.service.ItisCodeService;
-import com.trihydro.library.service.MilepostService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.List;
 import java.util.ArrayList;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
-import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
-import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
-
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
-import java.math.BigDecimal;
 
 @Component
 public class SetItisCodes {

@@ -32,22 +32,22 @@
         <dependency>
             <groupId>us.dot.jpo.ode</groupId>
             <artifactId>jpo-ode-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>us.dot.jpo.ode</groupId>
             <artifactId>jpo-ode-plugins</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>us.dot.jpo.ode</groupId>
             <artifactId>jpo-ode-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>us.dot.jpo.ode</groupId>
             <artifactId>jpo-ode-svcs</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.4</version>
         </dependency>      
         <dependency>
             <groupId>com.oracle</groupId>
@@ -68,7 +68,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>3.1.0</version>
+            <version>3.3.1</version>
         </dependency>
     </dependencies>    
 </project>

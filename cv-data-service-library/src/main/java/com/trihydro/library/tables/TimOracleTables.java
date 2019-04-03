@@ -10,7 +10,6 @@ public class TimOracleTables extends OracleTables {
     private static List<String> regionTable;
     private static List<String> nodeXYTable;
     private static List<String> pathNodeXYTable;
-    private static List<String> rsuIndexTable;
     private List<String> timTypeTable;
     private static List<String> activeTimTable;
     private static List<String> timRsuTable;
@@ -47,6 +46,7 @@ public class TimOracleTables extends OracleTables {
             timTable.add("PAYLOAD_TYPE");
             timTable.add("RECORD_TYPE");
             timTable.add("ODE_RECEIVED_AT");
+            timTable.add("SAT_RECORD_ID");
 
             return timTable;
         }
@@ -93,17 +93,6 @@ public class TimOracleTables extends OracleTables {
             pathNodeXYTable.add("NODE_XY_ID");
             pathNodeXYTable.add("PATH_ID");
             return pathNodeXYTable;
-        }
-    }
-
-    public static List<String> getRsuIndexTable() {
-        if (rsuIndexTable != null)
-            return rsuIndexTable;
-        else {
-            rsuIndexTable = new ArrayList<String>();
-            rsuIndexTable.add("RSU_ID");
-            rsuIndexTable.add("RSU_INDEX");
-            return rsuIndexTable;
         }
     }
 

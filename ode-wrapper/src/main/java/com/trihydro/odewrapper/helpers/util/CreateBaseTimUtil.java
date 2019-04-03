@@ -6,14 +6,7 @@ import com.trihydro.library.service.MilepostService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.List;
 import java.util.ArrayList;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
@@ -63,7 +56,7 @@ public class CreateBaseTimUtil {
         // region.setSegmentID(timBase.getDistrict());
 
         region.setLaneWidth(new BigDecimal(327));
-        region.setDirectionality(new Long(3));
+        region.setDirectionality("3");
         region.setClosedPath(false);
 
         // path

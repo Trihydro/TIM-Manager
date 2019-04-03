@@ -1,8 +1,6 @@
 package com.trihydro.library.service;
 
-import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata;
-import us.dot.its.jpo.ode.model.OdeTravelerInputData;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
@@ -16,20 +14,16 @@ import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import com.trihydro.library.service.SecurityResultCodeTypeService;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.tables.TimOracleTables;
-import us.dot.its.jpo.ode.plugin.ServiceRequest;
-import us.dot.its.jpo.ode.plugin.ServiceRequest.OdeInternal;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 
 public class TimService extends CvDataServiceLibrary {
 
 	public static Long insertTim(OdeMsgMetadata odeTimMetadata, ReceivedMessageDetails receivedMessageDetails,
-			OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName, SecurityResultCode securityResultCode) {
+			OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName, SecurityResultCode securityResultCode, String satRecordId) {
 
 		PreparedStatement preparedStatement = null;
 		Connection connection = null;
@@ -52,6 +46,8 @@ public class TimService extends CvDataServiceLibrary {
 				else if (col.equals("URL_B"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
 							j2735TravelerInformationMessage.getUrlB());
+				else if (col.equals("SAT_RECORD_ID"))
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, satRecordId);
 				else if (col.equals("TIME_STAMP")) {
 					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
 							java.sql.Timestamp.valueOf(LocalDateTime.parse(

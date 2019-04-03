@@ -1,6 +1,5 @@
 package com.trihydro.cvlogger.app.loggers;
 
-import java.sql.SQLException;
 import java.util.List;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TimType;
@@ -11,20 +10,29 @@ import com.trihydro.library.service.TimTypeService;
 
 public class BaseLogger {
 
-    protected static List<ItisCode> itisCodes;
-    protected static List<TimType> timTypes;
-    protected static List<WydotRsu> rsus;
+    private static List<ItisCode> itisCodes;
+    private static List<TimType> timTypes;
+    private static List<WydotRsu> rsus;
 
-    static {
-
-        itisCodes = ItisCodeService.selectAll();
-
-        timTypes = TimTypeService.selectAll();
-        try {
-            rsus = RsuService.selectAll();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static List<ItisCode> getItisCodes() {
+        if (itisCodes == null) {
+            itisCodes = ItisCodeService.selectAll();
         }
+        return itisCodes;
+    }
+
+    public static List<TimType> getTimTypes() {
+        if (timTypes == null) {
+            timTypes = TimTypeService.selectAll();
+        }
+        return timTypes;
+    }
+
+    public static List<WydotRsu> getRsus() {
+        if (rsus == null) {
+            rsus = RsuService.selectAll();
+        }
+        return rsus;
     }
 
 }

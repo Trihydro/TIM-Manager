@@ -6,14 +6,9 @@ import java.sql.SQLException;
 import java.util.TimeZone;
 
 import org.apache.ibatis.jdbc.ScriptRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.apache.ibatis.io.Resources;
 
 import com.trihydro.library.model.ConfigProperties;
@@ -37,28 +32,6 @@ public class DbUtility {
         return dbConfig;
     }
 
-    public static Connection getConnectionHikari() {
-        if (hds == null) {
-
-            config.addDataSourceProperty("cachePrepStmts", "true");
-            config.setUsername(dbConfig.getDbUsername());
-            config.setPassword(dbConfig.getDbPassword());
-            config.setJdbcUrl(dbConfig.getDbUrl());
-            config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(5);
-
-            hds = new HikariDataSource(config);
-        }
-
-        try {
-            return hds.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     // get connection
     public static Connection getConnectionPool() {
 
@@ -73,7 +46,7 @@ public class DbUtility {
             config.setPassword(dbConfig.getDbPassword());
             config.setJdbcUrl(dbConfig.getDbUrl());
             config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(10);
+            config.setMaximumPoolSize(5);
 
             hds = new HikariDataSource(config);
 

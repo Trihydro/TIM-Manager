@@ -1,6 +1,5 @@
 package com.trihydro.cvlogger.app.services;
 
-import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
-import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import com.trihydro.library.service.TracMessageSentService;
 import com.trihydro.library.service.TracMessageTypeService;

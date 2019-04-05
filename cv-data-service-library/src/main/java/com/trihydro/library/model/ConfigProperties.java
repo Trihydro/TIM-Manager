@@ -11,6 +11,7 @@ public class ConfigProperties {
     private String mongoDatabase;
     private String mongoUsername;
     private String mongoPassword;
+    private String trackUrl;
 
     public String getOdeUrl() {
         return odeUrl;
@@ -83,4 +84,11 @@ public class ConfigProperties {
     public void setMongoPassword(String mongoPassword) {
         this.mongoPassword = mongoPassword;
     }    
+
+    public void setTracUrl(String url){
+        this.trackUrl = url;
+    }
+    public String getGetTrackUrl(){
+        return this.trackUrl;
+    }
 }

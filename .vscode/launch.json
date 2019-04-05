@@ -14,17 +14,9 @@
         },
         {
             "type": "java",
-            "name": "CV Data Service Library (Launch)",
-            "request": "launch",
-            "args": "",
-            "cwd": "${workspaceRoot}/cv-data-service-library",
-            "mainClass": "com.trihydro.library.Application"
-        },
-        {
-            "type": "java",
             "name": "ODE Data Logger (Launch)",
             "request": "launch",
-            "args": "-g logger_group_tim_dev -t topic.OdeTimJson -type string -p config-dev.properties",
+            "args": "-g logger_group_tim_dev -t topic.OdeDNMsgJson -type string -p config-dev.properties",
             "cwd": "${workspaceRoot}/ode-data-logger",
             "mainClass": "com.trihydro.cvlogger.app.OdeLoggingConsumer"
         },

@@ -89,6 +89,7 @@ public class OdeLoggingConsumer {
 		config.setMongoDatabase(appProps.getProperty("mongoDatabase"));
 		config.setMongoUsername(appProps.getProperty("mongoUsername"));
 		config.setMongoPassword(appProps.getProperty("mongoPassword"));
+		config.setTracUrl(appProps.getProperty("tracUrl"));
 
 		CvDataServiceLibrary.setConfig(config);
 		MongoLogger.setConfig(config);
@@ -126,7 +127,7 @@ public class OdeLoggingConsumer {
 					ConsumerRecords<String, String> records = stringConsumer.poll(100);
 					for (ConsumerRecord<String, String> record : records) {
 						if (topic.equals("topic.OdeDNMsgJson")) {
-							TracManager.submitDNMsgToTrac(record.value());
+							TracManager.submitDNMsgToTrac(record.value(), config.getGetTrackUrl());
 						} else if (topic.equals("topic.OdeTimJson")) {
 							System.out.println(record.value());
 							OdeData odeData = TimLogger.processTimJson(record.value());

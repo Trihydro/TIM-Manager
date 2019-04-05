@@ -47,7 +47,7 @@ public class TracManager {
 		return tracMessageSentId;
 	}
 
-	public static void submitDNMsgToTrac(String value) {
+	public static void submitDNMsgToTrac(String value, String url) {
 
 		OdeLogMetadata metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 		OdeTimPayload payload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
@@ -61,7 +61,7 @@ public class TracManager {
 		// if not, add to db and sent to trac
 
 		RestTemplate restTemplate = new RestTemplate();
-		String url = "http://gisd01:8070/trac/newtask.text";
+		// String url = "http://gisd01:8070/trac/newtask.text";
 
 		String latitude = null;
 		String longitude = null;

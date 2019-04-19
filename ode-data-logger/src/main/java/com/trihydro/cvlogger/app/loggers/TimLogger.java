@@ -5,11 +5,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.plaf.synth.Region;
+
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 import us.dot.its.jpo.ode.util.JsonUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,20 +41,20 @@ public class TimLogger extends BaseLogger {
 	public static OdeData processTimJson(String value) {
 
 		JsonNode recordGeneratedBy = JsonUtils.getJsonNode(value, "metadata").get("recordGeneratedBy");
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 
 		String recordGeneratedByStr = null;
 
 		try {
 			recordGeneratedByStr = mapper.treeToValue(recordGeneratedBy, String.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-		
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
 		// if broadcast tim, translate accordingly, else translate as received TIM
-		if(recordGeneratedByStr.equals("TMC"))
-			return translateBroadcastTimJson(value);	
+		if (recordGeneratedByStr.equals("TMC"))
+			return translateBroadcastTimJson(value);
 		else
 			return translateTimJson(value);
 	}
@@ -68,15 +71,14 @@ public class TimLogger extends BaseLogger {
 	public static OdeData translateBroadcastTimJson(String value) {
 		OdeData odeData = null;
 		OdeRequestMsgMetadata odeTimMetadata = JsonToJavaConverter.convertBroadcastTimMetadataJsonToJava(value);
-		//OdeTravelerInformationMessage odeTim = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
+		// OdeTravelerInformationMessage odeTim =
+		// JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
 		OdeTimPayload odeTimPayload = JsonToJavaConverter.convertTmcTimTopicJsonToJava(value);
-		//OdeTimPayload odeTimPayload = new OdeTimPayload(odeTim);
+		// OdeTimPayload odeTimPayload = new OdeTimPayload(odeTim);
 		if (odeTimMetadata != null && odeTimPayload != null)
 			odeData = new OdeData(odeTimMetadata, odeTimPayload);
 		return odeData;
 	}
-
-
 
 	public static void addTimToOracleDB(OdeData odeData) {
 
@@ -84,8 +86,12 @@ public class TimLogger extends BaseLogger {
 
 			System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
 
-			Long timId = TimService.insertTim(odeData.getMetadata(), ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
-					((OdeTimPayload) odeData.getPayload()).getTim(), ((OdeLogMetadata) odeData.getMetadata()).getRecordType(), ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(), ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null);
+			Long timId = TimService.insertTim(odeData.getMetadata(),
+					((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
+					((OdeTimPayload) odeData.getPayload()).getTim(),
+					((OdeLogMetadata) odeData.getMetadata()).getRecordType(),
+					((OdeLogMetadata) odeData.getMetadata()).getLogFileName(),
+					((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null);
 
 			// return if TIM is not inserted
 			if (timId == null)
@@ -104,8 +110,8 @@ public class TimLogger extends BaseLogger {
 			// if this is an RSU TIM
 			if (activeTim.getRsuTarget() != null) {
 				// save TIM RSU in DB
-				WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
-						.orElse(null);
+				WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
+						.findFirst().orElse(null);
 				if (rsu != null)
 					TimRsuService.insertTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
 			}
@@ -137,13 +143,28 @@ public class TimLogger extends BaseLogger {
 		// variables
 		ActiveTim activeTim;
 
+		OdeTimPayload payload = (OdeTimPayload) odeData.getPayload();
+		if (payload == null)
+			return;
+		OdeTravelerInformationMessage tim = payload.getTim();
+		if (tim == null)
+			return;
+		DataFrame[] dframes = tim.getDataframes();
+		if (dframes == null || dframes.length == 0)
+			return;
+		OdeTravelerInformationMessage.DataFrame.Region[] regions = dframes[0].getRegions();
+		if (regions == null || regions.length == 0)
+			return;
+		String name = regions[0].getName();
+		if (StringUtils.isEmpty(name) || StringUtils.isBlank(name))
+			return;
+
 		// get information from the region name, first check splitname length
-		activeTim = setActiveTimByRegionName(
-				((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getName());
+		activeTim = setActiveTimByRegionName(name);
 
 		// save TIM
-		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null,
-				((OdeTimPayload) odeData.getPayload()).getTim(), null, null, null, activeTim.getSatRecordId());
+		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null,
+				activeTim.getSatRecordId());
 
 		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 
@@ -189,24 +210,24 @@ public class TimLogger extends BaseLogger {
 
 		// if true, TIM came from WYDOT
 		if (activeTim.getTimType() != null) {
-		
+
 			ActiveTim activeTimDb = null;
 
 			// if RSU TIM
-			if(activeTim.getRsuTarget() != null) // look for active RSU tim that matches incoming TIM
-				activeTimDb = ActiveTimService.getActiveRsuTim(activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget());
+			if (activeTim.getRsuTarget() != null) // look for active RSU tim that matches incoming TIM
+				activeTimDb = ActiveTimService.getActiveRsuTim(activeTim.getClientId(), activeTim.getDirection(),
+						activeTim.getRsuTarget());
 			else // else look for active SAT tim that matches incoming TIM
 				activeTimDb = ActiveTimService.getActiveSatTim(activeTim.getClientId(), activeTim.getDirection());
 
 			// if there is no active TIM, insert new one
-			if(activeTimDb == null){
+			if (activeTimDb == null) {
 				ActiveTimService.insertActiveTim(activeTim);
-			}
-			else{ // else update active TIM
+			} else { // else update active TIM
 				activeTim.setActiveTimId(activeTimDb.getActiveTimId());
 				ActiveTimService.updateActiveTim(activeTim);
 			}
-		
+
 		} else {
 			// not from WYDOT application
 			// just log for now
@@ -294,8 +315,8 @@ public class TimLogger extends BaseLogger {
 
 		String itisCodeId = null;
 
-		ItisCode itisCode = getItisCodes().stream().filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst()
-				.orElse(null);
+		ItisCode itisCode = getItisCodes().stream().filter(x -> x.getItisCode().equals(Integer.parseInt(item)))
+				.findFirst().orElse(null);
 		if (itisCode != null)
 			itisCodeId = itisCode.getItisCodeId().toString();
 

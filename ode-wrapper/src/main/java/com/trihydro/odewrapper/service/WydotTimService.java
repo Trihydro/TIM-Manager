@@ -416,7 +416,7 @@ public class WydotTimService {
         // add snmp
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
-        snmp.setRsuid("00000083");
+        snmp.setRsuid("8003");
         snmp.setMsgid(31);
         snmp.setMode(1);
         snmp.setChannel(178);
@@ -519,7 +519,7 @@ public class WydotTimService {
 
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
-        snmp.setRsuid("00000083");
+        snmp.setRsuid("8003");
         snmp.setMsgid(31);
         snmp.setMode(1);
         snmp.setChannel(178);

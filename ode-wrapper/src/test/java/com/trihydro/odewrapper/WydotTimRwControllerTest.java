@@ -7,7 +7,7 @@ import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
-import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.TimRwList;
 import com.trihydro.odewrapper.model.WydotTimRw;
 import com.trihydro.odewrapper.model.WydotTravelerInputData;
 
@@ -206,7 +206,7 @@ public class WydotTimRwControllerTest {
 
 	private void makeTims() {
 
-		WydotTimList wydotTimList = new WydotTimList();
+		TimRwList timRwList = new TimRwList();
 		List<WydotTimRw> rwList = new ArrayList<WydotTimRw>();
 		WydotTimRw wydotTim = new WydotTimRw();
 
@@ -218,14 +218,14 @@ public class WydotTimRwControllerTest {
 		wydotTim.setToRm(380.0);
 
 		rwList.add(wydotTim);
-		wydotTimList.setTimRwList(rwList);
+		timRwList.setTimRwList(rwList);
 
 		WydotTravelerInputData wydotTravelerInputData = CreateBaseTimUtil.buildTim(wydotTim, "westbound", "80");
 
 		OdeLogMetadata odeTimMetadata = new OdeLogMetadata();
 		odeTimMetadata.setOdeReceivedAt(null);
 
-		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null, null);
+		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null, null, null);
 
 		TimRsuService.insertTimRsu(timId, 1, 1);
 

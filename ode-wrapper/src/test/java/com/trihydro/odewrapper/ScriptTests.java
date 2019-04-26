@@ -1,7 +1,7 @@
 package com.trihydro.odewrapper;
 
 import com.google.gson.Gson;
-import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTimRc;
 
 import org.junit.FixMethodOrder;
@@ -30,7 +30,7 @@ public class ScriptTests {
     @Test
     public void scriptTests() {
 
-        WydotTimList wydotTimList = new WydotTimList();
+        TimRcList timRcList = new TimRcList();
 
         List<WydotTimRc> rcList = new ArrayList<WydotTimRc>();
 
@@ -45,10 +45,10 @@ public class ScriptTests {
         tim.setAdvisory(advisories);
 
         rcList.add(tim);
-        wydotTimList.setTimRcList(rcList);
+        timRcList.setTimRcList(rcList);
 
         Gson gson = new Gson();
-        String timJson = gson.toJson(wydotTimList);
+        String timJson = gson.toJson(timRcList);
 
         RestTemplate restTemplate = new RestTemplate();
 

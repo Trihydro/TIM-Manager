@@ -23,7 +23,7 @@ import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 public class TimService extends CvDataServiceLibrary {
 
 	public static Long insertTim(OdeMsgMetadata odeTimMetadata, ReceivedMessageDetails receivedMessageDetails,
-			OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName, SecurityResultCode securityResultCode, String satRecordId) {
+			OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName, SecurityResultCode securityResultCode, String satRecordId, String regionName) {
 
 		PreparedStatement preparedStatement = null;
 		Connection connection = null;
@@ -48,6 +48,8 @@ public class TimService extends CvDataServiceLibrary {
 							j2735TravelerInformationMessage.getUrlB());
 				else if (col.equals("SAT_RECORD_ID"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, satRecordId);
+				else if (col.equals("TIM_NAME"))
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, regionName);
 				else if (col.equals("TIME_STAMP")) {
 					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
 							java.sql.Timestamp.valueOf(LocalDateTime.parse(

@@ -11,8 +11,11 @@ import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
+import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Geometry;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
 import us.dot.its.jpo.ode.util.JsonUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -98,10 +101,28 @@ public class TimLogger extends BaseLogger {
 				return;
 
 			Long dataFrameId = DataFrameService.insertDataFrame(timId);
-			Long pathId = PathService.insertPath();
-			RegionService.insertRegion(dataFrameId, pathId,
-					((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
-							.getAnchorPosition());
+			// TODO: we don't always have a path, its either path or geometry
+			// ((OdeTimPayload)
+			// odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getGeometry()
+			Path path = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getPath();
+			Geometry geometry = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
+					.getGeometry();
+			OdePosition3D anchor = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
+					.getAnchorPosition();
+			if (path != null) {
+				Long pathId = PathService.insertPath();
+				RegionService.insertPathRegion(dataFrameId, pathId, anchor);
+
+				Long nodeXYId;
+				for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
+					nodeXYId = NodeXYService.insertNodeXY(nodeXY);
+					PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+				}
+			} else if (geometry != null) {
+				// insertGeometryRegion(Long dataFrameId, Region.Geometry geometry,
+				// OdePosition3D anchor) {
+				RegionService.insertGeometryRegion(dataFrameId, geometry, anchor);
+			}
 			String regionName = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
 					.getName();
 
@@ -114,14 +135,6 @@ public class TimLogger extends BaseLogger {
 						.findFirst().orElse(null);
 				if (rsu != null)
 					TimRsuService.insertTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
-			}
-
-			Long nodeXYId;
-
-			for (OdeTravelerInformationMessage.NodeXY nodeXY : ((OdeTimPayload) odeData.getPayload()).getTim()
-					.getDataframes()[0].getRegions()[0].getPath().getNodes()) {
-				nodeXYId = NodeXYService.insertNodeXY(nodeXY);
-				PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
 			}
 
 			// save DataFrame ITIS codes

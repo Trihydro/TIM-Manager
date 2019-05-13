@@ -18,8 +18,8 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.TimVslList;
 import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
 import org.springframework.http.HttpStatus;
@@ -34,10 +34,10 @@ public class WydotTimVslController extends WydotTimBaseController {
     TimType timType = getTimType(type);
 
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createUpdateVslTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> createUpdateVslTim(@RequestBody TimVslList timVslList) {
 
         System.out.println("Create/Update VSL TIM");
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timVslList);
         System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
@@ -45,7 +45,7 @@ public class WydotTimVslController extends WydotTimBaseController {
         List<WydotTim> timsToSend = new ArrayList<WydotTim>();
 
         // build TIM
-        for (WydotTimVsl wydotTim : wydotTimList.getTimVslList()) {
+        for (WydotTimVsl wydotTim : timVslList.getTimVslList()) {
             resultTim = validateInputVsl(wydotTim);
 
             if (resultTim.getResultMessages().size() > 0) {

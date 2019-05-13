@@ -1,4 +1,5 @@
 {
-    "editor.multiCursorModifier": "ctrlCmd"
+    "editor.multiCursorModifier": "ctrlCmd",
+    "java.configuration.updateBuildConfiguration": "disabled"
 
 }

@@ -2,13 +2,21 @@ package com.trihydro.odewrapper.model;
 
 import java.util.List;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class WydotTim implements Cloneable {
 
+	@ApiModelProperty(required = true)
 	private String direction;
+	@ApiModelProperty(required = true)
 	private Double fromRm;
+	@ApiModelProperty(required = true)
 	private Double toRm;
+	@ApiModelProperty(required = true)
 	private String route;
+	@ApiModelProperty(required = true)
 	private List<String> itisCodes;
+	@ApiModelProperty(required = true)
 	private String clientId;
 
 	@Override

@@ -12,7 +12,7 @@ import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
-import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.TimRwList;
 import com.trihydro.odewrapper.model.WydotTimRw;
 
 import io.swagger.annotations.Api;
@@ -36,10 +36,10 @@ public class WydotTimRwController extends WydotTimBaseController {
     List<WydotTimRw> timsToSend;
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createRoadContructionTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
 
         System.out.println("Create/Update RW TIM");
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timRwList);
         System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
@@ -47,7 +47,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         timsToSend = new ArrayList<WydotTimRw>();
 
         // build TIM
-        for (WydotTimRw wydotTim : wydotTimList.getTimRwList()) {
+        for (WydotTimRw wydotTim : timRwList.getTimRwList()) {
 
             // validate input
             resultTim = validateInputRw(wydotTim);

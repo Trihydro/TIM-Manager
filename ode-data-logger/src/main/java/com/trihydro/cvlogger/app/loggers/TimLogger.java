@@ -94,7 +94,7 @@ public class TimLogger extends BaseLogger {
 					((OdeTimPayload) odeData.getPayload()).getTim(),
 					((OdeLogMetadata) odeData.getMetadata()).getRecordType(),
 					((OdeLogMetadata) odeData.getMetadata()).getLogFileName(),
-					((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null);
+					((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null, null);
 
 			// return if TIM is not inserted
 			if (timId == null)
@@ -177,7 +177,7 @@ public class TimLogger extends BaseLogger {
 
 		// save TIM
 		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null,
-				activeTim.getSatRecordId());
+				activeTim.getSatRecordId(), name);
 
 		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 

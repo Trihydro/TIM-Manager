@@ -1,17 +1,30 @@
 package com.trihydro.odewrapper.model;
 
+import java.util.List;
+
+import io.swagger.annotations.ApiModelProperty;
+
 public class WydotTimIncident extends WydotTim {
 
     private String impact;
     private String problem;
     private String effect;
     private String action;
+    @ApiModelProperty(required = true)
     private String incidentId;
+    @ApiModelProperty(required = true)
     private String highway;
+    @ApiModelProperty(required = true)
     private String schedStart;
     private String schedEnd;
     private Integer pk;
     private String problemOtherText;
+    @ApiModelProperty(hidden = true)
+    private transient String clientId;
+    @ApiModelProperty(hidden = true)
+    private transient String route;
+    @ApiModelProperty(hidden = true)
+    private transient List<String> itisCodes;
 
     public String getSchedStart() {
         return this.schedStart;

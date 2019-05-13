@@ -11,8 +11,8 @@ import java.util.List;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
-import com.trihydro.odewrapper.model.WydotTimList;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,10 +32,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     TimType timType = getTimType(type);
 
     @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createIncidentTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> createIncidentTim(@RequestBody TimIncidentList timIncidentList) {
 
         System.out.println("Create Incident TIM");
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timIncidentList);
         System.out.println(post.toString());
 
         List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
@@ -44,7 +44,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         ControllerResult resultTim = null;
 
         // build TIM
-        for (WydotTimIncident wydotTim : wydotTimList.getTimIncidentList()) {
+        for (WydotTimIncident wydotTim : timIncidentList.getTimIncidentList()) {
 
             resultTim = validateInputIncident(wydotTim);
 
@@ -67,10 +67,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     }
 
     @RequestMapping(value = "/incident-tim", method = RequestMethod.PUT, headers = "Accept=application/json")
-    public ResponseEntity<String> updateIncidentTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> updateIncidentTim(@RequestBody TimIncidentList timIncidentList) {
 
         System.out.println("Update Incident TIM");
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timIncidentList);
         System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
@@ -78,7 +78,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
 
         // delete TIMs
-        for (WydotTimIncident wydotTim : wydotTimList.getTimIncidentList()) {
+        for (WydotTimIncident wydotTim : timIncidentList.getTimIncidentList()) {
 
             resultTim = validateInputIncident(wydotTim);
 

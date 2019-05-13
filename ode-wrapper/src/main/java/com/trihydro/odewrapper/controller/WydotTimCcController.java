@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 
 import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimRc;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +16,8 @@ import java.util.List;
 
 import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.TimRcList;
+
 import java.util.ArrayList;
 
 @CrossOrigin
@@ -29,24 +30,24 @@ public class WydotTimCcController extends WydotTimBaseController {
     TimType timType = getTimType(type);
 
     @RequestMapping(value = "/cc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createChainControlTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> createChainControlTim(@RequestBody TimRcList timRcList) {
 
         System.out.println("CHAIN CONTROL TIM");
 
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timRcList);
         System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
         List<WydotTimRc> timsToSend = new ArrayList<WydotTimRc>();
 
-        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
+        for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
             validateInputCc(wydotTim);
             wydotTimService.clearTimsById(type, wydotTim.getClientId(), null);
         }
 
         // build TIM
-        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
+        for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
 
             resultTim = validateInputCc(wydotTim);
 

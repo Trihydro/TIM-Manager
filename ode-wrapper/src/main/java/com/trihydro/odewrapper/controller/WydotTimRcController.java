@@ -9,8 +9,8 @@ import java.util.List;
 
 import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.model.WydotTimRc;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,10 +30,10 @@ public class WydotTimRcController extends WydotTimBaseController {
     TimType timType = getTimType(type);
 
     @RequestMapping(value = "/create-update-rc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody TimRcList timRcList) {
 
         System.out.println("Create Update RC TIM");
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timRcList);
         System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
@@ -41,7 +41,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         List<WydotTim> timsToSend = new ArrayList<WydotTim>();
 
         // build TIM
-        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
+        for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
 
             resultTim = validateInputRc(wydotTim);
 
@@ -49,9 +49,6 @@ public class WydotTimRcController extends WydotTimBaseController {
                 resultList.add(resultTim);
                 continue;
             }
-
-            // send TIM
-            //processRequest(wydotTim, timType, null, null, null);
 
              // add TIM to list for processing later
              timsToSend.add(wydotTim);        
@@ -66,15 +63,15 @@ public class WydotTimRcController extends WydotTimBaseController {
     }
 
     @RequestMapping(value = "/submit-rc-ac", method = RequestMethod.PUT, headers = "Accept=application/json")
-    public ResponseEntity<String> submitAllClearRoadConditionsTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> submitAllClearRoadConditionsTim(@RequestBody TimRcList timRcList) {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
 
         System.out.println("All Clear");
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timRcList);
         System.out.println(post.toString());
 
-        for (WydotTimRc wydotTim : wydotTimList.getTimRcList()) {
+        for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
             validateInputRc(wydotTim);
             wydotTimService.clearTimsById(timType.getType(), wydotTim.getClientId(), wydotTim.getDirection());
         }

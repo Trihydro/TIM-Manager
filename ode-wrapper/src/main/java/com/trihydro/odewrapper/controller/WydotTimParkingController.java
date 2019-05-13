@@ -10,7 +10,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.odewrapper.model.ControllerResult;
-import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.model.TimParkingList;
 import com.trihydro.odewrapper.model.WydotTimParking;
 
 import io.swagger.annotations.Api;
@@ -32,10 +32,10 @@ public class WydotTimParkingController extends WydotTimBaseController {
     TimType timType = getTimType(type);
 
     @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createParkingTim(@RequestBody WydotTimList wydotTimList) {
+    public ResponseEntity<String> createParkingTim(@RequestBody TimParkingList timParkingList) {
 
         System.out.println("Create Parking TIM");
-        String post = gson.toJson(wydotTimList);
+        String post = gson.toJson(timParkingList);
         System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
@@ -43,7 +43,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
         List<WydotTimParking> validTims = new ArrayList<WydotTimParking>();
 
         // build TIM
-        for (WydotTimParking wydotTim : wydotTimList.getTimParkingList()) {
+        for (WydotTimParking wydotTim : timParkingList.getTimParkingList()) {
 
             resultTim = validateInputParking(wydotTim);
 

@@ -4,8 +4,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -101,18 +99,6 @@ public class UtilityController extends WydotTimBaseController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-
-    @RequestMapping(value = "/test", method = RequestMethod.GET, headers = "Accept=application/json")
-    public ResponseEntity<String> test() {
-
-        
-        ZonedDateTime zdt = ZonedDateTime.parse("2019-01-31T23:03Z");
-        zdt = zdt.plus(20, ChronoUnit.MINUTES);		    
-        
-        
-        return ResponseEntity.status(HttpStatus.OK).body("ok");
-    }
-
     @RequestMapping(value = "/rsu-tim-check/{address:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<String> rsuTimCheck(@PathVariable String address) {
 
@@ -141,12 +127,6 @@ public class UtilityController extends WydotTimBaseController {
                     rsuCheckResults.queryList.add(index);
             }
         }
-
-   //     List<RsuIndex> rsuIndicies = RsuIndexService.selectByRsuId(rsu.getRsuId());
-
-        // for (RsuIndex rsuIndex : rsuIndicies) {
-        //     rsuCheckResults.rsuIndexList.add(rsuIndex.getRsuIndex());
-        // }
 
         rsuCheckResults.activeTimIndicesList = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
 

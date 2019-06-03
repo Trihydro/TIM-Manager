@@ -33,7 +33,7 @@ public class DbUtility {
     }
 
     // get connection
-    public static Connection getConnectionPool() {
+    public static Connection getConnectionPool() throws SQLException {
 
         // create pool if not already done
         if (hds == null) {
@@ -47,6 +47,8 @@ public class DbUtility {
             config.setJdbcUrl(dbConfig.getDbUrl());
             config.setDriverClassName(dbConfig.getDbDriver());
             config.setMaximumPoolSize(5);
+            config.setMaxLifetime(600000);// setting a maxLifetime of 10 minutes (defaults to 30), to help avoid
+                                          // connection issues
 
             hds = new HikariDataSource(config);
 
@@ -67,13 +69,13 @@ public class DbUtility {
         }
 
         // return a connection
-        try {
-            return hds.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // try {
+        return hds.getConnection();
+        // } catch (SQLException e) {
+        // e.printStackTrace();
+        // }
 
-        return null;
+        // return null;
     }
 
 }

@@ -65,20 +65,22 @@ public class DriverAlertItisCodeService extends CvDataServiceLibrary {
 			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("driver_alert_itis_code",
 					TimOracleTables.getDriverAlertItisCodeTable());
 			connection = DbUtility.getConnectionPool();
-			preparedStatement = connection.prepareStatement(insertQueryStatement,
-					new String[] { "driver_alert_itis_code_id" });
-			int fieldNum = 1;
+			if (connection != null) {
+				preparedStatement = connection.prepareStatement(insertQueryStatement,
+						new String[] { "driver_alert_itis_code_id" });
+				int fieldNum = 1;
 
-			for (String col : TimOracleTables.getDriverAlertItisCodeTable()) {
-				if (col.equals("ITIS_CODE_ID"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, itisCodeId);
-				else if (col.equals("DRIVER_ALERT_ID"))
-					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, driverAlertId);
-				fieldNum++;
+				for (String col : TimOracleTables.getDriverAlertItisCodeTable()) {
+					if (col.equals("ITIS_CODE_ID"))
+						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, itisCodeId);
+					else if (col.equals("DRIVER_ALERT_ID"))
+						SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, driverAlertId);
+					fieldNum++;
+				}
+
+				Long driverAlertItisCodeId = log(preparedStatement, "driverAlertItisCode");
+				return driverAlertItisCodeId;
 			}
-
-			Long driverAlertItisCodeId = log(preparedStatement, "driverAlertItisCode");
-			return driverAlertItisCodeId;
 
 		} catch (SQLException e) {
 			e.printStackTrace();

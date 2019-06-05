@@ -101,7 +101,6 @@ public class TimLogger extends BaseLogger {
 				return;
 
 			Long dataFrameId = DataFrameService.insertDataFrame(timId);
-			// TODO: we don't always have a path, its either path or geometry
 			// ((OdeTimPayload)
 			// odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getGeometry()
 			Path path = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getPath();

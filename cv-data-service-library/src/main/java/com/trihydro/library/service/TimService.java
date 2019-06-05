@@ -56,10 +56,12 @@ public class TimService extends CvDataServiceLibrary {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, regionName);
 				else if (col.equals("TIME_STAMP")) {
 					String timeStamp = j2735TravelerInformationMessage.getTimeStamp();
+					java.sql.Timestamp ts = null;
 					if (StringUtils.isNotEmpty(timeStamp) && StringUtils.isNotBlank(timeStamp)) {
-						SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp
-								.valueOf(LocalDateTime.parse(timeStamp, DateTimeFormatter.ISO_DATE_TIME)));
+						ts = java.sql.Timestamp
+								.valueOf(LocalDateTime.parse(timeStamp, DateTimeFormatter.ISO_DATE_TIME));
 					}
+					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
 				} else if (col.equals("RECORD_GENERATED_BY")) {
 					if (odeTimMetadata.getRecordGeneratedBy() != null)
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,

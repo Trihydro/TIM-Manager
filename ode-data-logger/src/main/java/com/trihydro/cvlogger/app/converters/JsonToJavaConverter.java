@@ -253,17 +253,21 @@ public class JsonToJavaConverter {
             OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = JsonToJavaConverter
                     .GetGeometryData(descriptionNode.get("geometry"));
 
-            // timNode.get("timeStamp").asInt();
-
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
-            LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timNode.get("timeStamp").asInt(),
-                    ChronoUnit.MINUTES);
             OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
-            tim.setTimeStamp(timeStampDate.toString());
+
+            JsonNode timeStampNode = timNode.get("timeStamp");
+            if (timeStampNode != null) {
+                LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timeStampNode.asInt(), ChronoUnit.MINUTES);
+                tim.setTimeStamp(timeStampDate.toString());
+            }
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 
-            tim.setPacketID(timNode.get("packetID").asText());
+            JsonNode packetIDNode = timNode.get("packetID");
+            if (packetIDNode != null) {
+                tim.setPacketID(packetIDNode.asText());
+            }
 
             // anchor is an optional property, check for null
             if (anchorNode != null) {
@@ -373,7 +377,7 @@ public class JsonToJavaConverter {
         try {
             if (geometryNode == null)
                 return null;
-                
+
             OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = new OdeTravelerInformationMessage.DataFrame.Region.Geometry();
             String direction = mapper.treeToValue(geometryNode.get("direction"), String.class);
             Integer extent = mapper.treeToValue(geometryNode.get("extent"), Integer.class);// optional

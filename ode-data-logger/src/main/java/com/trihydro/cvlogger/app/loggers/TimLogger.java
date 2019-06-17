@@ -274,10 +274,13 @@ public class TimLogger extends BaseLogger {
 			return activeTim;
 		if (splitName.length > 4) {
 			// if this is an RSU TIM
-			if (splitName[4].split("-")[0].equals("SAT")) {
-				activeTim.setSatRecordId(splitName[4].split("-")[1]);
-			} else {
-				activeTim.setRsuTarget(splitName[4].split("-")[1]);
+			String[] hyphen_array = splitName[4].split("-");
+			if (hyphen_array.length > 1) {
+				if (hyphen_array[0].equals("SAT")) {
+					activeTim.setSatRecordId(hyphen_array[1]);
+				} else {
+					activeTim.setRsuTarget(hyphen_array[1]);
+				}
 			}
 		} else
 			return activeTim;

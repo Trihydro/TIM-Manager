@@ -297,7 +297,15 @@ public class TimLogger extends BaseLogger {
 			return activeTim;
 
 		if (splitName.length > 7)
-			activeTim.setPk(Integer.valueOf(splitName[7]));
+		{
+			try{
+				Integer pk =Integer.valueOf(splitName[7]);
+				activeTim.setPk(pk);
+			}
+			catch(NumberFormatException ex){
+				//the pk won't get set here
+			}
+		}
 		else
 			return activeTim;
 

@@ -19,7 +19,6 @@ import org.apache.commons.cli.ParseException;
 import com.trihydro.cvlogger.app.loggers.BsmLogger;
 import com.trihydro.cvlogger.app.loggers.TimLogger;
 import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
-import com.trihydro.cvlogger.app.loggers.MongoLogger;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -86,13 +85,9 @@ public class OdeLoggingConsumer {
 		config.setDbUsername(appProps.getProperty("dbUsername"));
 		config.setDbPassword(appProps.getProperty("dbPassword"));
 		config.setEnv(appProps.getProperty("env"));
-		config.setMongoDatabase(appProps.getProperty("mongoDatabase"));
-		config.setMongoUsername(appProps.getProperty("mongoUsername"));
-		config.setMongoPassword(appProps.getProperty("mongoPassword"));
 		config.setTracUrl(appProps.getProperty("tracUrl"));
 
 		CvDataServiceLibrary.setConfig(config);
-		MongoLogger.setConfig(config);
 
 		System.out.println("starting..............");
 
@@ -136,26 +131,18 @@ public class OdeLoggingConsumer {
 										.getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC)
 									TimLogger.addActiveTimToOracleDB(odeData);
 								else{
-									MongoLogger.logTim(record.value());
 									TimLogger.addTimToOracleDB(odeData);
 								}
 							}
 						} else if (topic.equals("topic.OdeBsmJson")) {
-							MongoLogger.logBsm(record.value());
 							OdeData odeData = BsmLogger.processBsmJson(record.value());
 							if (odeData != null)
 								BsmLogger.addBSMToOracleDB(odeData, record.value());
 						} else if (topic.equals("topic.OdeDriverAlertJson")) {
-							MongoLogger.logDriverAlert(record.value());
 							OdeData odeData = DriverAlertLogger.processDriverAlertJson(record.value());
 							if (odeData != null)
 								DriverAlertLogger.addDriverAlertToOracleDB(odeData);
 						}
-						// else if (topic.equals("topic.OdeTimBroadcastJson")) {
-						// OdeData odeData = TimLogger.processBroadcastTimJson(record.value());
-						// if (odeData != null)
-						// TimLogger.addActiveTimToOracleDB(odeData);
-						// }
 					}
 				}
 			} finally {

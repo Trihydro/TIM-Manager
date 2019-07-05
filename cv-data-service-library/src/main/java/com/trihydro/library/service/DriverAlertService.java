@@ -30,8 +30,6 @@ public class DriverAlertService extends CvDataServiceLibrary {
 			connection = DbUtility.getConnectionPool();
 			String insertQueryStatement = DriverAlertOracleTables.buildInsertQueryStatement("driver_alert",
 					DriverAlertOracleTables.getDriverAlertTable());
-			// List<SecurityResultCodeType> securityResultCodeTypes =
-			// SecurityResultCodeTypeService.getSecurityResultCodeTypes(connection);
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "driver_alert_id" });
 			int fieldNum = 1;
 

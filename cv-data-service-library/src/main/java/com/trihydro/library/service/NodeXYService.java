@@ -67,5 +67,4 @@ public class NodeXYService extends CvDataServiceLibrary {
         }
         return new Long(0);
     }
-
 }

@@ -48,8 +48,6 @@ public class ActiveTimService extends CvDataServiceLibrary {
 					if (activeTim.getEndDateTime() != null)
 						SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
 								LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
-					// SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-					// java.sql.Timestamp.valueOf(endDateTime));
 					else
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 				else if (col.equals("TIM_TYPE_ID"))
@@ -243,9 +241,9 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		}
 
 		return deleteActiveTimResult;
-	}	
+	}
 
-	// utility 
+	// utility
 	public static List<Integer> getActiveTimIndicesByRsu(String rsuTarget) {
 
 		List<Integer> indices = new ArrayList<Integer>();
@@ -508,7 +506,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public static List<Integer> getIndiciesInUseForRsu(String rsuIpAddress) {
-	
+
 		List<Integer> indicies = new ArrayList<Integer>();
 		Connection connection = null;
 		Statement statement = null;
@@ -523,12 +521,12 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			selectStatement += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
 			selectStatement += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
 			selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-			selectStatement += " where ipv4_address = '" + rsuIpAddress +"'";
+			selectStatement += " where ipv4_address = '" + rsuIpAddress + "'";
 
 			rs = statement.executeQuery(selectStatement);
 
 			// convert to ActiveTim object
-			while (rs.next()) {			
+			while (rs.next()) {
 				indicies.add(rs.getInt("RSU_INDEX"));
 			}
 		} catch (SQLException e) {
@@ -567,7 +565,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
 			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
 			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-			query += " where ipv4_address = '" + ipv4Address + "' and client_id = '" + clientId + "' and active_tim.direction = '" + direction +"'";
+			query += " where ipv4_address = '" + ipv4Address + "' and client_id = '" + clientId
+					+ "' and active_tim.direction = '" + direction + "'";
 
 			rs = statement.executeQuery(query);
 
@@ -619,7 +618,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			connection = DbUtility.getConnectionPool();
 			statement = connection.createStatement();
 			String query = "select * from active_tim";
-			query += " where client_id = '" + clientId + "' and active_tim.direction = '" + direction +"' and sat_record_id is not null";
+			query += " where client_id = '" + clientId + "' and active_tim.direction = '" + direction
+					+ "' and sat_record_id is not null";
 
 			rs = statement.executeQuery(query);
 

@@ -71,7 +71,7 @@ public class JsonToJavaConverter {
     public static OdeBsmPayload convertBsmPayloadJsonToJava(String value) {
 
         JsonNode bsmCoreDataNode = null;
-        JsonNode part2Node = JsonUtils.getJsonNode(value, "payload").get("data").get("partII");
+        JsonNode part2Node = null;
         OdeBsmPayload odeBsmPayload = null;
         J2735Bsm bsm = new J2735Bsm();
 
@@ -79,9 +79,10 @@ public class JsonToJavaConverter {
             bsmCoreDataNode = JsonUtils.getJsonNode(value, "payload").get("data").get("coreData");
             part2Node = JsonUtils.getJsonNode(value, "payload").get("data").get("partII");
             J2735BsmCoreData bsmCoreData = mapper.treeToValue(bsmCoreDataNode, J2735BsmCoreData.class);
-            J2735BsmPart2Content[] part2List = mapper.treeToValue(part2Node, J2735BsmPart2Content[].class);
-
-            bsm.setPartII(Arrays.asList(part2List));
+            if (part2Node != null) {
+                J2735BsmPart2Content[] part2List = mapper.treeToValue(part2Node, J2735BsmPart2Content[].class);
+                bsm.setPartII(Arrays.asList(part2List));
+            }
 
             bsm.setCoreData(bsmCoreData);
             odeBsmPayload = new OdeBsmPayload(bsm);
@@ -132,8 +133,10 @@ public class JsonToJavaConverter {
     }
 
     public static JsonNode getPart2Node(String value, int i) {
-        JsonNode part2Node = JsonUtils.getJsonNode(value, "payload").get("data").get("partII").get(i).get("value");
-        return part2Node;
+        JsonNode part2 = JsonUtils.getJsonNode(value, "payload").get("data").get("partII");
+        if (part2 != null)
+            return part2.get(i).get("value");
+        return null;
     }
 
     public static OdeLogMetadata convertTimMetadataJsonToJava(String value) {
@@ -142,8 +145,7 @@ public class JsonToJavaConverter {
 
         try {
             JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");
-            JsonNode receivedMessageDetailsNode = JsonUtils.getJsonNode(value, "metadata")
-                    .get("receivedMessageDetails");
+            JsonNode receivedMessageDetailsNode = metaDataNode.get("receivedMessageDetails");
 
             // check for null rxSource for Distress Notifications
             if (receivedMessageDetailsNode != null) {
@@ -172,7 +174,9 @@ public class JsonToJavaConverter {
         try {
             JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");
 
-            JsonNode rsusNode = JsonUtils.getJsonNode(value, "metadata").get("request").get("rsus");
+            JsonNode rsusNode = metaDataNode.get("request").get("rsus");// J2735 Broadcast TIM should be array of
+                                                                        // RoadSiteUnit.RSU, embedded in JSON with
+                                                                        // {rsus} key
 
             String rsuTarget = null;
             int rsuIndex;
@@ -241,17 +245,20 @@ public class JsonToJavaConverter {
 
             JsonNode anchorNode = null;
             JsonNode regionNameNode = null;
+            OdeTravelerInformationMessage.DataFrame.Region.Path path = null;
+            OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = null;
             if (geoPath != null) {
                 anchorNode = geoPath.get("anchor");
                 regionNameNode = geoPath.get("name");
+
+                JsonNode descriptionNode = geoPath.get("description");
+                if (descriptionNode != null) {
+                    path = JsonToJavaConverter.GetPathData(descriptionNode.get("path"));
+                    geometry = JsonToJavaConverter.GetGeometryData(descriptionNode.get("geometry"));
+                }
             }
 
             JsonNode sequenceArrNode = travelerDataFrame.get("content").get("advisory").get("SEQUENCE");
-            JsonNode descriptionNode = travelerDataFrame.get("regions").get("GeographicalPath").get("description");
-            OdeTravelerInformationMessage.DataFrame.Region.Path path = JsonToJavaConverter
-                    .GetPathData(descriptionNode.get("path"));
-            OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = JsonToJavaConverter
-                    .GetGeometryData(descriptionNode.get("geometry"));
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
@@ -352,14 +359,15 @@ public class JsonToJavaConverter {
             if (nodeXYArrNode.isArray()) {
                 for (final JsonNode objNode : nodeXYArrNode) {
                     nodeXY = new OdeTravelerInformationMessage.NodeXY();
-                    BigDecimal lat = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lat"),
-                            BigDecimal.class);
-                    BigDecimal lon = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lon"),
-                            BigDecimal.class);
-                    nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
-                    nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
-                    nodeXY.setDelta("node-LatLon");
-                    nodeXYs.add(nodeXY);
+                    JsonNode nodeLatLon = objNode.get("delta").get("node-LatLon");
+                    if (nodeLatLon != null) {
+                        BigDecimal lat = mapper.treeToValue(nodeLatLon.get("lat"), BigDecimal.class);
+                        BigDecimal lon = mapper.treeToValue(nodeLatLon.get("lon"), BigDecimal.class);
+                        nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
+                        nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
+                        nodeXY.setDelta("node-LatLon");
+                        nodeXYs.add(nodeXY);
+                    }
                 }
             }
 
@@ -430,35 +438,96 @@ public class JsonToJavaConverter {
             // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
                     .get("TravelerInformation");
-            JsonNode anchorNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
-                    .get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
-                    .get("GeographicalPath").get("anchor");
-            JsonNode nodeXYArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame")
-                    .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
-                    .get("GeographicalPath").get("description").get("path").get("offset").get("xy").get("nodes")
-                    .get("NodeXY");
-            JsonNode sequenceArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame")
-                    .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("content")
-                    .get("advisory").get("SEQUENCE");
-            JsonNode regionNameNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame")
-                    .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
-                    .get("GeographicalPath").get("name");
+            JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
+            JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
+            JsonNode anchorNode = null;
+            JsonNode regionNameNode = null;
+            if (geoPath != null) {
+                anchorNode = geoPath.get("anchor");
+                regionNameNode = geoPath.get("name");
 
-            JsonNode startTimeNode = timNode.get("dataFrames").get("TravelerDataFrame").get("startTime");
+                JsonNode descChoice = geoPath.get("description");
+                if (descChoice != null) {
+                    JsonNode descPath = descChoice.get("path");
+                    if (descPath != null) {
+                        JsonNode xyNode = descPath.get("offset").get("xy");
+                        if (xyNode != null) {
+                            JsonNode nodeXYArrNode = xyNode.get("nodes").get("NodeXY");
+
+                            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+                            OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
+
+                            if (nodeXYArrNode.isArray()) {
+                                for (final JsonNode objNode : nodeXYArrNode) {
+                                    nodeXY = new OdeTravelerInformationMessage.NodeXY();
+
+                                    // delta is a choice, node-LatLon is only one option
+                                    JsonNode nodeLatLon = objNode.get("delta").get("node-LatLon");
+                                    if (nodeLatLon != null) {
+                                        BigDecimal lat = mapper.treeToValue(nodeLatLon.get("lat"), BigDecimal.class);
+                                        BigDecimal lon = mapper.treeToValue(nodeLatLon.get("lon"), BigDecimal.class);
+                                        nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
+                                        nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
+                                        nodeXY.setDelta("node-LatLon");
+                                        nodeXYs.add(nodeXY);
+                                    }
+                                }
+                            }
+
+                            OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[nodeXYs
+                                    .size()];
+                            nodeXYArr = nodeXYs.toArray(nodeXYArr);
+
+                            path.setNodes(nodeXYArr);
+                        }
+                    }
+                }
+            }
+
+            List<String> itemsList = new ArrayList<String>();
+            JsonNode advisoryNode = travelerDataFrame.get("content").get("advisory");// content is a CHOICE
+            if (advisoryNode != null) {
+                JsonNode sequenceArrNode = advisoryNode.get("SEQUENCE");
+
+                // if ITIS codes are in an array
+                String item = null;
+                if (sequenceArrNode.isArray()) {
+                    for (final JsonNode objNode : sequenceArrNode) {
+                        if (objNode.get("item").get("itis") != null)
+                            item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
+                        else if (objNode.get("item").get("text") != null)
+                            item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
+
+                        itemsList.add(item);
+                    }
+                }
+
+                // ADD NON ARRAY ELEMENT
+                if (!sequenceArrNode.isArray()) {
+                    if (sequenceArrNode.get("item").get("itis") != null)
+                        item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
+                    else if (sequenceArrNode.get("item").get("text") != null)
+                        item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+
+                    itemsList.add(item);
+                }
+            }
+
+            JsonNode startTimeNode = travelerDataFrame.get("startTime");
             System.out.println(startTimeNode);
-            JsonNode durationNode = timNode.get("dataFrames").get("TravelerDataFrame").get("duratonTime");
+            JsonNode durationNode = travelerDataFrame.get("duratonTime");
             System.out.println(durationNode);
-
-            timNode.get("timeStamp").asInt();
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
 
             OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
 
-            LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timNode.get("timeStamp").asInt(),
-                    ChronoUnit.MINUTES);
-            tim.setTimeStamp(timeStampDate.toString() + "Z");
+            JsonNode timeStampNode = timNode.get("timeStamp");
+            if (timeStampNode != null) {
+                LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timeStampNode.asInt(), ChronoUnit.MINUTES);
+                tim.setTimeStamp(timeStampDate.toString() + "Z");
+            }
 
             LocalDateTime startDate = firstDay.atStartOfDay().plus(startTimeNode.asInt(), ChronoUnit.MINUTES);
 
@@ -467,70 +536,28 @@ public class JsonToJavaConverter {
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 
-            tim.setPacketID(timNode.get("packetID").asText());
-
-            BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
-            BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
-
-            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-
-            // set region anchor
-            OdePosition3D anchorPosition = new OdePosition3D();
-            anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
-            anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
-            // TODO elevation
-
-            region.setAnchorPosition(anchorPosition);
-
-            OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
-
-            if (nodeXYArrNode.isArray()) {
-                for (final JsonNode objNode : nodeXYArrNode) {
-                    nodeXY = new OdeTravelerInformationMessage.NodeXY();
-                    BigDecimal lat = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lat"),
-                            BigDecimal.class);
-                    BigDecimal lon = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lon"),
-                            BigDecimal.class);
-                    nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
-                    nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
-                    nodeXY.setDelta("node-LatLon");
-                    nodeXYs.add(nodeXY);
-                }
+            JsonNode packetIDNode = timNode.get("packetID");
+            if (packetIDNode != null) {
+                tim.setPacketID(packetIDNode.asText());
             }
 
-            OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[nodeXYs.size()];
-            nodeXYArr = nodeXYs.toArray(nodeXYArr);
+            if (anchorNode != null) {
+                BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
+                BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
 
-            path.setNodes(nodeXYArr);
+                // set region anchor
+                OdePosition3D anchorPosition = new OdePosition3D();
+                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
+                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
+                // TODO elevation
+
+                region.setAnchorPosition(anchorPosition);
+            }
 
             if (regionNameNode != null)
                 region.setName(mapper.treeToValue(regionNameNode, String.class));
 
             region.setPath(path);
-
-            // if ITIS codes are in an array
-            List<String> itemsList = new ArrayList<String>();
-            String item = null;
-            if (sequenceArrNode.isArray()) {
-                for (final JsonNode objNode : sequenceArrNode) {
-                    if (objNode.get("item").get("itis") != null)
-                        item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
-                    else if (objNode.get("item").get("text") != null)
-                        item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
-
-                    itemsList.add(item);
-                }
-            }
-
-            // ADD NON ARRAY ELEMENT
-            if (!sequenceArrNode.isArray()) {
-                if (sequenceArrNode.get("item").get("itis") != null)
-                    item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
-                else if (sequenceArrNode.get("item").get("text") != null)
-                    item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
-
-                itemsList.add(item);
-            }
 
             String[] items = new String[itemsList.size()];
             items = itemsList.toArray(items);
@@ -542,7 +569,9 @@ public class JsonToJavaConverter {
             tim.setDataframes(dataFrames);
             odeTimPayload = new OdeTimPayload();
             odeTimPayload.setTim(tim);
-        } catch (IOException e) {
+        } catch (
+
+        IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
             System.out.println(e.getMessage());

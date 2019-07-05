@@ -6,6 +6,10 @@ import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
+import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
+
+import java.util.List;
+
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.trihydro.library.service.BsmCoreDataService;
 import com.trihydro.library.service.BsmPart2SpveService;
@@ -23,28 +27,28 @@ public class BsmLogger {
 		return odeData;
 	}
 
-    public static void addBSMToOracleDB(OdeData odeData, String value) {		
-        
+    public static void addBSMToOracleDB(OdeData odeData, String value) {        
         System.out.println("Logging: " + ((OdeBsmMetadata)odeData.getMetadata()).getLogFileName());
 
         Long bsmCoreDataId = BsmCoreDataService.insertBSMCoreData((OdeBsmMetadata)odeData.getMetadata(), ((OdeBsmPayload)odeData.getPayload()).getBsm());
 
-        if(bsmCoreDataId != null && !bsmCoreDataId.equals(new Long(0))){
-            for(int i = 0; i < ((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII().size(); i++) {																			
-                if(((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII().get(i).getId().name() == "VehicleSafetyExtensions") {					
+        List<J2735BsmPart2Content> partII = ((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII();
+        if(bsmCoreDataId != null && !bsmCoreDataId.equals(new Long(0)) && partII!=null){
+            for(int i = 0; i < partII.size(); i++) {																			
+                if(partII.get(i).getId().name() == "VehicleSafetyExtensions") {					
                     J2735VehicleSafetyExtensions vse = JsonToJavaConverter.convertJ2735VehicleSafetyExtensionsJsonToJava(value, i);
                     if(vse != null)
-                        BsmPart2VseService.insertBSMPart2VSE(((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII().get(i), vse, bsmCoreDataId);
+                        BsmPart2VseService.insertBSMPart2VSE(partII.get(i), vse, bsmCoreDataId);
                 }
-                else if(((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII().get(i).getId().name() == "SpecialVehicleExtensions"){
+                else if(partII.get(i).getId().name() == "SpecialVehicleExtensions"){
                     J2735SpecialVehicleExtensions spve = JsonToJavaConverter.convertJ2735SpecialVehicleExtensionsJsonToJava(value, i);
                     if(spve != null)
-                        BsmPart2SpveService.insertBSMPart2SPVE(((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII().get(i), spve, bsmCoreDataId);
+                        BsmPart2SpveService.insertBSMPart2SPVE(partII.get(i), spve, bsmCoreDataId);
                 }
-                else if(((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII().get(i).getId().name() == "SupplementalVehicleExtensions"){
+                else if(partII.get(i).getId().name() == "SupplementalVehicleExtensions"){
                     J2735SupplementalVehicleExtensions suve = JsonToJavaConverter.convertJ2735SupplementalVehicleExtensionsJsonToJava(value, i);
                     if(suve != null)
-                        BsmPart2SuveService.insertBSMPart2SUVE(((OdeBsmPayload)odeData.getPayload()).getBsm().getPartII().get(i), suve, bsmCoreDataId);
+                        BsmPart2SuveService.insertBSMPart2SUVE(partII.get(i), suve, bsmCoreDataId);
                 }					
             }	
         }							

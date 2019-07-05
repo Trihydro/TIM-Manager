@@ -11,6 +11,7 @@ public class ConfigProperties {
     private String mongoDatabase;
     private String mongoUsername;
     private String mongoPassword;
+    private String mongoHost;
     private String trackUrl;
 
     public String getOdeUrl() {
@@ -59,7 +60,7 @@ public class ConfigProperties {
 
     public void setEnv(String env) {
         this.env = env;
-    }    
+    }
 
     public String getMongoDatabase() {
         return mongoDatabase;
@@ -67,7 +68,7 @@ public class ConfigProperties {
 
     public void setMongoDatabase(String mongoDatabase) {
         this.mongoDatabase = mongoDatabase;
-    }    
+    }
 
     public String getMongoUsername() {
         return mongoUsername;
@@ -75,7 +76,7 @@ public class ConfigProperties {
 
     public void setMongoUsername(String mongoUsername) {
         this.mongoUsername = mongoUsername;
-    }    
+    }
 
     public String getMongoPassword() {
         return mongoPassword;
@@ -83,12 +84,21 @@ public class ConfigProperties {
 
     public void setMongoPassword(String mongoPassword) {
         this.mongoPassword = mongoPassword;
-    }    
+    }
 
-    public void setTracUrl(String url){
+    public String getMongoHost() {
+        return mongoHost;
+    }
+
+    public void setMongoHost(String mongoHost) {
+        this.mongoHost = mongoHost;
+    }
+
+    public void setTracUrl(String url) {
         this.trackUrl = url;
     }
-    public String getGetTrackUrl(){
+
+    public String getGetTrackUrl() {
         return this.trackUrl;
     }
 }

@@ -11,6 +11,7 @@ import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -36,6 +37,7 @@ import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.TimService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.internal.util.privilegedactions.GetDeclaredConstructor;
 
 import com.trihydro.library.service.TimRsuService;
 
@@ -74,10 +76,7 @@ public class TimLogger extends BaseLogger {
 	public static OdeData translateBroadcastTimJson(String value) {
 		OdeData odeData = null;
 		OdeRequestMsgMetadata odeTimMetadata = JsonToJavaConverter.convertBroadcastTimMetadataJsonToJava(value);
-		// OdeTravelerInformationMessage odeTim =
-		// JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
 		OdeTimPayload odeTimPayload = JsonToJavaConverter.convertTmcTimTopicJsonToJava(value);
-		// OdeTimPayload odeTimPayload = new OdeTimPayload(odeTim);
 		if (odeTimMetadata != null && odeTimPayload != null)
 			odeData = new OdeData(odeTimMetadata, odeTimPayload);
 		return odeData;
@@ -99,15 +98,22 @@ public class TimLogger extends BaseLogger {
 			// return if TIM is not inserted
 			if (timId == null)
 				return;
+			Long dataFrameId = null;
+			Path path = null;
+			Geometry geometry = null;
+			OdePosition3D anchor = null;
+			DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
+			if (dFrames.length > 0) {
+				us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0]
+						.getRegions();
+				if (regions.length > 0) {
+					path = regions[0].getPath();
+					geometry = regions[0].getGeometry();
+					anchor = regions[0].getAnchorPosition();
+				}
+				DataFrameService.insertDataFrame(timId, dFrames[0]);
+			}
 
-			Long dataFrameId = DataFrameService.insertDataFrame(timId);
-			// ((OdeTimPayload)
-			// odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getGeometry()
-			Path path = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0].getPath();
-			Geometry geometry = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
-					.getGeometry();
-			OdePosition3D anchor = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
-					.getAnchorPosition();
 			if (path != null) {
 				Long pathId = PathService.insertPath();
 				RegionService.insertPathRegion(dataFrameId, pathId, anchor);
@@ -118,31 +124,34 @@ public class TimLogger extends BaseLogger {
 					PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
 				}
 			} else if (geometry != null) {
-				// insertGeometryRegion(Long dataFrameId, Region.Geometry geometry,
-				// OdePosition3D anchor) {
 				RegionService.insertGeometryRegion(dataFrameId, geometry, anchor);
 			}
-			String regionName = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getRegions()[0]
-					.getName();
 
-			ActiveTim activeTim = setActiveTimByRegionName(regionName);
+			if (dFrames.length > 0) {
+				OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0].getRegions();
+				if (regions.length > 0) {
+					String regionName = regions[0].getName();
+					ActiveTim activeTim = setActiveTimByRegionName(regionName);
 
-			// if this is an RSU TIM
-			if (activeTim.getRsuTarget() != null) {
-				// save TIM RSU in DB
-				WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
-						.findFirst().orElse(null);
-				if (rsu != null)
-					TimRsuService.insertTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
-			}
+					// if this is an RSU TIM
+					if (activeTim.getRsuTarget() != null) {
+						// save TIM RSU in DB
+						WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
+								.findFirst().orElse(null);
+						if (rsu != null)
+							TimRsuService.insertTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
+					}
+				}
 
-			// save DataFrame ITIS codes
-			for (String timItisCodeId : ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getItems()) {
-				if (StringUtils.isNumeric(timItisCodeId)) {
-					if (getItisCodeId(timItisCodeId) != null)
-						DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, getItisCodeId(timItisCodeId));
-				} else
-					DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+				// save DataFrame ITIS codes
+				for (String timItisCodeId : dFrames[0].getItems()) {
+					if (StringUtils.isNumeric(timItisCodeId)) {
+						String itisCodeId = getItisCodeId(timItisCodeId);
+						if (itisCodeId != null)
+							DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+					} else
+						DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+				}
 			}
 		} catch (NullPointerException e) {
 			System.out.println(e.getMessage());
@@ -181,42 +190,43 @@ public class TimLogger extends BaseLogger {
 		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 
 		// save DataFrame
-		Long dataFrameId = DataFrameService.insertDataFrame(timId);
+		Long dataFrameId = DataFrameService.insertDataFrame(timId, dframes[0]);
 
 		if (activeTim == null)
 			return;
 
 		// TODO : Change to loop through RSU array - doing one rsu for now
+		RSU firstRsu = null;
 		if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
-				&& metaData.getRequest().getRsus().length > 0)
-			activeTim.setRsuTarget(metaData.getRequest().getRsus()[0].getRsuTarget());
+				&& metaData.getRequest().getRsus().length > 0) {
+			firstRsu = metaData.getRequest().getRsus()[0];
+			activeTim.setRsuTarget(firstRsu.getRsuTarget());
+		}
 
 		if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null)
 			activeTim.setSatRecordId(metaData.getRequest().getSdw().getRecordId());
 
-		activeTim.setStartDateTime(
-				((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime());
+		activeTim.setStartDateTime(dframes[0].getStartDateTime());
 		activeTim.setTimId(timId);
 
 		// if this is an RSU TIM
-		if (activeTim.getRsuTarget() != null) {
+		if (activeTim.getRsuTarget() != null && metaData.getRequest() != null && metaData.getRequest().getRsus() != null
+				&& metaData.getRequest().getRsus().length > 0) {
 			// save TIM RSU in DB
 			WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
 					.orElse(null);
-			TimRsuService.insertTimRsu(timId, rsu.getRsuId(), metaData.getRequest().getRsus()[0].getRsuIndex());
+			TimRsuService.insertTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
 		}
 
 		// save DataFrame ITIS codes
-		for (String timItisCodeId : ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getItems())
+		for (String timItisCodeId : dframes[0].getItems())
 			if (StringUtils.isNumeric(timItisCodeId))
 				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, getItisCodeId(timItisCodeId));
 
 		// set end time if duration is not indefinite
-		if (((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getDurationTime() != 32000) {
-			ZonedDateTime zdt = ZonedDateTime
-					.parse(((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getStartDateTime());
-			zdt = zdt.plus(((OdeTimPayload) odeData.getPayload()).getTim().getDataframes()[0].getDurationTime(),
-					ChronoUnit.MINUTES);
+		if (dframes[0].getDurationTime() != 32000) {
+			ZonedDateTime zdt = ZonedDateTime.parse(dframes[0].getStartDateTime());
+			zdt = zdt.plus(dframes[0].getDurationTime(), ChronoUnit.MINUTES);
 			activeTim.setEndDateTime(zdt.toString());
 		}
 
@@ -296,17 +306,14 @@ public class TimLogger extends BaseLogger {
 		else
 			return activeTim;
 
-		if (splitName.length > 7)
-		{
-			try{
-				Integer pk =Integer.valueOf(splitName[7]);
+		if (splitName.length > 7) {
+			try {
+				Integer pk = Integer.valueOf(splitName[7]);
 				activeTim.setPk(pk);
+			} catch (NumberFormatException ex) {
+				// the pk won't get set here
 			}
-			catch(NumberFormatException ex){
-				//the pk won't get set here
-			}
-		}
-		else
+		} else
 			return activeTim;
 
 		return activeTim;

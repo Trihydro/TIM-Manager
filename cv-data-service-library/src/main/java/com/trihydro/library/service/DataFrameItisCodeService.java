@@ -2,66 +2,15 @@ package com.trihydro.library.service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.model.DataFrameItisCode;
-
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.StringUtils;
 
 public class DataFrameItisCodeService extends CvDataServiceLibrary {
-
-	public static List<DataFrameItisCode> selectAll() {
-
-		List<DataFrameItisCode> dataFrameItisCodes = new ArrayList<DataFrameItisCode>();
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-
-			// build SQL statement
-			rs = statement.executeQuery("select * from DATA_FRAME_ITIS_CODE");
-
-			// convert to DriverAlertItisCode objects
-			while (rs.next()) {
-				DataFrameItisCode dataFrameItisCode = new DataFrameItisCode();
-				dataFrameItisCode.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
-				dataFrameItisCode.setItisCodeId(rs.getInt("ITIS_CODE_ID"));
-				dataFrameItisCodes.add(dataFrameItisCode);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return dataFrameItisCodes;
-	}
-
 	public static Long insertDataFrameItisCode(Long dataFrameId, String itis) {
 
 		Connection connection = null;

@@ -30,9 +30,9 @@ public class RegionService extends CvDataServiceLibrary {
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, dataFrameId);
 				else if (col.equals("PATH_ID"))
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, pathId);
-				else if (col.equals("ANCHOR_LAT"))
+				else if (col.equals("ANCHOR_LAT") && anchor != null)
 					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLatitude());
-				else if (col.equals("ANCHOR_LONG"))
+				else if (col.equals("ANCHOR_LONG") && anchor != null)
 					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLongitude());
 				fieldNum++;
 			}

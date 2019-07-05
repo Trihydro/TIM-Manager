@@ -41,125 +41,116 @@ public class TimService extends CvDataServiceLibrary {
 			int fieldNum = 1;
 
 			for (String col : TimOracleTables.getTimTable()) {
-				if (col.equals("MSG_CNT"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-							j2735TravelerInformationMessage.getMsgCnt());
-				else if (col.equals("PACKET_ID"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-							j2735TravelerInformationMessage.getPacketID());
-				else if (col.equals("URL_B"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-							j2735TravelerInformationMessage.getUrlB());
-				else if (col.equals("SAT_RECORD_ID"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, satRecordId);
-				else if (col.equals("TIM_NAME"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, regionName);
-				else if (col.equals("TIME_STAMP")) {
-					String timeStamp = j2735TravelerInformationMessage.getTimeStamp();
-					java.sql.Timestamp ts = null;
-					if (StringUtils.isNotEmpty(timeStamp) && StringUtils.isNotBlank(timeStamp)) {
-						ts = java.sql.Timestamp
-								.valueOf(LocalDateTime.parse(timeStamp, DateTimeFormatter.ISO_DATE_TIME));
+				// default to null
+				preparedStatement.setString(fieldNum, null);
+				if (j2735TravelerInformationMessage != null) {
+					if (col.equals("MSG_CNT"))
+						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
+								j2735TravelerInformationMessage.getMsgCnt());
+					else if (col.equals("PACKET_ID"))
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+								j2735TravelerInformationMessage.getPacketID());
+					else if (col.equals("URL_B"))
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+								j2735TravelerInformationMessage.getUrlB());
+					else if (col.equals("TIME_STAMP")) {
+						String timeStamp = j2735TravelerInformationMessage.getTimeStamp();
+						java.sql.Timestamp ts = null;
+						if (StringUtils.isNotEmpty(timeStamp) && StringUtils.isNotBlank(timeStamp)) {
+							ts = java.sql.Timestamp
+									.valueOf(LocalDateTime.parse(timeStamp, DateTimeFormatter.ISO_DATE_TIME));
+						}
+						SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
 					}
-					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
-				} else if (col.equals("RECORD_GENERATED_BY")) {
-					if (odeTimMetadata.getRecordGeneratedBy() != null)
+				}
+				if (odeTimMetadata != null) {
+					if (col.equals("RECORD_GENERATED_BY")) {
+						if (odeTimMetadata.getRecordGeneratedBy() != null)
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									odeTimMetadata.getRecordGeneratedBy().toString());
+						else
+							preparedStatement.setString(fieldNum, null);
+					} else if (col.equals("RECORD_GENERATED_AT")) {
+						if (odeTimMetadata.getRecordGeneratedAt() != null) {
+							java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									mstFormat.format(recordGeneratedAtDate));
+						} else {
+							preparedStatement.setString(fieldNum, null);
+						}
+					} else if (col.equals("SCHEMA_VERSION")) {
+						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
+					} else if (col.equals("SANITIZED")) {
+						if (odeTimMetadata.isSanitized())
+							preparedStatement.setString(fieldNum, "1");
+						else
+							preparedStatement.setString(fieldNum, "0");
+					} else if (col.equals("SERIAL_ID_STREAM_ID"))
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								odeTimMetadata.getRecordGeneratedBy().toString());
-					else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("RMD_LD_ELEVATION")) {
-					if (receivedMessageDetails != null)
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								receivedMessageDetails.getLocationData().getElevation());
-					else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("RMD_LD_HEADING")) {
-					if (receivedMessageDetails != null)
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								receivedMessageDetails.getLocationData().getHeading());
-					else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("RMD_LD_LATITUDE")) {
-					if (receivedMessageDetails != null)
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								receivedMessageDetails.getLocationData().getLatitude());
-					else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("RMD_LD_LONGITUDE")) {
-					if (receivedMessageDetails != null)
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								receivedMessageDetails.getLocationData().getLongitude());
-					else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("RMD_LD_SPEED")) {
-					if (receivedMessageDetails != null)
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								receivedMessageDetails.getLocationData().getSpeed());
-					else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("RMD_RX_SOURCE")) {
-					if (receivedMessageDetails != null && receivedMessageDetails.getRxSource() != null)
+								odeTimMetadata.getSerialId().getStreamId());
+					else if (col.equals("SERIAL_ID_BUNDLE_SIZE"))
+						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
+								odeTimMetadata.getSerialId().getBundleSize());
+					else if (col.equals("SERIAL_ID_BUNDLE_ID"))
+						SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
+								odeTimMetadata.getSerialId().getBundleId());
+					else if (col.equals("SERIAL_ID_RECORD_ID"))
+						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
+								odeTimMetadata.getSerialId().getRecordId());
+					else if (col.equals("SERIAL_ID_SERIAL_NUMBER"))
+						SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
+								odeTimMetadata.getSerialId().getSerialNumber());
+					else if (col.equals("PAYLOAD_TYPE")) {
+						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
+					} else if (col.equals("ODE_RECEIVED_AT")) {
+						if (odeTimMetadata.getOdeReceivedAt() != null) {
+							java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									mstFormat.format(receivedAtDate));
+						} else {
+							preparedStatement.setString(fieldNum, null);
+						}
+					}
+				}
+				if (receivedMessageDetails != null) {
+					if (receivedMessageDetails.getLocationData() != null) {
+						if (col.equals("RMD_LD_ELEVATION")) {
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									receivedMessageDetails.getLocationData().getElevation());
+						} else if (col.equals("RMD_LD_HEADING")) {
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									receivedMessageDetails.getLocationData().getHeading());
+						} else if (col.equals("RMD_LD_LATITUDE")) {
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									receivedMessageDetails.getLocationData().getLatitude());
+						} else if (col.equals("RMD_LD_LONGITUDE")) {
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									receivedMessageDetails.getLocationData().getLongitude());
+						} else if (col.equals("RMD_LD_SPEED")) {
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									receivedMessageDetails.getLocationData().getSpeed());
+						}
+					}
+					if (col.equals("RMD_RX_SOURCE") && receivedMessageDetails.getRxSource() != null) {
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
 								receivedMessageDetails.getRxSource().toString());
-					else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("SCHEMA_VERSION")) {
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
-				} else if (col.equals("SECURITY_RESULT_CODE")) {
-					if (receivedMessageDetails != null) {
+					} else if (col.equals("SECURITY_RESULT_CODE")) {
 						SecurityResultCodeType securityResultCodeType = getSecurityResultCodeTypes().stream()
 								.filter(x -> x.getSecurityResultCodeType().equals(securityResultCode.toString()))
 								.findFirst().orElse(null);
 						preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());
-					} else
-						preparedStatement.setString(fieldNum, null);
-				} else if (col.equals("LOG_FILE_NAME")) {
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, logFileName);
-				} else if (col.equals("RECORD_GENERATED_AT")) {
-					if (odeTimMetadata.getRecordGeneratedAt() != null) {
-						java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								mstFormat.format(recordGeneratedAtDate));
-					} else {
-						preparedStatement.setString(fieldNum, null);
 					}
-					// SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-					// java.sql.Timestamp.valueOf(LocalDateTime.parse(odeTimMetadata.getRecordGeneratedAt(),
-					// DateTimeFormatter.ISO_DATE_TIME)));
-				} else if (col.equals("SANITIZED")) {
-					if (odeTimMetadata.isSanitized())
-						preparedStatement.setString(fieldNum, "1");
-					else
-						preparedStatement.setString(fieldNum, "0");
-				} else if (col.equals("SERIAL_ID_STREAM_ID"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-							odeTimMetadata.getSerialId().getStreamId());
-				else if (col.equals("SERIAL_ID_BUNDLE_SIZE"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-							odeTimMetadata.getSerialId().getBundleSize());
-				else if (col.equals("SERIAL_ID_BUNDLE_ID"))
-					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
-							odeTimMetadata.getSerialId().getBundleId());
-				else if (col.equals("SERIAL_ID_RECORD_ID"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-							odeTimMetadata.getSerialId().getRecordId());
-				else if (col.equals("SERIAL_ID_SERIAL_NUMBER"))
-					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
-							odeTimMetadata.getSerialId().getSerialNumber());
-				else if (col.equals("PAYLOAD_TYPE")) {
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
+				}
+
+				if (col.equals("SAT_RECORD_ID"))
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, satRecordId);
+				else if (col.equals("TIM_NAME"))
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, regionName);
+				else if (col.equals("LOG_FILE_NAME")) {
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, logFileName);
 				} else if (col.equals("RECORD_TYPE") && recordType != null) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, recordType.toString());
-				} else if (col.equals("ODE_RECEIVED_AT")) {
-					if (odeTimMetadata.getOdeReceivedAt() != null) {
-						java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(receivedAtDate));
-					} else {
-						preparedStatement.setString(fieldNum, null);
-					}
-				} else
-					preparedStatement.setString(fieldNum, null);
+				}
 				fieldNum++;
 			}
 			// execute insert statement

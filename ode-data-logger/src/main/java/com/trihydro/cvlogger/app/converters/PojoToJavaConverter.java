@@ -37,8 +37,7 @@ public class PojoToJavaConverter {
 
         try {
             JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");
-            JsonNode receivedMessageDetailsNode = JsonUtils.getJsonNode(value, "metadata")
-                    .get("receivedMessageDetails");
+            JsonNode receivedMessageDetailsNode = metaDataNode.get("receivedMessageDetails");
 
             // check for null rxSource for Distress Notifications
             if (receivedMessageDetailsNode != null) {
@@ -71,16 +70,38 @@ public class PojoToJavaConverter {
             OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
             OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
 
+            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+            OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
+
             // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
                     .get("TravelerInformation");
-            JsonNode anchorNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
-                    .get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
-                    .get("GeographicalPath").get("anchor");
-            JsonNode nodeXYArrNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame")
-                    .get("value").get("TravelerInformation").get("dataFrames").get("TravelerDataFrame").get("regions")
-                    .get("GeographicalPath").get("description").get("path").get("offset").get("xy").get("nodes")
-                    .get("NodeXY");
+            JsonNode geoPathNode = timNode.get("dataFrames").get("TravelerDataFrame").get("regions")
+                    .get("GeographicalPath");
+            JsonNode anchorNode = geoPathNode.get("anchor");
+            JsonNode descripNode = geoPathNode.get("description");
+            if (descripNode != null) {
+                JsonNode pathNode = descripNode.get("path");// description is a CHOICE, path is just one option
+                if (pathNode != null) {
+                    JsonNode xyNode = pathNode.get("offset").get("xy");// offset is a CHOICE, xy is just one option
+                    if (xyNode != null) {
+                        JsonNode nodeXYArrNode = xyNode.get("nodes").get("NodeXY");
+                        if (nodeXYArrNode.isArray()) {
+                            for (final JsonNode objNode : nodeXYArrNode) {
+                                nodeXY = new OdeTravelerInformationMessage.NodeXY();
+                                BigDecimal lat = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lat"),
+                                        BigDecimal.class);
+                                BigDecimal lon = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lon"),
+                                        BigDecimal.class);
+                                nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
+                                nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
+                                nodeXY.setDelta("node-LatLon");
+                                nodeXYs.add(nodeXY);
+                            }
+                        }
+                    }
+                }
+            }
 
             timNode.get("timeStamp").asInt();
 
@@ -94,40 +115,22 @@ public class PojoToJavaConverter {
 
             tim.setPacketID(timNode.get("packetID").asText());
 
-            BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
-            BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
+            if (anchorNode != null) {
+                BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
+                BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
 
-            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+                // set region anchor
+                OdePosition3D anchorPosition = new OdePosition3D();
+                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
+                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
+                // TODO elevation
 
-            // set region anchor
-            OdePosition3D anchorPosition = new OdePosition3D();
-            anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
-            anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
-            // TODO elevation
-
-            region.setAnchorPosition(anchorPosition);
-
-            OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
-
-            if (nodeXYArrNode.isArray()) {
-                for (final JsonNode objNode : nodeXYArrNode) {
-                    nodeXY = new OdeTravelerInformationMessage.NodeXY();
-                    BigDecimal lat = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lat"),
-                            BigDecimal.class);
-                    BigDecimal lon = mapper.treeToValue(objNode.get("delta").get("node-LatLon").get("lon"),
-                            BigDecimal.class);
-                    nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
-                    nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
-                    nodeXY.setDelta("node-LatLon");
-                    nodeXYs.add(nodeXY);
-                }
+                region.setAnchorPosition(anchorPosition);
             }
 
             OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[nodeXYs.size()];
             nodeXYArr = nodeXYs.toArray(nodeXYArr);
-
             path.setNodes(nodeXYArr);
-
             region.setPath(path);
 
             regions[0] = region;

@@ -58,6 +58,16 @@ public class TimOracleTables extends OracleTables {
         else {
             dataFrameTable = new ArrayList<String>();
             dataFrameTable.add("TIM_ID");
+            dataFrameTable.add("CONTENT");
+            dataFrameTable.add("DURATION_TIME");
+            dataFrameTable.add("FRAME_TYPE");
+            dataFrameTable.add("MSG_ID");
+            dataFrameTable.add("PRIORITY");
+            dataFrameTable.add("SSP_LOCATION_RIGHTS");
+            dataFrameTable.add("SSP_MSG_TYPES");
+            dataFrameTable.add("SSP_MSG_CONTENT");
+            dataFrameTable.add("START_DATE_TIME");
+            dataFrameTable.add("URL");
             return dataFrameTable;
         }
     }
@@ -81,6 +91,16 @@ public class TimOracleTables extends OracleTables {
             regionTable.add("PATH_ID");
             regionTable.add("ANCHOR_LAT");
             regionTable.add("ANCHOR_LONG");
+
+            regionTable.add("GEOMETRY_DIRECTION");
+            regionTable.add("GEOMETRY_EXTENT");
+            regionTable.add("GEOMETRY_LANE_WIDTH");
+
+            regionTable.add("GEOMETRY_CIRCLE_POSITION_LAT");
+            regionTable.add("GEOMETRY_CIRCLE_POSITION_LONG");
+            regionTable.add("GEOMETRY_CIRCLE_POSITION_ELEV");
+            regionTable.add("GEOMETRY_CIRCLE_RADIUS");
+            regionTable.add("GEOMETRY_CIRCLE_UNITS");
             return regionTable;
         }
     }
@@ -104,6 +124,10 @@ public class TimOracleTables extends OracleTables {
             nodeXYTable.add("DELTA");
             nodeXYTable.add("NODE_LAT");
             nodeXYTable.add("NODE_LONG");
+            nodeXYTable.add("X");
+            nodeXYTable.add("Y");
+            nodeXYTable.add("ATTRIBUTES_DWIDTH");
+            nodeXYTable.add("ATTRIBUTES_DELEVATION");
             return nodeXYTable;
         }
     }

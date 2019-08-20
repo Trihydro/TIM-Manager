@@ -1,12 +1,14 @@
 ode-data-logger/target
 ode-mongo-logger/target
+tim-refresh/target
 cv-data-service-library/target
 ode-wrapper/target
 cv-data-controller/target
 cv-data-tasks/target
 
 ode-data-logger/**/*.class
-ode-moongo-logger/**/*.class
+ode-mongo-logger/**/*.class
+tim-refresh/**/*.class
 cv-data-service-library/**/*.class
 ode-wrapper/**/*.class
 cv-data-controller/**/*.class

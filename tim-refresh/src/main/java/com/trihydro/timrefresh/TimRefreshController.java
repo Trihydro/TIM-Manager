@@ -185,6 +185,10 @@ public class TimRefreshController {
     private void UpdateAndSendSDW(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
         SDW sdw = new SDW();
         AdvisorySituationDataDeposit asdd = SdwService.getSdwDataByRecordId(aTim.getSatRecordId());
+        if (asdd == null) {
+            System.out.println(String.format("SAT record not found for id {0}", aTim.getSatRecordId()));
+            return;
+        }
 
         // fetch all mileposts, get service region by bounding box
         List<Milepost> mps = MilepostService.selectMilepostRange(aTim.getDirection(), aTim.getRoute(),

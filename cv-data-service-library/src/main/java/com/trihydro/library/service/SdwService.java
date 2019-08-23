@@ -16,10 +16,13 @@ import org.apache.commons.lang3.StringUtils;
 
 public class SdwService {
     public static AdvisorySituationDataDeposit getSdwDataByRecordId(String recordId) {
-        URL url = getBaseUrl("api/GetDataByRecordId?recordId=" + recordId);
         String token = getToken();
+        if (token == null) {
+            return null;
+        }
 
         try {
+            URL url = getBaseUrl("api/GetDataByRecordId?recordId=" + recordId);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -72,12 +75,17 @@ public class SdwService {
             os.write(input.getBytes());
             os.flush();
 
+            int status = conn.getResponseCode();
+            if(status != 200){
+                return token;
+            }
             BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             token = br.readLine();
 
             conn.disconnect();
         } catch (IOException ex) {
-
+            System.out.println(String.format("Failed to fetch SDW token: {0}", ex.getMessage()));
+            token = null;
         }
         return token;
     }

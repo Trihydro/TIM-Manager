@@ -10,7 +10,7 @@ public enum DistributionType {
     Ip(2); // "00000010" intended for redistribution over IP
 
     private int value;
-    private static Map map = new HashMap<>();
+    private static Map<Integer, DistributionType> map = new HashMap<Integer, DistributionType>();
 
     private DistributionType(int value) {
         this.value = value;
@@ -23,7 +23,7 @@ public enum DistributionType {
     }
 
     public static DistributionType valueOf(int distributionType) {
-        return (DistributionType) map.get(distributionType);
+        return map.get(distributionType);
     }
 
     public int getValue() {

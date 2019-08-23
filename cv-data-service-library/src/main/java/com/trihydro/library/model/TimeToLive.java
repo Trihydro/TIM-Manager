@@ -8,7 +8,7 @@ public enum TimeToLive {
     Minute(0), HalfHour(1), Day(2), Week(3), Month(4), Year(5);
 
     private int value;
-    private static Map map = new HashMap<>();
+    private static Map<Integer, TimeToLive> map = new HashMap<Integer, TimeToLive>();
 
     private TimeToLive(int value) {
         this.value = value;
@@ -21,7 +21,7 @@ public enum TimeToLive {
     }
 
     public static TimeToLive valueOf(int timeToLive) {
-        return (TimeToLive) map.get(timeToLive);
+        return map.get(timeToLive);
     }
 
     public int getValue() {

@@ -17,7 +17,7 @@ public enum SemiDialogID {
     IntersectionSitDataQuery(163); // 0x00A3 Intersection Situation Data Query
 
     private int value;
-    private static Map map = new HashMap<>();
+    private static Map<Integer, SemiDialogID> map = new HashMap<Integer, SemiDialogID>();
 
     private SemiDialogID(int value) {
         this.value = value;
@@ -30,10 +30,10 @@ public enum SemiDialogID {
     }
 
     public static SemiDialogID valueOf(int semiDialogId) {
-        return (SemiDialogID) map.get(semiDialogId);
+        return map.get(semiDialogId);
     }
 
-    public int getValue(){
+    public int getValue() {
         return value;
     }
 }

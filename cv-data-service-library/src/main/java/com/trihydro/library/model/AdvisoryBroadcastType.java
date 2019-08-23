@@ -8,7 +8,7 @@ public enum AdvisoryBroadcastType {
     SpatAggregate(0), Map(1), Tim(2), Ev(3);
 
     private int value;
-    private static Map map = new HashMap<>();
+    private static Map<Integer,AdvisoryBroadcastType> map = new HashMap<Integer,AdvisoryBroadcastType>();
 
     private AdvisoryBroadcastType(int value) {
         this.value = value;
@@ -21,7 +21,7 @@ public enum AdvisoryBroadcastType {
     }
 
     public static AdvisoryBroadcastType valueOf(int advisoryBroadcastType) {
-        return (AdvisoryBroadcastType) map.get(advisoryBroadcastType);
+        return map.get(advisoryBroadcastType);
     }
 
     public int getValue() {

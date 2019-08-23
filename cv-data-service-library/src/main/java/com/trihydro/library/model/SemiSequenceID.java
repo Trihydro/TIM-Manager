@@ -17,7 +17,7 @@ public enum SemiSequenceID {
     SubscriptionCancel(10); // Subscription Cancellation
 
     private int value;
-    private static Map map = new HashMap<>();
+    private static Map<Integer, SemiSequenceID> map = new HashMap<Integer, SemiSequenceID>();
 
     private SemiSequenceID(int value) {
         this.value = value;
@@ -30,7 +30,7 @@ public enum SemiSequenceID {
     }
 
     public static SemiSequenceID valueOf(int semiSequenceID) {
-        return (SemiSequenceID) map.get(semiSequenceID);
+        return map.get(semiSequenceID);
     }
 
     public int getValue() {

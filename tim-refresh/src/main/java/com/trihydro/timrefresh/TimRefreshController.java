@@ -82,7 +82,7 @@ public class TimRefreshController {
             DataFrame df = new DataFrame();
             df.setStartDateTime(nowAsISO);
             df.setSspTimRights(aTim.getSspTimRights());
-            df.setFrameType(TravelerInfoType.advisory);// TODO: convert this from our db value
+            df.setFrameType(TravelerInfoType.advisory);
             df.setMsgId(msgId);
             df.setPriority(5);// 0-7, 0 being least important, 7 being most
             df.setSspLocationRights(aTim.getSspLocationRights());

@@ -9,6 +9,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
+
 import com.trihydro.library.service.TracMessageSentService;
 import com.trihydro.library.service.TracMessageTypeService;
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
@@ -59,15 +62,30 @@ public class TracManager {
 		}
 
 		// if not, add to db and sent to trac
-
 		RestTemplate restTemplate = new RestTemplate();
 		// String url = "http://gisd01:8070/trac/newtask.text";
 
+		// lat and long come from the dataframes.regions.anchorPosition
 		String latitude = null;
 		String longitude = null;
 
-		latitude = metadata.getReceivedMessageDetails().getLocationData().getLatitude();
-		longitude = metadata.getReceivedMessageDetails().getLocationData().getLongitude();
+		DataFrame[] dfs = payload.getTim().getDataframes();
+		if (dfs.length > 0) {
+			Region[] regs = dfs[0].getRegions();
+			if (regs.length > 0) {
+				latitude = regs[0].getAnchorPosition().getLatitude().toString();
+				longitude = regs[0].getAnchorPosition().getLongitude().toString();
+			}
+		}
+
+		// if we didn't find the anchorPosition, set it to the
+		// metadata.receivedMessageDetails location information
+		if (latitude == null) {
+			latitude = metadata.getReceivedMessageDetails().getLocationData().getLatitude();
+		}
+		if (longitude == null) {
+			longitude = metadata.getReceivedMessageDetails().getLocationData().getLongitude();
+		}
 
 		String descUrl = "<b>";
 		descUrl += "Distress Notification Issued at ";

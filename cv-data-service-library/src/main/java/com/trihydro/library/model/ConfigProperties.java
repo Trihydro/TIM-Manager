@@ -14,8 +14,50 @@ public class ConfigProperties {
     private String mongoHost;
     private String trackUrl;
 
+    private String sdwRestUrl;
+    private String sdwUsername;
+    private String sdwPassword;
+
+    private String[] alertAddresses;
+
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public String[] getAlertAddresses() {
+        return alertAddresses;
+    }
+
+    public void setAlertAddresses(String[] alertAddresses) {
+        this.alertAddresses = alertAddresses;
+    }
+
+    public void setAlertAddresses(String alertAddresses) {
+        this.alertAddresses = alertAddresses.split(",");
+    }
+
+    public String getSdwPassword() {
+        return sdwPassword;
+    }
+
+    public void setSdwPassword(String sdwPassword) {
+        this.sdwPassword = sdwPassword;
+    }
+
+    public String getSdwUsername() {
+        return sdwUsername;
+    }
+
+    public void setSdwUsername(String sdwUsername) {
+        this.sdwUsername = sdwUsername;
+    }
+
+    public String getSdwRestUrl() {
+        return sdwRestUrl;
+    }
+
+    public void setSdwRestUrl(String sdwRestUrl) {
+        this.sdwRestUrl = sdwRestUrl;
     }
 
     public void setOdeUrl(String odeUrl) {

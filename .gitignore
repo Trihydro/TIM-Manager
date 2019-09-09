@@ -46,3 +46,6 @@ testem.log
 Thumbs.db
 
 *.log
+
+# Package Files
+**/.sts4-cache/*

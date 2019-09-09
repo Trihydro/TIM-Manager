@@ -87,6 +87,8 @@ public class OdeLoggingConsumer {
 		config.setEnv(appProps.getProperty("env"));
 		config.setTracUrl(appProps.getProperty("tracUrl"));
 
+		config.setAlertAddresses(appProps.getProperty("alertAddress"));
+
 		CvDataServiceLibrary.setConfig(config);
 
 		System.out.println("starting..............");
@@ -116,13 +118,15 @@ public class OdeLoggingConsumer {
 
 			stringConsumer.subscribe(Arrays.asList(topic));
 			System.out.println("Subscribed to topic " + topic);
+
+			TracManager tm = new TracManager();
 			try {
 
 				while (true) {
 					ConsumerRecords<String, String> records = stringConsumer.poll(100);
 					for (ConsumerRecord<String, String> record : records) {
 						if (topic.equals("topic.OdeDNMsgJson")) {
-							TracManager.submitDNMsgToTrac(record.value(), config.getGetTrackUrl());
+							tm.submitDNMsgToTrac(record.value(), config);
 						} else if (topic.equals("topic.OdeTimJson")) {
 							System.out.println(record.value());
 							OdeData odeData = TimLogger.processTimJson(record.value());
@@ -130,7 +134,7 @@ public class OdeLoggingConsumer {
 								if (odeData.getMetadata()
 										.getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC)
 									TimLogger.addActiveTimToOracleDB(odeData);
-								else{
+								else {
 									TimLogger.addTimToOracleDB(odeData);
 								}
 							}

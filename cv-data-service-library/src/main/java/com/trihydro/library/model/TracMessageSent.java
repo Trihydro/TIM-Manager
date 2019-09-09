@@ -10,8 +10,45 @@ public class TracMessageSent {
     private String messageText;
     private String packetId;
 
+    private Integer restResponseCode;
+    private String restResponseMessage;
+    private boolean messageSent;
+    private boolean emailSent;
+
     public Integer getTracMessageSentId() {
         return this.tracMessageSentId;
+    }
+
+    public boolean isEmailSent() {
+        return emailSent;
+    }
+
+    public void setEmailSent(boolean emailSent) {
+        this.emailSent = emailSent;
+    }
+
+    public boolean isMessageSent() {
+        return messageSent;
+    }
+
+    public void setMessageSent(boolean messageSent) {
+        this.messageSent = messageSent;
+    }
+
+    public String getRestResponseMessage() {
+        return restResponseMessage;
+    }
+
+    public void setRestResponseMessage(String restResponseMessage) {
+        this.restResponseMessage = restResponseMessage;
+    }
+
+    public Integer getRestResponseCode() {
+        return restResponseCode;
+    }
+
+    public void setRestResponseCode(Integer restResponseCode) {
+        this.restResponseCode = restResponseCode;
     }
 
     public void setTracMessageSentId(Integer tracMessageSentId) {

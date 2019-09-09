@@ -8,7 +8,7 @@ import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.WydotTimParking;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.library.model.WydotTravelerInputData;
 
 import org.junit.Assert;
 import org.junit.Before;

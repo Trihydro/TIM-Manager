@@ -15,7 +15,7 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimRw;
 import com.trihydro.odewrapper.model.WydotTimVsl;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -532,7 +532,7 @@ public abstract class WydotTimBaseController {
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
                 startDateTime, endDateTime);
         // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);        
+        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk, endDateTime);        
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);

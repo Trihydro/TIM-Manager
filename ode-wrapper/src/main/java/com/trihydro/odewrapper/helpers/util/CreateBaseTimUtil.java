@@ -16,7 +16,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.M
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.library.model.WydotTravelerInputData;
 import java.math.BigDecimal;
 
 @Component

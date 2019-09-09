@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.library.model.TimType;
@@ -35,6 +35,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
 import com.google.gson.Gson;
 import com.trihydro.library.service.ActiveTimService;
@@ -149,7 +150,7 @@ public class WydotTimService {
     }
 
     public void sendTimToRsus(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev,
-            String direction, TimType timType, Integer pk) {
+            String direction, TimType timType, Integer pk, String endDateTime) {
 
         // FIND ALL RSUS TO SEND TO
         List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
@@ -177,7 +178,8 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
-            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(wydotTim.getClientId(), wydotTim.getDirection(), rsu.getRsuTarget());
+            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(wydotTim.getClientId(), wydotTim.getDirection(),
+                    rsu.getRsuTarget());
 
             // if active tims exist, update tim
             if (activeTim != null) {
@@ -188,13 +190,13 @@ public class WydotTimService {
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                updateTimOnRsu(timToSend, activeTim.getTimId(), tim, rsu.getRsuId());
+                updateTimOnRsu(timToSend, activeTim.getTimId(), tim, rsu.getRsuId(), endDateTime);
             } else {
                 // send new tim to rsu
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                sendNewTimToRsu(timToSend, rsu);
+                sendNewTimToRsu(timToSend, rsu, endDateTime);
             }
         }
     }
@@ -411,21 +413,9 @@ public class WydotTimService {
         return wydotRsu;
     }
 
-    public static void sendNewTimToRsu(WydotTravelerInputData timToSend, WydotRsu rsu) {
-
-        // add snmp
-        SNMP snmp = new SNMP();
-        snmp.setChannel(178);
-        snmp.setRsuid("8003");
-        snmp.setMsgid(31);
-        snmp.setMode(1);
-        snmp.setChannel(178);
-        snmp.setInterval(2);
-        snmp.setDeliverystart("2018-01-01T00:00:00-06:00");
-        snmp.setDeliverystop("2020-01-01T00:00:00-06:00");
-        snmp.setEnable(1);
-        snmp.setStatus(4);
-        timToSend.getRequest().setSnmp(snmp);
+    public static void sendNewTimToRsu(WydotTravelerInputData timToSend, WydotRsu rsu, String endDateTime) {
+        DataFrame df = timToSend.getTim().getDataframes()[0];
+        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime));
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
@@ -433,11 +423,12 @@ public class WydotTimService {
         TimQuery timQuery = submitTimQuery(rsu, 0);
 
         // query failed, don't send TIM
-        if(timQuery == null){
+        if (timQuery == null) {
             return;
         }
 
-        timToSend.getRequest().getRsus()[0].setRsuIndex(findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set()));
+        timToSend.getRequest().getRsus()[0]
+                .setRsuIndex(findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set()));
         rsu.setRsuIndex(timToSend.getRequest().getRsus()[0].getRsuIndex());
 
         String timToSendJson = gson.toJson(timToSend);
@@ -509,26 +500,15 @@ public class WydotTimService {
     }
 
     public static void updateTimOnRsu(WydotTravelerInputData timToSend, Long timId,
-            WydotOdeTravelerInformationMessage tim, Integer rsuId) {
-       
+            WydotOdeTravelerInformationMessage tim, Integer rsuId, String endDateTime) {
+
         WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);
 
         // set rsu index here
+        DataFrame df = timToSend.getTim().getDataframes()[0];
         TimRsu timRsu = TimRsuService.getTimRsu(timId, rsuId);
         timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
-
-        SNMP snmp = new SNMP();
-        snmp.setChannel(178);
-        snmp.setRsuid("8003");
-        snmp.setMsgid(31);
-        snmp.setMode(1);
-        snmp.setChannel(178);
-        snmp.setInterval(2);
-        snmp.setDeliverystart("2018-01-01T00:00:00-06:00");
-        snmp.setDeliverystop("2020-01-01T00:00:00-06:00");
-        snmp.setEnable(1);
-        snmp.setStatus(4);
-        timToSend.getRequest().setSnmp(snmp);
+        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime));
 
         String timToSendJson = gson.toJson(updatedTim);
 
@@ -632,7 +612,7 @@ public class WydotTimService {
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
         try {
-            System.out.println("deleting TIM " + index.toString() + " from rsu");            
+            System.out.println("deleting TIM " + index.toString() + " from rsu");
             restTemplate.exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
                     entity, String.class);
         } catch (HttpClientErrorException e) {
@@ -800,4 +780,20 @@ public class WydotTimService {
         return codes;
     }
 
+    protected static SNMP getSnmp(String startDateTime, String endDateTime) {
+        SNMP snmp = new SNMP();
+        snmp.setChannel(178);
+        snmp.setRsuid("8003");
+        snmp.setMsgid(31);
+        snmp.setMode(1);
+        snmp.setChannel(178);
+        snmp.setInterval(2);
+        // TODO: verify date format
+        snmp.setDeliverystart(startDateTime);// "2018-01-01T00:00:00-06:00");
+        snmp.setDeliverystop(endDateTime);// "2020-01-01T00:00:00-06:00");
+        snmp.setEnable(1);
+        snmp.setStatus(4);
+
+        return snmp;
+    }
 }

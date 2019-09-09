@@ -9,7 +9,7 @@ import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.TimRwList;
 import com.trihydro.odewrapper.model.WydotTimRw;
-import com.trihydro.odewrapper.model.WydotTravelerInputData;
+import com.trihydro.library.model.WydotTravelerInputData;
 
 import org.junit.Assert;
 import org.junit.Before;

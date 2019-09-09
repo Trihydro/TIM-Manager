@@ -2,10 +2,16 @@ package com.trihydro.library.service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.trihydro.library.tables.TimOracleTables;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -69,5 +75,48 @@ public class DataFrameService extends CvDataServiceLibrary {
 			}
 		}
 		return new Long(0);
+	}
+
+	public static String[] getItisCodesForDataFrameId(Integer dataFrameId) {
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		List<String> itisCodes = new ArrayList<>();
+
+		try {
+			connection = DbUtility.getConnectionPool();
+
+			statement = connection.createStatement();
+
+			String selectStatement = "select distinct ic.itis_code";
+			selectStatement += " from data_frame_itis_Code dfic inner join itis_code ic on dfic.itis_code_id = ic.itis_code_id";
+			selectStatement += "where data_frame_id =  ";
+			selectStatement += dataFrameId;
+
+			rs = statement.executeQuery(selectStatement);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				itisCodes.add(rs.getString("ITIS_CODE"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return itisCodes.toArray(new String[itisCodes.size()]);
 	}
 }

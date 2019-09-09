@@ -101,22 +101,24 @@ public class TimLogger extends BaseLogger {
 			Long dataFrameId = null;
 			Path path = null;
 			Geometry geometry = null;
-			OdePosition3D anchor = null;
+			// OdePosition3D anchor = null;
+			OdeTravelerInformationMessage.DataFrame.Region region = null;
 			DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
 			if (dFrames.length > 0) {
 				us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0]
 						.getRegions();
 				if (regions.length > 0) {
+					region = regions[0];
 					path = regions[0].getPath();
 					geometry = regions[0].getGeometry();
-					anchor = regions[0].getAnchorPosition();
+					// anchor = regions[0].getAnchorPosition();
 				}
-				DataFrameService.insertDataFrame(timId, dFrames[0]);
+				dataFrameId = DataFrameService.insertDataFrame(timId, dFrames[0]);
 			}
 
 			if (path != null) {
 				Long pathId = PathService.insertPath();
-				RegionService.insertPathRegion(dataFrameId, pathId, anchor);
+				RegionService.insertPathRegion(dataFrameId, pathId, region);
 
 				Long nodeXYId;
 				for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
@@ -124,7 +126,7 @@ public class TimLogger extends BaseLogger {
 					PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
 				}
 			} else if (geometry != null) {
-				RegionService.insertGeometryRegion(dataFrameId, geometry, anchor);
+				RegionService.insertGeometryRegion(dataFrameId, geometry, region);
 			}
 
 			if (dFrames.length > 0) {
@@ -134,7 +136,7 @@ public class TimLogger extends BaseLogger {
 					ActiveTim activeTim = setActiveTimByRegionName(regionName);
 
 					// if this is an RSU TIM
-					if (activeTim.getRsuTarget() != null) {
+					if (activeTim != null && activeTim.getRsuTarget() != null) {
 						// save TIM RSU in DB
 						WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
 								.findFirst().orElse(null);
@@ -183,9 +185,14 @@ public class TimLogger extends BaseLogger {
 		// get information from the region name, first check splitname length
 		activeTim = setActiveTimByRegionName(name);
 
+		String satRecordId = null;
+		if (activeTim != null) {
+			satRecordId = activeTim.getSatRecordId();
+		}
+
 		// save TIM
 		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null,
-				activeTim.getSatRecordId(), name);
+				satRecordId, name);
 
 		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 
@@ -258,6 +265,10 @@ public class TimLogger extends BaseLogger {
 	}
 
 	private static ActiveTim setActiveTimByRegionName(String regionName) {
+
+		if (StringUtils.isBlank(regionName) || StringUtils.isEmpty(regionName)) {
+			return null;
+		}
 
 		ActiveTim activeTim = new ActiveTim();
 

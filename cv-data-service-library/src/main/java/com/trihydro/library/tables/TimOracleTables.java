@@ -88,9 +88,15 @@ public class TimOracleTables extends OracleTables {
         else {
             regionTable = new ArrayList<String>();
             regionTable.add("DATA_FRAME_ID");
-            regionTable.add("PATH_ID");
+            regionTable.add("NAME");
+            regionTable.add("LANE_WIDTH");
+            regionTable.add("DIRECTIONALITY");
+            regionTable.add("DIRECTION");
+            regionTable.add("CLOSED_PATH");
             regionTable.add("ANCHOR_LAT");
             regionTable.add("ANCHOR_LONG");
+
+            regionTable.add("PATH_ID");
 
             regionTable.add("GEOMETRY_DIRECTION");
             regionTable.add("GEOMETRY_EXTENT");

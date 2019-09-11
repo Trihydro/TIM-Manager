@@ -55,6 +55,11 @@ public class TracManager {
 		TracMessageType tracMessageType = tracMessageTypes.stream().filter(x -> x.getTracMessageType().equals("DN"))
 				.findFirst().orElse(null);
 
+		if (tracMessageType == null) {
+			System.out.println("Unable to find TracMessageType 'DN'. Insert to database fails.");
+			return -1l;
+		}
+
 		TracMessageSent tracMessageSent = new TracMessageSent();
 		tracMessageSent.setTracMessageTypeId(tracMessageType.getTracMessageTypeId());
 		tracMessageSent.setDateTimeSent(new Timestamp(System.currentTimeMillis()));
@@ -143,10 +148,15 @@ public class TracManager {
 
 		if (!msgSent || responseCode != 200) {
 			// either the message failed to send, or there was a failure on the Trac side
-			// alertAddress is comma-delimited list of addresses to email
+			// if the message was sent but we received a non-success code, set msgSent to
+			// false for database record purposes
+			if (responseCode != 200 && msgSent) {
+				msgSent = !msgSent;
+			}
 			List<String> toAddresses = new ArrayList<String>();
 			List<String> bccAddresses = new ArrayList<String>();
 
+			// alertAddress is comma-delimited list of addresses to email
 			for (String address : config.getAlertAddresses()) {
 				if (address.contains("trihydro.com")) {
 					// add to BCC

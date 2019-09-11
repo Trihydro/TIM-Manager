@@ -5,8 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.plaf.synth.Region;
-
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
@@ -37,7 +35,6 @@ import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.TimService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.internal.util.privilegedactions.GetDeclaredConstructor;
 
 import com.trihydro.library.service.TimRsuService;
 
@@ -184,6 +181,8 @@ public class TimLogger extends BaseLogger {
 
 		// get information from the region name, first check splitname length
 		activeTim = setActiveTimByRegionName(name);
+		if (activeTim == null)
+			return;
 
 		String satRecordId = null;
 		if (activeTim != null) {
@@ -198,9 +197,6 @@ public class TimLogger extends BaseLogger {
 
 		// save DataFrame
 		Long dataFrameId = DataFrameService.insertDataFrame(timId, dframes[0]);
-
-		if (activeTim == null)
-			return;
 
 		// TODO : Change to loop through RSU array - doing one rsu for now
 		RSU firstRsu = null;

@@ -184,10 +184,7 @@ public class TimLogger extends BaseLogger {
 		if (activeTim == null)
 			return;
 
-		String satRecordId = null;
-		if (activeTim != null) {
-			satRecordId = activeTim.getSatRecordId();
-		}
+		String satRecordId = activeTim.getSatRecordId();
 
 		// save TIM
 		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null,

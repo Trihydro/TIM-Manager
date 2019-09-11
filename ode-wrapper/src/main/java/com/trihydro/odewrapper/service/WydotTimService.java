@@ -177,7 +177,8 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
-            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(wydotTim.getClientId(), wydotTim.getDirection(), rsu.getRsuTarget());
+            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(wydotTim.getClientId(), wydotTim.getDirection(),
+                    rsu.getRsuTarget());
 
             // if active tims exist, update tim
             if (activeTim != null) {
@@ -433,11 +434,12 @@ public class WydotTimService {
         TimQuery timQuery = submitTimQuery(rsu, 0);
 
         // query failed, don't send TIM
-        if(timQuery == null){
+        if (timQuery == null) {
             return;
         }
 
-        timToSend.getRequest().getRsus()[0].setRsuIndex(findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set()));
+        timToSend.getRequest().getRsus()[0]
+                .setRsuIndex(findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set()));
         rsu.setRsuIndex(timToSend.getRequest().getRsus()[0].getRsuIndex());
 
         String timToSendJson = gson.toJson(timToSend);
@@ -445,14 +447,11 @@ public class WydotTimService {
         // send TIM if not a test
         try {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -510,7 +509,7 @@ public class WydotTimService {
 
     public static void updateTimOnRsu(WydotTravelerInputData timToSend, Long timId,
             WydotOdeTravelerInformationMessage tim, Integer rsuId) {
-       
+
         WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);
 
         // set rsu index here
@@ -632,7 +631,7 @@ public class WydotTimService {
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
         try {
-            System.out.println("deleting TIM " + index.toString() + " from rsu");            
+            System.out.println("deleting TIM " + index.toString() + " from rsu");
             restTemplate.exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
                     entity, String.class);
         } catch (HttpClientErrorException e) {

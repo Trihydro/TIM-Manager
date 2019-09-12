@@ -37,6 +37,15 @@ public class TracMessageSentService extends CvDataServiceLibrary {
 				tracMessageSent.setDateTimeSent(rs.getTimestamp("date_time_sent"));
 				tracMessageSent.setMessageText(rs.getString("message_text"));
 				tracMessageSent.setPacketId(rs.getString("packet_id"));
+
+				int responseCode = rs.getInt("rest_response_code");
+				// rs.getInt returns 0 if null is found so only set if non-zero
+				if (responseCode != 0) {
+					tracMessageSent.setRestResponseCode(responseCode);
+				}
+				tracMessageSent.setRestResponseMessage(rs.getString("rest_response_message"));
+				tracMessageSent.setMessageSent(rs.getBoolean("message_sent"));
+				tracMessageSent.setEmailSent(rs.getBoolean("email_sent"));
 				tracMessagesSent.add(tracMessageSent);
 			}
 		} catch (SQLException e) {
@@ -84,6 +93,15 @@ public class TracMessageSentService extends CvDataServiceLibrary {
 				else if (col.equals("packet_id"))
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
 							tracMessageSent.getPacketId().toString());
+				else if (col.equals("rest_response_code"))
+					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, tracMessageSent.getRestResponseCode());
+				else if (col.equals("rest_response_message"))
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+							tracMessageSent.getRestResponseMessage());
+				else if (col.equals("message_sent"))
+					SQLNullHandler.setIntegerFromBool(preparedStatement, fieldNum, tracMessageSent.isMessageSent());
+				else if (col.equals("email_sent"))
+					SQLNullHandler.setIntegerFromBool(preparedStatement, fieldNum, tracMessageSent.isEmailSent());
 				fieldNum++;
 			}
 			// execute insert statement

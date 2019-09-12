@@ -436,14 +436,11 @@ public class WydotTimService {
         // send TIM if not a test
         try {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

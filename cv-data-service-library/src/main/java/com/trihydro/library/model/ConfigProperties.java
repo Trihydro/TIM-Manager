@@ -13,12 +13,27 @@ public class ConfigProperties {
     private String mongoPassword;
     private String mongoHost;
     private String trackUrl;
+
     private String sdwRestUrl;
     private String sdwUsername;
     private String sdwPassword;
 
+    private String[] alertAddresses;
+
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public String[] getAlertAddresses() {
+        return alertAddresses;
+    }
+
+    public void setAlertAddresses(String[] alertAddresses) {
+        this.alertAddresses = alertAddresses;
+    }
+
+    public void setAlertAddresses(String alertAddresses) {
+        this.alertAddresses = alertAddresses.split(",");
     }
 
     public String getSdwPassword() {

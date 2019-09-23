@@ -125,10 +125,10 @@ public class OdeLoggingConsumer {
 				while (true) {
 					ConsumerRecords<String, String> records = stringConsumer.poll(100);
 					for (ConsumerRecord<String, String> record : records) {
+						System.out.println("Input text: " + record.value());
 						if (topic.equals("topic.OdeDNMsgJson")) {
 							tm.submitDNMsgToTrac(record.value(), config);
 						} else if (topic.equals("topic.OdeTimJson")) {
-							System.out.println(record.value());
 							OdeData odeData = TimLogger.processTimJson(record.value());
 							if (odeData != null) {
 								if (odeData.getMetadata()

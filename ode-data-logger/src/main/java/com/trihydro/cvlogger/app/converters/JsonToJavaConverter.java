@@ -282,8 +282,8 @@ public class JsonToJavaConverter {
                 BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
                 // set region anchor
                 OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
-                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
+                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(".0000001")));
                 // TODO elevation
 
                 region.setAnchorPosition(anchorPosition);
@@ -363,8 +363,8 @@ public class JsonToJavaConverter {
                     if (nodeLatLon != null) {
                         BigDecimal lat = mapper.treeToValue(nodeLatLon.get("lat"), BigDecimal.class);
                         BigDecimal lon = mapper.treeToValue(nodeLatLon.get("lon"), BigDecimal.class);
-                        nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
-                        nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
+                        nodeXY.setNodeLat(lat.multiply(new BigDecimal(".0000001")));
+                        nodeXY.setNodeLong(lon.multiply(new BigDecimal(".0000001")));
                         nodeXY.setDelta("node-LatLon");
                         nodeXYs.add(nodeXY);
                     }
@@ -466,8 +466,8 @@ public class JsonToJavaConverter {
                                     if (nodeLatLon != null) {
                                         BigDecimal lat = mapper.treeToValue(nodeLatLon.get("lat"), BigDecimal.class);
                                         BigDecimal lon = mapper.treeToValue(nodeLatLon.get("lon"), BigDecimal.class);
-                                        nodeXY.setNodeLat(lat.multiply(new BigDecimal(.0000001)));
-                                        nodeXY.setNodeLong(lon.multiply(new BigDecimal(.0000001)));
+                                        nodeXY.setNodeLat(lat.multiply(new BigDecimal(".0000001")));
+                                        nodeXY.setNodeLong(lon.multiply(new BigDecimal(".0000001")));
                                         nodeXY.setDelta("node-LatLon");
                                         nodeXYs.add(nodeXY);
                                     }
@@ -547,8 +547,8 @@ public class JsonToJavaConverter {
 
                 // set region anchor
                 OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(.0000001)));
-                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(.0000001)));
+                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(".0000001")));
                 // TODO elevation
 
                 region.setAnchorPosition(anchorPosition);

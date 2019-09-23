@@ -4,6 +4,7 @@ import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,7 +90,7 @@ public class JsonToJavaConverterTest {
         }
 
         @Test
-        public void TestConvertTimPayloadJsonToJava_Path() throws IOException {
+        public void TestConvertTimPayloadJsonToJava_Path() throws IOException, URISyntaxException {
 
                 // create test objects
                 OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
@@ -107,23 +108,23 @@ public class JsonToJavaConverterTest {
                 tim.setTimeStamp("2017-10-11T21:32");
 
                 OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude((new BigDecimal(263056840)).multiply(new BigDecimal(.0000001)));
-                anchorPosition.setLongitude((new BigDecimal(-801481510)).multiply(new BigDecimal(.0000001)));
+                anchorPosition.setLatitude((new BigDecimal(263056840)).multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLongitude((new BigDecimal(-801481510)).multiply(new BigDecimal(".0000001")));
                 // anchorPosition.setElevation(new BigDecimal(20));
 
                 region.setAnchorPosition(anchorPosition);
 
                 OdeTravelerInformationMessage.NodeXY nodeXY0 = new OdeTravelerInformationMessage.NodeXY();
-                nodeXY0.setNodeLat((new BigDecimal(405744807)).multiply(new BigDecimal(.0000001)));
-                nodeXY0.setNodeLong((new BigDecimal(-1050524251)).multiply(new BigDecimal(.0000001)));
+                nodeXY0.setNodeLat((new BigDecimal("405744807")).multiply(new BigDecimal(".0000001")));
+                nodeXY0.setNodeLong((new BigDecimal("-1050524251")).multiply(new BigDecimal(".0000001")));
                 nodeXY0.setDelta("node-LatLon");
 
                 OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[2];
                 nodeXYArr[0] = nodeXY0;
 
                 OdeTravelerInformationMessage.NodeXY nodeXY1 = new OdeTravelerInformationMessage.NodeXY();
-                nodeXY1.setNodeLat((new BigDecimal(405735393)).multiply(new BigDecimal(.0000001)));
-                nodeXY1.setNodeLong((new BigDecimal(-1050500237)).multiply(new BigDecimal(.0000001)));
+                nodeXY1.setNodeLat((new BigDecimal("405735393")).multiply(new BigDecimal(".0000001")));
+                nodeXY1.setNodeLong((new BigDecimal("-1050500237")).multiply(new BigDecimal(".0000001")));
                 nodeXY1.setDelta("node-LatLon");
                 nodeXYArr[1] = nodeXY1;
 
@@ -136,7 +137,8 @@ public class JsonToJavaConverterTest {
 
                 odeTimPayload.setTim(tim);
 
-                String value = new String(Files.readAllBytes(Paths.get("src/test/resources/rxMsg_TIM_OdeOutput.json")));
+                String value = new String(Files
+                                .readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput.json").toURI())));
                 OdeTimPayload odeTimPayloadTest = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
                 System.out.println("PACKETID: " + odeTimPayload.getTim().getPacketID());
                 for (int i = 0; i < 2; i++) {
@@ -165,7 +167,7 @@ public class JsonToJavaConverterTest {
         }
 
         @Test
-        public void TestConvertTimPayloadJsonToJava_Geometry() throws IOException {
+        public void TestConvertTimPayloadJsonToJava_Geometry() throws IOException, URISyntaxException {
 
                 // create test objects
                 OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
@@ -183,8 +185,8 @@ public class JsonToJavaConverterTest {
                 tim.setTimeStamp("2017-10-11T21:32");
 
                 OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude((new BigDecimal(263056840)).multiply(new BigDecimal(.0000001)));
-                anchorPosition.setLongitude((new BigDecimal(-801481510)).multiply(new BigDecimal(.0000001)));
+                anchorPosition.setLatitude((new BigDecimal(263056840)).multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLongitude((new BigDecimal(-801481510)).multiply(new BigDecimal(".0000001")));
                 // anchorPosition.setElevation(new BigDecimal(20));
 
                 region.setAnchorPosition(anchorPosition);
@@ -210,7 +212,8 @@ public class JsonToJavaConverterTest {
 
                 odeTimPayload.setTim(tim);
 
-                String value = new String(Files.readAllBytes(Paths.get("src/test/resources/rxMsg_TIM_OdeOutput_Geometry.json")));
+                String value = new String(Files.readAllBytes(
+                                Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput_Geometry.json").toURI())));
                 OdeTimPayload odeTimPayloadTest = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
                 System.out.println("PACKETID: " + odeTimPayload.getTim().getPacketID());
 

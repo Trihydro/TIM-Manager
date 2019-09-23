@@ -82,6 +82,7 @@ public class TracManager {
 		// check if packetId is in trac message sent table
 		if (isDnMsgInTrac(payload.getTim().getPacketID()) != null) {
 			// if so, return
+			System.out.println("TRAC already submitted, returning");
 			return;
 		}
 

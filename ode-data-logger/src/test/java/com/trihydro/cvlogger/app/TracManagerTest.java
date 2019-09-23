@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.trihydro.cvlogger.app.services.RestTemplateProvider;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.TracMessageSent;
@@ -49,7 +50,7 @@ import com.trihydro.library.model.TracMessageType;
  * Unit tests for TimRefreshController
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ TracMessageSentService.class, TracMessageTypeService.class })
+@PrepareForTest({ TracMessageSentService.class, TracMessageTypeService.class, RestTemplateProvider.class })
 public class TracManagerTest {
 
         @Mock
@@ -65,6 +66,7 @@ public class TracManagerTest {
         public void setup() {
                 PowerMockito.mockStatic(TracMessageSentService.class);
                 PowerMockito.mockStatic(TracMessageTypeService.class);
+                PowerMockito.mockStatic(RestTemplateProvider.class);
 
                 List<TracMessageType> tmts = new ArrayList<TracMessageType>();
                 TracMessageType tmt = new TracMessageType();
@@ -72,6 +74,8 @@ public class TracManagerTest {
                 tmt.setTracMessageTypeId(-1);
                 tmts.add(tmt);
                 when(TracMessageTypeService.selectAll()).thenReturn(tmts);
+
+                when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
         }
 
         @Test

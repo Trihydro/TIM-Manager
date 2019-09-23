@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,6 +14,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
@@ -31,9 +33,6 @@ import com.trihydro.library.model.TracMessageType;
 public class TracManager {
 	@Autowired
 	private JavaMailSender jms;
-
-	@Autowired
-	private RestTemplate restTemplate;
 
 	public TracMessageSent isDnMsgInTrac(String packetId) {
 
@@ -132,16 +131,22 @@ public class TracManager {
 		int count = 0;
 		while (!msgSent && count < 2) {
 			try {
-				ResponseEntity<String> response = restTemplate.exchange(builder.buildAndExpand().toUri(),
-						HttpMethod.POST, new HttpEntity<String>(null, responseHeaders), String.class);
+				ResponseEntity<String> response = RestTemplateProvider.GetRestTemplate().exchange(
+						builder.buildAndExpand().toUri(), HttpMethod.POST,
+						new HttpEntity<String>(null, responseHeaders), String.class);
 				msgSent = true;
 				responseCode = response.getStatusCode().value();
 				responseText = response.getBody();
 				System.out.println("Trac response status code: " + responseCode);
 				System.out.println("Trac response message: " + responseText);
-			} catch (Exception exception) {
-				System.out.println(String.format("exception: %s", exception.getMessage()));
+			} catch (RestClientException exception) {
+				System.out.println(
+						String.format("Failed sending message to TRAC. Exception: %s", exception.getMessage()));
 				msgSent = false;
+				count++;
+			} catch (Exception ex) {
+				// if we got here, there was an error reading the status code or body
+				System.out.println("Error with parsing TRAC return value.");
 				count++;
 			}
 		}
@@ -179,9 +184,12 @@ public class TracManager {
 			bodyText += builder.buildAndExpand().toUriString();
 			message.setText(bodyText);
 			try {
+				System.out.println("Message failed to submit to TRAC. Sending email to "
+						+ String.join(",", message.getTo()) + ". BCC to " + message.getBcc());
 				jms.send(message);
 				emailSent = true;
-			} catch (MailException ex) {
+			} catch (Exception ex) {
+				System.out.println("Failed to send email: " + ex.getMessage());
 				emailSent = false;
 			}
 		}

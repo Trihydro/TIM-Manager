@@ -155,7 +155,7 @@ public class JsonToJavaConverter {
                     ((ObjectNode) metaDataNode).replace("receivedMessageDetails", receivedMessageDetailsNode);
                 }
             }
-            System.out.println(metaDataNode);
+            // System.out.println(metaDataNode);
             odeTimMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadata.class);
         } catch (IOException e) {
             System.out.println("IOException");

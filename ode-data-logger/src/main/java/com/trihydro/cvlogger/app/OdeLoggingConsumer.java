@@ -88,6 +88,8 @@ public class OdeLoggingConsumer {
 		config.setTracUrl(appProps.getProperty("tracUrl"));
 
 		config.setAlertAddresses(appProps.getProperty("alertAddress"));
+		config.setMailHost(appProps.getProperty("mailHost"));
+		config.setMailPort(Integer.parseInt(appProps.getProperty("mailPort")));
 
 		CvDataServiceLibrary.setConfig(config);
 
@@ -125,7 +127,7 @@ public class OdeLoggingConsumer {
 				while (true) {
 					ConsumerRecords<String, String> records = stringConsumer.poll(100);
 					for (ConsumerRecord<String, String> record : records) {
-						System.out.println("Input text: " + record.value());
+						// System.out.println("Input text: " + record.value());
 						if (topic.equals("topic.OdeDNMsgJson")) {
 							tm.submitDNMsgToTrac(record.value(), config);
 						} else if (topic.equals("topic.OdeTimJson")) {

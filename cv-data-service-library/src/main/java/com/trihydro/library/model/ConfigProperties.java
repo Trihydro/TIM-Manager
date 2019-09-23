@@ -18,10 +18,29 @@ public class ConfigProperties {
     private String sdwUsername;
     private String sdwPassword;
 
+    private String mailHost;
+    private int mailPort;
+
     private String[] alertAddresses;
 
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public int getMailPort() {
+        return mailPort;
+    }
+
+    public void setMailPort(int mailPort) {
+        this.mailPort = mailPort;
+    }
+
+    public String getMailHost() {
+        return mailHost;
+    }
+
+    public void setMailHost(String mailHost) {
+        this.mailHost = mailHost;
     }
 
     public String[] getAlertAddresses() {

@@ -10,7 +10,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
+import org.springframework.mail.MailParseException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -31,8 +34,6 @@ import com.trihydro.library.model.TracMessageType;
 
 @Component
 public class TracManager {
-	@Autowired
-	private JavaMailSender jms;
 
 	public TracMessageSent isDnMsgInTrac(String packetId) {
 
@@ -122,7 +123,7 @@ public class TracManager {
 				.queryParam("priority", "1").queryParam("description", descUrl)
 				.queryParam("createdBy", "Connected Vehicle Emergency Notification").queryParam("source", "CV System");
 
-		System.out.println(builder.buildAndExpand().toUri());
+		// System.out.println(builder.buildAndExpand().toUri());
 
 		HttpHeaders responseHeaders = new HttpHeaders();
 		int responseCode = -1;
@@ -142,7 +143,7 @@ public class TracManager {
 				System.out.println("Trac response message: " + responseText);
 			} catch (RestClientException exception) {
 				System.out.println(
-						String.format("Failed sending message to TRAC. Exception: %s", exception.getMessage()));
+						String.format("------> Failed sending message to TRAC. Exception: %s", exception.getMessage()));
 				msgSent = false;
 				count++;
 			} catch (Exception ex) {
@@ -186,11 +187,12 @@ public class TracManager {
 			message.setText(bodyText);
 			try {
 				System.out.println("Message failed to submit to TRAC. Sending email to "
-						+ String.join(",", message.getTo()) + ". BCC to " + message.getBcc());
-				jms.send(message);
+						+ String.join(",", message.getTo()) + ". BCC to " + String.join(",", message.getBcc()));
+				JavaMailSenderImplProvider.getJSenderImpl(config).send(message);
 				emailSent = true;
 			} catch (Exception ex) {
-				System.out.println("Failed to send email: " + ex.getMessage());
+				System.out.println(
+						"------> Failed to send email, " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				emailSent = false;
 			}
 		}

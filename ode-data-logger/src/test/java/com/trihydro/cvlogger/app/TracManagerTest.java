@@ -99,8 +99,8 @@ public class TracManagerTest {
 
                 // verify static functions, called once
                 PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectAll called once
-                TracMessageSentService.selectAll();
+                // assert TracMessageSentService.selectPacketIds called once
+                TracMessageSentService.selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate).exchange(any(URI.class), any(HttpMethod.class), Matchers.<HttpEntity<String>>any(),
@@ -133,8 +133,8 @@ public class TracManagerTest {
 
                 // verify static functions, called once
                 PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectAll called once
-                TracMessageSentService.selectAll();
+                // assert TracMessageSentService.selectPacketIds called once
+                TracMessageSentService.selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(2)).exchange(any(URI.class), any(HttpMethod.class),
@@ -163,8 +163,8 @@ public class TracManagerTest {
 
                 // verify static functions, called once
                 PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectAll called once
-                TracMessageSentService.selectAll();
+                // assert TracMessageSentService.selectPacketIds called once
+                TracMessageSentService.selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(2)).exchange(any(URI.class), any(HttpMethod.class),
@@ -199,8 +199,8 @@ public class TracManagerTest {
 
                 // verify static functions, called once
                 PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectAll called once
-                TracMessageSentService.selectAll();
+                // assert TracMessageSentService.selectPacketIds called once
+                TracMessageSentService.selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(1)).exchange(any(URI.class), any(HttpMethod.class),
@@ -237,8 +237,8 @@ public class TracManagerTest {
 
                 // verify static functions, called once
                 PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectAll called once
-                TracMessageSentService.selectAll();
+                // assert TracMessageSentService.selectPacketIds called once
+                TracMessageSentService.selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(1)).exchange(any(URI.class), any(HttpMethod.class),

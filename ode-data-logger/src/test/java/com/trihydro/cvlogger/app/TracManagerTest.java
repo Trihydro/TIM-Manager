@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.trihydro.cvlogger.app.services.JavaMailSenderImplProvider;
 import com.trihydro.cvlogger.app.services.RestTemplateProvider;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.library.model.ConfigProperties;
@@ -50,14 +52,15 @@ import com.trihydro.library.model.TracMessageType;
  * Unit tests for TimRefreshController
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ TracMessageSentService.class, TracMessageTypeService.class, RestTemplateProvider.class })
+@PrepareForTest({ TracMessageSentService.class, TracMessageTypeService.class, RestTemplateProvider.class,
+                JavaMailSenderImplProvider.class })
 public class TracManagerTest {
 
         @Mock
         private RestTemplate restTemplate;
 
         @Mock
-        private JavaMailSender jms;
+        private JavaMailSenderImpl jmsi;
 
         @InjectMocks
         TracManager uut;
@@ -67,6 +70,7 @@ public class TracManagerTest {
                 PowerMockito.mockStatic(TracMessageSentService.class);
                 PowerMockito.mockStatic(TracMessageTypeService.class);
                 PowerMockito.mockStatic(RestTemplateProvider.class);
+                PowerMockito.mockStatic(JavaMailSenderImplProvider.class);
 
                 List<TracMessageType> tmts = new ArrayList<TracMessageType>();
                 TracMessageType tmt = new TracMessageType();
@@ -74,8 +78,8 @@ public class TracManagerTest {
                 tmt.setTracMessageTypeId(-1);
                 tmts.add(tmt);
                 when(TracMessageTypeService.selectAll()).thenReturn(tmts);
-
                 when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
+                when(JavaMailSenderImplProvider.getJSenderImpl(Matchers.any(ConfigProperties.class))).thenReturn(jmsi);
         }
 
         @Test
@@ -174,7 +178,7 @@ public class TracManagerTest {
                 assertEquals(false, argument.getValue().isMessageSent());
                 assertEquals(true, argument.getValue().isEmailSent());
 
-                verify(jms).send(any(SimpleMailMessage.class));
+                verify(jmsi).send(any(SimpleMailMessage.class));
         }
 
         @Test
@@ -210,7 +214,7 @@ public class TracManagerTest {
                 assertEquals(false, argument.getValue().isMessageSent());
                 assertEquals(true, argument.getValue().isEmailSent());
 
-                verify(jms).send(any(SimpleMailMessage.class));
+                verify(jmsi).send(any(SimpleMailMessage.class));
         }
 
         @Test
@@ -220,7 +224,7 @@ public class TracManagerTest {
                                 Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
 
-                doThrow(new MailSendException("Exception")).when(jms).send(any(SimpleMailMessage.class));
+                doThrow(new MailSendException("Exception")).when(jmsi).send(any(SimpleMailMessage.class));
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
@@ -248,7 +252,7 @@ public class TracManagerTest {
                 assertEquals(false, argument.getValue().isMessageSent());
                 assertEquals(false, argument.getValue().isEmailSent());
 
-                verify(jms).send(any(SimpleMailMessage.class));
+                verify(jmsi).send(any(SimpleMailMessage.class));
         }
 
         @Test
@@ -258,7 +262,7 @@ public class TracManagerTest {
                                 Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
 
-                doThrow(new MailSendException("Exception")).when(jms).send(any(SimpleMailMessage.class));
+                doThrow(new MailSendException("Exception")).when(jmsi).send(any(SimpleMailMessage.class));
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
@@ -271,7 +275,7 @@ public class TracManagerTest {
 
                 // verify to field of email
                 ArgumentCaptor<SimpleMailMessage> smmArgument = ArgumentCaptor.forClass(SimpleMailMessage.class);
-                verify(jms).send(smmArgument.capture());
+                verify(jmsi).send(smmArgument.capture());
                 String[] tos = smmArgument.getValue().getTo();
                 assertEquals(2, tos.length);
                 List<String> tosList = Arrays.asList(tos);

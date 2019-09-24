@@ -4,21 +4,13 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailAuthenticationException;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailParseException;
-import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
@@ -35,14 +27,9 @@ import com.trihydro.library.model.TracMessageType;
 @Component
 public class TracManager {
 
-	public TracMessageSent isDnMsgInTrac(String packetId) {
-
-		List<TracMessageSent> tracMessagesSent = TracMessageSentService.selectAll();
-
-		TracMessageSent tracMessageSent = tracMessagesSent.stream().filter(x -> x.getPacketId().equals(packetId))
-				.findFirst().orElse(null);
-
-		return tracMessageSent;
+	public boolean isDnMsgInTrac(String packetId) {
+		List<String> packetIds = TracMessageSentService.selectPacketIds();
+		return packetIds.contains(packetId);
 	}
 
 	public Long logNewDistressNotification(String packetId, String messageText, int responseCode, String responseText,
@@ -77,20 +64,18 @@ public class TracManager {
 	}
 
 	public void submitDNMsgToTrac(String value, ConfigProperties config) {
-		OdeLogMetadata metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 		OdeTimPayload payload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
 
 		// check if packetId is in trac message sent table
-		if (isDnMsgInTrac(payload.getTim().getPacketID()) != null) {
+		if (isDnMsgInTrac(payload.getTim().getPacketID())) {
 			// if so, return
 			System.out.println("TRAC already submitted, returning");
 			return;
 		}
 
-		// if not, add to db and sent to trac
-		// RestTemplate restTemplate = new RestTemplate();
-		// String url = "http://gisd01:8070/trac/newtask.text";
+		OdeLogMetadata metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
 
+		// add to db and sent to trac
 		// lat and long come from the dataframes.regions.anchorPosition
 		String latitude = null;
 		String longitude = null;

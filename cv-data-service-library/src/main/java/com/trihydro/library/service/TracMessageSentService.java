@@ -68,6 +68,43 @@ public class TracMessageSentService extends CvDataServiceLibrary {
 		return tracMessagesSent;
 	}
 
+	public static List<String> selectPacketIds() {
+
+		List<String> packet_ids = new ArrayList<String>();
+		Connection connection = null;
+		ResultSet rs = null;
+		Statement statement = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL statement
+			rs = statement.executeQuery("select PACKET_ID from TRAC_MESSAGE_SENT");
+			// get packet_id values
+			while (rs.next()) {
+				packet_ids.add(rs.getString("packet_id"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return packet_ids;
+	}
+
 	public static Long insertTracMessageSent(TracMessageSent tracMessageSent) {
 
 		Connection connection = null;

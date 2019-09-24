@@ -172,6 +172,12 @@ public class TracManager {
 					toAddresses.add(address);
 				}
 			}
+			if (toAddresses.size() == 0 && bccAddresses.size() > 0) {
+				// switch bcc
+				toAddresses = bccAddresses;
+				bccAddresses = new ArrayList<String>();
+			}
+
 			SimpleMailMessage message = new SimpleMailMessage();
 			message.setTo(toAddresses.toArray(new String[toAddresses.size()]));
 			message.setBcc(bccAddresses.toArray(new String[bccAddresses.size()]));

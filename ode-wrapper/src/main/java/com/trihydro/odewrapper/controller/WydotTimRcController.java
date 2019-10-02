@@ -4,7 +4,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.TimType;
@@ -32,11 +35,15 @@ public class WydotTimRcController extends WydotTimBaseController {
     @RequestMapping(value = "/create-update-rc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createUpdateRoadConditionsTim(@RequestBody TimRcList timRcList) {
 
-        System.out.println("Create Update RC TIM");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Create Update RC TIM");
         String post = gson.toJson(timRcList);
         System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
+        List<ControllerResult> errList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
         List<WydotTim> timsToSend = new ArrayList<WydotTim>();
 
@@ -47,11 +54,12 @@ public class WydotTimRcController extends WydotTimBaseController {
 
             if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
+                errList.add(resultTim);
                 continue;
             }
 
-             // add TIM to list for processing later
-             timsToSend.add(wydotTim);        
+            // add TIM to list for processing later
+            timsToSend.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
@@ -59,6 +67,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         processRequestTest(timsToSend);
         String responseMessage = gson.toJson(resultList);
+        System.out.println("Failed to send TIMs: " + gson.toJson(errList));
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
@@ -67,7 +76,10 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
 
-        System.out.println("All Clear");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - All Clear");
         String post = gson.toJson(timRcList);
         System.out.println(post.toString());
 

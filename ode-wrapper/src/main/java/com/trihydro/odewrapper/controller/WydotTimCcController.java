@@ -18,7 +18,10 @@ import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 @CrossOrigin
 @RestController
@@ -32,7 +35,10 @@ public class WydotTimCcController extends WydotTimBaseController {
     @RequestMapping(value = "/cc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createChainControlTim(@RequestBody TimRcList timRcList) {
 
-        System.out.println("CHAIN CONTROL TIM");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - CHAIN CONTROL TIM");
 
         String post = gson.toJson(timRcList);
         System.out.println(post.toString());

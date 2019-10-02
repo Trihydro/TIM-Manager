@@ -438,7 +438,7 @@ public class WydotTimService {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
             TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
-            System.out.println("exception");
+            System.out.println("Send new TIM to RSU exception: " + targetException.getMessage());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

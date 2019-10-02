@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
@@ -36,7 +39,10 @@ public class WydotTimVslController extends WydotTimBaseController {
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createUpdateVslTim(@RequestBody TimVslList timVslList) {
 
-        System.out.println("Create/Update VSL TIM");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Create/Update VSL TIM");
         String post = gson.toJson(timVslList);
         System.out.println(post.toString());
 

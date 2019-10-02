@@ -2,8 +2,11 @@ package com.trihydro.odewrapper.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
@@ -34,7 +37,10 @@ public class WydotTimParkingController extends WydotTimBaseController {
     @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createParkingTim(@RequestBody TimParkingList timParkingList) {
 
-        System.out.println("Create Parking TIM");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Create Parking TIM");
         String post = gson.toJson(timParkingList);
         System.out.println(post.toString());
 
@@ -100,6 +106,10 @@ public class WydotTimParkingController extends WydotTimBaseController {
     @RequestMapping(value = "/parking-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteParkingTim(@PathVariable String id) {
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Delete Parking TIM");
         // clear TIM
         wydotTimService.clearTimsById("P", id, null);
 

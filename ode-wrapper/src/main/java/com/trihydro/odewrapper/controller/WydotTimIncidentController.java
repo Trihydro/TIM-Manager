@@ -4,8 +4,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
@@ -34,7 +37,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createIncidentTim(@RequestBody TimIncidentList timIncidentList) {
 
-        System.out.println("Create Incident TIM");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Create Incident TIM");
         String post = gson.toJson(timIncidentList);
         System.out.println(post.toString());
 
@@ -69,7 +75,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     @RequestMapping(value = "/incident-tim", method = RequestMethod.PUT, headers = "Accept=application/json")
     public ResponseEntity<String> updateIncidentTim(@RequestBody TimIncidentList timIncidentList) {
 
-        System.out.println("Update Incident TIM");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Update Incident TIM");
         String post = gson.toJson(timIncidentList);
         System.out.println(post.toString());
 
@@ -152,6 +161,11 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
     @RequestMapping(value = "/incident-tim/{incidentId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteIncidentTim(@PathVariable String incidentId) {
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Delete Incident TIM");
 
         // clear TIM
         wydotTimService.clearTimsById("I", incidentId, null);

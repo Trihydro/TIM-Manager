@@ -2,9 +2,12 @@ package com.trihydro.odewrapper.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
@@ -38,7 +41,10 @@ public class WydotTimRwController extends WydotTimBaseController {
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
 
-        System.out.println("Create/Update RW TIM");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Create/Update RW TIM");
         String post = gson.toJson(timRwList);
         System.out.println(post.toString());
 
@@ -228,6 +234,10 @@ public class WydotTimRwController extends WydotTimBaseController {
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();       
+
+        System.out.println(dateFormat.format(date) + " - Delete RW TIM");
         // clear TIM
         wydotTimService.clearTimsById(type, id, null);
 

@@ -424,7 +424,7 @@ public class WydotTimService {
 
     public static void sendNewTimToRsu(WydotTravelerInputData timToSend, WydotRsu rsu, String endDateTime) {
         DataFrame df = timToSend.getTim().getDataframes()[0];
-        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime));
+        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);

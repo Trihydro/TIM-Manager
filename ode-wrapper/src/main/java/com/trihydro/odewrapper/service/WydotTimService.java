@@ -514,7 +514,7 @@ public class WydotTimService {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         TimRsu timRsu = TimRsuService.getTimRsu(timId, rsuId);
         timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
-        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime));
+        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
         String timToSendJson = gson.toJson(updatedTim);
 

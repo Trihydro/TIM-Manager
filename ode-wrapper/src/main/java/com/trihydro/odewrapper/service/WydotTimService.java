@@ -1,19 +1,28 @@
 package com.trihydro.odewrapper.service;
 
 import org.springframework.stereotype.Component;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+
 import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -777,7 +786,7 @@ public class WydotTimService {
         return codes;
     }
 
-    protected static SNMP getSnmp(String startDateTime, String endDateTime) {
+    protected static SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
         snmp.setRsuid("8003");
@@ -785,9 +794,26 @@ public class WydotTimService {
         snmp.setMode(1);
         snmp.setChannel(178);
         snmp.setInterval(2);
-        // TODO: verify date format
         snmp.setDeliverystart(startDateTime);// "2018-01-01T00:00:00-06:00");
-        snmp.setDeliverystop(endDateTime);// "2020-01-01T00:00:00-06:00");
+
+        if (StringUtils.isBlank(endDateTime)) {
+            try {
+                int durationTime = timToSend.getTim().getDataframes()[0].getDurationTime();
+                Calendar cal =javax.xml.bind.DatatypeConverter.parseDateTime(startDateTime);
+                cal.add(Calendar.MINUTE, durationTime);
+                Date endDate = cal.getTime();
+
+                TimeZone tz = TimeZone.getTimeZone("UTC");
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+                df.setTimeZone(tz);
+                endDateTime = df.format(endDate);
+            } catch (IllegalArgumentException illArg) {
+                System.out.println("Illegal Argument exception for endDate: " + illArg.getMessage());
+                endDateTime = "2020-01-01T00:00:00-06:00";
+            }
+        }
+
+        snmp.setDeliverystop(endDateTime);
         snmp.setEnable(1);
         snmp.setStatus(4);
 

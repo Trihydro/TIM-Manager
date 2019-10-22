@@ -1,15 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.annotations.Api;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,6 +16,14 @@ import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
 
 @CrossOrigin
 @RestController
@@ -66,17 +64,18 @@ public class WydotTimVslController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-        processRequestTest(timsToSend);
+        processRequestAsync(timsToSend);
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void processRequestTest(List<WydotTim> wydotTims) {
+    public void processRequestAsync(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, timType, null, null, null);
+                    processRequest(tim, timType, startTime, null, null);
                 }
             }
         }).start();

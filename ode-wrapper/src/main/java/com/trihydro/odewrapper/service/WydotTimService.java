@@ -1,43 +1,54 @@
 package com.trihydro.odewrapper.service;
 
-import org.springframework.stereotype.Component;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
-import java.util.Random;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import static java.lang.Math.toIntExact;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import com.trihydro.odewrapper.model.TimQuery;
-import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.model.WydotTravelerInputData;
-import com.trihydro.odewrapper.config.BasicConfiguration;
-import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
+import com.google.gson.Gson;
+import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
+import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.RsuService;
+import com.trihydro.library.service.TimRsuService;
+import com.trihydro.library.service.TimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
+import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.odewrapper.model.WydotTim;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
@@ -45,19 +56,6 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-
-import com.google.gson.Gson;
-import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.RsuService;
-import com.trihydro.library.service.TimRsuService;
-import com.trihydro.library.service.TimService;
-import com.trihydro.library.service.TimTypeService;
-import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.Milepost;
-import com.trihydro.library.model.TimRsu;
-
-import org.springframework.http.MediaType;
-import static java.lang.Math.toIntExact;
 
 @Component
 public class WydotTimService {
@@ -808,8 +806,9 @@ public class WydotTimService {
                 df.setTimeZone(tz);
                 endDateTime = df.format(endDate);
             } catch (IllegalArgumentException illArg) {
+                // if we failed here, set the endDateTime for 2 weeks from current time
                 System.out.println("Illegal Argument exception for endDate: " + illArg.getMessage());
-                endDateTime = "2020-01-01T00:00:00-06:00";
+                endDateTime = java.time.Clock.systemUTC().instant().plus(2, ChronoUnit.WEEKS).toString();
             }
         }
 

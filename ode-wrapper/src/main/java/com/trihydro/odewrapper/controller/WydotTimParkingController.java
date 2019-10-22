@@ -1,7 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,14 +14,16 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimParkingList;
 import com.trihydro.odewrapper.model.WydotTimParking;
 
-import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
 
 @CrossOrigin
 @RestController
@@ -38,7 +38,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public ResponseEntity<String> createParkingTim(@RequestBody TimParkingList timParkingList) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Create Parking TIM");
         String post = gson.toJson(timParkingList);
@@ -107,7 +107,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public ResponseEntity<String> deleteParkingTim(@PathVariable String id) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Delete Parking TIM");
         // clear TIM
@@ -120,16 +120,18 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public void processRequest(List<WydotTimParking> wydotTims) {
         new Thread(new Runnable() {
             public void run() {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
+
                 for (WydotTimParking wydotTim : wydotTims) {
                     if (wydotTim.getDirection().equals("both")) {
 
                         wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
                         wydotTim.setToRm(wydotTim.getMileMarker());
-                        createSendTims(wydotTim, "eastbound", timType, null, null, null);
+                        createSendTims(wydotTim, "eastbound", timType, startTime, null, null);
 
                         wydotTim.setFromRm(wydotTim.getMileMarker());
                         wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        createSendTims(wydotTim, "westbound", timType, null, null, null);
+                        createSendTims(wydotTim, "westbound", timType, startTime, null, null);
                     } else {
                         if (wydotTim.getDirection().equals("eastbound")) {
                             wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
@@ -138,7 +140,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
                             wydotTim.setFromRm(wydotTim.getMileMarker());
                             wydotTim.setToRm(wydotTim.getMileMarker() + 10);
                         }
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, null);
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType, startTime, null, null);
                     }
                 }
             }

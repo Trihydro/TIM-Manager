@@ -1,7 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,15 +16,17 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRwList;
 import com.trihydro.odewrapper.model.WydotTimRw;
 
-import io.swagger.annotations.Api;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
 
 @CrossOrigin
 @RestController
@@ -42,7 +42,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Create/Update RW TIM");
         String post = gson.toJson(timRwList);
@@ -95,7 +95,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-        processRequestTest();
+        processRequestAsync();
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -108,12 +108,16 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         try {
             timOneWay = wydotTim.clone();
+            if (StringUtils.isBlank(timOneWay.getSchedStart())) {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
+                timOneWay.setSchedStart(startTime);
+            }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
 
         if (timPoint != null)
-        timOneWay.setFromRm(timPoint - 1);
+            timOneWay.setFromRm(timPoint - 1);
 
         timOneWay.setDirection("eastbound");
         timsToSend.add(timOneWay);
@@ -130,12 +134,16 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         try {
             timOneWay = wydotTim.clone();
+            if (StringUtils.isBlank(timOneWay.getSchedStart())) {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
+                timOneWay.setSchedStart(startTime);
+            }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
 
         if (timPoint != null)
-        timOneWay.setFromRm(timPoint + 1);
+            timOneWay.setFromRm(timPoint + 1);
 
         timOneWay.setDirection("westbound");
         timsToSend.add(timOneWay);
@@ -160,13 +168,17 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             try {
                 wydotTimBuffer = wydotTim.clone();
+                if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
+                    String startTime = java.time.Clock.systemUTC().instant().toString();
+                    wydotTimBuffer.setSchedStart(startTime);
+                }
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
             }
             wydotTimBuffer.setFromRm(bufferStart);
             wydotTimBuffer.setToRm(bufferEnd);
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-            wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int)bufferBefore));
+            wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
@@ -182,7 +194,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         }
     }
 
-    public void processRequestTest() {
+    public void processRequestAsync() {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
@@ -209,13 +221,17 @@ public class WydotTimRwController extends WydotTimBaseController {
             WydotTimRw wydotTimBuffer = null;
             try {
                 wydotTimBuffer = wydotTim.clone();
+                if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
+                    String startTime = java.time.Clock.systemUTC().instant().toString();
+                    wydotTimBuffer.setSchedStart(startTime);
+                }
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
             }
             wydotTimBuffer.setFromRm(bufferStart);
             wydotTimBuffer.setToRm(bufferEnd);
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
-            wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int)bufferBefore));
+            wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
@@ -235,7 +251,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Delete RW TIM");
         // clear TIM

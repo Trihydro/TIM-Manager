@@ -68,13 +68,13 @@ public class WydotTimCcController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-        processRequestTest(timsToSend);
+        processRequestAsync(timsToSend);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void processRequestTest(List<WydotTimRc> wydotTims) {
+    public void processRequestAsync(List<WydotTimRc> wydotTims) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {

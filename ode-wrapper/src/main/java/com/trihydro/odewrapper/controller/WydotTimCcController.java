@@ -1,27 +1,26 @@
 package com.trihydro.odewrapper.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-import io.swagger.annotations.Api;
-
-import com.trihydro.odewrapper.model.WydotTim;
-import com.trihydro.odewrapper.model.WydotTimRc;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.HttpStatus;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.TimType;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
+import com.trihydro.odewrapper.model.WydotTim;
+import com.trihydro.odewrapper.model.WydotTimRc;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
 
 @CrossOrigin
 @RestController
@@ -36,7 +35,7 @@ public class WydotTimCcController extends WydotTimBaseController {
     public ResponseEntity<String> createChainControlTim(@RequestBody TimRcList timRcList) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - CHAIN CONTROL TIM");
 
@@ -60,10 +59,10 @@ public class WydotTimCcController extends WydotTimBaseController {
             if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 continue;
-            }        
+            }
 
             // add TIM to list for processing later
-            timsToSend.add(wydotTim);          
+            timsToSend.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
@@ -79,8 +78,9 @@ public class WydotTimCcController extends WydotTimBaseController {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, timType, null, null, null);
+                    processRequest(tim, timType, startTime, null, null);
                 }
             }
         }).start();

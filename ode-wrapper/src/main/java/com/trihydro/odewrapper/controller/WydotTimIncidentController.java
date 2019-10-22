@@ -1,9 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.annotations.Api;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,13 +13,16 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
 
 @CrossOrigin
 @RestController
@@ -38,7 +37,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     public ResponseEntity<String> createIncidentTim(@RequestBody TimIncidentList timIncidentList) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Create Incident TIM");
         String post = gson.toJson(timIncidentList);
@@ -76,7 +75,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     public ResponseEntity<String> updateIncidentTim(@RequestBody TimIncidentList timIncidentList) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Update Incident TIM");
         String post = gson.toJson(timIncidentList);
@@ -105,8 +104,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-            // make tims and send them
-            makeTims(timsToSend);
+        // make tims and send them
+        makeTims(timsToSend);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -116,6 +115,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         new Thread(new Runnable() {
             public void run() {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimIncident wydotTim : wydotTims) {
 
                     Double timPoint = null;
@@ -134,13 +134,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (timPoint != null)
                             wydotTim.setToRm(timPoint - 1);
 
-                        createSendTims(wydotTim, "eastbound", timType, null, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "eastbound", timType, startTime, null, wydotTim.getPk());
 
                         // second TIM - westbound - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setToRm(timPoint + 1);
 
-                        createSendTims(wydotTim, "westbound", timType, null, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "westbound", timType, startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
 
@@ -152,7 +152,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (wydotTim.getDirection().equals("westbound") && timPoint != null)
                             wydotTim.setToRm(timPoint + 1);
 
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, wydotTim.getPk());
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType, startTime, null, wydotTim.getPk());
                     }
                 }
             }
@@ -163,7 +163,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     public ResponseEntity<String> deleteIncidentTim(@PathVariable String incidentId) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Delete Incident TIM");
 
@@ -205,7 +205,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
                 // get tim type
                 TimType timType = getTimType(type);
-
+                String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimIncident wydotTim : wydotTims) {
 
                     Double timPoint = null;
@@ -224,13 +224,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (timPoint != null)
                             wydotTim.setFromRm(timPoint - 1);
 
-                        createSendTims(wydotTim, "eastbound", timType, null, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "eastbound", timType, startTime, null, wydotTim.getPk());
 
                         // second TIM - westbound - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setFromRm(timPoint + 1);
 
-                        createSendTims(wydotTim, "westbound", timType, null, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "westbound", timType, startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
 
@@ -242,7 +242,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (wydotTim.getDirection().equals("westbound") && timPoint != null)
                             wydotTim.setFromRm(timPoint + 1);
 
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType, null, null, wydotTim.getPk());
+                        createSendTims(wydotTim, wydotTim.getDirection(), timType, startTime, null, wydotTim.getPk());
                     }
                 }
             }

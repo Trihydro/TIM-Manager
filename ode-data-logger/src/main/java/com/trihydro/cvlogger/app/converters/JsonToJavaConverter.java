@@ -20,6 +20,7 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Circle;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.DistanceUnits.DistanceUnitsEnum;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 import us.dot.its.jpo.ode.util.*;
 import java.io.IOException;
@@ -510,6 +511,17 @@ public class JsonToJavaConverter {
                         item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
 
                     itemsList.add(item);
+                }
+            }
+
+            // TravelerInfoType.valueOf();
+            JsonNode frameTypeNode = travelerDataFrame.get("frameType");
+            if (frameTypeNode != null) {
+                if (frameTypeNode.fieldNames().hasNext()) {
+                    TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
+                    if (frameType != null) {
+                        dataFrame.setFrameType(frameType);
+                    }
                 }
             }
 

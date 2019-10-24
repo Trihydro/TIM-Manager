@@ -39,9 +39,11 @@ public class DataFrameService extends CvDataServiceLibrary {
 				else if (col.equals("DURATION_TIME"))
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getDurationTime());
 				else if (col.equals("FRAME_TYPE")) {
+					Integer ordinal = null;
 					if (dFrame.getFrameType() != null) {
-						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getFrameType().ordinal());
+						ordinal = dFrame.getFrameType().ordinal();
 					}
+					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, ordinal);
 				}
 				// else if (col.equals("MSG_ID"))
 				// us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId

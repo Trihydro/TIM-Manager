@@ -19,6 +19,8 @@ import us.dot.its.jpo.ode.model.OdeLogMsgMetadataLocation;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TransmissionState;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.util.JsonUtils;
 import org.junit.Test;
@@ -33,7 +35,7 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
 /**
  * Unit test for simple App.
  */
-@Ignore
+// @Ignore
 public class CVLoggerTest {
 
     @Test
@@ -100,23 +102,23 @@ public class CVLoggerTest {
         tim.setTimeStamp("2017-10-11T21:32");
 
         OdePosition3D anchorPosition = new OdePosition3D();
-        anchorPosition.setLatitude((new BigDecimal(263056840)).multiply(new BigDecimal(.0000001)));
-        anchorPosition.setLongitude((new BigDecimal(-801481510)).multiply(new BigDecimal(.0000001)));
+        anchorPosition.setLatitude((new BigDecimal("263056840")).multiply(new BigDecimal(".0000001")));
+        anchorPosition.setLongitude((new BigDecimal("-801481510")).multiply(new BigDecimal(".0000001")));
         // anchorPosition.setElevation(new BigDecimal(20));
 
         region.setAnchorPosition(anchorPosition);
 
         OdeTravelerInformationMessage.NodeXY nodeXY0 = new OdeTravelerInformationMessage.NodeXY();
-        nodeXY0.setNodeLat((new BigDecimal(405744807)).multiply(new BigDecimal(.0000001)));
-        nodeXY0.setNodeLong((new BigDecimal(-1050524251)).multiply(new BigDecimal(.0000001)));
+        nodeXY0.setNodeLat((new BigDecimal("405744807")).multiply(new BigDecimal(".0000001")));
+        nodeXY0.setNodeLong((new BigDecimal("-1050524251")).multiply(new BigDecimal(".0000001")));
         nodeXY0.setDelta("node-LatLon");
 
         OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[2];
         nodeXYArr[0] = nodeXY0;
 
         OdeTravelerInformationMessage.NodeXY nodeXY1 = new OdeTravelerInformationMessage.NodeXY();
-        nodeXY1.setNodeLat((new BigDecimal(405735393)).multiply(new BigDecimal(.0000001)));
-        nodeXY1.setNodeLong((new BigDecimal(-1050500237)).multiply(new BigDecimal(.0000001)));
+        nodeXY1.setNodeLat((new BigDecimal("405735393")).multiply(new BigDecimal(".0000001")));
+        nodeXY1.setNodeLong((new BigDecimal("-1050500237")).multiply(new BigDecimal(".0000001")));
         nodeXY1.setDelta("node-LatLon");
         nodeXYArr[1] = nodeXY1;
 
@@ -156,6 +158,15 @@ public class CVLoggerTest {
         // odeTimPayloadTest.getTim().getTimeStamp());
         assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
         assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
+    }
+
+    @Test
+    public void TestProcessTimJsonFromFile_VerifyFrameType() throws IOException{
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/tmc_TIM.json")));
+        OdeData odeDataTest = TimLogger.processTimJson(value);
+        OdeTimPayload payload = (OdeTimPayload) odeDataTest.getPayload();
+        DataFrame df = payload.getTim().getDataframes()[0];
+        assertEquals(TravelerInfoType.advisory, df.getFrameType());
     }
 
     @Test

@@ -61,7 +61,7 @@ public class TimOracleTables extends OracleTables {
             dataFrameTable.add("CONTENT");
             dataFrameTable.add("DURATION_TIME");
             dataFrameTable.add("FRAME_TYPE");
-            dataFrameTable.add("MSG_ID");
+            // dataFrameTable.add("MSG_ID"); //ignore msg_id for now since its a full object
             dataFrameTable.add("PRIORITY");
             dataFrameTable.add("SSP_LOCATION_RIGHTS");
             dataFrameTable.add("SSP_MSG_TYPES");

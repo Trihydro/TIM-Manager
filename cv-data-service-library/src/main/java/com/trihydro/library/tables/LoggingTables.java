@@ -11,6 +11,7 @@ public class LoggingTables extends OracleTables {
 
             httpLoggingTable.add("REQUEST_TIME");
             httpLoggingTable.add("REST_REQUEST");
+            httpLoggingTable.add("RESPONSE_TIME");
         }
 
         return httpLoggingTable;

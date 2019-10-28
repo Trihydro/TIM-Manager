@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -19,8 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.output.TeeOutputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.trihydro.library.service.*;
@@ -28,8 +27,6 @@ import com.trihydro.library.service.*;
 // Adapted from https://stackoverflow.com/a/39137815
 @Component
 public class HttpLoggingFilter implements Filter {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpLoggingFilter.class);
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -39,6 +36,7 @@ public class HttpLoggingFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         try {
+            Timestamp requestTime = new Timestamp(System.currentTimeMillis());
             HttpServletRequest httpServletRequest = (HttpServletRequest) request;
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
@@ -53,11 +51,13 @@ public class HttpLoggingFilter implements Filter {
                     .append(httpServletRequest.getRemoteAddr()).append("]");
 
             chain.doFilter(bufferedRequest, bufferedResponse);
+            logMessage.append(" [RESPONSE CODE:").append(bufferedResponse.getStatus()).append("]");
             logMessage.append(" [RESPONSE:").append(bufferedResponse.getContent()).append("]");
-            log.debug(logMessage.toString());
-            LoggingService.LogHttpRequest(logMessage.toString());
+            System.out.println(logMessage.toString());
+            LoggingService.LogHttpRequest(logMessage.toString(), requestTime,
+                    new Timestamp(System.currentTimeMillis()));
         } catch (Throwable a) {
-            log.error(a.getMessage());
+            System.out.println(a.getMessage());
         }
     }
 

@@ -4,14 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
 
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.LoggingTables;
 
 public class LoggingService extends CvDataServiceLibrary {
-    public static Long LogHttpRequest(String request) {
+    public static Long LogHttpRequest(String request, Timestamp requestTime, Timestamp responseTime) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -25,10 +24,11 @@ public class LoggingService extends CvDataServiceLibrary {
 
             for (String col : LoggingTables.getHttpLoggingTable()) {
                 if (col.equals("REQUEST_TIME")) {
-                    SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-                            new Timestamp(System.currentTimeMillis()));
+                    SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, requestTime);
                 } else if (col.equals("REST_REQUEST")) {
                     SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, request);
+                } else if (col.equals("RESPONSE_TIME")) {
+                    SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, responseTime);
                 }
 
                 fieldNum++;

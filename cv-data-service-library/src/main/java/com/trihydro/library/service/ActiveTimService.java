@@ -673,17 +673,16 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			statement = connection.createStatement();
 
 			String selectStatement = "SELECT atim.*, t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id";
-			selectStatement += ", df.data_frame_id, df.frame_type, df.ssp_tim_rights, df.ssp_location_rights";
+			selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
 			selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
 			selectStatement += ", r.anchor_lat, r.anchor_long, r.lane_width, r.path_id, r.closed_path";
 			selectStatement += ", r.directionality, r.direction AS region_direction, r.path_id";
-			selectStatement += " FROM active_tim";
+			selectStatement += " FROM active_tim atim";
 			selectStatement += " INNER JOIN tim t ON atim.tim_id = t.tim_id";
 			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
-			selectStatement += " WHERE tim_start + INTERVAL '14' DAY < SYSDATE + INTERVAL '1' DAY";
-			selectStatement += " AND (tim_end is null OR tim_end > SYSDATE + INTERVAL '1' DAY)";
-			// todo: throw in rsuTarget
+			selectStatement += " WHERE tim_start + INTERVAL '14' DAY <= SYSDATE + INTERVAL '1' DAY";
+			selectStatement += " AND (tim_end is null OR tim_end >= SYSDATE + INTERVAL '1' DAY)";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -720,6 +719,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
 				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
+				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
 				activeTim.setSspLocationRights(rs.getShort("SSP_LOCATION_RIGHTS"));
 				activeTim.setSspTimRights(rs.getShort("SSP_TIM_RIGHTS"));
 				activeTim.setSspMsgTypes(rs.getShort("SSP_MSG_TYPES"));

@@ -13,11 +13,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import junit.framework.Assert;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.isA;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 
 import java.sql.Timestamp;
@@ -49,8 +47,6 @@ public class TimRefreshControllerTest {
 
     @InjectMocks
     TimRefreshController controllerUnderTest;
-
-    // private MockMvc mockMvc;
 
     @Before
     public void setup() {

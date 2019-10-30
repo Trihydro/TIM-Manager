@@ -13,14 +13,9 @@ import com.trihydro.library.model.WydotRsuTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.timrefresh.service.WydotTimService;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -29,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import oracle.sql.TIMESTAMP;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
@@ -51,14 +45,12 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class TimRefreshController {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
-    @Scheduled(cron = "*/5 * * * * *")
+    @Scheduled(cron = "0 0 1 * * ?") // run at 1:00am every day
     public void performTaskUsingCron() {
         System.out.println("Regular task performed using Cron at " + dateFormat.format(new Date()));
 
         // fetch Active_TIM that are expiring within 24 hrs
         List<TimUpdateModel> expiringTims = ActiveTimService.getExpiringActiveTims();
-
-        // log ones to be updated
 
         // loop through and issue new TIM to ODE
         for (TimUpdateModel aTim : expiringTims) {

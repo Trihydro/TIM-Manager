@@ -25,6 +25,7 @@ public class TimUpdateModel extends ActiveTim {
     // DataFrame properties
     private int dataFrameId;
     private int frameType;
+    private int durationTime;
     private short sspLocationRights;
     private short sspTimRights;
     private short sspMsgTypes;
@@ -35,6 +36,14 @@ public class TimUpdateModel extends ActiveTim {
     public BigDecimal getLaneWidth() {
         return laneWidth;
         // DataFrame df;df.setFrameType(frameType);
+    }
+
+    public int getDurationTime() {
+        return durationTime;
+    }
+
+    public void setDurationTime(int durationTime) {
+        this.durationTime = durationTime;
     }
 
     public Timestamp getEndDate_Timestamp() {

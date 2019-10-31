@@ -27,11 +27,11 @@ public class Application {
 
 	protected static BasicConfiguration configuration;
 
-    @Autowired
-    public void setConfiguration(BasicConfiguration configurationRhs) {
-        configuration = configurationRhs;
-        CvDataServiceLibrary.setConfig(configuration);
-    }
+	@Autowired
+	public void setConfiguration(BasicConfiguration configurationRhs) {
+		configuration = configurationRhs;
+		CvDataServiceLibrary.setConfig(configuration);
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
@@ -53,23 +53,19 @@ public class Application {
 				RestTemplate restTemplate = new RestTemplate();
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.APPLICATION_JSON);
-				HttpEntity<String> entity = null; 
+				HttpEntity<String> entity = null;
 				String activeTimJson;
 				Gson gson = new Gson();
 
 				// send to tim type endpoint to delete from RSUs and SDWs
 				for (ActiveTim activeTim : activeTims) {
-					
+
 					activeTimJson = gson.toJson(activeTim);
 					entity = new HttpEntity<String>(activeTimJson, headers);
 
-					restTemplate.exchange(configuration.getWrapperUrl() + "/delete-tim/",
-							HttpMethod.DELETE, entity, String.class);
+					restTemplate.exchange(configuration.getWrapperUrl() + "/delete-tim/", HttpMethod.DELETE, entity,
+							String.class);
 				}
-
-				// delete expired tims from database
-				ActiveTimService.deleteExpiredActiveTims();
-				
 			} catch (Exception e) {
 				e.printStackTrace();
 				// and re throw it so that the Executor also gets this error so that it can do

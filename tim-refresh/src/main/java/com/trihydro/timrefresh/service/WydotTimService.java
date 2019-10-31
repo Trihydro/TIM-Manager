@@ -3,52 +3,18 @@ package com.trihydro.timrefresh.service;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-// import com.trihydro.odewrapper.model.TimQuery;
-import com.trihydro.library.model.WydotRsu;
 import com.trihydro.timrefresh.config.BasicConfiguration;
-// import com.trihydro.odewrapper.config.BasicConfiguration;
-// import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotTravelerInputData;
-// import com.trihydro.odewrapper.model.WydotTim;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-
-import us.dot.its.jpo.ode.plugin.SNMP;
-import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
-import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
 import com.google.gson.Gson;
-import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.RsuService;
-import com.trihydro.library.service.TimRsuService;
-import com.trihydro.library.service.TimService;
-import com.trihydro.library.service.TimTypeService;
-import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Milepost;
-import com.trihydro.library.model.TimRsu;
-
-import org.springframework.http.MediaType;
-import static java.lang.Math.toIntExact;
 
 @Component
 public class WydotTimService {

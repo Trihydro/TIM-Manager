@@ -6,6 +6,7 @@ import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
+import com.google.gson.Gson;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
@@ -44,13 +45,16 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 @Component
 public class TimRefreshController {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    public static Gson gson = new Gson();
 
-    @Scheduled(cron = "0 0 1 * * ?") // run at 1:00am every day
+    @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
     public void performTaskUsingCron() {
         System.out.println("Regular task performed using Cron at " + dateFormat.format(new Date()));
 
         // fetch Active_TIM that are expiring within 24 hrs
         List<TimUpdateModel> expiringTims = ActiveTimService.getExpiringActiveTims();
+
+        System.out.println(expiringTims.size() + " expiring TIMs found");
 
         // loop through and issue new TIM to ODE
         for (TimUpdateModel aTim : expiringTims) {
@@ -134,6 +138,7 @@ public class TimRefreshController {
     private void UpdateAndSendRSU(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
         List<WydotRsuTim> wydotRsus = RsuService.getFullRsusTimIsOn(aTim.getTimId());
         if (wydotRsus.size() <= 0) {
+            System.out.println("RSU not found for id " + aTim.getTimId());
             return;
         }
 
@@ -171,6 +176,7 @@ public class TimRefreshController {
 
         timToSend.getRequest().setSnmp(snmp);
 
+        System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
         WydotTimService.updateTimOnRsu(timToSend);
     }
 
@@ -178,7 +184,7 @@ public class TimRefreshController {
         SDW sdw = new SDW();
         AdvisorySituationDataDeposit asdd = SdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
-            System.out.println(String.format("SAT record not found for id {0}", aTim.getSatRecordId()));
+            System.out.println("SAT record not found for id " + aTim.getSatRecordId());
             return;
         }
 
@@ -196,6 +202,7 @@ public class TimRefreshController {
         sdw.setServiceRegion(serviceRegion);
 
         // set sdw block in TIM
+        System.out.println("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
         WydotTimService.updateTimOnSdw(timToSend);
     }

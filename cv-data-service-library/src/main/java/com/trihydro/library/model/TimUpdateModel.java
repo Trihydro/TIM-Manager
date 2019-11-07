@@ -2,9 +2,6 @@ package com.trihydro.library.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.List;
-
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
 public class TimUpdateModel extends ActiveTim {
     // Tim properties
@@ -13,7 +10,13 @@ public class TimUpdateModel extends ActiveTim {
     private Timestamp startDate_Timestamp;
     private Timestamp endDate_Timestamp;
 
+    // Tim Type properties
+    private String timTypeName;
+    private String timTypeDescription;
+
     // Region properties
+    private Integer regionId;
+    private String regionName;
     private BigDecimal laneWidth;
     private BigDecimal anchorLat;
     private BigDecimal anchorLong;
@@ -36,6 +39,34 @@ public class TimUpdateModel extends ActiveTim {
     public BigDecimal getLaneWidth() {
         return laneWidth;
         // DataFrame df;df.setFrameType(frameType);
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public Integer getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Integer regionId) {
+        this.regionId = regionId;
+    }
+
+    public String getTimTypeName() {
+        return timTypeName;
+    }
+
+    public void setTimTypeName(String timTypeName) {
+        this.timTypeName = timTypeName;
+    }
+
+    public String getTimTypeDescription() {
+        return timTypeDescription;
+    }
+
+    public void setTimTypeDescription(String timTypeDescription) {
+        this.timTypeDescription = timTypeDescription;
     }
 
     public int getDurationTime() {
@@ -195,10 +226,10 @@ public class TimUpdateModel extends ActiveTim {
     }
 
     public String getRegionName() {
-        String regionName = getDirection();
-        regionName += "_" + getRoute();
-        regionName += "_" + getMilepostStart();
-        regionName += "_" + getMilepostStop();
-        return regionName;
+        // String regionName = getDirection();
+        // regionName += "_" + getRoute();
+        // regionName += "_" + getMilepostStart();
+        // regionName += "_" + getMilepostStop();
+        return this.regionName;
     }
 }

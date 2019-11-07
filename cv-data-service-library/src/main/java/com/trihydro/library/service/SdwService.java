@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Random;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.library.helpers.DbUtility;
@@ -16,8 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class SdwService {
     public static AdvisorySituationDataDeposit getSdwDataByRecordId(String recordId) {
-        String token = getToken();
-        if (token == null) {
+        String apiKey = DbUtility.getConfig().getSdwApiKey();
+        if (apiKey == null) {
             return null;
         }
 
@@ -26,7 +27,7 @@ public class SdwService {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + token);
+            conn.setRequestProperty("apikey", apiKey);
 
             BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
             String objString = br.readLine();
@@ -46,6 +47,18 @@ public class SdwService {
 
     }
 
+    public static String getNewRecordId() {
+        String hexChars = "ABCDEF1234567890";
+        StringBuilder hexStrB = new StringBuilder();
+        Random rnd = new Random();
+        while (hexStrB.length() < 8) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * hexChars.length());
+            hexStrB.append(hexChars.charAt(index));
+        }
+        String hexStr = hexStrB.toString();
+        return hexStr;
+    }
+
     private static URL getBaseUrl(String end) {
         try {
             String baseUrl = DbUtility.getConfig().getSdwRestUrl();
@@ -57,36 +70,5 @@ public class SdwService {
         } catch (MalformedURLException ex) {
             return null;
         }
-    }
-
-    public static String getToken() {
-        URL url = getBaseUrl("Token");
-        String token = null;
-        try {
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-
-            String input = String.format("{\"Email\": \"%s\",\"Password\": \"%s\"}",
-                    DbUtility.getConfig().getSdwUsername(), DbUtility.getConfig().getSdwPassword());
-
-            OutputStream os = conn.getOutputStream();
-            os.write(input.getBytes());
-            os.flush();
-
-            int status = conn.getResponseCode();
-            if(status != 200){
-                return token;
-            }
-            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            token = br.readLine();
-
-            conn.disconnect();
-        } catch (IOException ex) {
-            System.out.println(String.format("Failed to fetch SDW token: {0}", ex.getMessage()));
-            token = null;
-        }
-        return token;
     }
 }

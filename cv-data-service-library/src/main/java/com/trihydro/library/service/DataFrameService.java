@@ -134,7 +134,7 @@ public class DataFrameService extends CvDataServiceLibrary {
 
 			String selectStatement = "select distinct ic.itis_code";
 			selectStatement += " from data_frame_itis_Code dfic inner join itis_code ic on dfic.itis_code_id = ic.itis_code_id";
-			selectStatement += "where data_frame_id =  ";
+			selectStatement += " where data_frame_id =  ";
 			selectStatement += dataFrameId;
 
 			rs = statement.executeQuery(selectStatement);

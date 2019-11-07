@@ -9,7 +9,14 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SharedFieldsModel;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.trihydro.library.tables.TimOracleTables;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 
@@ -36,7 +43,7 @@ public class RegionService extends CvDataServiceLibrary {
 			else if (col.equals("ANCHOR_LONG") && anchor != null)
 				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLongitude());
 			else if (col.equals("NAME"))
-				SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, null);
+				SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, region.getName());// null);
 			else if (col.equals("LANE_WIDTH"))
 				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, region.getLaneWidth());
 			else if (col.equals("DIRECTIONALITY"))
@@ -143,4 +150,35 @@ public class RegionService extends CvDataServiceLibrary {
 		}
 		return new Long(0);
 	}
+
+	public static Boolean updateRegionName(Long regionId, String name) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
+		cols.add(new ImmutablePair<String, Object>("NAME", name));
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			preparedStatement = TimOracleTables.buildUpdateStatement(regionId, "REGION", "REGION_ID", cols, connection);
+
+			// execute update statement
+			Boolean success = updateOrDelete(preparedStatement);
+			return success;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
 }

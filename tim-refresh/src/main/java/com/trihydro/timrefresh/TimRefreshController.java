@@ -4,6 +4,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.PathNodeXYService;
+import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.google.gson.Gson;
@@ -182,15 +183,17 @@ public class TimRefreshController {
 
     private void UpdateAndSendSDW(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
         SDW sdw = new SDW();
+        List<Milepost> mps = MilepostService.selectMilepostRange(aTim.getDirection(), aTim.getRoute(),
+                aTim.getMilepostStart(), aTim.getMilepostStop());
+                timToSend.setMileposts(mps);
         AdvisorySituationDataDeposit asdd = SdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
             System.out.println("SAT record not found for id " + aTim.getSatRecordId());
+            UpdateAndSendNewSDW(timToSend, aTim);
             return;
         }
 
         // fetch all mileposts, get service region by bounding box
-        List<Milepost> mps = MilepostService.selectMilepostRange(aTim.getDirection(), aTim.getRoute(),
-                aTim.getMilepostStart(), aTim.getMilepostStop());
         OdeGeoRegion serviceRegion = WydotTimService.getServiceRegion(mps);
 
         // we are saving our ttl unencoded at the root level of the object as an int
@@ -205,5 +208,37 @@ public class TimRefreshController {
         System.out.println("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
         WydotTimService.updateTimOnSdw(timToSend);
+    }
+
+    private void UpdateAndSendNewSDW(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
+        String recordId = SdwService.getNewRecordId();
+        System.out.println("Generating new SAT id and TIM: " + recordId);
+        String regionName = GetRegionName(aTim, recordId);
+
+        // Update region.name in database
+        RegionService.updateRegionName(new Long(aTim.getRegionId()), regionName);
+        // Update active_tim.
+        ActiveTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
+        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
+        WydotTimService.sendNewTimToSdw(timToSend, recordId);
+    }
+
+    private String GetRegionName(TimUpdateModel aTim, String recordId) {
+
+        String oldName = aTim.getRegionName();
+        if (oldName != null && oldName.length() > 0) {
+            // just replace existing satRecordId with new
+            return oldName.replace(aTim.getSatRecordId(), recordId);
+        } else {
+            // generating from scratch...
+            String regionNamePrev = aTim.getDirection() + "_" + aTim.getRoute() + "_" + aTim.getMilepostStart() + "_"
+                    + aTim.getMilepostStop();
+
+            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + aTim.getTimTypeName();
+
+            if (aTim.getClientId() != null)
+                regionNameTemp += "_" + aTim.getClientId();
+            return regionNameTemp;
+        }
     }
 }

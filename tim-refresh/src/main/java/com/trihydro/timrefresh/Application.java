@@ -19,6 +19,7 @@ public class Application {
 
     @Autowired
     public void setConfiguration(BasicConfiguration configurationRhs) {
+        System.out.println("Setting configuration");
         configuration = configurationRhs;
         CvDataServiceLibrary.setConfig(configuration);
     }

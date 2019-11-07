@@ -10,6 +10,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import com.trihydro.library.tables.TimOracleTables;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +87,36 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		}
 
 		return new Long(0);
+	}
+
+	public static Boolean updateActiveTim_SatRecordId(Long activeTimId, String satRecordId) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
+		cols.add(new ImmutablePair<String, Object>("SAT_RECORD_ID", satRecordId));
+		boolean success = false;
+		try {
+			connection = DbUtility.getConnectionPool();
+			preparedStatement = TimOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
+					connection);
+
+			// execute update statement
+			success = updateOrDelete(preparedStatement);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return success;
 	}
 
 	// update all fields in TIM
@@ -672,15 +706,16 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "SELECT atim.*, t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id";
+			String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description, t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id";
 			selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
 			selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
-			selectStatement += ", r.anchor_lat, r.anchor_long, r.lane_width, r.path_id, r.closed_path";
+			selectStatement += ", r.region_id, r.name as region_name, r.anchor_lat, r.anchor_long, r.lane_width, r.path_id, r.closed_path";
 			selectStatement += ", r.directionality, r.direction AS region_direction, r.path_id";
 			selectStatement += " FROM active_tim atim";
 			selectStatement += " INNER JOIN tim t ON atim.tim_id = t.tim_id";
 			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
+			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
 			selectStatement += " WHERE tim_start + INTERVAL '14' DAY <= SYSDATE + INTERVAL '1' DAY";
 			selectStatement += " AND (tim_end is null OR tim_end >= SYSDATE + INTERVAL '1' DAY)";
 
@@ -693,12 +728,14 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				// Active_Tim properties
 				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
 				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
 				activeTim.setStartDateTime(rs.getString("TIM_START"));
 				activeTim.setEndDateTime(rs.getString("TIM_END"));
 				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
 				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
 				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
 				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setRoute(rs.getString("ROUTE"));
 
 				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START"));
 				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END"));
@@ -707,11 +744,17 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				activeTim.setMsgCnt(rs.getInt("MSG_CNT"));
 				activeTim.setUrlB(rs.getString("URL_B"));
 
+				// Tim Type properties
+				activeTim.setTimTypeName(rs.getString("TIM_TYPE_NAME"));
+				activeTim.setTimTypeDescription(rs.getString("TIM_TYPE_DESCRIPTION"));
+
 				// Region Properties
+				activeTim.setRegionId(rs.getInt("REGION_ID"));
+				activeTim.setRegionName(rs.getString("REGION_NAME"));
 				activeTim.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
 				activeTim.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
 				activeTim.setLaneWidth(rs.getBigDecimal("LANE_WIDTH"));
-				activeTim.setDirection(rs.getString("REGION_DIRECTION"));
+				// activeTim.setDirection(rs.getString("REGION_DIRECTION"));
 				activeTim.setDirectionality(rs.getString("DIRECTIONALITY"));
 				activeTim.setClosedPath(rs.getBoolean("CLOSED_PATH"));
 				activeTim.setPathId(rs.getInt("PATH_ID"));

@@ -15,8 +15,7 @@ public class ConfigProperties {
     private String trackUrl;
 
     private String sdwRestUrl;
-    private String sdwUsername;
-    private String sdwPassword;
+    private String sdwApiKey;
 
     private String mailHost;
     private int mailPort;
@@ -25,6 +24,14 @@ public class ConfigProperties {
 
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public String getSdwApiKey() {
+        return sdwApiKey;
+    }
+
+    public void setSdwApiKey(String sdwApiKey) {
+        this.sdwApiKey = sdwApiKey;
     }
 
     public int getMailPort() {
@@ -53,22 +60,6 @@ public class ConfigProperties {
 
     public void setAlertAddresses(String alertAddresses) {
         this.alertAddresses = alertAddresses.split(",");
-    }
-
-    public String getSdwPassword() {
-        return sdwPassword;
-    }
-
-    public void setSdwPassword(String sdwPassword) {
-        this.sdwPassword = sdwPassword;
-    }
-
-    public String getSdwUsername() {
-        return sdwUsername;
-    }
-
-    public void setSdwUsername(String sdwUsername) {
-        this.sdwUsername = sdwUsername;
     }
 
     public String getSdwRestUrl() {

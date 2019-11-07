@@ -10,6 +10,7 @@ import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotTravelerInputData;
 import org.springframework.web.client.RestTemplate;
 
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
@@ -43,6 +44,35 @@ public class WydotTimService {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
+        }
+    }
+
+    public static void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId) {
+
+        // set msgCnt to 1 and create new packetId
+        timToSend.getTim().setMsgCnt(1);
+
+        SDW sdw = new SDW();
+
+        // calculate service region
+        sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
+
+        // set time to live
+        sdw.setTtl(configuration.getSdwTtl());
+        // set new record id
+        sdw.setRecordId(recordId);
+
+        // set sdw block in TIM
+        timToSend.getRequest().setSdw(sdw);
+
+        // send to ODE
+        String timToSendJson = gson.toJson(timToSend);
+
+        try {
+            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+        } catch (RuntimeException targetException) {
+            System.out.println("Failed to POST refresh SDX TIM");
+            targetException.printStackTrace();
         }
     }
 

@@ -31,6 +31,7 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RsuService;
+import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
@@ -141,7 +142,7 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
         } else {
-            String recordId = getNewRecordId();
+            String recordId = SdwService.getNewRecordId();
             String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
 
             if (wydotTim.getClientId() != null)
@@ -472,24 +473,11 @@ public class WydotTimService {
         // send to ODE
         String timToSendJson = gson.toJson(timToSend);
 
-        // if (!DbUtility.getConnectionEnvironment().equals("test"))
         try {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
         }
-    }
-
-    protected static String getNewRecordId() {
-        String hexChars = "ABCDEF1234567890";
-        StringBuilder hexStrB = new StringBuilder();
-        Random rnd = new Random();
-        while (hexStrB.length() < 8) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * hexChars.length());
-            hexStrB.append(hexChars.charAt(index));
-        }
-        String hexStr = hexStrB.toString();
-        return hexStr;
     }
 
     public String convertUtcDateTimeToLocal(String utcDateTime) {

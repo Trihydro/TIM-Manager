@@ -41,6 +41,10 @@ public class TimUpdateModel extends ActiveTim {
         // DataFrame df;df.setFrameType(frameType);
     }
 
+    public String getRegionName() {
+        return this.regionName;
+    }
+
     public void setRegionName(String regionName) {
         this.regionName = regionName;
     }
@@ -223,13 +227,5 @@ public class TimUpdateModel extends ActiveTim {
 
     public void setLaneWidth(BigDecimal laneWidth) {
         this.laneWidth = laneWidth;
-    }
-
-    public String getRegionName() {
-        // String regionName = getDirection();
-        // regionName += "_" + getRoute();
-        // regionName += "_" + getMilepostStart();
-        // regionName += "_" + getMilepostStop();
-        return this.regionName;
     }
 }

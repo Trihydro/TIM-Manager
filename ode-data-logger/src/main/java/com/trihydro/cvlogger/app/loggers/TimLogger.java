@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TimType;
@@ -116,7 +117,7 @@ public class TimLogger extends BaseLogger {
 
 			if (path != null) {
 				Long pathId = PathService.insertPath();
-				RegionService.insertPathRegion(dataFrameId, pathId, region);
+				RegionService.insertRegion(dataFrameId, pathId, region);
 
 				Long nodeXYId;
 				for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
@@ -124,7 +125,12 @@ public class TimLogger extends BaseLogger {
 					PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
 				}
 			} else if (geometry != null) {
-				RegionService.insertGeometryRegion(dataFrameId, geometry, region);
+				RegionService.insertRegion(dataFrameId, null, region);
+				// RegionService.insertGeometryRegion(dataFrameId, geometry, region);
+			} else {
+				Utility.logWithDate(
+						"addTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+								+ dataFrameId + ")");
 			}
 
 			if (dFrames.length > 0) {
@@ -205,7 +211,7 @@ public class TimLogger extends BaseLogger {
 
 		if (path != null) {
 			Long pathId = PathService.insertPath();
-			RegionService.insertPathRegion(dataFrameId, pathId, region);
+			RegionService.insertRegion(dataFrameId, pathId, region);
 
 			Long nodeXYId;
 			for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
@@ -213,7 +219,12 @@ public class TimLogger extends BaseLogger {
 				PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
 			}
 		} else if (geometry != null) {
-			RegionService.insertGeometryRegion(dataFrameId, geometry, region);
+			RegionService.insertRegion(dataFrameId, null, region);
+			// RegionService.insertGeometryRegion(dataFrameId, geometry, region);
+		} else {
+			Utility.logWithDate(
+					"addActiveTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+							+ dataFrameId + ")");
 		}
 
 		// TODO : Change to loop through RSU array - doing one rsu for now

@@ -47,7 +47,7 @@ public class WydotTimService {
         }
     }
 
-    public static void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId) {
+    public static void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps) {
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
@@ -55,7 +55,7 @@ public class WydotTimService {
         SDW sdw = new SDW();
 
         // calculate service region
-        sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
+        sdw.setServiceRegion(getServiceRegion(mps));
 
         // set time to live
         sdw.setTtl(configuration.getSdwTtl());
@@ -70,8 +70,9 @@ public class WydotTimService {
 
         try {
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            System.out.println("Successfully sent POST to ODE to send new TIM: " + timToSendJson);
         } catch (RuntimeException targetException) {
-            System.out.println("Failed to POST refresh SDX TIM");
+            System.out.println("Failed to POST new SDX TIM: " + timToSendJson);
             targetException.printStackTrace();
         }
     }
@@ -96,26 +97,31 @@ public class WydotTimService {
 
         Comparator<Milepost> compLat = (l1, l2) -> Double.compare(l1.getLatitude(), l2.getLatitude());
         Comparator<Milepost> compLong = (l1, l2) -> Double.compare(l1.getLongitude(), l2.getLongitude());
-
-        Milepost maxLat = mileposts.stream().max(compLat).get();
-
-        Milepost minLat = mileposts.stream().min(compLat).get();
-
-        Milepost maxLong = mileposts.stream().max(compLong).get();
-
-        Milepost minLong = mileposts.stream().min(compLong).get();
-
-        OdePosition3D nwCorner = new OdePosition3D();
-        nwCorner.setLatitude(new BigDecimal(maxLat.getLatitude()));
-        nwCorner.setLongitude(new BigDecimal(minLong.getLongitude()));
-
-        OdePosition3D seCorner = new OdePosition3D();
-        seCorner.setLatitude(new BigDecimal(minLat.getLatitude()));
-        seCorner.setLongitude(new BigDecimal(maxLong.getLongitude()));
-
         OdeGeoRegion serviceRegion = new OdeGeoRegion();
-        serviceRegion.setNwCorner(nwCorner);
-        serviceRegion.setSeCorner(seCorner);
+
+        if (mileposts.size() > 0) {
+
+            Milepost maxLat = mileposts.stream().max(compLat).get();
+
+            Milepost minLat = mileposts.stream().min(compLat).get();
+
+            Milepost maxLong = mileposts.stream().max(compLong).get();
+
+            Milepost minLong = mileposts.stream().min(compLong).get();
+
+            OdePosition3D nwCorner = new OdePosition3D();
+            nwCorner.setLatitude(new BigDecimal(maxLat.getLatitude()));
+            nwCorner.setLongitude(new BigDecimal(minLong.getLongitude()));
+
+            OdePosition3D seCorner = new OdePosition3D();
+            seCorner.setLatitude(new BigDecimal(minLat.getLatitude()));
+            seCorner.setLongitude(new BigDecimal(maxLong.getLongitude()));
+
+            serviceRegion.setNwCorner(nwCorner);
+            serviceRegion.setSeCorner(seCorner);
+        } else {
+            System.out.println("getServiceRegion fails due to no mileposts");
+        }
         return serviceRegion;
     }
 }

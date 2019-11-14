@@ -68,7 +68,8 @@ public class RegionService extends CvDataServiceLibrary {
 					Integer extent = (pathId == null && geometry != null) ? geometry.getExtent() : null;
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, extent);
 				} else if (col.equals("GEOMETRY_LANE_WIDTH")) {
-					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, geometry.getLaneWidth());
+					BigDecimal laneWidth = (pathId == null && geometry != null) ? geometry.getLaneWidth() : null;
+					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, laneWidth);
 				} else if (col.equals("GEOMETRY_CIRCLE_POSITION_LAT")) {
 					BigDecimal lat = null;
 					if (pathId == null && geometry != null && geometry.getCircle() != null

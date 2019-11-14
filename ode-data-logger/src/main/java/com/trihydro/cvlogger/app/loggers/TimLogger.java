@@ -13,6 +13,7 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Geometry;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
 import us.dot.its.jpo.ode.util.JsonUtils;
@@ -193,7 +194,27 @@ public class TimLogger extends BaseLogger {
 		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 
 		// save DataFrame
-		Long dataFrameId = DataFrameService.insertDataFrame(timId, dframes[0]);
+		Long dataFrameId = null; // DataFrameService.insertDataFrame(timId, dframes[0]);
+
+		Path path = null;
+		Geometry geometry = null;
+		Region region = regions[0];
+		path = region.getPath();
+		geometry = region.getGeometry();
+		dataFrameId = DataFrameService.insertDataFrame(timId, dframes[0]);
+
+		if (path != null) {
+			Long pathId = PathService.insertPath();
+			RegionService.insertPathRegion(dataFrameId, pathId, region);
+
+			Long nodeXYId;
+			for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
+				nodeXYId = NodeXYService.insertNodeXY(nodeXY);
+				PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+			}
+		} else if (geometry != null) {
+			RegionService.insertGeometryRegion(dataFrameId, geometry, region);
+		}
 
 		// TODO : Change to loop through RSU array - doing one rsu for now
 		RSU firstRsu = null;
@@ -219,9 +240,18 @@ public class TimLogger extends BaseLogger {
 		}
 
 		// save DataFrame ITIS codes
-		for (String timItisCodeId : dframes[0].getItems())
-			if (StringUtils.isNumeric(timItisCodeId))
-				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, getItisCodeId(timItisCodeId));
+		String[] items = dframes[0].getItems();
+		if (items.length == 0) {
+			System.out.println("No itis codes found to associate with data_frame " + dataFrameId);
+		}
+		for (String timItisCodeId : items) {
+			if (StringUtils.isNumeric(timItisCodeId)) {
+				String itisCodeId = getItisCodeId(timItisCodeId);
+				if (itisCodeId != null)
+					DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+			} else
+				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+		}
 
 		// set end time if duration is not indefinite
 		if (dframes[0].getDurationTime() != 32000) {
@@ -240,7 +270,7 @@ public class TimLogger extends BaseLogger {
 				activeTimDb = ActiveTimService.getActiveRsuTim(activeTim.getClientId(), activeTim.getDirection(),
 						activeTim.getRsuTarget());
 			else // else look for active SAT tim that matches incoming TIM
-				activeTimDb = ActiveTimService.getActiveSatTim(activeTim.getClientId(), activeTim.getDirection());
+				activeTimDb = ActiveTimService.getActiveSatTim(activeTim.getSatRecordId(), activeTim.getDirection());
 
 			// if there is no active TIM, insert new one
 			if (activeTimDb == null) {
@@ -253,6 +283,7 @@ public class TimLogger extends BaseLogger {
 		} else {
 			// not from WYDOT application
 			// just log for now
+			System.out.println("Inserting new active_tim, no TimType found - not from WYDOT application");
 			ActiveTimService.insertActiveTim(activeTim);
 		}
 	}

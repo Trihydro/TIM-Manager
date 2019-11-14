@@ -1,11 +1,14 @@
 package com.trihydro.library.service;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
@@ -146,7 +149,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			SQLNullHandler.setIntegerOrNull(preparedStatement, 6, activeTim.getPk());
 			SQLNullHandler.setLongOrNull(preparedStatement, 7, activeTim.getActiveTimId());
 			activeTimIdResult = updateOrDelete(preparedStatement);
-
+			System.out.println("------ Updated active_tim with id: " + activeTim.getActiveTimId() + " --------------");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -642,7 +645,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	// get Active TIMs by client ID direction
-	public static ActiveTim getActiveSatTim(String clientId, String direction) {
+	public static ActiveTim getActiveSatTim(String satRecordId, String direction) {
 
 		ActiveTim activeTim = null;
 		Connection connection = null;
@@ -653,8 +656,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			connection = DbUtility.getConnectionPool();
 			statement = connection.createStatement();
 			String query = "select * from active_tim";
-			query += " where client_id = '" + clientId + "' and active_tim.direction = '" + direction
-					+ "' and sat_record_id is not null";
+			query += " where sat_record_id = '" + satRecordId + "' and active_tim.direction = '" + direction + "'";
 
 			rs = statement.executeQuery(query);
 
@@ -706,11 +708,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description, t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id";
+			String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
+			selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
 			selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
 			selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
-			selectStatement += ", r.region_id, r.name as region_name, r.anchor_lat, r.anchor_long, r.lane_width, r.path_id, r.closed_path";
-			selectStatement += ", r.directionality, r.direction AS region_direction, r.path_id";
+			selectStatement += ", r.region_id, r.name as region_name, r.anchor_lat, r.anchor_long, r.lane_width";
+			selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
+			selectStatement += ", r.directionality, r.direction AS region_direction";
 			selectStatement += " FROM active_tim atim";
 			selectStatement += " INNER JOIN tim t ON atim.tim_id = t.tim_id";
 			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
@@ -743,6 +747,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				// Tim properties
 				activeTim.setMsgCnt(rs.getInt("MSG_CNT"));
 				activeTim.setUrlB(rs.getString("URL_B"));
+				activeTim.setPacketId(rs.getString("PACKET_ID"));
 
 				// Tim Type properties
 				activeTim.setTimTypeName(rs.getString("TIM_TYPE_NAME"));
@@ -753,21 +758,36 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				activeTim.setRegionName(rs.getString("REGION_NAME"));
 				activeTim.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
 				activeTim.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
-				activeTim.setLaneWidth(rs.getBigDecimal("LANE_WIDTH"));
-				// activeTim.setDirection(rs.getString("REGION_DIRECTION"));
+
+				BigDecimal lane_width = rs.getBigDecimal("LANE_WIDTH");
+				if (lane_width == null) {
+					lane_width = new BigDecimal(327);
+					// TODO: we default to 327 in the wrapper too, but this should come from config
+					// and likely needs to be a bit smaller
+				}
+				activeTim.setLaneWidth(lane_width);
+				activeTim.setRegionDirection(rs.getString("REGION_DIRECTION"));
 				activeTim.setDirectionality(rs.getString("DIRECTIONALITY"));
 				activeTim.setClosedPath(rs.getBoolean("CLOSED_PATH"));
 				activeTim.setPathId(rs.getInt("PATH_ID"));
+				activeTim.setRegionDescription(rs.getString("REGION_DESCRIPTION"));
 
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
 				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-				activeTim.setSspLocationRights(rs.getShort("SSP_LOCATION_RIGHTS"));
-				activeTim.setSspTimRights(rs.getShort("SSP_TIM_RIGHTS"));
-				activeTim.setSspMsgTypes(rs.getShort("SSP_MSG_TYPES"));
-				activeTim.setSspMsgContent(rs.getShort("SSP_MSG_CONTENT"));
-				activeTim.setDfContent(rs.getString("DF_CONTENT"));
+				activeTim.setSspLocationRights(Utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
+				activeTim.setSspTimRights(Utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
+				activeTim.setSspMsgTypes(Utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
+				activeTim.setSspMsgContent(Utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+
+				// set dataFrame content. it's required for the ODE, so if we didn't record it,
+				// assume Advisory
+				String dfContent = rs.getString("DF_CONTENT");
+				if (dfContent == null || dfContent == "") {
+					dfContent = "advisory";
+				}
+				activeTim.setDfContent(dfContent);
 				activeTim.setUrl(rs.getString("URL"));
 
 				activeTims.add(activeTim);

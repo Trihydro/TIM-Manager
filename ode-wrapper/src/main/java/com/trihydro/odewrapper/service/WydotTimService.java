@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimRsu;
@@ -94,8 +95,8 @@ public class WydotTimService {
 
         // set the duration if there is an enddate
         if (endDateTime != null) {
-            long durationTime = getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
-            timToSend.getTim().getDataframes()[0].setDurationTime(toIntExact(durationTime));
+            int durationTime = Utility.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+            timToSend.getTim().getDataframes()[0].setDurationTime(durationTime);
         }
 
         // if parking TIM
@@ -276,18 +277,6 @@ public class WydotTimService {
         return activeTims;
     }
 
-    public long getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime) {
-
-        ZonedDateTime zdtStart = ZonedDateTime.parse(startDateTime);
-        ZonedDateTime zdtEnd = ZonedDateTime.parse(endDateTime);
-
-        java.time.Duration dateDuration = java.time.Duration.between(zdtStart, zdtEnd);
-        Math.abs(dateDuration.toMinutes());
-        long durationTime = Math.abs(dateDuration.toMinutes());
-
-        return durationTime;
-    }
-
     public ArrayList<WydotRsu> getRsus() {
         if (rsus != null)
             return rsus;
@@ -443,6 +432,7 @@ public class WydotTimService {
 
         // send TIM if not a test
         try {
+            System.out.println("----> Sending new TIM to RSU: " + timToSendJson);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
             TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
@@ -474,6 +464,7 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(timToSend);
 
         try {
+            System.out.println("----> Sending new TIM to SDW: " + timToSendJson);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
@@ -504,7 +495,12 @@ public class WydotTimService {
 
         String timToSendJson = gson.toJson(updatedTim);
 
-        restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+        try {
+            System.out.println("----> Updating TIM on RSU: " + timToSendJson);
+            restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+        } catch (RestClientException ex) {
+            System.out.println("Failed to send update to RSU");
+        }
     }
 
     public static void updateTimOnSdw(WydotTravelerInputData timToSend, Long timId, String recordId,
@@ -529,6 +525,7 @@ public class WydotTimService {
 
         // send TIM
         try {
+            System.out.println("----> Updating TIM on SDW: " + timToSendJson);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");

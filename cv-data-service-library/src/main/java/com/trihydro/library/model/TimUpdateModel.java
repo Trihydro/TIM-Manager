@@ -9,6 +9,7 @@ public class TimUpdateModel extends ActiveTim {
     private String urlB;
     private Timestamp startDate_Timestamp;
     private Timestamp endDate_Timestamp;
+    private String packetId;
 
     // Tim Type properties
     private String timTypeName;
@@ -17,10 +18,11 @@ public class TimUpdateModel extends ActiveTim {
     // Region properties
     private Integer regionId;
     private String regionName;
+    private String regionDescription;
     private BigDecimal laneWidth;
     private BigDecimal anchorLat;
     private BigDecimal anchorLong;
-    private String direction;
+    private String regionDirection;
     private String directionality;
     private Boolean closedPath;
     private Integer pathId;
@@ -39,6 +41,30 @@ public class TimUpdateModel extends ActiveTim {
     public BigDecimal getLaneWidth() {
         return laneWidth;
         // DataFrame df;df.setFrameType(frameType);
+    }
+
+    public String getRegionDirection() {
+        return regionDirection;
+    }
+
+    public void setRegionDirection(String regionDirection) {
+        this.regionDirection = regionDirection;
+    }
+
+    public String getRegionDescription() {
+        return regionDescription;
+    }
+
+    public void setRegionDescription(String regionDescription) {
+        this.regionDescription = regionDescription;
+    }
+
+    public String getPacketId() {
+        return packetId;
+    }
+
+    public void setPacketId(String packetId) {
+        this.packetId = packetId;
     }
 
     public String getRegionName() {
@@ -135,14 +161,6 @@ public class TimUpdateModel extends ActiveTim {
 
     public void setDirectionality(String directionality) {
         this.directionality = directionality;
-    }
-
-    public String getDirection() {
-        return direction;
-    }
-
-    public void setDirection(String direction) {
-        this.direction = direction;
     }
 
     public int getDataFrameId() {

@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
@@ -71,7 +72,7 @@ public class CvDataServiceLibrary {
                 try {
                     if (generatedKeys != null && generatedKeys.next()) {
                         id = generatedKeys.getLong(1);
-                        System.out.println("------ Generated " + type + " " + id + " --------------");
+                        Utility.logWithDate("------ Generated " + type + " " + id + " --------------");
                     }
                 } finally {
                     try {

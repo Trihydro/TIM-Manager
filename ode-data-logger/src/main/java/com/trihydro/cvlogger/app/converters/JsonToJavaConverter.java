@@ -228,6 +228,91 @@ public class JsonToJavaConverter {
         return odeTimMetadata;
     }
 
+    private static OdeTravelerInformationMessage.DataFrame.Region getRegion(JsonNode geoPath)
+            throws JsonProcessingException {
+        if (geoPath == null) {
+            return null;
+        }
+        OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
+        JsonNode anchorNode = null;
+        JsonNode regionNameNode = null;
+        JsonNode regionDirectionalityNode = null;
+        JsonNode regionLaneWidthNode = null;
+        JsonNode regionClosedPathNode = null;
+        JsonNode regionDirectionNode = null;
+        OdeTravelerInformationMessage.DataFrame.Region.Path path = null;
+        OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = null;
+        if (geoPath != null) {
+            anchorNode = geoPath.get("anchor");
+            regionNameNode = geoPath.get("name");
+            regionDirectionalityNode = geoPath.get("directionality");
+            regionLaneWidthNode = geoPath.get("laneWidth");
+            regionClosedPathNode = geoPath.get("closedPath");
+            regionDirectionNode = geoPath.get("direction");
+
+            // anchor is an optional property, check for null
+            if (anchorNode != null) {
+                BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
+                BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
+                // set region anchor
+                OdePosition3D anchorPosition = new OdePosition3D();
+                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(".0000001")));
+                // TODO elevation
+
+                region.setAnchorPosition(anchorPosition);
+            }
+
+            // name
+            if (regionNameNode != null)
+                region.setName(mapper.treeToValue(regionNameNode, String.class));
+
+            // Directionality
+            if (regionDirectionalityNode != null) {
+                // J2735 7.31 DirectionOfUse
+                JsonNode unavailable = regionDirectionalityNode.get("unavailable");// 0
+                JsonNode forward = regionDirectionalityNode.get("forward");// 1
+                JsonNode reverse = regionDirectionalityNode.get("reverse");// 2
+                // JsonNode both = regionDirectionalityNode.get("both");// 3
+                if (unavailable != null)
+                    region.setDirectionality("0");
+                else if (forward != null)
+                    region.setDirectionality("1");
+                else if (reverse != null)
+                    region.setDirectionality("2");
+                else
+                    region.setDirectionality("3");
+            }
+
+            // lane width
+            if (regionLaneWidthNode != null) {
+                region.setLaneWidth(mapper.treeToValue(regionLaneWidthNode, BigDecimal.class));
+            }
+
+            // closed path
+            if (regionClosedPathNode != null) {
+                region.setClosedPath(regionClosedPathNode.get("true") != null);
+            }
+
+            if (regionDirectionNode != null) {
+                region.setDirection(mapper.treeToValue(regionDirectionNode, String.class));
+            }
+
+            JsonNode descriptionNode = geoPath.get("description");
+            if (descriptionNode != null) {
+                path = JsonToJavaConverter.GetPathData(descriptionNode.get("path"));
+                geometry = JsonToJavaConverter.GetGeometryData(descriptionNode.get("geometry"));
+
+                if (path != null)
+                    region.setPath(path);
+                else if (geometry != null)
+                    region.setGeometry(geometry);
+            }
+        }
+
+        return region;
+    }
+
     public static OdeTimPayload convertTimPayloadJsonToJava(String value) {
 
         OdeTimPayload odeTimPayload = null;
@@ -236,28 +321,12 @@ public class JsonToJavaConverter {
             OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
             OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
-            OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
 
             // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
                     .get("TravelerInformation");
             JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
             JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
-
-            JsonNode anchorNode = null;
-            JsonNode regionNameNode = null;
-            OdeTravelerInformationMessage.DataFrame.Region.Path path = null;
-            OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = null;
-            if (geoPath != null) {
-                anchorNode = geoPath.get("anchor");
-                regionNameNode = geoPath.get("name");
-
-                JsonNode descriptionNode = geoPath.get("description");
-                if (descriptionNode != null) {
-                    path = JsonToJavaConverter.GetPathData(descriptionNode.get("path"));
-                    geometry = JsonToJavaConverter.GetGeometryData(descriptionNode.get("geometry"));
-                }
-            }
 
             JsonNode sequenceArrNode = travelerDataFrame.get("content").get("advisory").get("SEQUENCE");
 
@@ -276,27 +345,6 @@ public class JsonToJavaConverter {
             if (packetIDNode != null) {
                 tim.setPacketID(packetIDNode.asText());
             }
-
-            // anchor is an optional property, check for null
-            if (anchorNode != null) {
-                BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
-                BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
-                // set region anchor
-                OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(".0000001")));
-                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(".0000001")));
-                // TODO elevation
-
-                region.setAnchorPosition(anchorPosition);
-            }
-
-            if (regionNameNode != null)
-                region.setName(mapper.treeToValue(regionNameNode, String.class));
-
-            if (path != null)
-                region.setPath(path);
-            else if (geometry != null)
-                region.setGeometry(geometry);
 
             // if ITIS codes are in an array
             List<String> itemsList = new ArrayList<String>();
@@ -325,7 +373,7 @@ public class JsonToJavaConverter {
             String[] items = new String[itemsList.size()];
             items = itemsList.toArray(items);
 
-            regions[0] = region;
+            regions[0] = getRegion(geoPath);
             dataFrame.setRegions(regions);
             dataFrame.setItems(items);
             dataFrames[0] = dataFrame;
@@ -433,57 +481,11 @@ public class JsonToJavaConverter {
             OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
             OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
-            OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
-            OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
 
-            // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
                     .get("TravelerInformation");
             JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
             JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
-            JsonNode anchorNode = null;
-            JsonNode regionNameNode = null;
-            if (geoPath != null) {
-                anchorNode = geoPath.get("anchor");
-                regionNameNode = geoPath.get("name");
-
-                JsonNode descChoice = geoPath.get("description");
-                if (descChoice != null) {
-                    JsonNode descPath = descChoice.get("path");
-                    if (descPath != null) {
-                        JsonNode xyNode = descPath.get("offset").get("xy");
-                        if (xyNode != null) {
-                            JsonNode nodeXYArrNode = xyNode.get("nodes").get("NodeXY");
-
-                            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-                            OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
-
-                            if (nodeXYArrNode.isArray()) {
-                                for (final JsonNode objNode : nodeXYArrNode) {
-                                    nodeXY = new OdeTravelerInformationMessage.NodeXY();
-
-                                    // delta is a choice, node-LatLon is only one option
-                                    JsonNode nodeLatLon = objNode.get("delta").get("node-LatLon");
-                                    if (nodeLatLon != null) {
-                                        BigDecimal lat = mapper.treeToValue(nodeLatLon.get("lat"), BigDecimal.class);
-                                        BigDecimal lon = mapper.treeToValue(nodeLatLon.get("lon"), BigDecimal.class);
-                                        nodeXY.setNodeLat(lat.multiply(new BigDecimal(".0000001")));
-                                        nodeXY.setNodeLong(lon.multiply(new BigDecimal(".0000001")));
-                                        nodeXY.setDelta("node-LatLon");
-                                        nodeXYs.add(nodeXY);
-                                    }
-                                }
-                            }
-
-                            OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[nodeXYs
-                                    .size()];
-                            nodeXYArr = nodeXYs.toArray(nodeXYArr);
-
-                            path.setNodes(nodeXYArr);
-                        }
-                    }
-                }
-            }
 
             List<String> itemsList = new ArrayList<String>();
             JsonNode advisoryNode = travelerDataFrame.get("content").get("advisory");// content is a CHOICE
@@ -553,28 +555,10 @@ public class JsonToJavaConverter {
                 tim.setPacketID(packetIDNode.asText());
             }
 
-            if (anchorNode != null) {
-                BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
-                BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
-
-                // set region anchor
-                OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(".0000001")));
-                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(".0000001")));
-                // TODO elevation
-
-                region.setAnchorPosition(anchorPosition);
-            }
-
-            if (regionNameNode != null)
-                region.setName(mapper.treeToValue(regionNameNode, String.class));
-
-            region.setPath(path);
-
             String[] items = new String[itemsList.size()];
             items = itemsList.toArray(items);
 
-            regions[0] = region;
+            regions[0] = getRegion(geoPath);// region;
             dataFrame.setRegions(regions);
             dataFrame.setItems(items);
             dataFrames[0] = dataFrame;

@@ -40,6 +40,18 @@ public class SQLNullHandler {
 			ps.setNull(column, java.sql.Types.NUMERIC);
 	}
 
+	public static void setBigDecimalOrNull(PreparedStatement ps, int column, String value) throws SQLException {
+		if (value != null && value != "") {
+			try {
+				BigDecimal bd = new BigDecimal(value);
+				ps.setBigDecimal(column, bd);
+			} catch (NumberFormatException ex) {
+				ps.setNull(column, java.sql.Types.NUMERIC);
+			}
+		} else
+			ps.setNull(column, java.sql.Types.NUMERIC);
+	}
+
 	public static void setTimestampOrNull(PreparedStatement ps, int column, Timestamp value) throws SQLException {
 		if (value != null)
 			ps.setTimestamp(column, value);

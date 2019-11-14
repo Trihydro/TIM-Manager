@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SharedFieldsModel;
 
 import java.sql.SQLException;
@@ -22,13 +23,8 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 
 public class RegionService extends CvDataServiceLibrary {
 
-	private static SharedFieldsModel setSharedInsertFields(Connection connection, Long dataFrameId, Region region)
+	private static int setSharedInsertFields(PreparedStatement preparedStatement, Long dataFrameId, Region region)
 			throws SQLException {
-		String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("region",
-				TimOracleTables.getRegionTable());
-		PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement,
-				new String[] { "region_id" });
-
 		OdePosition3D anchor = null;
 		if (region != null)
 			anchor = region.getAnchorPosition();
@@ -36,30 +32,38 @@ public class RegionService extends CvDataServiceLibrary {
 		int fieldNum = 1;
 
 		for (String col : TimOracleTables.getRegionTable()) {
-			if (col.equals("DATA_FRAME_ID"))
+			if (col.equals("DATA_FRAME_ID")) {
 				SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, dataFrameId);
-			else if (col.equals("ANCHOR_LAT") && anchor != null)
-				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLatitude());
-			else if (col.equals("ANCHOR_LONG") && anchor != null)
-				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLongitude());
-			else if (col.equals("NAME"))
-				SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, region.getName());// null);
-			else if (col.equals("LANE_WIDTH"))
+				fieldNum++;
+			} else if (col.equals("NAME")) {
+				SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, region.getName());
+				fieldNum++;
+			} else if (col.equals("LANE_WIDTH")) {
 				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, region.getLaneWidth());
-			else if (col.equals("DIRECTIONALITY"))
-				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-						new BigDecimal(region.getDirectionality()));
-			else if (col.equals("DIRECTION"))
+				fieldNum++;
+			} else if (col.equals("DIRECTIONALITY")) {
+				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, region.getDirectionality());
+				fieldNum++;
+			} else if (col.equals("DIRECTION")) {
 				SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, region.getDirection());
-			else if (col.equals("CLOSED_PATH"))
+				fieldNum++;
+			} else if (col.equals("CLOSED_PATH")) {
 				preparedStatement.setBoolean(fieldNum, region.isClosedPath());
-			fieldNum++;
+				fieldNum++;
+			} else if (col.equals("ANCHOR_LAT") && anchor != null) {
+				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLatitude());
+				fieldNum++;
+			} else if (col.equals("ANCHOR_LONG") && anchor != null) {
+				SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLongitude());
+				fieldNum++;
+			}
 		}
+		return fieldNum;
 
-		SharedFieldsModel model = new SharedFieldsModel();
-		model.setFieldCount(fieldNum);
-		model.setPreparedStatement(preparedStatement);
-		return model;
+		// SharedFieldsModel model = new SharedFieldsModel();
+		// model.setFieldCount(fieldNum);
+		// model.setPreparedStatement(preparedStatement);
+		// return model;
 	}
 
 	public static Long insertPathRegion(Long dataFrameId, Long pathId, Region region) {
@@ -69,14 +73,17 @@ public class RegionService extends CvDataServiceLibrary {
 
 		try {
 			connection = DbUtility.getConnectionPool();
-			SharedFieldsModel model = setSharedInsertFields(connection, dataFrameId, region);
-			preparedStatement = model.getPreparedStatement();
-			int fieldNum = model.getFieldCount();
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("region",
+					TimOracleTables.getRegionTable());
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "region_id" });
+			int fieldNum = setSharedInsertFields(preparedStatement, dataFrameId, region);
 
 			for (String col : TimOracleTables.getRegionTable()) {
-				if (col.equals("PATH_ID"))
+				if (col.equals("PATH_ID")) {
+					Utility.logWithDate("Inserting path_id at index " + fieldNum);
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, pathId);
-				fieldNum++;
+					fieldNum++;
+				}
 			}
 			// execute insert statement
 			Long regionId = log(preparedStatement, "regionID");
@@ -103,33 +110,41 @@ public class RegionService extends CvDataServiceLibrary {
 		PreparedStatement preparedStatement = null;
 
 		try {
-
 			connection = DbUtility.getConnectionPool();
-			SharedFieldsModel model = setSharedInsertFields(connection, dataFrameId, region);
-			preparedStatement = model.getPreparedStatement();
-			int fieldNum = model.getFieldCount();
+			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("region",
+					TimOracleTables.getRegionTable());
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "region_id" });
+			int fieldNum = setSharedInsertFields(preparedStatement, dataFrameId, region);
 
 			for (String col : TimOracleTables.getRegionTable()) {
-				if (col.equals("GEOMETRY_DIRECTION"))
+				if (col.equals("GEOMETRY_DIRECTION")) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, geometry.getDirection());
-				else if (col.equals("GEOMETRY_EXTENT"))
+					fieldNum++;
+				} else if (col.equals("GEOMETRY_EXTENT")) {
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, geometry.getExtent());
-				else if (col.equals("GEOMETRY_LANE_WIDTH"))
+					fieldNum++;
+				} else if (col.equals("GEOMETRY_LANE_WIDTH")) {
 					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, geometry.getLaneWidth());
-				else if (col.equals("GEOMETRY_CIRCLE_POSITION_LAT"))
+					fieldNum++;
+				} else if (col.equals("GEOMETRY_CIRCLE_POSITION_LAT")) {
 					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
 							geometry.getCircle().getPosition().getLatitude());
-				else if (col.equals("GEOMETRY_CIRCLE_POSITION_LONG"))
+					fieldNum++;
+				} else if (col.equals("GEOMETRY_CIRCLE_POSITION_LONG")) {
 					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
 							geometry.getCircle().getPosition().getLongitude());
-				else if (col.equals("GEOMETRY_CIRCLE_POSITION_ELEV"))
+					fieldNum++;
+				} else if (col.equals("GEOMETRY_CIRCLE_POSITION_ELEV")) {
 					SQLNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
 							geometry.getCircle().getPosition().getElevation());
-				else if (col.equals("GEOMETRY_CIRCLE_RADIUS"))
+					fieldNum++;
+				} else if (col.equals("GEOMETRY_CIRCLE_RADIUS")) {
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, geometry.getCircle().getRadius());
-				else if (col.equals("GEOMETRY_CIRCLE_UNITS"))
+					fieldNum++;
+				} else if (col.equals("GEOMETRY_CIRCLE_UNITS")) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, geometry.getCircle().getUnits());
-				fieldNum++;
+					fieldNum++;
+				}
 			}
 			// execute insert statement
 			Long regionId = log(preparedStatement, "regionID");

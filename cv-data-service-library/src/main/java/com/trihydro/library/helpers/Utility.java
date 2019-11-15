@@ -7,7 +7,14 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.service.RsuService;
 
 public class Utility {
 	public static void logWithDate(String msg) {
@@ -135,4 +142,96 @@ public class Utility {
 
 		return direction;
 	}
+
+	private static ArrayList<WydotRsu> getRsusByRoute(String route) {
+		ArrayList<WydotRsu> rsus = RsuService.selectRsusByRoute(route);
+		for (WydotRsu rsu : rsus) {
+			rsu.setRsuRetries(3);
+			rsu.setRsuTimeout(5000);
+		}
+		return rsus;
+	}
+
+	public static List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost,
+			String route) {
+
+		List<WydotRsu> rsus = new ArrayList<>();
+		Integer closestIndexOutsideRange = null;
+		Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
+		WydotRsu entryRsu = null;
+		// WydotRsu rsuHigher;
+
+		// if there are no rsus on this route
+		ArrayList<WydotRsu> mainRsus = getRsusByRoute(route);
+		if (rsus.size() == 0)
+			return rsus;
+
+		if (direction.equals("eastbound")) {
+
+			// get rsus at mileposts less than your milepost
+			List<WydotRsu> rsusLower = mainRsus.stream().filter(x -> x.getMilepost() < lowerMilepost)
+					.collect(Collectors.toList());
+
+			if (rsusLower.size() == 0) {
+				// if no rsus found farther west than lowerMilepost
+				// example: higherMilepost = 12, lowerMilepost = 2, no RSUs at mileposts < 2
+				// find milepost furthest west than milepost of TIM location
+				rsusLower = mainRsus.stream().filter(x -> x.getMilepost() < higherMilepost)
+						.collect(Collectors.toList());
+
+				// example: RSU at milepost 7.5 found
+				entryRsu = rsusLower.stream().min(compMilepost).get();
+
+				if ((lowerMilepost - entryRsu.getMilepost()) > 20) {
+					// don't send to RSU if its further that X amount of miles away
+					entryRsu = null;
+				}
+			}
+			// else find milepost closest to lowerMilepost
+			else {
+				// get max from that list
+				entryRsu = rsusLower.stream().max(compMilepost).get();
+			}
+			if (entryRsu == null)
+				closestIndexOutsideRange = mainRsus.indexOf(entryRsu);
+
+		} else { // westbound
+
+			// get rsus at mileposts greater than your milepost
+			List<WydotRsu> rsusHigher = mainRsus.stream().filter(x -> x.getMilepost() > higherMilepost)
+					.collect(Collectors.toList());
+
+			if (rsusHigher.size() == 0) {
+				rsusHigher = mainRsus.stream().filter(x -> x.getMilepost() > lowerMilepost)
+						.collect(Collectors.toList());
+
+				// get min from that list
+				entryRsu = rsusHigher.stream().max(compMilepost).get();
+
+				if ((entryRsu.getMilepost() - higherMilepost) > 20) {
+					// don't send to RSU if its further that X amount of miles away
+					entryRsu = null;
+				}
+			} else {
+				entryRsu = rsusHigher.stream().min(compMilepost).get();
+			}
+			// get min from that list
+			if (entryRsu == null)
+				closestIndexOutsideRange = mainRsus.indexOf(entryRsu);
+		}
+
+		rsus = mainRsus.stream()
+				.filter(x -> x.getMilepost() >= lowerMilepost && x.getMilepost() <= higherMilepost)
+				.collect(Collectors.toList());
+
+		if (entryRsu != null)
+			rsus.add(entryRsu);
+
+		// add RSU closest in range
+		if (closestIndexOutsideRange != null)
+			rsus.add(mainRsus.get(closestIndexOutsideRange));
+
+		return rsus;
+	}
+
 }

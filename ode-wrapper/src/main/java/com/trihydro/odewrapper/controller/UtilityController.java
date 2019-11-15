@@ -14,7 +14,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.odewrapper.model.TimQuery;
+import com.trihydro.library.service.OdeService;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -81,7 +81,7 @@ public class UtilityController extends WydotTimBaseController {
             rsuCheckResults.activeTimIndicesList = activeTimIndicies;
             rsuCheckResults.rsuTarget = rsu.getRsuTarget();
             
-            TimQuery timQuery = submitTimQuery(rsu, 0);
+            com.trihydro.library.model.TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
             if(timQuery == null || timQuery.getIndicies_set() == null){
                 rsuCheckResultsList.add(rsuCheckResults);
                 continue;
@@ -119,7 +119,7 @@ public class UtilityController extends WydotTimBaseController {
         System.out.println(rsu.getRsuTarget());
         rsuCheckResults.rsuTarget = rsu.getRsuTarget();
 
-        TimQuery timQuery = submitTimQuery(rsu, 0);
+        com.trihydro.library.model.TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
 
         if (timQuery != null && timQuery.getIndicies_set().size() > 0) {
             for (int index : timQuery.getIndicies_set()) {

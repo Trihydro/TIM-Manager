@@ -21,10 +21,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.TimeToLive;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
@@ -39,7 +41,7 @@ import com.trihydro.timrefresh.service.WydotTimService;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class,
-        SdwService.class, DataFrameService.class })
+        SdwService.class, DataFrameService.class, Utility.class })
 public class TimRefreshControllerTest {
     private long timID = 1l;
 
@@ -57,6 +59,7 @@ public class TimRefreshControllerTest {
         PowerMockito.mockStatic(MilepostService.class);
         PowerMockito.mockStatic(SdwService.class);
         PowerMockito.mockStatic(DataFrameService.class);
+        PowerMockito.mockStatic(Utility.class);
 
         setupMilePost();
         setupDataFrameService();
@@ -120,10 +123,13 @@ public class TimRefreshControllerTest {
         // setup return
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
         ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
+        ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
         TimUpdateModel tum = getRsuTim();
         arrLst.add(tum);
         when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(RsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
+        when(Utility.getRsusInBuffer(isA(String.class), isA(double.class), isA(double.class), isA(String.class)))
+        .thenReturn(rsus);
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
@@ -196,7 +202,10 @@ public class TimRefreshControllerTest {
         PowerMockito.verifyStatic();
         WydotTimService.updateTimOnSdw(any());
 
-        PowerMockito.verifyZeroInteractions(RsuService.class);
+        // verify static functions were called
+        PowerMockito.verifyStatic();
+        RsuService.getFullRsusTimIsOn(any());
+
         PowerMockito.verifyNoMoreInteractions(MilepostService.class);
         PowerMockito.verifyNoMoreInteractions(ActiveTimService.class);
         PowerMockito.verifyNoMoreInteractions(WydotTimService.class);

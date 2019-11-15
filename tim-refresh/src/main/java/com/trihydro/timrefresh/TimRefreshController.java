@@ -3,6 +3,7 @@ package com.trihydro.timrefresh;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
+import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
@@ -12,17 +13,21 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.timrefresh.config.BasicConfiguration;
 import com.trihydro.timrefresh.service.WydotTimService;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +52,12 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class TimRefreshController {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     public static Gson gson = new Gson();
+    protected static BasicConfiguration configuration;
+
+    @Autowired
+    public void setConfiguration(BasicConfiguration configurationRhs) {
+        configuration = configurationRhs;
+    }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
     public void performTaskUsingCron() {
@@ -79,12 +90,15 @@ public class TimRefreshController {
             timToSend.setRequest(new ServiceRequest());
             timToSend.setTim(tim);
 
-            if (!StringUtils.isEmpty(aTim.getRsuTarget()) && !StringUtils.isBlank(aTim.getRsuTarget())) {
-                updateAndSendRSU(timToSend, aTim);
-            }
+            // always try to send to RSU
+            updateAndSendRSU(timToSend, aTim);
 
+            // only send to SDX if the sat record id exists
             if (!StringUtils.isEmpty(aTim.getSatRecordId()) && !StringUtils.isBlank(aTim.getSatRecordId())) {
-                updateAndSendSDW(timToSend, aTim, mps);
+                updateAndSendSDX(timToSend, aTim, mps);
+            } else {
+                Utility.logWithDate("active_tim_id " + aTim.getActiveTimId()
+                        + " not sent to SDX (no SAT_RECORD_ID found in database)");
             }
         }
     }
@@ -95,7 +109,7 @@ public class TimRefreshController {
         // check to see if we have any itis codes
         // if not, just continue on
         if (df.getItems() == null || df.getItems().length == 0) {
-            System.out.println("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
+            Utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
         Region region = getRegion(aTim, mps);
@@ -152,55 +166,67 @@ public class TimRefreshController {
 
     private void updateAndSendRSU(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
         List<WydotRsuTim> wydotRsus = RsuService.getFullRsusTimIsOn(aTim.getTimId());
-        if (wydotRsus.size() <= 0) {
-            System.out.println("RSUs not found for tim_id " + aTim.getTimId());
-            return;
+        List<WydotRsu> dbRsus = new ArrayList<WydotRsu>();
+        if (wydotRsus == null || wydotRsus.size() <= 0) {
+            Utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
+
+            dbRsus = Utility.getRsusInBuffer(aTim.getDirection(),
+                    Math.min(aTim.getMilepostStart(), aTim.getMilepostStop()),
+                    Math.max(aTim.getMilepostStop(), aTim.getMilepostStart()), "80");
+
+            // if no RSUs found
+            if (dbRsus.size() == 0) {
+                Utility.logWithDate("No possible RSUs found for active_tim_id " + aTim.getActiveTimId());
+                return;
+            }
         }
-
-        RSU[] rsus = new RSU[wydotRsus.size()];
-        RSU rsu = null;
-        for (int i = 0; i < wydotRsus.size(); i++) {
-            // set RSUS
-            rsu = new RSU();
-            rsu.setRsuIndex(wydotRsus.get(i).getRsuIndex());
-            rsu.setRsuTarget(wydotRsus.get(i).getRsuTarget());
-            rsu.setRsuUsername(wydotRsus.get(i).getRsuUsername());
-            rsu.setRsuPassword(wydotRsus.get(i).getRsuPassword());
-            rsu.setRsuRetries(2);
-            rsu.setRsuTimeout(5000);
-            rsus[i] = rsu;
-        }
-
-        timToSend.getRequest().setRsus(rsus);
-
         // set SNMP command
-        SNMP snmp = new SNMP();
-        snmp.setRsuid("00000083");
-        snmp.setMsgid(31);
-        snmp.setMode(1);
-        snmp.setChannel(178);
-        snmp.setInterval(2);
-
-        // getStartDateTime returns oracle timestamp format of
-        // 08-JUL-19 03.50.00.000000000 AM (this is UTC)
-        // but we need 2019-08-16T19:54:00.000Z format
-        snmp.setDeliverystart(aTim.getStartDate_Timestamp().toInstant().toString());
-        snmp.setDeliverystop(aTim.getEndDate_Timestamp().toInstant().toString());
-        snmp.setEnable(1);
-        snmp.setStatus(4);
-
+        SNMP snmp = OdeService.getSnmp(aTim.getStartDate_Timestamp().toInstant().toString(),
+                aTim.getEndDate_Timestamp().toInstant().toString(), timToSend);
         timToSend.getRequest().setSnmp(snmp);
 
-        System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
-        WydotTimService.updateTimOnRsu(timToSend);
+        RSU[] rsus = null;
+        if (wydotRsus.size() > 0) {
+            rsus = new RSU[wydotRsus.size()];
+            RSU rsu = null;
+            for (int i = 0; i < wydotRsus.size(); i++) {
+                // set RSUS
+                rsu = new RSU();
+                rsu.setRsuIndex(wydotRsus.get(i).getRsuIndex());
+                rsu.setRsuTarget(wydotRsus.get(i).getRsuTarget());
+                rsu.setRsuUsername(wydotRsus.get(i).getRsuUsername());
+                rsu.setRsuPassword(wydotRsus.get(i).getRsuPassword());
+                rsu.setRsuRetries(2);
+                rsu.setRsuTimeout(5000);
+                rsus[i] = rsu;
+            }
+
+            timToSend.getRequest().setRsus(rsus);
+
+            System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
+            WydotTimService.updateTimOnRsu(timToSend);
+        } else {
+            // we don't have any existing RSUs, but some fall within the boundary so send
+            // new ones there
+            rsus = new RSU[1];
+            for (int i = 0; i < dbRsus.size(); i++) {
+                rsus[0] = dbRsus.get(i);
+                timToSend.getRequest().setRsus(rsus);
+                OdeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl());
+                rsus[0] = dbRsus.get(i);
+                timToSend.getRequest().setRsus(rsus);
+            }
+        }
     }
 
-    private void updateAndSendSDW(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
+    private void updateAndSendSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
+        // remove rsus from TIM
+        timToSend.getRequest().setRsus(null);
         SDW sdw = new SDW();
         AdvisorySituationDataDeposit asdd = SdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
             System.out.println("SAT record not found for id " + aTim.getSatRecordId());
-            updateAndSendNewSDW(timToSend, aTim, mps);
+            updateAndSendNewSDX(timToSend, aTim, mps);
             return;
         }
 
@@ -216,12 +242,12 @@ public class TimRefreshController {
         sdw.setServiceRegion(serviceRegion);
 
         // set sdw block in TIM
-        System.out.println("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
+        Utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
         WydotTimService.updateTimOnSdw(timToSend);
     }
 
-    private void updateAndSendNewSDW(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
+    private void updateAndSendNewSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
         String recordId = SdwService.getNewRecordId();
         System.out.println("Generating new SAT id and TIM: " + recordId);
         String regionName = getSATRegionName(aTim, recordId);

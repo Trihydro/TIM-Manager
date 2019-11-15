@@ -131,7 +131,7 @@ public class OdeService {
         snmp.setInterval(2);
         snmp.setDeliverystart(startDateTime);// "2018-01-01T00:00:00-06:00");
 
-        if (StringUtils.isBlank(endDateTime)) {
+        if (endDateTime == null || StringUtils.isBlank(endDateTime)) {
             try {
                 int durationTime = timToSend.getTim().getDataframes()[0].getDurationTime();
                 Calendar cal = javax.xml.bind.DatatypeConverter.parseDateTime(startDateTime);

@@ -167,6 +167,7 @@ public class TimLogger extends BaseLogger {
 	// only does one TIM at a time ***
 	public static void addActiveTimToOracleDB(OdeData odeData) {
 
+		Utility.logWithDate("Called addActiveTimToOracleDB");
 		// variables
 		ActiveTim activeTim;
 

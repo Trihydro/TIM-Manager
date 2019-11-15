@@ -181,11 +181,15 @@ public class TimRefreshController {
             }
         }
         // set SNMP command
-        SNMP snmp = OdeService.getSnmp(aTim.getStartDate_Timestamp().toInstant().toString(),
-                aTim.getEndDate_Timestamp().toInstant().toString(), timToSend);
+        String startTimeString = aTim.getStartDate_Timestamp() != null
+                ? aTim.getStartDate_Timestamp().toInstant().toString()
+                : "";
+        String endTimeString = aTim.getEndDate_Timestamp() != null ? aTim.getEndDate_Timestamp().toInstant().toString()
+                : "";
+        SNMP snmp = OdeService.getSnmp(startTimeString, endTimeString, timToSend);
         timToSend.getRequest().setSnmp(snmp);
 
-        RSU[] rsus = null;
+        RSU[] rsus = new RSU[1];
         if (wydotRsus.size() > 0) {
             rsus = new RSU[wydotRsus.size()];
             RSU rsu = null;
@@ -198,18 +202,18 @@ public class TimRefreshController {
                 rsu.setRsuPassword(wydotRsus.get(i).getRsuPassword());
                 rsu.setRsuRetries(2);
                 rsu.setRsuTimeout(5000);
-                rsus[i] = rsu;
+                rsus[0] = rsu;
+                timToSend.getRequest().setRsus(rsus);
+
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
+                System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
+                WydotTimService.updateTimOnRsu(timToSend);
             }
-
-            timToSend.getRequest().setRsus(rsus);
-
-            System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
-            WydotTimService.updateTimOnRsu(timToSend);
         } else {
             // we don't have any existing RSUs, but some fall within the boundary so send
-            // new ones there
-            rsus = new RSU[1];
+            // new ones there. We need to update requestName in this case
             for (int i = 0; i < dbRsus.size(); i++) {
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, dbRsus.get(i)));
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
                 OdeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl());
@@ -359,6 +363,37 @@ public class TimRefreshController {
         return region;
     }
 
+    private String getRsuRegionName(TimUpdateModel aTim, RSU rsu) {
+        return getBaseRegionName(aTim, "_RSU-" + rsu.getRsuTarget());
+    }
+
+    private String getBaseRegionName(TimUpdateModel aTim, String middle) {
+        String regionName = aTim.getDirection();
+        regionName += "_" + aTim.getRoute();
+        regionName += "_" + aTim.getMilepostStart();
+        regionName += "_" + aTim.getMilepostStop();
+
+        regionName += middle;// SAT_xxx or RSU_xxx
+
+        String timType = aTim.getTimTypeName();
+        if (timType == null || timType == "") {
+            timType = "RC";// defaulting to Road Condition
+        }
+        // the rest depend on each other to be there for indexing
+        // note that if we don't have a type, our logger inserts a new active_tim rather
+        // than updating
+        regionName += "_" + timType;
+
+        if (aTim.getClientId() != null) {
+            regionName += "_" + aTim.getClientId();
+
+            if (aTim.getPk() != null) {
+                regionName += "_" + aTim.getPk();
+            }
+        }
+        return regionName;
+    }
+
     private String getSATRegionName(TimUpdateModel aTim, String recordId) {
 
         // name is direction_route_startMP_endMP_SAT-satRecordId_TIMType_ClientId_pk
@@ -368,28 +403,7 @@ public class TimRefreshController {
             return oldName.replace(aTim.getSatRecordId(), recordId);
         } else {
             // generating from scratch...
-            String regionNamePrev = aTim.getDirection() + "_" + aTim.getRoute() + "_" + aTim.getMilepostStart() + "_"
-                    + aTim.getMilepostStop();
-
-            String regionNameTemp = regionNamePrev + "_SAT-" + recordId;
-
-            String timType = aTim.getTimTypeName();
-            if (timType == null || timType == "") {
-                timType = "RC";// defaulting to Road Condition
-            }
-            // the rest depend on each other to be there for indexing
-            // note that if we don't have a type, our logger inserts a new active_tim rather
-            // than updating
-            regionNameTemp += "_" + timType;
-
-            if (aTim.getClientId() != null) {
-                regionNameTemp += "_" + aTim.getClientId();
-
-                if (aTim.getPk() != null) {
-                    regionNameTemp += "_" + aTim.getPk();
-                }
-            }
-            return regionNameTemp;
+            return getBaseRegionName(aTim, "_SAT-" + recordId);
         }
     }
 }

@@ -528,9 +528,7 @@ public class JsonToJavaConverter {
             }
 
             JsonNode startTimeNode = travelerDataFrame.get("startTime");
-            System.out.println(startTimeNode);
             JsonNode durationNode = travelerDataFrame.get("duratonTime");
-            System.out.println(durationNode);
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());

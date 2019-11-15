@@ -529,6 +529,9 @@ public class JsonToJavaConverter {
 
             JsonNode startTimeNode = travelerDataFrame.get("startTime");
             JsonNode durationNode = travelerDataFrame.get("duratonTime");
+            JsonNode priorityNode = travelerDataFrame.get("priority");
+            JsonNode sspLocationRightsNode = travelerDataFrame.get("sspLocationRights");
+            JsonNode sspTimRightsNode = travelerDataFrame.get("sspTimRights");
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
@@ -545,6 +548,11 @@ public class JsonToJavaConverter {
 
             dataFrame.setStartDateTime(startDate.toString() + "Z");
             dataFrame.setDurationTime(durationNode.asInt());
+            dataFrame.setPriority(priorityNode.asInt());
+            dataFrame.setSspLocationRights((short) sspLocationRightsNode.asInt());
+            dataFrame.setSspTimRights((short) sspTimRightsNode.asInt());
+            dataFrame.setContent("advisory");// content is a choice, but we're only picking advisory right now. others
+                                             // are found in J2735 6.142
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 

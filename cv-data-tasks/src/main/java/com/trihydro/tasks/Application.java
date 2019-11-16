@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 
-
+import com.trihydro.tasks.actions.CleanupActiveTims;
 import com.trihydro.tasks.actions.RemoveExpiredActiveTims;
 import com.trihydro.tasks.config.BasicConfiguration;
 
@@ -33,7 +33,8 @@ public class Application {
 
 	@PostConstruct
 	public void run() {
-		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(configuration), 1, 5, TimeUnit.MINUTES);
+		scheduledExecutorService.scheduleAtFixedRate(new CleanupActiveTims(configuration), 1, 5, TimeUnit.MINUTES);
 	}
 }

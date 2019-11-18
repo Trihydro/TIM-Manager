@@ -58,16 +58,24 @@ public class TimOracleTables extends OracleTables {
         else {
             dataFrameTable = new ArrayList<String>();
             dataFrameTable.add("TIM_ID");
-            dataFrameTable.add("CONTENT");
-            dataFrameTable.add("DURATION_TIME");
+            dataFrameTable.add("SSP_TIM_RIGHTS");
             dataFrameTable.add("FRAME_TYPE");
             // dataFrameTable.add("MSG_ID"); //ignore msg_id for now since its a full object
+            // dataFrameTable.add("FURTHER_INFO_ID"); //ignore further_info_id for now
+            // dataFrameTable.add("VIEW_ANGLE"); //not part of ode DataFrame object
+            // dataFrameTable.add("MUTCD"); //not part of ode DataFrame object
+            // dataFrameTable.add("CRC"); //not part of ode DataFrame object
+            dataFrameTable.add("DURATION_TIME");
             dataFrameTable.add("PRIORITY");
             dataFrameTable.add("SSP_LOCATION_RIGHTS");
             dataFrameTable.add("SSP_MSG_TYPES");
             dataFrameTable.add("SSP_MSG_CONTENT");
-            dataFrameTable.add("START_DATE_TIME");
+            dataFrameTable.add("CONTENT");
             dataFrameTable.add("URL");
+            // dataFrameTable.add("POSITION_LAT"); //not part of ode DataFrame object
+            // dataFrameTable.add("POSITION_LONG"); //not part of ode DataFrame object
+            // dataFrameTable.add("POSITION_ELEV"); //not part of ode DataFrame object
+            dataFrameTable.add("START_DATE_TIME");
             return dataFrameTable;
         }
     }

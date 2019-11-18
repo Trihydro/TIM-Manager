@@ -154,7 +154,6 @@ public class TimService extends CvDataServiceLibrary {
 				fieldNum++;
 			}
 			// execute insert statement
-			System.out.println(preparedStatement.toString());
 			Long timId = log(preparedStatement, "timID");
 			return timId;
 		} catch (SQLException e) {

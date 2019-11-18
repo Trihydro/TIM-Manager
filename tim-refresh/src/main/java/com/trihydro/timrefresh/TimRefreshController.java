@@ -3,26 +3,31 @@ package com.trihydro.timrefresh;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
+import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.timrefresh.config.BasicConfiguration;
 import com.trihydro.timrefresh.service.WydotTimService;
 
-import java.text.DateFormat;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +52,12 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class TimRefreshController {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     public static Gson gson = new Gson();
+    protected static BasicConfiguration configuration;
+
+    @Autowired
+    public void setConfiguration(BasicConfiguration configurationRhs) {
+        configuration = configurationRhs;
+    }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
     public void performTaskUsingCron() {
@@ -59,137 +70,167 @@ public class TimRefreshController {
 
         // loop through and issue new TIM to ODE
         for (TimUpdateModel aTim : expiringTims) {
-            WydotTravelerInputData timToSend = new WydotTravelerInputData();
+            System.out.println("------ Processing active_tim with id: " + aTim.getActiveTimId());
 
-            TimeZone tz = TimeZone.getTimeZone("UTC");
-            DateFormat dteFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-            dteFormat.setTimeZone(tz);
-            String nowAsISO = dteFormat.format(new Date());
-
-            // RoadSignID
-            RoadSignID rsid = new RoadSignID();
-            rsid.setMutcdCode(MutcdCodeEnum.warning);
-            rsid.setViewAngle("1111111111111111");
-            rsid.setPosition(new OdePosition3D(aTim.getAnchorLat(), aTim.getAnchorLong(), null));
-
-            MsgId msgId = new MsgId();
-            msgId.setRoadSignID(rsid);
-
-            // DataFrame
-            DataFrame df = new DataFrame();
-            df.setStartDateTime(nowAsISO);
-            df.setSspTimRights(aTim.getSspTimRights());
-            df.setFrameType(TravelerInfoType.advisory);
-            df.setMsgId(msgId);
-            df.setPriority(5);// 0-7, 0 being least important, 7 being most
-            df.setSspLocationRights(aTim.getSspLocationRights());
-            df.setSspMsgTypes(aTim.getSspMsgTypes());
-            df.setSspMsgContent(aTim.getSspMsgContent());
-            df.setContent(aTim.getDfContent());
-            df.setUrl(aTim.getUrl());
-
-            df.setItems(DataFrameService.getItisCodesForDataFrameId(aTim.getDataFrameId()));
-
-            // Set region information
-            Region region = new Region();
-            region.setName(aTim.getRegionName());
-            region.setAnchorPosition(new OdePosition3D(aTim.getAnchorLat(), aTim.getAnchorLong(), null));
-            region.setLaneWidth(aTim.getLaneWidth());
-            region.setDirection(aTim.getDirection());
-            region.setDirectionality(aTim.getDirectionality());
-            region.setClosedPath(aTim.getClosedPath());
-
-            if (aTim.getPathId() != null) {
-                NodeXY[] nodes = PathNodeXYService.GetNodeXYForPath(aTim.getPathId());
-                Path path = new Path();
-                path.setType("xy");
-                path.setNodes(nodes);
-                region.setPath(path);
+            // Mileposts
+            String route = aTim.getRoute().replaceAll("\\D+", "");// get just the numeric value for the 'like' statement
+                                                                  // to avoid issues with differing formats
+            List<Milepost> mps = MilepostService.selectMilepostRange(aTim.getDirection(), route,
+                    aTim.getMilepostStart(), aTim.getMilepostStop());
+            if (mps.size() == 0) {
+                System.out.println("Unable to send TIM to SDW, no mileposts found to determine service area");
+                continue;
             }
 
-            Region[] regions = new Region[1];
-            regions[0] = region;
-            df.setRegions(regions);
-
-            DataFrame[] dataframes = new DataFrame[1];
-            dataframes[0] = df;
-
-            OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
-            tim.setDataframes(dataframes);
-            tim.setMsgCnt(aTim.getMsgCnt());
-            tim.setTimeStamp(LocalDateTime.now().toString());
-
-            // tim.setPacketID();
-            tim.setUrlB(aTim.getUrlB());
-
+            OdeTravelerInformationMessage tim = getTim(aTim, mps);
+            if (tim == null) {
+                continue;
+            }
+            WydotTravelerInputData timToSend = new WydotTravelerInputData();
             timToSend.setRequest(new ServiceRequest());
             timToSend.setTim(tim);
 
-            if (!StringUtils.isEmpty(aTim.getRsuTarget()) && !StringUtils.isBlank(aTim.getRsuTarget())) {
-                UpdateAndSendRSU(timToSend, aTim);
-            }
+            // always try to send to RSU
+            updateAndSendRSU(timToSend, aTim);
 
+            // only send to SDX if the sat record id exists
             if (!StringUtils.isEmpty(aTim.getSatRecordId()) && !StringUtils.isBlank(aTim.getSatRecordId())) {
-                UpdateAndSendSDW(timToSend, aTim);
+                updateAndSendSDX(timToSend, aTim, mps);
+            } else {
+                Utility.logWithDate("active_tim_id " + aTim.getActiveTimId()
+                        + " not sent to SDX (no SAT_RECORD_ID found in database)");
             }
         }
-
     }
 
-    private void UpdateAndSendRSU(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
+    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps) {
+        String nowAsISO = Instant.now().toString();
+        DataFrame df = getDataFrame(aTim, nowAsISO, mps);
+        // check to see if we have any itis codes
+        // if not, just continue on
+        if (df.getItems() == null || df.getItems().length == 0) {
+            Utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
+            return null;
+        }
+        Region region = getRegion(aTim, mps);
+        Region[] regions = new Region[1];
+        regions[0] = region;
+        df.setRegions(regions);
+
+        DataFrame[] dataframes = new DataFrame[1];
+        dataframes[0] = df;
+
+        OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
+        tim.setDataframes(dataframes);
+        tim.setMsgCnt(getMsgCnt(aTim.getMsgCnt()));
+        tim.setPacketID(aTim.getPacketId());
+
+        tim.setTimeStamp(nowAsISO);
+
+        tim.setUrlB(aTim.getUrlB());
+        return tim;
+    }
+
+    private int getMsgCnt(int currentCnt) {
+        if (currentCnt == 127)
+            return 1;
+        // else increment msgCnt
+        else
+            return currentCnt++;
+    }
+
+    private NodeXY[] buildNodePathFromMileposts(List<Milepost> mps) {
+        NodeXY[] nodes = new NodeXY[mps.size()];
+        for (int i = 0; i < mps.size(); i++) {
+            NodeXY node = new OdeTravelerInformationMessage.NodeXY();
+            node.setNodeLat(new BigDecimal(mps.get(i).getLatitude()));
+            node.setNodeLong(new BigDecimal(mps.get(i).getLongitude()));
+            node.setDelta("node-LatLon");
+            nodes[i] = node;
+        }
+        return nodes;
+    }
+
+    private String getHeadingSliceFromMileposts(List<Milepost> mps) {
+        int timDirection = 0;
+        for (int i = 0; i < mps.size(); i++) {
+            timDirection |= Utility.getDirection(mps.get(i).getBearing());
+        }
+
+        // set direction based on bearings
+        String dirTest = Integer.toBinaryString(timDirection);
+        dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
+        dirTest = StringUtils.reverse(dirTest);
+        return dirTest; // heading slice
+    }
+
+    private void updateAndSendRSU(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
         List<WydotRsuTim> wydotRsus = RsuService.getFullRsusTimIsOn(aTim.getTimId());
-        if (wydotRsus.size() <= 0) {
-            System.out.println("RSU not found for id " + aTim.getTimId());
-            return;
+        List<WydotRsu> dbRsus = new ArrayList<WydotRsu>();
+        if (wydotRsus == null || wydotRsus.size() <= 0) {
+            Utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
+
+            dbRsus = Utility.getRsusInBuffer(aTim.getDirection(),
+                    Math.min(aTim.getMilepostStart(), aTim.getMilepostStop()),
+                    Math.max(aTim.getMilepostStop(), aTim.getMilepostStart()), "80");
+
+            // if no RSUs found
+            if (dbRsus.size() == 0) {
+                Utility.logWithDate("No possible RSUs found for active_tim_id " + aTim.getActiveTimId());
+                return;
+            }
         }
-
-        RSU[] rsus = new RSU[wydotRsus.size()];
-        RSU rsu = null;
-        for (int i = 0; i < wydotRsus.size(); i++) {
-            // set RSUS
-            rsu = new RSU();
-            rsu.setRsuIndex(wydotRsus.get(i).getRsuIndex());
-            rsu.setRsuTarget(wydotRsus.get(i).getRsuTarget());
-            rsu.setRsuUsername(wydotRsus.get(i).getRsuUsername());
-            rsu.setRsuPassword(wydotRsus.get(i).getRsuPassword());
-            rsu.setRsuRetries(2);
-            rsu.setRsuTimeout(5000);
-            rsus[i] = rsu;
-        }
-
-        timToSend.getRequest().setRsus(rsus);
-
         // set SNMP command
-        SNMP snmp = new SNMP();
-        snmp.setRsuid("00000083");
-        snmp.setMsgid(31);
-        snmp.setMode(1);
-        snmp.setChannel(178);
-        snmp.setInterval(2);
-
-        // getStartDateTime returns oracle timestamp format of
-        // 08-JUL-19 03.50.00.000000000 AM (this is UTC)
-        // but we need 2019-08-16T19:54:00.000Z format
-        snmp.setDeliverystart(aTim.getStartDate_Timestamp().toInstant().toString());
-        snmp.setDeliverystop(aTim.getEndDate_Timestamp().toInstant().toString());
-        snmp.setEnable(1);
-        snmp.setStatus(4);
-
+        String startTimeString = aTim.getStartDate_Timestamp() != null
+                ? aTim.getStartDate_Timestamp().toInstant().toString()
+                : "";
+        String endTimeString = aTim.getEndDate_Timestamp() != null ? aTim.getEndDate_Timestamp().toInstant().toString()
+                : "";
+        SNMP snmp = OdeService.getSnmp(startTimeString, endTimeString, timToSend);
         timToSend.getRequest().setSnmp(snmp);
 
-        System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
-        WydotTimService.updateTimOnRsu(timToSend);
+        RSU[] rsus = new RSU[1];
+        if (wydotRsus.size() > 0) {
+            rsus = new RSU[wydotRsus.size()];
+            RSU rsu = null;
+            for (int i = 0; i < wydotRsus.size(); i++) {
+                // set RSUS
+                rsu = new RSU();
+                rsu.setRsuIndex(wydotRsus.get(i).getRsuIndex());
+                rsu.setRsuTarget(wydotRsus.get(i).getRsuTarget());
+                rsu.setRsuUsername(wydotRsus.get(i).getRsuUsername());
+                rsu.setRsuPassword(wydotRsus.get(i).getRsuPassword());
+                rsu.setRsuRetries(2);
+                rsu.setRsuTimeout(5000);
+                rsus[0] = rsu;
+                timToSend.getRequest().setRsus(rsus);
+
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
+                System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
+                WydotTimService.updateTimOnRsu(timToSend);
+            }
+        } else {
+            // we don't have any existing RSUs, but some fall within the boundary so send
+            // new ones there. We need to update requestName in this case
+            for (int i = 0; i < dbRsus.size(); i++) {
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, dbRsus.get(i)));
+                rsus[0] = dbRsus.get(i);
+                timToSend.getRequest().setRsus(rsus);
+                OdeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl());
+                rsus[0] = dbRsus.get(i);
+                timToSend.getRequest().setRsus(rsus);
+            }
+        }
     }
 
-    private void UpdateAndSendSDW(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
+    private void updateAndSendSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
+        // remove rsus from TIM
+        timToSend.getRequest().setRsus(null);
         SDW sdw = new SDW();
-        List<Milepost> mps = MilepostService.selectMilepostRange(aTim.getDirection(), aTim.getRoute(),
-                aTim.getMilepostStart(), aTim.getMilepostStop());
-                timToSend.setMileposts(mps);
         AdvisorySituationDataDeposit asdd = SdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
             System.out.println("SAT record not found for id " + aTim.getSatRecordId());
-            UpdateAndSendNewSDW(timToSend, aTim);
+            updateAndSendNewSDX(timToSend, aTim, mps);
             return;
         }
 
@@ -205,40 +246,164 @@ public class TimRefreshController {
         sdw.setServiceRegion(serviceRegion);
 
         // set sdw block in TIM
-        System.out.println("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
+        Utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
         WydotTimService.updateTimOnSdw(timToSend);
     }
 
-    private void UpdateAndSendNewSDW(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
+    private void updateAndSendNewSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
         String recordId = SdwService.getNewRecordId();
         System.out.println("Generating new SAT id and TIM: " + recordId);
-        String regionName = GetRegionName(aTim, recordId);
+        String regionName = getSATRegionName(aTim, recordId);
 
         // Update region.name in database
         RegionService.updateRegionName(new Long(aTim.getRegionId()), regionName);
         // Update active_tim.
         ActiveTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
-        WydotTimService.sendNewTimToSdw(timToSend, recordId);
+        WydotTimService.sendNewTimToSdw(timToSend, recordId, mps);
     }
 
-    private String GetRegionName(TimUpdateModel aTim, String recordId) {
+    private DataFrame getDataFrame(TimUpdateModel aTim, String nowAsISO, List<Milepost> mps) {
+        // RoadSignID
+        RoadSignID rsid = new RoadSignID();
+        rsid.setMutcdCode(MutcdCodeEnum.warning);
+        rsid.setViewAngle("1111111111111111");
+        rsid.setPosition(getAnchorPosition(aTim, mps));
 
+        // MsgId
+        MsgId msgId = new MsgId();
+        msgId.setRoadSignID(rsid);
+
+        // DataFrame
+        DataFrame df = new DataFrame();
+        df.setStartDateTime(nowAsISO);
+        df.setSspTimRights(aTim.getSspTimRights());
+        df.setFrameType(TravelerInfoType.advisory);
+        df.setMsgId(msgId);
+        df.setPriority(5);// 0-7, 0 being least important, 7 being most
+        df.setSspLocationRights(aTim.getSspLocationRights());
+        df.setSspMsgTypes(aTim.getSspMsgTypes());
+        df.setSspMsgContent(aTim.getSspMsgContent());
+        df.setContent(aTim.getDfContent());
+        df.setUrl(aTim.getUrl());
+
+        // set durationTime
+        if (aTim.getEndDateTime() != null) {
+            int durationTime = Utility.getMinutesDurationBetweenTwoDates(aTim.getStartDateTime(),
+                    aTim.getEndDateTime());
+            df.setDurationTime(durationTime);
+        } else {
+            // we don't have an endDate so set duration time to 22 days worth of minutes
+            // (max time)
+            df.setDurationTime(32000);
+        }
+
+        df.setItems(DataFrameService.getItisCodesForDataFrameId(aTim.getDataFrameId()));
+        return df;
+    }
+
+    private OdePosition3D getAnchorPosition(TimUpdateModel aTim, List<Milepost> mps) {
+        OdePosition3D anchorPosition = new OdePosition3D();
+        if (aTim.getAnchorLat() != null && aTim.getAnchorLong() != null) {
+            anchorPosition.setLatitude(aTim.getAnchorLat());
+            anchorPosition.setLongitude(aTim.getAnchorLong());
+        } else {
+            if (mps.size() > 0) {
+                anchorPosition.setLatitude(new BigDecimal(mps.get(0).getLatitude()));
+                anchorPosition.setLongitude(new BigDecimal(mps.get(0).getLongitude()));
+            } else {
+                anchorPosition.setLatitude(new BigDecimal(0));
+                anchorPosition.setLongitude(new BigDecimal(0));
+                anchorPosition.setElevation(new BigDecimal(0));
+            }
+        }
+        return anchorPosition;
+    }
+
+    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps) {
+        // Set region information
+        Region region = new Region();
+        region.setName(aTim.getRegionName());
+        region.setAnchorPosition(getAnchorPosition(aTim, mps));
+        region.setLaneWidth(aTim.getLaneWidth());
+        String regionDirection = aTim.getRegionDirection();
+        if (regionDirection == null || regionDirection == "") {
+            regionDirection = getHeadingSliceFromMileposts(mps);
+        }
+        region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
+
+        // set directionality, default to 3
+        String directionality = aTim.getDirectionality();
+        if (directionality == null || directionality == "") {
+            directionality = "3";
+        }
+        region.setDirectionality(directionality);
+        region.setClosedPath(aTim.getClosedPath());
+
+        String regionDescrip = aTim.getRegionDescription();// J2736 - one of path, geometry, oldRegion
+        if (regionDescrip == null || regionDescrip == "") {
+            regionDescrip = "path";// if null, set it to path...we only support path anyway, and only have tables
+                                   // supporting path
+        }
+        region.setDescription(regionDescrip);
+
+        if (aTim.getPathId() != null) {
+            NodeXY[] nodes = PathNodeXYService.GetNodeXYForPath(aTim.getPathId());
+            if (nodes == null || nodes.length == 0) {
+                nodes = buildNodePathFromMileposts(mps);
+            }
+            Path path = new Path();
+            path.setScale(0);
+            path.setType("xy");
+            path.setNodes(nodes);
+            region.setPath(path);
+        }
+
+        return region;
+    }
+
+    private String getRsuRegionName(TimUpdateModel aTim, RSU rsu) {
+        return getBaseRegionName(aTim, "_RSU-" + rsu.getRsuTarget());
+    }
+
+    private String getBaseRegionName(TimUpdateModel aTim, String middle) {
+        String regionName = aTim.getDirection();
+        regionName += "_" + aTim.getRoute();
+        regionName += "_" + aTim.getMilepostStart();
+        regionName += "_" + aTim.getMilepostStop();
+
+        regionName += middle;// SAT_xxx or RSU_xxx
+
+        String timType = aTim.getTimTypeName();
+        if (timType == null || timType == "") {
+            timType = "RC";// defaulting to Road Condition
+        }
+        // the rest depend on each other to be there for indexing
+        // note that if we don't have a type, our logger inserts a new active_tim rather
+        // than updating
+        regionName += "_" + timType;
+
+        if (aTim.getClientId() != null) {
+            regionName += "_" + aTim.getClientId();
+
+            if (aTim.getPk() != null) {
+                regionName += "_" + aTim.getPk();
+            }
+        }
+        return regionName;
+    }
+
+    private String getSATRegionName(TimUpdateModel aTim, String recordId) {
+
+        // name is direction_route_startMP_endMP_SAT-satRecordId_TIMType_ClientId_pk
         String oldName = aTim.getRegionName();
         if (oldName != null && oldName.length() > 0) {
             // just replace existing satRecordId with new
             return oldName.replace(aTim.getSatRecordId(), recordId);
         } else {
             // generating from scratch...
-            String regionNamePrev = aTim.getDirection() + "_" + aTim.getRoute() + "_" + aTim.getMilepostStart() + "_"
-                    + aTim.getMilepostStop();
-
-            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + aTim.getTimTypeName();
-
-            if (aTim.getClientId() != null)
-                regionNameTemp += "_" + aTim.getClientId();
-            return regionNameTemp;
+            return getBaseRegionName(aTim, "_SAT-" + recordId);
         }
     }
 }

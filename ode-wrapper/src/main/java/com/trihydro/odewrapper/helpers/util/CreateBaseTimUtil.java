@@ -1,6 +1,7 @@
 package com.trihydro.odewrapper.helpers.util;
 
 import com.trihydro.odewrapper.model.WydotTim;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.service.MilepostService;
 
@@ -143,7 +144,7 @@ public class CreateBaseTimUtil {
             node.setNodeLong(new BigDecimal(timToSend.getMileposts().get(j).getLongitude()));
             node.setDelta("node-LatLon");
             nodes.add(node);
-            timDirection |= getDirection(timToSend.getMileposts().get(j).getBearing());
+            timDirection |= Utility.getDirection(timToSend.getMileposts().get(j).getBearing());
         }
 
         // set direction based on bearings
@@ -182,45 +183,5 @@ public class CreateBaseTimUtil {
             return "node-LL5";
         else
             return "node-LL6";
-    }
-
-    protected static int getDirection(Double bearing) {
-
-        int direction = 0;
-
-        if (bearing >= 0 && bearing <= 22.5)
-            direction = 1;
-        else if (bearing > 22.5 && bearing <= 45)
-            direction = 2;
-        else if (bearing > 45 && bearing <= 67.5)
-            direction = 4;
-        else if (bearing > 67.5 && bearing <= 90)
-            direction = 8;
-        else if (bearing > 90 && bearing <= 112.5)
-            direction = 16;
-        else if (bearing > 112.5 && bearing <= 135)
-            direction = 32;
-        else if (bearing > 135 && bearing <= 157.5)
-            direction = 64;
-        else if (bearing > 157.5 && bearing <= 180)
-            direction = 128;
-        else if (bearing > 180 && bearing <= 202.5)
-            direction = 256;
-        else if (bearing > 202.5 && bearing <= 225)
-            direction = 512;
-        else if (bearing > 225 && bearing <= 247.5)
-            direction = 1024;
-        else if (bearing > 247.5 && bearing <= 270)
-            direction = 2048;
-        else if (bearing > 270 && bearing <= 292.5)
-            direction = 4096;
-        else if (bearing > 292.5 && bearing <= 315)
-            direction = 8192;
-        else if (bearing > 315 && bearing <= 337.5)
-            direction = 16384;
-        else if (bearing > 337.5 && bearing <= 360)
-            direction = 32768;
-
-        return direction;
     }
 }

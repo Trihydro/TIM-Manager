@@ -43,12 +43,8 @@ public class DataFrameService extends CvDataServiceLibrary {
 				if (col.equals("TIM_ID")) {
 					params += timID;
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, timID);
-				} else if (col.equals("CONTENT")) {
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getContent());
-					params += dFrame.getContent();
-				} else if (col.equals("DURATION_TIME")) {
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getDurationTime());
-					params += dFrame.getDurationTime();
+				} else if (col.equals("SSP_TIM_RIGHTS")) {
+					SQLNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspTimRights());
 				} else if (col.equals("FRAME_TYPE")) {
 					Integer ordinal = null;
 					if (dFrame.getFrameType() != null) {
@@ -56,15 +52,10 @@ public class DataFrameService extends CvDataServiceLibrary {
 					}
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, ordinal);
 					params += ordinal;
-				}
-				// else if (col.equals("MSG_ID")) {
-				// //msg_id is a whole object...ignore it for now
-				// // dFrame.getMsgId();
-				// //
-				// us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId
-				// id;
-				// }
-				else if (col.equals("PRIORITY")) {
+				} else if (col.equals("DURATION_TIME")) {
+					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getDurationTime());
+					params += dFrame.getDurationTime();
+				} else if (col.equals("PRIORITY")) {
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getPriority());
 					params += dFrame.getPriority();
 				} else if (col.equals("SSP_LOCATION_RIGHTS")) {
@@ -76,6 +67,12 @@ public class DataFrameService extends CvDataServiceLibrary {
 				} else if (col.equals("SSP_MSG_CONTENT")) {
 					SQLNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspMsgContent());
 					params += dFrame.getSspMsgContent();
+				} else if (col.equals("CONTENT")) {
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getContent());
+					params += dFrame.getContent();
+				} else if (col.equals("URL")) {
+					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getUrl());
+					params += dFrame.getUrl();
 				} else if (col.equals("START_DATE_TIME")) {
 					Timestamp time = null;
 					try {
@@ -90,17 +87,14 @@ public class DataFrameService extends CvDataServiceLibrary {
 					}
 					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, time);
 					params += time.toString();
-				} else if (col.equals("URL")) {
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getUrl());
-					params += dFrame.getUrl();
 				}
 
 				params += ";";
 				fieldNum++;
 			}
 
-			System.out.println(
-					"--------------- dataFrameService inserting: " + insertQueryStatement + " WITH PARAMS: " + params);
+			// System.out.println(
+			// 		"--------------- dataFrameService inserting: " + insertQueryStatement + " WITH PARAMS: " + params);
 
 			Long dataFrameId = log(preparedStatement, "dataframe");
 			return dataFrameId;

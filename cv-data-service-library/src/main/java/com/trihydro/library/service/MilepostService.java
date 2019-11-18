@@ -154,6 +154,10 @@ public class MilepostService extends CvDataServiceLibrary {
 				milepost.setBearing(rs.getDouble("bearing"));
 				mileposts.add(milepost);
 			}
+
+			if(mileposts.size()==0){
+				System.out.println("Unable to find mileposts with query: " + statementStr);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

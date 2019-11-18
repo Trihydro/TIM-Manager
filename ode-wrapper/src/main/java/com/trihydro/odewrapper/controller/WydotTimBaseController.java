@@ -36,7 +36,6 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
-import com.trihydro.odewrapper.model.TimQuery;
 
 @RestController
 @ApiIgnore
@@ -532,56 +531,11 @@ public abstract class WydotTimBaseController {
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
                 startDateTime, endDateTime);
         // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk, endDateTime);        
+        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk,
+                endDateTime);
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);       
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);
     }
-
-    protected static TimQuery submitTimQuery(WydotRsu rsu, int counter) {
-
-        // stop if this fails twice
-        if (counter == 1)
-            return null;
-
-        // tim query to ODE
-        String rsuJson = gson.toJson(rsu);
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
-
-        String responseStr = null;
-
-        try {
-            responseStr = restTemplate.postForObject(configuration.getOdeUrl() + "/tim/query", entity, String.class);
-        } catch (RestClientException e) {
-            return submitTimQuery(rsu, counter + 1);
-        }
-
-        String[] items = responseStr.replaceAll("\\\"", "").replaceAll("\\:", "").replaceAll("indicies_set", "")
-                .replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\[", "").replaceAll(" ", "")
-                .replaceAll("\\]", "").replaceAll("\\s", "").split(",");
-
-        List<Integer> results = new ArrayList<Integer>();
-
-        for (int i = 0; i < items.length; i++) {
-            try {
-                results.add(Integer.parseInt(items[i]));
-            } catch (NumberFormatException nfe) {
-                // NOTE: write something here if you need to recover from formatting errors
-            }
-        }
-
-        Collections.sort(results);
-
-        TimQuery timQuery = new TimQuery();
-        timQuery.setIndicies_set(results);
-        // TimQuery timQuery = gson.fromJson(responseStr, TimQuery.class);
-
-        return timQuery;
-    }
-
 }

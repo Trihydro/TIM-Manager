@@ -42,6 +42,7 @@ public class SdwService {
             return asdd;
 
         } catch (IOException ex) {
+            ex.printStackTrace();
             return null;
         }
 

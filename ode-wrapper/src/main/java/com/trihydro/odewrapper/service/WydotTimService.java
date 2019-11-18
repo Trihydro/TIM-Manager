@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimRsu;
@@ -30,6 +31,7 @@ import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimRsuService;
@@ -37,7 +39,6 @@ import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
-import com.trihydro.odewrapper.model.TimQuery;
 import com.trihydro.odewrapper.model.WydotTim;
 
 import org.apache.commons.lang3.StringUtils;
@@ -94,8 +95,8 @@ public class WydotTimService {
 
         // set the duration if there is an enddate
         if (endDateTime != null) {
-            long durationTime = getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
-            timToSend.getTim().getDataframes()[0].setDurationTime(toIntExact(durationTime));
+            int durationTime = Utility.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+            timToSend.getTim().getDataframes()[0].setDurationTime(durationTime);
         }
 
         // if parking TIM
@@ -161,7 +162,7 @@ public class WydotTimService {
             String direction, TimType timType, Integer pk, String endDateTime) {
 
         // FIND ALL RSUS TO SEND TO
-        List<WydotRsu> rsus = getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
+        List<WydotRsu> rsus = Utility.getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
                 Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), "80");
 
         // if no RSUs found
@@ -204,7 +205,7 @@ public class WydotTimService {
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                sendNewTimToRsu(timToSend, rsu, endDateTime);
+                OdeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl());
             }
         }
     }
@@ -276,18 +277,6 @@ public class WydotTimService {
         return activeTims;
     }
 
-    public long getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime) {
-
-        ZonedDateTime zdtStart = ZonedDateTime.parse(startDateTime);
-        ZonedDateTime zdtEnd = ZonedDateTime.parse(endDateTime);
-
-        java.time.Duration dateDuration = java.time.Duration.between(zdtStart, zdtEnd);
-        Math.abs(dateDuration.toMinutes());
-        long durationTime = Math.abs(dateDuration.toMinutes());
-
-        return durationTime;
-    }
-
     public ArrayList<WydotRsu> getRsus() {
         if (rsus != null)
             return rsus;
@@ -296,19 +285,6 @@ public class WydotTimService {
             for (WydotRsu rsu : rsus) {
                 rsu.setRsuRetries(2);
                 rsu.setRsuTimeout(2000);
-            }
-            return rsus;
-        }
-    }
-
-    public ArrayList<WydotRsu> getRsusByRoute(String route) {
-        if (rsus != null)
-            return rsus;
-        else {
-            rsus = RsuService.selectRsusByRoute(route);
-            for (WydotRsu rsu : rsus) {
-                rsu.setRsuRetries(3);
-                rsu.setRsuTimeout(5000);
             }
             return rsus;
         }
@@ -323,92 +299,6 @@ public class WydotTimService {
         }
     }
 
-    public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost, String route) {
-
-        List<WydotRsu> rsus = new ArrayList<>();
-        Integer closestIndexOutsideRange = null;
-        Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
-        WydotRsu entryRsu = null;
-        // WydotRsu rsuHigher;
-
-        // if there are no rsus on this route
-        if (getRsusByRoute(route).size() == 0)
-            return rsus;
-
-        if (direction.equals("eastbound")) {
-
-            // get rsus at mileposts less than your milepost
-            List<WydotRsu> rsusLower = getRsusByRoute(route).stream().filter(x -> x.getMilepost() < lowerMilepost)
-                    .collect(Collectors.toList());
-
-            if (rsusLower.size() == 0) {
-                // if no rsus found farther west than lowerMilepost
-                // example: higherMilepost = 12, lowerMilepost = 2, no RSUs at mileposts < 2
-                // find milepost furthest west than milepost of TIM location
-                rsusLower = getRsusByRoute(route).stream().filter(x -> x.getMilepost() < higherMilepost)
-                        .collect(Collectors.toList());
-
-                // example: RSU at milepost 7.5 found
-                entryRsu = rsusLower.stream().min(compMilepost).get();
-
-                if ((lowerMilepost - entryRsu.getMilepost()) > 20) {
-                    // don't send to RSU if its further that X amount of miles away
-                    entryRsu = null;
-                }
-            }
-            // else find milepost closest to lowerMilepost
-            else {
-                // get max from that list
-                entryRsu = rsusLower.stream().max(compMilepost).get();
-            }
-            if (entryRsu == null)
-                closestIndexOutsideRange = getRsusByRoute(route).indexOf(entryRsu);
-
-        } else { // westbound
-
-            // get rsus at mileposts greater than your milepost
-            List<WydotRsu> rsusHigher = getRsusByRoute(route).stream().filter(x -> x.getMilepost() > higherMilepost)
-                    .collect(Collectors.toList());
-
-            if (rsusHigher.size() == 0) {
-                rsusHigher = getRsusByRoute(route).stream().filter(x -> x.getMilepost() > lowerMilepost)
-                        .collect(Collectors.toList());
-
-                // get min from that list
-                entryRsu = rsusHigher.stream().max(compMilepost).get();
-
-                if ((entryRsu.getMilepost() - higherMilepost) > 20) {
-                    // don't send to RSU if its further that X amount of miles away
-                    entryRsu = null;
-                }
-            } else {
-                entryRsu = rsusHigher.stream().min(compMilepost).get();
-            }
-            // get min from that list
-            if (entryRsu == null)
-                closestIndexOutsideRange = getRsusByRoute(route).indexOf(entryRsu);
-        }
-
-        // for (i = 0; i < getRsusByRoute(route).size(); i++) {
-        // if (getRsusByRoute(route).get(i).getMilepost() >= lowerMilepost
-        // && getRsusByRoute(route).get(i).getMilepost() <= higherMilepost)
-        // rsus.add(getRsusByRoute(route).get(i));
-        // }
-
-        rsus = getRsusByRoute(route).stream()
-                .filter(x -> x.getMilepost() >= lowerMilepost && x.getMilepost() <= higherMilepost)
-                .collect(Collectors.toList());
-
-        if (entryRsu != null)
-            rsus.add(entryRsu);
-
-        // add RSU closest in range
-        if (closestIndexOutsideRange != null)
-            rsus.add(getRsusByRoute(route).get(closestIndexOutsideRange));
-
-        return rsus;
-    }
-
     public WydotRsu getRsu(Long rsuId) {
 
         WydotRsu wydotRsu = null;
@@ -419,37 +309,6 @@ public class WydotTimService {
         }
 
         return wydotRsu;
-    }
-
-    public static void sendNewTimToRsu(WydotTravelerInputData timToSend, WydotRsu rsu, String endDateTime) {
-        DataFrame df = timToSend.getTim().getDataframes()[0];
-        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
-
-        // set msgCnt to 1 and create new packetId
-        timToSend.getTim().setMsgCnt(1);
-
-        TimQuery timQuery = submitTimQuery(rsu, 0);
-
-        // query failed, don't send TIM
-        if (timQuery == null) {
-            return;
-        }
-
-        timToSend.getRequest().getRsus()[0]
-                .setRsuIndex(findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set()));
-        rsu.setRsuIndex(timToSend.getRequest().getRsus()[0].getRsuIndex());
-
-        String timToSendJson = gson.toJson(timToSend);
-
-        // send TIM if not a test
-        try {
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
-            TimeUnit.SECONDS.sleep(10);
-        } catch (RuntimeException targetException) {
-            System.out.println("Send new TIM to RSU exception: " + targetException.getMessage());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public static void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId) {
@@ -474,6 +333,7 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(timToSend);
 
         try {
+            System.out.println("----> Sending new TIM to SDW: " + timToSendJson);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
@@ -500,11 +360,16 @@ public class WydotTimService {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         TimRsu timRsu = TimRsuService.getTimRsu(timId, rsuId);
         timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
-        timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
+        timToSend.getRequest().setSnmp(OdeService.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
         String timToSendJson = gson.toJson(updatedTim);
 
-        restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+        try {
+            System.out.println("----> Updating TIM on RSU: " + timToSendJson);
+            restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+        } catch (RestClientException ex) {
+            System.out.println("Failed to send update to RSU");
+        }
     }
 
     public static void updateTimOnSdw(WydotTravelerInputData timToSend, Long timId, String recordId,
@@ -529,6 +394,7 @@ public class WydotTimService {
 
         // send TIM
         try {
+            System.out.println("----> Updating TIM on SDW: " + timToSendJson);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
@@ -549,50 +415,6 @@ public class WydotTimService {
             timToSend.getTim().setMsgCnt(tim.getMsgCnt() + 1);
 
         return timToSend;
-    }
-
-    protected static TimQuery submitTimQuery(WydotRsu rsu, int counter) {
-
-        // stop if this fails twice
-        if (counter == 2)
-            return null;
-
-        // tim query to ODE
-        String rsuJson = gson.toJson(rsu);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
-
-        String responseStr = null;
-
-        try {
-            responseStr = restTemplate.postForObject(configuration.getOdeUrl() + "/tim/query", entity, String.class);
-        } catch (RestClientException e) {
-            return submitTimQuery(rsu, counter + 1);
-        }
-
-        String[] items = responseStr.replaceAll("\\\"", "").replaceAll("\\:", "").replaceAll("indicies_set", "")
-                .replaceAll("\\{", "").replaceAll("\\}", "").replaceAll("\\[", "").replaceAll(" ", "")
-                .replaceAll("\\]", "").replaceAll("\\s", "").split(",");
-
-        List<Integer> results = new ArrayList<Integer>();
-
-        for (int i = 0; i < items.length; i++) {
-            try {
-                results.add(Integer.parseInt(items[i]));
-            } catch (NumberFormatException nfe) {
-                // NOTE: write something here if you need to recover from formatting errors
-            }
-        }
-
-        Collections.sort(results);
-
-        TimQuery timQuery = new TimQuery();
-        timQuery.setIndicies_set(results);
-        // TimQuery timQuery = gson.fromJson(responseStr, TimQuery.class);
-
-        return timQuery;
     }
 
     public static void deleteTimFromRsu(WydotRsu rsu, Integer index) {
@@ -772,38 +594,4 @@ public class WydotTimService {
         return codes;
     }
 
-    protected static SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
-        SNMP snmp = new SNMP();
-        snmp.setChannel(178);
-        snmp.setRsuid("8003");
-        snmp.setMsgid(31);
-        snmp.setMode(1);
-        snmp.setChannel(178);
-        snmp.setInterval(2);
-        snmp.setDeliverystart(startDateTime);// "2018-01-01T00:00:00-06:00");
-
-        if (StringUtils.isBlank(endDateTime)) {
-            try {
-                int durationTime = timToSend.getTim().getDataframes()[0].getDurationTime();
-                Calendar cal =javax.xml.bind.DatatypeConverter.parseDateTime(startDateTime);
-                cal.add(Calendar.MINUTE, durationTime);
-                Date endDate = cal.getTime();
-
-                TimeZone tz = TimeZone.getTimeZone("UTC");
-                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-                df.setTimeZone(tz);
-                endDateTime = df.format(endDate);
-            } catch (IllegalArgumentException illArg) {
-                // if we failed here, set the endDateTime for 2 weeks from current time
-                System.out.println("Illegal Argument exception for endDate: " + illArg.getMessage());
-                endDateTime = java.time.Clock.systemUTC().instant().plus(2, ChronoUnit.WEEKS).toString();
-            }
-        }
-
-        snmp.setDeliverystop(endDateTime);
-        snmp.setEnable(1);
-        snmp.setStatus(4);
-
-        return snmp;
-    }
 }

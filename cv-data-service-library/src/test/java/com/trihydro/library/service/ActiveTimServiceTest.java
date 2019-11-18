@@ -4,20 +4,14 @@ import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.ActiveTim;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -27,7 +21,6 @@ import java.util.List;
 
 import static org.mockito.Matchers.isA;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ DbUtility.class })

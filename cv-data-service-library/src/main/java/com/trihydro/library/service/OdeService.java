@@ -124,7 +124,7 @@ public class OdeService {
     public static SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
-        snmp.setRsuid("8003");
+        snmp.setRsuid("131");// this will parse out for p-encoded hex 83 which is what the RSU wants
         snmp.setMsgid(31);
         snmp.setMode(1);
         snmp.setChannel(178);

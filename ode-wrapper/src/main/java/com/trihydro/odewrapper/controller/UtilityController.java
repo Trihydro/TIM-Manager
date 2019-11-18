@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
@@ -81,7 +82,7 @@ public class UtilityController extends WydotTimBaseController {
             rsuCheckResults.activeTimIndicesList = activeTimIndicies;
             rsuCheckResults.rsuTarget = rsu.getRsuTarget();
             
-            com.trihydro.library.model.TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
+            TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
             if(timQuery == null || timQuery.getIndicies_set() == null){
                 rsuCheckResultsList.add(rsuCheckResults);
                 continue;

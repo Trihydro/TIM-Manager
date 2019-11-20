@@ -13,12 +13,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.RsuService;
 
 public class Utility {
+	public static Gson gson = new Gson();
+
 	public static void logWithDate(String msg) {
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Date date = new Date();
 		System.out.println(date + " " + msg);
 	}
@@ -156,15 +158,19 @@ public class Utility {
 			String route) {
 
 		List<WydotRsu> rsus = new ArrayList<>();
-		Integer closestIndexOutsideRange = null;
 		Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
 		WydotRsu entryRsu = null;
 		// WydotRsu rsuHigher;
 
 		// if there are no rsus on this route
 		ArrayList<WydotRsu> mainRsus = getRsusByRoute(route);
-		if (rsus.size() == 0)
+		if (mainRsus.size() == 0) {
+			Utility.logWithDate("No RSUs found for route " + route);
 			return rsus;
+		} else {
+			Utility.logWithDate("Found the following RSUs for route " + route + ": ");
+			System.out.println(gson.toJson(mainRsus));
+		}
 
 		if (direction.equals("eastbound")) {
 
@@ -192,8 +198,6 @@ public class Utility {
 				// get max from that list
 				entryRsu = rsusLower.stream().max(compMilepost).get();
 			}
-			if (entryRsu == null)
-				closestIndexOutsideRange = mainRsus.indexOf(entryRsu);
 
 		} else { // westbound
 
@@ -202,34 +206,32 @@ public class Utility {
 					.collect(Collectors.toList());
 
 			if (rsusHigher.size() == 0) {
+				Utility.logWithDate("No RSUs found higher than 'high' milepost " + higherMilepost);
 				rsusHigher = mainRsus.stream().filter(x -> x.getMilepost() > lowerMilepost)
 						.collect(Collectors.toList());
 
+				if (rsusHigher.size() == 0) {
+					Utility.logWithDate("No RSUs found higher than 'low' milepost: " + lowerMilepost);
+				}
+
 				// get min from that list
 				entryRsu = rsusHigher.stream().max(compMilepost).get();
-
-				if ((entryRsu.getMilepost() - higherMilepost) > 20) {
-					// don't send to RSU if its further that X amount of miles away
-					entryRsu = null;
-				}
 			} else {
 				entryRsu = rsusHigher.stream().min(compMilepost).get();
 			}
-			// get min from that list
-			if (entryRsu == null)
-				closestIndexOutsideRange = mainRsus.indexOf(entryRsu);
+
+			if (entryRsu != null && (entryRsu.getMilepost() - higherMilepost) > 20) {
+				// don't send to RSU if its further than 20 miles away
+				Utility.logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
+				entryRsu = null;
+			}
 		}
 
-		rsus = mainRsus.stream()
-				.filter(x -> x.getMilepost() >= lowerMilepost && x.getMilepost() <= higherMilepost)
+		rsus = mainRsus.stream().filter(x -> x.getMilepost() >= lowerMilepost && x.getMilepost() <= higherMilepost)
 				.collect(Collectors.toList());
 
 		if (entryRsu != null)
 			rsus.add(entryRsu);
-
-		// add RSU closest in range
-		if (closestIndexOutsideRange != null)
-			rsus.add(mainRsus.get(closestIndexOutsideRange));
 
 		return rsus;
 	}

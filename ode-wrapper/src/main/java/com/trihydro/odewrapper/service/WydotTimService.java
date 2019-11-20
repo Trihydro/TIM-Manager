@@ -166,8 +166,10 @@ public class WydotTimService {
                 Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), "80");
 
         // if no RSUs found
-        if (rsus.size() == 0)
+        if (rsus.size() == 0) {
+            Utility.logWithDate("No RSUs found to place TIM on, returning");
             return;
+        }
 
         // for each rsu in range
         for (WydotRsu rsu : rsus) {
@@ -333,7 +335,7 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(timToSend);
 
         try {
-            System.out.println("----> Sending new TIM to SDW: " + timToSendJson);
+            Utility.logWithDate("Sending new TIM to SDW. sat_record_id: " + recordId);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
@@ -365,10 +367,10 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(updatedTim);
 
         try {
-            System.out.println("----> Updating TIM on RSU: " + timToSendJson);
+            Utility.logWithDate("Updating TIM on RSU. tim_id: " + timId);
             restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RestClientException ex) {
-            System.out.println("Failed to send update to RSU");
+            Utility.logWithDate("Failed to send update to RSU");
         }
     }
 
@@ -394,10 +396,11 @@ public class WydotTimService {
 
         // send TIM
         try {
-            System.out.println("----> Updating TIM on SDW: " + timToSendJson);
+            Utility.logWithDate("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
-            System.out.println("exception");
+            Utility.logWithDate("exception updating tim on SDW");
+            targetException.printStackTrace();
         }
     }
 
@@ -426,7 +429,7 @@ public class WydotTimService {
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
         try {
-            System.out.println("deleting TIM " + index.toString() + " from rsu");
+            Utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
             restTemplate.exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
                     entity, String.class);
         } catch (HttpClientErrorException e) {
@@ -459,6 +462,7 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(updatedTim);
 
         try {
+            Utility.logWithDate("Deleting TIM from SDX. tim_id: " + timId + ", sat_record_id: " + recordId);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");

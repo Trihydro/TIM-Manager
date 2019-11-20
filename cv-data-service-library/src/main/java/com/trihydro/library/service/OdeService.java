@@ -12,6 +12,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -38,10 +39,13 @@ public class OdeService {
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
 
-        TimQuery timQuery = submitTimQuery((WydotRsu) timToSend.getRequest().getRsus()[0], 0, odeUrl);
+        WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
+        TimQuery timQuery = submitTimQuery(wydotRsu, 0, odeUrl);
 
         // query failed, don't send TIM
         if (timQuery == null) {
+            Utility.logWithDate(
+                    "Returning without sending TIM to RSU. submitTimQuery failed for RSU " + gson.toJson(wydotRsu));
             return;
         }
 
@@ -52,7 +56,7 @@ public class OdeService {
 
         // send TIM if not a test
         try {
-            System.out.println("----> Sending new TIM to RSU: " + timToSendJson);
+            Utility.logWithDate("Sending new TIM to RSU");
             restTemplate.postForObject(odeUrl + "/tim", timToSendJson, String.class);
             TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
@@ -124,7 +128,8 @@ public class OdeService {
     public static SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
-        snmp.setRsuid("131");// this will parse out for p-encoded hex 83 which is what the RSU wants
+        snmp.setRsuid("83");// RSU wants hex 83, and the ODE is expecting a hex value to parse. This parses
+                            // to hex string 8003 when p-encoded
         snmp.setMsgid(31);
         snmp.setMode(1);
         snmp.setChannel(178);

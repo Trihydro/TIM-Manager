@@ -261,7 +261,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			// execute delete SQL stetement
 			deleteActiveTimResult = updateOrDelete(preparedStatement);
 
-			System.out.println("Active Tim is deleted!");
+			System.out.println("Active Tim (active_tim_id " + activeTimId + ") is deleted!");
 
 		} catch (SQLException e) {
 			e.printStackTrace();

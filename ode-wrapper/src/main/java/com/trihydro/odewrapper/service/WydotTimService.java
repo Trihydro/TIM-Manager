@@ -1,24 +1,15 @@
 package com.trihydro.odewrapper.service;
 
-import static java.lang.Math.toIntExact;
-
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
@@ -41,7 +32,6 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.WydotTim;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +42,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
@@ -231,6 +220,7 @@ public class WydotTimService {
             if (timRsus.size() == 1) {
                 rsu = getRsu(timRsus.get(0).getRsuId());
                 // delete tim off rsu
+                Utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
                 deleteTimFromRsu(rsu, timRsus.get(0).getRsuIndex());
             } else {
                 // is satellite tim
@@ -241,7 +231,7 @@ public class WydotTimService {
                 items[0] = "4868";
                 timToSend.getTim().getDataframes()[0].setDurationTime(1);
                 timToSend.getTim().getDataframes()[0].setItems(items);
-                deleteTimFromSdw(timToSend, activeTim.getSatRecordId(), activeTim.getTimId(), tim);
+                deleteTimFromSdx(timToSend, activeTim.getSatRecordId(), activeTim.getTimId(), tim);
             }
 
             // delete active tim
@@ -254,6 +244,7 @@ public class WydotTimService {
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
         activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction);
+        Utility.logWithDate(activeTims.size() + " active_tim found for deletion");
 
         deleteTimsFromRsusAndSdw(activeTims);
 
@@ -439,7 +430,7 @@ public class WydotTimService {
         }
     }
 
-    public static void deleteTimFromSdw(WydotTravelerInputData timToSend, String recordId, Long timId,
+    public static void deleteTimFromSdx(WydotTravelerInputData timToSend, String recordId, Long timId,
             WydotOdeTravelerInformationMessage tim) {
 
         WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);

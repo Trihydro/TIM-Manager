@@ -1,6 +1,8 @@
 package com.trihydro.tasks.actions;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +25,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
-
-import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ActiveTimService.class, RestTemplateProvider.class })
@@ -56,7 +56,7 @@ public class RemoveExpiredActiveTimsTest {
     public void cleanupActiveTims_runTest() {
         uut.run();
 
-        // assert exchange called once
+        // assert exchange called twice
         verify(mockRestTemplate, Mockito.times(2)).exchange(any(String.class), any(HttpMethod.class),
                 Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
     }

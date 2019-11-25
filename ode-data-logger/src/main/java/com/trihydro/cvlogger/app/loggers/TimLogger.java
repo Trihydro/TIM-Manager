@@ -1,22 +1,11 @@
 package com.trihydro.cvlogger.app.loggers;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-
-import us.dot.its.jpo.ode.model.OdeData;
-import us.dot.its.jpo.ode.model.OdeLogMetadata;
-import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
-import us.dot.its.jpo.ode.model.OdeTimPayload;
-import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
-import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Geometry;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
-import us.dot.its.jpo.ode.util.JsonUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,14 +20,25 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameItisCodeService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.NodeXYService;
-import com.trihydro.library.service.PathService;
 import com.trihydro.library.service.PathNodeXYService;
+import com.trihydro.library.service.PathService;
 import com.trihydro.library.service.RegionService;
+import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.trihydro.library.service.TimRsuService;
+import us.dot.its.jpo.ode.model.OdeData;
+import us.dot.its.jpo.ode.model.OdeLogMetadata;
+import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
+import us.dot.its.jpo.ode.model.OdeTimPayload;
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Geometry;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
+import us.dot.its.jpo.ode.util.JsonUtils;
 
 public class TimLogger extends BaseLogger {
 
@@ -100,7 +100,6 @@ public class TimLogger extends BaseLogger {
 			Long dataFrameId = null;
 			Path path = null;
 			Geometry geometry = null;
-			// OdePosition3D anchor = null;
 			OdeTravelerInformationMessage.DataFrame.Region region = null;
 			DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
 			if (dFrames.length > 0) {
@@ -110,7 +109,6 @@ public class TimLogger extends BaseLogger {
 					region = regions[0];
 					path = regions[0].getPath();
 					geometry = regions[0].getGeometry();
-					// anchor = regions[0].getAnchorPosition();
 				}
 				dataFrameId = DataFrameService.insertDataFrame(timId, dFrames[0]);
 			}
@@ -126,7 +124,6 @@ public class TimLogger extends BaseLogger {
 				}
 			} else if (geometry != null) {
 				RegionService.insertRegion(dataFrameId, null, region);
-				// RegionService.insertGeometryRegion(dataFrameId, geometry, region);
 			} else {
 				Utility.logWithDate(
 						"addTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
@@ -164,6 +161,47 @@ public class TimLogger extends BaseLogger {
 		}
 	}
 
+	private static void addRegion(DataFrame dataFrame, Long dataFrameId) {
+		Path path = null;
+		Geometry geometry = null;
+		Region region = dataFrame.getRegions()[0];
+		path = region.getPath();
+		geometry = region.getGeometry();
+
+		if (path != null) {
+			Long pathId = PathService.insertPath();
+			RegionService.insertRegion(dataFrameId, pathId, region);
+
+			Long nodeXYId;
+			for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
+				nodeXYId = NodeXYService.insertNodeXY(nodeXY);
+				PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+			}
+		} else if (geometry != null) {
+			RegionService.insertRegion(dataFrameId, null, region);
+		} else {
+			Utility.logWithDate(
+					"addActiveTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+							+ dataFrameId + ")");
+		}
+	}
+
+	private static void addDataFrameItis(DataFrame dataFrame, Long dataFrameId) {
+		// save DataFrame ITIS codes
+		String[] items = dataFrame.getItems();
+		if (items.length == 0) {
+			System.out.println("No itis codes found to associate with data_frame " + dataFrameId);
+		}
+		for (String timItisCodeId : items) {
+			if (StringUtils.isNumeric(timItisCodeId)) {
+				String itisCodeId = getItisCodeId(timItisCodeId);
+				if (itisCodeId != null)
+					DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+			} else
+				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+		}
+	}
+
 	// only does one TIM at a time ***
 	public static void addActiveTimToOracleDB(OdeData odeData) {
 
@@ -198,35 +236,32 @@ public class TimLogger extends BaseLogger {
 		Long timId = TimService.insertTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null,
 				satRecordId, name);
 
-		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
-
-		// save DataFrame
-		Long dataFrameId = null; // DataFrameService.insertDataFrame(timId, dframes[0]);
-
-		Path path = null;
-		Geometry geometry = null;
-		Region region = regions[0];
-		path = region.getPath();
-		geometry = region.getGeometry();
-		dataFrameId = DataFrameService.insertDataFrame(timId, dframes[0]);
-
-		if (path != null) {
-			Long pathId = PathService.insertPath();
-			RegionService.insertRegion(dataFrameId, pathId, region);
-
-			Long nodeXYId;
-			for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
-				nodeXYId = NodeXYService.insertNodeXY(nodeXY);
-				PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
-			}
-		} else if (geometry != null) {
-			RegionService.insertRegion(dataFrameId, null, region);
-			// RegionService.insertGeometryRegion(dataFrameId, geometry, region);
+		if (timId != null) {
+			// we inserted a new TIM, add additional data
+			Long dataFrameId = DataFrameService.insertDataFrame(timId, dframes[0]);
+			addRegion(dframes[0], dataFrameId);
+			addDataFrameItis(dframes[0], dataFrameId);
 		} else {
-			Utility.logWithDate(
-					"addActiveTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
-							+ dataFrameId + ")");
+			// TIM failed to insert, assume it exists and we need to fetch it
+			java.sql.Timestamp ts = null;
+			if (StringUtils.isNotEmpty(tim.getTimeStamp()) && StringUtils.isNotBlank(tim.getTimeStamp())) {
+				ts = java.sql.Timestamp
+						.valueOf(LocalDateTime.parse(tim.getTimeStamp(), DateTimeFormatter.ISO_DATE_TIME));
+			}
+
+			timId = TimService.getTimId(tim.getPacketID(), ts);
+			if (timId != null) {
+				Utility.logWithDate("TIM already exists, tim_id " + timId);
+
+				// ensure we handle a new satRecordId
+				if (satRecordId != null && satRecordId != "") {
+					TimService.updateTimSatRecordId(timId, satRecordId);
+					Utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
+				}
+			}
 		}
+
+		OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
 
 		// TODO : Change to loop through RSU array - doing one rsu for now
 		RSU firstRsu = null;
@@ -243,26 +278,11 @@ public class TimLogger extends BaseLogger {
 		activeTim.setTimId(timId);
 
 		// if this is an RSU TIM
-		if (activeTim.getRsuTarget() != null && metaData.getRequest() != null && metaData.getRequest().getRsus() != null
-				&& metaData.getRequest().getRsus().length > 0) {
+		if (activeTim.getRsuTarget() != null && firstRsu != null) {
 			// save TIM RSU in DB
 			WydotRsu rsu = getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
 					.orElse(null);
 			TimRsuService.insertTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
-		}
-
-		// save DataFrame ITIS codes
-		String[] items = dframes[0].getItems();
-		if (items.length == 0) {
-			System.out.println("No itis codes found to associate with data_frame " + dataFrameId);
-		}
-		for (String timItisCodeId : items) {
-			if (StringUtils.isNumeric(timItisCodeId)) {
-				String itisCodeId = getItisCodeId(timItisCodeId);
-				if (itisCodeId != null)
-					DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
-			} else
-				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
 		}
 
 		// set end time if duration is not indefinite

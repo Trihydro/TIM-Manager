@@ -5,7 +5,6 @@ import static org.mockito.Matchers.isA;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +43,7 @@ public class TimServiceTest {
     private ReceivedMessageDetails receivedMessageDetails;
     @Mock
     private OdeTravelerInformationMessage j2735TravelerInformationMessage;
-    @Mock
-    private ResultSet mockRs;
+    
     @Mock
     private SQLException sqlException;
 
@@ -67,16 +65,8 @@ public class TimServiceTest {
         Mockito.when(SecurityResultCodeTypeService.getSecurityResultCodeTypes()).thenReturn(securityResultCodeTypes);
     }
 
-    private void setupPreparedStatementForString() throws SQLException {
-        Mockito.when(mockConnection.prepareStatement(isA(String.class))).thenReturn(preppedStatementReturnsSomething);
-        Mockito.when(preppedStatementReturnsSomething.executeQuery()).thenReturn(mockRs);
-        Mockito.when(mockRs.next()).thenReturn(true);
-    }
-
     @Test
     public void insertTim_uniqueViolation() throws SQLException {
-        setupPreparedStatementForString();
-        Mockito.when(mockRs.getLong("tim_id")).thenReturn(new Long(999));
         Mockito.when(mockStatement.executeUpdate()).thenThrow(sqlException);
 
         String logFileName = "unit test log";
@@ -87,6 +77,6 @@ public class TimServiceTest {
         RecordType recordType = RecordType.rxMsg;
         Long tim_id = TimService.insertTim(odeTimMetadata, receivedMessageDetails, j2735TravelerInformationMessage,
                 recordType, logFileName, securityResultCode, satRecordId, regionName);
-        assertEquals(new Long(999), tim_id);
+        assertEquals(null, tim_id);
     }
 }

@@ -5,12 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.tables.TimOracleTables;
@@ -174,21 +174,6 @@ public class TimService extends CvDataServiceLibrary {
 			}
 			// execute insert statement
 			Long timId = log(preparedStatement, "timID");
-			if (timId == null) {
-				timId = getTimId(j2735TravelerInformationMessage.getPacketID(),
-						j2735TravelerInformationMessage.getTimeStamp());
-
-				if (timId != null) {
-					Utility.logWithDate("TIM already exists, tim_id " + timId);
-
-					// if the TIM failed to insert due to existing, and we have a satRecordId,
-					// update the TIM to include this
-					if (satRecordId != null && satRecordId != "") {
-						updateTimSatRecordId(timId, satRecordId, connection);
-						Utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
-					}
-				}
-			}
 			return timId;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -207,10 +192,12 @@ public class TimService extends CvDataServiceLibrary {
 		return new Long(0);
 	}
 
-	private static boolean updateTimSatRecordId(Long timId, String satRecordId, Connection connection) {
+	public static boolean updateTimSatRecordId(Long timId, String satRecordId) {
 		PreparedStatement preparedStatement = null;
+		Connection connection = null;
 
 		try {
+			connection = DbUtility.getConnectionPool();
 			preparedStatement = connection.prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
 			preparedStatement.setString(1, satRecordId);
 			preparedStatement.setLong(2, timId);
@@ -220,7 +207,7 @@ public class TimService extends CvDataServiceLibrary {
 		}
 	}
 
-	private static Long getTimId(String packetId, String timeStamp) {
+	public static Long getTimId(String packetId, Timestamp timeStamp) {
 		ResultSet rs = null;
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
@@ -229,9 +216,9 @@ public class TimService extends CvDataServiceLibrary {
 		try {
 			connection = DbUtility.getConnectionPool();
 			preparedStatement = connection
-					.prepareStatement("select tim_id from tim where packet_id = ? and timestamp = ?");
+					.prepareStatement("select tim_id from tim where packet_id = ? and time_stamp = ?");
 			preparedStatement.setString(1, packetId);
-			preparedStatement.setString(2, timeStamp);
+			preparedStatement.setTimestamp(2, timeStamp);
 
 			rs = preparedStatement.executeQuery();
 			if (rs.next()) {

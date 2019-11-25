@@ -140,27 +140,4 @@ public class DataFrameService extends CvDataServiceLibrary {
 		return itisCodes.toArray(new String[itisCodes.size()]);
 	}
 
-	public static Long getDataFrameIdForTim(Long timID) {
-		ResultSet rs = null;
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		Long id = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			preparedStatement = connection.prepareStatement("select data_frame_id from data_frame where tim_id = ?");
-			preparedStatement.setLong(1, timID);
-
-			rs = preparedStatement.executeQuery();
-			// its possible we have more than one, but just grab the first for now since we
-			// are assuming a single data_frame/tim combo
-			if (rs.next()) {
-				id = rs.getLong("tim_id");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return id;
-	}
 }

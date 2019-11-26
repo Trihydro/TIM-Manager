@@ -5,9 +5,9 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.tasks.config.BasicConfiguration;
 
-import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -27,7 +27,6 @@ public class RemoveExpiredActiveTims implements Runnable {
 
             // delete active tims from rsus
 
-            RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = null;
@@ -40,7 +39,7 @@ public class RemoveExpiredActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                restTemplate.exchange(configuration.getWrapperUrl() + "/delete-tim/", HttpMethod.DELETE, entity,
+                RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/", HttpMethod.DELETE, entity,
                         String.class);
             }
         } catch (Exception e) {

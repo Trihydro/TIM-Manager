@@ -20,7 +20,7 @@ import com.trihydro.tasks.config.BasicConfiguration;
 public class Application {
 
 	protected static BasicConfiguration configuration;
-	
+
 	@Autowired
 	public void setConfiguration(BasicConfiguration configurationRhs) {
 		configuration = configurationRhs;
@@ -34,7 +34,9 @@ public class Application {
 	@PostConstruct
 	public void run() {
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
-		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(configuration), 1, 5, TimeUnit.MINUTES);
-		scheduledExecutorService.scheduleAtFixedRate(new CleanupActiveTims(configuration), 1, 5, TimeUnit.MINUTES);
+		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(configuration), 1, 5,
+				TimeUnit.MINUTES);
+		scheduledExecutorService.scheduleAtFixedRate(new CleanupActiveTims(configuration), 1, 5,
+				TimeUnit.MINUTES);
 	}
 }

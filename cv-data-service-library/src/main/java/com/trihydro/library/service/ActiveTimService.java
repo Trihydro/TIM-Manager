@@ -399,7 +399,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID, ROUTE from active_tim";
 			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
-			selectStatement += "  WHERE TIM_END < SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+			selectStatement += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 
 			rs = statement.executeQuery(selectStatement);
 

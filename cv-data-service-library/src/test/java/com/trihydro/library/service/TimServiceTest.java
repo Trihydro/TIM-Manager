@@ -5,6 +5,7 @@ import static org.mockito.Matchers.isA;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +44,12 @@ public class TimServiceTest {
     private ReceivedMessageDetails receivedMessageDetails;
     @Mock
     private OdeTravelerInformationMessage j2735TravelerInformationMessage;
-    
+
     @Mock
     private SQLException sqlException;
+
+    @Mock
+    private ResultSet resultSet;
 
     @Before
     public void setup() throws SQLException {
@@ -54,6 +58,9 @@ public class TimServiceTest {
         PowerMockito.mockStatic(SecurityResultCodeTypeService.class);
         Mockito.when(DbUtility.getConnectionPool()).thenReturn(mockConnection);
         Mockito.when(mockConnection.prepareStatement(isA(String.class), isA(String[].class))).thenReturn(mockStatement);
+        Mockito.when(mockStatement.getGeneratedKeys()).thenReturn(resultSet);
+        Mockito.when(resultSet.next()).thenReturn(true);
+        Mockito.when(resultSet.getLong(1)).thenReturn(1L);
 
         // Setup the static SecurityResultCodeTypeService.getSecurityResultCodeTypes to
         // return a basic list with a single type (unknown, id -1)
@@ -78,5 +85,22 @@ public class TimServiceTest {
         Long tim_id = TimService.insertTim(odeTimMetadata, receivedMessageDetails, j2735TravelerInformationMessage,
                 recordType, logFileName, securityResultCode, satRecordId, regionName);
         assertEquals(null, tim_id);
+    }
+
+    @Test
+    public void insertTim_success() throws SQLException {
+        Mockito.when(mockStatement.executeUpdate()).thenReturn(1);
+
+        String logFileName = "unit test log";
+        String satRecordId = "TEST";
+        String regionName = "TEST";
+        SecurityResultCode securityResultCode = SecurityResultCode.unknown;
+        RecordType recordType = RecordType.rxMsg;
+
+        Long tim_id = TimService.insertTim(odeTimMetadata, receivedMessageDetails, j2735TravelerInformationMessage,
+                recordType, logFileName, securityResultCode, satRecordId, regionName);
+
+        Long expected = 1L;
+        assertEquals(expected, tim_id);
     }
 }

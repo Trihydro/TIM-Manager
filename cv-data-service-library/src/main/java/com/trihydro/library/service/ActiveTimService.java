@@ -805,10 +805,27 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "select active_tim.* from active_tim";
+			// The inner subqueries leave us with a list of tim_ids that aren't associated with any valid itis codes. Select the active_tims with
+			// those tim_ids
+			String selectStatement = " select * from active_tim where active_tim.tim_id in";
+
+			// Outer subquery: Get all records that have a tim_id found to be associated with a null itis code (from inner subquery)
+			// We need to do this because there could me multiple records for a single tim_id
+			selectStatement += " (select active_tim.tim_id from active_tim";
+			selectStatement += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+			selectStatement += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+			selectStatement += " where active_tim.tim_id in";
+
+			// Inner subquery: Get tim_ids of active_tims that _might_ not have an associated itis code
+			selectStatement += " (select active_tim.tim_id from active_tim";
 			selectStatement += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			selectStatement += " left join data_frame_itis_code ON data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
-			selectStatement += " where data_frame_itis_code.itis_code_id is null";
+			selectStatement += " where data_frame_itis_code.itis_code_id is null)";
+
+			// Outer subquery (cont'd): Group by tim_id and filter out any records that have a tim_id
+			// associated with both null and valid itis codes (we only want tim_ids associated with just null itis codes)
+			selectStatement += " group by active_tim.tim_id";
+			selectStatement += " having max(data_frame_itis_code.itis_code_id) is null)";
 
 			rs = statement.executeQuery(selectStatement);
 

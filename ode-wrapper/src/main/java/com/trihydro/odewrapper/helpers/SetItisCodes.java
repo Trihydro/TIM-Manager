@@ -1,19 +1,20 @@
 package com.trihydro.odewrapper.helpers;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.trihydro.library.model.IncidentChoice;
+import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.service.IncidentChoicesService;
+import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
-import com.trihydro.library.model.IncidentChoice;
-import com.trihydro.library.model.ItisCode;
-import com.trihydro.library.service.IncidentChoicesService;
-import com.trihydro.library.service.ItisCodeService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import java.util.List;
-import java.util.ArrayList;
 
 @Component
 public class SetItisCodes {
@@ -222,7 +223,7 @@ public class SetItisCodes {
         }
 
         if (items.size() == 0)
-            items.add("531");
+            items.add("531");// 531 is "Incident"
 
         return items;
     }

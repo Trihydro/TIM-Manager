@@ -1,30 +1,46 @@
 package com.trihydro.library.service;
 
-import us.dot.its.jpo.ode.model.OdeMsgMetadata;
-import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
-import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
-import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
+import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
+import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
+import us.dot.its.jpo.ode.model.OdeMsgMetadata;
+import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
 public class TimService extends CvDataServiceLibrary {
 
+	/**
+	 * Insert a new TIM record to the database. In the case that the TIM already
+	 * exists, this function returns the existing tim_id. If the TIM exists and this
+	 * function is passed a satRecordId, it will update the database record to
+	 * include this satRecordId
+	 * 
+	 * @param odeTimMetadata
+	 * @param receivedMessageDetails
+	 * @param j2735TravelerInformationMessage
+	 * @param recordType
+	 * @param logFileName
+	 * @param securityResultCode
+	 * @param satRecordId
+	 * @param regionName
+	 * @return
+	 */
 	public static Long insertTim(OdeMsgMetadata odeTimMetadata, ReceivedMessageDetails receivedMessageDetails,
 			OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName,
 			SecurityResultCode securityResultCode, String satRecordId, String regionName) {
@@ -85,22 +101,7 @@ public class TimService extends CvDataServiceLibrary {
 							preparedStatement.setString(fieldNum, "1");
 						else
 							preparedStatement.setString(fieldNum, "0");
-					} else if (col.equals("SERIAL_ID_STREAM_ID"))
-						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								odeTimMetadata.getSerialId().getStreamId());
-					else if (col.equals("SERIAL_ID_BUNDLE_SIZE"))
-						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-								odeTimMetadata.getSerialId().getBundleSize());
-					else if (col.equals("SERIAL_ID_BUNDLE_ID"))
-						SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
-								odeTimMetadata.getSerialId().getBundleId());
-					else if (col.equals("SERIAL_ID_RECORD_ID"))
-						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-								odeTimMetadata.getSerialId().getRecordId());
-					else if (col.equals("SERIAL_ID_SERIAL_NUMBER"))
-						SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
-								odeTimMetadata.getSerialId().getSerialNumber());
-					else if (col.equals("PAYLOAD_TYPE")) {
+					} else if (col.equals("PAYLOAD_TYPE")) {
 						SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
 					} else if (col.equals("ODE_RECEIVED_AT")) {
 						if (odeTimMetadata.getOdeReceivedAt() != null) {
@@ -110,6 +111,24 @@ public class TimService extends CvDataServiceLibrary {
 						} else {
 							preparedStatement.setString(fieldNum, null);
 						}
+					}
+
+					if (odeTimMetadata.getSerialId() != null) {
+						if (col.equals("SERIAL_ID_STREAM_ID"))
+							SQLNullHandler.setStringOrNull(preparedStatement, fieldNum,
+									odeTimMetadata.getSerialId().getStreamId());
+						else if (col.equals("SERIAL_ID_BUNDLE_SIZE"))
+							SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
+									odeTimMetadata.getSerialId().getBundleSize());
+						else if (col.equals("SERIAL_ID_BUNDLE_ID"))
+							SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
+									odeTimMetadata.getSerialId().getBundleId());
+						else if (col.equals("SERIAL_ID_RECORD_ID"))
+							SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
+									odeTimMetadata.getSerialId().getRecordId());
+						else if (col.equals("SERIAL_ID_SERIAL_NUMBER"))
+							SQLNullHandler.setLongOrNull(preparedStatement, fieldNum,
+									odeTimMetadata.getSerialId().getSerialNumber());
 					}
 				}
 				if (receivedMessageDetails != null) {
@@ -171,6 +190,45 @@ public class TimService extends CvDataServiceLibrary {
 			}
 		}
 		return new Long(0);
+	}
+
+	public static boolean updateTimSatRecordId(Long timId, String satRecordId) {
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			preparedStatement = connection.prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
+			preparedStatement.setString(1, satRecordId);
+			preparedStatement.setLong(2, timId);
+			return updateOrDelete(preparedStatement);
+		} catch (Exception ex) {
+			return false;
+		}
+	}
+
+	public static Long getTimId(String packetId, Timestamp timeStamp) {
+		ResultSet rs = null;
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		Long id = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			preparedStatement = connection
+					.prepareStatement("select tim_id from tim where packet_id = ? and time_stamp = ?");
+			preparedStatement.setString(1, packetId);
+			preparedStatement.setTimestamp(2, timeStamp);
+
+			rs = preparedStatement.executeQuery();
+			if (rs.next()) {
+				id = rs.getLong("tim_id");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return id;
 	}
 
 	public static WydotOdeTravelerInformationMessage getTim(Long timId) {

@@ -1,37 +1,42 @@
 package com.trihydro.cvlogger.app;
 
-import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
-import com.fasterxml.jackson.databind.JsonNode;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
+
 import org.junit.Ignore;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
+import us.dot.its.jpo.ode.model.OdeBsmMetadata.BsmSource;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
-import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
+import us.dot.its.jpo.ode.model.OdeLogMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
+import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
 import us.dot.its.jpo.ode.model.OdeLogMsgMetadataLocation;
+import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.RxSource;
 import us.dot.its.jpo.ode.model.SerialId;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TransmissionState;
+import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
+import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Circle;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.DistanceUnits.DistanceUnitsEnum;
-import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
-import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
-import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
-import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
-import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
-import us.dot.its.jpo.ode.model.OdeBsmMetadata.BsmSource;
 
 /**
  * Unit tests for JSON to Java Object Converters.
@@ -280,8 +285,6 @@ public class JsonToJavaConverterTest {
                 OdeTravelerInformationMessage timTest = JsonToJavaConverter.convertBroadcastTimPayloadJsonToJava(value);
 
                 assertEquals(1, timTest.getMsgCnt());
-                // TODO
-                // assertEquals(1, timTest.getIndex());
                 assertEquals("2018-03-15T21:18:46.719-07:00", timTest.getTimeStamp());
                 assertEquals("17e610000000000000", timTest.getPacketID());
                 assertEquals("null", timTest.getUrlB());

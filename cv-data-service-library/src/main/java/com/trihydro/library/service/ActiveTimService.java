@@ -1,27 +1,24 @@
 package com.trihydro.library.service;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.helpers.Utility;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimUpdateModel;
 
 public class ActiveTimService extends CvDataServiceLibrary {
 
@@ -759,13 +756,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				activeTim.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
 				activeTim.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
 
-				BigDecimal lane_width = rs.getBigDecimal("LANE_WIDTH");
-				if (lane_width == null) {
-					lane_width = new BigDecimal(327);
-					// TODO: we default to 327 in the wrapper too, but this should come from config
-					// and likely needs to be a bit smaller
-				}
-				activeTim.setLaneWidth(lane_width);
+				activeTim.setLaneWidth(rs.getBigDecimal("LANE_WIDTH"));
 				activeTim.setRegionDirection(rs.getString("REGION_DIRECTION"));
 				activeTim.setDirectionality(rs.getString("DIRECTIONALITY"));
 				activeTim.setClosedPath(rs.getBoolean("CLOSED_PATH"));

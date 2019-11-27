@@ -197,6 +197,8 @@ public class TimLogger extends BaseLogger {
 				String itisCodeId = getItisCodeId(timItisCodeId);
 				if (itisCodeId != null)
 					DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+				else
+					Utility.logWithDate("Could not find corresponding itis code it for " + timItisCodeId);
 			} else
 				DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
 		}

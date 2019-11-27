@@ -4,38 +4,30 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
+import com.trihydro.odewrapper.model.Buffer;
+import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimRw;
 import com.trihydro.odewrapper.model.WydotTimVsl;
-import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import springfox.documentation.annotations.ApiIgnore;
-
-import com.trihydro.library.model.TimType;
-import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.service.TimTypeService;
-import com.trihydro.odewrapper.config.BasicConfiguration;
-import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.odewrapper.model.Buffer;
-import com.trihydro.odewrapper.model.ControllerResult;
 
 @RestController
 @ApiIgnore

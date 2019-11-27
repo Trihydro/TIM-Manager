@@ -217,7 +217,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			connection = DbUtility.getConnectionPool();
 			preparedStatement = connection.prepareStatement(deleteSQL);
 
-			// execute delete SQL stetement
+			// execute delete SQL statement
 			deleteActiveTimResult = updateOrDelete(preparedStatement);
 
 			System.out.println("deleteExpiredActiveTims ran");

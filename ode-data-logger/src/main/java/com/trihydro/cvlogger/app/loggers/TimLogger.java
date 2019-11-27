@@ -10,6 +10,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
@@ -41,6 +42,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 import us.dot.its.jpo.ode.util.JsonUtils;
 
 public class TimLogger extends BaseLogger {
+	public static Gson gson = new Gson();
 
 	public static OdeData processTimJson(String value) {
 
@@ -260,6 +262,12 @@ public class TimLogger extends BaseLogger {
 					TimService.updateTimSatRecordId(timId, satRecordId);
 					Utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
 				}
+			} else {
+				// failed to insert new tim and failed to fetch existing, log and return
+				Utility.logWithDate(
+						"Failed to insert tim, and failed to fetch existing tim. No data inserted for OdeData: "
+								+ gson.toJson(odeData));
+				return;
 			}
 		}
 

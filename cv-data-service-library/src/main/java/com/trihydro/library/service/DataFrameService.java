@@ -3,10 +3,6 @@ package com.trihydro.library.service;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -18,6 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -36,12 +34,9 @@ public class DataFrameService extends CvDataServiceLibrary {
 					TimOracleTables.getDataFrameTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "data_frame_id" });
 			int fieldNum = 1;
-			String params = "";
 
 			for (String col : TimOracleTables.getDataFrameTable()) {
-				params += col + ":";
 				if (col.equals("TIM_ID")) {
-					params += timID;
 					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, timID);
 				} else if (col.equals("SSP_TIM_RIGHTS")) {
 					SQLNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspTimRights());
@@ -51,28 +46,20 @@ public class DataFrameService extends CvDataServiceLibrary {
 						ordinal = dFrame.getFrameType().ordinal();
 					}
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, ordinal);
-					params += ordinal;
 				} else if (col.equals("DURATION_TIME")) {
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getDurationTime());
-					params += dFrame.getDurationTime();
 				} else if (col.equals("PRIORITY")) {
 					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getPriority());
-					params += dFrame.getPriority();
 				} else if (col.equals("SSP_LOCATION_RIGHTS")) {
 					SQLNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspLocationRights());
-					params += dFrame.getSspLocationRights();
 				} else if (col.equals("SSP_MSG_TYPES")) {
 					SQLNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspMsgTypes());
-					params += dFrame.getSspMsgTypes();
 				} else if (col.equals("SSP_MSG_CONTENT")) {
 					SQLNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspMsgContent());
-					params += dFrame.getSspMsgContent();
 				} else if (col.equals("CONTENT")) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getContent());
-					params += dFrame.getContent();
 				} else if (col.equals("URL")) {
 					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getUrl());
-					params += dFrame.getUrl();
 				} else if (col.equals("START_DATE_TIME")) {
 					Timestamp time = null;
 					try {
@@ -86,15 +73,10 @@ public class DataFrameService extends CvDataServiceLibrary {
 						System.out.println("Unable to parse startdate: " + dFrame.getStartDateTime());
 					}
 					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, time);
-					params += time.toString();
 				}
 
-				params += ";";
 				fieldNum++;
 			}
-
-			// System.out.println(
-			// 		"--------------- dataFrameService inserting: " + insertQueryStatement + " WITH PARAMS: " + params);
 
 			Long dataFrameId = log(preparedStatement, "dataframe");
 			return dataFrameId;
@@ -157,4 +139,5 @@ public class DataFrameService extends CvDataServiceLibrary {
 
 		return itisCodes.toArray(new String[itisCodes.size()]);
 	}
+
 }

@@ -6,10 +6,17 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Application",
+            "request": "launch",
+            "mainClass": "com.trihydro.library.Application",
+            "projectName": "cv-data-service-library"
+        },
+        {
+            "type": "java",
             "name": "CV Data Controller (Launch)",
             "request": "launch",
-            "cwd": "${workspaceRoot}/cv-data-controller",      
-            "args": "--spring.profiles.active=dev",     
+            "cwd": "${workspaceRoot}/cv-data-controller",
+            "args": "--spring.profiles.active=dev",
             "mainClass": "com.trihydro.cvdatacontroller.Application"
         },
         {
@@ -24,7 +31,7 @@
             "type": "java",
             "name": "CV Data Tasks (Launch)",
             "request": "launch",
-            "cwd": "${}/cv-data-tasks",
+            "cwd": "${workspaceRoot}/cv-data-tasks",
             "args": "--spring.profiles.active=dev",
             "mainClass": "com.trihydro.tasks.Application"
         },

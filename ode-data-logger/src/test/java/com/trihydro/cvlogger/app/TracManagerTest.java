@@ -40,9 +40,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.cvlogger.app.services.JavaMailSenderImplProvider;
-import com.trihydro.cvlogger.app.services.RestTemplateProvider;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.service.TracMessageSentService;
 import com.trihydro.library.service.TracMessageTypeService;

@@ -13,6 +13,7 @@ import java.util.List;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
+import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ DbUtility.class, SQLNullHandler.class, SecurityResultCodeTypeService.class })
+@PrepareForTest({ DbUtility.class, SQLNullHandler.class, SecurityResultCodeTypeService.class, TimOracleTables.class })
 public class TimServiceTest {
     @Mock
     private Connection mockConnection;
@@ -56,6 +57,7 @@ public class TimServiceTest {
         PowerMockito.mockStatic(DbUtility.class);
         PowerMockito.mockStatic(SQLNullHandler.class);
         PowerMockito.mockStatic(SecurityResultCodeTypeService.class);
+        PowerMockito.mockStatic(TimOracleTables.class);
         Mockito.when(DbUtility.getConnectionPool()).thenReturn(mockConnection);
         Mockito.when(mockConnection.prepareStatement(isA(String.class), isA(String[].class))).thenReturn(mockStatement);
         Mockito.when(mockStatement.getGeneratedKeys()).thenReturn(resultSet);

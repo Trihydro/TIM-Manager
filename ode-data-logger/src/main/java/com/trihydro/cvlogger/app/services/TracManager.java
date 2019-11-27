@@ -17,6 +17,7 @@ import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TracMessageSentService;
 import com.trihydro.library.service.TracMessageTypeService;
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;

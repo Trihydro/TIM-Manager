@@ -1,4 +1,4 @@
-package com.trihydro.cvlogger.app.services;
+package com.trihydro.library.service;
 
 import org.springframework.web.client.RestTemplate;
 

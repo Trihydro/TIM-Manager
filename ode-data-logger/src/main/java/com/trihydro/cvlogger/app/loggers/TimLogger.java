@@ -5,19 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.dot.its.jpo.ode.model.OdeData;
-import us.dot.its.jpo.ode.model.OdeLogMetadata;
-import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
-import us.dot.its.jpo.ode.model.OdeTimPayload;
-import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
-import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Geometry;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
-import us.dot.its.jpo.ode.util.JsonUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,14 +18,25 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameItisCodeService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.NodeXYService;
-import com.trihydro.library.service.PathService;
 import com.trihydro.library.service.PathNodeXYService;
+import com.trihydro.library.service.PathService;
 import com.trihydro.library.service.RegionService;
+import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.trihydro.library.service.TimRsuService;
+import us.dot.its.jpo.ode.model.OdeData;
+import us.dot.its.jpo.ode.model.OdeLogMetadata;
+import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
+import us.dot.its.jpo.ode.model.OdeTimPayload;
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Geometry;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
+import us.dot.its.jpo.ode.util.JsonUtils;
 
 public class TimLogger extends BaseLogger {
 

@@ -18,6 +18,8 @@ public class WydotTim implements Cloneable {
 	private List<String> itisCodes;
 	@ApiModelProperty(required = true)
 	private String clientId;
+	@ApiModelProperty(required = true)
+	private String lrsRoute;
 
 	@Override
 	public WydotTim clone() throws CloneNotSupportedException {
@@ -30,6 +32,14 @@ public class WydotTim implements Cloneable {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+	public String getLrsRoute() {
+		return this.lrsRoute;
+	}
+
+	public void setLrsRoute(String lrsRoute) {
+		this.lrsRoute = lrsRoute;
 	}
 
 	public List<String> getItisCodes() {

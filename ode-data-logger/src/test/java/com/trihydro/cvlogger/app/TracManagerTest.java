@@ -1,5 +1,30 @@
 package com.trihydro.cvlogger.app;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.trihydro.cvlogger.app.services.JavaMailSenderImplProvider;
+import com.trihydro.cvlogger.app.services.TracManager;
+import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.model.TracMessageSent;
+import com.trihydro.library.model.TracMessageType;
+import com.trihydro.library.service.RestTemplateProvider;
+import com.trihydro.library.service.TracMessageSentService;
+import com.trihydro.library.service.TracMessageTypeService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,35 +43,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import com.trihydro.cvlogger.app.services.JavaMailSenderImplProvider;
-import com.trihydro.cvlogger.app.services.TracManager;
-import com.trihydro.library.model.ConfigProperties;
-import com.trihydro.library.service.RestTemplateProvider;
-import com.trihydro.library.model.TracMessageSent;
-import com.trihydro.library.service.TracMessageSentService;
-import com.trihydro.library.service.TracMessageTypeService;
-import com.trihydro.library.model.TracMessageType;
 
 /**
  * Unit tests for TimRefreshController

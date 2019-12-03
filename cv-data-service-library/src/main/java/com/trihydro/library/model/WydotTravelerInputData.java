@@ -2,11 +2,10 @@ package com.trihydro.library.model;
 
 import java.util.List;
 
-import com.trihydro.library.model.Milepost;
-
 import us.dot.its.jpo.ode.model.OdeTravelerInputData;
 
 public class WydotTravelerInputData extends OdeTravelerInputData {
+    private static final long serialVersionUID = 4901957472231480432L;
     private String dateSent;
     private String dateReceived;
     private List<Milepost> mileposts;

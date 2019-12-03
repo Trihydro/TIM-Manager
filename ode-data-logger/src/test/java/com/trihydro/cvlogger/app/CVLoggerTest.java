@@ -1,36 +1,40 @@
 package com.trihydro.cvlogger.app;
 
-import com.trihydro.cvlogger.app.loggers.BsmLogger;
-import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
-import com.trihydro.cvlogger.app.loggers.TimLogger;
-import com.fasterxml.jackson.databind.JsonNode;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.Ignore;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.trihydro.cvlogger.app.loggers.BsmLogger;
+import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
+import com.trihydro.cvlogger.app.loggers.TimLogger;
+
+import org.junit.Test;
+
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
 import us.dot.its.jpo.ode.model.OdeData;
-import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
+import us.dot.its.jpo.ode.model.OdeLogMetadata;
+import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
+import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
 import us.dot.its.jpo.ode.model.OdeLogMsgMetadataLocation;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
-import us.dot.its.jpo.ode.plugin.j2735.J2735TransmissionState;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
-import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
-import us.dot.its.jpo.ode.util.JsonUtils;
-import org.junit.Test;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.RxSource;
 import us.dot.its.jpo.ode.model.SerialId;
-import static org.junit.Assert.*;
-import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
-import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
+import us.dot.its.jpo.ode.plugin.j2735.J2735TransmissionState;
+import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
+import us.dot.its.jpo.ode.util.JsonUtils;
 
 /**
  * Unit test for simple App.

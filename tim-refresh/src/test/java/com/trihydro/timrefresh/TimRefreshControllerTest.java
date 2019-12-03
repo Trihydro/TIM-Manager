@@ -1,21 +1,8 @@
 package com.trihydro.timrefresh;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.mockito.internal.verification.VerificationModeFactory;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -34,7 +21,20 @@ import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
+import com.trihydro.timrefresh.config.BasicConfiguration;
 import com.trihydro.timrefresh.service.WydotTimService;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.internal.verification.VerificationModeFactory;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit tests for TimRefreshController
@@ -48,11 +48,16 @@ public class TimRefreshControllerTest {
     @Rule
     public TestName name = new TestName();
 
-    @InjectMocks
-    TimRefreshController controllerUnderTest;
+    @Mock
+    BasicConfiguration configuration;
+
+    // @InjectMocks
+    private TimRefreshController controllerUnderTest;
 
     @Before
     public void setup() {
+        controllerUnderTest = new TimRefreshController(configuration);
+
         PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(WydotTimService.class);
         PowerMockito.mockStatic(RsuService.class);
@@ -129,7 +134,7 @@ public class TimRefreshControllerTest {
         when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(RsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
         when(Utility.getRsusInBuffer(isA(String.class), isA(double.class), isA(double.class), isA(String.class)))
-        .thenReturn(rsus);
+                .thenReturn(rsus);
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();

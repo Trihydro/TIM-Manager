@@ -1,29 +1,32 @@
 package com.trihydro.odewrapper.helpers.util;
 
-import com.trihydro.odewrapper.model.WydotTim;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.MilepostService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.model.WydotTim;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import java.time.Instant;
-import java.util.List;
-import java.util.ArrayList;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
-import com.trihydro.library.model.WydotTravelerInputData;
-import java.math.BigDecimal;
-
 @Component
 public class CreateBaseTimUtil {
 
-    public static WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, String route) {
+    public static WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, String route,
+            BasicConfiguration config) {
 
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
@@ -54,9 +57,8 @@ public class CreateBaseTimUtil {
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
         region.setName("Temp");
         region.setRegulatorID(0);
-        // region.setSegmentID(timBase.getDistrict());
 
-        region.setLaneWidth(new BigDecimal(327));
+        region.setLaneWidth(config.getDefaultLaneWidth());// new BigDecimal(327));
         region.setDirectionality("3");
         region.setClosedPath(false);
 

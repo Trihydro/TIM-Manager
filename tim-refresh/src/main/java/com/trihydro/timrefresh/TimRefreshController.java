@@ -1,13 +1,12 @@
 package com.trihydro.timrefresh;
 
-import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.DataFrameService;
-import com.trihydro.library.service.MilepostService;
-import com.trihydro.library.service.OdeService;
-import com.trihydro.library.service.PathNodeXYService;
-import com.trihydro.library.service.RegionService;
-import com.trihydro.library.service.RsuService;
-import com.trihydro.library.service.SdwService;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
@@ -16,35 +15,36 @@ import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.DataFrameService;
+import com.trihydro.library.service.MilepostService;
+import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.PathNodeXYService;
+import com.trihydro.library.service.RegionService;
+import com.trihydro.library.service.RsuService;
+import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.BasicConfiguration;
 import com.trihydro.timrefresh.service.WydotTimService;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
-import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
@@ -55,7 +55,7 @@ public class TimRefreshController {
     protected static BasicConfiguration configuration;
 
     @Autowired
-    public void setConfiguration(BasicConfiguration configurationRhs) {
+    public TimRefreshController(BasicConfiguration configurationRhs) {
         configuration = configurationRhs;
     }
 
@@ -71,6 +71,10 @@ public class TimRefreshController {
         // loop through and issue new TIM to ODE
         for (TimUpdateModel aTim : expiringTims) {
             System.out.println("------ Processing active_tim with id: " + aTim.getActiveTimId());
+
+            if (aTim.getLaneWidth() == null) {
+                aTim.setLaneWidth(configuration.getDefaultLaneWidth());
+            }
 
             // Mileposts
             String route = aTim.getRoute().replaceAll("\\D+", "");// get just the numeric value for the 'like' statement

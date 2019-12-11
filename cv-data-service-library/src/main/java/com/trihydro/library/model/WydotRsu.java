@@ -3,6 +3,7 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 
 public class WydotRsu extends RSU
 {
+	private static final long serialVersionUID = 3381208236984831107L;
 	private Double latitude;
 	private Double longitude;
 	private Integer rsuId;

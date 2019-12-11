@@ -70,7 +70,7 @@ public class WydotTimService {
 
         String route = wydotTim.getRoute().replaceAll("\\D+", "");
         // build base TIM
-        WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route);
+        WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route, configuration);
 
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0]
@@ -225,8 +225,8 @@ public class WydotTimService {
             } else {
                 // is satellite tim
                 String route = activeTim.getRoute().replaceAll("\\D+", "");
-                WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, activeTim.getDirection(),
-                        route);
+                WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, activeTim.getDirection(), route,
+                        configuration);
                 String[] items = new String[1];
                 items[0] = "4868";
                 timToSend.getTim().getDataframes()[0].setDurationTime(1);

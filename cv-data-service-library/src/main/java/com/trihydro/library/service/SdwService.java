@@ -3,6 +3,7 @@ package com.trihydro.library.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -65,8 +66,8 @@ public class SdwService {
         return hexStr;
     }
 
-    public static HashMap<Integer, Boolean> deleteSdxDataBySatRecordId(List<String> satRecordIds) {
-        HashMap<Integer, Boolean> results = null;
+    public static HashMap<Long, Boolean> deleteSdxDataBySatRecordId(List<String> satRecordIds) {
+        HashMap<Long, Boolean> results = null;
         String apiKey = DbUtility.getConfig().getSdwApiKey();
         if (satRecordIds == null || satRecordIds.size() == 0 || apiKey == null) {
             Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
@@ -96,7 +97,7 @@ public class SdwService {
             BufferedReader br = new BufferedReader(isr);
             String objString = br.readLine();
             ObjectMapper mapper = new ObjectMapper();
-            TypeReference<HashMap<Integer, Boolean>> typeRef = new TypeReference<HashMap<Integer, Boolean>>() {
+            TypeReference<HashMap<Long, Boolean>> typeRef = new TypeReference<HashMap<Long, Boolean>>() {
             };
             results = mapper.readValue(objString, typeRef);
             Utility.logWithDate("Results from deleting SDX data by recordId: " + gson.toJson(results));

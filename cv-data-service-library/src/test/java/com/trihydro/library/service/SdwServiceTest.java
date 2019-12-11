@@ -111,7 +111,7 @@ public class SdwServiceTest {
 
     @Test
     public void deleteSdxDataBySatRecordId_nullRecordIds() {
-        HashMap<Integer, Boolean> results = SdwService.deleteSdxDataBySatRecordId(null);
+        HashMap<Long, Boolean> results = SdwService.deleteSdxDataBySatRecordId(null);
         PowerMockito.verifyStatic();
         Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
         assertNull(results);
@@ -119,7 +119,7 @@ public class SdwServiceTest {
 
     @Test
     public void deleteSdxDataBySatRecordId_emptyRecordIds() {
-        HashMap<Integer, Boolean> results = SdwService.deleteSdxDataBySatRecordId(new ArrayList<String>());
+        HashMap<Long, Boolean> results = SdwService.deleteSdxDataBySatRecordId(new ArrayList<String>());
         PowerMockito.verifyStatic();
         Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
         assertNull(results);
@@ -131,7 +131,7 @@ public class SdwServiceTest {
         satNames.add("A9184436");
         Mockito.when(Utility.getUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenThrow(new IOException());
-        HashMap<Integer, Boolean> results = SdwService.deleteSdxDataBySatRecordId(satNames);
+        HashMap<Long, Boolean> results = SdwService.deleteSdxDataBySatRecordId(satNames);
         assertNull(results);
     }
 
@@ -151,7 +151,7 @@ public class SdwServiceTest {
         Mockito.when(mockUrlConn.getResponseCode()).thenReturn(200);
         Mockito.when(Utility.getUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenReturn(mockUrlConn);
-        HashMap<Integer, Boolean> results = SdwService.deleteSdxDataBySatRecordId(satNames);
+        HashMap<Long, Boolean> results = SdwService.deleteSdxDataBySatRecordId(satNames);
         assertNotNull(results);
         assertThat(results, IsMapContaining.hasKey(-1));
     }

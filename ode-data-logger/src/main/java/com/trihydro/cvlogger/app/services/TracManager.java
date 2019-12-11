@@ -4,6 +4,15 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
+import com.trihydro.library.helpers.JavaMailSenderImplProvider;
+import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.model.TracMessageSent;
+import com.trihydro.library.model.TracMessageType;
+import com.trihydro.library.service.RestTemplateProvider;
+import com.trihydro.library.service.TracMessageSentService;
+import com.trihydro.library.service.TracMessageTypeService;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,18 +21,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
-
-import com.trihydro.library.service.RestTemplateProvider;
-import com.trihydro.library.service.TracMessageSentService;
-import com.trihydro.library.service.TracMessageTypeService;
-import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
-import com.trihydro.library.model.ConfigProperties;
-import com.trihydro.library.model.TracMessageSent;
-import com.trihydro.library.model.TracMessageType;
 
 @Component
 public class TracManager {
@@ -180,7 +182,7 @@ public class TracManager {
 			try {
 				System.out.println("Message failed to submit to TRAC. Sending email to "
 						+ String.join(",", message.getTo()) + ". BCC to " + String.join(",", message.getBcc()));
-				JavaMailSenderImplProvider.getJSenderImpl(config).send(message);
+				JavaMailSenderImplProvider.getJSenderImpl(config.getMailHost(), config.getMailPort()).send(message);
 				emailSent = true;
 			} catch (Exception ex) {
 				System.out.println(

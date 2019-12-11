@@ -5,15 +5,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.TimeZone;
 
+import com.trihydro.library.model.ConfigProperties;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.apache.ibatis.io.Resources;
-
-import com.trihydro.library.model.ConfigProperties;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @ComponentScan
@@ -69,13 +69,7 @@ public class DbUtility {
         }
 
         // return a connection
-        // try {
         return hds.getConnection();
-        // } catch (SQLException e) {
-        // e.printStackTrace();
-        // }
-
-        // return null;
     }
 
 }

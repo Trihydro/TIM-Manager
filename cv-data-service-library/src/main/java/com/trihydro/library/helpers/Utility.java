@@ -2,6 +2,9 @@ package com.trihydro.library.helpers;
 
 import static java.lang.Math.toIntExact;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -236,4 +239,12 @@ public class Utility {
 		return rsus;
 	}
 
+	public static HttpURLConnection getUrlConnection(String method, URL url, String apiKey) throws IOException {
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod(method);
+		conn.setRequestProperty("Accept", "application/json");
+		conn.setRequestProperty("apikey", apiKey);
+
+		return conn;
+	}
 }

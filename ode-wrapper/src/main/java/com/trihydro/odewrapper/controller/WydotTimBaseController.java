@@ -46,7 +46,7 @@ public abstract class WydotTimBaseController {
     private List<TimType> timTypes;
 
     WydotTimBaseController() {
-        this.wydotTimService = new WydotTimService();
+        this.wydotTimService = new WydotTimService(configuration);
     }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {

@@ -48,8 +48,8 @@ public class WydotTimCcController extends WydotTimBaseController {
 
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
             validateInputCc(wydotTim);
-            wydotTimService.clearTimsById(type, wydotTim.getClientId(), null);
         }
+        wydotTimService.deleteWydotTimsByType(timRcList.getTimRcList(), "CC");
 
         // build TIM
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {

@@ -86,10 +86,11 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
             validateInputRc(wydotTim);
-            wydotTimService.clearTimsById(timType.getType(), wydotTim.getClientId(), wydotTim.getDirection());
         }
+        wydotTimService.deleteWydotTimsByType(timRcList.getTimRcList(), type);
 
         String responseMessage = gson.toJson(resultList);
+        //TODO: better return...this one seems to be empty
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 

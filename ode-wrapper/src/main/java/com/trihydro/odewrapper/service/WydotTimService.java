@@ -8,11 +8,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Milepost;
@@ -23,6 +27,7 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimRsuService;
@@ -32,6 +37,7 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.WydotTim;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -54,11 +60,11 @@ public class WydotTimService {
     protected static BasicConfiguration configuration;
 
     @Autowired
-    public void setConfiguration(BasicConfiguration configurationRhs) {
+    public WydotTimService(BasicConfiguration configurationRhs) {
         configuration = configurationRhs;
     }
 
-    public static RestTemplate restTemplate = new RestTemplate();
+    public static RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
     public static Gson gson = new Gson();
     private ArrayList<WydotRsu> rsus;
     private List<TimType> timTypes;
@@ -201,18 +207,22 @@ public class WydotTimService {
         }
     }
 
-    public void deleteTimsFromRsusAndSdw(List<ActiveTim> activeTims) {
+    public void deleteTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
 
         WydotRsu rsu = null;
         WydotTim wydotTim = new WydotTim();
 
-        for (ActiveTim activeTim : activeTims) {
+        // split activeTims into sat and rsu for processing
+        List<ActiveTim> satTims = activeTims.stream().filter(x -> StringUtils.isNotBlank(x.getSatRecordId()))
+                .collect(Collectors.toList());
+        List<ActiveTim> rsuTims = activeTims.stream().filter(x -> StringUtils.isBlank(x.getSatRecordId()))
+                .collect(Collectors.toList());
+
+        for (ActiveTim activeTim : rsuTims) {
 
             wydotTim.setFromRm(activeTim.getMilepostStart());
             wydotTim.setToRm(activeTim.getMilepostStop());
 
-            // get all tims
-            WydotOdeTravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());
             // get RSU TIM is on
             List<TimRsu> timRsus = TimRsuService.getTimRsusByTimId(activeTim.getTimId());
             // get full RSU
@@ -222,20 +232,39 @@ public class WydotTimService {
                 // delete tim off rsu
                 Utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
                 deleteTimFromRsu(rsu, timRsus.get(0).getRsuIndex());
-            } else {
-                // is satellite tim
-                String route = activeTim.getRoute().replaceAll("\\D+", "");
-                WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, activeTim.getDirection(), route,
-                        configuration);
-                String[] items = new String[1];
-                items[0] = "4868";
-                timToSend.getTim().getDataframes()[0].setDurationTime(1);
-                timToSend.getTim().getDataframes()[0].setItems(items);
-                deleteTimFromSdx(timToSend, activeTim.getSatRecordId(), activeTim.getTimId(), tim);
             }
-
             // delete active tim
             ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());
+        }
+
+        if (satTims != null && satTims.size() > 0) {
+            // Get the sat_record_id values and active_tim_id values
+            List<String> satRecordIds = satTims.stream().map(ActiveTim::getSatRecordId).collect(Collectors.toList());
+            List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
+
+            // Issue one delete call to the REST service, encompassing all sat_record_ids
+            HashMap<Long, Boolean> sdxDelResults = SdwService.deleteSdxDataBySatRecordId(satRecordIds);
+
+            // Determine if anything failed
+            Stream<Entry<Long, Boolean>> failedStream = sdxDelResults.entrySet().stream()
+                    .filter(x -> x.getValue() == false);
+            List<Long> failedSatRecords = failedStream.map(x -> new Long(x.getKey())).collect(Collectors.toList());
+            if (failedSatRecords.size() > 0) {
+                // pull out failed deletions for corresponding active_tim records so we don't
+                // orphan them
+                activeSatTimIds = satTims.stream()
+                        .filter(x -> !failedSatRecords.contains(Long.parseLong(x.getSatRecordId(), 16)))
+                        .map(ActiveTim::getActiveTimId).collect(Collectors.toList());
+                String failedResultsText = sdxDelResults.entrySet().stream().filter(x -> x.getValue() == false)
+                        .map(x -> x.getKey().toString()).collect(Collectors.joining(","));
+                if (StringUtils.isNotBlank(failedResultsText)) {
+                    String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
+                    EmailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
+                            configuration);
+                }
+            }
+
+            ActiveTimService.deleteActiveTimsById(activeSatTimIds);
         }
     }
 
@@ -246,7 +275,21 @@ public class WydotTimService {
         activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction);
         Utility.logWithDate(activeTims.size() + " active_tim found for deletion");
 
-        deleteTimsFromRsusAndSdw(activeTims);
+        deleteTimsFromRsusAndSdx(activeTims);
+
+        return true;
+    }
+
+    public boolean deleteWydotTimsByType(List<? extends WydotTim> wydotTims, String timTypeStr) {
+        List<ActiveTim> aTims = new ArrayList<ActiveTim>();
+        TimType timType = getTimType(timTypeStr);
+        // TODO: let's not loop and call db here, single call to db
+        for (WydotTim wydotTim : wydotTims) {
+            aTims.addAll(ActiveTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
+                    timType.getTimTypeId(), wydotTim.getDirection()));
+        }
+
+        deleteTimsFromRsusAndSdx(aTims);
 
         return true;
     }

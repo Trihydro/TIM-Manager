@@ -1,9 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.annotations.Api;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,19 +10,22 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
-import com.trihydro.library.model.WydotTravelerInputData;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
 
 @CrossOrigin
 @RestController
@@ -143,7 +142,7 @@ public class UtilityController extends WydotTimBaseController {
     @RequestMapping(value = "/delete-tim", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteTim(@RequestBody ActiveTim activeTim) {
 
-        wydotTimService.deleteTimsFromRsusAndSdw(Stream.of(activeTim).collect(Collectors.toList()));
+        wydotTimService.deleteTimsFromRsusAndSdx(Stream.of(activeTim).collect(Collectors.toList()));
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);

@@ -1,37 +1,39 @@
 package com.trihydro.library.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.verify;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.ActiveTim;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
-import static org.mockito.Matchers.isA;
-import static org.junit.Assert.assertEquals;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ DbUtility.class })
 public class ActiveTimServiceTest {
-    // @InjectMocks
-    // ActiveTimService unitUnderTest;
-
     @Mock
     private Connection mockConnection;
     @Mock
     private Statement mockStatement;
+    @Mock
+    private PreparedStatement mockPreparedStatement;
     @Mock
     private ResultSet mockRs;
 
@@ -40,6 +42,7 @@ public class ActiveTimServiceTest {
         PowerMockito.mockStatic(DbUtility.class);
         Mockito.when(DbUtility.getConnectionPool()).thenReturn(mockConnection);
         Mockito.when(mockConnection.createStatement()).thenReturn(mockStatement);
+        Mockito.when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
         Mockito.when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
         Mockito.when(mockRs.next()).thenReturn(true).thenReturn(false);
 
@@ -85,5 +88,18 @@ public class ActiveTimServiceTest {
         assertEquals(tim.getClientId(), "123");
         assertEquals(tim.getSatRecordId(), "HEX");
         assertEquals((long) tim.getActiveTimId(), 1l);
+    }
+
+    @Test
+    public void deleteActiveTimsById() throws SQLException {
+        Mockito.when(mockPreparedStatement.executeUpdate()).thenReturn(2);
+        List<Long> activeTimIds = new ArrayList<Long>();
+        activeTimIds.add(-1l);
+        activeTimIds.add(-2l);
+        boolean success = ActiveTimService.deleteActiveTimsById(activeTimIds);
+        assertTrue(success);
+        verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (?,?)");
+        verify(mockPreparedStatement).setLong(1, -1l);
+        verify(mockPreparedStatement).setLong(2, -2l);
     }
 }

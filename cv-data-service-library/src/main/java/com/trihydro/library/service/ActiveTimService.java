@@ -392,10 +392,10 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				if (i > 0) {
 					query += " OR ";
 				}
-				query += "(CLIENT_ID like '?%'";
+				query += "(CLIENT_ID like ?";
 				wydotTim = wydotTims.get(i);
 				if (wydotTim.getDirection() != null) {
-					query += " and DIRECTION = '?'";
+					query += " and DIRECTION = ?";
 				}
 				query += ")";
 			}
@@ -413,7 +413,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				wydotTim = wydotTims.get(i);
 
 				// set client id
-				ps.setString(index, wydotTim.getClientId());
+				ps.setString(index, wydotTim.getClientId()+"%");
 				index++;
 
 				// set direction

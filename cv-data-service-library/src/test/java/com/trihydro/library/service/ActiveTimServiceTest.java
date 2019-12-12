@@ -151,16 +151,16 @@ public class ActiveTimServiceTest {
         assertFalse(aTims.isEmpty());
         assertEquals(1, aTims.size());
         String sql = "select * from active_tim where TIM_TYPE_ID = ? and (";
-        sql += "(CLIENT_ID like '?%' and DIRECTION = '?')";
+        sql += "(CLIENT_ID like ? and DIRECTION = ?)";
         sql += " OR ";
-        sql += "(CLIENT_ID like '?%' and DIRECTION = '?')";
+        sql += "(CLIENT_ID like ? and DIRECTION = ?)";
         sql += ")";
         verify(mockConnection).prepareStatement(sql);
         int index = 1;
         verify(mockPreparedStatement).setLong(index, timTypeId);
         index++;
         for (int i = 0; i < wydotTims.size(); i++) {
-            verify(mockPreparedStatement).setString(index, wydotTims.get(i).getClientId());
+            verify(mockPreparedStatement).setString(index, wydotTims.get(i).getClientId() + "%");
             index++;
             verify(mockPreparedStatement).setString(index, wydotTims.get(i).getDirection());
             index++;

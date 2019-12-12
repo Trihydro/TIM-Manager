@@ -1,4 +1,4 @@
-package com.trihydro.odewrapper.model;
+package com.trihydro.library.model;
 
 import java.util.List;
 

@@ -10,10 +10,10 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
-import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimList;
 
 import org.springframework.http.HttpStatus;

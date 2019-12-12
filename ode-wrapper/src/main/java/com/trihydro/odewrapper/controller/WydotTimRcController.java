@@ -7,9 +7,9 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
-import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimRc;
 
 import org.springframework.http.HttpStatus;

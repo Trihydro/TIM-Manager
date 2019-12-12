@@ -49,7 +49,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
-import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -473,36 +472,6 @@ public class WydotTimService {
         }
     }
 
-    public static void deleteTimFromSdx(WydotTravelerInputData timToSend, String recordId, Long timId,
-            WydotOdeTravelerInformationMessage tim) {
-
-        WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);
-
-        SDW sdw = new SDW();
-
-        // calculate service region
-        sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
-
-        // set time to live
-        sdw.setTtl(TimeToLive.oneminute);
-        // set new record id
-        sdw.setRecordId(recordId);
-        // increment msgCnt
-        updatedTim.getTim().setMsgCnt(updatedTim.getTim().getMsgCnt() + 1);
-
-        // set sdw block in TIM
-        updatedTim.getRequest().setSdw(sdw);
-
-        String timToSendJson = gson.toJson(updatedTim);
-
-        try {
-            Utility.logWithDate("Deleting TIM from SDX. tim_id: " + timId + ", sat_record_id: " + recordId);
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
-        } catch (RuntimeException targetException) {
-            System.out.println("exception");
-        }
-    }
-
     public TimType getTimType(String timTypeName) {
 
         // get tim type
@@ -631,5 +600,4 @@ public class WydotTimService {
 
         return codes;
     }
-
 }

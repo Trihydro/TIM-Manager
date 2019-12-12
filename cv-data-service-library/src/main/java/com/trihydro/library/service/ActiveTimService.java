@@ -16,6 +16,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -370,6 +371,93 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		}
 
 		return indices;
+	}
+
+	public static List<ActiveTim> getActiveTimsByWydotTim(List<? extends WydotTim> wydotTims, Long timTypeId) {
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		PreparedStatement ps = null;
+		// Statement statement = null;
+		ResultSet rs = null;
+		WydotTim wydotTim = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			String query = "select * from active_tim where ";
+			if (timTypeId != null) {
+				query += "TIM_TYPE_ID = ? and (";
+			}
+
+			for (int i = 0; i < wydotTims.size(); i++) {
+				if (i > 0) {
+					query += " OR ";
+				}
+				query += "(CLIENT_ID like '?%'";
+				wydotTim = wydotTims.get(i);
+				if (wydotTim.getDirection() != null) {
+					query += " and DIRECTION = '?'";
+				}
+				query += ")";
+			}
+			if (timTypeId != null) {
+				query += ")";
+			}
+			ps = connection.prepareStatement(query);
+
+			int index = 1;
+			if (timTypeId != null) {
+				ps.setLong(index, timTypeId);
+				index++;
+			}
+			for (int i = 0; i < wydotTims.size(); i++) {
+				wydotTim = wydotTims.get(i);
+
+				// set client id
+				ps.setString(index, wydotTim.getClientId());
+				index++;
+
+				// set direction
+				if (wydotTim.getDirection() != null) {
+					ps.setString(index, wydotTim.getDirection());
+					index++;
+				}
+			}
+			rs = ps.executeQuery();
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setPk(rs.getInt("PK"));
+				activeTims.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement and result set (rs closed by prepared statement)
+				if (ps != null) {
+					ps.close();
+				}
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return activeTims;
 	}
 
 	// get Active TIMs by client ID direction

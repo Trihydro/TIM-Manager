@@ -282,12 +282,7 @@ public class WydotTimService {
     public boolean deleteWydotTimsByType(List<? extends WydotTim> wydotTims, String timTypeStr) {
         List<ActiveTim> aTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
-        // TODO: let's not loop and call db here, single call to db
-        for (WydotTim wydotTim : wydotTims) {
-            aTims.addAll(ActiveTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
-                    timType.getTimTypeId(), wydotTim.getDirection()));
-        }
-
+        aTims = ActiveTimService.getActiveTimsByWydotTim(wydotTims, timType.getTimTypeId());
         deleteTimsFromRsusAndSdx(aTims);
 
         return true;

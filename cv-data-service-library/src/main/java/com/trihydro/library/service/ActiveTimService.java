@@ -378,7 +378,6 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		PreparedStatement ps = null;
-		// Statement statement = null;
 		ResultSet rs = null;
 		WydotTim wydotTim = null;
 

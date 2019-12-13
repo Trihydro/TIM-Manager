@@ -70,7 +70,11 @@ public class SdwService {
         HashMap<Long, Boolean> results = null;
         String apiKey = DbUtility.getConfig().getSdwApiKey();
         if (satRecordIds == null || satRecordIds.size() == 0 || apiKey == null) {
-            Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
+            if (apiKey == null) {
+                Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
+            } else {
+                Utility.logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
+            }
             return results;
         }
 
@@ -89,13 +93,13 @@ public class SdwService {
                 os.close();
             }
 
-            if(conn.getResponseCode() != 200){
+            if (conn.getResponseCode() != 200) {
                 Utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
             }
 
             InputStreamReader isr = new InputStreamReader(conn.getInputStream());
             BufferedReader br = new BufferedReader(isr);
-            String objString = br.readLine();
+            String objString = br.lines().collect(Collectors.joining());// br.readLine();
             ObjectMapper mapper = new ObjectMapper();
             TypeReference<HashMap<Long, Boolean>> typeRef = new TypeReference<HashMap<Long, Boolean>>() {
             };

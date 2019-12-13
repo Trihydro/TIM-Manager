@@ -16,6 +16,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +58,9 @@ public class SdwServiceTest {
 
     @Mock
     OutputStream mockOutputStream;
+
+    @Mock
+    Stream<String> mockStringStream;
 
     @Before
     public void setup() {
@@ -113,13 +118,24 @@ public class SdwServiceTest {
     public void deleteSdxDataBySatRecordId_nullRecordIds() {
         HashMap<Long, Boolean> results = SdwService.deleteSdxDataBySatRecordId(null);
         PowerMockito.verifyStatic();
-        Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
+        Utility.logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
         assertNull(results);
     }
 
     @Test
     public void deleteSdxDataBySatRecordId_emptyRecordIds() {
         HashMap<Long, Boolean> results = SdwService.deleteSdxDataBySatRecordId(new ArrayList<String>());
+        PowerMockito.verifyStatic();
+        Utility.logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
+        assertNull(results);
+    }
+
+    @Test
+    public void deleteSdxDataBySatRecordId_nullApiKey() {
+        List<String> satNames = new ArrayList<String>();
+        satNames.add("A9184436");
+        Mockito.when(mockConfig.getSdwApiKey()).thenReturn(null);
+        HashMap<Long, Boolean> results = SdwService.deleteSdxDataBySatRecordId(satNames);
         PowerMockito.verifyStatic();
         Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
         assertNull(results);
@@ -142,7 +158,9 @@ public class SdwServiceTest {
         HashMap<Integer, Boolean> hMap = new HashMap<Integer, Boolean>();
         hMap.put(-1, true);
 
-        Mockito.when(mockBufferedReader.readLine()).thenReturn("testValue");
+        // Mockito.when(mockBufferedReader.readLine()).thenReturn("testValue")        
+        Mockito.when(mockStringStream.collect(isA(Collector.class))).thenReturn("testValue");
+        Mockito.when(mockBufferedReader.lines()).thenReturn(mockStringStream);
         Mockito.when(mockObjMapper.readValue(isA(String.class), isA(TypeReference.class))).thenReturn(hMap);
         PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(mockISReader);
         PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(mockBufferedReader);

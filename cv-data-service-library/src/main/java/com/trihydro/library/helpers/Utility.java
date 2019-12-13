@@ -239,7 +239,15 @@ public class Utility {
 		return rsus;
 	}
 
-	public static HttpURLConnection getUrlConnection(String method, URL url, String apiKey) throws IOException {
+	/**
+	 * Creates a connection with authentication via an apikey and returning JSON. Used to send HTTP requests to the SDX api
+	 * @param method The HTTP method to use (GET,POST,PUT,DELETE)
+	 * @param url The URL to send the request to
+	 * @param apiKey The apikey value to apply in the header
+	 * @return
+	 * @throws IOException
+	 */
+	public static HttpURLConnection getSdxUrlConnection(String method, URL url, String apiKey) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod(method);
 		conn.setRequestProperty("Accept", "application/json");

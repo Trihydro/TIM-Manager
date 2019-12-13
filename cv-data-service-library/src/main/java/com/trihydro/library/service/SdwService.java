@@ -32,7 +32,7 @@ public class SdwService {
 
         try {
             URL url = getBaseUrl("api/GetDataByRecordId?recordId=" + recordId);
-            HttpURLConnection conn = Utility.getUrlConnection("GET", url, apiKey);
+            HttpURLConnection conn = Utility.getSdxUrlConnection("GET", url, apiKey);
 
             InputStreamReader isr = new InputStreamReader(conn.getInputStream());
             BufferedReader br = new BufferedReader(isr);
@@ -79,7 +79,7 @@ public class SdwService {
             List<Long> satRecordInts = satRecordIds.stream().map(x -> Long.parseLong(x, 16))
                     .collect(Collectors.toList());
             String body = gson.toJson(satRecordInts);
-            HttpURLConnection conn = Utility.getUrlConnection("DELETE", url, apiKey);
+            HttpURLConnection conn = Utility.getSdxUrlConnection("DELETE", url, apiKey);
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
             conn.setDoOutput(true);
 

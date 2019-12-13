@@ -221,11 +221,13 @@ public class WydotTimService {
             List<TimRsu> timRsus = TimRsuService.getTimRsusByTimId(activeTim.getTimId());
             // get full RSU
 
-            if (timRsus.size() == 1) {
-                rsu = getRsu(timRsus.get(0).getRsuId());
-                // delete tim off rsu
-                Utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
-                deleteTimFromRsu(rsu, timRsus.get(0).getRsuIndex());
+            if (timRsus.size() > 0) {
+                for (TimRsu timRsu : timRsus) {
+                    rsu = getRsu(timRsu.getRsuId());
+                    // delete tim off rsu
+                    Utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
+                    deleteTimFromRsu(rsu, timRsu.getRsuIndex());
+                }
             }
             // delete active tim
             ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());
@@ -258,7 +260,7 @@ public class WydotTimService {
                                 configuration);
                     } catch (Exception ex) {
                         Utility.logWithDate(body + ", and the email failed to send to support");
-                        ex.printStackTrace();                        
+                        ex.printStackTrace();
                     }
                 }
             }

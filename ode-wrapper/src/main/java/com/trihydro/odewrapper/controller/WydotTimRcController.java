@@ -84,13 +84,28 @@ public class WydotTimRcController extends WydotTimBaseController {
         String post = gson.toJson(timRcList);
         System.out.println(post.toString());
 
+        List<ControllerResult> errList = new ArrayList<ControllerResult>();
+        ControllerResult resultTim = null;
+        List<WydotTim> timsToDelete = new ArrayList<WydotTim>();
+
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
-            validateInputRc(wydotTim);
+            resultTim = validateInputRc(wydotTim);
+            if (resultTim.getResultMessages().size() > 0) {
+                resultList.add(resultTim);
+                errList.add(resultTim);
+                continue;
+            }
+
+            timsToDelete.add(wydotTim);
+            resultTim.getResultMessages().add("success");
+            resultList.add(resultTim);
         }
-        wydotTimService.deleteWydotTimsByType(timRcList.getTimRcList(), type);
+        
+        if (timsToDelete.size() > 0) {
+            wydotTimService.deleteWydotTimsByType(timsToDelete, type);
+        }
 
         String responseMessage = gson.toJson(resultList);
-        //TODO: better return...this one seems to be empty
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 

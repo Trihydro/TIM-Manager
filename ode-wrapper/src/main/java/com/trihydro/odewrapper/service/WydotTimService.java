@@ -209,7 +209,6 @@ public class WydotTimService {
     public void deleteTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
 
         WydotRsu rsu = null;
-        WydotTim wydotTim = new WydotTim();
 
         // split activeTims into sat and rsu for processing
         List<ActiveTim> satTims = activeTims.stream().filter(x -> StringUtils.isNotBlank(x.getSatRecordId()))
@@ -218,10 +217,6 @@ public class WydotTimService {
                 .collect(Collectors.toList());
 
         for (ActiveTim activeTim : rsuTims) {
-
-            wydotTim.setFromRm(activeTim.getMilepostStart());
-            wydotTim.setToRm(activeTim.getMilepostStop());
-
             // get RSU TIM is on
             List<TimRsu> timRsus = TimRsuService.getTimRsusByTimId(activeTim.getTimId());
             // get full RSU

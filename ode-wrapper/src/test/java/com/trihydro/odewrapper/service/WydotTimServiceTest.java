@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
 import com.sun.mail.imap.Utility;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.model.ActiveTim;
@@ -33,6 +35,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.mail.MailException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(PowerMockRunner.class)
@@ -121,7 +124,7 @@ public class WydotTimServiceTest {
     }
 
     @Test
-    public void deleteTimsFromRsusAndSdx_Sdx() {
+    public void deleteTimsFromRsusAndSdx_Sdx() throws MailException, MessagingException {
         // Arrange
         List<ActiveTim> activeTims = getActiveTims(true);
         HashMap<Long, Boolean> sdxDelResults = new HashMap<>();

@@ -258,8 +258,13 @@ public class WydotTimService {
                         .map(x -> x.getKey().toString()).collect(Collectors.joining(","));
                 if (StringUtils.isNotBlank(failedResultsText)) {
                     String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
-                    EmailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
-                            configuration);
+                    try {
+                        EmailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
+                                configuration);
+                    } catch (Exception ex) {
+                        Utility.logWithDate(body + ", and the email failed to send to support");
+                        ex.printStackTrace();                        
+                    }
                 }
             }
 

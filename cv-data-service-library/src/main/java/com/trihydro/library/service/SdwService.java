@@ -66,8 +66,8 @@ public class SdwService {
         return hexStr;
     }
 
-    public static HashMap<Long, Boolean> deleteSdxDataBySatRecordId(List<String> satRecordIds) {
-        HashMap<Long, Boolean> results = null;
+    public static HashMap<Integer, Boolean> deleteSdxDataBySatRecordId(List<String> satRecordIds) {
+        HashMap<Integer, Boolean> results = null;
         String apiKey = DbUtility.getConfig().getSdwApiKey();
         if (satRecordIds == null || satRecordIds.size() == 0 || apiKey == null) {
             if (apiKey == null) {
@@ -80,7 +80,7 @@ public class SdwService {
 
         try {
             URL url = getBaseUrl("api/delete-multiple-by-recordid");
-            List<Long> satRecordInts = satRecordIds.stream().map(x -> Long.parseLong(x, 16))
+            List<Integer> satRecordInts = satRecordIds.stream().map(x -> Integer.parseUnsignedInt(x, 16))
                     .collect(Collectors.toList());
             String body = gson.toJson(satRecordInts);
             HttpURLConnection conn = Utility.getSdxUrlConnection("DELETE", url, apiKey);
@@ -101,7 +101,7 @@ public class SdwService {
             BufferedReader br = new BufferedReader(isr);
             String objString = br.lines().collect(Collectors.joining());// br.readLine();
             ObjectMapper mapper = new ObjectMapper();
-            TypeReference<HashMap<Long, Boolean>> typeRef = new TypeReference<HashMap<Long, Boolean>>() {
+            TypeReference<HashMap<Integer, Boolean>> typeRef = new TypeReference<HashMap<Integer, Boolean>>() {
             };
             results = mapper.readValue(objString, typeRef);
             Utility.logWithDate("Results from deleting SDX data by recordId: " + gson.toJson(results));

@@ -9,12 +9,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -278,6 +280,51 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return deleteActiveTimResult;
 	}
 
+	public static boolean deleteActiveTimsById(List<Long> activeTimIds) {
+		boolean deleteActiveTimResult = false;
+
+		String deleteSQL = "DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (";
+		for (int i = 0; i < activeTimIds.size(); i++) {
+			deleteSQL += "?,";
+		}
+		deleteSQL = deleteSQL.substring(0, deleteSQL.length() - 1);
+		deleteSQL += ")";
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
+		try {
+
+			connection = DbUtility.getConnectionPool();
+			preparedStatement = connection.prepareStatement(deleteSQL);
+			for (int i = 0; i < activeTimIds.size(); i++) {
+				preparedStatement.setLong(i + 1, activeTimIds.get(i));
+			}
+
+			// execute delete SQL stetement
+			deleteActiveTimResult = updateOrDelete(preparedStatement);
+
+			System.out.println("Active Tims (active_tim_ids "
+					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") deleted!");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return deleteActiveTimResult;
+	}
+
 	// utility
 	public static List<Integer> getActiveTimIndicesByRsu(String rsuTarget) {
 
@@ -324,6 +371,92 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		}
 
 		return indices;
+	}
+
+	public static List<ActiveTim> getActiveTimsByWydotTim(List<? extends WydotTim> wydotTims, Long timTypeId) {
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		WydotTim wydotTim = null;
+
+		try {
+			connection = DbUtility.getConnectionPool();
+			String query = "select * from active_tim where ";
+			if (timTypeId != null) {
+				query += "TIM_TYPE_ID = ? and (";
+			}
+
+			for (int i = 0; i < wydotTims.size(); i++) {
+				if (i > 0) {
+					query += " OR ";
+				}
+				query += "(CLIENT_ID like ?";
+				wydotTim = wydotTims.get(i);
+				if (wydotTim.getDirection() != null) {
+					query += " and DIRECTION = ?";
+				}
+				query += ")";
+			}
+			if (timTypeId != null) {
+				query += ")";
+			}
+			ps = connection.prepareStatement(query);
+
+			int index = 1;
+			if (timTypeId != null) {
+				ps.setLong(index, timTypeId);
+				index++;
+			}
+			for (int i = 0; i < wydotTims.size(); i++) {
+				wydotTim = wydotTims.get(i);
+
+				// set client id
+				ps.setString(index, wydotTim.getClientId()+"%");
+				index++;
+
+				// set direction
+				if (wydotTim.getDirection() != null) {
+					ps.setString(index, wydotTim.getDirection());
+					index++;
+				}
+			}
+			rs = ps.executeQuery();
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setPk(rs.getInt("PK"));
+				activeTims.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement and result set (rs closed by prepared statement)
+				if (ps != null) {
+					ps.close();
+				}
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return activeTims;
 	}
 
 	// get Active TIMs by client ID direction
@@ -816,25 +949,31 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 			statement = connection.createStatement();
 
-			// The inner subqueries leave us with a list of tim_ids that aren't associated with any valid itis codes. Select the active_tims with
+			// The inner subqueries leave us with a list of tim_ids that aren't associated
+			// with any valid itis codes. Select the active_tims with
 			// those tim_ids
 			String selectStatement = " select * from active_tim where active_tim.tim_id in";
 
-			// Outer subquery: Get all records that have a tim_id found to be associated with a null itis code (from inner subquery)
-			// We need to do this because there could me multiple records for a single tim_id
+			// Outer subquery: Get all records that have a tim_id found to be associated
+			// with a null itis code (from inner subquery)
+			// We need to do this because there could me multiple records for a single
+			// tim_id
 			selectStatement += " (select active_tim.tim_id from active_tim";
 			selectStatement += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			selectStatement += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			selectStatement += " where active_tim.tim_id in";
 
-			// Inner subquery: Get tim_ids of active_tims that _might_ not have an associated itis code
+			// Inner subquery: Get tim_ids of active_tims that _might_ not have an
+			// associated itis code
 			selectStatement += " (select active_tim.tim_id from active_tim";
 			selectStatement += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			selectStatement += " left join data_frame_itis_code ON data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			selectStatement += " where data_frame_itis_code.itis_code_id is null)";
 
-			// Outer subquery (cont'd): Group by tim_id and filter out any records that have a tim_id
-			// associated with both null and valid itis codes (we only want tim_ids associated with just null itis codes)
+			// Outer subquery (cont'd): Group by tim_id and filter out any records that have
+			// a tim_id
+			// associated with both null and valid itis codes (we only want tim_ids
+			// associated with just null itis codes)
 			selectStatement += " group by active_tim.tim_id";
 			selectStatement += " having max(data_frame_itis_code.itis_code_id) is null)";
 

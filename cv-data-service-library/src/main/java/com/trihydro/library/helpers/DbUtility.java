@@ -5,15 +5,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.TimeZone;
 
+import com.trihydro.library.model.ConfigProperties;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.apache.ibatis.io.Resources;
-
-import com.trihydro.library.model.ConfigProperties;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @ComponentScan
@@ -21,7 +22,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class DbUtility {
 
     private static HikariDataSource hds = null;
-    private static HikariConfig config = new HikariConfig();
+    private static HikariConfig config;
     private static ConfigProperties dbConfig;
 
     public static void setConfig(ConfigProperties configProperties) {
@@ -40,6 +41,7 @@ public class DbUtility {
 
             TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
             TimeZone.setDefault(timeZone);
+            config = new HikariConfig();
 
             config.addDataSourceProperty("cachePrepStmts", "true");
             config.setUsername(dbConfig.getDbUsername());
@@ -69,13 +71,25 @@ public class DbUtility {
         }
 
         // return a connection
-        // try {
-        return hds.getConnection();
-        // } catch (SQLException e) {
-        // e.printStackTrace();
-        // }
-
-        // return null;
+        try {
+            return hds.getConnection();
+        } catch (SQLException ex) {
+            String body = "The ODE Wrapper failed attempting to open a connection to ";
+            body += dbConfig.getDbUrl();
+            body += ". <br/>Exception message: ";
+            body += ex.getMessage();
+            body += "<br/>Stacktrace: ";
+            body += ExceptionUtils.getStackTrace(ex);
+            try {
+                EmailHelper.SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body,
+                        dbConfig);
+            } catch (Exception exception) {
+                Utility.logWithDate(
+                        "ODE Wrapper failed to open connection to " + dbConfig.getDbUrl() + ", then failed to send email");
+                exception.printStackTrace();
+            }
+            throw ex;
+        }
     }
 
 }

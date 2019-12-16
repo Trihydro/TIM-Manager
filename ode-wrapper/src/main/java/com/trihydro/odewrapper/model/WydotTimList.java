@@ -2,6 +2,8 @@ package com.trihydro.odewrapper.model;
 
 import java.util.List;
 
+import com.trihydro.library.model.WydotTim;
+
 public class WydotTimList {
 	private List<WydotTimVsl> timVslList;
 	private List<WydotTimCc> timCcList;

@@ -2,6 +2,8 @@ package com.trihydro.odewrapper.model;
 
 import java.util.List;
 
+import com.trihydro.library.model.WydotTim;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class WydotTimRc extends WydotTim {

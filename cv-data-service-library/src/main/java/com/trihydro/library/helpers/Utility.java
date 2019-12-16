@@ -2,6 +2,9 @@ package com.trihydro.library.helpers;
 
 import static java.lang.Math.toIntExact;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -236,4 +239,20 @@ public class Utility {
 		return rsus;
 	}
 
+	/**
+	 * Creates a connection with authentication via an apikey and returning JSON. Used to send HTTP requests to the SDX api
+	 * @param method The HTTP method to use (GET,POST,PUT,DELETE)
+	 * @param url The URL to send the request to
+	 * @param apiKey The apikey value to apply in the header
+	 * @return
+	 * @throws IOException
+	 */
+	public static HttpURLConnection getSdxUrlConnection(String method, URL url, String apiKey) throws IOException {
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod(method);
+		conn.setRequestProperty("Accept", "application/json");
+		conn.setRequestProperty("apikey", apiKey);
+
+		return conn;
+	}
 }

@@ -21,9 +21,18 @@ public class ConfigProperties {
     private int mailPort;
 
     private String[] alertAddresses;
+    private String fromEmail;
 
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public String getFromEmail() {
+        return fromEmail;
+    }
+
+    public void setFromEmail(String fromEmail) {
+        this.fromEmail = fromEmail;
     }
 
     public String getSdwApiKey() {

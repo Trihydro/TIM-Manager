@@ -1,5 +1,7 @@
 package com.trihydro.odewrapper.model;
 
+import com.trihydro.library.model.WydotTim;
+
 public class WydotTimCc extends WydotTim {
 
     private String segment;

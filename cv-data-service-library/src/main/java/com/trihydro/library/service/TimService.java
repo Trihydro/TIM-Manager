@@ -204,6 +204,16 @@ public class TimService extends CvDataServiceLibrary {
 			return updateOrDelete(preparedStatement);
 		} catch (Exception ex) {
 			return false;
+		} finally {
+			try {
+				if (preparedStatement != null)
+					preparedStatement.close();
+
+				if (connection != null)
+					connection.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -227,6 +237,16 @@ public class TimService extends CvDataServiceLibrary {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				if (preparedStatement != null)
+					preparedStatement.close();
+
+				if (connection != null)
+					connection.close();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
 		}
 		return id;
 	}

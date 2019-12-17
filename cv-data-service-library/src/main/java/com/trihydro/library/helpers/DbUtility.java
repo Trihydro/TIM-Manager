@@ -48,7 +48,10 @@ public class DbUtility {
             config.setPassword(dbConfig.getDbPassword());
             config.setJdbcUrl(dbConfig.getDbUrl());
             config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(5);
+            config.setMaximumPoolSize(20);// formula: connections = ((core_count*2) + effective_spindle_count)
+                                          // https://stackoverflow.com/questions/28987540/why-does-hikaricp-recommend-fixed-size-pool-for-better-performance
+                                          // we have 8 cores and are limiting the container to run on a single 'drive'
+                                          // which gives us 17 pool size. we round up here
             config.setMaxLifetime(600000);// setting a maxLifetime of 10 minutes (defaults to 30), to help avoid
                                           // connection issues
 
@@ -84,8 +87,8 @@ public class DbUtility {
                 EmailHelper.SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body,
                         dbConfig);
             } catch (Exception exception) {
-                Utility.logWithDate(
-                        "ODE Wrapper failed to open connection to " + dbConfig.getDbUrl() + ", then failed to send email");
+                Utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
+                        + ", then failed to send email");
                 exception.printStackTrace();
             }
             throw ex;

@@ -76,7 +76,7 @@ public class DbUtilityTest {
         verify(mockHikariConfig).setPassword(mockConfig.getDbPassword());
         verify(mockHikariConfig).setJdbcUrl(mockConfig.getDbUrl());
         verify(mockHikariConfig).setDriverClassName(mockConfig.getDbDriver());
-        verify(mockHikariConfig).setMaximumPoolSize(5);
+        verify(mockHikariConfig).setMaximumPoolSize(20);
         verify(mockHikariConfig).setMaxLifetime(600000);
         PowerMockito.verifyStatic();
         String body = "The ODE Wrapper failed attempting to open a connection to ";

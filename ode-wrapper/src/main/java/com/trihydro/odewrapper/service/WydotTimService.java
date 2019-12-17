@@ -239,17 +239,17 @@ public class WydotTimService {
             List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
 
             // Issue one delete call to the REST service, encompassing all sat_record_ids
-            HashMap<Long, Boolean> sdxDelResults = SdwService.deleteSdxDataBySatRecordId(satRecordIds);
+            HashMap<Integer, Boolean> sdxDelResults = SdwService.deleteSdxDataBySatRecordId(satRecordIds);
 
             // Determine if anything failed
-            Stream<Entry<Long, Boolean>> failedStream = sdxDelResults.entrySet().stream()
+            Stream<Entry<Integer, Boolean>> failedStream = sdxDelResults.entrySet().stream()
                     .filter(x -> x.getValue() == false);
-            List<Long> failedSatRecords = failedStream.map(x -> new Long(x.getKey())).collect(Collectors.toList());
+            List<Integer> failedSatRecords = failedStream.map(x -> x.getKey()).collect(Collectors.toList());
             if (failedSatRecords.size() > 0) {
                 // pull out failed deletions for corresponding active_tim records so we don't
                 // orphan them
                 activeSatTimIds = satTims.stream()
-                        .filter(x -> !failedSatRecords.contains(Long.parseLong(x.getSatRecordId(), 16)))
+                        .filter(x -> !failedSatRecords.contains(Integer.parseUnsignedInt(x.getSatRecordId(), 16)))
                         .map(ActiveTim::getActiveTimId).collect(Collectors.toList());
                 String failedResultsText = sdxDelResults.entrySet().stream().filter(x -> x.getValue() == false)
                         .map(x -> x.getKey().toString()).collect(Collectors.joining(","));

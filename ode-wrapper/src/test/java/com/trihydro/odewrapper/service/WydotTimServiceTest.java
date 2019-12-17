@@ -127,11 +127,11 @@ public class WydotTimServiceTest {
     public void deleteTimsFromRsusAndSdx_Sdx() throws MailException, MessagingException {
         // Arrange
         List<ActiveTim> activeTims = getActiveTims(true);
-        HashMap<Long, Boolean> sdxDelResults = new HashMap<>();
-        sdxDelResults.put(3262954399l, false);
-        sdxDelResults.put(2262841222l, true);
+        HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
+        sdxDelResults.put(-1032012897, false);
+        sdxDelResults.put(-2032126074, true);
         String subject = "SDX Delete Fail";
-        String body = "The following recordIds failed to delete from the SDX: 3262954399";
+        String body = "The following recordIds failed to delete from the SDX: -1032012897";
         Mockito.when(SdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class))).thenReturn(sdxDelResults);
 
         // Act

@@ -1,49 +1,49 @@
 package com.trihydro.library.service;
 
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.model.ItisCode;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.ArrayList;
-import com.trihydro.library.service.CvDataServiceLibrary;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.model.ItisCode;
 
 public class ItisCodeService extends CvDataServiceLibrary {
 
 	public static List<ItisCode> selectAll() {
 		List<ItisCode> itisCodes = new ArrayList<ItisCode>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
 		try {
-			Connection connection = DbUtility.getConnectionPool();
-			try (Statement statement = connection.createStatement()) {
-				// select all Itis Codes from ItisCode table
-				ResultSet rs = statement.executeQuery("select * from itis_code");
-				try {
-					// convert to ItisCode objects
-					while (rs.next()) {
-						ItisCode itisCode = new ItisCode();
-						itisCode.setItisCodeId(rs.getInt("itis_code_id"));
-						itisCode.setItisCode(rs.getInt("itis_code"));
-						itisCode.setDescription(rs.getString("description").toLowerCase());
-						itisCode.setCategoryId(rs.getInt("category_id"));
-						itisCodes.add(itisCode);
-					}
-				} finally {
-					try {
-						rs.close();
-					} catch (Exception ignore) {
-					}
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
+			connection = DbUtility.getConnectionPool();
+			// select all Itis Codes from ItisCode table
+			statement = connection.createStatement();
+			rs = statement.executeQuery("select * from itis_code");
+			// convert to ItisCode objects
+			while (rs.next()) {
+				ItisCode itisCode = new ItisCode();
+				itisCode.setItisCodeId(rs.getInt("itis_code_id"));
+				itisCode.setItisCode(rs.getInt("itis_code"));
+				itisCode.setDescription(rs.getString("description").toLowerCase());
+				itisCode.setCategoryId(rs.getInt("category_id"));
+				itisCodes.add(itisCode);
 			}
-
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+
+			try {
+				if (statement != null)
+					statement.close();
+
+				if (connection != null)
+					connection.close();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
 		}
 		return itisCodes;
 	}

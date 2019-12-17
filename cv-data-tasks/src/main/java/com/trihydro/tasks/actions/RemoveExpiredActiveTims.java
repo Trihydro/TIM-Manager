@@ -3,6 +3,7 @@ package com.trihydro.tasks.actions;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -24,9 +25,11 @@ public class RemoveExpiredActiveTims implements Runnable {
         try {
             // select active tims
             List<ActiveTim> activeTims = ActiveTimService.getExpiredActiveTims();
+            if (activeTims.size() > 0) {
+                Utility.logWithDate("Found " + activeTims.size() + " expired Active TIMs");
+            }
 
             // delete active tims from rsus
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = null;

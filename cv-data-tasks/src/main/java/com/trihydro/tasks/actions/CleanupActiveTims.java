@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -20,15 +21,25 @@ public class CleanupActiveTims implements Runnable {
     public CleanupActiveTims(BasicConfiguration configuration) {
         this.configuration = configuration;
     }
-    
+
     public void run() {
         try {
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+            List<ActiveTim> tmp = null;
 
             // select active tims missing ITIS codes
-            activeTims.addAll(ActiveTimService.getActiveTimsMissingItisCodes());
+            tmp = ActiveTimService.getActiveTimsMissingItisCodes();
+            if (tmp.size() > 0) {
+                Utility.logWithDate("Found " + tmp.size() + " Active TIMs missing ITIS Codes");
+                activeTims.addAll(tmp);
+            }
+
             // add active tims that weren't sent to the SDX or any RSUs
-            activeTims.addAll(ActiveTimService.getActiveTimsNotSent());
+            tmp = ActiveTimService.getActiveTimsNotSent();
+            if (tmp.size() > 0) {
+                Utility.logWithDate("Found " + tmp.size() + " Active TIMS that weren't distributed");
+                activeTims.addAll(tmp);
+            }
 
             // delete from rsus and the SDX
             HttpHeaders headers = new HttpHeaders();

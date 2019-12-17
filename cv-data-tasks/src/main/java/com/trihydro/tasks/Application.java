@@ -36,7 +36,7 @@ public class Application {
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(configuration), 1, 5,
 				TimeUnit.MINUTES);
-		scheduledExecutorService.scheduleAtFixedRate(new CleanupActiveTims(configuration), 1, 5,
+		scheduledExecutorService.scheduleAtFixedRate(new CleanupActiveTims(configuration), 2, 5,
 				TimeUnit.MINUTES);
 	}
 }

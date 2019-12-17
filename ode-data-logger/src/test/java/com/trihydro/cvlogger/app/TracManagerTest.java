@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.trihydro.cvlogger.app.services.JavaMailSenderImplProvider;
 import com.trihydro.cvlogger.app.services.TracManager;
+import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.model.TracMessageType;
@@ -78,7 +78,9 @@ public class TracManagerTest {
                 tmts.add(tmt);
                 when(TracMessageTypeService.selectAll()).thenReturn(tmts);
                 when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
-                when(JavaMailSenderImplProvider.getJSenderImpl(Matchers.any(ConfigProperties.class))).thenReturn(jmsi);
+                when(JavaMailSenderImplProvider.getJSenderImpl(Matchers.any(String.class),
+                                Matchers.any(int.class)))
+                                .thenReturn(jmsi);
         }
 
         @Test

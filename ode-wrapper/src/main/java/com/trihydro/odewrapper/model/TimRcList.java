@@ -4,7 +4,7 @@ import java.util.List;
 
 public class TimRcList {
 
-    private List<WydotTimRc> timRcList;
+	private List<WydotTimRc> timRcList;
 
 	public List<WydotTimRc> getTimRcList() {
 		return this.timRcList;

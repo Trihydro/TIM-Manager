@@ -7,9 +7,9 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
-import com.trihydro.odewrapper.model.WydotTim;
 import com.trihydro.odewrapper.model.WydotTimRc;
 
 import org.springframework.http.HttpStatus;
@@ -84,9 +84,25 @@ public class WydotTimRcController extends WydotTimBaseController {
         String post = gson.toJson(timRcList);
         System.out.println(post.toString());
 
+        List<ControllerResult> errList = new ArrayList<ControllerResult>();
+        ControllerResult resultTim = null;
+        List<WydotTim> timsToDelete = new ArrayList<WydotTim>();
+
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
-            validateInputRc(wydotTim);
-            wydotTimService.clearTimsById(timType.getType(), wydotTim.getClientId(), wydotTim.getDirection());
+            resultTim = validateInputRc(wydotTim);
+            if (resultTim.getResultMessages().size() > 0) {
+                resultList.add(resultTim);
+                errList.add(resultTim);
+                continue;
+            }
+
+            timsToDelete.add(wydotTim);
+            resultTim.getResultMessages().add("success");
+            resultList.add(resultTim);
+        }
+        
+        if (timsToDelete.size() > 0) {
+            wydotTimService.deleteWydotTimsByType(timsToDelete, type);
         }
 
         String responseMessage = gson.toJson(resultList);

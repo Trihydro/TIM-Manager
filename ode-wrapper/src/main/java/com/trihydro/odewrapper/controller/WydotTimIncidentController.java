@@ -94,15 +94,14 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 resultList.add(resultTim);
                 continue;
             }
-
-            wydotTimService.clearTimsById(type, wydotTim.getClientId(), null);
-
+            
             // make tims
             timsToSend.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
+        wydotTimService.deleteWydotTimsByType(timIncidentList.getTimIncidentList(), type);
 
         // make tims and send them
         makeTims(timsToSend);

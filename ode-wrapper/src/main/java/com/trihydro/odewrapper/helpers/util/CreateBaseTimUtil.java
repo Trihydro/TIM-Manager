@@ -7,10 +7,10 @@ import java.util.List;
 
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
-import com.trihydro.odewrapper.model.WydotTim;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;

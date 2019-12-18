@@ -45,6 +45,14 @@
         },
         {
             "type": "java",
+            "name": "Data Logger TIM (Launch)",
+            "request": "launch",
+            "cwd": "${workspaceRoot}/ode-data-logger",
+            "args": "-g testGroup -t topic.OdeTimJson -type string -p config-dev.properties",
+            "mainClass": "com.trihydro.cvlogger.app.OdeLoggingConsumer"
+        },
+        {
+            "type": "java",
             "name": "Debug (Attach)",
             "request": "attach",
             "hostName": "localhost",

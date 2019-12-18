@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.Utility;
@@ -159,18 +158,18 @@ public class SdwServiceTest {
         hMap.put(-1, true);
 
         // Mockito.when(mockBufferedReader.readLine()).thenReturn("testValue")        
-        Mockito.when(mockStringStream.collect(isA(Collector.class))).thenReturn("testValue");
+        Mockito.when(mockStringStream.collect(isA(Collector.class))).thenReturn("{\"-1101625306\":null}");
         Mockito.when(mockBufferedReader.lines()).thenReturn(mockStringStream);
-        Mockito.when(mockObjMapper.readValue(isA(String.class), isA(TypeReference.class))).thenReturn(hMap);
+        // Mockito.when(mockObjMapper.readValue(isA(String.class), isA(TypeReference.class))).thenReturn(hMap);
         PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(mockISReader);
         PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(mockBufferedReader);
-        PowerMockito.whenNew(ObjectMapper.class).withNoArguments().thenReturn(mockObjMapper);
+        // PowerMockito.whenNew(ObjectMapper.class).withNoArguments().thenReturn(mockObjMapper);
         Mockito.when(mockUrlConn.getOutputStream()).thenReturn(mockOutputStream);
         Mockito.when(mockUrlConn.getResponseCode()).thenReturn(200);
         Mockito.when(Utility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenReturn(mockUrlConn);
         HashMap<Integer, Boolean> results = SdwService.deleteSdxDataBySatRecordId(satNames);
         assertNotNull(results);
-        assertThat(results, IsMapContaining.hasKey(-1));
+        assertThat(results, IsMapContaining.hasKey(-1101625306));
     }
 }

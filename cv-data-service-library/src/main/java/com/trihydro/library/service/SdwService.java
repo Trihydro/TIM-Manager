@@ -104,7 +104,7 @@ public class SdwService {
             TypeReference<HashMap<Integer, Boolean>> typeRef = new TypeReference<HashMap<Integer, Boolean>>() {
             };
             results = mapper.readValue(objString, typeRef);
-            Utility.logWithDate("Results from deleting SDX data by recordId: " + gson.toJson(results));
+            Utility.logWithDate("Results from deleting SDX data by recordId: " + results.toString());
             return results;
         } catch (IOException ex) {
             ex.printStackTrace();

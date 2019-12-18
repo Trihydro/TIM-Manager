@@ -147,4 +147,25 @@ public class WydotTimServiceTest {
         PowerMockito.verifyStatic(never());
         TimRsuService.getTimRsusByTimId(isA(Long.class));
     }
+
+    @Test
+    public void deleteTimsFromRsusAndSdx_SdxNullValueInMap() throws MailException, MessagingException {
+        // Arrange
+        List<ActiveTim> activeTims = getActiveTims(true);
+        HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
+        sdxDelResults.put(-1032012897, null);
+        Mockito.when(SdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class))).thenReturn(sdxDelResults);
+
+        // Act
+        uut.deleteTimsFromRsusAndSdx(activeTims);
+
+        // Assert
+        PowerMockito.verifyStatic();
+        List<Long> delIds = new ArrayList<Long>();
+        delIds.add(-1l);
+        delIds.add(-2l);
+        ActiveTimService.deleteActiveTimsById(delIds);
+        PowerMockito.verifyStatic(never());
+        TimRsuService.getTimRsusByTimId(isA(Long.class));
+    }
 }

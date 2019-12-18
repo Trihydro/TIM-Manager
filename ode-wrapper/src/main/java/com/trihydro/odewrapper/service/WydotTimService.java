@@ -242,12 +242,15 @@ public class WydotTimService {
             HashMap<Integer, Boolean> sdxDelResults = SdwService.deleteSdxDataBySatRecordId(satRecordIds);
 
             // Determine if anything failed
-            Stream<Entry<Integer, Boolean>> failedStream = sdxDelResults.entrySet().stream()
-                    .filter(x -> x.getValue() == false);
-            List<Integer> failedSatRecords = failedStream.map(x -> x.getKey()).collect(Collectors.toList());
-            if (failedSatRecords.size() > 0) {
+            Boolean errorsOccurred = sdxDelResults.entrySet().stream()
+                    .anyMatch(x -> x.getValue() != null && x.getValue() == false);
+            if (errorsOccurred) {
                 // pull out failed deletions for corresponding active_tim records so we don't
                 // orphan them
+                Stream<Entry<Integer, Boolean>> failedStream = sdxDelResults.entrySet().stream()
+                        .filter(x -> x.getValue() == false);
+                List<Integer> failedSatRecords = failedStream.map(x -> x.getKey()).collect(Collectors.toList());
+
                 activeSatTimIds = satTims.stream()
                         .filter(x -> !failedSatRecords.contains(Integer.parseUnsignedInt(x.getSatRecordId(), 16)))
                         .map(ActiveTim::getActiveTimId).collect(Collectors.toList());

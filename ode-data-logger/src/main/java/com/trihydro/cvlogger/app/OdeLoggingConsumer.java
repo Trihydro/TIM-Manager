@@ -1,33 +1,34 @@
 package com.trihydro.cvlogger.app;
 
-import java.sql.*;
-import java.util.Properties;
-import java.util.Arrays;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Properties;
 
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.ParseException;
-
-import com.trihydro.cvlogger.app.loggers.BsmLogger;
-import com.trihydro.cvlogger.app.loggers.TimLogger;
-import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
-
-import us.dot.its.jpo.ode.model.OdeData;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
+import com.trihydro.cvlogger.app.loggers.BsmLogger;
+import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
+import com.trihydro.cvlogger.app.loggers.TimLogger;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.service.CvDataServiceLibrary;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import us.dot.its.jpo.ode.model.OdeData;
 
 public class OdeLoggingConsumer {
 
@@ -87,7 +88,7 @@ public class OdeLoggingConsumer {
 		config.setEnv(appProps.getProperty("env"));
 		config.setTracUrl(appProps.getProperty("tracUrl"));
 
-		config.setAlertAddresses(appProps.getProperty("alertAddress"));
+		config.setAlertAddresses(appProps.getProperty("alertAddresses"));
 		config.setMailHost(appProps.getProperty("mailHost"));
 		config.setMailPort(Integer.parseInt(appProps.getProperty("mailPort")));
 

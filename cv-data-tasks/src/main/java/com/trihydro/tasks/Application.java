@@ -34,9 +34,9 @@ public class Application {
 	@PostConstruct
 	public void run() {
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
-		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(configuration), 1, 5,
-				TimeUnit.MINUTES);
-		scheduledExecutorService.scheduleAtFixedRate(new CleanupActiveTims(configuration), 2, 5,
-				TimeUnit.MINUTES);
+		scheduledExecutorService.scheduleAtFixedRate(new RemoveExpiredActiveTims(configuration), 0, 4,
+				TimeUnit.HOURS);
+		scheduledExecutorService.scheduleAtFixedRate(new CleanupActiveTims(configuration), 0, 4,
+				TimeUnit.HOURS);
 	}
 }

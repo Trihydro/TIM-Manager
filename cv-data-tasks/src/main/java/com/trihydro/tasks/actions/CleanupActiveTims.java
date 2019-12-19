@@ -23,6 +23,8 @@ public class CleanupActiveTims implements Runnable {
     }
 
     public void run() {
+        Utility.logWithDate("CleanupActiveTims - Running...");
+
         try {
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
             List<ActiveTim> tmp = null;
@@ -30,15 +32,20 @@ public class CleanupActiveTims implements Runnable {
             // select active tims missing ITIS codes
             tmp = ActiveTimService.getActiveTimsMissingItisCodes();
             if (tmp.size() > 0) {
-                Utility.logWithDate("Found " + tmp.size() + " Active TIMs missing ITIS Codes");
+                Utility.logWithDate("CleanupActiveTims - Found " + tmp.size() + " Active TIMs missing ITIS Codes");
                 activeTims.addAll(tmp);
             }
 
             // add active tims that weren't sent to the SDX or any RSUs
             tmp = ActiveTimService.getActiveTimsNotSent();
             if (tmp.size() > 0) {
-                Utility.logWithDate("Found " + tmp.size() + " Active TIMS that weren't distributed");
+                Utility.logWithDate(
+                        "CleanupActiveTims - Found " + tmp.size() + " Active TIMs that weren't distributed");
                 activeTims.addAll(tmp);
+            }
+
+            if (activeTims.size() == 0) {
+                Utility.logWithDate("CleanupActiveTims - Found 0 Active TIMs");
             }
 
             // delete from rsus and the SDX
@@ -54,13 +61,15 @@ public class CleanupActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/", HttpMethod.DELETE, entity,
-                        String.class);
+                Utility.logWithDate(
+                        "CleanupActiveTims - Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }");
+                RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
+                        HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // and re-throw it so that the Executor also gets this error
-            throw new RuntimeException(e);
+            // don't rethrow error, or the task won't be reran until the service is
+            // restarted.
         }
     }
 }

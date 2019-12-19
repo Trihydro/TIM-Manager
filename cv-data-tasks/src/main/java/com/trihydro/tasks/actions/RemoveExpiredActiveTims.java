@@ -20,14 +20,14 @@ public class RemoveExpiredActiveTims implements Runnable {
     public RemoveExpiredActiveTims(BasicConfiguration configuration) {
         this.configuration = configuration;
     }
-    
+
     public void run() {
+        Utility.logWithDate("RemoveExpiredActiveTims - Running...");
+
         try {
             // select active tims
             List<ActiveTim> activeTims = ActiveTimService.getExpiredActiveTims();
-            if (activeTims.size() > 0) {
-                Utility.logWithDate("Found " + activeTims.size() + " expired Active TIMs");
-            }
+            Utility.logWithDate("RemoveExpiredActiveTims - Found " + activeTims.size() + " expired Active TIMs");
 
             // delete active tims from rsus
             HttpHeaders headers = new HttpHeaders();
@@ -42,13 +42,15 @@ public class RemoveExpiredActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/", HttpMethod.DELETE, entity,
-                        String.class);
+                Utility.logWithDate("RemoveExpiredActiveTims - Deleting ActiveTim: { activeTimId: "
+                        + activeTim.getActiveTimId() + " }");
+                RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
+                        HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // and re-throw it so that the Executor also gets this error
-            throw new RuntimeException(e);
+            // don't rethrow error, or the task won't be reran until the service is
+            // restarted.
         }
     }
 }

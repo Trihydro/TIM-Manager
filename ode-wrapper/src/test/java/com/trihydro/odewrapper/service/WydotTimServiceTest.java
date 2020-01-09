@@ -115,9 +115,8 @@ public class WydotTimServiceTest {
         ActiveTimService.deleteActiveTim(-1l);
         PowerMockito.verifyStatic();
         ActiveTimService.deleteActiveTim(-2l);
-        // verify(restTemplate).exchange(any(String.class), any(HttpMethod.class),
-        // Matchers.<HttpEntity<String>>any(),
-        // Matchers.<Class<String>>any());
+        // verify(restTemplate).exchange(any(String.class), any(HttpMethod.class), Matchers.<HttpEntity<String>>any(),
+        //                         Matchers.<Class<String>>any());
     }
 
     @Test

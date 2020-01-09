@@ -14,8 +14,10 @@ import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.WydotTimList;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -39,9 +41,20 @@ public class UtilityController extends WydotTimBaseController {
         String rsuTarget;
     }
 
+    class RsuClearSuccess {
+        String rsuTarget;
+        boolean success;
+        String errMessage;
+    }
+
     private static String type = "TEST";
     // get tim type
     TimType timType = getTimType(type);
+
+    @Autowired
+    public UtilityController(BasicConfiguration configurationRhs) {
+        configuration = configurationRhs;
+    }
 
     @RequestMapping(value = "/create-sat-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createSatTim(@RequestBody WydotTimList wydotTimList) {
@@ -73,26 +86,26 @@ public class UtilityController extends WydotTimBaseController {
 
         // get all RSUs
         for (WydotRsu rsu : wydotTimService.getRsus()) {
-            
+
             List<Integer> activeTimIndicies = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
             Collections.sort(activeTimIndicies);
 
             RsuCheckResults rsuCheckResults = new RsuCheckResults();
             rsuCheckResults.activeTimIndicesList = activeTimIndicies;
             rsuCheckResults.rsuTarget = rsu.getRsuTarget();
-            
+
             TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
-            if(timQuery == null || timQuery.getIndicies_set() == null){
+            if (timQuery == null || timQuery.getIndicies_set() == null) {
                 rsuCheckResultsList.add(rsuCheckResults);
                 continue;
             }
-                
-            Collections.sort(timQuery.getIndicies_set());           
 
-            if(!activeTimIndicies.equals(timQuery.getIndicies_set())){                
-                rsuCheckResults.queryList = timQuery.getIndicies_set();            
+            Collections.sort(timQuery.getIndicies_set());
+
+            if (!activeTimIndicies.equals(timQuery.getIndicies_set())) {
+                rsuCheckResults.queryList = timQuery.getIndicies_set();
                 rsuCheckResultsList.add(rsuCheckResults);
-            }           
+            }
         }
 
         String responseMessage = gson.toJson(rsuCheckResultsList);
@@ -146,5 +159,43 @@ public class UtilityController extends WydotTimBaseController {
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    @RequestMapping(value = "/clear-rsu", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    public ResponseEntity<String> clearRsu(@RequestBody String[] addresses) {
+        if (addresses == null || addresses.length == 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No addresses supplied");
+        }
+
+        List<RsuClearSuccess> deleteResults = new ArrayList<>();
+
+        for (String address : addresses) {
+            RsuClearSuccess result = new RsuClearSuccess();
+            result.rsuTarget = address;
+            WydotRsu rsu = wydotTimService.getRsus().stream().filter(x -> x.getRsuTarget().equals(address)).findFirst()
+                    .orElse(null);
+
+            if (rsu != null) {
+
+                // query for used indexes, then send delete for each one
+                TimQuery tq = OdeService.submitTimQuery(rsu, 1, configuration.getOdeUrl());
+                if (tq != null) {
+
+                    for (Integer index : tq.getIndicies_set()) {
+                        wydotTimService.deleteTimFromRsu(rsu, index);
+                    }
+                    result.success = true;
+                } else {
+                    result.success = false;
+                    result.errMessage = "Querying RSU indexes failed";
+                }
+            } else {
+                result.success = false;
+                result.errMessage = "RSU not found for provided address";
+            }
+            deleteResults.add(result);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(gson.toJson(deleteResults));
     }
 }

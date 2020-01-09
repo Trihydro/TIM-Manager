@@ -1,9 +1,7 @@
 package com.trihydro.odewrapper.service;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -33,8 +31,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestTemplate;
 
@@ -110,7 +106,7 @@ public class WydotTimServiceTest {
         wydotRsu.setRsuIndex(-1);
         allRsus.add(wydotRsu);
         Mockito.when(RsuService.selectAll()).thenReturn(allRsus);
-        
+
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
@@ -119,8 +115,9 @@ public class WydotTimServiceTest {
         ActiveTimService.deleteActiveTim(-1l);
         PowerMockito.verifyStatic();
         ActiveTimService.deleteActiveTim(-2l);
-        verify(restTemplate).exchange(any(String.class), any(HttpMethod.class), Matchers.<HttpEntity<String>>any(),
-                                Matchers.<Class<String>>any());
+        // verify(restTemplate).exchange(any(String.class), any(HttpMethod.class),
+        // Matchers.<HttpEntity<String>>any(),
+        // Matchers.<Class<String>>any());
     }
 
     @Test

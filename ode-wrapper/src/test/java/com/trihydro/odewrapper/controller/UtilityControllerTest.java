@@ -3,6 +3,8 @@ package com.trihydro.odewrapper.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
@@ -45,12 +47,11 @@ public class UtilityControllerTest {
     private UtilityController uut;
     private ArrayList<WydotRsu> wydotRsus;
     private String rsuTarget = "a.b.c.d";
+    private String rsuTarget2 = "1.2.3.4";
     protected Gson gson = new Gson();
 
     @Before
     public void setup() throws Exception {
-        // TODO: setup wydotTimService
-
         PowerMockito.mockStatic(OdeService.class);
         PowerMockito.mockStatic(TimTypeService.class);
         PowerMockito.whenNew(WydotTimService.class).withAnyArguments().thenReturn(wydotTimService);
@@ -73,6 +74,9 @@ public class UtilityControllerTest {
         wydotRsus = new ArrayList<>();
         WydotRsu wydotRsu = new WydotRsu();
         wydotRsu.setRsuTarget(rsuTarget);
+        wydotRsus.add(wydotRsu);
+        wydotRsu = new WydotRsu();
+        wydotRsu.setRsuTarget(rsuTarget2);
         wydotRsus.add(wydotRsu);
     }
 
@@ -152,9 +156,10 @@ public class UtilityControllerTest {
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
 
+        when(configuration.getOdeUrl()).thenReturn("ode_url");
         when(wydotTimService.getRsus()).thenReturn(wydotRsus);
-
-        when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class))).thenReturn(timQuery);
+        when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
+                .thenReturn(timQuery);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -167,8 +172,33 @@ public class UtilityControllerTest {
         assertFalse(returnMessages.isEmpty());
         assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
         assertEquals(true, returnMessages.get(0).success);
+        verify(wydotTimService, times(2)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
+    }
 
-        //TODO: verify delete called twice
-        //wydotTimService.deleteTimFromRsu(rsu, index);
+    @Test
+    public void clearRsu_MultipleSuccess() {
+        // Arrange
+        String[] addresses = new String[2];
+        addresses[0] = rsuTarget;
+        addresses[1] = rsuTarget2;
+
+        when(configuration.getOdeUrl()).thenReturn("ode_url");
+        when(wydotTimService.getRsus()).thenReturn(wydotRsus);
+        when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
+                .thenReturn(timQuery);
+
+        // Act
+        ResponseEntity<String> result = uut.clearRsu(addresses);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        Type typeOfT = new TypeToken<List<RsuClearSuccess>>() {
+        }.getType();
+        List<RsuClearSuccess> returnMessages = gson.fromJson(result.getBody(), typeOfT);
+        assertFalse(returnMessages.isEmpty());
+        assertEquals(2, returnMessages.size());
+        assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
+        assertEquals(true, returnMessages.get(0).success);
+        verify(wydotTimService, times(4)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
     }
 }

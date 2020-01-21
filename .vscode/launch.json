@@ -23,9 +23,9 @@
             "type": "java",
             "name": "ODE Data Logger (Launch)",
             "request": "launch",
-            "args": "-g logger_group_tim_dev -t topic.OdeDNMsgJson -type string -p config-dev.properties",
+            "args": "--spring.profiles.active=dev",
             "cwd": "${workspaceRoot}/ode-data-logger",
-            "mainClass": "com.trihydro.cvlogger.app.OdeLoggingConsumer"
+            "mainClass": "com.trihydro.cvlogger.Application"
         },
         {
             "type": "java",

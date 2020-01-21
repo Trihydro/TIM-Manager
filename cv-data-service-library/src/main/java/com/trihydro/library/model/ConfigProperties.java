@@ -1,5 +1,8 @@
 package com.trihydro.library.model;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties
 public class ConfigProperties {
 
     private String odeUrl;
@@ -23,8 +26,27 @@ public class ConfigProperties {
     private String[] alertAddresses;
     private String fromEmail;
 
+    private String depositTopic;
+    private String depositGroup;
+
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public String getDepositGroup() {
+        return depositGroup;
+    }
+
+    public void setDepositGroup(String depositGroup) {
+        this.depositGroup = depositGroup;
+    }
+
+    public String getDepositTopic() {
+        return depositTopic;
+    }
+
+    public void setDepositTopic(String depositTopic) {
+        this.depositTopic = depositTopic;
     }
 
     public String getFromEmail() {

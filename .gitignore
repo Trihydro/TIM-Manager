@@ -51,3 +51,5 @@ Thumbs.db
 
 # Package Files
 **/.sts4-cache/*
+
+.env

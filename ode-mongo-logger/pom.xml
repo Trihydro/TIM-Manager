@@ -2,12 +2,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.8.RELEASE</version>
-  </parent> -->
-
   <parent>
     <groupId>com.wyocv</groupId>
     <artifactId>wyo-cv</artifactId>
@@ -89,7 +83,7 @@
   </dependencies>
   <build>
     <plugins>
-      <plugin>
+      <!-- <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
@@ -105,14 +99,14 @@
         </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- bind to the packaging phase -->
+            <id>make-assembly</id> 
+            <phase>package</phase> 
             <goals>
               <goal>single</goal>
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin> -->
     	<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -175,10 +169,10 @@
 					</execution>
 				</executions>
 			</plugin>
-      <!-- <plugin>
+      <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin> -->
+      </plugin>
     </plugins>
   </build>
 </project>

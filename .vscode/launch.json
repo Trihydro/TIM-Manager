@@ -29,6 +29,14 @@
         },
         {
             "type": "java",
+            "name": "ODE Mongo Logger (Launch)",
+            "request": "launch",
+            "args": "--spring.profiles.active=dev",
+            "cwd": "${workspaceRoot}/ode-mongo-logger",
+            "mainClass": "com.trihydro.mongologger.Application"
+        },
+        {
+            "type": "java",
             "name": "CV Data Tasks (Launch)",
             "request": "launch",
             "cwd": "${workspaceRoot}/cv-data-tasks",

@@ -14,6 +14,7 @@ public class ConfigProperties {
     private String mongoDatabase;
     private String mongoUsername;
     private String mongoPassword;
+    private String hostname;
     private String mongoHost;
     private String trackUrl;
 
@@ -31,6 +32,14 @@ public class ConfigProperties {
 
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     public String getDepositGroup() {

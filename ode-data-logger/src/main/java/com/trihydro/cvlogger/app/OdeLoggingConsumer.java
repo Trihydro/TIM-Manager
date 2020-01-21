@@ -40,7 +40,7 @@ public class OdeLoggingConsumer {
 
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		String endpoint = configProperties.getMailHost() + ":9092";
+		String endpoint = configProperties.getHostname() + ":9092";
 
 		// Properties for the kafka topic
 		Properties props = new Properties();

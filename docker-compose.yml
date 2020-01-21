@@ -3,6 +3,21 @@ services:
   ode_wrapper:
     build: ode-wrapper
     restart: always
+    environment:
+      CONFIG_ODE_URL: ${WRAPPER_CONFIG_ODE_URL}
+      CONFIG_DB_DRIVER: ${WRAPPER_CONFIG_DB_DRIVER}
+      CONFIG_DB_URL: ${WRAPPER_CONFIG_DB_URL}
+      CONFIG_DB_USERNAME: ${WRAPPER_CONFIG_DB_USERNAME}
+      CONFIG_DB_PASSWORD: ${WRAPPER_CONFIG_DB_PASSWORD}
+      CONFIG_ENV: ${WRAPPER_CONFIG_ENV}
+      CONFIG_SDW_TTL: ${WRAPPER_CONFIG_SDW_TTL}
+      CONFIG_SDW_REST_URL: ${WRAPPER_CONFIG_SDW_REST_URL}
+      CONFIG_SDW_API_KEY: ${WRAPPER_CONFIG_SDW_API_KEY}
+      CONFIG_ALERT_ADDRESSES: ${WRAPPER_CONFIG_ALERT_ADDRESSES}
+      CONFIG_FROM_EMAIL: ${WRAPPER_CONFIG_FROM_EMAIL}
+      CONFIG_MAIL_HOST: ${WRAPPER_CONFIG_MAIL_HOST}
+      CONFIG_MAIL_PORT: ${WRAPPER_CONFIG_MAIL_PORT}
+      CONFIG_DEFAULT_LANE_WIDTH: ${WRAPPER_CONFIG_DEFAULT_LANE_WIDTH}
     ports:
       - "7777:7777"
 
@@ -28,8 +43,8 @@ services:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_mongo_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_MONGO}
     logging:
       options:
         max-size: 50m
@@ -38,8 +53,8 @@ services:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_mongo_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_MONGO}
     logging:
       options:
         max-size: 50m
@@ -48,8 +63,8 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
     logging:
       options:
         max-size: 50m
@@ -58,27 +73,18 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
     logging:
       options:
         max-size: 50m
-  
-        #broadcast_tim_logger:
-        #    build: ode-data-logger
-        #    environment:
-        #      DEPOSIT_TOPIC: topic.OdeTimBroadcastJson
-        #      DEPOSIT_GROUP: group_broadcast_tim_logger
-        #    logging:
-        #      options:
-        #        max-size: 50m
 
   tim_logger_mongo:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_mongo_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_MONGO}
     logging:
       options:
         max-size: 50m
@@ -87,8 +93,8 @@ services:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_mongo_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_MONGO}
     logging:
       options:
         max-size: 50m
@@ -97,8 +103,8 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
     logging:
       options:
         max-size: 50m
@@ -108,27 +114,18 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
     logging:
       options:
         max-size: 50m
-
-        #  tim_logger_3:
-        #    build: ode-data-logger
-        #    environment:
-        #      DEPOSIT_TOPIC: topic.OdeTimJson
-        #      DEPOSIT_GROUP: group_tim_logger
-        #    logging:
-        #      options:
-        #        max-size: 50m
 
   da_logger_mongo:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_mongo_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_MONGO}
     logging:
       options:
         max-size: 50m
@@ -138,8 +135,8 @@ services:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_mongo_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_MONGO}
     logging:
       options:
         max-size: 50m
@@ -148,8 +145,8 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
     logging:
       options:
         max-size: 50m
@@ -158,8 +155,8 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
     logging:
       options:
         max-size: 50m      
@@ -168,8 +165,8 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDNMsgJson
-      DEPOSIT_GROUP: group_dn_sender
+      DEPOSIT_TOPIC: ${DN_TOPIC}
+      DEPOSIT_GROUP: ${DN_GROUP}
     logging:
       options:
         max-size: 50m
@@ -191,5 +188,3 @@ services:
         max-size: 50m 
     ports:
       - "8081:8081"
-
-

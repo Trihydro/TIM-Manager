@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-ADD . /home/wyocv/wyocv_applications/cv-data-tasks
+ADD . /home/wyocv/wyocv_applications/tim-refresh
 
 RUN apt-get update && \
  apt-get install -y openjdk-8-jdk

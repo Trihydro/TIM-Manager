@@ -65,6 +65,14 @@
             "request": "attach",
             "hostName": "localhost",
             "port": 0
+        },
+        {
+            "type": "java",
+            "name": "TIM Refresh (Launch)",
+            "request": "launch",
+            "args": "--spring.profiles.active=dev",
+            "cwd": "${workspaceRoot}/tim-refresh",
+            "mainClass": "com.trihydro.timrefresh.Application"
         }
     ]
 }

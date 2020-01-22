@@ -19,15 +19,24 @@ services:
       CONFIG_MAIL_PORT: ${MAIL_PORT}
       CONFIG_DEFAULT_LANE_WIDTH: ${WRAPPER_CONFIG_DEFAULT_LANE_WIDTH}
     ports:
-      - "7777:7777"
+      - '7777:7777'
 
-  cv-data-tasks: 
+  cv-data-tasks:
     build: cv-data-tasks
+    restart: always
+    environment:
+      CONFIG_ODE_URL: ${TASKS_CONFIG_ODE_URL}
+      CONFIG_DB_DRIVER: ${TASKS_CONFIG_DB_DRIVER}
+      CONFIG_DB_URL: ${TASKS_CONFIG_DB_URL}
+      CONFIG_DB_USERNAME: ${TASKS_CONFIG_DB_USERNAME}
+      CONFIG_DB_PASSWORD: ${TASKS_CONFIG_DB_PASSWORD}
+      CONFIG_ENV: ${TASKS_CONFIG_ENV}
+      CONFIG_WRAPPER_URL: ${TASKS_CONFIG_WRAPPER_URL}
 
   tim-refresh:
     build: tim-refresh
     restart: always
-    environment: 
+    environment:
       CONFIG_ODE_URL: ${REFRESH_CONFIG_ODE_URL}
       CONFIG_DB_DRIVER: ${REFRESH_CONFIG_DB_DRIVER}
       CONFIG_DB_URL: ${REFRESH_CONFIG_DB_URL}
@@ -44,13 +53,13 @@ services:
     build: cv-data-controller
     restart: always
     ports:
-      - "8888:8888"
+      - '8888:8888'
 
-  angular: 
-    build: timBuilder 
+  angular:
+    build: timBuilder
     restart: always
-    ports: 
-      - "4200:4200"
+    ports:
+      - '4200:4200'
 
   bsm_logger_mongo:
     build: ode-mongo-logger
@@ -153,7 +162,7 @@ services:
     logging:
       options:
         max-size: 50m
-  
+
   tim_logger_mongo_2:
     build: ode-mongo-logger
     restart: always
@@ -195,7 +204,6 @@ services:
       options:
         max-size: 50m
 
-
   tim_logger_2:
     build: ode-data-logger
     restart: always
@@ -236,7 +244,6 @@ services:
     logging:
       options:
         max-size: 50m
-
 
   da_logger_mongo_2:
     build: ode-mongo-logger
@@ -298,7 +305,7 @@ services:
       MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 50m      
+        max-size: 50m
 
   dn_trac_sender:
     build: ode-data-logger
@@ -328,13 +335,13 @@ services:
       options:
         max-size: 50m
     ports:
-      - "9999:9999"
+      - '9999:9999'
 
-  smdm: 
-    build: smdm 
+  smdm:
+    build: smdm
     restart: always
     logging:
       options:
-        max-size: 50m 
+        max-size: 50m
     ports:
-      - "8081:8081"
+      - '8081:8081'

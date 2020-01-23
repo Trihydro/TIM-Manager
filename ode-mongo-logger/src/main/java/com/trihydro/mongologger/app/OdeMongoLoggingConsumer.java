@@ -26,9 +26,11 @@ public class OdeMongoLoggingConsumer {
 	static PreparedStatement preparedStatement = null;
 	static Statement statement = null;
 	static ObjectMapper mapper;
+	private ConfigProperties configProperties;
 
 	@Autowired
 	public OdeMongoLoggingConsumer(ConfigProperties configProperties) throws IOException, SQLException {
+		this.configProperties = configProperties;
 		CvDataServiceLibrary.setConfig(configProperties);
 		MongoLogger.setConfig(configProperties);
 
@@ -36,43 +38,52 @@ public class OdeMongoLoggingConsumer {
 
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		String endpoint = configProperties.getHostname() + ":9092";
+		startKafkaConsumerAsync();
+	}
 
-		// Properties for the kafka topic
-		Properties props = new Properties();
-		props.put("bootstrap.servers", endpoint);
-		props.put("group.id", configProperties.getDepositGroup());
-		props.put("enable.auto.commit", "false");
-		props.put("auto.commit.interval.ms", "1000");
-		props.put("session.timeout.ms", "30000");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+	public void startKafkaConsumerAsync() {
+		// An Async task always executes in new thread
+		new Thread(new Runnable() {
+			public void run() {
+				String endpoint = configProperties.getHostname() + ":9092";
 
-		KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
-		String topic = configProperties.getDepositTopic();
+				// Properties for the kafka topic
+				Properties props = new Properties();
+				props.put("bootstrap.servers", endpoint);
+				props.put("group.id", configProperties.getDepositGroup());
+				props.put("enable.auto.commit", "false");
+				props.put("auto.commit.interval.ms", "1000");
+				props.put("session.timeout.ms", "30000");
+				props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+				props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
-		stringConsumer.subscribe(Arrays.asList(topic));
-		System.out.println("Subscribed to topic " + topic);
-		try {
-			while (true) {
-				ConsumerRecords<String, String> records = stringConsumer.poll(100);
-				ArrayList<String> recStrings = new ArrayList<String>();
-				for (ConsumerRecord<String, String> record : records) {
-					recStrings.add(record.value());
-				}
+				KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
+				String topic = configProperties.getDepositTopic();
 
-				String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
+				stringConsumer.subscribe(Arrays.asList(topic));
+				System.out.println("Subscribed to topic " + topic);
+				try {
+					while (true) {
+						ConsumerRecords<String, String> records = stringConsumer.poll(100);
+						ArrayList<String> recStrings = new ArrayList<String>();
+						for (ConsumerRecord<String, String> record : records) {
+							recStrings.add(record.value());
+						}
 
-				if (topic.equals("topic.OdeTimJson")) {
-					MongoLogger.logTim(recStringArr);
-				} else if (topic.equals("topic.OdeBsmJson")) {
-					MongoLogger.logBsm(recStringArr);
-				} else if (topic.equals("topic.OdeDriverAlertJson")) {
-					MongoLogger.logDriverAlert(recStringArr);
+						String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
+
+						if (topic.equals("topic.OdeTimJson")) {
+							MongoLogger.logTim(recStringArr);
+						} else if (topic.equals("topic.OdeBsmJson")) {
+							MongoLogger.logBsm(recStringArr);
+						} else if (topic.equals("topic.OdeDriverAlertJson")) {
+							MongoLogger.logDriverAlert(recStringArr);
+						}
+					}
+				} finally {
+					stringConsumer.close();
 				}
 			}
-		} finally {
-			stringConsumer.close();
-		}
+		}).start();
 	}
 }

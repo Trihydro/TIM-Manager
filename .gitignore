@@ -53,3 +53,4 @@ Thumbs.db
 **/.sts4-cache/*
 
 .env
+*.bak

@@ -16,7 +16,7 @@ public class ConfigProperties {
     private String mongoPassword;
     private String hostname;
     private String mongoHost;
-    private String trackUrl;
+    private String tracUrl;
 
     private String sdwRestUrl;
     private String sdwApiKey;
@@ -187,10 +187,10 @@ public class ConfigProperties {
     }
 
     public void setTracUrl(String url) {
-        this.trackUrl = url;
+        this.tracUrl = url;
     }
 
-    public String getGetTrackUrl() {
-        return this.trackUrl;
+    public String getGetTracUrl() {
+        return this.tracUrl;
     }
 }

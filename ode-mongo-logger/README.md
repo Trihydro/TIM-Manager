@@ -126,9 +126,9 @@ You may configure these values in `ode-mongo-logger/src/main/resources/applicati
 | hostname                          | MONGO_HOSTNAME                   | IP address of the host machine            | 0.0.0.0                                                        |
 | env                               | MONGO_ENV                        | Configuration environment                 | dev                                                            |
 | mongoHost                         | MONGO_HOST                       | IP address hosting Mongo server           | 0.0.0.0                                                        |
-| database                          | MONGO_DATABASE                   | Name of Mongo database                    | cvtest                                                         |
-| user_name                         | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
-| password                          | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
+| mongoDatabase                     | MONGO_DATABASE                   | Name of Mongo database                    | cvtest                                                         |
+| mongoUsername                     | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
+| mongoPassword                     | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
 | alertAddresses                    | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |
 | fromEmail                         | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
 | mailHost                          | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |

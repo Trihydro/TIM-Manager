@@ -18,11 +18,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them.
+The WyoCV suite is reliant on very few prerequisites. Any module-specific prerequisite can be found in associated README files. In general, the suite is built using Java and thus a version of JDK 7 or higher is required (JDK found [here](https://www.oracle.com/technetwork/java/javase/downloads/index.html)). 
 
-```
-Give examples
-```
+Additionally, all tools are compiled using [Maven](https://maven.apache.org/). 
+
+At the time of writing this README, the latest working versions are Maven version 3.6.3, Java Version 8 Update 241 (build 1.8.0_241-b07).
 
 ### Installing
 

@@ -107,7 +107,7 @@ public class TracManager {
 				+ longitude + "</a></b>";
 
 		// Query parameters
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(config.getGetTrackUrl())
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(config.getGetTracUrl())
 				.queryParam("priority", "1").queryParam("description", descUrl)
 				.queryParam("createdBy", "Connected Vehicle Emergency Notification").queryParam("source", "CV System");
 

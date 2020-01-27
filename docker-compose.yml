@@ -3,33 +3,93 @@ services:
   ode_wrapper:
     build: ode-wrapper
     restart: always
+    environment:
+      CONFIG_ODE_URL: ${WRAPPER_CONFIG_ODE_URL}
+      CONFIG_DB_DRIVER: ${WRAPPER_CONFIG_DB_DRIVER}
+      CONFIG_DB_URL: ${WRAPPER_CONFIG_DB_URL}
+      CONFIG_DB_USERNAME: ${WRAPPER_CONFIG_DB_USERNAME}
+      CONFIG_DB_PASSWORD: ${WRAPPER_CONFIG_DB_PASSWORD}
+      CONFIG_ENV: ${WRAPPER_CONFIG_ENV}
+      CONFIG_SDW_TTL: ${WRAPPER_CONFIG_SDW_TTL}
+      CONFIG_SDW_REST_URL: ${WRAPPER_CONFIG_SDW_REST_URL}
+      CONFIG_SDW_API_KEY: ${WRAPPER_CONFIG_SDW_API_KEY}
+      CONFIG_ALERT_ADDRESSES: ${WRAPPER_CONFIG_ALERT_ADDRESSES}
+      CONFIG_FROM_EMAIL: ${WRAPPER_CONFIG_FROM_EMAIL}
+      CONFIG_MAIL_HOST: ${MAIL_HOST}
+      CONFIG_MAIL_PORT: ${MAIL_PORT}
+      CONFIG_DEFAULT_LANE_WIDTH: ${WRAPPER_CONFIG_DEFAULT_LANE_WIDTH}
+      SERVER_PORT: ${WRAPPER_SERVER_PORT}
+      # THE FOLLOWING ARE ONLY USED IN PRODUCTION:
+      # SERVER_SSL_KEY_STORE: ${WRAPPER_SERVER_SSL_KEY_STORE}
+      # SERVER_SSL_KEY_STORE_PASSWORD: ${WRAPPER_SERVER_SSL_KEY_STORE_PASSWORD}
+      # SERVER_SSL_KEY_STORE_TYPE: ${WRAPPER_SERVER_SSL_KEY_STORE_TYPE}
+      # SERVER_SSL_KEY_ALIAS: ${WRAPPER_SERVER_SSL_KEY_ALIAS}
     ports:
-      - "7777:7777"
+      - '7777:7777'
 
-  cv-data-tasks: 
+  cv-data-tasks:
     build: cv-data-tasks
+    restart: always
+    environment:
+      CONFIG_ODE_URL: ${TASKS_CONFIG_ODE_URL}
+      CONFIG_DB_DRIVER: ${TASKS_CONFIG_DB_DRIVER}
+      CONFIG_DB_URL: ${TASKS_CONFIG_DB_URL}
+      CONFIG_DB_USERNAME: ${TASKS_CONFIG_DB_USERNAME}
+      CONFIG_DB_PASSWORD: ${TASKS_CONFIG_DB_PASSWORD}
+      CONFIG_ENV: ${TASKS_CONFIG_ENV}
+      CONFIG_WRAPPER_URL: ${TASKS_CONFIG_WRAPPER_URL}
 
   tim-refresh:
     build: tim-refresh
+    restart: always
+    environment:
+      CONFIG_ODE_URL: ${REFRESH_CONFIG_ODE_URL}
+      CONFIG_DB_DRIVER: ${REFRESH_CONFIG_DB_DRIVER}
+      CONFIG_DB_URL: ${REFRESH_CONFIG_DB_URL}
+      CONFIG_DB_USERNAME: ${REFRESH_CONFIG_DB_USERNAME}
+      CONFIG_DB_PASSWORD: ${REFRESH_CONFIG_DB_PASSWORD}
+      CONFIG_ENV: ${REFRESH_CONFIG_ENV}
+      CONFIG_SDW_TTL: ${REFRESH_CONFIG_SDW_TTL}
+      CONFIG_SDW_REST_URL: ${REFRESH_CONFIG_SDW_REST_URL}
+      CONFIG_SDW_API_KEY: ${REFRESH_CONFIG_SDW_API_KEY}
+      CONFIG_DEFAULT_LANE_WIDTH: ${REFRESH_CONFIG_DEFAULT_LANE_WIDTH}
+      CRON_EXPRESSION: ${REFRESH_CRON_EXPRESSION}
 
   cv-data-controller:
     build: cv-data-controller
     restart: always
     ports:
-      - "8888:8888"
+      - '8888:8888'
+    environment:
+      CONFIG_ODE_URL: ${CONTROLLER_CONFIG_ODE_URL}
+      CONFIG_DB_DRIVER: ${CONTROLLER_CONFIG_DB_DRIVER}
+      CONFIG_DB_URL: ${CONTROLLER_CONFIG_DB_URL}
+      CONFIG_DB_USERNAME: ${CONTROLLER_CONFIG_DB_USERNAME}
+      CONFIG_DB_PASSWORD: ${CONTROLLER_CONFIG_DB_PASSWORD}
+      CONFIG_ENV: ${CONTROLLER_CONFIG_ENV}
 
-  angular: 
-    build: timBuilder 
+  angular:
+    build: timBuilder
     restart: always
-    ports: 
-      - "4200:4200"
+    ports:
+      - '4200:4200'
 
   bsm_logger_mongo:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_mongo_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_MONGO}
+      HOSTNAME: ${MONGO_HOSTNAME}
+      ENV: ${MONGO_ENV}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
+      FROM_EMAIL: ${MONGO_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
@@ -38,8 +98,18 @@ services:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_mongo_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_MONGO}
+      HOSTNAME: ${MONGO_HOSTNAME}
+      ENV: ${MONGO_ENV}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
+      FROM_EMAIL: ${MONGO_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
@@ -48,8 +118,19 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
+      HOSTNAME: ${LOGGER_HOSTNAME}
+      DB_DRIVER: ${LOGGER_DB_DRIVER}
+      DB_URL: ${LOGGER_DB_URL}
+      DB_USERNAME: ${LOGGER_DB_USERNAME}
+      DB_PASSWORD: ${LOGGER_DB_PASSWORD}
+      ENV: ${LOGGER_ENV}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
@@ -58,37 +139,59 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      DEPOSIT_GROUP: group_bsm_logger
+      DEPOSIT_TOPIC: ${BSM_TOPIC}
+      DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
+      HOSTNAME: ${LOGGER_HOSTNAME}
+      DB_DRIVER: ${LOGGER_DB_DRIVER}
+      DB_URL: ${LOGGER_DB_URL}
+      DB_USERNAME: ${LOGGER_DB_USERNAME}
+      DB_PASSWORD: ${LOGGER_DB_PASSWORD}
+      ENV: ${LOGGER_ENV}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
-  
-        #broadcast_tim_logger:
-        #    build: ode-data-logger
-        #    environment:
-        #      DEPOSIT_TOPIC: topic.OdeTimBroadcastJson
-        #      DEPOSIT_GROUP: group_broadcast_tim_logger
-        #    logging:
-        #      options:
-        #        max-size: 50m
 
   tim_logger_mongo:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_mongo_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_MONGO}
+      HOSTNAME: ${MONGO_HOSTNAME}
+      ENV: ${MONGO_ENV}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
+      FROM_EMAIL: ${MONGO_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
-  
+
   tim_logger_mongo_2:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_mongo_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_MONGO}
+      HOSTNAME: ${MONGO_HOSTNAME}
+      ENV: ${MONGO_ENV}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
+      FROM_EMAIL: ${MONGO_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
@@ -97,49 +200,80 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
+      HOSTNAME: ${LOGGER_HOSTNAME}
+      DB_DRIVER: ${LOGGER_DB_DRIVER}
+      DB_URL: ${LOGGER_DB_URL}
+      DB_USERNAME: ${LOGGER_DB_USERNAME}
+      DB_PASSWORD: ${LOGGER_DB_PASSWORD}
+      ENV: ${LOGGER_ENV}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
-
 
   tim_logger_2:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeTimJson
-      DEPOSIT_GROUP: group_tim_logger
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
+      HOSTNAME: ${LOGGER_HOSTNAME}
+      DB_DRIVER: ${LOGGER_DB_DRIVER}
+      DB_URL: ${LOGGER_DB_URL}
+      DB_USERNAME: ${LOGGER_DB_USERNAME}
+      DB_PASSWORD: ${LOGGER_DB_PASSWORD}
+      ENV: ${LOGGER_ENV}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
-
-        #  tim_logger_3:
-        #    build: ode-data-logger
-        #    environment:
-        #      DEPOSIT_TOPIC: topic.OdeTimJson
-        #      DEPOSIT_GROUP: group_tim_logger
-        #    logging:
-        #      options:
-        #        max-size: 50m
 
   da_logger_mongo:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_mongo_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_MONGO}
+      HOSTNAME: ${MONGO_HOSTNAME}
+      ENV: ${MONGO_ENV}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
+      FROM_EMAIL: ${MONGO_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
-
 
   da_logger_mongo_2:
     build: ode-mongo-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_mongo_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_MONGO}
+      HOSTNAME: ${MONGO_HOSTNAME}
+      ENV: ${MONGO_ENV}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
+      FROM_EMAIL: ${MONGO_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
@@ -148,8 +282,19 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
+      HOSTNAME: ${LOGGER_HOSTNAME}
+      DB_DRIVER: ${LOGGER_DB_DRIVER}
+      DB_URL: ${LOGGER_DB_URL}
+      DB_USERNAME: ${LOGGER_DB_USERNAME}
+      DB_PASSWORD: ${LOGGER_DB_PASSWORD}
+      ENV: ${LOGGER_ENV}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
@@ -158,18 +303,40 @@ services:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      DEPOSIT_GROUP: group_da_logger
+      DEPOSIT_TOPIC: ${DA_TOPIC}
+      DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
+      HOSTNAME: ${LOGGER_HOSTNAME}
+      DB_DRIVER: ${LOGGER_DB_DRIVER}
+      DB_URL: ${LOGGER_DB_URL}
+      DB_USERNAME: ${LOGGER_DB_USERNAME}
+      DB_PASSWORD: ${LOGGER_DB_PASSWORD}
+      ENV: ${LOGGER_ENV}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 50m      
+        max-size: 50m
 
   dn_trac_sender:
     build: ode-data-logger
     restart: always
     environment:
-      DEPOSIT_TOPIC: topic.OdeDNMsgJson
-      DEPOSIT_GROUP: group_dn_sender
+      DEPOSIT_TOPIC: ${DN_TOPIC}
+      DEPOSIT_GROUP: ${DN_GROUP}
+      HOSTNAME: ${LOGGER_HOSTNAME}
+      DB_DRIVER: ${LOGGER_DB_DRIVER}
+      DB_URL: ${LOGGER_DB_URL}
+      DB_USERNAME: ${LOGGER_DB_USERNAME}
+      DB_PASSWORD: ${LOGGER_DB_PASSWORD}
+      ENV: ${LOGGER_ENV}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
         max-size: 50m
@@ -181,15 +348,13 @@ services:
       options:
         max-size: 50m
     ports:
-      - "9999:9999"
+      - '9999:9999'
 
-  smdm: 
-    build: smdm 
+  smdm:
+    build: smdm
     restart: always
     logging:
       options:
-        max-size: 50m 
+        max-size: 50m
     ports:
-      - "8081:8081"
-
-
+      - '8081:8081'

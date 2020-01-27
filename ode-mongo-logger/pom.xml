@@ -1,12 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <!-- <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.8.RELEASE</version>
-  </parent> -->
 
   <parent>
     <groupId>com.wyocv</groupId>
@@ -20,10 +13,10 @@
   <packaging>jar</packaging>
 
   <properties>
-		<jacoco.version>0.7.5.201505241946</jacoco.version>
-		<junit.version>4.12</junit.version>
+    <jacoco.version>0.7.5.201505241946</jacoco.version>
+    <junit.version>4.12</junit.version>
     <java.version>1.8</java.version>
-	</properties>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -54,25 +47,25 @@
 
     <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
     <dependency>
-        <groupId>commons-cli</groupId>
-        <artifactId>commons-cli</artifactId>
-        <version>1.3</version>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.3</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
     <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.0</version>
-    </dependency>  
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.0</version>
+    </dependency>
     <dependency>
       <groupId>com.esotericsoftware</groupId>
       <artifactId>kryo</artifactId>
       <version>4.0.0</version>
     </dependency>
     <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.8.0</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -82,14 +75,18 @@
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
     <dependency>
-        <groupId>org.mongodb</groupId>
-        <artifactId>mongo-java-driver</artifactId>
-        <version>3.10.1</version>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo-java-driver</artifactId>
+      <version>3.10.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
   </dependencies>
   <build>
     <plugins>
-      <plugin>
+      <!-- <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
@@ -105,81 +102,80 @@
         </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- bind to the packaging phase -->
+            <id>make-assembly</id> 
+            <phase>package</phase> 
             <goals>
               <goal>single</goal>
             </goals>
           </execution>
         </executions>
-      </plugin>
-    	<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
-				<executions>
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>post-unit-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-
-							<dataFile>target/jacoco.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
-      <plugin>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.12</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit47</artifactId>
-						<version>2.12</version>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>**/*.class</include>
-							</includes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-      <!-- <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin> -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>post-unit-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <!-- Sets the path to the file which contains the execution data. -->
+
+              <dataFile>target/jacoco.exec</dataFile>
+              <!-- Sets the output directory for the code coverage report. -->
+              <outputDirectory>target/jacoco-ut</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <systemPropertyVariables>
+            <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.12</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit47</artifactId>
+            <version>2.12</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/*.class</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 </project>
-

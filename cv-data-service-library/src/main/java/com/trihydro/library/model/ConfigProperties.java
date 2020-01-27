@@ -1,5 +1,8 @@
 package com.trihydro.library.model;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties
 public class ConfigProperties {
 
     private String odeUrl;
@@ -11,8 +14,9 @@ public class ConfigProperties {
     private String mongoDatabase;
     private String mongoUsername;
     private String mongoPassword;
+    private String hostname;
     private String mongoHost;
-    private String trackUrl;
+    private String tracUrl;
 
     private String sdwRestUrl;
     private String sdwApiKey;
@@ -23,8 +27,35 @@ public class ConfigProperties {
     private String[] alertAddresses;
     private String fromEmail;
 
+    private String depositTopic;
+    private String depositGroup;
+
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public String getDepositGroup() {
+        return depositGroup;
+    }
+
+    public void setDepositGroup(String depositGroup) {
+        this.depositGroup = depositGroup;
+    }
+
+    public String getDepositTopic() {
+        return depositTopic;
+    }
+
+    public void setDepositTopic(String depositTopic) {
+        this.depositTopic = depositTopic;
     }
 
     public String getFromEmail() {
@@ -156,10 +187,10 @@ public class ConfigProperties {
     }
 
     public void setTracUrl(String url) {
-        this.trackUrl = url;
+        this.tracUrl = url;
     }
 
-    public String getGetTrackUrl() {
-        return this.trackUrl;
+    public String getGetTracUrl() {
+        return this.tracUrl;
     }
 }

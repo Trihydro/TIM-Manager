@@ -1,29 +1,30 @@
 package com.trihydro.timrefresh.service;
 
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
 import java.math.BigDecimal;
 import java.util.Comparator;
-import com.trihydro.timrefresh.config.BasicConfiguration;
+import java.util.List;
+
+import com.google.gson.Gson;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.timrefresh.config.TimRefreshConfiguration;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
-import com.google.gson.Gson;
-import com.trihydro.library.model.Milepost;
-
 @Component
 public class WydotTimService {
 
-    protected static BasicConfiguration configuration;
+    protected static TimRefreshConfiguration configuration;
 
     @Autowired
-    public void setConfiguration(BasicConfiguration configurationRhs) {
+    public void setConfiguration(TimRefreshConfiguration configurationRhs) {
         configuration = configurationRhs;
     }
 

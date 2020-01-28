@@ -21,7 +21,7 @@ import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
-import com.trihydro.timrefresh.config.BasicConfiguration;
+import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 import com.trihydro.timrefresh.service.WydotTimService;
 
 import org.junit.Before;
@@ -49,7 +49,7 @@ public class TimRefreshControllerTest {
     public TestName name = new TestName();
 
     @Mock
-    BasicConfiguration configuration;
+    TimRefreshConfiguration configuration;
 
     // @InjectMocks
     private TimRefreshController controllerUnderTest;

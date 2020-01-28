@@ -2,8 +2,6 @@ package com.trihydro.timrefresh.config;
 
 import java.math.BigDecimal;
 
-import com.trihydro.library.model.ConfigProperties;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -11,13 +9,31 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 
 @Component
 @ConfigurationProperties("config")
-public class BasicConfiguration extends ConfigProperties {
+public class TimRefreshConfiguration {// } extends ConfigProperties {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth;
+    private String odeUrl;
+    private String cvRestService;
 
     public TimeToLive getSdwTtl() {
         return sdwTtl;
+    }
+
+    public String getCvRestService() {
+        return cvRestService;
+    }
+
+    public void setCvRestService(String cvRestService) {
+        this.cvRestService = cvRestService;
+    }
+
+    public String getOdeUrl() {
+        return odeUrl;
+    }
+
+    public void setOdeUrl(String odeUrl) {
+        this.odeUrl = odeUrl;
     }
 
     public BigDecimal getDefaultLaneWidth() {

@@ -20,6 +20,7 @@ import com.trihydro.odewrapper.model.WydotTimRc;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -194,6 +195,7 @@ public class WydotTimRcControllerTest {
 		// .andExpect(MockMvcResultMatchers.jsonPath("$[1].direction").value("westbound"));
 	}
 
+	@Ignore
 	@Test
 	public void testAllClear() throws Exception {
 

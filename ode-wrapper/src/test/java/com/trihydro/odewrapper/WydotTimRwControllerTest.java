@@ -22,6 +22,7 @@ import com.trihydro.odewrapper.model.WydotTimRw;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -166,6 +167,7 @@ public class WydotTimRwControllerTest {
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
 
+	@Ignore
 	@Test
 	public void testDeleteRwTimsByClientId() throws Exception {
 		makeTims();
@@ -182,6 +184,7 @@ public class WydotTimRwControllerTest {
 		assertEquals(0, activeTimsAfterDelete.size());
 	}
 
+	@Ignore
 	@Test
 	public void testGetRwTims() throws Exception {
 
@@ -197,6 +200,7 @@ public class WydotTimRwControllerTest {
 		System.out.println(result);
 	}
 
+	@Ignore
 	@Test
 	public void testGetRwTimsByClientId() throws Exception {
 

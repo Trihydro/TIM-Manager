@@ -12,10 +12,10 @@ import java.util.List;
 
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
-import com.trihydro.library.model.ConfigProperties;
 
 public class CvDataServiceLibrary {
 
@@ -30,6 +30,8 @@ public class CvDataServiceLibrary {
     private static List<DriverAlertType> driverAlertTypes;
     private static List<ItisCode> itisCodes;
 
+    protected static String CVRestUrl;
+
     static {
         utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); // 25
@@ -41,6 +43,10 @@ public class CvDataServiceLibrary {
 
     public static void setConfig(ConfigProperties config) {
         DbUtility.setConfig(config);
+    }
+
+    public static void setCVRestUrl(String url){
+        CVRestUrl = url;
     }
 
     public static List<DriverAlertType> getDriverAlertTypes() {

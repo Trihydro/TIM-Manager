@@ -21,6 +21,7 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -147,6 +148,7 @@ public class WydotTimParkingControllerTest {
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
 	}
 
+	@Ignore
 	@Test
 	public void testDeleteParkingTimsByClientId() throws Exception {
 
@@ -164,6 +166,7 @@ public class WydotTimParkingControllerTest {
 		assertEquals(0, activeTimsAfterDelete.size());
 	}
 
+	@Ignore
 	@Test
 	public void testGetParkingTims() throws Exception {
 
@@ -179,6 +182,7 @@ public class WydotTimParkingControllerTest {
 		System.out.println(result);
 	}
 
+	@Ignore
 	@Test
 	public void testGetParkingTimsByClientId() throws Exception {
 

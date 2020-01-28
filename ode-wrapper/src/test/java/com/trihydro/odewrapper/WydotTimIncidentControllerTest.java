@@ -22,6 +22,7 @@ import com.trihydro.odewrapper.model.WydotTimIncident;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -171,6 +172,7 @@ public class WydotTimIncidentControllerTest {
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
+	@Ignore
 	@Test
 	public void testGetIncidentTims() throws Exception {
 
@@ -188,6 +190,7 @@ public class WydotTimIncidentControllerTest {
 		System.out.println(result);
 	}
 
+	@Ignore
 	@Test
 	public void testGetIncidentTimsByClientId() throws Exception {
 
@@ -235,6 +238,7 @@ public class WydotTimIncidentControllerTest {
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
 	}
 
+	@Ignore
 	@Test
 	public void testDeleteIncidentTimsByClientId() throws Exception {
 

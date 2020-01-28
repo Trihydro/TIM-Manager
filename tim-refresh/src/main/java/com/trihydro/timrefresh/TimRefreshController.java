@@ -23,7 +23,7 @@ import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
-import com.trihydro.timrefresh.config.BasicConfiguration;
+import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 import com.trihydro.timrefresh.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,10 +52,10 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class TimRefreshController {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     public static Gson gson = new Gson();
-    protected static BasicConfiguration configuration;
+    protected static TimRefreshConfiguration configuration;
 
     @Autowired
-    public TimRefreshController(BasicConfiguration configurationRhs) {
+    public TimRefreshController(TimRefreshConfiguration configurationRhs) {
         configuration = configurationRhs;
     }
 

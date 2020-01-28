@@ -65,50 +65,11 @@ public class RsuService extends CvDataServiceLibrary {
 		return rsus;
 	}
 
-	public static ArrayList<WydotRsu> selectRsusByRoute(String route) {
-
-		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
-		Connection connection = null;
-		ResultSet rs = null;
-		Statement statement = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-
-			// select all RSUs from RSU table
-			rs = statement.executeQuery(
-					"select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.route like '%"
-							+ route + "%' and rsu_vw.status = 'Existing' order by milepost asc");
-
-			while (rs.next()) {
-				WydotRsu rsu = new WydotRsu();
-				rsu.setRsuId(rs.getInt("rsu_id"));
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
-				rsu.setRoute(rs.getString("route"));
-				rsu.setMilepost(rs.getDouble("milepost"));
-				rsus.add(rsu);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return rsus;
+	public static List<WydotRsu> selectRsusByRoute(String route) {
+		String url = String.format("%s/rsus-by-route/%s", CVRestUrl, route);
+		ResponseEntity<WydotRsu[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+				WydotRsu[].class);
+		return Arrays.asList(response.getBody());
 	}
 
 	public static List<WydotRsu> selectActiveRSUs() {

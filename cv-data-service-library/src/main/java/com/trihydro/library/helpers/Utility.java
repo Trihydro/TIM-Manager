@@ -148,8 +148,8 @@ public class Utility {
 		return direction;
 	}
 
-	private static ArrayList<WydotRsu> getRsusByRoute(String route) {
-		ArrayList<WydotRsu> rsus = RsuService.selectRsusByRoute(route);
+	private static List<WydotRsu> getRsusByRoute(String route) {
+		List<WydotRsu> rsus = RsuService.selectRsusByRoute(route);
 		for (WydotRsu rsu : rsus) {
 			rsu.setRsuRetries(3);
 			rsu.setRsuTimeout(5000);
@@ -166,7 +166,7 @@ public class Utility {
 		// WydotRsu rsuHigher;
 
 		// if there are no rsus on this route
-		ArrayList<WydotRsu> mainRsus = getRsusByRoute(route);
+		List<WydotRsu> mainRsus = getRsusByRoute(route);
 		if (mainRsus.size() == 0) {
 			Utility.logWithDate("No RSUs found for route " + route);
 			return rsus;
@@ -240,9 +240,11 @@ public class Utility {
 	}
 
 	/**
-	 * Creates a connection with authentication via an apikey and returning JSON. Used to send HTTP requests to the SDX api
+	 * Creates a connection with authentication via an apikey and returning JSON.
+	 * Used to send HTTP requests to the SDX api
+	 * 
 	 * @param method The HTTP method to use (GET,POST,PUT,DELETE)
-	 * @param url The URL to send the request to
+	 * @param url    The URL to send the request to
 	 * @param apiKey The apikey value to apply in the header
 	 * @return
 	 * @throws IOException

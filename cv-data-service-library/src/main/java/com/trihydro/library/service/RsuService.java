@@ -5,12 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -151,7 +153,7 @@ public class RsuService extends CvDataServiceLibrary {
 		return rsus;
 	}
 
-	public static List<WydotRsu> getRsusTimIsOn(Long timId){
+	public static List<WydotRsu> getRsusTimIsOn(Long timId) {
 		List<WydotRsu> rsus = new ArrayList<WydotRsu>();
 		Connection connection = null;
 		ResultSet rs = null;
@@ -163,7 +165,8 @@ public class RsuService extends CvDataServiceLibrary {
 
 			// select all RSUs that are labeled as 'Existing' in the WYDOT view
 			rs = statement.executeQuery(
-					"select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id where tim_rsu.tim_id = " + timId);
+					"select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id where tim_rsu.tim_id = "
+							+ timId);
 
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();
@@ -194,50 +197,13 @@ public class RsuService extends CvDataServiceLibrary {
 
 	}
 
-	public static List<WydotRsuTim> getFullRsusTimIsOn(Long timId){
-		List<WydotRsuTim> rsus = new ArrayList<WydotRsuTim>();
-		Connection connection = null;
-		ResultSet rs = null;
-		Statement statement = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-
-			// select all RSUs that are labeled as 'Existing' in the WYDOT view
-			rs = statement.executeQuery(
-					"select rsu.*, tim_rsu.rsu_index, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id where tim_rsu.tim_id = " + timId);
-
-			while (rs.next()) {
-				WydotRsuTim rsu = new WydotRsuTim();
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
-				rsu.setIndex(rs.getInt("rsu_index"));
-				rsu.setRsuUsername(rs.getString("update_username"));
-				rsu.setRsuPassword(rs.getString("update_password"));
-				rsus.add(rsu);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return rsus;
+	public static List<WydotRsuTim> getFullRsusTimIsOn(Long timId) {
+		String url = String.format("%s/rsus-for-tim/%d", CVRestUrl, timId);
+		ResponseEntity<WydotRsuTim[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+				WydotRsuTim[].class);
+		return Arrays.asList(response.getBody());
 	}
-	
+
 	public static List<WydotRsu> selectRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost) {
 
 		Connection connection = null;

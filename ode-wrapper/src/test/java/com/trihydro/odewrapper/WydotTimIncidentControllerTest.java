@@ -172,6 +172,8 @@ public class WydotTimIncidentControllerTest {
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
 	}
 
+	// TODO: once we migrate functionality to REST service, we want to move these
+	// tests there as well
 	@Ignore
 	@Test
 	public void testGetIncidentTims() throws Exception {

@@ -1,4 +1,4 @@
-package com.trihydro.library.tables;
+package com.trihydro.cvdatacontroller.tables;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,12 +8,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-/**
- * @deprecated The OracleTables functionality has been moved to the cv-data-controller
- * project to better separate concerns. All database interactions will go
- * through that project.
- */
-@Deprecated
 public class OracleTables {
 
     public static String buildInsertQueryStatement(String tableName, List<String> table) {

@@ -1,6 +1,7 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.TimeZone;
 
@@ -94,6 +95,21 @@ public class BaseController {
         }
     }
 
+    public boolean updateOrDelete(PreparedStatement preparedStatement) {
+
+        boolean result = false;
+
+        try {
+            if (preparedStatement.executeUpdate() > 0) {
+                result = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
     void SendEmail(String[] to, String[] bcc, String subject, String body)
             throws MailException, MessagingException  {
         JavaMailSenderImpl mailSender = JavaMailSenderImplProvider.getJSenderImpl(dbConfig.getMailHost(),

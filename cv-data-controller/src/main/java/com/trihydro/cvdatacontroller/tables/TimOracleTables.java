@@ -1,14 +1,8 @@
-package com.trihydro.library.tables;
+package com.trihydro.cvdatacontroller.tables;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @deprecated The TimOracleTables functionality has been moved to the cv-data-controller
- * project to better separate concerns. All database interactions will go
- * through that project.
- */
-@Deprecated
 public class TimOracleTables extends OracleTables {
 
     private static List<String> timTable;

@@ -4,15 +4,12 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.http.ResponseEntity;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
@@ -122,33 +119,9 @@ public class RegionService extends CvDataServiceLibrary {
 	}
 
 	public static Boolean updateRegionName(Long regionId, String name) {
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
-		cols.add(new ImmutablePair<String, Object>("NAME", name));
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			preparedStatement = TimOracleTables.buildUpdateStatement(regionId, "REGION", "REGION_ID", cols, connection);
-
-			// execute update statement
-			Boolean success = updateOrDelete(preparedStatement);
-			return success;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (preparedStatement != null)
-					preparedStatement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return false;
+		String url = String.format("/update-region-name/%d/%s", CVRestUrl, regionId, name);
+		ResponseEntity<Boolean> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Boolean.class);
+		return response.getBody();
 	}
 
 }

@@ -25,7 +25,51 @@ public class MilepostController extends BaseController {
 
 	@RequestMapping(value = "/mileposts", method = RequestMethod.GET, headers = "Accept=application/json")
 	public List<Milepost> getMileposts() {
-		List<Milepost> mileposts = MilepostService.selectAll();
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			// build statement SQL query
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			String sqlQuery = "select * from MILEPOST_VW where MOD(milepost, 1) = 0 order by milepost asc";
+			rs = statement.executeQuery(sqlQuery);
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				// milepost.setMilepostId(rs.getInt("milepost_id"));
+				milepost.setRoute(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setDirection(rs.getString("direction"));
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setElevation(rs.getDouble("elevation_ft"));
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 		return mileposts;
 	}
 
@@ -50,9 +94,9 @@ public class MilepostController extends BaseController {
 					+ Math.max(fromMilepost, toMilepost) + " and route like '%" + route + "%'";
 
 			if (fromMilepost < toMilepost)
-				rs = statement.executeQuery(statementStr + "order by milepost asc");
+				rs = statement.executeQuery(statementStr + " order by milepost asc");
 			else
-				rs = statement.executeQuery(statementStr + "order by milepost desc");
+				rs = statement.executeQuery(statementStr + " order by milepost desc");
 
 			// convert result to milepost objects
 			while (rs.next()) {
@@ -93,7 +137,55 @@ public class MilepostController extends BaseController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/mileposts-route/{route}/{mod}")
 	public List<Milepost> getMilepostsRoute(@PathVariable String route, @PathVariable Boolean mod) {
-		List<Milepost> mileposts = MilepostService.getMilepostsRoute(route, mod);
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			// build statement SQL query
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build statement SQL query
+			String sqlString = "select * from MILEPOST_VW where route like '%" + route + "%'";
+
+			if (mod)
+				sqlString += " and MOD(milepost, 1) = 0";
+
+			rs = statement.executeQuery(sqlString);
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				// milepost.setMilepostId(rs.getInt("milepost_id"));
+				milepost.setRoute(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setDirection(rs.getString("direction"));
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setElevation(rs.getDouble("elevation_ft"));
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 		return mileposts;
 	}
 

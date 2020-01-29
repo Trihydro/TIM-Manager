@@ -17,112 +17,23 @@ public class MilepostService extends CvDataServiceLibrary {
 
 	// select all mileposts
 	public static List<Milepost> selectAll() {
-
-		List<Milepost> mileposts = new ArrayList<Milepost>();
-
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
-		try {
-
-			// build statement SQL query
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-
-			String sqlQuery = "select * from MILEPOST_VW where MOD(milepost, 1) = 0 order by milepost asc";
-			rs = statement.executeQuery(sqlQuery);
-
-			// convert result to milepost objects
-			while (rs.next()) {
-				Milepost milepost = new Milepost();
-				// milepost.setMilepostId(rs.getInt("milepost_id"));
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
-				mileposts.add(milepost);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return mileposts;
+		String url = String.format("/%s/mileposts", CVRestUrl);
+		ResponseEntity<Milepost[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+				Milepost[].class);
+		return Arrays.asList(response.getBody());
 	}
 
 	public static List<Milepost> getMilepostsRoute(String route, Boolean mod) {
-
-		List<Milepost> mileposts = new ArrayList<Milepost>();
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
-		try {
-
-			// build statement SQL query
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-
-			// build statement SQL query
-			String sqlString = "select * from MILEPOST_VW where route like '%" + route + "%'";
-
-			if (mod)
-				sqlString += " and MOD(milepost, 1) = 0";
-
-			rs = statement.executeQuery(sqlString);
-
-			// convert result to milepost objects
-			while (rs.next()) {
-				Milepost milepost = new Milepost();
-				// milepost.setMilepostId(rs.getInt("milepost_id"));
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
-				mileposts.add(milepost);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return mileposts;
+		String url = String.format("/%s/mileposts-route/%s/%b", CVRestUrl, route, mod);
+		ResponseEntity<Milepost[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+				Milepost[].class);
+		return Arrays.asList(response.getBody());
 	}
 
-	
 	/**
-	 * Calls out to the cv-data-controller REST service to select all mileposts within a range in one direction
+	 * Calls out to the cv-data-controller REST service to select all mileposts
+	 * within a range in one direction
+	 * 
 	 * @param direction
 	 * @param route
 	 * @param fromMilepost

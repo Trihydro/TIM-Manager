@@ -1,7 +1,6 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -13,8 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import com.trihydro.cvdatacontroller.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +31,6 @@ public class PathNodeXYControllerTest {
     private PreparedStatement mockPreparedStatement;
     @Mock
     private ResultSet mockRs;
-    @Mock
-    private TimOracleTables mockTimOracleTables;
 
     private PathNodeXYController uut;
 
@@ -48,9 +43,6 @@ public class PathNodeXYControllerTest {
         when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
         when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
         when(mockRs.next()).thenReturn(true).thenReturn(false);
-
-        doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
-                any());
     }
 
     @Test

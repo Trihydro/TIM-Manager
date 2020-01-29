@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class OracleTables {
 
-    public static String buildInsertQueryStatement(String tableName, List<String> table) {
+    public String buildInsertQueryStatement(String tableName, List<String> table) {
 
         String insertQueryStatement = "INSERT INTO " + tableName + " (";
         String values = "VALUES (";
@@ -29,7 +29,7 @@ public class OracleTables {
         return insertQueryStatement;
     }
 
-    public static PreparedStatement buildUpdateStatement(Long id, String tableName, String keyColumnName,
+    public PreparedStatement buildUpdateStatement(Long id, String tableName, String keyColumnName,
             List<Pair<String, Object>> table, Connection connection) {
 
         String updateStatement = "UPDATE " + tableName + " SET";

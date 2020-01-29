@@ -9,6 +9,10 @@ import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
@@ -119,8 +123,12 @@ public class RegionService extends CvDataServiceLibrary {
 	}
 
 	public static Boolean updateRegionName(Long regionId, String name) {
-		String url = String.format("/update-region-name/%d/%s", CVRestUrl, regionId, name);
-		ResponseEntity<Boolean> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Boolean.class);
+		String url = String.format("/%s/update-region-name/%d/%s", CVRestUrl, regionId, name);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<Boolean> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+				Boolean.class);
 		return response.getBody();
 	}
 

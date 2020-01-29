@@ -10,6 +10,7 @@ import com.trihydro.cvdatacontroller.tables.TimOracleTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +25,15 @@ import springfox.documentation.annotations.ApiIgnore;
 @ApiIgnore
 public class RegionController extends BaseController {
 
-    @RequestMapping(method = RequestMethod.POST, value = "/update-region-name/{regionId}/{name}")
-    public Boolean updateRegionName(@PathVariable Long regionId, @PathVariable String name) {
+	private TimOracleTables timOracleTables;
+
+	@Autowired
+	public RegionController(TimOracleTables _timOracleTables) {
+		timOracleTables = _timOracleTables;
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/update-region-name/{regionId}/{name}")
+	public Boolean updateRegionName(@PathVariable Long regionId, @PathVariable String name) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
@@ -33,7 +41,7 @@ public class RegionController extends BaseController {
 
 		try {
 			connection = GetConnectionPool();
-			preparedStatement = TimOracleTables.buildUpdateStatement(regionId, "REGION", "REGION_ID", cols, connection);
+			preparedStatement = timOracleTables.buildUpdateStatement(regionId, "REGION", "REGION_ID", cols, connection);
 
 			// execute update statement
 			Boolean success = updateOrDelete(preparedStatement);

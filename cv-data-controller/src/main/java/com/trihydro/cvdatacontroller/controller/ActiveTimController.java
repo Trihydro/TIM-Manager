@@ -1,16 +1,22 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.cvdatacontroller.tables.TimOracleTables;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TimUpdateModel;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,10 +28,17 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("active-tim")
 @ApiIgnore
 public class ActiveTimController extends BaseController {
-	
+
+	private TimOracleTables timOracleTables;
+
+	@Autowired
+	public ActiveTimController(TimOracleTables _timOracleTables) {
+		timOracleTables = _timOracleTables;
+	}
+
 	// select all ITIS codes
-	@RequestMapping(value="/expiring",method = RequestMethod.GET,headers="Accept=application/json")
-  	public List<TimUpdateModel> getExpiringActiveTims() {
+	@RequestMapping(value = "/expiring", method = RequestMethod.GET, headers = "Accept=application/json")
+	public List<TimUpdateModel> getExpiringActiveTims() {
 		TimUpdateModel activeTim = null;
 		List<TimUpdateModel> activeTims = new ArrayList<TimUpdateModel>();
 		Connection connection = null;
@@ -133,5 +146,36 @@ public class ActiveTimController extends BaseController {
 		}
 
 		return activeTims;
+	}
+
+	@RequestMapping(value = "/update-sat-record-id/{activeTimId}/{satRecordId}", method = RequestMethod.PUT)
+	public Boolean updateActiveTim_SatRecordId(@PathVariable Long activeTimId, @PathVariable String satRecordId) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
+		cols.add(new ImmutablePair<String, Object>("SAT_RECORD_ID", satRecordId));
+		boolean success = false;
+		try {
+			connection = GetConnectionPool();
+			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
+					connection);
+
+			// execute update statement
+			success = updateOrDelete(preparedStatement);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return success;
 	}
 }

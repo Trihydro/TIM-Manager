@@ -57,7 +57,6 @@ public class BaseController {
 
             hds = new HikariDataSource(config);
 
-            // TODO: unit tests...should we use this again?
             // if (dbConfig.getEnv().equals("test")) {
             //     // run scripts for in-memory test database
             //     try {

@@ -120,7 +120,15 @@ public class MilepostService extends CvDataServiceLibrary {
 		return mileposts;
 	}
 
-	// select all mileposts within a range in one direction
+	
+	/**
+	 * Calls out to the cv-data-controller REST service to select all mileposts within a range in one direction
+	 * @param direction
+	 * @param route
+	 * @param fromMilepost
+	 * @param toMilepost
+	 * @return Mileposts found within range
+	 */
 	public static List<Milepost> selectMilepostRange(String direction, String route, Double fromMilepost,
 			Double toMilepost) {
 		String url = String.format("/%s/get-milepost-range/%s/%d/%d/%s", CVRestUrl, direction, fromMilepost, toMilepost,

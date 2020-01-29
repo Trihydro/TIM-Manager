@@ -19,9 +19,10 @@ import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 public class ActiveTimService extends CvDataServiceLibrary {
@@ -94,33 +95,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public static Boolean updateActiveTim_SatRecordId(Long activeTimId, String satRecordId) {
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
-		cols.add(new ImmutablePair<String, Object>("SAT_RECORD_ID", satRecordId));
-		boolean success = false;
-		try {
-			connection = DbUtility.getConnectionPool();
-			preparedStatement = TimOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
-					connection);
-
-			// execute update statement
-			success = updateOrDelete(preparedStatement);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (preparedStatement != null)
-					preparedStatement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return success;
+		String url = String.format("/%s/update-sat-record-id/%d/%s", CVRestUrl, activeTimId, satRecordId);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<Boolean> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+				Boolean.class);
+		return response.getBody();
 	}
 
 	// update all fields in TIM
@@ -834,6 +815,10 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return responseHeaders;
 	}
 
+	/**
+	 * Calls out to the cv-data-controller REST function to fetch expiring TIMs
+	 * @return List of TimUpdateModel representing all TIMs expiring within 1 day
+	 */
 	public static List<TimUpdateModel> getExpiringActiveTims() {
 		ResponseEntity<TimUpdateModel[]> response = RestTemplateProvider.GetRestTemplate()
 				.getForEntity(CVRestUrl + "/active-tim/expiring", TimUpdateModel[].class);

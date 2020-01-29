@@ -1,12 +1,11 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
@@ -14,10 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import com.trihydro.cvdatacontroller.tables.TimOracleTables;
-import com.trihydro.library.model.TimUpdateModel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +22,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
+
 @RunWith(MockitoJUnitRunner.class)
-public class ActiveTimControllerTest {
+public class PathNodeXYControllerTest {
     @Mock
     private Connection mockConnection;
     @Mock
@@ -38,14 +37,11 @@ public class ActiveTimControllerTest {
     @Mock
     private TimOracleTables mockTimOracleTables;
 
-    private ActiveTimController uut;
-
-    // @Rule
-    // public final ExpectedException exception = ExpectedException.none();
+    private PathNodeXYController uut;
 
     @Before
     public void setup() throws SQLException {
-        uut = spy(new ActiveTimController(mockTimOracleTables));
+        uut = spy(new PathNodeXYController());
         when(mockConnection.createStatement()).thenReturn(mockStatement);
         when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
         doReturn(mockConnection).when(uut).GetConnectionPool();
@@ -58,40 +54,36 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void getExpiringActiveTims() throws SQLException {
+    public void GetNodeXYForPath_Fail() throws SQLException {
         // Arrange
-        // we only set one property to verify its returned
-        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException("Unit test exception"));
 
         // Act
-        List<TimUpdateModel> tums = uut.getExpiringActiveTims();
+        NodeXY[] data = uut.GetNodeXYForPath(-1);
 
         // Assert
-        assertEquals(1, tums.size());
-        assertEquals(new Long(999), tums.get(0).getActiveTimId());
+        // verify everything was closed despite error
+        verify(mockStatement).executeQuery(
+                "select * from node_xy where node_xy_id in (select node_xy_id from path_node_xy where path_id = -1)");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(0, data.length);
     }
 
     @Test
-    public void updateActiveTim_SatRecordId_FAIL() {
+    public void GetNodeXYForPath_Success() throws SQLException {
         // Arrange
-        doReturn(false).when(uut).updateOrDelete(mockPreparedStatement);
 
         // Act
-        boolean success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
+        NodeXY[] data = uut.GetNodeXYForPath(-1);
 
         // Assert
-        assertFalse("UpdateActiveTim_SatRecordId succeeded when it should have failed", success);
-    }
-
-    @Test
-    public void updateActiveTim_SatRecordId_SUCCESS() {
-        // Arrange
-        doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
-
-        // Act
-        boolean success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
-
-        // Assert
-        assertTrue("UpdateActiveTim_SatRecordId failed when it should have succeeded", success);
+        // verify everything was closed despite error
+        verify(mockStatement).executeQuery(
+                "select * from node_xy where node_xy_id in (select node_xy_id from path_node_xy where path_id = -1)");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+        assertEquals(1, data.length);
     }
 }

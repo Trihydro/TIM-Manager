@@ -2,17 +2,17 @@ package com.trihydro.library.service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.trihydro.library.tables.TimOracleTables;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 
@@ -59,52 +59,13 @@ public class PathNodeXYService extends CvDataServiceLibrary {
 		return new Long(0);
 	}
 
-	public static NodeXY[] GetNodeXYForPath(int pathId){
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-		List<NodeXY> nodeXYs = new ArrayList<>();
-
-		try {
-			connection = DbUtility.getConnectionPool();
-
-			statement = connection.createStatement();
-
-			String selectStatement = "select * from node_xy where node_xy_id in (select node_xy_id from path_node_xy where path_id = ";
-			selectStatement += pathId;
-			selectStatement += ")";
-
-			rs = statement.executeQuery(selectStatement);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				NodeXY nodexy = new NodeXY();
-				nodexy.setDelta(rs.getString("DELTA"));
-				nodexy.setNodeLat(rs.getBigDecimal("NODE_LAT"));
-				nodexy.setNodeLong(rs.getBigDecimal("NODE_LONG"));
-				nodexy.setX(rs.getBigDecimal("X"));
-				nodexy.setY(rs.getBigDecimal("Y"));
-
-				nodeXYs.add(nodexy);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return nodeXYs.toArray(new NodeXY[nodeXYs.size()]);
+	public static NodeXY[] GetNodeXYForPath(int pathId) {
+		String url = String.format("/%s/path-node-xy/get-nodexy-path/%d", CVRestUrl, pathId);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<NodeXY[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+				NodeXY[].class);
+		return response.getBody();
 	}
 }

@@ -9,7 +9,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 
 @Component
 @ConfigurationProperties("config")
-public class TimRefreshConfiguration {// } extends ConfigProperties {
+public class TimRefreshConfiguration {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth;

@@ -46,7 +46,7 @@ public class PathNodeXYControllerTest {
     }
 
     @Test
-    public void GetNodeXYForPath_Fail() throws SQLException {
+    public void GetNodeXYForPath_FAIL() throws SQLException {
         // Arrange
         when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException("Unit test exception"));
 
@@ -63,7 +63,7 @@ public class PathNodeXYControllerTest {
     }
 
     @Test
-    public void GetNodeXYForPath_Success() throws SQLException {
+    public void GetNodeXYForPath_SUCCESS() throws SQLException {
         // Arrange
 
         // Act

@@ -53,7 +53,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMileposts_Success() throws SQLException {
+    public void getMileposts_SUCCESS() throws SQLException {
         // Arrange
 
         // Act
@@ -68,7 +68,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostRange_Direction_asc_Success() throws SQLException {
+    public void getMilepostRange_Direction_asc_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_VW where direction = '";
         statementStr += direction;
@@ -90,7 +90,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostRange_Direction_desc_Success() throws SQLException {
+    public void getMilepostRange_Direction_desc_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_VW where direction = '";
         statementStr += direction;
@@ -112,7 +112,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostsRoute_Success() throws SQLException {
+    public void getMilepostsRoute_SUCCESS() throws SQLException {
         // Arrange
 
         // Act
@@ -133,7 +133,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostRangeNoDirection_asc_Success() throws SQLException{
+    public void getMilepostRangeNoDirection_asc_SUCCESS() throws SQLException{
         // Arrange
         String statementStr = "select * from MILEPOST_VW where milepost between ";
         statementStr += fromMilepost;
@@ -159,7 +159,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostRangeNoDirection_desc_Success() throws SQLException{
+    public void getMilepostRangeNoDirection_desc_SUCCESS() throws SQLException{
         // Arrange
         String statementStr = "select * from MILEPOST_VW where milepost between ";
         statementStr += fromMilepost;
@@ -185,7 +185,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostTestRange_asc_Success() throws SQLException{
+    public void getMilepostTestRange_asc_SUCCESS() throws SQLException{
         // Arrange
         String statementStr = "select * from MILEPOST_TEST where direction = '";
         statementStr += direction;
@@ -214,7 +214,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostTestRange_desc_Success() throws SQLException{
+    public void getMilepostTestRange_desc_SUCCESS() throws SQLException{
         // Arrange
         String statementStr = "select * from MILEPOST_TEST where direction = '";
         statementStr += direction;
@@ -243,7 +243,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostsTest_Success() throws SQLException{
+    public void getMilepostsTest_SUCCESS() throws SQLException{
         // Arrange
         String statementStr = "select * from MILEPOST_TEST order by milepost asc";
         

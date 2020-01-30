@@ -98,7 +98,7 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void GetActiveTimsMissingItisCodes_Success() throws SQLException {
+    public void GetActiveTimsMissingItisCodes_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = " select * from active_tim where active_tim.tim_id in";
         statementStr += " (select active_tim.tim_id from active_tim";
@@ -131,7 +131,7 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void GetActiveTimsNotSent_Success() throws SQLException {
+    public void GetActiveTimsNotSent_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select active_tim.* from active_tim";
         statementStr += " left join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
@@ -151,6 +151,32 @@ public class ActiveTimControllerTest {
         verify(mockRs).getString("CLIENT_ID");
         verify(mockRs).getString("SAT_RECORD_ID");
         verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, aTims.size());
+    }
+
+    @Test
+    public void GetExpiredActiveTims_SUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID, ROUTE from active_tim";
+        statementStr += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
+        statementStr += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+
+        // Act
+        List<ActiveTim> aTims = uut.GetExpiredActiveTims();
+
+        // Assert
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockRs).getLong("TIM_ID");
+        verify(mockRs).getString("SAT_RECORD_ID");
+        verify(mockRs).getDouble("MILEPOST_START");
+        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getString("TYPE");
+        verify(mockRs).getString("CLIENT_ID");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getString("DIRECTION");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, aTims.size());

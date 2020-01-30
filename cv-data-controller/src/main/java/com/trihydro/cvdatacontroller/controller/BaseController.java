@@ -2,6 +2,7 @@ package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.TimeZone;
 
@@ -56,21 +57,6 @@ public class BaseController {
                                           // connection issues
 
             hds = new HikariDataSource(config);
-
-            // if (dbConfig.getEnv().equals("test")) {
-            //     // run scripts for in-memory test database
-            //     try {
-
-            //         ScriptRunner scriptRunner = new ScriptRunner(hds.getConnection());
-            //         scriptRunner.runScript(Resources.getResourceAsReader("db/unitTestSql.sql"));
-            //         hds.getConnection().commit();
-
-            //     } catch (SQLException e) {
-            //         e.printStackTrace();
-            //     } catch (IOException e) {
-            //         e.printStackTrace();
-            //     }
-            // }
         }
 
         // return a connection
@@ -109,6 +95,30 @@ public class BaseController {
         return result;
     }
     
+    public Long log(PreparedStatement preparedStatement, String type) {
+        Long id = null;
+        try {
+            if (preparedStatement.executeUpdate() > 0) {
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                try {
+                    if (generatedKeys != null && generatedKeys.next()) {
+                        id = generatedKeys.getLong(1);
+                        Utility.logWithDate("------ Generated " + type + " " + id + " --------------");
+                    }
+                } finally {
+                    try {
+                        generatedKeys.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
     void SendEmail(String[] to, String[] bcc, String subject, String body)
             throws MailException, MessagingException  {
         JavaMailSenderImpl mailSender = JavaMailSenderImplProvider.getJSenderImpl(dbConfig.getMailHost(),

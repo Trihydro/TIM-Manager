@@ -38,7 +38,9 @@ public class TestBase<T> {
         uut = spy((T)clazz.newInstance());
         when(mockConnection.createStatement()).thenReturn(mockStatement);
         when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
+        when(mockConnection.prepareStatement(isA(String.class), isA(String[].class))).thenReturn(mockPreparedStatement);
         doReturn(mockConnection).when((BaseController)uut).GetConnectionPool();
+        doReturn(-1l).when((BaseController)uut).log(isA(PreparedStatement.class), isA(String.class));
         when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
         when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
         when(mockRs.next()).thenReturn(true).thenReturn(false);

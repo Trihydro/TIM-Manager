@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.model.Milepost;
-import com.trihydro.library.service.MilepostService;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -243,16 +242,104 @@ public class MilepostController extends BaseController {
 		return mileposts;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{start}/{end}/{route}")
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
 	public List<Milepost> getMilepostTestRange(@PathVariable String direction, @PathVariable String route,
-			@PathVariable Double start, @PathVariable Double end) {
-		List<Milepost> mileposts = MilepostService.selectMilepostTestRange(direction, route, start, end);
+			@PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_TEST where direction = '" + direction
+					+ "' and milepost between " + Math.min(fromMilepost, toMilepost) + " and "
+					+ Math.max(fromMilepost, toMilepost) + " and route like '%" + route + "%'";
+
+			if (fromMilepost < toMilepost)
+				rs = statement.executeQuery(statementStr + " order by milepost asc");
+			else
+				rs = statement.executeQuery(statementStr + " order by milepost desc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setRoute(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setDirection(rs.getString("direction"));
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setElevation(rs.getDouble("elevation_ft"));
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 		return mileposts;
 	}
 
 	@RequestMapping(value = "/mileposts-test", method = RequestMethod.GET, headers = "Accept=application/json")
 	public List<Milepost> getMilepostsTest() {
-		List<Milepost> mileposts = MilepostService.selectAllTest();
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+			rs = statement.executeQuery("select * from MILEPOST_TEST order by milepost asc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				// milepost.setMilepostId(rs.getInt("milepost_id"));
+				milepost.setRoute(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setDirection(rs.getString("direction"));
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setElevation(rs.getDouble("elevation_ft"));
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 		return mileposts;
 	}
 

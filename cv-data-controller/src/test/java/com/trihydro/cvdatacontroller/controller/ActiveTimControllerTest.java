@@ -7,6 +7,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import com.trihydro.cvdatacontroller.tables.TimOracleTables;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 
 import org.junit.Before;
@@ -93,5 +95,38 @@ public class ActiveTimControllerTest {
 
         // Assert
         assertTrue("UpdateActiveTim_SatRecordId failed when it should have succeeded", success);
+    }
+
+    @Test
+    public void getActiveTimsMissingItisCodes_Success() throws SQLException {
+        // Arrange
+        String statementStr = " select * from active_tim where active_tim.tim_id in";
+        statementStr += " (select active_tim.tim_id from active_tim";
+        statementStr += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+        statementStr += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        statementStr += " where active_tim.tim_id in";
+        statementStr += " (select active_tim.tim_id from active_tim";
+        statementStr += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+        statementStr += " left join data_frame_itis_code ON data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        statementStr += " where data_frame_itis_code.itis_code_id is null)";
+        statementStr += " group by active_tim.tim_id";
+        statementStr += " having max(data_frame_itis_code.itis_code_id) is null)";
+
+        // Act
+        List<ActiveTim> aTims = uut.getActiveTimsMissingItisCodes();
+
+        // Assert
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getLong("TIM_ID");
+        verify(mockRs).getDouble("MILEPOST_START");
+        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getString("CLIENT_ID");
+        verify(mockRs).getString("SAT_RECORD_ID");
+        verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, aTims.size());
     }
 }

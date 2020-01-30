@@ -7,17 +7,17 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
-import com.trihydro.tasks.config.BasicConfiguration;
+import com.trihydro.tasks.config.DataTasksConfiguration;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpHeaders;
 
 public class RemoveExpiredActiveTims implements Runnable {
-    private BasicConfiguration configuration;
+    private DataTasksConfiguration configuration;
 
-    public RemoveExpiredActiveTims(BasicConfiguration configuration) {
+    public RemoveExpiredActiveTims(DataTasksConfiguration configuration) {
         this.configuration = configuration;
     }
 

@@ -4,16 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import com.trihydro.cvdatacontroller.tables.TimOracleTables;
@@ -26,33 +20,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ActiveTimControllerTest {
+public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Mock
-    private Connection mockConnection;
-    @Mock
-    private Statement mockStatement;
-    @Mock
-    private PreparedStatement mockPreparedStatement;
-    @Mock
-    private ResultSet mockRs;
-    @Mock
-    private TimOracleTables mockTimOracleTables;
-
-    private ActiveTimController uut;
-
-    // @Rule
-    // public final ExpectedException exception = ExpectedException.none();
-
+    private TimOracleTables mockTimOracleTables;   
+    
     @Before
-    public void setup() throws SQLException {
-        uut = spy(new ActiveTimController(mockTimOracleTables));
-        when(mockConnection.createStatement()).thenReturn(mockStatement);
-        when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
-        doReturn(mockConnection).when(uut).GetConnectionPool();
-        when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
-        when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
-        when(mockRs.next()).thenReturn(true).thenReturn(false);
-
+    public void setupSubTest(){
+        uut.SetTables(mockTimOracleTables);
         doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
     }

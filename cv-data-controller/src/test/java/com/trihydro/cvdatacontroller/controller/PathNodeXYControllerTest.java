@@ -2,48 +2,19 @@ package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PathNodeXYControllerTest {
-    @Mock
-    private Connection mockConnection;
-    @Mock
-    private Statement mockStatement;
-    @Mock
-    private PreparedStatement mockPreparedStatement;
-    @Mock
-    private ResultSet mockRs;
-
-    private PathNodeXYController uut;
-
-    @Before
-    public void setup() throws SQLException {
-        uut = spy(new PathNodeXYController());
-        when(mockConnection.createStatement()).thenReturn(mockStatement);
-        when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
-        doReturn(mockConnection).when(uut).GetConnectionPool();
-        when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
-        when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
-        when(mockRs.next()).thenReturn(true).thenReturn(false);
-    }
+public class PathNodeXYControllerTest extends TestBase<PathNodeXYController> {
 
     @Test
     public void GetNodeXYForPath_Fail() throws SQLException {

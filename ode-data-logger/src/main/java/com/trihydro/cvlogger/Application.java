@@ -1,13 +1,13 @@
 package com.trihydro.cvlogger;
 
-import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
-@EnableConfigurationProperties(ConfigProperties.class)
+@EnableConfigurationProperties(DataLoggerConfiguration.class)
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

@@ -6,12 +6,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import com.trihydro.library.model.TracMessageSent;
-import com.trihydro.library.tables.TracMessageOracleTables;
-import com.trihydro.library.service.CvDataServiceLibrary;
+
 import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.model.TracMessageSent;
+import com.trihydro.library.tables.TracMessageOracleTables;
+
+import org.springframework.http.ResponseEntity;
 
 public class TracMessageSentService extends CvDataServiceLibrary {
 
@@ -69,40 +72,9 @@ public class TracMessageSentService extends CvDataServiceLibrary {
 	}
 
 	public static List<String> selectPacketIds() {
-
-		List<String> packet_ids = new ArrayList<String>();
-		Connection connection = null;
-		ResultSet rs = null;
-		Statement statement = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-
-			// build SQL statement
-			rs = statement.executeQuery("select PACKET_ID from TRAC_MESSAGE_SENT");
-			// get packet_id values
-			while (rs.next()) {
-				packet_ids.add(rs.getString("packet_id"));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return packet_ids;
+		String url = String.format("/%s/trac-message/packet-ids", CVRestUrl);
+		ResponseEntity<String[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, String[].class);
+		return Arrays.asList(response.getBody());
 	}
 
 	public static Long insertTracMessageSent(TracMessageSent tracMessageSent) {

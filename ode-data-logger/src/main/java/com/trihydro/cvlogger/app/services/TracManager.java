@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
+import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
-import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.model.TracMessageType;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -66,7 +66,7 @@ public class TracManager {
 		return tracMessageSentId;
 	}
 
-	public void submitDNMsgToTrac(String value, ConfigProperties config) {
+	public void submitDNMsgToTrac(String value, DataLoggerConfiguration config) {
 		OdeTimPayload payload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
 
 		// check if packetId is in trac message sent table
@@ -107,7 +107,7 @@ public class TracManager {
 				+ longitude + "</a></b>";
 
 		// Query parameters
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(config.getGetTracUrl())
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(config.getTracUrl())
 				.queryParam("priority", "1").queryParam("description", descUrl)
 				.queryParam("createdBy", "Connected Vehicle Emergency Notification").queryParam("source", "CV System");
 

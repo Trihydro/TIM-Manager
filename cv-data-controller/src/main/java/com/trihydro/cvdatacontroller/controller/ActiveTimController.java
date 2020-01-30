@@ -32,7 +32,7 @@ public class ActiveTimController extends BaseController {
 	private TimOracleTables timOracleTables;
 
 	@Autowired
-	public ActiveTimController(TimOracleTables _timOracleTables) {
+	public void SetTables(TimOracleTables _timOracleTables) {
 		timOracleTables = _timOracleTables;
 	}
 

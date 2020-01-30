@@ -13,8 +13,8 @@ import com.trihydro.cvlogger.app.loggers.BsmLogger;
 import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
 import com.trihydro.cvlogger.app.loggers.TimLogger;
 import com.trihydro.cvlogger.app.services.TracManager;
+import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.service.CvDataServiceLibrary;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -31,12 +31,13 @@ public class OdeLoggingConsumer {
 	static PreparedStatement preparedStatement = null;
 	static Statement statement = null;
 	static ObjectMapper mapper;
-	private ConfigProperties configProperties;
+	private DataLoggerConfiguration configProperties;
 
 	@Autowired
-	public OdeLoggingConsumer(ConfigProperties configProperties) throws IOException {
+	public OdeLoggingConsumer(DataLoggerConfiguration configProperties) throws IOException {
 		this.configProperties = configProperties;
-		CvDataServiceLibrary.setConfig(configProperties);
+		CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
+		// CvDataServiceLibrary.setConfig(configProperties);
 
 		System.out.println("starting..............");
 

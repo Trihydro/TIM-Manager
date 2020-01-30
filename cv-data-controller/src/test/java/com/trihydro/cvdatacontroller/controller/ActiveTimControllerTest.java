@@ -60,13 +60,13 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void getExpiringActiveTims() throws SQLException {
+    public void GetExpiringActiveTims() throws SQLException {
         // Arrange
         // we only set one property to verify its returned
         when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
 
         // Act
-        List<TimUpdateModel> tums = uut.getExpiringActiveTims();
+        List<TimUpdateModel> tums = uut.GetExpiringActiveTims();
 
         // Assert
         assertEquals(1, tums.size());
@@ -74,7 +74,7 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void updateActiveTim_SatRecordId_FAIL() {
+    public void UpdateActiveTim_SatRecordId_FAIL() {
         // Arrange
         doReturn(false).when(uut).updateOrDelete(mockPreparedStatement);
 
@@ -86,7 +86,7 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void updateActiveTim_SatRecordId_SUCCESS() {
+    public void UpdateActiveTim_SatRecordId_SUCCESS() {
         // Arrange
         doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
 
@@ -98,7 +98,7 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void getActiveTimsMissingItisCodes_Success() throws SQLException {
+    public void GetActiveTimsMissingItisCodes_Success() throws SQLException {
         // Arrange
         String statementStr = " select * from active_tim where active_tim.tim_id in";
         statementStr += " (select active_tim.tim_id from active_tim";
@@ -113,7 +113,33 @@ public class ActiveTimControllerTest {
         statementStr += " having max(data_frame_itis_code.itis_code_id) is null)";
 
         // Act
-        List<ActiveTim> aTims = uut.getActiveTimsMissingItisCodes();
+        List<ActiveTim> aTims = uut.GetActiveTimsMissingItisCodes();
+
+        // Assert
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getLong("TIM_ID");
+        verify(mockRs).getDouble("MILEPOST_START");
+        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getString("CLIENT_ID");
+        verify(mockRs).getString("SAT_RECORD_ID");
+        verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, aTims.size());
+    }
+
+    @Test
+    public void GetActiveTimsNotSent_Success() throws SQLException {
+        // Arrange
+        String statementStr = "select active_tim.* from active_tim";
+        statementStr += " left join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
+        statementStr += " where active_tim.sat_record_id is null";
+        statementStr += " and tim_rsu.rsu_id is null";
+
+        // Act
+        List<ActiveTim> aTims = uut.GetActiveTimsNotSent();
 
         // Assert
         verify(mockStatement).executeQuery(statementStr);

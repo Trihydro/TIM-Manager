@@ -832,55 +832,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public static List<ActiveTim> getActiveTimsNotSent() {
-		ActiveTim activeTim = null;
-		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-
-			statement = connection.createStatement();
-
-			String selectStatement = "select active_tim.* from active_tim";
-			selectStatement += " left join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
-			selectStatement += " where active_tim.sat_record_id is null";
-			selectStatement += " and tim_rsu.rsu_id is null";
-
-			rs = statement.executeQuery(selectStatement);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTims.add(activeTim);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return activeTims;
+		ResponseEntity<TimUpdateModel[]> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(CVRestUrl + "/active-tim/not-sent", TimUpdateModel[].class);
+		return Arrays.asList(response.getBody());
 	}
 }

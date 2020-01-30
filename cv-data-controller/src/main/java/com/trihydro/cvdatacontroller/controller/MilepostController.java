@@ -190,9 +190,56 @@ public class MilepostController extends BaseController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range-no-direction/{fromMilepost}/{toMilepost}/{route}")
-	public List<Milepost> getMilepostRange(@PathVariable String route, @PathVariable Double fromMilepost,
+	public List<Milepost> getMilepostRangeNoDirection(@PathVariable String route, @PathVariable Double fromMilepost,
 			@PathVariable Double toMilepost) {
-		List<Milepost> mileposts = MilepostService.selectMilepostRangeNoDirection(route, fromMilepost, toMilepost);
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_VW where milepost between "
+					+ Math.min(fromMilepost, toMilepost) + " and " + Math.max(fromMilepost, toMilepost)
+					+ " and route like '%" + route + "%'";
+
+			if (fromMilepost < toMilepost)
+				rs = statement.executeQuery(statementStr + " order by milepost asc");
+			else
+				rs = statement.executeQuery(statementStr + " order by milepost desc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setRoute(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setElevation(rs.getDouble("elevation_ft"));
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 		return mileposts;
 	}
 

@@ -41,12 +41,13 @@ public class ActiveTimController extends BaseController {
 
 	// select all ITIS codes
 	@RequestMapping(value = "/expiring", method = RequestMethod.GET, headers = "Accept=application/json")
-	public List<TimUpdateModel> GetExpiringActiveTims() {
+	public ResponseEntity<List<TimUpdateModel>> GetExpiringActiveTims() {
 		TimUpdateModel activeTim = null;
 		List<TimUpdateModel> activeTims = new ArrayList<TimUpdateModel>();
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
+		boolean exception = false;
 
 		try {
 			connection = GetConnectionPool();
@@ -131,6 +132,7 @@ public class ActiveTimController extends BaseController {
 				activeTims.add(activeTim);
 			}
 		} catch (Exception e) {
+			exception = true;
 			e.printStackTrace();
 		} finally {
 			try {
@@ -148,7 +150,10 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 
-		return activeTims;
+		if (exception && activeTims.size() == 0) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		}
+		return ResponseEntity.ok(activeTims);
 	}
 
 	@RequestMapping(value = "/update-sat-record-id/{activeTimId}/{satRecordId}", method = RequestMethod.PUT)
@@ -265,12 +270,13 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/not-sent", method = RequestMethod.GET)
-	public List<ActiveTim> GetActiveTimsNotSent() {
+	public ResponseEntity<List<ActiveTim>> GetActiveTimsNotSent() {
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
+		boolean exception = false;
 
 		try {
 			connection = GetConnectionPool();
@@ -299,6 +305,7 @@ public class ActiveTimController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			exception = true;
 		} finally {
 			try {
 				// close prepared statement
@@ -315,16 +322,20 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 
-		return activeTims;
+		if (exception && activeTims.size() == 0) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		}
+		return ResponseEntity.ok(activeTims);
 	}
 
 	@RequestMapping(value = "/expired", method = RequestMethod.GET)
-	public List<ActiveTim> GetExpiredActiveTims() {
+	public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims() {
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
+		boolean exception = false;
 
 		try {
 			connection = GetConnectionPool();
@@ -353,6 +364,7 @@ public class ActiveTimController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			exception = true;
 		} finally {
 			try {
 				// close prepared statement
@@ -369,6 +381,9 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 
-		return activeTims;
+		if (exception && activeTims.size() == 0) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		}
+		return ResponseEntity.ok(activeTims);
 	}
 }

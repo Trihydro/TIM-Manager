@@ -62,17 +62,36 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void GetExpiringActiveTims() throws SQLException {
+    public void GetExpiringActiveTims_SUCCESS() throws SQLException {
         // Arrange
         // we only set one property to verify its returned
         when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
 
         // Act
-        List<TimUpdateModel> tums = uut.GetExpiringActiveTims();
+        ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();
 
         // Assert
-        assertEquals(1, tums.size());
-        assertEquals(new Long(999), tums.get(0).getActiveTimId());
+        assertEquals(HttpStatus.OK, tums.getStatusCode());
+        assertEquals(1, tums.getBody().size());
+        assertEquals(new Long(999), tums.getBody().get(0).getActiveTimId());
+    }
+
+    @Test
+    public void GetExpiringActiveTims_FAIL() throws SQLException {
+        // Arrange
+        // we only set one property to verify its returned
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenThrow(new SQLException());
+
+        // Act
+        ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, tums.getStatusCode());
+        assertEquals(0, tums.getBody().size());
+        verify(mockRs).close();
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        
     }
 
     @Test
@@ -134,7 +153,7 @@ public class ActiveTimControllerTest {
     }
 
     @Test
-    public void GetActiveTimsMissingItisCodes_FAIL() throws SQLException{
+    public void GetActiveTimsMissingItisCodes_FAIL() throws SQLException {
         // Arrange
         String statementStr = " select * from active_tim where active_tim.tim_id in";
         statementStr += " (select active_tim.tim_id from active_tim";
@@ -170,9 +189,10 @@ public class ActiveTimControllerTest {
         statementStr += " and tim_rsu.rsu_id is null";
 
         // Act
-        List<ActiveTim> aTims = uut.GetActiveTimsNotSent();
+        ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsNotSent();
 
         // Assert
+        assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getDouble("MILEPOST_START");
@@ -184,7 +204,27 @@ public class ActiveTimControllerTest {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, aTims.size());
+        assertEquals(1, aTims.getBody().size());
+    }
+
+    @Test
+    public void GetActiveTimsNotSent_FAIL() throws SQLException {
+        // Arrange
+        String statementStr = "select active_tim.* from active_tim";
+        statementStr += " left join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
+        statementStr += " where active_tim.sat_record_id is null";
+        statementStr += " and tim_rsu.rsu_id is null";
+        when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException());
+
+        // Act
+        ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsNotSent();
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(0, aTims.getBody().size());
     }
 
     @Test
@@ -195,9 +235,10 @@ public class ActiveTimControllerTest {
         statementStr += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 
         // Act
-        List<ActiveTim> aTims = uut.GetExpiredActiveTims();
+        ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
 
         // Assert
+        assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -210,6 +251,25 @@ public class ActiveTimControllerTest {
         verify(mockRs).getString("DIRECTION");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, aTims.size());
+        assertEquals(1, aTims.getBody().size());
+    }
+
+    @Test
+    public void GetExpiredActiveTims_FAIL() throws SQLException {
+        // Arrange
+        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID, ROUTE from active_tim";
+        statementStr += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
+        statementStr += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+        when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException());
+
+        // Act
+        ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(0, aTims.getBody().size());
     }
 }

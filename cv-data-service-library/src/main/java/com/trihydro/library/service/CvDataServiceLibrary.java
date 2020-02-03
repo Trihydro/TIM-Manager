@@ -109,6 +109,12 @@ public class CvDataServiceLibrary {
         return result;
     }
 
+    /**
+     * @deprecated Moved to service
+     * @param incomingDate
+     * @return
+     */
+    @Deprecated
     public static Date convertDate(String incomingDate) {
 
         Date convertedDate = null;

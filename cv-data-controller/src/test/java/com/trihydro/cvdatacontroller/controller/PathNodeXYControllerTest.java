@@ -44,7 +44,6 @@ public class PathNodeXYControllerTest extends TestBase<PathNodeXYController> {
         NodeXY[] data = uut.GetNodeXYForPath(-1);
 
         // Assert
-        // verify everything was closed despite error
         verify(mockStatement).executeQuery(
                 "select * from node_xy where node_xy_id in (select node_xy_id from path_node_xy where path_id = -1)");
         verify(mockRs).getString("DELTA");

@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 import javax.mail.MessagingException;
@@ -29,6 +33,13 @@ public class BaseController {
     private HikariDataSource hds = null;
     private HikariConfig config;
     private DataControllerConfigProperties dbConfig;
+
+    private DateFormat utcFormatMilliSec= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private DateFormat utcFormatSec= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private DateFormat utcFormatMin= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+    protected DateFormat mstFormat= new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+    // private DateTimeFormatter localDateTimeformatter;
+    // private DateFormat mstLocalFormat= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");
 
     @Autowired
     public void SetConfig(DataControllerConfigProperties props) {
@@ -94,7 +105,7 @@ public class BaseController {
 
         return result;
     }
-    
+
     public Long log(PreparedStatement preparedStatement, String type) {
         Long id = null;
         try {
@@ -119,10 +130,28 @@ public class BaseController {
         return id;
     }
 
-    void SendEmail(String[] to, String[] bcc, String subject, String body)
-            throws MailException, MessagingException  {
+    public Date convertDate(String incomingDate) {
+
+        Date convertedDate = null;
+
+        try {
+            if (incomingDate != null) {
+                if (incomingDate.contains("."))
+                    convertedDate = utcFormatMilliSec.parse(incomingDate);
+                else if (incomingDate.length() == 22)
+                    convertedDate = utcFormatMin.parse(incomingDate);
+                else
+                    convertedDate = utcFormatSec.parse(incomingDate);
+            }
+        } catch (ParseException e1) {
+            e1.printStackTrace();
+        }
+        return convertedDate;
+    }
+
+    void SendEmail(String[] to, String[] bcc, String subject, String body) throws MailException, MessagingException {
         JavaMailSenderImpl mailSender = JavaMailSenderImplProvider.getJSenderImpl(dbConfig.getMailHost(),
-        dbConfig.getMailPort());
+                dbConfig.getMailPort());
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
         helper.setSubject(subject);

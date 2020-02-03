@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.cvlogger.app.services.TracManager;
+import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
-import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.model.TracMessageType;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -78,8 +78,7 @@ public class TracManagerTest {
                 tmts.add(tmt);
                 when(TracMessageTypeService.selectAll()).thenReturn(tmts);
                 when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
-                when(JavaMailSenderImplProvider.getJSenderImpl(Matchers.any(String.class),
-                                Matchers.any(int.class)))
+                when(JavaMailSenderImplProvider.getJSenderImpl(Matchers.any(String.class), Matchers.any(int.class)))
                                 .thenReturn(jmsi);
         }
 
@@ -92,7 +91,7 @@ public class TracManagerTest {
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
-                ConfigProperties config = new ConfigProperties();
+                DataLoggerConfiguration config = new DataLoggerConfiguration();
                 config.setTracUrl("");
 
                 // call function to test
@@ -126,7 +125,7 @@ public class TracManagerTest {
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
-                ConfigProperties config = new ConfigProperties();
+                DataLoggerConfiguration config = new DataLoggerConfiguration();
                 config.setTracUrl("");
 
                 // call function to test
@@ -155,9 +154,11 @@ public class TracManagerTest {
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
-                ConfigProperties config = new ConfigProperties();
+                DataLoggerConfiguration config = new DataLoggerConfiguration();
                 config.setTracUrl("");
-                config.setAlertAddresses("email@test.com");
+                String[] addresses = new String[1];
+                addresses[0] = "email@test.com";
+                config.setAlertAddresses(addresses);
 
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
@@ -191,9 +192,11 @@ public class TracManagerTest {
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
-                ConfigProperties config = new ConfigProperties();
+                DataLoggerConfiguration config = new DataLoggerConfiguration();
                 config.setTracUrl("");
-                config.setAlertAddresses("email@test.com");
+                String[] addresses = new String[1];
+                addresses[0] = "email@test.com";
+                config.setAlertAddresses(addresses);
 
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
@@ -229,9 +232,11 @@ public class TracManagerTest {
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
-                ConfigProperties config = new ConfigProperties();
+                DataLoggerConfiguration config = new DataLoggerConfiguration();
                 config.setTracUrl("");
-                config.setAlertAddresses("email@test.com");
+                String[] addresses = new String[1];
+                addresses[0] = "email@test.com";
+                config.setAlertAddresses(addresses);
 
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
@@ -267,9 +272,13 @@ public class TracManagerTest {
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
-                ConfigProperties config = new ConfigProperties();
+                DataLoggerConfiguration config = new DataLoggerConfiguration();
                 config.setTracUrl("");
-                config.setAlertAddresses("email@test.com,email2@test.com,email@trihydro.com");
+                String[] addresses = new String[3];
+                addresses[0] = "email@test.com";
+                addresses[1] = "email2@test.com";
+                addresses[2] = "email@trihydro.com";
+                config.setAlertAddresses(addresses);
 
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);

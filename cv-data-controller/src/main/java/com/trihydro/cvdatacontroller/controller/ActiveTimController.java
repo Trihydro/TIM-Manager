@@ -16,6 +16,8 @@ import com.trihydro.library.model.TimUpdateModel;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -181,12 +183,13 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/missing-itis", method = RequestMethod.GET)
-	public List<ActiveTim> GetActiveTimsMissingItisCodes() {
+	public ResponseEntity<List<ActiveTim>> GetActiveTimsMissingItisCodes() {
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
+		boolean exception = false;
 
 		try {
 			connection = GetConnectionPool();
@@ -238,6 +241,7 @@ public class ActiveTimController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			exception = true;
 		} finally {
 			try {
 				// close prepared statement
@@ -254,11 +258,14 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 
-		return activeTims;
+		if (exception && activeTims.size() == 0) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		}
+		return ResponseEntity.ok(activeTims);
 	}
 
 	@RequestMapping(value = "/not-sent", method = RequestMethod.GET)
-	public List<ActiveTim> GetActiveTimsNotSent(){
+	public List<ActiveTim> GetActiveTimsNotSent() {
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
@@ -312,7 +319,7 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/expired", method = RequestMethod.GET)
-	public List<ActiveTim> GetExpiredActiveTims(){
+	public List<ActiveTim> GetExpiredActiveTims() {
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;

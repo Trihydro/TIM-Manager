@@ -26,6 +26,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ActiveTimControllerTest {
@@ -113,9 +115,10 @@ public class ActiveTimControllerTest {
         statementStr += " having max(data_frame_itis_code.itis_code_id) is null)";
 
         // Act
-        List<ActiveTim> aTims = uut.GetActiveTimsMissingItisCodes();
+        ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsMissingItisCodes();
 
         // Assert
+        assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getDouble("MILEPOST_START");
@@ -127,7 +130,35 @@ public class ActiveTimControllerTest {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, aTims.size());
+        assertEquals(1, aTims.getBody().size());
+    }
+
+    @Test
+    public void GetActiveTimsMissingItisCodes_FAIL() throws SQLException{
+        // Arrange
+        String statementStr = " select * from active_tim where active_tim.tim_id in";
+        statementStr += " (select active_tim.tim_id from active_tim";
+        statementStr += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+        statementStr += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        statementStr += " where active_tim.tim_id in";
+        statementStr += " (select active_tim.tim_id from active_tim";
+        statementStr += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+        statementStr += " left join data_frame_itis_code ON data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        statementStr += " where data_frame_itis_code.itis_code_id is null)";
+        statementStr += " group by active_tim.tim_id";
+        statementStr += " having max(data_frame_itis_code.itis_code_id) is null)";
+        when(mockRs.getLong(isA(String.class))).thenThrow(new SQLException("error"));
+
+        // Act
+        ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsMissingItisCodes();
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+        assertEquals(0, aTims.getBody().size());
     }
 
     @Test

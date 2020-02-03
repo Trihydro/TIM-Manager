@@ -1,0 +1,27 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
+// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/ubuntu-18.04-git
+{
+  "name": "WyoCV Container",
+  "dockerFile": "Dockerfile",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+
+  // Ports forwarded from container
+  "appPort": [7777, 8888, 4200, 9999, 8081],
+
+  // Extensions to install in container
+  "extensions": [
+    "vscjava.vscode-java-dependency",
+    "vscjava.vscode-java-debug",
+    "vscjava.vscode-java-pack",
+    "vscjava.vscode-java-test",
+    "redhat.java",
+    "vscjava.vscode-maven",
+    "esbenp.prettier-vscode",
+    "visualstudioexptteam.vscodeintellicode"
+  ],
+
+  // Run post-create script after container is running and directory is mapped
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}

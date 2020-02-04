@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.trihydro.library.model.Milepost;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class MilepostController extends BaseController {
 
 	@RequestMapping(value = "/mileposts", method = RequestMethod.GET, headers = "Accept=application/json")
-	public List<Milepost> getMileposts() {
+	public ResponseEntity<List<Milepost>> getMileposts() {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 
 		Connection connection = null;
@@ -54,6 +56,7 @@ public class MilepostController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -69,13 +72,13 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return mileposts;
+		return ResponseEntity.ok(mileposts);
 	}
 
 	// TODO: after the view updates are completed, we need to update anything with
 	// the milepost_vw
 	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
-	public List<Milepost> getMilepostRange(@PathVariable String direction, @PathVariable String route,
+	public ResponseEntity<List<Milepost>> getMilepostRange(@PathVariable String direction, @PathVariable String route,
 			@PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 		Connection connection = null;
@@ -115,6 +118,7 @@ public class MilepostController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -130,12 +134,11 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-
-		return mileposts;
+		return ResponseEntity.ok(mileposts);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/mileposts-route/{route}/{mod}")
-	public List<Milepost> getMilepostsRoute(@PathVariable String route, @PathVariable Boolean mod) {
+	public ResponseEntity<List<Milepost>> getMilepostsRoute(@PathVariable String route, @PathVariable Boolean mod) {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 		Connection connection = null;
 		Statement statement = null;
@@ -170,6 +173,7 @@ public class MilepostController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -185,12 +189,12 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return mileposts;
+		return ResponseEntity.ok(mileposts);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range-no-direction/{fromMilepost}/{toMilepost}/{route}")
-	public List<Milepost> getMilepostRangeNoDirection(@PathVariable String route, @PathVariable Double fromMilepost,
-			@PathVariable Double toMilepost) {
+	public ResponseEntity<List<Milepost>> getMilepostRangeNoDirection(@PathVariable String route,
+			@PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 		Connection connection = null;
 		Statement statement = null;
@@ -224,6 +228,7 @@ public class MilepostController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -239,12 +244,12 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return mileposts;
+		return ResponseEntity.ok(mileposts);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
-	public List<Milepost> getMilepostTestRange(@PathVariable String direction, @PathVariable String route,
-			@PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
+	public ResponseEntity<List<Milepost>> getMilepostTestRange(@PathVariable String direction,
+			@PathVariable String route, @PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 		Connection connection = null;
 		Statement statement = null;
@@ -279,6 +284,7 @@ public class MilepostController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -294,11 +300,11 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return mileposts;
+		return ResponseEntity.ok(mileposts);
 	}
 
 	@RequestMapping(value = "/mileposts-test", method = RequestMethod.GET, headers = "Accept=application/json")
-	public List<Milepost> getMilepostsTest() {
+	public ResponseEntity<List<Milepost>> getMilepostsTest() {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 		Connection connection = null;
 		Statement statement = null;
@@ -325,6 +331,7 @@ public class MilepostController extends BaseController {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -340,7 +347,7 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return mileposts;
+		return ResponseEntity.ok(mileposts);
 	}
 
 }

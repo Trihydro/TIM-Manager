@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MilepostControllerTest {
@@ -57,14 +59,31 @@ public class MilepostControllerTest {
         // Arrange
 
         // Act
-        List<Milepost> data = uut.getMileposts();
+        ResponseEntity<List<Milepost>> data = uut.getMileposts();
 
         // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement)
                 .executeQuery("select * from MILEPOST_VW where MOD(milepost, 1) = 0 order by milepost asc");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.size());
+        assertEquals(1, data.getBody().size());
+    }
+
+    @Test
+    public void getMileposts_FAIL() throws SQLException {
+        // Arrange
+        when(mockRs.getString(isA(String.class))).thenThrow(new SQLException());
+        // Act
+        ResponseEntity<List<Milepost>> data = uut.getMileposts();
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        verify(mockStatement)
+                .executeQuery("select * from MILEPOST_VW where MOD(milepost, 1) = 0 order by milepost asc");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(0, data.getBody().size());
     }
 
     @Test
@@ -80,13 +99,14 @@ public class MilepostControllerTest {
         statementStr += "%' order by milepost asc";
 
         // Act
-        List<Milepost> milePosts = uut.getMilepostRange(direction, route, fromMilepost, toMilepost);
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRange(direction, route, fromMilepost, toMilepost);
 
         // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, milePosts.size());
+        assertEquals(1, milePosts.getBody().size());
     }
 
     @Test
@@ -102,13 +122,38 @@ public class MilepostControllerTest {
         statementStr += "%' order by milepost desc";
 
         // Act
-        List<Milepost> milePosts = uut.getMilepostRange(direction, route, toMilepost, fromMilepost);
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRange(direction, route, toMilepost, fromMilepost);
 
         // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, milePosts.size());
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostRange_Direction_FAIL() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW where direction = '";
+        statementStr += direction;
+        statementStr += "' and milepost between ";
+        statementStr += fromMilepost;
+        statementStr += " and " + toMilepost;
+        statementStr += " and route like '%";
+        statementStr += route;
+        statementStr += "%' order by milepost desc";
+        when(mockRs.getString("route")).thenThrow(new SQLException());
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRange(direction, route, toMilepost, fromMilepost);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(0, milePosts.getBody().size());
     }
 
     @Test
@@ -133,7 +178,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostRangeNoDirection_asc_SUCCESS() throws SQLException{
+    public void getMilepostRangeNoDirection_asc_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_VW where milepost between ";
         statementStr += fromMilepost;
@@ -141,7 +186,7 @@ public class MilepostControllerTest {
         statementStr += " and route like '%";
         statementStr += route;
         statementStr += "%' order by milepost asc";
-        
+
         // Act
         List<Milepost> milePosts = uut.getMilepostRangeNoDirection(route, fromMilepost, toMilepost);
 
@@ -159,7 +204,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostRangeNoDirection_desc_SUCCESS() throws SQLException{
+    public void getMilepostRangeNoDirection_desc_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_VW where milepost between ";
         statementStr += fromMilepost;
@@ -167,7 +212,7 @@ public class MilepostControllerTest {
         statementStr += " and route like '%";
         statementStr += route;
         statementStr += "%' order by milepost desc";
-        
+
         // Act
         List<Milepost> milePosts = uut.getMilepostRangeNoDirection(route, toMilepost, fromMilepost);
 
@@ -185,7 +230,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostTestRange_asc_SUCCESS() throws SQLException{
+    public void getMilepostTestRange_asc_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_TEST where direction = '";
         statementStr += direction;
@@ -195,7 +240,7 @@ public class MilepostControllerTest {
         statementStr += " and route like '%";
         statementStr += route;
         statementStr += "%' order by milepost asc";
-        
+
         // Act
         List<Milepost> milePosts = uut.getMilepostTestRange(direction, route, fromMilepost, toMilepost);
 
@@ -214,7 +259,7 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostTestRange_desc_SUCCESS() throws SQLException{
+    public void getMilepostTestRange_desc_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_TEST where direction = '";
         statementStr += direction;
@@ -224,7 +269,7 @@ public class MilepostControllerTest {
         statementStr += " and route like '%";
         statementStr += route;
         statementStr += "%' order by milepost desc";
-        
+
         // Act
         List<Milepost> milePosts = uut.getMilepostTestRange(direction, route, toMilepost, fromMilepost);
 
@@ -243,10 +288,10 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMilepostsTest_SUCCESS() throws SQLException{
+    public void getMilepostsTest_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_TEST order by milepost asc";
-        
+
         // Act
         List<Milepost> milePosts = uut.getMilepostsTest();
 

@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.trihydro.library.model.Milepost;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +25,13 @@ import springfox.documentation.annotations.ApiIgnore;
 public class MilepostController extends BaseController {
 
 	@RequestMapping(value = "/mileposts", method = RequestMethod.GET, headers = "Accept=application/json")
-	public List<Milepost> getMileposts() {
+	public ResponseEntity<List<Milepost>> getMileposts() {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
+		boolean exception = false;
 
 		try {
 
@@ -53,6 +56,7 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
+			exception = true;
 			e.printStackTrace();
 		} finally {
 			try {
@@ -69,18 +73,22 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return mileposts;
+		if (exception && mileposts.size() == 0) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		}
+		return ResponseEntity.ok(mileposts);
 	}
 
 	// TODO: after the view updates are completed, we need to update anything with
 	// the milepost_vw
 	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
-	public List<Milepost> getMilepostRange(@PathVariable String direction, @PathVariable String route,
+	public ResponseEntity<List<Milepost>> getMilepostRange(@PathVariable String direction, @PathVariable String route,
 			@PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
 		List<Milepost> mileposts = new ArrayList<Milepost>();
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
+		boolean exception = false;
 
 		try {
 
@@ -114,6 +122,7 @@ public class MilepostController extends BaseController {
 				System.out.println("Unable to find mileposts with query: " + statementStr);
 			}
 		} catch (SQLException e) {
+			exception = true;
 			e.printStackTrace();
 		} finally {
 			try {
@@ -131,7 +140,10 @@ public class MilepostController extends BaseController {
 			}
 		}
 
-		return mileposts;
+		if (exception && mileposts.size() == 0) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		}
+		return ResponseEntity.ok(mileposts);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/mileposts-route/{route}/{mod}")

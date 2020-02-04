@@ -1,12 +1,19 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.cvdatacontroller.helpers.SQLNullHandler;
+import com.trihydro.cvdatacontroller.tables.TimOracleTables;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,12 +29,22 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 @ApiIgnore
 public class PathNodeXYController extends BaseController {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-nodexy-path/{pathId}")
-    public NodeXY[] GetNodeXYForPath(@PathVariable int pathId){
+	private TimOracleTables timOracleTables;
+	private SQLNullHandler sqlNullHandler;
+
+	@Autowired
+	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
+		timOracleTables = _timOracleTables;
+		sqlNullHandler = _sqlNullHandler;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/get-nodexy-path/{pathId}")
+	public ResponseEntity<NodeXY[]> GetNodeXYForPath(@PathVariable int pathId) {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
 		List<NodeXY> nodeXYs = new ArrayList<>();
+		boolean exception = false;
 
 		try {
 			connection = GetConnectionPool();
@@ -52,6 +69,7 @@ public class PathNodeXYController extends BaseController {
 				nodeXYs.add(nodexy);
 			}
 		} catch (Exception e) {
+			exception = true;
 			e.printStackTrace();
 		} finally {
 			try {
@@ -68,7 +86,52 @@ public class PathNodeXYController extends BaseController {
 				e.printStackTrace();
 			}
 		}
+		NodeXY[] data = nodeXYs.toArray(new NodeXY[nodeXYs.size()]);
+		if (exception && nodeXYs.size() == 0) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(data);
+		}
+		return ResponseEntity.ok(data);
+	}
 
-		return nodeXYs.toArray(new NodeXY[nodeXYs.size()]);
+	@RequestMapping(method = RequestMethod.POST, value = "add-path-nodexy/{nodeXYId}/{pathId}")
+	public ResponseEntity<Long> AddPathNodeXY(@PathVariable Long nodeXYId, @PathVariable Long pathId) {
+
+		PreparedStatement preparedStatement = null;
+		Connection connection = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path_node_xy",
+					timOracleTables.getPathNodeXYTable());
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_node_xy_id" });
+			int fieldNum = 1;
+
+			for (String col : timOracleTables.getPathNodeXYTable()) {
+				if (col.equals("NODE_XY_ID"))
+					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, nodeXYId);
+				else if (col.equals("PATH_ID"))
+					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, pathId);
+				fieldNum++;
+			}
+			// execute insert statement
+			Long pathNodeXYId = log(preparedStatement, "pathnodexyid");
+			return ResponseEntity.ok(pathNodeXYId);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
 	}
 }

@@ -3,57 +3,30 @@ package com.trihydro.library.service;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import com.trihydro.library.tables.TimOracleTables;
+
+import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.TimRsu;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 public class TimRsuService extends CvDataServiceLibrary {
 
 	public static Long insertTimRsu(Long timId, Integer rsuId, Integer rsuIndex) {
-
-		PreparedStatement preparedStatement = null;
-		Connection connection = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("TIM_RSU",
-					TimOracleTables.getTimRsuTable());
-			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "TIM_RSU_ID" });
-			int fieldNum = 1;
-
-			for (String col : TimOracleTables.getTimRsuTable()) {
-				if (col.equals("TIM_ID"))
-					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
-				else if (col.equals("RSU_ID"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuId);
-				else if (col.equals("RSU_INDEX"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuIndex);
-				fieldNum++;
-			}
-			Long timRsuId = log(preparedStatement, "tim rsu");
-			return timRsuId;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (preparedStatement != null)
-					preparedStatement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return new Long(0);
+		String url = String.format("%s/tim-rsu/add-tim-rsu/%d/%d/%d", CVRestUrl, timId, rsuId, rsuIndex);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<Long> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity,
+				Long.class);
+		return response.getBody();
 	}
 
 	public static List<TimRsu> getTimRsusByTimId(Long timId) {

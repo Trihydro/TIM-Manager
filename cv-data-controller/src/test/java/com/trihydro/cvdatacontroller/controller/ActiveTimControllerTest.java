@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,7 +92,7 @@ public class ActiveTimControllerTest {
         verify(mockRs).close();
         verify(mockStatement).close();
         verify(mockConnection).close();
-        
+
     }
 
     @Test
@@ -100,10 +101,10 @@ public class ActiveTimControllerTest {
         doReturn(false).when(uut).updateOrDelete(mockPreparedStatement);
 
         // Act
-        boolean success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
+        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
 
         // Assert
-        assertFalse("UpdateActiveTim_SatRecordId succeeded when it should have failed", success);
+        assertFalse("UpdateActiveTim_SatRecordId succeeded when it should have failed", success.getBody());
     }
 
     @Test
@@ -112,10 +113,22 @@ public class ActiveTimControllerTest {
         doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
 
         // Act
-        boolean success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
+        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
 
         // Assert
-        assertTrue("UpdateActiveTim_SatRecordId failed when it should have succeeded", success);
+        assertTrue("UpdateActiveTim_SatRecordId failed when it should have succeeded", success.getBody());
+    }
+
+    @Test
+    public void UpdateActiveTim_SatRecordId_EXCEPTION() throws SQLException {
+        // Arrange
+        doThrow(new SQLException()).when(uut).GetConnectionPool();
+
+        // Act
+        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
+
+        // Assert
+        assertFalse("UpdateActiveTim_SatRecordId was successful during an error", success.getBody());
     }
 
     @Test

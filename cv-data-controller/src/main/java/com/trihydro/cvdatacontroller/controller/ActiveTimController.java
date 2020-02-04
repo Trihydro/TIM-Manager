@@ -157,12 +157,13 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/update-sat-record-id/{activeTimId}/{satRecordId}", method = RequestMethod.PUT)
-	public Boolean updateActiveTim_SatRecordId(@PathVariable Long activeTimId, @PathVariable String satRecordId) {
+	public ResponseEntity<Boolean> updateActiveTim_SatRecordId(@PathVariable Long activeTimId, @PathVariable String satRecordId) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
 		cols.add(new ImmutablePair<String, Object>("SAT_RECORD_ID", satRecordId));
 		boolean success = false;
+		boolean exception=false;
 		try {
 			connection = GetConnectionPool();
 			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
@@ -171,6 +172,7 @@ public class ActiveTimController extends BaseController {
 			// execute update statement
 			success = updateOrDelete(preparedStatement);
 		} catch (SQLException e) {
+			exception=true;
 			e.printStackTrace();
 		} finally {
 			try {
@@ -184,7 +186,10 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return success;
+		if(exception){
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		}
+		return ResponseEntity.ok(success);
 	}
 
 	@RequestMapping(value = "/missing-itis", method = RequestMethod.GET)

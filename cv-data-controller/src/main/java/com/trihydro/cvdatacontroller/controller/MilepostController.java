@@ -31,7 +31,6 @@ public class MilepostController extends BaseController {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		boolean exception = false;
 
 		try {
 
@@ -56,8 +55,8 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			exception = true;
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -73,9 +72,6 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		if (exception && mileposts.size() == 0) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
-		}
 		return ResponseEntity.ok(mileposts);
 	}
 
@@ -88,7 +84,6 @@ public class MilepostController extends BaseController {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		boolean exception = false;
 
 		try {
 
@@ -122,8 +117,8 @@ public class MilepostController extends BaseController {
 				System.out.println("Unable to find mileposts with query: " + statementStr);
 			}
 		} catch (SQLException e) {
-			exception = true;
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -139,10 +134,6 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-
-		if (exception && mileposts.size() == 0) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
-		}
 		return ResponseEntity.ok(mileposts);
 	}
 
@@ -152,7 +143,6 @@ public class MilepostController extends BaseController {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		boolean exception = false;
 
 		try {
 
@@ -182,8 +172,8 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			exception = true;
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -199,9 +189,6 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		if (exception && mileposts.size() == 0) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
-		}
 		return ResponseEntity.ok(mileposts);
 	}
 
@@ -212,7 +199,6 @@ public class MilepostController extends BaseController {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		boolean exception = false;
 
 		try {
 
@@ -241,8 +227,8 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			exception = true;
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -258,9 +244,6 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		if (exception && mileposts.size() == 0) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
-		}
 		return ResponseEntity.ok(mileposts);
 	}
 
@@ -271,7 +254,6 @@ public class MilepostController extends BaseController {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		boolean exception = false;
 
 		try {
 
@@ -301,8 +283,8 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			exception = true;
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -318,9 +300,6 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		if (exception && mileposts.size() == 0) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
-		}
 		return ResponseEntity.ok(mileposts);
 	}
 
@@ -330,7 +309,6 @@ public class MilepostController extends BaseController {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		boolean exception = false;
 
 		try {
 
@@ -352,8 +330,8 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			exception = true;
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
 				// close prepared statement
@@ -368,9 +346,6 @@ public class MilepostController extends BaseController {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		}
-		if (exception && mileposts.size() == 0) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		}
 		return ResponseEntity.ok(mileposts);
 	}

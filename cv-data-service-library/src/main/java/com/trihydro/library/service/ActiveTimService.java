@@ -95,7 +95,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public static Boolean updateActiveTim_SatRecordId(Long activeTimId, String satRecordId) {
-		String url = String.format("/%s/update-sat-record-id/%d/%s", CVRestUrl, activeTimId, satRecordId);
+		String url = String.format("%s/update-sat-record-id/%d/%s", CVRestUrl, activeTimId, satRecordId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

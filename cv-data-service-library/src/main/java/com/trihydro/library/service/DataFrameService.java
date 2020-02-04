@@ -105,7 +105,7 @@ public class DataFrameService extends CvDataServiceLibrary {
 	 * @return String array of all ITIS codes associated with dataFrameId
 	 */
 	public static String[] getItisCodesForDataFrameId(Integer dataFrameId) {
-		String url = String.format("/%s/data-frame/itis-for-data-frame/%d", CVRestUrl, dataFrameId);
+		String url = String.format("%s/data-frame/itis-for-data-frame/%d", CVRestUrl, dataFrameId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

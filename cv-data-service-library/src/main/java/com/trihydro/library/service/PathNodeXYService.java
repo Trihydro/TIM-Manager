@@ -21,7 +21,7 @@ public class PathNodeXYService extends CvDataServiceLibrary {
 	}
 
 	public static NodeXY[] GetNodeXYForPath(int pathId) {
-		String url = String.format("/%s/path-node-xy/get-nodexy-path/%d", CVRestUrl, pathId);
+		String url = String.format("%s/path-node-xy/get-nodexy-path/%d", CVRestUrl, pathId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

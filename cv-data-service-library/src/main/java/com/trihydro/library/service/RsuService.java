@@ -66,7 +66,7 @@ public class RsuService extends CvDataServiceLibrary {
 	}
 
 	public static List<WydotRsu> selectRsusByRoute(String route) {
-		String url = String.format("/%s/rsus-by-route/%s", CVRestUrl, route);
+		String url = String.format("%s/rsus-by-route/%s", CVRestUrl, route);
 		ResponseEntity<WydotRsu[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
 				WydotRsu[].class);
 		return Arrays.asList(response.getBody());
@@ -159,7 +159,7 @@ public class RsuService extends CvDataServiceLibrary {
 	}
 
 	public static List<WydotRsuTim> getFullRsusTimIsOn(Long timId) {
-		String url = String.format("/%s/rsus-for-tim/%d", CVRestUrl, timId);
+		String url = String.format("%s/rsus-for-tim/%d", CVRestUrl, timId);
 		ResponseEntity<WydotRsuTim[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
 				WydotRsuTim[].class);
 		return Arrays.asList(response.getBody());

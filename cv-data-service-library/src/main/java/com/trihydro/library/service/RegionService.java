@@ -21,7 +21,7 @@ public class RegionService extends CvDataServiceLibrary {
 	}
 
 	public static Boolean updateRegionName(Long regionId, String name) {
-		String url = String.format("/%s/region/update-region-name/%d/%s", CVRestUrl, regionId, name);
+		String url = String.format("%s/region/update-region-name/%d/%s", CVRestUrl, regionId, name);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

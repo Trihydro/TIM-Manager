@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.cvdatacontroller.helpers.SQLNullHandler;
-import com.trihydro.cvdatacontroller.tables.TimOracleTables;
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -14,8 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.trihydro.cvdatacontroller.helpers.SQLNullHandler;
-import com.trihydro.cvdatacontroller.tables.TimOracleTables;
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;

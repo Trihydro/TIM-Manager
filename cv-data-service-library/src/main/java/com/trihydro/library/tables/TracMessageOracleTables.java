@@ -9,7 +9,7 @@ import java.util.List;
  * through that project.
  */
 @Deprecated
-public class TracMessageOracleTables extends OracleTables {
+public class TracMessageOracleTables extends OracleTablesStatic {
 
     private List<String> tracMessageSentTable;
     private List<String> tracMessageTypeTable;

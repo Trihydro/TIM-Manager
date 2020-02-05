@@ -1,20 +1,22 @@
 package com.trihydro.library.service;
 
-import java.sql.*;
-import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
-import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmOracleTablesStatic;
+
+import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
+import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 
 public class BsmPart2SuveService extends CvDataServiceLibrary {
 
 	public static Long insertBSMPart2SUVE(J2735BsmPart2Content part2Content, J2735SupplementalVehicleExtensions suve,
 			Long bsmCoreDataId) {
 
-		String bsmSuveInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_suve",
-				BsmOracleTables.getBsmPart2SuveTable());
+		String bsmSuveInsertQueryStatement = BsmOracleTablesStatic.buildInsertQueryStatement("bsm_part2_suve",
+				BsmOracleTablesStatic.getBsmPart2SuveTable());
 		PreparedStatement bsmSuvePreparedStatement = null;
 		Connection connection = null;
 

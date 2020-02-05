@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.SQLNullHandlerStatic;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimOracleTablesStatic;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,8 +33,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		PreparedStatement preparedStatement = null;
 
 		try {
-			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("active_tim",
-					TimOracleTables.getActiveTimTable());
+			String insertQueryStatement = TimOracleTablesStatic.buildInsertQueryStatement("active_tim",
+					TimOracleTablesStatic.getActiveTimTable());
 
 			// get connection
 			connection = DbUtility.getConnectionPool();
@@ -42,34 +42,34 @@ public class ActiveTimService extends CvDataServiceLibrary {
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
 			int fieldNum = 1;
 
-			for (String col : TimOracleTables.getActiveTimTable()) {
+			for (String col : TimOracleTablesStatic.getActiveTimTable()) {
 				if (col.equals("TIM_ID"))
-					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
+					SQLNullHandlerStatic.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
 				else if (col.equals("MILEPOST_START"))
-					SQLNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStart());
+					SQLNullHandlerStatic.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStart());
 				else if (col.equals("MILEPOST_STOP"))
-					SQLNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStop());
+					SQLNullHandlerStatic.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStop());
 				else if (col.equals("DIRECTION"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
+					SQLNullHandlerStatic.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
 				else if (col.equals("TIM_START"))
-					SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
+					SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
 							LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 				else if (col.equals("TIM_END"))
 					if (activeTim.getEndDateTime() != null)
-						SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
+						SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
 								LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 					else
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 				else if (col.equals("TIM_TYPE_ID"))
-					SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimTypeId());
+					SQLNullHandlerStatic.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimTypeId());
 				else if (col.equals("ROUTE"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getRoute());
+					SQLNullHandlerStatic.setStringOrNull(preparedStatement, fieldNum, activeTim.getRoute());
 				else if (col.equals("CLIENT_ID"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getClientId());
+					SQLNullHandlerStatic.setStringOrNull(preparedStatement, fieldNum, activeTim.getClientId());
 				else if (col.equals("SAT_RECORD_ID"))
-					SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getSatRecordId());
+					SQLNullHandlerStatic.setStringOrNull(preparedStatement, fieldNum, activeTim.getSatRecordId());
 				else if (col.equals("PK"))
-					SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
+					SQLNullHandlerStatic.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
 
 				fieldNum++;
 			}
@@ -116,20 +116,20 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		try {
 			connection = DbUtility.getConnectionPool();
 			preparedStatement = connection.prepareStatement(updateTableSQL);
-			SQLNullHandler.setLongOrNull(preparedStatement, 1, activeTim.getTimId());
-			SQLNullHandler.setDoubleOrNull(preparedStatement, 2, activeTim.getMilepostStart());
-			SQLNullHandler.setDoubleOrNull(preparedStatement, 3, activeTim.getMilepostStop());
-			SQLNullHandler.setTimestampOrNull(preparedStatement, 4, java.sql.Timestamp
+			SQLNullHandlerStatic.setLongOrNull(preparedStatement, 1, activeTim.getTimId());
+			SQLNullHandlerStatic.setDoubleOrNull(preparedStatement, 2, activeTim.getMilepostStart());
+			SQLNullHandlerStatic.setDoubleOrNull(preparedStatement, 3, activeTim.getMilepostStop());
+			SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, 4, java.sql.Timestamp
 					.valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 
 			if (activeTim.getEndDateTime() == null)
 				preparedStatement.setString(5, null);
 			else
-				SQLNullHandler.setTimestampOrNull(preparedStatement, 5, java.sql.Timestamp
+				SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, 5, java.sql.Timestamp
 						.valueOf(LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 
-			SQLNullHandler.setIntegerOrNull(preparedStatement, 6, activeTim.getPk());
-			SQLNullHandler.setLongOrNull(preparedStatement, 7, activeTim.getActiveTimId());
+			SQLNullHandlerStatic.setIntegerOrNull(preparedStatement, 6, activeTim.getPk());
+			SQLNullHandlerStatic.setLongOrNull(preparedStatement, 7, activeTim.getActiveTimId());
 			activeTimIdResult = updateOrDelete(preparedStatement);
 			System.out.println("------ Updated active_tim with id: " + activeTim.getActiveTimId() + " --------------");
 		} catch (SQLException e) {

@@ -1,13 +1,5 @@
 package com.trihydro.cvlogger.app.loggers;
 
-import us.dot.its.jpo.ode.model.OdeBsmMetadata;
-import us.dot.its.jpo.ode.model.OdeBsmPayload;
-import us.dot.its.jpo.ode.model.OdeData;
-import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
-import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
-import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
-import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
-
 import java.util.List;
 
 import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
@@ -15,6 +7,14 @@ import com.trihydro.library.service.BsmCoreDataService;
 import com.trihydro.library.service.BsmPart2SpveService;
 import com.trihydro.library.service.BsmPart2SuveService;
 import com.trihydro.library.service.BsmPart2VseService;
+
+import us.dot.its.jpo.ode.model.OdeBsmMetadata;
+import us.dot.its.jpo.ode.model.OdeBsmPayload;
+import us.dot.its.jpo.ode.model.OdeData;
+import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
+import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
+import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
+import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 
 public class BsmLogger {
     
@@ -27,6 +27,12 @@ public class BsmLogger {
 		return odeData;
 	}
 
+    @Deprecated
+    /**
+     * @deprecated Moved to logger-kafka-consumer
+     * @param odeData
+     * @param value
+     */
     public static void addBSMToOracleDB(OdeData odeData, String value) {        
         System.out.println("Logging: " + ((OdeBsmMetadata)odeData.getMetadata()).getLogFileName());
 

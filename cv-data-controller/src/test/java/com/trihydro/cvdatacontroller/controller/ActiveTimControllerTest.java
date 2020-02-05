@@ -13,9 +13,9 @@ import static org.mockito.Mockito.when;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.tables.TimOracleTables;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
+import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -8,15 +8,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-/**
- * @deprecated The OracleTables functionality has been moved to the cv-data-controller
- * project to better separate concerns. All database interactions will go
- * through that project.
- */
-@Deprecated
 public class OracleTables {
 
-    public static String buildInsertQueryStatement(String tableName, List<String> table) {
+    public String buildInsertQueryStatement(String tableName, List<String> table) {
 
         String insertQueryStatement = "INSERT INTO " + tableName + " (";
         String values = "VALUES (";
@@ -35,7 +29,7 @@ public class OracleTables {
         return insertQueryStatement;
     }
 
-    public static PreparedStatement buildUpdateStatement(Long id, String tableName, String keyColumnName,
+    public PreparedStatement buildUpdateStatement(Long id, String tableName, String keyColumnName,
             List<Pair<String, Object>> table, Connection connection) {
 
         String updateStatement = "UPDATE " + tableName + " SET";

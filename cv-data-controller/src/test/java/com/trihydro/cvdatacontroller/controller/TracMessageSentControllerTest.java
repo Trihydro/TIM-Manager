@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.helpers.SQLNullHandler;
 import com.trihydro.cvdatacontroller.tables.TracMessageOracleTables;
+import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TracMessageSent;
 
 import org.junit.Before;

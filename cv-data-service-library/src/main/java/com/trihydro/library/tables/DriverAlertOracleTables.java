@@ -1,8 +1,9 @@
 package com.trihydro.library.tables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class DriverAlertOracleTables extends OracleTables {
+public class DriverAlertOracleTables extends OracleTablesStatic {
     
     private static List<String> driverAlertTable;
 

@@ -1,12 +1,14 @@
 package com.trihydro.library.service;
 
-import java.sql.*;
-import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
-import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmOracleTablesStatic;
+
+import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
+import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
 
 public class BsmPart2SpveService extends CvDataServiceLibrary {
 
@@ -19,8 +21,8 @@ public class BsmPart2SpveService extends CvDataServiceLibrary {
 		try {
 
 			connection = DbUtility.getConnectionPool();
-			String insertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_spve",
-					BsmOracleTables.getBsmPart2SpveTable());
+			String insertQueryStatement = BsmOracleTablesStatic.buildInsertQueryStatement("bsm_part2_spve",
+					BsmOracleTablesStatic.getBsmPart2SpveTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "bsm_part2_spve_id" });
 
 			int fieldNum = 1;

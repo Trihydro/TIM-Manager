@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.helpers.SQLNullHandler;
-import com.trihydro.cvdatacontroller.tables.TimOracleTables;
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;

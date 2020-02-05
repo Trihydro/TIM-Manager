@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.SQLNullHandlerStatic;
 import com.trihydro.library.tables.LoggingTables;
 
 public class LoggingService extends CvDataServiceLibrary {
@@ -24,11 +24,11 @@ public class LoggingService extends CvDataServiceLibrary {
 
             for (String col : LoggingTables.getHttpLoggingTable()) {
                 if (col.equals("REQUEST_TIME")) {
-                    SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, requestTime);
+                    SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, fieldNum, requestTime);
                 } else if (col.equals("REST_REQUEST")) {
-                    SQLNullHandler.setStringOrNull(preparedStatement, fieldNum, request);
+                    SQLNullHandlerStatic.setStringOrNull(preparedStatement, fieldNum, request);
                 } else if (col.equals("RESPONSE_TIME")) {
-                    SQLNullHandler.setTimestampOrNull(preparedStatement, fieldNum, responseTime);
+                    SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, fieldNum, responseTime);
                 }
 
                 fieldNum++;

@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.SQLNullHandlerStatic;
 import com.trihydro.library.model.DriverAlertItisCode;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimOracleTablesStatic;
 
 public class DriverAlertItisCodeService extends CvDataServiceLibrary {
 
@@ -62,19 +62,19 @@ public class DriverAlertItisCodeService extends CvDataServiceLibrary {
 
 		try {
 
-			String insertQueryStatement = TimOracleTables.buildInsertQueryStatement("driver_alert_itis_code",
-					TimOracleTables.getDriverAlertItisCodeTable());
+			String insertQueryStatement = TimOracleTablesStatic.buildInsertQueryStatement("driver_alert_itis_code",
+					TimOracleTablesStatic.getDriverAlertItisCodeTable());
 			connection = DbUtility.getConnectionPool();
 			if (connection != null) {
 				preparedStatement = connection.prepareStatement(insertQueryStatement,
 						new String[] { "driver_alert_itis_code_id" });
 				int fieldNum = 1;
 
-				for (String col : TimOracleTables.getDriverAlertItisCodeTable()) {
+				for (String col : TimOracleTablesStatic.getDriverAlertItisCodeTable()) {
 					if (col.equals("ITIS_CODE_ID"))
-						SQLNullHandler.setIntegerOrNull(preparedStatement, fieldNum, itisCodeId);
+						SQLNullHandlerStatic.setIntegerOrNull(preparedStatement, fieldNum, itisCodeId);
 					else if (col.equals("DRIVER_ALERT_ID"))
-						SQLNullHandler.setLongOrNull(preparedStatement, fieldNum, driverAlertId);
+						SQLNullHandlerStatic.setLongOrNull(preparedStatement, fieldNum, driverAlertId);
 					fieldNum++;
 				}
 

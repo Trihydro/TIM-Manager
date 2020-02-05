@@ -1,8 +1,9 @@
 package com.trihydro.library.tables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class LoggingTables extends OracleTables {
+public class LoggingTables extends OracleTablesStatic {
     private static List<String> httpLoggingTable;
 
     public static List<String> getHttpLoggingTable() {

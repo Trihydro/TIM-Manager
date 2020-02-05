@@ -1,20 +1,22 @@
 package com.trihydro.library.service;
 
-import java.sql.*;
-import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
-import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmOracleTablesStatic;
+
+import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
+import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 
 public class BsmPart2VseService extends CvDataServiceLibrary {
 
 	public static Long insertBSMPart2VSE(J2735BsmPart2Content part2Content, J2735VehicleSafetyExtensions vse,
 			Long bsmCoreDataId) {
 
-		String bsmVseInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_part2_vse",
-				BsmOracleTables.getBsmPart2VseTable());
+		String bsmVseInsertQueryStatement = BsmOracleTablesStatic.buildInsertQueryStatement("bsm_part2_vse",
+				BsmOracleTablesStatic.getBsmPart2VseTable());
 		PreparedStatement bsmVsePreparedStatement = null;
 		Connection connection = null;
 
@@ -25,7 +27,7 @@ public class BsmPart2VseService extends CvDataServiceLibrary {
 
 			int fieldNum = 1;
 
-			for (String col : BsmOracleTables.getBsmPart2VseTable()) {
+			for (String col : BsmOracleTablesStatic.getBsmPart2VseTable()) {
 				if (col.equals("BSM_CORE_DATA_ID")) {
 					bsmVsePreparedStatement.setLong(fieldNum, bsmCoreDataId);
 				} else if (col.equals("ID")) {

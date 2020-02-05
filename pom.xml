@@ -22,6 +22,7 @@
         <module>ode-wrapper</module>
         <module>cv-data-tasks</module>
         <module>tim-refresh</module>
+        <module>logger-kafka-consumer</module>
   </modules>
 
     <dependencies>

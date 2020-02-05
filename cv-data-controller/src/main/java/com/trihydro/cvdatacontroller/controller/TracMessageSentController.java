@@ -8,8 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.helpers.SQLNullHandler;
 import com.trihydro.cvdatacontroller.tables.TracMessageOracleTables;
+import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TracMessageSent;
 
 import org.springframework.beans.factory.annotation.Autowired;

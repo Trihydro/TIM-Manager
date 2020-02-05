@@ -43,7 +43,7 @@ public class OracleTablesTest {
         List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
         cols.add(new ImmutablePair<String, Object>("NAME", "name_change"));
         Long id = new Long(-1);
-        PreparedStatement ps = OracleTables.buildUpdateStatement(id, tableName, tableId, cols, connection);
+        PreparedStatement ps = OracleTablesStatic.buildUpdateStatement(id, tableName, tableId, cols, connection);
 
         try {
             String testSql = "UPDATE unitTestTable SET NAME = ? WHERE unitTestTable_id = ?";
@@ -63,7 +63,7 @@ public class OracleTablesTest {
         cols.add(new ImmutablePair<String, Object>("NAME", "name_change"));
         cols.add(new ImmutablePair<String, Object>("COL2_NUMERIC", 27));
         Long id = new Long(-1);
-        PreparedStatement ps = OracleTables.buildUpdateStatement(id, tableName, tableId, cols, connection);
+        PreparedStatement ps = OracleTablesStatic.buildUpdateStatement(id, tableName, tableId, cols, connection);
 
         try {
             String testSql = "UPDATE unitTestTable SET NAME = ?, COL2_NUMERIC = ? WHERE unitTestTable_id = ?";

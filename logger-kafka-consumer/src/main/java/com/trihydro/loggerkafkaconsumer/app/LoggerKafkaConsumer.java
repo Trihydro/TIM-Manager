@@ -6,8 +6,10 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.loggerkafkaconsumer.app.services.BsmService;
+import com.trihydro.loggerkafkaconsumer.app.services.DriverAlertService;
 import com.trihydro.loggerkafkaconsumer.app.services.TimService;
 import com.trihydro.loggerkafkaconsumer.config.LoggerConfiguration;
 
@@ -24,14 +26,15 @@ public class LoggerKafkaConsumer {
     private LoggerConfiguration loggerConfig;
     private BsmService bsmService;
     private TimService timService;
+    private DriverAlertService driverAlertService;
 
     @Autowired
-    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService)
-            throws IOException {
+    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService,
+            DriverAlertService _driverAlertService) throws IOException {
         this.loggerConfig = _loggerConfig;
         this.bsmService = _bsmService;
         this.timService = _timService;
-        // CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
+        this.driverAlertService = _driverAlertService;
 
         System.out.println("starting..............");
 
@@ -63,7 +66,6 @@ public class LoggerKafkaConsumer {
                 System.out.println("Subscribed to topic " + topic);
 
                 try {
-
                     while (true) {
                         ConsumerRecords<String, String> records = stringConsumer.poll(100);
                         for (ConsumerRecord<String, String> record : records) {
@@ -91,18 +93,16 @@ public class LoggerKafkaConsumer {
                                     break;
 
                                 case "topic.OdeDriverAlertJson":
+                                    driverAlertService.addDriverAlertToOracleDB(tdw.getData());
                                     break;
                                 }
                             } else {
+                                Utility.logWithDate("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
                                 // TODO: alert that something went wrong
                             }
                         }
                     }
                 }
-                // catch (SQLException sqlException) {
-                // Utility.logWithDate("SQLException in data logger");
-                // sqlException.printStackTrace();
-                // }
                 finally {
                     stringConsumer.close();
                 }

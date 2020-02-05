@@ -1,17 +1,17 @@
 package com.trihydro.library.service;
 
-import us.dot.its.jpo.ode.model.OdeLogMetadata;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import com.trihydro.library.service.CvDataServiceLibrary;
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandlerStatic;
 import java.sql.SQLException;
 import java.util.List;
+
+import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.helpers.SQLNullHandlerStatic;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
-import com.trihydro.library.tables.DriverAlertOracleTables;
+import com.trihydro.library.tables.DriverAlertOracleTablesStatic;
+
+import us.dot.its.jpo.ode.model.OdeLogMetadata;
 
 public class DriverAlertService extends CvDataServiceLibrary {
 
@@ -28,12 +28,12 @@ public class DriverAlertService extends CvDataServiceLibrary {
 		try {
 
 			connection = DbUtility.getConnectionPool();
-			String insertQueryStatement = DriverAlertOracleTables.buildInsertQueryStatement("driver_alert",
-					DriverAlertOracleTables.getDriverAlertTable());
+			String insertQueryStatement = DriverAlertOracleTablesStatic.buildInsertQueryStatement("driver_alert",
+					DriverAlertOracleTablesStatic.getDriverAlertTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "driver_alert_id" });
 			int fieldNum = 1;
 
-			for (String col : DriverAlertOracleTables.getDriverAlertTable()) {
+			for (String col : DriverAlertOracleTablesStatic.getDriverAlertTable()) {
 				if (col.equals("RECORD_GENERATED_BY"))
 					SQLNullHandlerStatic.setStringOrNull(preparedStatement, fieldNum,
 							odeDriverAlertMetadata.getRecordGeneratedBy().toString());

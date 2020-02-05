@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.model.OdeData;
+import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata;
@@ -69,6 +70,87 @@ public class TimService extends BaseService {
         timTypeService = _tts;
         itisCodeService = _itisCodesService;
         timRsuService = _timRsuService;
+    }
+
+    public void addTimToOracleDB(OdeData odeData) {
+
+        try {
+
+            System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
+
+            Long timId = AddTim(odeData.getMetadata(),
+                    ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
+                    ((OdeTimPayload) odeData.getPayload()).getTim(),
+                    ((OdeLogMetadata) odeData.getMetadata()).getRecordType(),
+                    ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(),
+                    ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null, null);
+
+            // return if TIM is not inserted
+            if (timId == null)
+                return;
+            Long dataFrameId = null;
+            Path path = null;
+            Geometry geometry = null;
+            OdeTravelerInformationMessage.DataFrame.Region region = null;
+            DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
+            if (dFrames.length > 0) {
+                us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0]
+                        .getRegions();
+                if (regions.length > 0) {
+                    region = regions[0];
+                    path = regions[0].getPath();
+                    geometry = regions[0].getGeometry();
+                }
+                dataFrameId = dataFrameService.AddDataFrame(dFrames[0], timId);
+            }
+
+            if (path != null) {
+                Long pathId = pathService.InsertPath();
+                regionService.AddRegion(dataFrameId, pathId, region);
+
+                Long nodeXYId;
+                for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
+                    nodeXYId = NodeXYService.insertNodeXY(nodeXY);
+                    PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                }
+            } else if (geometry != null) {
+                regionService.AddRegion(dataFrameId, null, region);
+            } else {
+                Utility.logWithDate(
+                        "addTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+                                + dataFrameId + ")");
+            }
+
+            if (dFrames.length > 0) {
+                OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0].getRegions();
+                if (regions.length > 0) {
+                    String regionName = regions[0].getName();
+                    ActiveTim activeTim = setActiveTimByRegionName(regionName);
+
+                    // if this is an RSU TIM
+                    if (activeTim != null && activeTim.getRsuTarget() != null) {
+                        // save TIM RSU in DB
+                        WydotRsu rsu = rsuService.getRsus().stream()
+                                .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
+                                .orElse(null);
+                        if (rsu != null)
+                            timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
+                    }
+                }
+
+                // save DataFrame ITIS codes
+                for (String timItisCodeId : dFrames[0].getItems()) {
+                    if (StringUtils.isNumeric(timItisCodeId)) {
+                        String itisCodeId = getItisCodeId(timItisCodeId);
+                        if (itisCodeId != null)
+                            DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+                    } else
+                        DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+                }
+            }
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     // only does one TIM at a time ***

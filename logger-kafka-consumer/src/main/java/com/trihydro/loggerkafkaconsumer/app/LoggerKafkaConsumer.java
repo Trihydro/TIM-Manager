@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.loggerkafkaconsumer.app.services.BsmService;
+import com.trihydro.loggerkafkaconsumer.app.services.TimService;
 import com.trihydro.loggerkafkaconsumer.config.LoggerConfiguration;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -22,11 +23,14 @@ public class LoggerKafkaConsumer {
     private ObjectMapper mapper;
     private LoggerConfiguration loggerConfig;
     private BsmService bsmService;
+    private TimService timService;
 
     @Autowired
-    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService) throws IOException {
+    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService)
+            throws IOException {
         this.loggerConfig = _loggerConfig;
         this.bsmService = _bsmService;
+        this.timService = _timService;
         // CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
 
         System.out.println("starting..............");
@@ -74,14 +78,12 @@ public class LoggerKafkaConsumer {
                             if (tdw != null && tdw.getData() != null) {
                                 switch (tdw.getTopic()) {
                                 case "topic.OdeTimJson":
-                                        // TODO: inject timLogger and insert
-                                        // if (tdw.getData().getMetadata()
-                                        // .getRecordGeneratedBy() ==
-                                        // us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC)
-                                        // timLogger.addActiveTimToOracleDB(tdw.getData());
-                                        // else {
-                                        // timLogger.addTimToOracleDB(tdw.getData());
-                                        // }
+                                    if (tdw.getData().getMetadata()
+                                            .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
+                                        timService.addActiveTimToOracleDB(tdw.getData());
+                                    } else {
+                                        timService.addTimToOracleDB(tdw.getData());
+                                    }
                                     break;
 
                                 case "topic.OdeBsmJson":

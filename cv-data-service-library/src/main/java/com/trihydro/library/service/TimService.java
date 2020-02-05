@@ -44,7 +44,7 @@ public class TimService extends CvDataServiceLibrary {
 	public static Long insertTim(OdeMsgMetadata odeTimMetadata, ReceivedMessageDetails receivedMessageDetails,
 			OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName,
 			SecurityResultCode securityResultCode, String satRecordId, String regionName) {
-		String url = String.format("/%s/add-tim", CVRestUrl);
+		String url = String.format("%s/add-tim", CVRestUrl);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 

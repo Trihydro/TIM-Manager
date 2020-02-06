@@ -1,5 +1,8 @@
 package com.trihydro.cvlogger.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties
 public class DataLoggerConfiguration {
     private String hostname;
     private String tracUrl;

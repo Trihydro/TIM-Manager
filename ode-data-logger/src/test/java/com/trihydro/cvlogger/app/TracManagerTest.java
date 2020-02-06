@@ -19,6 +19,7 @@ import java.util.List;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
+import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.model.TracMessageType;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -33,6 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -60,6 +62,9 @@ public class TracManagerTest {
 
         @Mock
         private JavaMailSenderImpl jmsi;
+
+        @Spy
+        JsonToJavaConverter jsonToJava = new JsonToJavaConverter();
 
         @InjectMocks
         TracManager uut;

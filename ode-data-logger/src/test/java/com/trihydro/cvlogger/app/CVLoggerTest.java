@@ -13,7 +13,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.trihydro.cvlogger.app.loggers.BsmLogger;
 import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
 import com.trihydro.cvlogger.app.loggers.TimLogger;
+import com.trihydro.library.helpers.JsonToJavaConverter;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
@@ -42,6 +44,21 @@ import us.dot.its.jpo.ode.util.JsonUtils;
 // @Ignore
 public class CVLoggerTest {
 
+    private TimLogger timLogger;
+    private BsmLogger bsmLogger;
+    private DriverAlertLogger driverAlertLogger;
+    private JsonToJavaConverter _jsonToJava;
+
+    @Before
+    public void Setup(){
+        _jsonToJava = new JsonToJavaConverter();
+        timLogger = new TimLogger();
+        timLogger.InjectDependencies(_jsonToJava);
+        bsmLogger = new BsmLogger();
+        bsmLogger.InjectDependencies(_jsonToJava);
+        driverAlertLogger = new DriverAlertLogger();
+        driverAlertLogger.InjectDependencies(_jsonToJava);
+    }
     @Test
     public void testFileRead() throws IOException {
         Path currentRelativePath = Paths.get("");
@@ -136,7 +153,7 @@ public class CVLoggerTest {
         odeTimPayload.setTim(tim);
 
         // call test code
-        OdeData odeDataTest = TimLogger.processTimJson(value);
+        OdeData odeDataTest = timLogger.processTimJson(value);
         OdeLogMetadata odeTimMetadataTest = ((OdeLogMetadata) odeDataTest.getMetadata());
         OdeTimPayload odeTimPayloadTest = (OdeTimPayload) odeDataTest.getPayload();
 
@@ -167,7 +184,7 @@ public class CVLoggerTest {
     @Test
     public void TestProcessTimJsonFromFile_VerifyFrameType() throws IOException{
         String value = new String(Files.readAllBytes(Paths.get("src/test/resources/tmc_TIM.json")));
-        OdeData odeDataTest = TimLogger.processTimJson(value);
+        OdeData odeDataTest = timLogger.processTimJson(value);
         OdeTimPayload payload = (OdeTimPayload) odeDataTest.getPayload();
         DataFrame df = payload.getTim().getDataframes()[0];
         assertEquals(TravelerInfoType.advisory, df.getFrameType());
@@ -200,7 +217,7 @@ public class CVLoggerTest {
         String value = new String(Files.readAllBytes(Paths.get("src/test/resources/bsmLogDuringEvent_OdeOutput.json")));
 
         // call test code
-        OdeData odeDataTest = BsmLogger.processBsmJson(value);
+        OdeData odeDataTest = bsmLogger.processBsmJson(value);
 
         OdeBsmMetadata odeBsmMetadataTest = (OdeBsmMetadata) odeDataTest.getMetadata();
         OdeBsmPayload odeBsmPayloadTest = (OdeBsmPayload) odeDataTest.getPayload();
@@ -274,7 +291,7 @@ public class CVLoggerTest {
         String value = new String(Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput.json")));
 
         // call test code
-        OdeData odeDataTest = DriverAlertLogger.processDriverAlertJson(value);
+        OdeData odeDataTest = driverAlertLogger.processDriverAlertJson(value);
 
         OdeLogMetadata odeDriverAlertMetadataTest = (OdeLogMetadata) odeDataTest.getMetadata();
         OdeDriverAlertPayload odeDriverAlertPayloadTest = (OdeDriverAlertPayload) odeDataTest.getPayload();

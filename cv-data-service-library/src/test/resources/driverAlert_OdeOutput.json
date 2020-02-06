@@ -1,0 +1,32 @@
+{
+    "metadata": {
+      "receivedMessageDetails": {
+        "locationData": {
+          "latitude": "40.4739771",
+          "longitude": "-104.9691666",
+          "elevation": "1486.0",
+          "speed": "1.04",
+          "heading": "331.9000"
+        }
+      },
+      "logFileName": "driverAlert_OdeOutput.csv",
+      "recordType": "driverAlert",
+      "payloadType": "us.dot.its.jpo.ode.model.OdeDriverAlertPayload",
+      "serialId": {
+        "streamId": "408f1086-d028-4919-afc7-50ec097ddba9",
+        "bundleSize": 1,
+        "bundleId": 12,
+        "recordId": 2,
+        "serialNumber": 0
+      },
+      "odeReceivedAt": "2017-11-30T21:37:24.266Z[UTC]",
+      "schemaVersion": 3,
+      "recordGeneratedAt": "2017-10-04T21:03:56.614Z[UTC]",
+      "recordGeneratedBy": "OBU",
+      "securityResultCode": "unknown",
+      "sanitized": false
+    },
+    "payload": {
+      "alert": "ICW"
+    }
+  }

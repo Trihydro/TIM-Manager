@@ -4,15 +4,16 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
+import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.model.TracMessageType;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TracMessageSentService;
 import com.trihydro.library.service.TracMessageTypeService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -29,6 +30,13 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 
 @Component
 public class TracManager {
+
+	private JsonToJavaConverter jsonToJava;
+
+	@Autowired
+	public void InjectDependencies(JsonToJavaConverter _jsonToJava){
+		jsonToJava = _jsonToJava;
+	}
 
 	public boolean isDnMsgInTrac(String packetId) {
 		List<String> packetIds = TracMessageSentService.selectPacketIds();
@@ -67,7 +75,7 @@ public class TracManager {
 	}
 
 	public void submitDNMsgToTrac(String value, DataLoggerConfiguration config) {
-		OdeTimPayload payload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
+		OdeTimPayload payload = jsonToJava.convertTimPayloadJsonToJava(value);
 
 		// check if packetId is in trac message sent table
 		if (isDnMsgInTrac(payload.getTim().getPacketID())) {
@@ -76,7 +84,7 @@ public class TracManager {
 			return;
 		}
 
-		OdeLogMetadata metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
+		OdeLogMetadata metadata = jsonToJava.convertTimMetadataJsonToJava(value);
 
 		// add to db and sent to trac
 		// lat and long come from the dataframes.regions.anchorPosition

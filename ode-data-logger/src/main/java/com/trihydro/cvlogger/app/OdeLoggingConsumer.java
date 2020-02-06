@@ -2,7 +2,6 @@ package com.trihydro.cvlogger.app;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Properties;
@@ -14,7 +13,6 @@ import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
 import com.trihydro.cvlogger.app.loggers.TimLogger;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.CvDataServiceLibrary;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -32,13 +30,17 @@ public class OdeLoggingConsumer {
 	static Statement statement = null;
 	static ObjectMapper mapper;
 	private DataLoggerConfiguration configProperties;
+	private TimLogger timLogger;
+	private BsmLogger bsmLogger;
+	private DriverAlertLogger driverAlertLogger;
 
 	@Autowired
-	public OdeLoggingConsumer(DataLoggerConfiguration configProperties) throws IOException {
+	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TimLogger _timLogger, BsmLogger _bsmLogger, DriverAlertLogger _driverAlertLogger) throws IOException {
 		this.configProperties = configProperties;
+		timLogger = _timLogger;
+		bsmLogger = _bsmLogger;
+		driverAlertLogger = _driverAlertLogger;
 		CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
-		// CvDataServiceLibrary.setConfig(configProperties);
-
 		System.out.println("starting..............");
 
 		mapper = new ObjectMapper();
@@ -77,29 +79,30 @@ public class OdeLoggingConsumer {
 							if (topic.equals("topic.OdeDNMsgJson")) {
 								tm.submitDNMsgToTrac(record.value(), configProperties);
 							} else if (topic.equals("topic.OdeTimJson")) {
-								OdeData odeData = TimLogger.processTimJson(record.value());
-								if (odeData != null) {
-									if (odeData.getMetadata()
-											.getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC)
-										TimLogger.addActiveTimToOracleDB(odeData);
-									else {
-										TimLogger.addTimToOracleDB(odeData);
-									}
-								}
+								OdeData odeData = timLogger.processTimJson(record.value());
+								// TODO: push to kafka
+								// if (odeData != null) {
+								// if (odeData.getMetadata()
+								// .getRecordGeneratedBy() ==
+								// us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC)
+								// TimLogger.addActiveTimToOracleDB(odeData);
+								// else {
+								// TimLogger.addTimToOracleDB(odeData);
+								// }
+								// }
 							} else if (topic.equals("topic.OdeBsmJson")) {
-								OdeData odeData = BsmLogger.processBsmJson(record.value());
-								if (odeData != null)
-									BsmLogger.addBSMToOracleDB(odeData, record.value());
+								OdeData odeData = bsmLogger.processBsmJson(record.value());
+								// TODO: push to kafka with original string
+								// if (odeData != null)
+								// BsmLogger.addBSMToOracleDB(odeData, record.value());
 							} else if (topic.equals("topic.OdeDriverAlertJson")) {
-								OdeData odeData = DriverAlertLogger.processDriverAlertJson(record.value());
-								if (odeData != null)
-									DriverAlertLogger.addDriverAlertToOracleDB(odeData);
+								OdeData odeData = driverAlertLogger.processDriverAlertJson(record.value());
+								// todo: push to kafka
+								// if (odeData != null)
+								// DriverAlertLogger.addDriverAlertToOracleDB(odeData);
 							}
 						}
 					}
-				} catch (SQLException sqlException) {
-					Utility.logWithDate("SQLException in data logger");
-					sqlException.printStackTrace();
 				} finally {
 					stringConsumer.close();
 				}

@@ -17,7 +17,7 @@ public class DriverAlertItisCodeService extends BaseService {
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void injectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
+    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
     }

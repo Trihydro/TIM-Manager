@@ -17,6 +17,7 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
 public class BsmPart2SpveService extends BaseService {
 
     private BsmOracleTables bsmOracleTables;
+    //TODO: refactor code to use sqlNullHandler
     private SQLNullHandler sqlNullHandler;
 
     @Autowired

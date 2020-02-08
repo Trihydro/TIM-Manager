@@ -27,7 +27,7 @@ public class DriverAlertService extends BaseService {
     private DriverAlertItisCodeService driverAlertItisCodeService;
 
     @Autowired
-    public void injectDependencies(DriverAlertOracleTables _driverAlertOracleTables, SQLNullHandler _sqlNullHandler,
+    public void InjectDependencies(DriverAlertOracleTables _driverAlertOracleTables, SQLNullHandler _sqlNullHandler,
             ItisCodeService _itisCodeService, DriverAlertTypeService _driverAlertTypeService,
             DriverAlertItisCodeService _driverAlertItisCodeService) {
         driverAlertOracleTables = _driverAlertOracleTables;
@@ -144,6 +144,7 @@ public class DriverAlertService extends BaseService {
                             if (dat.getShortName().equals(alert)) {
                                 sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
                                         dat.getDriverAlertTypeId());
+                                break;
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-package com.trihydro.loggerkafkaconsumer;
+package com.trihydro.loggerkafkaconsumer.app.services;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,8 +18,6 @@ import java.time.format.DateTimeFormatter;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.tables.TimOracleTables;
-import com.trihydro.loggerkafkaconsumer.app.services.ActiveTimService;
-import com.trihydro.loggerkafkaconsumer.app.services.TestBase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,11 +26,6 @@ import org.mockito.Spy;
 
 public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
-    // public Long insertActiveTim(ActiveTim activeTim) {
-    // public boolean updateActiveTim(ActiveTim activeTim) {
-    // public ActiveTim getActiveSatTim(String satRecordId, String direction) {
-    // public ActiveTim getActiveRsuTim(String clientId, String direction, String
-    // ipv4Address) {
     @Spy
     private TimOracleTables mockTimOracleTables = new TimOracleTables();
     @Mock
@@ -41,11 +34,6 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
     @Before
     public void setupSubTest() {
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
-        // doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(isA(String.class),
-        // table)
-        // doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(),
-        // any(), any(), any(),
-        // any());
     }
 
     @Test

@@ -5,12 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
-import com.trihydro.library.service.BsmPart2SpveService;
-import com.trihydro.library.service.BsmPart2SuveService;
-import com.trihydro.library.service.BsmPart2VseService;
 import com.trihydro.library.tables.BsmOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,45 +30,62 @@ public class BsmService extends BaseService {
     private JsonToJavaConverter jsonToJava;
     private BsmOracleTables bsmOracleTables;
     private SQLNullHandler sqlNullHandler;
+    private BsmPart2SpveService bsmPart2SpveService;
+    private BsmPart2VseService bsmPart2VseService;
+    private BsmPart2SuveService bsmPart2SuveService;
 
     @Autowired
-    public void injectDependencies(JsonToJavaConverter _jsonToJava, BsmOracleTables _bsmOracleTables,
-            SQLNullHandler _sqlNullHandler) {
+    public void InjectDependencies(JsonToJavaConverter _jsonToJava, BsmOracleTables _bsmOracleTables,
+            SQLNullHandler _sqlNullHandler, BsmPart2SpveService _bsmPart2SpveService,
+            BsmPart2VseService _bsmPart2VseService, BsmPart2SuveService _bsmPart2SuveService) {
         jsonToJava = _jsonToJava;
         bsmOracleTables = _bsmOracleTables;
         sqlNullHandler = _sqlNullHandler;
+        bsmPart2SpveService = _bsmPart2SpveService;
+        bsmPart2VseService = _bsmPart2VseService;
+        bsmPart2SuveService = _bsmPart2SuveService;
     }
 
     public void addBSMToOracleDB(OdeData odeData, String value) {
-        System.out.println("Logging: " + ((OdeBsmMetadata) odeData.getMetadata()).getLogFileName());
+        OdeBsmMetadata metadata = (OdeBsmMetadata) odeData.getMetadata();
+        OdeBsmPayload payload = (OdeBsmPayload) odeData.getPayload();
+        Gson gson = new Gson();
+        if (metadata != null && payload != null) {
+            System.out.println("Logging: " + metadata.getLogFileName());
 
-        Long bsmCoreDataId = addBSMCoreData((OdeBsmMetadata) odeData.getMetadata(),
-                ((OdeBsmPayload) odeData.getPayload()).getBsm());
-
-        List<J2735BsmPart2Content> partII = ((OdeBsmPayload) odeData.getPayload()).getBsm().getPartII();
-        if (bsmCoreDataId != null && !bsmCoreDataId.equals(new Long(0)) && partII != null) {
-            for (int i = 0; i < partII.size(); i++) {
-                if (partII.get(i).getId().name() == "VehicleSafetyExtensions") {
-                    J2735VehicleSafetyExtensions vse = jsonToJava.convertJ2735VehicleSafetyExtensionsJsonToJava(value,
-                            i);
-                    if (vse != null)
-                        BsmPart2VseService.insertBSMPart2VSE(partII.get(i), vse, bsmCoreDataId);
-                } else if (partII.get(i).getId().name() == "SpecialVehicleExtensions") {
-                    J2735SpecialVehicleExtensions spve = jsonToJava
-                            .convertJ2735SpecialVehicleExtensionsJsonToJava(value, i);
-                    if (spve != null)
-                        BsmPart2SpveService.insertBSMPart2SPVE(partII.get(i), spve, bsmCoreDataId);
-                } else if (partII.get(i).getId().name() == "SupplementalVehicleExtensions") {
-                    J2735SupplementalVehicleExtensions suve = jsonToJava
-                            .convertJ2735SupplementalVehicleExtensionsJsonToJava(value, i);
-                    if (suve != null)
-                        BsmPart2SuveService.insertBSMPart2SUVE(partII.get(i), suve, bsmCoreDataId);
+            J2735Bsm bsm = payload.getBsm();
+            if (bsm != null) {
+                Long bsmCoreDataId = addBSMCoreData(metadata, bsm);
+                List<J2735BsmPart2Content> partII = payload.getBsm().getPartII();
+                if (bsmCoreDataId != null && !bsmCoreDataId.equals(new Long(0)) && partII != null) {
+                    for (int i = 0; i < partII.size(); i++) {
+                        if (partII.get(i).getId().name() == "VehicleSafetyExtensions") {
+                            J2735VehicleSafetyExtensions vse = jsonToJava
+                                    .convertJ2735VehicleSafetyExtensionsJsonToJava(value, i);
+                            if (vse != null)
+                                bsmPart2VseService.insertBSMPart2VSE(partII.get(i), vse, bsmCoreDataId);
+                        } else if (partII.get(i).getId().name() == "SpecialVehicleExtensions") {
+                            J2735SpecialVehicleExtensions spve = jsonToJava
+                                    .convertJ2735SpecialVehicleExtensionsJsonToJava(value, i);
+                            if (spve != null)
+                                bsmPart2SpveService.insertBSMPart2SPVE(partII.get(i), spve, bsmCoreDataId);
+                        } else if (partII.get(i).getId().name() == "SupplementalVehicleExtensions") {
+                            J2735SupplementalVehicleExtensions suve = jsonToJava
+                                    .convertJ2735SupplementalVehicleExtensionsJsonToJava(value, i);
+                            if (suve != null)
+                                bsmPart2SuveService.insertBSMPart2SUVE(partII.get(i), suve, bsmCoreDataId);
+                        }
+                    }
                 }
+            } else {
+                Utility.logWithDate("addBSMToOracleDB failed due to null payload.Bsm object. OdeData: " + gson.toJson(odeData));
             }
+        } else {
+            Utility.logWithDate("addBSMToOracleDB failed due to invalid OdeData object: " + gson.toJson(odeData));
         }
     }
 
-    private Long addBSMCoreData(OdeBsmMetadata metadata, J2735Bsm bsm) {
+    public Long addBSMCoreData(OdeBsmMetadata metadata, J2735Bsm bsm) {
 
         String bsmCoreInsertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_core_data",
                 bsmOracleTables.getBsmCoreDataTable());

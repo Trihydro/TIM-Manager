@@ -28,16 +28,16 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
-public class BaseService{
+public class BaseService {
 
     private HikariDataSource hds = null;
     private HikariConfig config;
     private LoggerConfiguration dbConfig;
 
-    private DateFormat utcFormatMilliSec= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private DateFormat utcFormatSec= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    private DateFormat utcFormatMin= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-    protected DateFormat mstFormat= new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+    private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+    public DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     public Connection GetConnectionPool() throws SQLException {
 
@@ -144,43 +144,43 @@ public class BaseService{
 
     public List<SecurityResultCodeType> GetSecurityResultCodeTypes() {
         SecurityResultCodeType securityResultCodeType = null;
-		List<SecurityResultCodeType> securityResultCodeTypes = new ArrayList<SecurityResultCodeType>();
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
+        List<SecurityResultCodeType> securityResultCodeTypes = new ArrayList<SecurityResultCodeType>();
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
 
-		try {
+        try {
 
-			connection = GetConnectionPool();
-			statement = connection.createStatement();
-			rs = statement.executeQuery("select * from SECURITY_RESULT_CODE_TYPE");
+            connection = GetConnectionPool();
+            statement = connection.createStatement();
+            rs = statement.executeQuery("select * from SECURITY_RESULT_CODE_TYPE");
 
-			// convert to ActiveTim object
-			while (rs.next()) {
-				securityResultCodeType = new SecurityResultCodeType();
-				securityResultCodeType.setSecurityResultCodeTypeId(rs.getInt("SECURITY_RESULT_CODE_TYPE_ID"));
-				securityResultCodeType.setSecurityResultCodeType(rs.getString("SECURITY_RESULT_CODE_TYPE"));
-				securityResultCodeTypes.add(securityResultCodeType);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
+            // convert to ActiveTim object
+            while (rs.next()) {
+                securityResultCodeType = new SecurityResultCodeType();
+                securityResultCodeType.setSecurityResultCodeTypeId(rs.getInt("SECURITY_RESULT_CODE_TYPE_ID"));
+                securityResultCodeType.setSecurityResultCodeType(rs.getString("SECURITY_RESULT_CODE_TYPE"));
+                securityResultCodeTypes.add(securityResultCodeType);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
 
-		return securityResultCodeTypes;
+        return securityResultCodeTypes;
     }
 
     void SendEmail(String[] to, String[] bcc, String subject, String body) throws MailException, MessagingException {

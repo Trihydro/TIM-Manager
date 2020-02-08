@@ -18,9 +18,6 @@ import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.service.DataFrameItisCodeService;
-import com.trihydro.library.service.NodeXYService;
-import com.trihydro.library.service.PathNodeXYService;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,11 +52,16 @@ public class TimService extends BaseService {
     private TimTypeService timTypeService;
     private ItisCodeService itisCodeService;
     private TimRsuService timRsuService;
+    private DataFrameItisCodeService dataFrameItisCodeService;
+    private PathNodeXYService pathNodeXYService;
+    private NodeXYService nodeXYService;
 
     public void InjectDependencies(ActiveTimService _ats, TimOracleTables _timOracleTables,
             SQLNullHandler _sqlNullHandler, PathService _pathService, RegionService _regionService,
             DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
-            ItisCodeService _itisCodesService, TimRsuService _timRsuService) {
+            ItisCodeService _itisCodesService, TimRsuService _timRsuService,
+            DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
+            NodeXYService _nodeXYService) {
         activeTimService = _ats;
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
@@ -70,6 +72,9 @@ public class TimService extends BaseService {
         timTypeService = _tts;
         itisCodeService = _itisCodesService;
         timRsuService = _timRsuService;
+        dataFrameItisCodeService = _dataFrameItisCodeService;
+        pathNodeXYService = _pathNodeXYService;
+        nodeXYService = _nodeXYService;
     }
 
     public void addTimToOracleDB(OdeData odeData) {
@@ -110,8 +115,8 @@ public class TimService extends BaseService {
 
                 Long nodeXYId;
                 for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
-                    nodeXYId = NodeXYService.insertNodeXY(nodeXY);
-                    PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                    nodeXYId = nodeXYService.AddNodeXY(nodeXY);
+                    pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
                 }
             } else if (geometry != null) {
                 regionService.AddRegion(dataFrameId, null, region);
@@ -143,9 +148,9 @@ public class TimService extends BaseService {
                     if (StringUtils.isNumeric(timItisCodeId)) {
                         String itisCodeId = getItisCodeId(timItisCodeId);
                         if (itisCodeId != null)
-                            DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+                            dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
                     } else
-                        DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+                        dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
                 }
             }
         } catch (NullPointerException e) {
@@ -474,8 +479,8 @@ public class TimService extends BaseService {
 
             Long nodeXYId;
             for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
-                nodeXYId = NodeXYService.insertNodeXY(nodeXY);
-                PathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                nodeXYId = nodeXYService.AddNodeXY(nodeXY);
+                pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
             }
         } else if (geometry != null) {
             regionService.AddRegion(dataFrameId, null, region);
@@ -496,11 +501,11 @@ public class TimService extends BaseService {
             if (StringUtils.isNumeric(timItisCodeId)) {
                 String itisCodeId = getItisCodeId(timItisCodeId);
                 if (itisCodeId != null)
-                    DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+                    dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
                 else
                     Utility.logWithDate("Could not find corresponding itis code it for " + timItisCodeId);
             } else
-                DataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+                dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
         }
     }
 
@@ -529,7 +534,7 @@ public class TimService extends BaseService {
         }
     }
 
-    private ActiveTim setActiveTimByRegionName(String regionName) {
+    public ActiveTim setActiveTimByRegionName(String regionName) {
 
         if (StringUtils.isBlank(regionName) || StringUtils.isEmpty(regionName)) {
             return null;

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ItisCodeService extends BaseService {
 
-    public List<ItisCode> selectAllItisCodes() { 
+	public List<ItisCode> selectAllItisCodes() {
 		List<ItisCode> itisCodes = new ArrayList<ItisCode>();
 		Connection connection = null;
 		Statement statement = null;
@@ -29,7 +29,11 @@ public class ItisCodeService extends BaseService {
 				ItisCode itisCode = new ItisCode();
 				itisCode.setItisCodeId(rs.getInt("itis_code_id"));
 				itisCode.setItisCode(rs.getInt("itis_code"));
-				itisCode.setDescription(rs.getString("description").toLowerCase());
+				String desc = rs.getString("description");
+				if (desc != null && desc.length() > 0) {
+					desc = desc.toLowerCase();
+				}
+				itisCode.setDescription(desc);
 				itisCode.setCategoryId(rs.getInt("category_id"));
 				itisCodes.add(itisCode);
 			}
@@ -48,5 +52,5 @@ public class ItisCodeService extends BaseService {
 			}
 		}
 		return itisCodes;
-  	}
+	}
 }

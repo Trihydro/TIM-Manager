@@ -1,10 +1,13 @@
 package com.trihydro.loggerkafkaconsumer.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties
 public class LoggerConfiguration {
 
     private String depositGroup;
     private String depositTopic;
-    private String hostname;
+    private String kafkaHostServer;
     private String dbUsername;
     private String dbPassword;
     private String dbUrl;
@@ -82,12 +85,12 @@ public class LoggerConfiguration {
         this.dbPassword = dbPassword;
     }
 
-    public String getHostname() {
-        return hostname;
+    public String getKafkaHostServer() {
+        return kafkaHostServer;
     }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
+    public void setKafkaHostServer(String hostname) {
+        this.kafkaHostServer = hostname;
     }
 
     public String getDepositTopic() {

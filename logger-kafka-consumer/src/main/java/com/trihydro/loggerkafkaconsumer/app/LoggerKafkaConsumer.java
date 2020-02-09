@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.loggerkafkaconsumer.app.services.BsmService;
@@ -47,7 +48,7 @@ public class LoggerKafkaConsumer {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                String endpoint = loggerConfig.getHostname() + ":9092";
+                String endpoint = loggerConfig.getKafkaHostServer() + ":9092";
 
                 // Properties for the kafka topic
                 Properties props = new Properties();
@@ -97,13 +98,16 @@ public class LoggerKafkaConsumer {
                                     break;
                                 }
                             } else {
-                                Utility.logWithDate("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
-                                // TODO: alert that something went wrong
+                                Utility.logWithDate(
+                                        "Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
+                                if (tdw != null) {
+                                    Gson gson = new Gson();
+                                    Utility.logWithDate(gson.toJson(tdw));
+                                }
                             }
                         }
                     }
-                }
-                finally {
+                } finally {
                     stringConsumer.close();
                 }
             }

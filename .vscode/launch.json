@@ -29,6 +29,14 @@
         },
         {
             "type": "java",
+            "name": "Logger Kafka Consumer (Launch)",
+            "request": "launch",
+            "args": "--spring.profiles.active=dev",
+            "cwd": "${workspaceRoot}/logger-kafka-consumer",
+            "mainClass": "com.trihydro.loggerkafkaconsumer.Application"
+        },
+        {
+            "type": "java",
             "name": "ODE Mongo Logger (Launch)",
             "request": "launch",
             "args": "--spring.profiles.active=dev",

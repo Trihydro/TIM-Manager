@@ -466,7 +466,7 @@ public class TimService extends BaseService {
         return new Long(0);
     }
 
-    private void addRegion(DataFrame dataFrame, Long dataFrameId) {
+    public void addRegion(DataFrame dataFrame, Long dataFrameId) {
         Path path = null;
         Geometry geometry = null;
         Region region = dataFrame.getRegions()[0];
@@ -491,11 +491,12 @@ public class TimService extends BaseService {
         }
     }
 
-    private void addDataFrameItis(DataFrame dataFrame, Long dataFrameId) {
+    public void addDataFrameItis(DataFrame dataFrame, Long dataFrameId) {
         // save DataFrame ITIS codes
         String[] items = dataFrame.getItems();
-        if (items.length == 0) {
+        if (items == null || items.length == 0) {
             System.out.println("No itis codes found to associate with data_frame " + dataFrameId);
+            return;
         }
         for (String timItisCodeId : items) {
             if (StringUtils.isNumeric(timItisCodeId)) {
@@ -547,10 +548,8 @@ public class TimService extends BaseService {
         if (splitName.length == 0)
             return null;
 
-        if (splitName.length > 0)
-            activeTim.setDirection(splitName[0]);
-        else
-            return activeTim;
+        activeTim.setDirection(splitName[0]);
+
         if (splitName.length > 1)
             activeTim.setRoute(splitName[1]);
         else

@@ -1,17 +1,28 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.tables.TimOracleTables;
 
@@ -66,6 +77,7 @@ public class TimServiceTest extends TestBase<TimService> {
     NodeXYService mockNodeXYService;
 
     private WydotRsu rsu;
+    private Long pathId = -99l;
 
     @Before
     public void setupSubTest() {
@@ -83,6 +95,8 @@ public class TimServiceTest extends TestBase<TimService> {
         rsu.setRsuTarget("rsuTarget");
         rsus.add(rsu);
         doReturn(rsus).when(mockRsuService).getRsus();
+
+        doReturn(pathId).when(mockPathService).InsertPath();
     }
 
     @Test
@@ -117,7 +131,6 @@ public class TimServiceTest extends TestBase<TimService> {
         // Arrange
         OdeData odeData = getOdeData();
         Long timId = -1l;
-        Long pathId = -99l;
         Long dataFrameId = -2l;
         DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
         doReturn(timId).when(uut).AddTim(odeData.getMetadata(),
@@ -140,6 +153,254 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(mockRegionService).AddRegion(dataFrameId, pathId, dFrames[0].getRegions()[0]);
         verify(mockTimRsuService).AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
         verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, dFrames[0].getItems()[0]);
+    }
+
+    @Test
+    public void addRegion_pathSUCCESS() {
+        // Arrange
+        DataFrame dataFrame = getDataFrames()[0];
+        Path path = dataFrame.getRegions()[0].getPath();
+        Long dataFrameId = -1l;
+        Long nodeXYId = -2l;
+        doReturn(pathId).when(mockPathService).InsertPath();
+        doReturn(nodeXYId).when(mockNodeXYService).AddNodeXY(isA(OdeTravelerInformationMessage.NodeXY.class));
+
+        // Act
+        uut.addRegion(dataFrame, dataFrameId);
+
+        // Assert
+        verify(mockPathService).InsertPath();
+        verify(mockRegionService).AddRegion(dataFrameId, pathId, dataFrame.getRegions()[0]);
+        verify(mockNodeXYService).AddNodeXY(path.getNodes()[0]);
+        verify(mockPathNodeXYService).insertPathNodeXY(nodeXYId, pathId);
+        verifyNoMoreInteractions(mockRegionService);
+    }
+
+    @Test
+    public void addRegion_geometrySUCCESS() {
+        // Arrange
+        DataFrame dataFrame = getDataFrames()[0];
+        dataFrame.getRegions()[0].setPath(null);
+        dataFrame.getRegions()[0].setGeometry(new Geometry());
+        Long dataFrameId = -1l;
+        Long nodeXYId = -2l;
+        doReturn(pathId).when(mockPathService).InsertPath();
+        doReturn(nodeXYId).when(mockNodeXYService).AddNodeXY(isA(OdeTravelerInformationMessage.NodeXY.class));
+
+        // Act
+        uut.addRegion(dataFrame, dataFrameId);
+
+        // Assert
+        verify(mockPathService, never()).InsertPath();
+        verify(mockRegionService, never()).AddRegion(dataFrameId, pathId, dataFrame.getRegions()[0]);
+        verify(mockNodeXYService, never()).AddNodeXY(isA(NodeXY.class));
+        verify(mockPathNodeXYService, never()).insertPathNodeXY(nodeXYId, pathId);
+        verify(mockRegionService).AddRegion(dataFrameId, null, dataFrame.getRegions()[0]);
+        verifyNoMoreInteractions(mockRegionService);
+    }
+
+    @Test
+    public void addDataFrameItis_noItemsFAIL() {
+        // Arrange
+        Long dataFrameId = -1l;
+        DataFrame dataFrame = new DataFrame();
+        // Act
+        uut.addDataFrameItis(dataFrame, dataFrameId);
+
+        // Assert
+        verifyZeroInteractions(mockDataFrameItisCodeService);
+    }
+
+    @Test
+    public void addDataFrameItis_nonNumericSUCCESS() {
+        // Arrange
+        Long dataFrameId = -1l;
+        DataFrame dataFrame = getDataFrames()[0];
+        // Act
+        uut.addDataFrameItis(dataFrame, dataFrameId);
+
+        // Assert
+        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, dataFrame.getItems()[0]);
+    }
+
+    @Test
+    public void addDataFrameItis_numericSUCCESS() {
+        // Arrange
+        Long dataFrameId = -1l;
+        DataFrame dataFrame = getDataFrames()[0];
+        dataFrame.setItems(new String[] { "1234" });
+        doReturn("test").when(uut).getItisCodeId("1234");
+
+        // Act
+        uut.addDataFrameItis(dataFrame, dataFrameId);
+
+        // Assert
+        verify(uut).getItisCodeId("1234");
+        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, "test");
+    }
+
+    @Test
+    public void addDataFrameItis_numericFAIL() {
+        // Arrange
+        Long dataFrameId = -1l;
+        DataFrame dataFrame = getDataFrames()[0];
+        dataFrame.setItems(new String[] { "1234" });
+        doReturn(null).when(uut).getItisCodeId("1234");
+
+        // Act
+        uut.addDataFrameItis(dataFrame, dataFrameId);
+
+        // Assert
+        verify(uut).getItisCodeId("1234");
+        verifyNoMoreInteractions(mockDataFrameItisCodeService);
+    }
+
+    @Test
+    public void updateTimSatRecordId_FAIL() throws SQLException {
+        // Arrange
+        Long timId = -1l;
+        String satRecordId = "asdf";
+        doThrow(new SQLException()).when(mockPreparedStatement).setString(1, satRecordId);
+        // Act
+        boolean data = uut.updateTimSatRecordId(timId, satRecordId);
+
+        // Assert
+        assertFalse("updateTimSatRecordId returned true when failure", data);
+        verify(mockConnection).prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void updateTimSatRecordId_SUCCESS() throws SQLException {
+        // Arrange
+        Long timId = -1l;
+        String satRecordId = "asdf";
+        // Act
+        boolean data = uut.updateTimSatRecordId(timId, satRecordId);
+
+        // Assert
+        assertTrue("updateTimSatRecordId returned false when successful", data);
+        verify(mockConnection).prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
+        verify(mockPreparedStatement).setString(1, satRecordId);
+        verify(mockPreparedStatement).setLong(2, timId);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void setActiveTimByRegionName_regionNameFAIL() {
+        // Arrange
+
+        // Act
+        ActiveTim data = uut.setActiveTimByRegionName(null);
+
+        // Assert
+        assertNull(data);
+    }
+
+    @Test
+    public void setActiveTimByRegionName_RsuSUCCESS() {
+        // Arrange
+        String regionName = "any_Prairie Center Cir_108.82122_108.66974_RSU-10.145.1.100_RC_clientId";
+        TimType timType = new TimType();
+        timType.setType("RC");
+        timType.setTimTypeId(-1l);
+        doReturn(timType).when(uut).getTimType("RC");
+
+        // Act
+        ActiveTim data = uut.setActiveTimByRegionName(regionName);
+
+        // Assert
+        assertNotNull(data);
+        assertNotNull(data.getDirection());
+        assertNotNull(data.getRoute());
+        assertNotNull(data.getMilepostStart());
+        assertNotNull(data.getMilepostStop());
+        assertNotNull(data.getRsuTarget());
+        assertNotNull(data.getTimType());
+        assertNotNull(data.getTimTypeId());
+        assertNotNull(data.getClientId());
+    }
+
+    @Test
+    public void setActiveTimByRegionName_SatSUCCESS() {
+        // Arrange
+        String regionName = "any_Prairie Center Cir_108.82122_108.66974_SAT-satId_RC_clientId";
+        TimType timType = new TimType();
+        timType.setType("RC");
+        timType.setTimTypeId(-1l);
+        doReturn(timType).when(uut).getTimType("RC");
+
+        // Act
+        ActiveTim data = uut.setActiveTimByRegionName(regionName);
+
+        // Assert
+        assertNotNull(data);
+        assertNotNull(data.getDirection());
+        assertNotNull(data.getRoute());
+        assertNotNull(data.getMilepostStart());
+        assertNotNull(data.getMilepostStop());
+        assertNotNull(data.getSatRecordId());
+        assertNotNull(data.getTimType());
+        assertNotNull(data.getTimTypeId());
+        assertNotNull(data.getClientId());
+    }
+
+    @Test
+    public void getTimType_FAIL() {
+        // Arrange
+        doReturn(new ArrayList<>()).when(mockTts).getTimTypes();
+        // Act
+        TimType data = uut.getTimType("timTypeName");
+
+        // Assert
+        assertNull(data);
+    }
+
+    @Test
+    public void getTimType_SUCCESS() {
+        // Arrange
+        List<TimType> timTypes = new ArrayList<TimType>();
+        TimType tt = new TimType();
+        tt.setType("timTypeName");
+        tt.setTimTypeId(-1l);
+        timTypes.add(tt);
+        doReturn(timTypes).when(mockTts).getTimTypes();
+        // Act
+        TimType data = uut.getTimType("timTypeName");
+
+        // Assert
+        assertNotNull(data);
+        assertEquals(new Long(-1), data.getTimTypeId());
+    }
+
+    @Test
+    public void getItisCodeId_FAIL() {
+        // Arrange
+        doReturn(new ArrayList<>()).when(mockItisCodesService).selectAllItisCodes();
+
+        // Act
+        String data = uut.getItisCodeId("1234");
+
+        // Assert
+        assertNull(data);
+    }
+
+    @Test
+    public void getItisCodeId_SUCCESS() {
+        // Arrange
+        List<ItisCode> itisCodes = new ArrayList<ItisCode>();
+        ItisCode code = new ItisCode();
+        code.setItisCode(1234);
+        code.setItisCodeId(-1);
+        itisCodes.add(code);
+        doReturn(itisCodes).when(mockItisCodesService).selectAllItisCodes();
+
+        // Act
+        String data = uut.getItisCodeId("1234");
+
+        // Assert
+        assertEquals("-1", data);
     }
 
     // ******************************************* //
@@ -204,17 +465,22 @@ public class TimServiceTest extends TestBase<TimService> {
         DataFrame dFrame = new DataFrame();
 
         Region[] regions = new Region[1];
-        Region region = new Region();
-        region.setName("name");
-        region.setPath(getPath());
-        region.setGeometry(new Geometry());
-        regions[0] = region;
+
+        regions[0] = getRegion();
 
         dFrame.setRegions(regions);
         dFrame.setItems(new String[] { "asdf" });
         dFrames[0] = dFrame;
 
         return dFrames;
+    }
+
+    private Region getRegion() {
+        Region region = new Region();
+        region.setName("name");
+        region.setPath(getPath());
+        region.setGeometry(new Geometry());
+        return region;
     }
 
     private Path getPath() {
@@ -228,6 +494,7 @@ public class TimServiceTest extends TestBase<TimService> {
         NodeXY nxy = new NodeXY();
         nxy.setNodeLat(new BigDecimal(-1));
         nxy.setNodeLong(new BigDecimal(-2));
+        nodes[0] = nxy;
         return nodes;
     }
 }

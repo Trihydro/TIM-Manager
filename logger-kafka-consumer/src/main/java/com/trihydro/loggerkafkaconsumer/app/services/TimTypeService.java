@@ -14,15 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimTypeService extends BaseService {
 
-    // private TimOracleTables timOracleTables;
-	// private SQLNullHandler sqlNullHandler;
-
-	// @Autowired
-	// public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-	// 	timOracleTables = _timOracleTables;
-	// 	sqlNullHandler = _sqlNullHandler;
-    // }
-
     public List<TimType> getTimTypes() {
 		List<TimType> timTypes = new ArrayList<TimType>();
 		Connection connection = null;

@@ -13,10 +13,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class TestBase<T> {
     @Mock

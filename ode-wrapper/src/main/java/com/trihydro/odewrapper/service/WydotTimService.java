@@ -65,7 +65,7 @@ public class WydotTimService {
 
     public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
     public Gson gson = new Gson();
-    private ArrayList<WydotRsu> rsus;
+    private List<WydotRsu> rsus;
     private List<TimType> timTypes;
     WydotRsu[] rsuArr = new WydotRsu[1];
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -312,7 +312,7 @@ public class WydotTimService {
         return activeTims;
     }
 
-    public ArrayList<WydotRsu> getRsus() {
+    public List<WydotRsu> getRsus() {
         if (rsus != null)
             return rsus;
         else {

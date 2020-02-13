@@ -31,7 +31,7 @@
             "type": "java",
             "name": "Logger Kafka Consumer (Launch)",
             "request": "launch",
-            "args": "--spring.profiles.active=dev",
+            "args": "--spring.profiles.active=dev --server.port=8082",
             "cwd": "${workspaceRoot}/logger-kafka-consumer",
             "mainClass": "com.trihydro.loggerkafkaconsumer.Application"
         },

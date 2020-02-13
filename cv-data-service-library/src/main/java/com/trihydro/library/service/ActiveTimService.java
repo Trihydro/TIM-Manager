@@ -310,50 +310,9 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	// utility
 	public static List<Integer> getActiveTimIndicesByRsu(String rsuTarget) {
-
-		List<Integer> indices = new ArrayList<Integer>();
-
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
-		try {
-
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-
-			String selectStatement = "select tim_rsu.rsu_index from active_tim";
-			selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
-			selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
-			selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
-			selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-			selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
-
-			rs = statement.executeQuery(selectStatement);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				indices.add(rs.getInt("RSU_INDEX"));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return indices;
+		String url = String.format("%s/active-tim/indices-rsu/%s", CVRestUrl, rsuTarget);
+		ResponseEntity<Integer[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Integer[].class);
+		return Arrays.asList(response.getBody());
 	}
 
 	public static List<ActiveTim> getActiveTimsByWydotTim(List<? extends WydotTim> wydotTims, Long timTypeId) {

@@ -28,10 +28,10 @@ import org.springframework.http.ResponseEntity;
 @RunWith(MockitoJUnitRunner.class)
 public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Mock
-    private TimOracleTables mockTimOracleTables;   
-    
+    private TimOracleTables mockTimOracleTables;
+
     @Before
-    public void setupSubTest(){
+    public void setupSubTest() {
         uut.SetTables(mockTimOracleTables);
         doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
@@ -259,5 +259,51 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(0, aTims.getBody().size());
+    }
+
+    @Test
+    public void GetActiveTimIndicesByRsu_SUCCESS() throws SQLException {
+        // Arrange
+        String rsuTarget = "10.0.0.1";
+        String selectStatement = "select tim_rsu.rsu_index from active_tim";
+        selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
+        selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
+        selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
+        selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+        selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
+
+        // Act
+        ResponseEntity<List<Integer>> data = uut.GetActiveTimIndicesByRsu(rsuTarget);
+
+        // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
+        verify(mockStatement).executeQuery(selectStatement);
+        verify(mockRs).getInt("RSU_INDEX");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void GetActiveTimIndicesByRsu_FAIL() throws SQLException {
+        // Arrange
+        String rsuTarget = "10.0.0.1";
+        String selectStatement = "select tim_rsu.rsu_index from active_tim";
+        selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
+        selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
+        selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
+        selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+        selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
+        doThrow(new SQLException()).when(mockRs).getInt("RSU_INDEX");
+
+        // Act
+        ResponseEntity<List<Integer>> data = uut.GetActiveTimIndicesByRsu(rsuTarget);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        verify(mockStatement).executeQuery(selectStatement);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
     }
 }

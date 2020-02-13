@@ -32,14 +32,19 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 public class TracManager {
 
 	private JsonToJavaConverter jsonToJava;
+	private TracMessageTypeService tracMessageTypeService;
+	private TracMessageSentService tracMessageSentService;
 
 	@Autowired
-	public void InjectDependencies(JsonToJavaConverter _jsonToJava){
+	public void InjectDependencies(JsonToJavaConverter _jsonToJava, TracMessageTypeService _tracMessageTypeService,
+			TracMessageSentService _tracMessageSentService) {
 		jsonToJava = _jsonToJava;
+		tracMessageTypeService = _tracMessageTypeService;
+		tracMessageSentService = _tracMessageSentService;
 	}
 
 	public boolean isDnMsgInTrac(String packetId) {
-		List<String> packetIds = TracMessageSentService.selectPacketIds();
+		List<String> packetIds = tracMessageSentService.selectPacketIds();
 		return packetIds.contains(packetId);
 	}
 
@@ -47,7 +52,7 @@ public class TracManager {
 			boolean messageSent, boolean emailSent) {
 
 		// get trac message types
-		List<TracMessageType> tracMessageTypes = TracMessageTypeService.selectAll();
+		List<TracMessageType> tracMessageTypes = tracMessageTypeService.selectAll();
 
 		// get message type equal to distress notification
 		TracMessageType tracMessageType = tracMessageTypes.stream().filter(x -> x.getTracMessageType().equals("DN"))
@@ -70,7 +75,7 @@ public class TracManager {
 		tracMessageSent.setEmailSent(emailSent);
 		System.out.println("packet id: " + packetId);
 		// log in db
-		Long tracMessageSentId = TracMessageSentService.insertTracMessageSent(tracMessageSent);
+		Long tracMessageSentId = tracMessageSentService.insertTracMessageSent(tracMessageSent);
 		return tracMessageSentId;
 	}
 

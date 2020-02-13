@@ -35,7 +35,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -53,8 +52,7 @@ import org.springframework.web.client.RestTemplate;
  * Unit tests for TimRefreshController
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ TracMessageSentService.class, TracMessageTypeService.class, RestTemplateProvider.class,
-                JavaMailSenderImplProvider.class })
+@PrepareForTest({ RestTemplateProvider.class, JavaMailSenderImplProvider.class })
 public class TracManagerTest {
 
         @Mock
@@ -62,6 +60,10 @@ public class TracManagerTest {
 
         @Mock
         private JavaMailSenderImpl jmsi;
+        @Mock
+        private TracMessageTypeService mockTrackMessageTypeService;
+        @Mock
+        private TracMessageSentService mockTracMessageSentService;
 
         @Spy
         JsonToJavaConverter jsonToJava = new JsonToJavaConverter();
@@ -71,8 +73,6 @@ public class TracManagerTest {
 
         @Before
         public void setup() {
-                PowerMockito.mockStatic(TracMessageSentService.class);
-                PowerMockito.mockStatic(TracMessageTypeService.class);
                 PowerMockito.mockStatic(RestTemplateProvider.class);
                 PowerMockito.mockStatic(JavaMailSenderImplProvider.class);
 
@@ -81,7 +81,7 @@ public class TracManagerTest {
                 tmt.setTracMessageType("DN");
                 tmt.setTracMessageTypeId(-1);
                 tmts.add(tmt);
-                when(TracMessageTypeService.selectAll()).thenReturn(tmts);
+                when(mockTrackMessageTypeService.selectAll()).thenReturn(tmts);
                 when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
                 when(JavaMailSenderImplProvider.getJSenderImpl(Matchers.any(String.class), Matchers.any(int.class)))
                                 .thenReturn(jmsi);
@@ -102,18 +102,15 @@ public class TracManagerTest {
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
 
-                // verify static functions, called once
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
                 // assert TracMessageSentService.selectPacketIds called once
-                TracMessageSentService.selectPacketIds();
+                verify(mockTracMessageSentService).selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate).exchange(any(URI.class), any(HttpMethod.class), Matchers.<HttpEntity<String>>any(),
                                 Matchers.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                TracMessageSentService.insertTracMessageSent(argument.capture());
+                verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
                 assertEquals(new Integer(200), argument.getValue().getRestResponseCode());
                 assertEquals(true, argument.getValue().isMessageSent());
@@ -136,18 +133,12 @@ public class TracManagerTest {
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
 
-                // verify static functions, called once
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
                 // assert TracMessageSentService.selectPacketIds called once
-                TracMessageSentService.selectPacketIds();
-
+                verify(mockTracMessageSentService).selectPacketIds();
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(2)).exchange(any(URI.class), any(HttpMethod.class),
                                 Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
-
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.insertTracMessageSent called once
-                TracMessageSentService.insertTracMessageSent(any(TracMessageSent.class));
+                verify(mockTracMessageSentService).insertTracMessageSent(any(TracMessageSent.class));
         }
 
         @Test
@@ -168,18 +159,14 @@ public class TracManagerTest {
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
 
-                // verify static functions, called once
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectPacketIds called once
-                TracMessageSentService.selectPacketIds();
+                verify(mockTracMessageSentService).selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(2)).exchange(any(URI.class), any(HttpMethod.class),
                                 Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                TracMessageSentService.insertTracMessageSent(argument.capture());
+                verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
                 assertEquals(new Integer(-1), argument.getValue().getRestResponseCode());
                 assertEquals(false, argument.getValue().isMessageSent());
@@ -206,18 +193,14 @@ public class TracManagerTest {
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
 
-                // verify static functions, called once
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectPacketIds called once
-                TracMessageSentService.selectPacketIds();
+                verify(mockTracMessageSentService).selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(1)).exchange(any(URI.class), any(HttpMethod.class),
                                 Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                TracMessageSentService.insertTracMessageSent(argument.capture());
+                verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
                 assertEquals(new Integer(500), argument.getValue().getRestResponseCode());
                 assertEquals(false, argument.getValue().isMessageSent());
@@ -246,18 +229,14 @@ public class TracManagerTest {
                 // call function to test
                 uut.submitDNMsgToTrac(value, config);
 
-                // verify static functions, called once
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                // assert TracMessageSentService.selectPacketIds called once
-                TracMessageSentService.selectPacketIds();
+                verify(mockTracMessageSentService).selectPacketIds();
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(1)).exchange(any(URI.class), any(HttpMethod.class),
                                 Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
-                PowerMockito.verifyStatic(VerificationModeFactory.times(1));
-                TracMessageSentService.insertTracMessageSent(argument.capture());
+                verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
                 assertEquals(new Integer(500), argument.getValue().getRestResponseCode());
                 assertEquals(false, argument.getValue().isMessageSent());

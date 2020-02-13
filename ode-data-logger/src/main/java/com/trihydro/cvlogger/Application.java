@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 
-@ComponentScan({"com.trihydro.cvlogger","com.trihydro.library.helpers"})
+@ComponentScan({ "com.trihydro.cvlogger", "com.trihydro.library.helpers", "com.trihydro.library.service" })
 @SpringBootApplication
 @EnableConfigurationProperties(DataLoggerConfiguration.class)
 public class Application {

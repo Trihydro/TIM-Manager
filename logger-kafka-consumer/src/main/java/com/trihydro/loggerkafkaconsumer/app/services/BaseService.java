@@ -24,6 +24,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -39,6 +40,11 @@ public class BaseService {
     private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
     public DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
+    @Autowired
+    public void InjectDependencies(LoggerConfiguration _loggerConfiguration) {
+        dbConfig = _loggerConfiguration;
+    }
+
     public Connection GetConnectionPool() throws SQLException {
 
         // create pool if not already done
@@ -53,10 +59,11 @@ public class BaseService {
             config.setPassword(dbConfig.getDbPassword());
             config.setJdbcUrl(dbConfig.getDbUrl());
             config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(13);// formula: connections = ((core_count*2) + effective_spindle_count)
-                                          // https://stackoverflow.com/questions/28987540/why-does-hikaricp-recommend-fixed-size-pool-for-better-performance
-                                          // we have 8 cores and are limiting the container to run on a single 'drive'
-                                          // which gives us 17 pool size. we round up here
+            config.setMaximumPoolSize(dbConfig.getPoolSize());// formula: connections = ((core_count*2) +
+                                                              // effective_spindle_count)
+            // https://stackoverflow.com/questions/28987540/why-does-hikaricp-recommend-fixed-size-pool-for-better-performance
+            // we have 8 cores and are limiting the container to run on a single 'drive'
+            // which gives us 17 pool size. we round up here
             config.setMaxLifetime(600000);// setting a maxLifetime of 10 minutes (defaults to 30), to help avoid
                                           // connection issues
 

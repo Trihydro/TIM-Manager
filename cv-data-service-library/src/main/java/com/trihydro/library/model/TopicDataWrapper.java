@@ -1,22 +1,11 @@
 package com.trihydro.library.model;
 
-import us.dot.its.jpo.ode.model.OdeData;
-
 public class TopicDataWrapper {
-    private OdeData data;
     private String topic;
-    private String originalString;
+    private String data;
 
-    public OdeData getData() {
+    public String getData() {
         return data;
-    }
-
-    public String getOriginalString() {
-        return originalString;
-    }
-
-    public void setOriginalString(String originalString) {
-        this.originalString = originalString;
     }
 
     public String getTopic() {
@@ -27,7 +16,7 @@ public class TopicDataWrapper {
         this.topic = topic;
     }
 
-    public void setData(OdeData data) {
+    public void setData(String data) {
         this.data = data;
     }
 }

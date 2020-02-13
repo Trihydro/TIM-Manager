@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
+import com.trihydro.loggerkafkaconsumer.app.dataConverters.BsmDataConverter;
+import com.trihydro.loggerkafkaconsumer.app.dataConverters.DriverAlertDataConverter;
+import com.trihydro.loggerkafkaconsumer.app.dataConverters.TimDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.services.BsmService;
 import com.trihydro.loggerkafkaconsumer.app.services.DriverAlertService;
 import com.trihydro.loggerkafkaconsumer.app.services.TimService;
@@ -20,6 +23,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import us.dot.its.jpo.ode.model.OdeData;
+
 @Component
 public class LoggerKafkaConsumer {
 
@@ -28,14 +33,21 @@ public class LoggerKafkaConsumer {
     private BsmService bsmService;
     private TimService timService;
     private DriverAlertService driverAlertService;
+    private TimDataConverter timDataConverter;
+    private BsmDataConverter bsmDataConverter;
+    private DriverAlertDataConverter daConverter;
 
     @Autowired
     public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService,
-            DriverAlertService _driverAlertService) throws IOException {
-        this.loggerConfig = _loggerConfig;
-        this.bsmService = _bsmService;
-        this.timService = _timService;
-        this.driverAlertService = _driverAlertService;
+            DriverAlertService _driverAlertService, TimDataConverter _timDataConverter,
+            BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter) throws IOException {
+        loggerConfig = _loggerConfig;
+        bsmService = _bsmService;
+        timService = _timService;
+        driverAlertService = _driverAlertService;
+        timDataConverter = _timDataConverter;
+        bsmDataConverter = _bsmDataConverter;
+        daConverter = _daConverter;
 
         System.out.println("starting..............");
 
@@ -66,14 +78,16 @@ public class LoggerKafkaConsumer {
                 stringConsumer.subscribe(Arrays.asList(topic));
                 System.out.println("Subscribed to topic " + topic);
 
+                Gson gson = new Gson();
+
                 try {
+                    OdeData odeData = new OdeData();
                     while (true) {
                         ConsumerRecords<String, String> records = stringConsumer.poll(100);
                         for (ConsumerRecord<String, String> record : records) {
-                            ObjectMapper mapper = new ObjectMapper();
                             TopicDataWrapper tdw = null;
                             try {
-                                tdw = mapper.readValue(record.value(), TopicDataWrapper.class);
+                                tdw = gson.fromJson(record.value(), TopicDataWrapper.class);
                             } catch (Exception e) {
                                 // Could be ioException, JsonParseException, JsonMappingException
                                 e.printStackTrace();
@@ -81,27 +95,29 @@ public class LoggerKafkaConsumer {
                             if (tdw != null && tdw.getData() != null) {
                                 switch (tdw.getTopic()) {
                                 case "topic.OdeTimJson":
-                                    if (tdw.getData().getMetadata()
+                                    odeData = timDataConverter.processTimJson(tdw.getData());
+                                    if (odeData.getMetadata()
                                             .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
-                                        timService.addActiveTimToOracleDB(tdw.getData());
+                                        timService.addActiveTimToOracleDB(odeData);
                                     } else {
-                                        timService.addTimToOracleDB(tdw.getData());
+                                        timService.addTimToOracleDB(odeData);
                                     }
                                     break;
 
                                 case "topic.OdeBsmJson":
-                                    bsmService.addBSMToOracleDB(tdw.getData(), tdw.getOriginalString());
+                                    odeData = bsmDataConverter.processBsmJson(tdw.getData());
+                                    bsmService.addBSMToOracleDB(odeData, tdw.getData());
                                     break;
 
                                 case "topic.OdeDriverAlertJson":
-                                    driverAlertService.addDriverAlertToOracleDB(tdw.getData());
+                                    odeData = daConverter.processDriverAlertJson(tdw.getData());
+                                    driverAlertService.addDriverAlertToOracleDB(odeData);
                                     break;
                                 }
                             } else {
                                 Utility.logWithDate(
                                         "Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
                                 if (tdw != null) {
-                                    Gson gson = new Gson();
                                     Utility.logWithDate(gson.toJson(tdw));
                                 }
                             }

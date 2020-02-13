@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
 public class DataLoggerConfiguration {
-    private String hostname;
+    private String kafkaHostServer;
     private String tracUrl;
 
     private String mailHost;
@@ -17,8 +17,18 @@ public class DataLoggerConfiguration {
     private String depositGroup;
     private String cvRestService;
 
+    private String producerTopic;
+
     public String getTracUrl() {
         return tracUrl;
+    }
+
+    public String getProducerTopic() {
+        return producerTopic;
+    }
+
+    public void setProducerTopic(String producerTopic) {
+        this.producerTopic = producerTopic;
     }
 
     public String getFromEmail() {
@@ -53,12 +63,12 @@ public class DataLoggerConfiguration {
         this.mailHost = mailHost;
     }
 
-    public String getHostname() {
-        return hostname;
+    public String getKafkaHostServer() {
+        return kafkaHostServer;
     }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
+    public void setKafkaHostServer(String hostname) {
+        this.kafkaHostServer = hostname;
     }
 
     public String getCvRestService() {

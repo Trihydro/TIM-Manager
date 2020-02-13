@@ -16,9 +16,18 @@ public class LoggerConfiguration {
     private String fromEmail;
     private String mailHost;
     private int mailPort;
+    private int poolSize;
 
     public String getDepositGroup() {
         return depositGroup;
+    }
+
+    public int getPoolSize() {
+        return poolSize;
+    }
+
+    public void setPoolSize(int poolSize) {
+        this.poolSize = poolSize;
     }
 
     public int getMailPort() {

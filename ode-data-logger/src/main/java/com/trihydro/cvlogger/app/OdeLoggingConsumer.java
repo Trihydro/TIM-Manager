@@ -3,25 +3,29 @@ package com.trihydro.cvlogger.app;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trihydro.cvlogger.app.loggers.BsmLogger;
-import com.trihydro.cvlogger.app.loggers.DriverAlertLogger;
-import com.trihydro.cvlogger.app.loggers.TimLogger;
+import com.google.gson.Gson;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
+import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.library.service.CvDataServiceLibrary;
 
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import us.dot.its.jpo.ode.model.OdeData;
 
 @Component
 public class OdeLoggingConsumer {
@@ -30,81 +34,88 @@ public class OdeLoggingConsumer {
 	static Statement statement = null;
 	static ObjectMapper mapper;
 	private DataLoggerConfiguration configProperties;
-	private TimLogger timLogger;
-	private BsmLogger bsmLogger;
-	private DriverAlertLogger driverAlertLogger;
+	private TracManager tracManager;
 
 	@Autowired
-	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TimLogger _timLogger, BsmLogger _bsmLogger, DriverAlertLogger _driverAlertLogger) throws IOException {
+	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TracManager _tracManager) throws IOException {
 		this.configProperties = configProperties;
-		timLogger = _timLogger;
-		bsmLogger = _bsmLogger;
-		driverAlertLogger = _driverAlertLogger;
+		tracManager = _tracManager;
 		CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
 		System.out.println("starting..............");
 
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		setupTopic();
 		startKafkaConsumerAsync();
+	}
+
+	public void setupTopic() {
+		String endpoint = configProperties.getKafkaHostServer() + ":9092";
+		Properties properties = new Properties();
+		properties.put("bootstrap.servers", endpoint);
+		properties.put("group.id", configProperties.getDepositGroup());
+		properties.put("enable.auto.commit", "false");
+		properties.put("auto.commit.interval.ms", "1000");
+		properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		AdminClient adminClient = AdminClient.create(properties);
+		NewTopic newTopic = new NewTopic(configProperties.getProducerTopic(), 1, (short) 1);
+		List<NewTopic> newTopics = new ArrayList<NewTopic>();
+		newTopics.add(newTopic);
+
+		adminClient.createTopics(newTopics);
+		adminClient.close();
 	}
 
 	public void startKafkaConsumerAsync() {
 		// An Async task always executes in new thread
 		new Thread(new Runnable() {
 			public void run() {
-				String endpoint = configProperties.getHostname() + ":9092";
+				String endpoint = configProperties.getKafkaHostServer() + ":9092";
 
 				// Properties for the kafka topic
-				Properties props = new Properties();
-				props.put("bootstrap.servers", endpoint);
-				props.put("group.id", configProperties.getDepositGroup());
-				props.put("enable.auto.commit", "false");
-				props.put("auto.commit.interval.ms", "1000");
-				props.put("session.timeout.ms", "30000");
-				props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
+				Properties consumerProps = new Properties();
+				consumerProps.put("bootstrap.servers", endpoint);
+				consumerProps.put("group.id", configProperties.getDepositGroup());
+				consumerProps.put("enable.auto.commit", "false");
+				consumerProps.put("auto.commit.interval.ms", "1000");
+				consumerProps.put("session.timeout.ms", "30000");
+				consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+				consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+				KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(consumerProps);
+				String consumerTopic = configProperties.getDepositTopic();
+				stringConsumer.subscribe(Arrays.asList(consumerTopic));
+				System.out.println("Subscribed to topic " + consumerTopic);
 
-				String topic = configProperties.getDepositTopic();
+				Properties producerProps = new Properties();
+				producerProps.put("bootstrap.servers", endpoint);
+				producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+				producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+				KafkaProducer<String, String> stringProducer = new KafkaProducer<String, String>(producerProps);
+				String producerTopic = configProperties.getProducerTopic();
 
-				stringConsumer.subscribe(Arrays.asList(topic));
-				System.out.println("Subscribed to topic " + topic);
+				Gson gson = new Gson();
 
-				TracManager tm = new TracManager();
 				try {
-
 					while (true) {
-						ConsumerRecords<String, String> records = stringConsumer.poll(100);
+						Duration polTime = Duration.ofMillis(100);
+						ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
 						for (ConsumerRecord<String, String> record : records) {
-							if (topic.equals("topic.OdeDNMsgJson")) {
-								tm.submitDNMsgToTrac(record.value(), configProperties);
-							} else if (topic.equals("topic.OdeTimJson")) {
-								OdeData odeData = timLogger.processTimJson(record.value());
-								// TODO: push to kafka
-								// if (odeData != null) {
-								// if (odeData.getMetadata()
-								// .getRecordGeneratedBy() ==
-								// us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC)
-								// TimLogger.addActiveTimToOracleDB(odeData);
-								// else {
-								// TimLogger.addTimToOracleDB(odeData);
-								// }
-								// }
-							} else if (topic.equals("topic.OdeBsmJson")) {
-								OdeData odeData = bsmLogger.processBsmJson(record.value());
-								// TODO: push to kafka with original string
-								// if (odeData != null)
-								// BsmLogger.addBSMToOracleDB(odeData, record.value());
-							} else if (topic.equals("topic.OdeDriverAlertJson")) {
-								OdeData odeData = driverAlertLogger.processDriverAlertJson(record.value());
-								// todo: push to kafka
-								// if (odeData != null)
-								// DriverAlertLogger.addDriverAlertToOracleDB(odeData);
+							if (consumerTopic.equals("topic.OdeDNMsgJson")) {
+								tracManager.submitDNMsgToTrac(record.value(), configProperties);
+							} else {
+								TopicDataWrapper tdw = new TopicDataWrapper();
+								tdw.setTopic(record.topic());
+								tdw.setData(record.value());
+								ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(
+										producerTopic, gson.toJson(tdw));
+								stringProducer.send(producerRecord);
 							}
 						}
 					}
 				} finally {
 					stringConsumer.close();
+					stringProducer.close();
 				}
 			}
 		}).start();

@@ -21,6 +21,7 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.model.OdeData;
@@ -56,6 +57,7 @@ public class TimService extends BaseService {
     private PathNodeXYService pathNodeXYService;
     private NodeXYService nodeXYService;
 
+    @Autowired
     public void InjectDependencies(ActiveTimService _ats, TimOracleTables _timOracleTables,
             SQLNullHandler _sqlNullHandler, PathService _pathService, RegionService _regionService,
             DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,

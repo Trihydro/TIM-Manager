@@ -6,25 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-
 public class DataFrameService extends CvDataServiceLibrary {
-
-	/**
-	 * Calls out to the cv-data-controller REST service to insert a new dataFrame record
-	 * @param timID
-	 * @param dFrame
-	 * @return
-	 */
-	public static Long insertDataFrame(Long timID, DataFrame dFrame) {
-		String url = String.format("/%s/data-frame/add-data-frame/%d", CVRestUrl, timID);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<DataFrame> entity = new HttpEntity<DataFrame>(dFrame, headers);
-		ResponseEntity<Long> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity,
-				Long.class);
-		return response.getBody();
-	}
 
 	/**
 	 * Calls out to cv-data-controller REST service to fetch ITIS codes associated

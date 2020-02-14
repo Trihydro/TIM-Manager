@@ -43,6 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @WebAppConfiguration

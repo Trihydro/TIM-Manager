@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 
 import com.trihydro.library.helpers.DbUtility;
@@ -123,46 +122,10 @@ public class TimService extends CvDataServiceLibrary {
 	}
 
 	public static WydotOdeTravelerInformationMessage getTim(Long timId) {
-
-		WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();
-
-		Statement statement = null;
-		ResultSet rs = null;
-		Connection connection = null;
-
-		try {
-			// build SQL statement
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-			rs = statement.executeQuery("select * from tim where tim_id = " + timId);
-
-			// convert to DriverAlertType objects
-			while (rs.next()) {
-				tim.setPacketID(rs.getString("PACKET_ID"));
-				tim.setMsgCnt(rs.getInt("MSG_CNT"));
-				tim.setTimeStamp(rs.getString("TIME_STAMP"));
-				tim.setUrlB(rs.getString("URL_B"));
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return tim;
+		String url = String.format("%s/get-tim/timId", CVRestUrl, timId);
+		ResponseEntity<WydotOdeTravelerInformationMessage> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(url, WydotOdeTravelerInformationMessage.class);
+		return response.getBody();
 	}
 
 	public static boolean deleteTim(Long timId) {

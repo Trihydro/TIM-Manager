@@ -11,7 +11,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 public class PathNodeXYService extends CvDataServiceLibrary {
 
 	public static Long insertPathNodeXY(Long nodeXYId, Long pathId) {
-		String url = String.format("/%s/path-node-xy/add-path-nodexy/%d/%d", CVRestUrl, nodeXYId, pathId);
+		String url = String.format("%s/path-node-xy/add-path-nodexy/%d/%d", CVRestUrl, nodeXYId, pathId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -25,7 +25,7 @@ public class PathNodeXYService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<NodeXY[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+		ResponseEntity<NodeXY[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity,
 				NodeXY[].class);
 		return response.getBody();
 	}

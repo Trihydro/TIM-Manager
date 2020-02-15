@@ -13,7 +13,7 @@ public class SecurityResultCodeTypeService extends CvDataServiceLibrary {
 	static PreparedStatement preparedStatement = null;
 
 	public static List<SecurityResultCodeType> getSecurityResultCodeTypes() {
-		String url = String.format("/%s/security-result-code-type/get-all", CVRestUrl);
+		String url = String.format("%s/security-result-code-type/get-all", CVRestUrl);
 		ResponseEntity<SecurityResultCodeType[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
 				SecurityResultCodeType[].class);
 		return Arrays.asList(response.getBody());

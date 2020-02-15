@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import java.sql.SQLException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+@Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ RestTemplateProvider.class })
 public class BaseServiceTest {

@@ -26,7 +26,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 @RunWith(PowerMockRunner.class)
-// @PrepareForTest({ ActiveTimService.class })
 public class ActiveTimServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<TimUpdateModel[]> mockResponseEntity;

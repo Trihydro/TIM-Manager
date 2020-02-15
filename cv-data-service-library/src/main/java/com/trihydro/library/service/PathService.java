@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 public class PathService extends CvDataServiceLibrary {
 
 	public static Long insertPath() {
-		String url = String.format("/%s/path/add-path", CVRestUrl);
+		String url = String.format("%s/path/add-path", CVRestUrl);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

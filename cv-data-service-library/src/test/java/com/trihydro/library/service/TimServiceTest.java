@@ -13,7 +13,6 @@ import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -26,7 +25,6 @@ import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ RestTemplateProvider.class })
 public class TimServiceTest extends BaseServiceTest {
     @Mock
     private OdeMsgMetadata odeTimMetadata;

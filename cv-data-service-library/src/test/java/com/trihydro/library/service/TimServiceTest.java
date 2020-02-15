@@ -1,25 +1,23 @@
 package com.trihydro.library.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 
 import com.trihydro.library.model.TimInsertModel;
+import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
@@ -29,7 +27,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ RestTemplateProvider.class })
-public class TimServiceTest {
+public class TimServiceTest extends BaseServiceTest {
     @Mock
     private OdeMsgMetadata odeTimMetadata;
     @Mock
@@ -37,21 +35,11 @@ public class TimServiceTest {
     @Mock
     private OdeTravelerInformationMessage j2735TravelerInformationMessage;
     @Mock
-    private RestTemplate mockRestTemplate;
-    @Mock
-    private ResponseEntity<Long> mockResponseEntityLong;
-
-    @Before
-    public void setup() throws SQLException {
-        PowerMockito.mockStatic(RestTemplateProvider.class);
-        when(RestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
-    }
+    private ResponseEntity<WydotOdeTravelerInformationMessage> mockWydotOdeTravelerInformationMessage;
 
     @Test
     public void insertTim_success() throws SQLException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<TimInsertModel> entity = new HttpEntity<TimInsertModel>(null, headers);
+        HttpEntity<TimInsertModel> entity = getEntity(null, TimInsertModel.class);
         when(mockRestTemplate.exchange("null/add-tim", HttpMethod.POST, entity, Long.class))
                 .thenReturn(mockResponseEntityLong);
         when(mockResponseEntityLong.getBody()).thenReturn(1l);
@@ -66,5 +54,22 @@ public class TimServiceTest {
 
         Long expected = 1L;
         assertEquals(expected, tim_id);
+    }
+
+    @Test
+    public void getTim() {
+        // Arrange
+        Long timId = -1l;
+        String url = String.format("null/get-tim/%d", timId);
+        when(mockWydotOdeTravelerInformationMessage.getBody()).thenReturn(new WydotOdeTravelerInformationMessage());
+        when(mockRestTemplate.getForEntity(url, WydotOdeTravelerInformationMessage.class))
+                .thenReturn(mockWydotOdeTravelerInformationMessage);
+
+        // Act
+        WydotOdeTravelerInformationMessage data = TimService.getTim(timId);
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, WydotOdeTravelerInformationMessage.class);
+        assertNotNull(data);
     }
 }

@@ -2,9 +2,14 @@ package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +71,92 @@ public class TimRsuController extends BaseController {
                 // return connection back to pool
                 if (connection != null)
                     connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @RequestMapping(value = "/tim-id", method = RequestMethod.GET)
+    public ResponseEntity<List<TimRsu>> GetTimRsusByTimId(Long timId) {
+
+        Statement statement = null;
+        Connection connection = null;
+        ResultSet rs = null;
+        List<TimRsu> timRsus = new ArrayList<TimRsu>();
+
+        try {
+
+            connection = GetConnectionPool();
+            statement = connection.createStatement();
+            // build SQL statement
+            rs = statement.executeQuery("select * from TIM_RSU where tim_id = " + timId);
+
+            // convert to DriverAlertType objects
+            while (rs.next()) {
+                TimRsu timRsu = new TimRsu();
+                timRsu.setTimId(rs.getLong("TIM_ID"));
+                timRsu.setRsuId(rs.getLong("RSU_ID"));
+                timRsu.setRsuIndex(rs.getInt("RSU_INDEX"));
+                timRsus.add(timRsu);
+            }
+            return ResponseEntity.ok(timRsus);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(timRsus);
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @RequestMapping(value = "/tim-rsu/{timId}/{rsuId}", method = RequestMethod.GET)
+    public ResponseEntity<TimRsu> GetTimRsu(@PathVariable Long timId, @PathVariable Integer rsuId) {
+
+        Statement statement = null;
+        Connection connection = null;
+        ResultSet rs = null;
+        TimRsu timRsu = new TimRsu();
+
+        try {
+            connection = GetConnectionPool();
+            statement = connection.createStatement();
+            // build SQL statement
+            rs = statement.executeQuery("select * from TIM_RSU where rsu_id = " + rsuId + " and tim_id = " + timId);
+
+            // convert to DriverAlertType objects
+            while (rs.next()) {
+                timRsu.setTimRsuId(rs.getLong("TIM_RSU_ID"));
+                timRsu.setTimId(rs.getLong("TIM_ID"));
+                timRsu.setRsuId(rs.getLong("RSU_ID"));
+                timRsu.setRsuIndex(rs.getInt("RSU_INDEX"));
+            }
+            return ResponseEntity.ok(timRsu);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }

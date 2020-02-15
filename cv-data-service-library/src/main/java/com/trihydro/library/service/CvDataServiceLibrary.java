@@ -35,10 +35,18 @@ public class CvDataServiceLibrary {
         DbUtility.setConfig(config);
     }
 
-    public static void setCVRestUrl(String url){
+    public static void setCVRestUrl(String url) {
         CVRestUrl = url;
     }
 
+    @Deprecated
+    /**
+     * @deprecated This should no longer be used, as all interactions with db have
+     *             been moved to REST service
+     * @param preparedStatement
+     * @param type
+     * @return
+     */
     public static Long log(PreparedStatement preparedStatement, String type) {
         Long id = null;
         try {
@@ -63,6 +71,13 @@ public class CvDataServiceLibrary {
         return id;
     }
 
+    @Deprecated
+    /**
+     * @deprecated This should no longer be used, as all interactions with db have
+     *             been moved to REST service
+     * @param preparedStatement
+     * @return
+     */
     public static boolean updateOrDelete(PreparedStatement preparedStatement) {
 
         boolean result = false;
@@ -78,4 +93,4 @@ public class CvDataServiceLibrary {
         return result;
     }
 
-    }
+}

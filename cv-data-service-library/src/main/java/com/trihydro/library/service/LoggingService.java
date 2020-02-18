@@ -1,55 +1,30 @@
 package com.trihydro.library.service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandlerStatic;
-import com.trihydro.library.tables.LoggingTables;
+import com.trihydro.library.model.HttpLoggingModel;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+
+@Component
 public class LoggingService extends CvDataServiceLibrary {
-    public static Long LogHttpRequest(String request, Timestamp requestTime, Timestamp responseTime) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-
-            connection = DbUtility.getConnectionPool();
-            String insertQueryStatement = LoggingTables.buildInsertQueryStatement("http_logging",
-                    LoggingTables.getHttpLoggingTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "http_logging_id" });
-            int fieldNum = 1;
-
-            for (String col : LoggingTables.getHttpLoggingTable()) {
-                if (col.equals("REQUEST_TIME")) {
-                    SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, fieldNum, requestTime);
-                } else if (col.equals("REST_REQUEST")) {
-                    SQLNullHandlerStatic.setStringOrNull(preparedStatement, fieldNum, request);
-                } else if (col.equals("RESPONSE_TIME")) {
-                    SQLNullHandlerStatic.setTimestampOrNull(preparedStatement, fieldNum, responseTime);
-                }
-
-                fieldNum++;
-            }
-
-            Long httpLoggingId = log(preparedStatement, "http_logging");
-            return httpLoggingId;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return new Long(0);
+    
+    public Long LogHttpRequest(String request, Timestamp requestTime, Timestamp responseTime) {
+        String url = String.format("%s/http-logging/add-http-logging", CVRestUrl);
+        HttpLoggingModel httpLoggingModel = new HttpLoggingModel();
+        httpLoggingModel.setRequest(request);
+        httpLoggingModel.setRequestTime(requestTime);
+        httpLoggingModel.setResponseTime(responseTime);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<HttpLoggingModel> entity = new HttpEntity<HttpLoggingModel>(httpLoggingModel, headers);
+        ResponseEntity<Long> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity,
+                Long.class);
+        return response.getBody();
     }
 }

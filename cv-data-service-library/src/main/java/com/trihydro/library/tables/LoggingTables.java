@@ -3,10 +3,13 @@ package com.trihydro.library.tables;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoggingTables extends OracleTablesStatic {
-    private static List<String> httpLoggingTable;
+import org.springframework.stereotype.Component;
 
-    public static List<String> getHttpLoggingTable() {
+@Component
+public class LoggingTables extends OracleTables {
+    private List<String> httpLoggingTable;
+
+    public List<String> getHttpLoggingTable() {
         if (httpLoggingTable == null) {
             httpLoggingTable = new ArrayList<String>();
 

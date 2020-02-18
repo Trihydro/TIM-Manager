@@ -14,19 +14,38 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import javax.servlet.*;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.output.TeeOutputStream;
-import org.springframework.stereotype.Component;
 
-import com.trihydro.library.service.*;
+import com.trihydro.library.service.LoggingService;
+
+import org.apache.commons.io.output.TeeOutputStream;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 // Adapted from https://stackoverflow.com/a/39137815
 @Component
 public class HttpLoggingFilter implements Filter {
+
+    private LoggingService loggingService;
+
+    @Autowired
+    public void InjectDependencies(LoggingService _loggingService) {
+        loggingService = _loggingService;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -54,7 +73,7 @@ public class HttpLoggingFilter implements Filter {
             logMessage.append(" [RESPONSE CODE:").append(bufferedResponse.getStatus()).append("]");
             logMessage.append(" [RESPONSE:").append(bufferedResponse.getContent()).append("]");
             System.out.println(logMessage.toString());
-            LoggingService.LogHttpRequest(logMessage.toString(), requestTime,
+            loggingService.LogHttpRequest(logMessage.toString(), requestTime,
                     new Timestamp(System.currentTimeMillis()));
         } catch (Throwable a) {
             System.out.println(a.getMessage());

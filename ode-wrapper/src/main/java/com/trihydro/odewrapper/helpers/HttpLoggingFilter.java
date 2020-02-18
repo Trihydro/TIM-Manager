@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import com.trihydro.library.model.HttpLoggingModel;
 import com.trihydro.library.service.LoggingService;
 
 import org.apache.commons.io.output.TeeOutputStream;
@@ -73,8 +74,11 @@ public class HttpLoggingFilter implements Filter {
             logMessage.append(" [RESPONSE CODE:").append(bufferedResponse.getStatus()).append("]");
             logMessage.append(" [RESPONSE:").append(bufferedResponse.getContent()).append("]");
             System.out.println(logMessage.toString());
-            loggingService.LogHttpRequest(logMessage.toString(), requestTime,
-                    new Timestamp(System.currentTimeMillis()));
+            HttpLoggingModel httpLoggingModel = new HttpLoggingModel();
+            httpLoggingModel.setRequest(logMessage.toString());
+            httpLoggingModel.setRequestTime(requestTime);
+            httpLoggingModel.setResponseTime(new Timestamp(System.currentTimeMillis()));
+            loggingService.LogHttpRequest(httpLoggingModel);
         } catch (Throwable a) {
             System.out.println(a.getMessage());
         }

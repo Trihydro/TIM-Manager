@@ -73,7 +73,7 @@ public class NodeXYController extends BaseController {
                         preparedStatement.setString(fieldNum, null);
                 fieldNum++;
             }
-            Long nodeXYId = log(preparedStatement, "nodexy");
+            Long nodeXYId = executeAndLog(preparedStatement, "nodexy");
             return ResponseEntity.ok(nodeXYId);
         } catch (SQLException e) {
             e.printStackTrace();

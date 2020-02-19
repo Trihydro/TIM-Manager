@@ -51,7 +51,7 @@ public class PathController extends BaseController {
                 fieldNum++;
             }
             // execute insert statement
-            Long pathId = log(preparedStatement, "pathId");
+            Long pathId = executeAndLog(preparedStatement, "pathId");
             return ResponseEntity.ok(pathId);
         } catch (SQLException e) {
             e.printStackTrace();

@@ -106,7 +106,7 @@ public class TracMessageSentController extends BaseController {
 				fieldNum++;
 			}
 			// execute insert statement
-			Long tracMessageSentId = log(preparedStatement, "tracMessageSentId");
+			Long tracMessageSentId = executeAndLog(preparedStatement, "tracMessageSentId");
 			return tracMessageSentId;
 		} catch (SQLException e) {
 			e.printStackTrace();

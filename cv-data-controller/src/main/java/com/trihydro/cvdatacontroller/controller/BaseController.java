@@ -34,12 +34,10 @@ public class BaseController {
     private HikariConfig config;
     private DataControllerConfigProperties dbConfig;
 
-    private DateFormat utcFormatMilliSec= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private DateFormat utcFormatSec= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    private DateFormat utcFormatMin= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-    protected DateFormat mstFormat= new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-    // private DateTimeFormatter localDateTimeformatter;
-    // private DateFormat mstLocalFormat= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS-07:00");
+    private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+    protected DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
     public void SetConfig(DataControllerConfigProperties props) {
@@ -106,7 +104,7 @@ public class BaseController {
         return result;
     }
 
-    public Long log(PreparedStatement preparedStatement, String type) {
+    public Long executeAndLog(PreparedStatement preparedStatement, String type) {
         Long id = null;
         try {
             if (preparedStatement.executeUpdate() > 0) {

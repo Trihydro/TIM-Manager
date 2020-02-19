@@ -115,7 +115,7 @@ public class PathNodeXYController extends BaseController {
 				fieldNum++;
 			}
 			// execute insert statement
-			Long pathNodeXYId = log(preparedStatement, "pathnodexyid");
+			Long pathNodeXYId = executeAndLog(preparedStatement, "pathnodexyid");
 			return ResponseEntity.ok(pathNodeXYId);
 
 		} catch (SQLException e) {

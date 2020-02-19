@@ -11,6 +11,8 @@ import com.trihydro.library.model.TracMessageType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TracMessageTypeControllerTest extends TestBase<TracMessageTypeController> {
@@ -19,15 +21,16 @@ public class TracMessageTypeControllerTest extends TestBase<TracMessageTypeContr
         // Arrange
 
         // Act
-        List<TracMessageType> data = uut.GetAll();
+        ResponseEntity<List<TracMessageType>> data = uut.GetAll();
 
         // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery("select * from TRAC_MESSAGE_TYPE");
         verify(mockRs).getInt("trac_message_type_id");
         verify(mockRs).getString("trac_message_type");
         verify(mockRs).getString("trac_message_description");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.size());
+        assertEquals(1, data.getBody().size());
     }
 }

@@ -11,6 +11,8 @@ import com.trihydro.library.model.SecurityResultCodeType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityResultCodeTypeControllerTest extends TestBase<SecurityResultCodeTypeController> {
@@ -19,14 +21,15 @@ public class SecurityResultCodeTypeControllerTest extends TestBase<SecurityResul
         // Arrange
 
         // Act
-        List<SecurityResultCodeType> data = uut.GetSecurityResultCodeTypes();
+        ResponseEntity<List<SecurityResultCodeType>> data = uut.GetSecurityResultCodeTypes();
 
         // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery("select * from SECURITY_RESULT_CODE_TYPE");
         verify(mockRs).getInt("SECURITY_RESULT_CODE_TYPE_ID");
         verify(mockRs).getString("SECURITY_RESULT_CODE_TYPE");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.size());
+        assertEquals(1, data.getBody().size());
     }
 }

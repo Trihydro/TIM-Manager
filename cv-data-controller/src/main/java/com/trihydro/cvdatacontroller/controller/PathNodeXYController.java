@@ -44,7 +44,6 @@ public class PathNodeXYController extends BaseController {
 		Statement statement = null;
 		ResultSet rs = null;
 		List<NodeXY> nodeXYs = new ArrayList<>();
-		boolean exception = false;
 
 		try {
 			connection = GetConnectionPool();
@@ -68,9 +67,11 @@ public class PathNodeXYController extends BaseController {
 
 				nodeXYs.add(nodexy);
 			}
+			return ResponseEntity.ok(nodeXYs.toArray(new NodeXY[nodeXYs.size()]));
 		} catch (Exception e) {
-			exception = true;
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(nodeXYs.toArray(new NodeXY[nodeXYs.size()]));
 		} finally {
 			try {
 				// close prepared statement
@@ -86,11 +87,6 @@ public class PathNodeXYController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		NodeXY[] data = nodeXYs.toArray(new NodeXY[nodeXYs.size()]);
-		if (exception && nodeXYs.size() == 0) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(data);
-		}
-		return ResponseEntity.ok(data);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "add-path-nodexy/{nodeXYId}/{pathId}")
@@ -120,6 +116,7 @@ public class PathNodeXYController extends BaseController {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
 		} finally {
 			try {
 				// close prepared statement
@@ -132,6 +129,5 @@ public class PathNodeXYController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
 	}
 }

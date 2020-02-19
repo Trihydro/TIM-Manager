@@ -36,9 +36,9 @@ public class TracMessageTypeController extends BaseController {
 			// convert to TracMessageSent objects
 			while (rs.next()) {
 				TracMessageType tracMessageType = new TracMessageType();
-				tracMessageType.setTracMessageTypeId(rs.getInt("trac_message_type_id"));
-				tracMessageType.setTracMessageType(rs.getString("trac_message_type"));
-				tracMessageType.setTracMessageDescription(rs.getString("trac_message_description"));
+				tracMessageType.setTracMessageTypeId(rs.getInt("TRAC_MESSAGE_TYPE_ID"));
+				tracMessageType.setTracMessageType(rs.getString("TRAC_MESSAGE_TYPE"));
+				tracMessageType.setTracMessageDescription(rs.getString("TRAC_MESSAGE_DESCRIPTION"));
 				tracMessagesType.add(tracMessageType);
 			}
 			return ResponseEntity.ok(tracMessagesType);

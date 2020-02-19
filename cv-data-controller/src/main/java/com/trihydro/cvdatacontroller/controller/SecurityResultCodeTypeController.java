@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.trihydro.library.model.SecurityResultCodeType;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("security-result-code-type")
 public class SecurityResultCodeTypeController extends BaseController {
-    @RequestMapping(value = "/get-all", method = RequestMethod.POST, headers = "Accept=application/json")
-    public List<SecurityResultCodeType> GetSecurityResultCodeTypes() {
+	@RequestMapping(value = "/get-all", method = RequestMethod.POST, headers = "Accept=application/json")
+	public ResponseEntity<List<SecurityResultCodeType>> GetSecurityResultCodeTypes() {
 
 		SecurityResultCodeType securityResultCodeType = null;
 		List<SecurityResultCodeType> securityResultCodeTypes = new ArrayList<SecurityResultCodeType>();
@@ -40,8 +42,10 @@ public class SecurityResultCodeTypeController extends BaseController {
 				securityResultCodeType.setSecurityResultCodeType(rs.getString("SECURITY_RESULT_CODE_TYPE"));
 				securityResultCodeTypes.add(securityResultCodeType);
 			}
+			return ResponseEntity.ok(securityResultCodeTypes);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(securityResultCodeTypes);
 		} finally {
 			try {
 				// close prepared statement
@@ -57,7 +61,5 @@ public class SecurityResultCodeTypeController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-
-		return securityResultCodeTypes;
 	}
 }

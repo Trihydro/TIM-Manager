@@ -49,7 +49,7 @@ public class TracMessageSentController extends BaseController {
 			rs = statement.executeQuery("select PACKET_ID from TRAC_MESSAGE_SENT");
 			// get packet_id values
 			while (rs.next()) {
-				packet_ids.add(rs.getString("packet_id"));
+				packet_ids.add(rs.getString("PACKET_ID"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

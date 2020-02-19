@@ -1,16 +1,14 @@
 package com.trihydro.library.service;
 
-import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.model.IncidentChoice;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.ArrayList;
-import com.trihydro.library.service.CvDataServiceLibrary;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.model.IncidentChoice;
 
 public class IncidentChoicesService extends CvDataServiceLibrary {
 
@@ -33,9 +31,9 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 			// convert to IncidentChoice objects
 			while (rs.next()) {
 				IncidentChoice incidentAction = new IncidentChoice();
-				incidentAction.setItisCodeId(rs.getInt("itis_code_id"));
-				incidentAction.setDescription(rs.getString("description"));
-				incidentAction.setCode(rs.getString("code"));
+				incidentAction.setItisCodeId(rs.getInt("ITIS_CODE_ID"));
+				incidentAction.setDescription(rs.getString("DESCRIPTION"));
+				incidentAction.setCode(rs.getString("CODE"));
 				incidentActions.add(incidentAction);
 			}
 
@@ -75,9 +73,9 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 			// convert to IncidentChoice objects
 			while (rs.next()) {
 				IncidentChoice incidentEffect = new IncidentChoice();
-				incidentEffect.setItisCodeId(rs.getInt("itis_code_id"));
-				incidentEffect.setDescription(rs.getString("description"));
-				incidentEffect.setCode(rs.getString("code"));
+				incidentEffect.setItisCodeId(rs.getInt("ITIS_CODE_ID"));
+				incidentEffect.setDescription(rs.getString("DESCRIPTION"));
+				incidentEffect.setCode(rs.getString("CODE"));
 				incidentEffects.add(incidentEffect);
 			}
 
@@ -119,9 +117,9 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 			// convert to IncidentChoice objects
 			while (rs.next()) {
 				IncidentChoice incidentProblem = new IncidentChoice();
-				incidentProblem.setItisCodeId(rs.getInt("itis_code_id"));
-				incidentProblem.setDescription(rs.getString("description"));
-				incidentProblem.setCode(rs.getString("code"));
+				incidentProblem.setItisCodeId(rs.getInt("ITIS_CODE_ID"));
+				incidentProblem.setDescription(rs.getString("DESCRIPTION"));
+				incidentProblem.setCode(rs.getString("CODE"));
 				incidentProblems.add(incidentProblem);
 			}
 		} catch (SQLException e) {

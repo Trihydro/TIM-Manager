@@ -35,10 +35,10 @@ public class ItisCodeController extends BaseController{
 			// convert to ItisCode objects
 			while (rs.next()) {
 				ItisCode itisCode = new ItisCode();
-				itisCode.setItisCodeId(rs.getInt("itis_code_id"));
-				itisCode.setItisCode(rs.getInt("itis_code"));
-				itisCode.setDescription(rs.getString("description").toLowerCase());
-				itisCode.setCategoryId(rs.getInt("category_id"));
+				itisCode.setItisCodeId(rs.getInt("ITIS_CODE_ID"));
+				itisCode.setItisCode(rs.getInt("ITIS_CODE"));
+				itisCode.setDescription(rs.getString("DESCRIPTION").toLowerCase());
+				itisCode.setCategoryId(rs.getInt("CATEGORY_ID"));
 				itisCodes.add(itisCode);
 			}
 		} catch (SQLException e) {

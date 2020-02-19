@@ -60,13 +60,13 @@ public class TimController extends BaseController {
             connection = GetConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
             int fieldNum = 1;
+            OdeTravelerInformationMessage j2735 = tim.getJ2735TravelerInformationMessage();
+            OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
+            ReceivedMessageDetails receivedMessageDetails = tim.getReceivedMessageDetails();
 
             for (String col : timOracleTables.getTimTable()) {
                 // default to null
                 preparedStatement.setString(fieldNum, null);
-                OdeTravelerInformationMessage j2735 = tim.getJ2735TravelerInformationMessage();
-                OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
-                ReceivedMessageDetails receivedMessageDetails = tim.getReceivedMessageDetails();
                 if (j2735 != null) {
                     if (col.equals("MSG_CNT"))
                         sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, j2735.getMsgCnt());
@@ -160,8 +160,8 @@ public class TimController extends BaseController {
                                 receivedMessageDetails.getRxSource().toString());
                     } else if (col.equals("SECURITY_RESULT_CODE")) {
                         SecurityResultCodeType securityResultCodeType = securityResultCodeTypeController
-                                .GetSecurityResultCodeTypes().stream().filter(x -> x.getSecurityResultCodeType()
-                                        .equals(tim.getSecurityResultCode().toString()))
+                                .GetSecurityResultCodeTypes().getBody().stream().filter(x -> x
+                                        .getSecurityResultCodeType().equals(tim.getSecurityResultCode().toString()))
                                 .findFirst().orElse(null);
                         preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());
                     }

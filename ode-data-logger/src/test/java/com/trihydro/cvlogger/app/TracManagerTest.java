@@ -64,6 +64,8 @@ public class TracManagerTest {
         private TracMessageTypeService mockTrackMessageTypeService;
         @Mock
         private TracMessageSentService mockTracMessageSentService;
+        @Mock
+        private JavaMailSenderImplProvider mockJavaMailSenderImplProvider;
 
         @Spy
         JsonToJavaConverter jsonToJava = new JsonToJavaConverter();
@@ -83,7 +85,7 @@ public class TracManagerTest {
                 tmts.add(tmt);
                 when(mockTrackMessageTypeService.selectAll()).thenReturn(tmts);
                 when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
-                when(JavaMailSenderImplProvider.getJSenderImpl(Matchers.any(String.class), Matchers.any(int.class)))
+                when(mockJavaMailSenderImplProvider.getJSenderImpl(Matchers.any(String.class), Matchers.any(int.class)))
                                 .thenReturn(jmsi);
         }
 

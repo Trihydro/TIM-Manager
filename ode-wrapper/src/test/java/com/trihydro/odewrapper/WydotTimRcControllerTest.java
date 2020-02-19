@@ -53,10 +53,12 @@ public class WydotTimRcControllerTest {
 	private MockMvc mockMvc;
 
 	protected static BasicConfiguration configuration;
+	protected static TimTypeService timTypeService;
 
 	@Autowired
-	public void setConfiguration(BasicConfiguration configurationRhs) {
+	public void setConfiguration(BasicConfiguration configurationRhs, TimTypeService _timTypeService) {
 		configuration = configurationRhs;
+		timTypeService = _timTypeService;
 	}
 
 	@Before
@@ -65,7 +67,7 @@ public class WydotTimRcControllerTest {
 	}
 
 	public static Long getTimTypeId() throws Exception {
-		List<TimType> timTypes = TimTypeService.selectAll();
+		List<TimType> timTypes = timTypeService.selectAll();
 
 		TimType timType = timTypes.stream().filter(x -> x.getType().equals("RC")).findFirst().orElse(null);
 

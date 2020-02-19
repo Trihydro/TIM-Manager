@@ -11,10 +11,14 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
 import com.trihydro.odewrapper.model.WydotTimVsl;
+import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,11 +38,17 @@ public class WydotTimVslController extends WydotTimBaseController {
     // get tim type
     TimType timType = getTimType(type);
 
+    @Autowired
+    public WydotTimVslController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService);
+    }
+
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createUpdateVslTim(@RequestBody TimVslList timVslList) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Create/Update VSL TIM");
         String post = gson.toJson(timVslList);
@@ -58,7 +68,7 @@ public class WydotTimVslController extends WydotTimBaseController {
             }
 
             // add TIM to list for processing later
-            timsToSend.add(wydotTim);            
+            timsToSend.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);

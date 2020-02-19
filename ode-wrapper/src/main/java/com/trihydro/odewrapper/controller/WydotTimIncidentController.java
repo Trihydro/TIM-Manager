@@ -9,10 +9,14 @@ import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
+import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -32,6 +36,12 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     private static String type = "I";
     // get tim type
     TimType timType = getTimType(type);
+
+    @Autowired
+    public WydotTimIncidentController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService);
+    }
 
     @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createIncidentTim(@RequestBody TimIncidentList timIncidentList) {

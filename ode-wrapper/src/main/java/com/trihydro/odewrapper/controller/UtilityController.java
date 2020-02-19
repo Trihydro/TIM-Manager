@@ -14,8 +14,10 @@ import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.WydotTimList;
+import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,8 +54,9 @@ public class UtilityController extends WydotTimBaseController {
     TimType timType = getTimType(type);
 
     @Autowired
-    public UtilityController(BasicConfiguration configurationRhs) {
-        configuration = configurationRhs;
+    public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService);
     }
 
     @RequestMapping(value = "/create-sat-tim", method = RequestMethod.POST, headers = "Accept=application/json")

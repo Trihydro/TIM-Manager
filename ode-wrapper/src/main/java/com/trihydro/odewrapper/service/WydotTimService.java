@@ -57,10 +57,15 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 public class WydotTimService {
 
     protected BasicConfiguration configuration;
+    protected EmailHelper emailHelper;
+    protected TimTypeService timTypeService;
 
     @Autowired
-    public WydotTimService(BasicConfiguration configurationRhs) {
+    public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
+            TimTypeService _timTypeService) {
         configuration = configurationRhs;
+        emailHelper = _emailHelper;
+        timTypeService = _timTypeService;
     }
 
     public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
@@ -259,7 +264,7 @@ public class WydotTimService {
                 if (StringUtils.isNotBlank(failedResultsText)) {
                     String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
                     try {
-                        EmailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
+                        emailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
                                 configuration);
                     } catch (Exception ex) {
                         Utility.logWithDate(body + ", and the email failed to send to support");
@@ -329,7 +334,7 @@ public class WydotTimService {
         if (timTypes != null)
             return timTypes;
         else {
-            timTypes = TimTypeService.selectAll();
+            timTypes = timTypeService.selectAll();
             return timTypes;
         }
     }
@@ -387,8 +392,8 @@ public class WydotTimService {
         return startDateTime;
     }
 
-    public void updateTimOnRsu(WydotTravelerInputData timToSend, Long timId,
-            WydotOdeTravelerInformationMessage tim, Integer rsuId, String endDateTime) {
+    public void updateTimOnRsu(WydotTravelerInputData timToSend, Long timId, WydotOdeTravelerInformationMessage tim,
+            Integer rsuId, String endDateTime) {
 
         WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);
 

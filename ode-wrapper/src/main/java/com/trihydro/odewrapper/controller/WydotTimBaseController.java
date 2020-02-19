@@ -24,30 +24,39 @@ import com.trihydro.odewrapper.model.WydotTimVsl;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
-import springfox.documentation.annotations.ApiIgnore;
-
-@RestController
-@ApiIgnore
+// @RestController
+// @ApiIgnore
+@Component
 public abstract class WydotTimBaseController {
 
     protected static BasicConfiguration configuration;
+    protected WydotTimService wydotTimService;
+    protected TimTypeService timTypeService;
 
-    @Autowired
-    public void setConfiguration(BasicConfiguration configurationRhs) {
-        configuration = configurationRhs;
+    public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService) {
+        configuration = _basicConfiguration;
+        wydotTimService = _wydotTimService;
+        timTypeService = _timTypeService;
     }
+    // @Autowired
+    // public void setConfiguration(BasicConfiguration configurationRhs) {
+    // configuration = configurationRhs;
+    // }
 
-    // services
-    protected final WydotTimService wydotTimService;
+    // @Autowired
+    // public void InjectDependencies(WydotTimService _WydotTimService) {
+    // wydotTimService = _WydotTimService;
+    // }
+
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
 
-    WydotTimBaseController() {
-        this.wydotTimService = new WydotTimService(configuration);
-    }
+    // WydotTimBaseController() {
+    // this.wydotTimService = new WydotTimService(configuration);
+    // }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {
 
@@ -508,7 +517,7 @@ public abstract class WydotTimBaseController {
         if (timTypes != null)
             return timTypes;
         else {
-            timTypes = TimTypeService.selectAll();
+            timTypes = timTypeService.selectAll();
             return timTypes;
         }
     }

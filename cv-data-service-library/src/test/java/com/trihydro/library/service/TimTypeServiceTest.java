@@ -21,6 +21,8 @@ public class TimTypeServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<TimType[]> mockResponseEntityTimTypeArray;
 
+    private TimTypeService uut = new TimTypeService();
+
     @Test
     public void selectAll() {
         // Arrange
@@ -35,7 +37,7 @@ public class TimTypeServiceTest extends BaseServiceTest {
         doReturn(mockResponseEntityTimTypeArray).when(mockRestTemplate).getForEntity(url, TimType[].class);
 
         // Act
-        List<TimType> data = TimTypeService.selectAll();
+        List<TimType> data = uut.selectAll();
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, TimType[].class);

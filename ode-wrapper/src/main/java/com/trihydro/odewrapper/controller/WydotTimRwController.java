@@ -11,12 +11,16 @@ import java.util.List;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRwList;
 import com.trihydro.odewrapper.model.WydotTimRw;
+import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -37,6 +41,12 @@ public class WydotTimRwController extends WydotTimBaseController {
     // get tim type
     TimType timType = getTimType(type);
     List<WydotTimRw> timsToSend;
+
+    @Autowired
+    public WydotTimRwController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService);
+    }
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {

@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
@@ -34,29 +35,18 @@ public abstract class WydotTimBaseController {
     protected static BasicConfiguration configuration;
     protected WydotTimService wydotTimService;
     protected TimTypeService timTypeService;
+    private TimType timType = null;
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
+        CvDataServiceLibrary.setCVRestUrl(configuration.getCvRestService());
     }
-    // @Autowired
-    // public void setConfiguration(BasicConfiguration configurationRhs) {
-    // configuration = configurationRhs;
-    // }
-
-    // @Autowired
-    // public void InjectDependencies(WydotTimService _WydotTimService) {
-    // wydotTimService = _WydotTimService;
-    // }
 
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
-
-    // WydotTimBaseController() {
-    // this.wydotTimService = new WydotTimService(configuration);
-    // }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {
 
@@ -507,10 +497,14 @@ public abstract class WydotTimBaseController {
 
     public TimType getTimType(String timTypeName) {
 
-        // get tim type
-        TimType timType = getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst().orElse(null);
+        if (timType != null && timType.getType() == timTypeName) {
+            return timType;
+        } else {
+            // get tim type
+            timType = getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst().orElse(null);
 
-        return timType;
+            return timType;
+        }
     }
 
     public List<TimType> getTimTypes() {

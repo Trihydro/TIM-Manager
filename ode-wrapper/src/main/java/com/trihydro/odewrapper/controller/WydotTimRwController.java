@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
@@ -38,8 +37,6 @@ import io.swagger.annotations.Api;
 public class WydotTimRwController extends WydotTimBaseController {
 
     private static String type = "RW";
-    // get tim type
-    TimType timType = getTimType(type);
     List<WydotTimRw> timsToSend;
 
     @Autowired
@@ -209,7 +206,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 for (WydotTimRw tim : timsToSend) {
-                    processRequest(tim, timType, tim.getSchedStart(), tim.getSchedEnd(), null);
+                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
                 }
             }
         }).start();

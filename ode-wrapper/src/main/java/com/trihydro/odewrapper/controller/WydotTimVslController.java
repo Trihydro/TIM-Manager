@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
@@ -35,8 +34,6 @@ import io.swagger.annotations.Api;
 public class WydotTimVslController extends WydotTimBaseController {
 
     private static String type = "VSL";
-    // get tim type
-    TimType timType = getTimType(type);
 
     @Autowired
     public WydotTimVslController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
@@ -85,7 +82,7 @@ public class WydotTimVslController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, timType, startTime, null, null);
+                    processRequest(tim, getTimType(type), startTime, null, null);
                 }
             }
         }).start();

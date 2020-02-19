@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
@@ -32,8 +31,6 @@ import io.swagger.annotations.Api;
 public class WydotTimRcController extends WydotTimBaseController {
 
     private static String type = "RC";
-    // get tim type
-    TimType timType = getTimType(type);
 
     @Autowired
     public WydotTimRcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
@@ -110,7 +107,7 @@ public class WydotTimRcController extends WydotTimBaseController {
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
-        
+
         if (timsToDelete.size() > 0) {
             wydotTimService.deleteWydotTimsByType(timsToDelete, type);
         }
@@ -125,7 +122,7 @@ public class WydotTimRcController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, timType, startTime, null, null);
+                    processRequest(tim, getTimType(type), startTime, null, null);
                 }
             }
         }).start();

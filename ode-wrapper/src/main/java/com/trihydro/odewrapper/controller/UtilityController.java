@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimQuery;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -50,8 +49,6 @@ public class UtilityController extends WydotTimBaseController {
     }
 
     private static String type = "TEST";
-    // get tim type
-    TimType timType = getTimType(type);
 
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
@@ -61,19 +58,17 @@ public class UtilityController extends WydotTimBaseController {
 
     @RequestMapping(value = "/create-sat-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createSatTim(@RequestBody WydotTimList wydotTimList) {
-
         // build TIM
         for (WydotTim wydotTim : wydotTimList.getTimList()) {
-
             // send TIM
-
             String regionNamePrev = wydotTim.getDirection() + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm()
                     + "_" + wydotTim.getToRm();
 
             WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, wydotTim.getDirection(), null, null,
                     null);
 
-            wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, null);
+            wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), getTimType(type),
+                    null);
 
         }
         return ResponseEntity.status(HttpStatus.OK).body("ok");

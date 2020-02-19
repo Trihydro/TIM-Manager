@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
@@ -35,8 +34,6 @@ import io.swagger.annotations.Api;
 public class WydotTimParkingController extends WydotTimBaseController {
 
     private static String type = "P";
-    // get tim type
-    TimType timType = getTimType(type);
 
     @Autowired
     public WydotTimParkingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
@@ -131,17 +128,16 @@ public class WydotTimParkingController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
-
                 for (WydotTimParking wydotTim : wydotTims) {
                     if (wydotTim.getDirection().equals("both")) {
 
                         wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
                         wydotTim.setToRm(wydotTim.getMileMarker());
-                        createSendTims(wydotTim, "eastbound", timType, startTime, null, null);
+                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, null);
 
                         wydotTim.setFromRm(wydotTim.getMileMarker());
                         wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        createSendTims(wydotTim, "westbound", timType, startTime, null, null);
+                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, null);
                     } else {
                         if (wydotTim.getDirection().equals("eastbound")) {
                             wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
@@ -150,7 +146,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
                             wydotTim.setFromRm(wydotTim.getMileMarker());
                             wydotTim.setToRm(wydotTim.getMileMarker() + 10);
                         }
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType, startTime, null, null);
+                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null, null);
                     }
                 }
             }

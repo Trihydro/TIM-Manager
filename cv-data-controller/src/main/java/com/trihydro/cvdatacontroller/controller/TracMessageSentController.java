@@ -13,6 +13,8 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TracMessageSent;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +36,7 @@ public class TracMessageSentController extends BaseController {
 	}
 
 	@RequestMapping(value = "/packet-ids", method = RequestMethod.GET, headers = "Accept=application/json")
-	public List<String> SelectPacketIds() {
+	public ResponseEntity<List<String>> SelectPacketIds() {
 
 		List<String> packet_ids = new ArrayList<String>();
 		Connection connection = null;
@@ -51,8 +53,10 @@ public class TracMessageSentController extends BaseController {
 			while (rs.next()) {
 				packet_ids.add(rs.getString("PACKET_ID"));
 			}
+			return ResponseEntity.ok(packet_ids);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(packet_ids);
 		} finally {
 			try {
 				// close prepared statement
@@ -68,11 +72,10 @@ public class TracMessageSentController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return packet_ids;
 	}
 
 	@RequestMapping(value = "/add-trac-message-sent", method = RequestMethod.POST, headers = "Accept=application/json")
-	public Long InsertTracMessageSent(@RequestBody TracMessageSent tracMessageSent) {
+	public ResponseEntity<Long> InsertTracMessageSent(@RequestBody TracMessageSent tracMessageSent) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 
@@ -107,9 +110,10 @@ public class TracMessageSentController extends BaseController {
 			}
 			// execute insert statement
 			Long tracMessageSentId = executeAndLog(preparedStatement, "tracMessageSentId");
-			return tracMessageSentId;
+			return ResponseEntity.ok(tracMessageSentId);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
 		} finally {
 			try {
 				// close prepared statement
@@ -122,6 +126,5 @@ public class TracMessageSentController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return new Long(0);
 	}
 }

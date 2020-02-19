@@ -16,6 +16,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TracMessageSentControllerTest extends TestBase<TracMessageSentController> {
@@ -34,14 +36,14 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
         // Arrange
 
         // Act
-        List<String> data = uut.SelectPacketIds();
+        ResponseEntity<List<String>> data = uut.SelectPacketIds();
 
         // Assert
         verify(mockStatement).executeQuery("select PACKET_ID from TRAC_MESSAGE_SENT");
         verify(mockRs).getString("PACKET_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.size());
+        assertEquals(1, data.getBody().size());
     }
 
     @Test
@@ -49,9 +51,10 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
         // Arrange
         TracMessageSent mockTMS = Mockito.mock(TracMessageSent.class);
         // Act
-        Long key = uut.InsertTracMessageSent(mockTMS);
+        ResponseEntity<Long> key = uut.InsertTracMessageSent(mockTMS);
 
         // Assert
+        assertEquals(HttpStatus.OK, key.getStatusCode());
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, mockTMS.getTracMessageTypeId());
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 2, mockTMS.getDateTimeSent());
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, mockTMS.getMessageText());
@@ -60,6 +63,6 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6, mockTMS.getRestResponseMessage());
         verify(mockSqlNullHandler).setIntegerFromBool(mockPreparedStatement, 7, mockTMS.isMessageSent());
         verify(mockSqlNullHandler).setIntegerFromBool(mockPreparedStatement, 8, mockTMS.isEmailSent());
-        assertEquals(new Long(-1), key);
+        assertEquals(new Long(-1), key.getBody());
     }
 }

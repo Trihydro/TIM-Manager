@@ -38,7 +38,7 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
 
         // Assert
         verify(mockStatement).executeQuery("select PACKET_ID from TRAC_MESSAGE_SENT");
-        verify(mockRs).getString("packet_id");
+        verify(mockRs).getString("PACKET_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, data.size());

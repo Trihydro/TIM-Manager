@@ -26,9 +26,9 @@ public class TracMessageTypeControllerTest extends TestBase<TracMessageTypeContr
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery("select * from TRAC_MESSAGE_TYPE");
-        verify(mockRs).getInt("trac_message_type_id");
-        verify(mockRs).getString("trac_message_type");
-        verify(mockRs).getString("trac_message_description");
+        verify(mockRs).getInt("TRAC_MESSAGE_TYPE_ID");
+        verify(mockRs).getString("TRAC_MESSAGE_TYPE");
+        verify(mockRs).getString("TRAC_MESSAGE_DESCRIPTION");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, data.getBody().size());

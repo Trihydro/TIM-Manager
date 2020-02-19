@@ -64,8 +64,6 @@ public class TimControllerTest extends TestBase<TimController> {
         public void AddTim_J2735_SUCCESS() throws SQLException {
                 // Arrange
                 TimInsertModel tim = new TimInsertModel();
-                // tim.setOdeTimMetadata(new OdeMsgMetadata());
-                // tim.setReceivedMessageDetails(new ReceivedMessageDetails());
                 tim.setJ2735TravelerInformationMessage(new OdeTravelerInformationMessage());
                 tim.setRecordType(RecordType.driverAlert);
                 tim.setLogFileName("logFileName");
@@ -93,12 +91,11 @@ public class TimControllerTest extends TestBase<TimController> {
                 OdeMsgMetadata omm = GetOmm();
                 omm.setRecordGeneratedBy(GeneratedBy.TMC);
                 tim.setOdeTimMetadata(omm);
-                // tim.setReceivedMessageDetails(new ReceivedMessageDetails());
                 tim.setRecordType(RecordType.driverAlert);
-                tim.setLogFileName("logFileName");
+                tim.setLogFileName("LOGFILENAME");
                 tim.setSecurityResultCode(SecurityResultCode.success);
-                tim.setSatRecordId("recordId");
-                tim.setRegionName("regionName");
+                tim.setSatRecordId("RECORDID");
+                tim.setRegionName("REGIONNAME");
                 OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
 
                 // Act
@@ -134,10 +131,10 @@ public class TimControllerTest extends TestBase<TimController> {
                 TimInsertModel tim = new TimInsertModel();
                 tim.setReceivedMessageDetails(getRxMsg());
                 tim.setRecordType(RecordType.driverAlert);
-                tim.setLogFileName("logFileName");
+                tim.setLogFileName("LOGFILENAME");
                 tim.setSecurityResultCode(SecurityResultCode.success);
-                tim.setSatRecordId("recordId");
-                tim.setRegionName("regionName");
+                tim.setSatRecordId("RECORDID");
+                tim.setRegionName("REGIONNAME");
                 ReceivedMessageDetails receivedMessageDetails = tim.getReceivedMessageDetails();
 
                 // Act

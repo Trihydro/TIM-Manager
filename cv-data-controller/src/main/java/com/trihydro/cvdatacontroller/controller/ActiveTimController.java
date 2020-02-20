@@ -40,11 +40,13 @@ public class ActiveTimController extends BaseController {
 
 	private TimOracleTables timOracleTables;
 	private SQLNullHandler sqlNullHandler;
+	private Utility utility;
 
 	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
+	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler, Utility _utility) {
 		timOracleTables = _timOracleTables;
 		sqlNullHandler = _sqlNullHandler;
+		utility = _utility;
 	}
 
 	// select all ITIS codes
@@ -122,10 +124,10 @@ public class ActiveTimController extends BaseController {
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
 				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-				activeTim.setSspLocationRights(Utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
-				activeTim.setSspTimRights(Utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
-				activeTim.setSspMsgTypes(Utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
-				activeTim.setSspMsgContent(Utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
+				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
+				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
+				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory

@@ -16,9 +16,9 @@ public class Application {
     public Gson gson = new Gson();
 
     @Autowired
-    public void setConfiguration(BasicConfiguration configurationRhs) {
+    public void InjectDependencies(BasicConfiguration configurationRhs, Utility _utility) {
         configuration = configurationRhs;
-        Utility.logWithDate("ODE Wrapper found the following configuration: " + gson.toJson(configuration));
+        _utility.logWithDate("ODE Wrapper found the following configuration: " + gson.toJson(configuration));
         CvDataServiceLibrary.setConfig(configuration);
     }
 

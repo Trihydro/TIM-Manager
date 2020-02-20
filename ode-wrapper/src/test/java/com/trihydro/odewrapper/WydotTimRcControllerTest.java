@@ -54,11 +54,14 @@ public class WydotTimRcControllerTest {
 
 	protected static BasicConfiguration configuration;
 	protected static TimTypeService timTypeService;
+	private CreateBaseTimUtil createBaseTimUtil;
 
 	@Autowired
-	public void setConfiguration(BasicConfiguration configurationRhs, TimTypeService _timTypeService) {
+	public void setConfiguration(BasicConfiguration configurationRhs, TimTypeService _timTypeService,
+			CreateBaseTimUtil _createBaseTimUtil) {
 		configuration = configurationRhs;
 		timTypeService = _timTypeService;
+		createBaseTimUtil = _createBaseTimUtil;
 	}
 
 	@Before
@@ -230,7 +233,7 @@ public class WydotTimRcControllerTest {
 		wydotTim.setRoadCode("LARI80WQDHLD");
 		wydotTim.setAdvisory(new Integer[] { 4871 });
 
-		WydotTravelerInputData wydotTravelerInputData = CreateBaseTimUtil.buildTim(wydotTim, "westbound", "80",
+		WydotTravelerInputData wydotTravelerInputData = createBaseTimUtil.buildTim(wydotTim, "westbound", "80",
 				configuration);
 
 		OdeLogMetadata odeTimMetadata = new OdeLogMetadata();

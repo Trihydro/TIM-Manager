@@ -60,14 +60,21 @@ public class WydotTimService {
     protected EmailHelper emailHelper;
     protected TimTypeService timTypeService;
     private SdwService sdwService;
+    private Utility utility;
+    private OdeService odeService;
+    private CreateBaseTimUtil createBaseTimUtil;
 
     @Autowired
     public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
-            TimTypeService _timTypeService, SdwService _sdwService) {
+            TimTypeService _timTypeService, SdwService _sdwService, Utility _utility, OdeService _odeService,
+            CreateBaseTimUtil _createBaseTimUtil) {
         configuration = configurationRhs;
         emailHelper = _emailHelper;
         timTypeService = _timTypeService;
         sdwService = _sdwService;
+        utility = _utility;
+        odeService = _odeService;
+        createBaseTimUtil = _createBaseTimUtil;
     }
 
     public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
@@ -82,7 +89,7 @@ public class WydotTimService {
 
         String route = wydotTim.getRoute().replaceAll("\\D+", "");
         // build base TIM
-        WydotTravelerInputData timToSend = CreateBaseTimUtil.buildTim(wydotTim, direction, route, configuration);
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, route, configuration);
 
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0]
@@ -96,7 +103,7 @@ public class WydotTimService {
 
         // set the duration if there is an enddate
         if (endDateTime != null) {
-            int durationTime = Utility.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+            int durationTime = utility.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
             timToSend.getTim().getDataframes()[0].setDurationTime(durationTime);
         }
 
@@ -163,12 +170,12 @@ public class WydotTimService {
             String direction, TimType timType, Integer pk, String endDateTime) {
 
         // FIND ALL RSUS TO SEND TO
-        List<WydotRsu> rsus = Utility.getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
+        List<WydotRsu> rsus = utility.getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
                 Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), "80");
 
         // if no RSUs found
         if (rsus.size() == 0) {
-            Utility.logWithDate("No RSUs found to place TIM on, returning");
+            utility.logWithDate("No RSUs found to place TIM on, returning");
             return;
         }
 
@@ -208,7 +215,7 @@ public class WydotTimService {
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                OdeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl());
+                odeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl());
             }
         }
     }
@@ -232,7 +239,7 @@ public class WydotTimService {
                 for (TimRsu timRsu : timRsus) {
                     rsu = getRsu(timRsu.getRsuId());
                     // delete tim off rsu
-                    Utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
+                    utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
                     deleteTimFromRsu(rsu, timRsu.getRsuIndex());
                 }
             }
@@ -269,7 +276,7 @@ public class WydotTimService {
                         emailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
                                 configuration);
                     } catch (Exception ex) {
-                        Utility.logWithDate(body + ", and the email failed to send to support");
+                        utility.logWithDate(body + ", and the email failed to send to support");
                         ex.printStackTrace();
                     }
                 }
@@ -284,7 +291,7 @@ public class WydotTimService {
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
         activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction);
-        Utility.logWithDate(activeTims.size() + " active_tim found for deletion");
+        utility.logWithDate(activeTims.size() + " active_tim found for deletion");
 
         deleteTimsFromRsusAndSdx(activeTims);
 
@@ -375,7 +382,7 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(timToSend);
 
         try {
-            Utility.logWithDate("Sending new TIM to SDW. sat_record_id: " + recordId);
+            utility.logWithDate("Sending new TIM to SDW. sat_record_id: " + recordId);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("Failed to send new TIM to SDW");
@@ -408,10 +415,10 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(updatedTim);
 
         try {
-            Utility.logWithDate("Updating TIM on RSU. tim_id: " + timId);
+            utility.logWithDate("Updating TIM on RSU. tim_id: " + timId);
             restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RestClientException ex) {
-            Utility.logWithDate("Failed to send update to RSU");
+            utility.logWithDate("Failed to send update to RSU");
         }
     }
 
@@ -437,10 +444,10 @@ public class WydotTimService {
 
         // send TIM
         try {
-            Utility.logWithDate("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
+            utility.logWithDate("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
             restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
-            Utility.logWithDate("exception updating tim on SDW");
+            utility.logWithDate("exception updating tim on SDW");
             targetException.printStackTrace();
         }
     }
@@ -470,7 +477,7 @@ public class WydotTimService {
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
         try {
-            Utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+            utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
             restTemplate.exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
                     entity, String.class);
         } catch (HttpClientErrorException e) {

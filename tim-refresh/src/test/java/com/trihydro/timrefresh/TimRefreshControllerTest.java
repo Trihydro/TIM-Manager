@@ -19,6 +19,7 @@ import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
+import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
@@ -29,6 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
@@ -40,8 +42,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Unit tests for TimRefreshController
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class,
-        SdwService.class, DataFrameService.class, Utility.class })
+@PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class, DataFrameService.class })
 public class TimRefreshControllerTest {
     private long timID = 1l;
 
@@ -52,21 +53,23 @@ public class TimRefreshControllerTest {
     TimRefreshConfiguration configuration;
     @Mock
     SdwService mockSdwService;
+    @Mock
+    Utility mockUtility;
+    @Mock
+    OdeService mockOdeService;
 
-    // @InjectMocks
+    @InjectMocks
     private TimRefreshController controllerUnderTest;
 
     @Before
     public void setup() {
-        controllerUnderTest = new TimRefreshController(configuration, mockSdwService);
+        // controllerUnderTest = new TimRefreshController(configuration, mockSdwService);
 
         PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(WydotTimService.class);
         PowerMockito.mockStatic(RsuService.class);
         PowerMockito.mockStatic(MilepostService.class);
-        PowerMockito.mockStatic(SdwService.class);
         PowerMockito.mockStatic(DataFrameService.class);
-        PowerMockito.mockStatic(Utility.class);
 
         setupMilePost();
         setupDataFrameService();
@@ -135,7 +138,7 @@ public class TimRefreshControllerTest {
         arrLst.add(tum);
         when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(RsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
-        when(Utility.getRsusInBuffer(isA(String.class), isA(double.class), isA(double.class), isA(String.class)))
+        when(mockUtility.getRsusInBuffer(isA(String.class), isA(double.class), isA(double.class), isA(String.class)))
                 .thenReturn(rsus);
 
         // call the function to test

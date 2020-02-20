@@ -16,18 +16,20 @@ import org.springframework.http.MediaType;
 
 public class RemoveExpiredActiveTims implements Runnable {
     private DataTasksConfiguration configuration;
+    private Utility utility;
 
-    public RemoveExpiredActiveTims(DataTasksConfiguration configuration) {
+    public RemoveExpiredActiveTims(DataTasksConfiguration configuration, Utility _utility) {
         this.configuration = configuration;
+        utility = _utility;
     }
 
     public void run() {
-        Utility.logWithDate("RemoveExpiredActiveTims - Running...");
+        utility.logWithDate("RemoveExpiredActiveTims - Running...");
 
         try {
             // select active tims
             List<ActiveTim> activeTims = ActiveTimService.getExpiredActiveTims();
-            Utility.logWithDate("RemoveExpiredActiveTims - Found " + activeTims.size() + " expired Active TIMs");
+            utility.logWithDate("RemoveExpiredActiveTims - Found " + activeTims.size() + " expired Active TIMs");
 
             // delete active tims from rsus
             HttpHeaders headers = new HttpHeaders();
@@ -42,7 +44,7 @@ public class RemoveExpiredActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                Utility.logWithDate("RemoveExpiredActiveTims - Deleting ActiveTim: { activeTimId: "
+                utility.logWithDate("RemoveExpiredActiveTims - Deleting ActiveTim: { activeTimId: "
                         + activeTim.getActiveTimId() + " }");
                 RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);

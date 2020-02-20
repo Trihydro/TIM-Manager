@@ -36,11 +36,13 @@ public class LoggerKafkaConsumer {
     private TimDataConverter timDataConverter;
     private BsmDataConverter bsmDataConverter;
     private DriverAlertDataConverter daConverter;
+    private Utility utility;
 
     @Autowired
     public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService,
             DriverAlertService _driverAlertService, TimDataConverter _timDataConverter,
-            BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter) throws IOException {
+            BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter, Utility _utility)
+            throws IOException {
         loggerConfig = _loggerConfig;
         bsmService = _bsmService;
         timService = _timService;
@@ -48,6 +50,7 @@ public class LoggerKafkaConsumer {
         timDataConverter = _timDataConverter;
         bsmDataConverter = _bsmDataConverter;
         daConverter = _daConverter;
+        utility = _utility;
 
         System.out.println("starting..............");
 
@@ -94,31 +97,31 @@ public class LoggerKafkaConsumer {
                             }
                             if (tdw != null && tdw.getData() != null) {
                                 switch (tdw.getTopic()) {
-                                case "topic.OdeTimJson":
-                                    odeData = timDataConverter.processTimJson(tdw.getData());
-                                    if (odeData.getMetadata()
-                                            .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
-                                        timService.addActiveTimToOracleDB(odeData);
-                                    } else {
-                                        timService.addTimToOracleDB(odeData);
-                                    }
-                                    break;
+                                    case "topic.OdeTimJson":
+                                        odeData = timDataConverter.processTimJson(tdw.getData());
+                                        if (odeData.getMetadata()
+                                                .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
+                                            timService.addActiveTimToOracleDB(odeData);
+                                        } else {
+                                            timService.addTimToOracleDB(odeData);
+                                        }
+                                        break;
 
-                                case "topic.OdeBsmJson":
-                                    odeData = bsmDataConverter.processBsmJson(tdw.getData());
-                                    bsmService.addBSMToOracleDB(odeData, tdw.getData());
-                                    break;
+                                    case "topic.OdeBsmJson":
+                                        odeData = bsmDataConverter.processBsmJson(tdw.getData());
+                                        bsmService.addBSMToOracleDB(odeData, tdw.getData());
+                                        break;
 
-                                case "topic.OdeDriverAlertJson":
-                                    odeData = daConverter.processDriverAlertJson(tdw.getData());
-                                    driverAlertService.addDriverAlertToOracleDB(odeData);
-                                    break;
+                                    case "topic.OdeDriverAlertJson":
+                                        odeData = daConverter.processDriverAlertJson(tdw.getData());
+                                        driverAlertService.addDriverAlertToOracleDB(odeData);
+                                        break;
                                 }
                             } else {
-                                Utility.logWithDate(
+                                utility.logWithDate(
                                         "Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
                                 if (tdw != null) {
-                                    Utility.logWithDate(gson.toJson(tdw));
+                                    utility.logWithDate(gson.toJson(tdw));
                                 }
                             }
                         }

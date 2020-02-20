@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -40,10 +41,12 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     private TimOracleTables mockTimOracleTables = new TimOracleTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
+    @Mock
+    private Utility mockUtility;
 
     @Before
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockUtility);
         doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
     }
@@ -730,7 +733,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String endTime = Instant.now().plusSeconds(60).toString();
         activeTim.setStartDateTime(startTime);
         activeTim.setEndDateTime(endTime);
-        doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());
+        doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1,
+                activeTim.getTimId());
 
         // Act
         ResponseEntity<Long> data = uut.InsertActiveTim(activeTim);

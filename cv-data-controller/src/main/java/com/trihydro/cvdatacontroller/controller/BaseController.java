@@ -33,7 +33,8 @@ public class BaseController {
     private HikariDataSource hds = null;
     private HikariConfig config;
     private DataControllerConfigProperties dbConfig;
-    JavaMailSenderImplProvider mailProvider;
+    private JavaMailSenderImplProvider mailProvider;
+    private Utility utility;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -41,9 +42,11 @@ public class BaseController {
     protected DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(DataControllerConfigProperties props, JavaMailSenderImplProvider _mailProvider) {
+    public void InjectDependencies(DataControllerConfigProperties props, JavaMailSenderImplProvider _mailProvider,
+            Utility _utility) {
         dbConfig = props;
         mailProvider = _mailProvider;
+        utility = _utility;
     }
 
     public Connection GetConnectionPool() throws SQLException {
@@ -83,7 +86,7 @@ public class BaseController {
             try {
                 SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body);
             } catch (Exception exception) {
-                Utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
+                utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");
                 exception.printStackTrace();
             }
@@ -114,7 +117,7 @@ public class BaseController {
                 try {
                     if (generatedKeys != null && generatedKeys.next()) {
                         id = generatedKeys.getLong(1);
-                        Utility.logWithDate("------ Generated " + type + " " + id + " --------------");
+                        utility.logWithDate("------ Generated " + type + " " + id + " --------------");
                     }
                 } finally {
                     try {

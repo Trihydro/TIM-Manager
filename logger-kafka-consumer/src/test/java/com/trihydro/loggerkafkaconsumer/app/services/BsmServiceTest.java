@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.tables.BsmOracleTables;
 
@@ -63,11 +64,13 @@ public class BsmServiceTest extends TestBase<BsmService> {
     private BsmPart2VseService mockBsmPart2VseService;
     @Mock
     private BsmPart2SuveService mockBsmPart2SuveService;
+    @Mock
+    private Utility mockUtility;
 
     @Before
     public void setupSubTest() {
         uut.InjectDependencies(mockJsonToJava, mockBsmOracleTables, mockSqlNullHandler, mockBsmPart2SpveService,
-                mockBsmPart2VseService, mockBsmPart2SuveService);
+                mockBsmPart2VseService, mockBsmPart2SuveService, mockUtility);
 
         doReturn(mockJ2735VehicleSafetyExtensions).when(mockJsonToJava)
                 .convertJ2735VehicleSafetyExtensionsJsonToJava(isA(String.class), isA(Integer.class));
@@ -253,16 +256,16 @@ public class BsmServiceTest extends TestBase<BsmService> {
         J2735BsmPart2Content content = new J2735BsmPart2Content();
 
         switch (partIIName) {
-        case "VehicleSafetyExtensions":
-            content.setId(J2735BsmPart2Id.VehicleSafetyExtensions);
-            break;
-        case "SpecialVehicleExtensions":
-            content.setId(J2735BsmPart2Id.SpecialVehicleExtensions);
-            break;
+            case "VehicleSafetyExtensions":
+                content.setId(J2735BsmPart2Id.VehicleSafetyExtensions);
+                break;
+            case "SpecialVehicleExtensions":
+                content.setId(J2735BsmPart2Id.SpecialVehicleExtensions);
+                break;
 
-        case "SupplementalVehicleExtensions":
-            content.setId(J2735BsmPart2Id.SupplementalVehicleExtensions);
-            break;
+            case "SupplementalVehicleExtensions":
+                content.setId(J2735BsmPart2Id.SupplementalVehicleExtensions);
+                break;
         }
         partII.add(content);
         bsmPayload.setPartII(partII);

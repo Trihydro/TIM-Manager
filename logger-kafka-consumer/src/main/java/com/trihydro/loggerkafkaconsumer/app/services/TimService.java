@@ -56,6 +56,7 @@ public class TimService extends BaseService {
     private DataFrameItisCodeService dataFrameItisCodeService;
     private PathNodeXYService pathNodeXYService;
     private NodeXYService nodeXYService;
+    private Utility utility;
 
     @Autowired
     public void InjectDependencies(ActiveTimService _ats, TimOracleTables _timOracleTables,
@@ -63,7 +64,7 @@ public class TimService extends BaseService {
             DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
             ItisCodeService _itisCodesService, TimRsuService _timRsuService,
             DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
-            NodeXYService _nodeXYService) {
+            NodeXYService _nodeXYService, Utility _utility) {
         activeTimService = _ats;
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
@@ -77,6 +78,7 @@ public class TimService extends BaseService {
         dataFrameItisCodeService = _dataFrameItisCodeService;
         pathNodeXYService = _pathNodeXYService;
         nodeXYService = _nodeXYService;
+        utility = _utility;
     }
 
     public void addTimToOracleDB(OdeData odeData) {
@@ -123,7 +125,7 @@ public class TimService extends BaseService {
             } else if (geometry != null) {
                 regionService.AddRegion(dataFrameId, null, region);
             } else {
-                Utility.logWithDate(
+                utility.logWithDate(
                         "addTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
                                 + dataFrameId + ")");
             }
@@ -163,7 +165,7 @@ public class TimService extends BaseService {
     // only does one TIM at a time ***
     public void addActiveTimToOracleDB(OdeData odeData) {
 
-        Utility.logWithDate("Called addActiveTimToOracleDB");
+        utility.logWithDate("Called addActiveTimToOracleDB");
         // variables
         ActiveTim activeTim;
 
@@ -209,16 +211,16 @@ public class TimService extends BaseService {
 
             timId = getTimId(tim.getPacketID(), ts);
             if (timId != null) {
-                Utility.logWithDate("TIM already exists, tim_id " + timId);
+                utility.logWithDate("TIM already exists, tim_id " + timId);
 
                 // ensure we handle a new satRecordId
                 if (satRecordId != null && satRecordId != "") {
                     updateTimSatRecordId(timId, satRecordId);
-                    Utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
+                    utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
                 }
             } else {
                 // failed to insert new tim and failed to fetch existing, log and return
-                Utility.logWithDate(
+                utility.logWithDate(
                         "Failed to insert tim, and failed to fetch existing tim. No data inserted for OdeData: "
                                 + gson.toJson(odeData));
                 return;
@@ -487,7 +489,7 @@ public class TimService extends BaseService {
         } else if (geometry != null) {
             regionService.AddRegion(dataFrameId, null, region);
         } else {
-            Utility.logWithDate(
+            utility.logWithDate(
                     "addActiveTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
                             + dataFrameId + ")");
         }
@@ -506,7 +508,7 @@ public class TimService extends BaseService {
                 if (itisCodeId != null)
                     dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
                 else
-                    Utility.logWithDate("Could not find corresponding itis code it for " + timItisCodeId);
+                    utility.logWithDate("Could not find corresponding itis code it for " + timItisCodeId);
             } else
                 dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
         }

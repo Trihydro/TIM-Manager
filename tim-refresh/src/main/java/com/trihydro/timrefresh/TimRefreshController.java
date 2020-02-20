@@ -54,11 +54,16 @@ public class TimRefreshController {
     public static Gson gson = new Gson();
     protected TimRefreshConfiguration configuration;
     private SdwService sdwService;
+    private Utility utility;
+    private OdeService odeService;
 
     @Autowired
-    public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService) {
+    public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
+            OdeService _odeService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
+        utility = _utility;
+        odeService = _odeService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -103,7 +108,7 @@ public class TimRefreshController {
             if (!StringUtils.isEmpty(aTim.getSatRecordId()) && !StringUtils.isBlank(aTim.getSatRecordId())) {
                 updateAndSendSDX(timToSend, aTim, mps);
             } else {
-                Utility.logWithDate("active_tim_id " + aTim.getActiveTimId()
+                utility.logWithDate("active_tim_id " + aTim.getActiveTimId()
                         + " not sent to SDX (no SAT_RECORD_ID found in database)");
             }
         }
@@ -115,7 +120,7 @@ public class TimRefreshController {
         // check to see if we have any itis codes
         // if not, just continue on
         if (df.getItems() == null || df.getItems().length == 0) {
-            Utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
+            utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
         Region region = getRegion(aTim, mps);
@@ -160,7 +165,7 @@ public class TimRefreshController {
     private String getHeadingSliceFromMileposts(List<Milepost> mps) {
         int timDirection = 0;
         for (int i = 0; i < mps.size(); i++) {
-            timDirection |= Utility.getDirection(mps.get(i).getBearing());
+            timDirection |= utility.getDirection(mps.get(i).getBearing());
         }
 
         // set direction based on bearings
@@ -174,15 +179,15 @@ public class TimRefreshController {
         List<WydotRsuTim> wydotRsus = RsuService.getFullRsusTimIsOn(aTim.getTimId());
         List<WydotRsu> dbRsus = new ArrayList<WydotRsu>();
         if (wydotRsus == null || wydotRsus.size() <= 0) {
-            Utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
+            utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
 
-            dbRsus = Utility.getRsusInBuffer(aTim.getDirection(),
+            dbRsus = utility.getRsusInBuffer(aTim.getDirection(),
                     Math.min(aTim.getMilepostStart(), aTim.getMilepostStop()),
                     Math.max(aTim.getMilepostStop(), aTim.getMilepostStart()), "80");
 
             // if no RSUs found
             if (dbRsus.size() == 0) {
-                Utility.logWithDate("No possible RSUs found for active_tim_id " + aTim.getActiveTimId());
+                utility.logWithDate("No possible RSUs found for active_tim_id " + aTim.getActiveTimId());
                 return;
             }
         }
@@ -222,7 +227,7 @@ public class TimRefreshController {
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, dbRsus.get(i)));
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
-                OdeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl());
+                odeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl());
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
             }
@@ -252,7 +257,7 @@ public class TimRefreshController {
         sdw.setServiceRegion(serviceRegion);
 
         // set sdw block in TIM
-        Utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
+        utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
         WydotTimService.updateTimOnSdw(timToSend);
     }
@@ -296,7 +301,7 @@ public class TimRefreshController {
 
         // set durationTime
         if (aTim.getEndDateTime() != null) {
-            int durationTime = Utility.getMinutesDurationBetweenTwoDates(aTim.getStartDateTime(),
+            int durationTime = utility.getMinutesDurationBetweenTwoDates(aTim.getStartDateTime(),
                     aTim.getEndDateTime());
             df.setDurationTime(durationTime);
         } else {

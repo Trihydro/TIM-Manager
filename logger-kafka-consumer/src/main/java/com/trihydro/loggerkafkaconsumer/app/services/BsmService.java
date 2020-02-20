@@ -33,17 +33,19 @@ public class BsmService extends BaseService {
     private BsmPart2SpveService bsmPart2SpveService;
     private BsmPart2VseService bsmPart2VseService;
     private BsmPart2SuveService bsmPart2SuveService;
+    private Utility utility;
 
     @Autowired
     public void InjectDependencies(JsonToJavaConverter _jsonToJava, BsmOracleTables _bsmOracleTables,
             SQLNullHandler _sqlNullHandler, BsmPart2SpveService _bsmPart2SpveService,
-            BsmPart2VseService _bsmPart2VseService, BsmPart2SuveService _bsmPart2SuveService) {
+            BsmPart2VseService _bsmPart2VseService, BsmPart2SuveService _bsmPart2SuveService, Utility _utility) {
         jsonToJava = _jsonToJava;
         bsmOracleTables = _bsmOracleTables;
         sqlNullHandler = _sqlNullHandler;
         bsmPart2SpveService = _bsmPart2SpveService;
         bsmPart2VseService = _bsmPart2VseService;
         bsmPart2SuveService = _bsmPart2SuveService;
+        utility = _utility;
     }
 
     public void addBSMToOracleDB(OdeData odeData, String value) {
@@ -78,10 +80,11 @@ public class BsmService extends BaseService {
                     }
                 }
             } else {
-                Utility.logWithDate("addBSMToOracleDB failed due to null payload.Bsm object. OdeData: " + gson.toJson(odeData));
+                utility.logWithDate(
+                        "addBSMToOracleDB failed due to null payload.Bsm object. OdeData: " + gson.toJson(odeData));
             }
         } else {
-            Utility.logWithDate("addBSMToOracleDB failed due to invalid OdeData object: " + gson.toJson(odeData));
+            utility.logWithDate("addBSMToOracleDB failed due to invalid OdeData object: " + gson.toJson(odeData));
         }
     }
 

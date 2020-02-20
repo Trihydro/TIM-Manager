@@ -58,11 +58,14 @@ public class WydotTimParkingControllerTest {
 
 	protected static BasicConfiguration configuration;
 	protected static TimTypeService timTypeService;
+	private CreateBaseTimUtil createBaseTimUtil;
 
 	@Autowired
-	public void setConfiguration(BasicConfiguration configurationRhs, TimTypeService _timTypeService) {
+	public void setConfiguration(BasicConfiguration configurationRhs, TimTypeService _timTypeService,
+			CreateBaseTimUtil _createBaseTimUtil) {
 		configuration = configurationRhs;
 		timTypeService = _timTypeService;
+		createBaseTimUtil = _createBaseTimUtil;
 	}
 
 	@Before
@@ -217,7 +220,7 @@ public class WydotTimParkingControllerTest {
 
 		parkingList.add(wydotTim);
 
-		WydotTravelerInputData wydotTravelerInputData = CreateBaseTimUtil.buildTim(wydotTim, "westbound", "80",
+		WydotTravelerInputData wydotTravelerInputData = createBaseTimUtil.buildTim(wydotTim, "westbound", "80",
 				configuration);
 
 		OdeLogMetadata odeTimMetadata = new OdeLogMetadata();

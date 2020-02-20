@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TimType;
@@ -75,6 +76,8 @@ public class TimServiceTest extends TestBase<TimService> {
     PathNodeXYService mockPathNodeXYService;
     @Mock
     NodeXYService mockNodeXYService;
+    @Mock
+    private Utility mockUtility;
 
     private WydotRsu rsu;
     private Long pathId = -99l;
@@ -83,7 +86,7 @@ public class TimServiceTest extends TestBase<TimService> {
     public void setupSubTest() {
         uut.InjectDependencies(mockActiveTimService, mockTimOracleTables, mockSqlNullHandler, mockPathService,
                 mockRegionService, mockDataFrameService, mockRsuService, mockTts, mockItisCodesService,
-                mockTimRsuService, mockDataFrameItisCodeService, mockPathNodeXYService, mockNodeXYService);
+                mockTimRsuService, mockDataFrameItisCodeService, mockPathNodeXYService, mockNodeXYService, mockUtility);
 
         ArrayList<WydotRsu> rsus = new ArrayList<>();
         rsu = new WydotRsu();
@@ -120,7 +123,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verifyZeroInteractions(mockDataFrameItisCodeService);
         // verify only these were called on the uut
         verify(uut).InjectDependencies(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any());
+                any(), any(), any());
         verify(uut).addTimToOracleDB(odeData);
         verify(uut).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verifyNoMoreInteractions(uut);

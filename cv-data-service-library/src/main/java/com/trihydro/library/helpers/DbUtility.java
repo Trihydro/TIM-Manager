@@ -2,13 +2,9 @@ package com.trihydro.library.helpers;
 
 import com.trihydro.library.model.ConfigProperties;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
-@ComponentScan
-@EnableConfigurationProperties(ConfigProperties.class)
+@Component
 public class DbUtility {
 
     private static ConfigProperties dbConfig;

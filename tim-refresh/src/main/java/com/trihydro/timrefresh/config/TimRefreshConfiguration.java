@@ -12,7 +12,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 
 @Component
 @ConfigurationProperties("config")
-@ComponentScan({ "com.trihydro.timrefresh", "com.trihydro.library.service" })
+@ComponentScan({ "com.trihydro.timrefresh", "com.trihydro.library.service", "com.trihydro.library.helpers" })
 public class TimRefreshConfiguration extends ConfigProperties {
 
     private TimeToLive sdwTtl;

@@ -87,6 +87,10 @@
     {
       "name": "Wrapper Compound Launch",
       "configurations": ["CV Data Controller (Launch)", "ODE Wrapper (Launch)"]
+    },
+    {
+      "name": "Tim Refresh Compound Launch",
+      "configurations": ["CV Data Controller (Launch)", "TIM Refresh (Launch)"]
     }
   ]
 }

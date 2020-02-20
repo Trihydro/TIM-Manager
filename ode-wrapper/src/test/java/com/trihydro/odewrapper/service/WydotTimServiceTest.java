@@ -50,6 +50,9 @@ public class WydotTimServiceTest {
     @Mock
     EmailHelper mockEmailHelper;
 
+    @Mock
+    SdwService mockSdwService;
+
     @InjectMocks
     private WydotTimService uut;
 
@@ -132,7 +135,7 @@ public class WydotTimServiceTest {
         sdxDelResults.put(-2032126074, true);
         String subject = "SDX Delete Fail";
         String body = "The following recordIds failed to delete from the SDX: -1032012897";
-        Mockito.when(SdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class))).thenReturn(sdxDelResults);
+        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class))).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
@@ -153,7 +156,7 @@ public class WydotTimServiceTest {
         List<ActiveTim> activeTims = getActiveTims(true);
         HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
         sdxDelResults.put(-1032012897, null);
-        Mockito.when(SdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class))).thenReturn(sdxDelResults);
+        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class))).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);

@@ -15,24 +15,33 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.trihydro.library.helpers.DbUtility;
+// import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.ConfigProperties;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SdwService {
-    public static Gson gson = new Gson();
+    public Gson gson = new Gson();
+    private ConfigProperties configProperties;
 
-    public static AdvisorySituationDataDeposit getSdwDataByRecordId(String recordId) {
-        String apiKey = DbUtility.getConfig().getSdwApiKey();
-        if (recordId == null || apiKey == null) {
+    @Autowired
+    public void InjectDependencies(ConfigProperties _config) {
+        configProperties = _config;
+    }
+
+    public AdvisorySituationDataDeposit getSdwDataByRecordId(String recordId) {
+        if (recordId == null || configProperties.getSdwApiKey() == null) {
             return null;
         }
 
         try {
             URL url = getBaseUrl("api/GetDataByRecordId?recordId=" + recordId);
-            HttpURLConnection conn = Utility.getSdxUrlConnection("GET", url, apiKey);
+            HttpURLConnection conn = Utility.getSdxUrlConnection("GET", url, configProperties.getSdwApiKey());
 
             InputStreamReader isr = new InputStreamReader(conn.getInputStream());
             BufferedReader br = new BufferedReader(isr);
@@ -54,7 +63,7 @@ public class SdwService {
 
     }
 
-    public static String getNewRecordId() {
+    public String getNewRecordId() {
         String hexChars = "ABCDEF1234567890";
         StringBuilder hexStrB = new StringBuilder();
         Random rnd = new Random();
@@ -66,11 +75,10 @@ public class SdwService {
         return hexStr;
     }
 
-    public static HashMap<Integer, Boolean> deleteSdxDataBySatRecordId(List<String> satRecordIds) {
+    public HashMap<Integer, Boolean> deleteSdxDataBySatRecordId(List<String> satRecordIds) {
         HashMap<Integer, Boolean> results = null;
-        String apiKey = DbUtility.getConfig().getSdwApiKey();
-        if (satRecordIds == null || satRecordIds.size() == 0 || apiKey == null) {
-            if (apiKey == null) {
+        if (satRecordIds == null || satRecordIds.size() == 0 || configProperties.getSdwApiKey() == null) {
+            if (configProperties.getSdwApiKey() == null) {
                 Utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
             } else {
                 Utility.logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
@@ -83,7 +91,7 @@ public class SdwService {
             List<Integer> satRecordInts = satRecordIds.stream().map(x -> Integer.parseUnsignedInt(x, 16))
                     .collect(Collectors.toList());
             String body = gson.toJson(satRecordInts);
-            HttpURLConnection conn = Utility.getSdxUrlConnection("DELETE", url, apiKey);
+            HttpURLConnection conn = Utility.getSdxUrlConnection("DELETE", url, configProperties.getSdwApiKey());
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
             conn.setDoOutput(true);
 
@@ -112,9 +120,9 @@ public class SdwService {
         }
     }
 
-    private static URL getBaseUrl(String end) {
+    private URL getBaseUrl(String end) {
         try {
-            String baseUrl = DbUtility.getConfig().getSdwRestUrl();
+            String baseUrl = configProperties.getSdwRestUrl();
             if (!baseUrl.endsWith("/")) {
                 baseUrl += "/";
             }

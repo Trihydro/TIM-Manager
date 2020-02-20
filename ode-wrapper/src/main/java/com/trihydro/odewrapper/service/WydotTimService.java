@@ -59,13 +59,15 @@ public class WydotTimService {
     protected BasicConfiguration configuration;
     protected EmailHelper emailHelper;
     protected TimTypeService timTypeService;
+    private SdwService sdwService;
 
     @Autowired
     public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
-            TimTypeService _timTypeService) {
+            TimTypeService _timTypeService, SdwService _sdwService) {
         configuration = configurationRhs;
         emailHelper = _emailHelper;
         timTypeService = _timTypeService;
+        sdwService = _sdwService;
     }
 
     public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
@@ -142,7 +144,7 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
         } else {
-            String recordId = SdwService.getNewRecordId();
+            String recordId = sdwService.getNewRecordId();
             String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
 
             if (wydotTim.getClientId() != null)
@@ -244,7 +246,7 @@ public class WydotTimService {
             List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
 
             // Issue one delete call to the REST service, encompassing all sat_record_ids
-            HashMap<Integer, Boolean> sdxDelResults = SdwService.deleteSdxDataBySatRecordId(satRecordIds);
+            HashMap<Integer, Boolean> sdxDelResults = sdwService.deleteSdxDataBySatRecordId(satRecordIds);
 
             // Determine if anything failed
             Boolean errorsOccurred = sdxDelResults.entrySet().stream()

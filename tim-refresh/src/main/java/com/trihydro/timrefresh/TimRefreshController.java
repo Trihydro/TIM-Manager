@@ -52,11 +52,13 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class TimRefreshController {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     public static Gson gson = new Gson();
-    protected static TimRefreshConfiguration configuration;
+    protected TimRefreshConfiguration configuration;
+    private SdwService sdwService;
 
     @Autowired
-    public TimRefreshController(TimRefreshConfiguration configurationRhs) {
+    public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService) {
         configuration = configurationRhs;
+        sdwService = _sdwService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -231,7 +233,7 @@ public class TimRefreshController {
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
         SDW sdw = new SDW();
-        AdvisorySituationDataDeposit asdd = SdwService.getSdwDataByRecordId(aTim.getSatRecordId());
+        AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
             System.out.println("SAT record not found for id " + aTim.getSatRecordId());
             updateAndSendNewSDX(timToSend, aTim, mps);
@@ -256,7 +258,7 @@ public class TimRefreshController {
     }
 
     private void updateAndSendNewSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
-        String recordId = SdwService.getNewRecordId();
+        String recordId = sdwService.getNewRecordId();
         System.out.println("Generating new SAT id and TIM: " + recordId);
         String regionName = getSATRegionName(aTim, recordId);
 

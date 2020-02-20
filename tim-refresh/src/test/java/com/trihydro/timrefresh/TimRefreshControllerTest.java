@@ -50,13 +50,15 @@ public class TimRefreshControllerTest {
 
     @Mock
     TimRefreshConfiguration configuration;
+    @Mock
+    SdwService mockSdwService;
 
     // @InjectMocks
     private TimRefreshController controllerUnderTest;
 
     @Before
     public void setup() {
-        controllerUnderTest = new TimRefreshController(configuration);
+        controllerUnderTest = new TimRefreshController(configuration, mockSdwService);
 
         PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(WydotTimService.class);
@@ -189,7 +191,7 @@ public class TimRefreshControllerTest {
         arrLst.add(tum);
 
         when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-        when(SdwService.getSdwDataByRecordId(any(String.class))).thenReturn(getAdvisorySituationDataDeposit());
+        when(mockSdwService.getSdwDataByRecordId(any(String.class))).thenReturn(getAdvisorySituationDataDeposit());
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();

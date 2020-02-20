@@ -2,57 +2,27 @@ package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import com.trihydro.library.model.Milepost;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MilepostControllerTest {
-    @Mock
-    private Connection mockConnection;
-    @Mock
-    private Statement mockStatement;
-    @Mock
-    private PreparedStatement mockPreparedStatement;
-    @Mock
-    private ResultSet mockRs;
-
-    private MilepostController uut;
-
+public class MilepostControllerTest extends TestBase<MilepostController> {
     private String direction = "direction";
     private String route = "route";
     private double fromMilepost = 0d;
     private double toMilepost = 10d;
     private boolean mod = false;
-
-    @Before
-    public void setup() throws SQLException {
-        uut = spy(new MilepostController());
-        when(mockConnection.createStatement()).thenReturn(mockStatement);
-        when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
-        doReturn(mockConnection).when(uut).GetConnectionPool();
-        when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
-        when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
-        when(mockRs.next()).thenReturn(true).thenReturn(false);
-    }
 
     @Test
     public void getMileposts_SUCCESS() throws SQLException {
@@ -143,7 +113,7 @@ public class MilepostControllerTest {
         statementStr += " and route like '%";
         statementStr += route;
         statementStr += "%' order by milepost desc";
-        when(mockRs.getString("route")).thenThrow(new SQLException());
+        when(mockRs.getString("ROUTE")).thenThrow(new SQLException());
 
         // Act
         ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRange(direction, route, toMilepost, fromMilepost);
@@ -166,13 +136,13 @@ public class MilepostControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery("select * from MILEPOST_VW where route like '%" + route + "%'");
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
-        verify(mockRs).getString("direction");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getDouble("elevation_ft");
-        verify(mockRs).getDouble("bearing");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getDouble("ELEVATION_FT");
+        verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, milePosts.getBody().size());
@@ -210,12 +180,12 @@ public class MilepostControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getDouble("elevation_ft");
-        verify(mockRs).getDouble("bearing");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getDouble("ELEVATION_FT");
+        verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, milePosts.getBody().size());
@@ -237,12 +207,12 @@ public class MilepostControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getDouble("elevation_ft");
-        verify(mockRs).getDouble("bearing");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getDouble("ELEVATION_FT");
+        verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, milePosts.getBody().size());
@@ -289,13 +259,13 @@ public class MilepostControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
-        verify(mockRs).getString("direction");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getDouble("elevation_ft");
-        verify(mockRs).getDouble("bearing");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getDouble("ELEVATION_FT");
+        verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, milePosts.getBody().size());
@@ -319,13 +289,13 @@ public class MilepostControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
-        verify(mockRs).getString("direction");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getDouble("elevation_ft");
-        verify(mockRs).getDouble("bearing");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getDouble("ELEVATION_FT");
+        verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, milePosts.getBody().size());
@@ -367,13 +337,13 @@ public class MilepostControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
-        verify(mockRs).getString("direction");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getDouble("elevation_ft");
-        verify(mockRs).getDouble("bearing");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getDouble("ELEVATION_FT");
+        verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, milePosts.getBody().size());

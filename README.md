@@ -14,37 +14,44 @@ The WyoCV Applications are a suite of tools for interacting with the Wyoming DOT
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [Deployment](#deployment) for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 
-The WyoCV suite is reliant on very few prerequisites. Any module-specific prerequisite can be found in associated README files. In general, the suite is built using Java and thus a version of JDK 7 or higher is required (JDK found [here](https://www.oracle.com/technetwork/java/javase/downloads/index.html)). 
-
-Additionally, all tools are compiled using [Maven](https://maven.apache.org/). 
-
-At the time of writing this README, the latest working versions are Maven version 3.6.3, Java Version 8 Update 241 (build 1.8.0_241-b07).
+- Git (https://git-scm.com/downloads)
+- Docker Desktop (https://docs.docker.com/install/)
+- VS Code (https://code.visualstudio.com/)
+- Remote - Containers (VS Code Extension: [see here](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers))
 
 ### Installing
 
 1. Clone the repo
 
-```
-git clone https://trihydro@dev.azure.com/trihydro/CV/_git/WyoCV
-```
+   ```
+   git clone https://trihydro@dev.azure.com/trihydro/CV/_git/WyoCV
+   ```
 
-2. Open the cloned folder in VS Code
+2. Open the `wyocv` workspace in VS Code
 
-```
-code WyoCV
-```
+    ```
+    code wyocv.code-workspace
+    ```
 
-3. Build the project
+3. Open the project in a development container
+    - Click <kbd>F1</kbd> then run the `Remote-Containers: Open Workspace in Container...` command
+    ![command](/images/open-in-remote-container.png)
+    - Alternatively, click the Status Bar in the lower-left corner of the window to access this command more quickly.
+    ![quick actions](/images/remote-dev-status-bar.png)
 
-```
-mvn clean install
-```
+    > __Note:__ the first time you do this, it will take a few minutes to build the container. Subsequent connections will be much faster.
 
-4. Use the debugger to run each individual module (as seen in the [launch.json](./.vscode/launch.json)).
+4. Once you've connected to the development container, you should be able to build the project by running the following command:
+    ```
+    mvn clean install
+    ```
+5. To debug the project, select and run the relevant profile from the _VS Code Debug_ window (see [launch.json](./.vscode/launch.json)).
+
+> __Note:__ when developing inside a docker container, the workspace files are mounted from the local file system. So any changes you make in the container will persist to your computer. If you close your connection to the container, you can still open the workspace locally and commit your changes as necessary.
 
 ## Usage 
 

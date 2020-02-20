@@ -66,6 +66,7 @@ public class OdeService {
         }
     }
 
+    //TODO: if this returns 0, we should NOT send it to the RSU
     protected static int findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
 
         List<Integer> setIndexList = new ArrayList<Integer>();

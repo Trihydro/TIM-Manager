@@ -1,12 +1,16 @@
 package com.trihydro.library.tables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class DriverAlertOracleTables extends OracleTables {
     
-    private static List<String> driverAlertTable;
+    private List<String> driverAlertTable;
 
-    public static List<String> getDriverAlertTable(){
+    public List<String> getDriverAlertTable(){
         if(driverAlertTable != null)
             return driverAlertTable;
         else {
@@ -36,4 +40,3 @@ public class DriverAlertOracleTables extends OracleTables {
     }
     
 }
-

@@ -61,12 +61,12 @@ public class RsuController extends BaseController {
 
 			while (rs.next()) {
 				WydotRsuTim rsu = new WydotRsuTim();
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
-				rsu.setIndex(rs.getInt("rsu_index"));
-				rsu.setRsuUsername(rs.getString("update_username"));
-				rsu.setRsuPassword(rs.getString("update_password"));
+				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				rsu.setLatitude(rs.getDouble("LATITUDE"));
+				rsu.setLongitude(rs.getDouble("LONGITUDE"));
+				rsu.setIndex(rs.getInt("RSU_INDEX"));
+				rsu.setRsuUsername(rs.getString("UPDATE_USERNAME"));
+				rsu.setRsuPassword(rs.getString("UPDATE_PASSWORD"));
 				rsus.add(rsu);
 			}
 		} catch (SQLException e) {
@@ -107,12 +107,12 @@ public class RsuController extends BaseController {
 
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();
-				rsu.setRsuId(rs.getInt("rsu_id"));
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
-				rsu.setRoute(rs.getString("route"));
-				rsu.setMilepost(rs.getDouble("milepost"));
+				rsu.setRsuId(rs.getInt("RSU_ID"));
+				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				rsu.setLatitude(rs.getDouble("LATITUDE"));
+				rsu.setLongitude(rs.getDouble("LONGITUDE"));
+				rsu.setRoute(rs.getString("ROUTE"));
+				rsu.setMilepost(rs.getDouble("MILEPOST"));
 				rsus.add(rsu);
 			}
 		} catch (SQLException e) {

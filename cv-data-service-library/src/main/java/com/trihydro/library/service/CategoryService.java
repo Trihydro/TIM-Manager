@@ -34,8 +34,8 @@ public class CategoryService extends CvDataServiceLibrary {
 			// convert to Category objects
 			while (rs.next()) {
 				Category category = new Category();
-				category.setCategoryId(rs.getInt("category_id"));
-				category.setCategory(rs.getString("category"));
+				category.setCategoryId(rs.getInt("CATEGORY_ID"));
+				category.setCategory(rs.getString("CATEGORY"));
 				categories.add(category);
 			}
 		} catch (SQLException e) {

@@ -1,8 +1,15 @@
 package com.trihydro.library.tables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TracMessageOracleTables extends OracleTables {
+/**
+ * @deprecated The TracMessageOracleTables functionality has been moved to the cv-data-controller
+ * project to better separate concerns. All database interactions will go
+ * through that project.
+ */
+@Deprecated
+public class TracMessageOracleTables extends OracleTablesStatic {
 
     private List<String> tracMessageSentTable;
     private List<String> tracMessageTypeTable;

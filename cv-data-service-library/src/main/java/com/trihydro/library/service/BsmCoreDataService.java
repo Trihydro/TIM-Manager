@@ -1,20 +1,23 @@
 package com.trihydro.library.service;
 
-import java.sql.*;
-import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
-import us.dot.its.jpo.ode.model.OdeBsmMetadata;
-import com.trihydro.library.tables.BsmOracleTables;
-import com.trihydro.library.service.CvDataServiceLibrary;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import com.trihydro.library.helpers.DbUtility;
-import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.SQLNullHandlerStatic;
 import com.trihydro.library.model.SecurityResultCodeType;
+import com.trihydro.library.tables.BsmOracleTablesStatic;
+
+import us.dot.its.jpo.ode.model.OdeBsmMetadata;
+import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 
 public class BsmCoreDataService extends CvDataServiceLibrary {
 
 	public static Long insertBSMCoreData(OdeBsmMetadata metadata, J2735Bsm bsm) {
 
-		String bsmCoreInsertQueryStatement = BsmOracleTables.buildInsertQueryStatement("bsm_core_data",
-				BsmOracleTables.getBsmCoreDataTable());
+		String bsmCoreInsertQueryStatement = BsmOracleTablesStatic.buildInsertQueryStatement("bsm_core_data",
+				BsmOracleTablesStatic.getBsmCoreDataTable());
 		PreparedStatement bsmPreparedStatement = null;
 		Connection connection = null;
 
@@ -27,7 +30,7 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 
 			int fieldNum = 1;
 
-			for (String col : BsmOracleTables.getBsmCoreDataTable()) {
+			for (String col : BsmOracleTablesStatic.getBsmCoreDataTable()) {
 				if (col.equals("ID")) {
 					bsmPreparedStatement.setString(fieldNum, bsm.getCoreData().getId());
 				} else if (col.equals("MSGCNT")) {
@@ -141,7 +144,7 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 				} else if (col.equals("RECORD_GENERATED_AT")) {
 					if (metadata.getRecordGeneratedAt() != null) {
 						java.util.Date recordGeneratedAtDate = convertDate(metadata.getRecordGeneratedAt());
-						SQLNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum,
+						SQLNullHandlerStatic.setStringOrNull(bsmPreparedStatement, fieldNum,
 								mstFormat.format(recordGeneratedAtDate));
 					} else
 						bsmPreparedStatement.setString(fieldNum, null);
@@ -168,7 +171,7 @@ public class BsmCoreDataService extends CvDataServiceLibrary {
 				} else if (col.equals("ODE_RECEIVED_AT")) {
 					if (metadata.getOdeReceivedAt() != null) {
 						java.util.Date receivedAtDate = convertDate(metadata.getOdeReceivedAt());
-						SQLNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum,
+						SQLNullHandlerStatic.setStringOrNull(bsmPreparedStatement, fieldNum,
 								mstFormat.format(receivedAtDate));
 					} else
 						bsmPreparedStatement.setString(fieldNum, null);

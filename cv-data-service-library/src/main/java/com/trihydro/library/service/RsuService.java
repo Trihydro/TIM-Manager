@@ -35,12 +35,12 @@ public class RsuService extends CvDataServiceLibrary {
 
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();
-				rsu.setRsuId(rs.getInt("rsu_id"));
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
-				rsu.setRoute(rs.getString("route"));
-				rsu.setMilepost(rs.getDouble("milepost"));
+				rsu.setRsuId(rs.getInt("RSU_ID"));
+				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				rsu.setLatitude(rs.getDouble("LATITUDE"));
+				rsu.setLongitude(rs.getDouble("LONGITUDE"));
+				rsu.setRoute(rs.getString("ROUTE"));
+				rsu.setMilepost(rs.getDouble("MILEPOST"));
 				rsus.add(rsu);
 			}
 
@@ -89,9 +89,9 @@ public class RsuService extends CvDataServiceLibrary {
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();
 				// rsu.setRsuId(rs.getInt("rsu_id"));
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
+				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				rsu.setLatitude(rs.getDouble("LATITUDE"));
+				rsu.setLongitude(rs.getDouble("LONGITUDE"));
 				rsus.add(rsu);
 			}
 		} catch (SQLException e) {
@@ -132,9 +132,9 @@ public class RsuService extends CvDataServiceLibrary {
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();
 				// rsu.setRsuId(rs.getInt("rsu_id"));
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
+				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				rsu.setLatitude(rs.getDouble("LATITUDE"));
+				rsu.setLongitude(rs.getDouble("LONGITUDE"));
 				rsus.add(rsu);
 			}
 		} catch (SQLException e) {
@@ -193,10 +193,10 @@ public class RsuService extends CvDataServiceLibrary {
 
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();
-				rsu.setRsuId(rs.getInt("rsu_id"));
-				rsu.setRsuTarget(rs.getString("ipv4_address"));
-				rsu.setLatitude(rs.getDouble("latitude"));
-				rsu.setLongitude(rs.getDouble("longitude"));
+				rsu.setRsuId(rs.getInt("RSU_ID"));
+				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				rsu.setLatitude(rs.getDouble("LATITUDE"));
+				rsu.setLongitude(rs.getDouble("LONGITUDE"));
 				rsus.add(rsu);
 			}
 		} catch (SQLException e) {

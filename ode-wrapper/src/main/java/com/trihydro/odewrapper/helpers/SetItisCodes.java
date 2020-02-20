@@ -22,9 +22,9 @@ public class SetItisCodes {
     private static List<IncidentChoice> incidentEffects;
     private static List<IncidentChoice> incidentActions;
 
-    private static List<ItisCode> itisCodes;
+    private List<ItisCode> itisCodes;
 
-    public static List<ItisCode> getItisCodes() {
+    public List<ItisCode> getItisCodes() {
         if (itisCodes != null)
             return itisCodes;
         else {
@@ -33,7 +33,7 @@ public class SetItisCodes {
         }
     }
 
-    public static List<String> setItisCodesFromAdvisoryArray(WydotTimRc wydotTim) {
+    public List<String> setItisCodesFromAdvisoryArray(WydotTimRc wydotTim) {
 
         // check to see if code exists
 
@@ -48,7 +48,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesRc(WydotTimRc wydotTim) {
+    public List<String> setItisCodesRc(WydotTimRc wydotTim) {
 
         List<String> items = new ArrayList<String>();
 
@@ -70,7 +70,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesVsl(WydotTimVsl wydotTim) {
+    public List<String> setItisCodesVsl(WydotTimVsl wydotTim) {
 
         List<String> items = new ArrayList<String>();
 
@@ -94,7 +94,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesParking(WydotTimParking wydotTim) {
+    public List<String> setItisCodesParking(WydotTimParking wydotTim) {
 
         // check to see if code exists
         List<String> items = new ArrayList<String>();
@@ -152,7 +152,7 @@ public class SetItisCodes {
         return list;
     }
 
-    public static List<String> setItisCodesFromAvailability(WydotTimParking wydotTim) {
+    public List<String> setItisCodesFromAvailability(WydotTimParking wydotTim) {
 
         // check to see if code exists
         List<String> items = new ArrayList<String>();
@@ -180,7 +180,7 @@ public class SetItisCodes {
         return itisCode;
     }
 
-    public static List<String> setItisCodesIncident(WydotTimIncident wydotTim) {
+    public List<String> setItisCodesIncident(WydotTimIncident wydotTim) {
         List<String> items = new ArrayList<String>();
 
         // action

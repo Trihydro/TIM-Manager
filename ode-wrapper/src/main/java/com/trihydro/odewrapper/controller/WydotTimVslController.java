@@ -12,6 +12,7 @@ import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
 import com.trihydro.odewrapper.model.WydotTimVsl;
@@ -37,8 +38,8 @@ public class WydotTimVslController extends WydotTimBaseController {
 
     @Autowired
     public WydotTimVslController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes);
     }
 
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")

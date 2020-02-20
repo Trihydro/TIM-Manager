@@ -9,6 +9,7 @@ import java.util.List;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTimRc;
@@ -34,8 +35,8 @@ public class WydotTimCcController extends WydotTimBaseController {
 
     @Autowired
     public WydotTimCcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes);
     }
 
     @RequestMapping(value = "/cc-tim", method = RequestMethod.POST, headers = "Accept=application/json")

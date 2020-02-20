@@ -36,12 +36,14 @@ public abstract class WydotTimBaseController {
     protected WydotTimService wydotTimService;
     protected TimTypeService timTypeService;
     private TimType timType = null;
+    private SetItisCodes setItisCodes;
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService) {
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
+        setItisCodes = _setItisCodes;
         CvDataServiceLibrary.setCVRestUrl(configuration.getCvRestService());
     }
 
@@ -87,7 +89,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesParking(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesParking(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -97,7 +99,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputIncident(WydotTimIncident tim) {
+    public ControllerResult validateInputIncident(WydotTimIncident tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -141,7 +143,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesIncident(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesIncident(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -301,7 +303,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesRc(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesRc(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -363,7 +365,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesVsl(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesVsl(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -430,7 +432,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesFromAdvisoryArray(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesFromAdvisoryArray(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);

@@ -11,6 +11,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimParkingList;
 import com.trihydro.odewrapper.model.WydotTimParking;
@@ -37,8 +38,8 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
     @Autowired
     public WydotTimParkingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes);
     }
 
     @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")

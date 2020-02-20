@@ -59,7 +59,7 @@ public class HttpLoggingController extends BaseController {
                 fieldNum++;
             }
 
-            Long httpLoggingId = log(preparedStatement, "http_logging");
+            Long httpLoggingId = executeAndLog(preparedStatement, "http_logging");
             return ResponseEntity.ok(httpLoggingId);
         } catch (SQLException e) {
             e.printStackTrace();

@@ -915,7 +915,7 @@ public class ActiveTimController extends BaseController {
 				fieldNum++;
 			}
 
-			activeTimId = log(preparedStatement, "active tim");
+			activeTimId = executeAndLog(preparedStatement, "active tim");
 			return ResponseEntity.ok(activeTimId);
 		} catch (SQLException e) {
 			e.printStackTrace();

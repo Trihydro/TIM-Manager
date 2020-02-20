@@ -31,12 +31,12 @@ public class RsuControllerTest extends TestBase<RsuController> {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
-        verify(mockRs).getInt("rsu_id");
-        verify(mockRs).getString("ipv4_address");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
+        verify(mockRs).getInt("RSU_ID");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -46,7 +46,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
     public void SelectAllRsus_FAIL() throws SQLException {
         // Arrange
         String selectStatement = "select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid order by milepost asc";
-        doThrow(new SQLException()).when(mockRs).getInt("rsu_id");
+        doThrow(new SQLException()).when(mockRs).getInt("RSU_ID");
         // Act
         ResponseEntity<List<WydotRsu>> data = uut.SelectAllRsus();
 
@@ -69,9 +69,9 @@ public class RsuControllerTest extends TestBase<RsuController> {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
-        verify(mockRs).getString("ipv4_address");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -81,7 +81,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
     public void SelectActiveRsus_FAIL() throws SQLException {
         // Arrange
         String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing'";
-        doThrow(new SQLException()).when(mockRs).getString("ipv4_address");
+        doThrow(new SQLException()).when(mockRs).getString("IPV4_ADDRESS");
 
         // Act
         ResponseEntity<List<WydotRsu>> data = uut.SelectActiveRsus();
@@ -109,10 +109,10 @@ public class RsuControllerTest extends TestBase<RsuController> {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
-        verify(mockRs).getInt("rsu_id");
-        verify(mockRs).getString("ipv4_address");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
+        verify(mockRs).getInt("RSU_ID");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -133,10 +133,10 @@ public class RsuControllerTest extends TestBase<RsuController> {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
-        verify(mockRs).getInt("rsu_id");
-        verify(mockRs).getString("ipv4_address");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
+        verify(mockRs).getInt("RSU_ID");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -150,7 +150,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         double endingMilepost = 20d;
         String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing' and rsu_vw.milepost >= "
                 + startingMilepost + "and rsu_vw.milepost <= " + 25.0 + " and rsu_vw.route like '%80%'";
-        doThrow(new SQLException()).when(mockRs).getInt("rsu_id");
+        doThrow(new SQLException()).when(mockRs).getInt("RSU_ID");
 
         // Act
         ResponseEntity<List<WydotRsu>> data = uut.SelectRsusInBuffer(direction, startingMilepost, endingMilepost);
@@ -176,12 +176,12 @@ public class RsuControllerTest extends TestBase<RsuController> {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
-        verify(mockRs).getString("ipv4_address");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getInt("rsu_index");
-        verify(mockRs).getString("update_username");
-        verify(mockRs).getString("update_password");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getInt("RSU_INDEX");
+        verify(mockRs).getString("UPDATE_USERNAME");
+        verify(mockRs).getString("UPDATE_PASSWORD");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -193,7 +193,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         Long timId = -1l;
         String selectStatement = "select rsu.*, tim_rsu.rsu_index, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id where tim_rsu.tim_id = "
                 + timId;
-        doThrow(new SQLException()).when(mockRs).getString("ipv4_address");
+        doThrow(new SQLException()).when(mockRs).getString("IPV4_ADDRESS");
 
         // Act
         ResponseEntity<List<WydotRsuTim>> data = uut.GetFullRsusTimIsOn(timId);
@@ -218,12 +218,12 @@ public class RsuControllerTest extends TestBase<RsuController> {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
-        verify(mockRs).getInt("rsu_id");
-        verify(mockRs).getString("ipv4_address");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
+        verify(mockRs).getInt("RSU_ID");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -235,7 +235,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         String route = "I80";
         String selectStatement = "select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.route like '%"
                 + route + "%' and rsu_vw.status = 'Existing' order by milepost asc";
-        doThrow(new SQLException()).when(mockRs).getInt("rsu_id");
+        doThrow(new SQLException()).when(mockRs).getInt("RSU_ID");
         // Act
         ResponseEntity<ArrayList<WydotRsu>> data = uut.SelectRsusByRoute(route);
 

@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +23,14 @@ import org.springframework.http.ResponseEntity;
 @RunWith(MockitoJUnitRunner.class)
 public class TracMessageSentControllerTest extends TestBase<TracMessageSentController> {
 
-    private TracMessageOracleTables _tracMessageOracleTables = new TracMessageOracleTables();
+    @Spy
+    private TracMessageOracleTables mockTracMessageOracleTables = new TracMessageOracleTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
     @Before
     public void setupSubTest() {
-        uut.InjectDependencies(_tracMessageOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTracMessageOracleTables, mockSqlNullHandler);
     }
 
     @Test

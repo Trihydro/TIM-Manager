@@ -88,23 +88,23 @@ public class TracMessageSentController extends BaseController {
 			int fieldNum = 1;
 
 			for (String col : tracMessageOracleTables.getTracMessageSentTable()) {
-				if (col.equals("trac_message_type_id"))
+				if (col.equals("TRAC_MESSAGE_TYPE_ID"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
 							tracMessageSent.getTracMessageTypeId());
-				else if (col.equals("date_time_sent"))
+				else if (col.equals("DATE_TIME_SENT"))
 					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tracMessageSent.getDateTimeSent());
-				else if (col.equals("message_text"))
+				else if (col.equals("MESSAGE_TEXT"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, tracMessageSent.getMessageText());
-				else if (col.equals("packet_id"))
+				else if (col.equals("PACKET_ID"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, tracMessageSent.getPacketId());
-				else if (col.equals("rest_response_code"))
+				else if (col.equals("REST_RESPONSE_CODE"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, tracMessageSent.getRestResponseCode());
-				else if (col.equals("rest_response_message"))
+				else if (col.equals("REST_RESPONSE_MESSAGE"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
 							tracMessageSent.getRestResponseMessage());
-				else if (col.equals("message_sent"))
+				else if (col.equals("MESSAGE_SENT"))
 					sqlNullHandler.setIntegerFromBool(preparedStatement, fieldNum, tracMessageSent.isMessageSent());
-				else if (col.equals("email_sent"))
+				else if (col.equals("EMAIL_SENT"))
 					sqlNullHandler.setIntegerFromBool(preparedStatement, fieldNum, tracMessageSent.isEmailSent());
 				fieldNum++;
 			}

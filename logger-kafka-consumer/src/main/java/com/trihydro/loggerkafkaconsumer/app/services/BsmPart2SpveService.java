@@ -184,7 +184,7 @@ public class BsmPart2SpveService extends BaseService {
             fieldNum++;
 
             // execute insert statement
-            Long bsmPart2SpveId = log(preparedStatement, "bsmPart2SpveId");
+            Long bsmPart2SpveId = executeAndLog(preparedStatement, "bsmPart2SpveId");
             return bsmPart2SpveId;
 
         } catch (SQLException e) {

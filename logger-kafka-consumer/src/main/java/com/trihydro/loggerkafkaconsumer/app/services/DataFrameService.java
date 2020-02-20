@@ -85,7 +85,7 @@ public class DataFrameService extends BaseService {
                 fieldNum++;
             }
 
-            Long dataFrameId = log(preparedStatement, "dataframe");
+            Long dataFrameId = executeAndLog(preparedStatement, "dataframe");
             return dataFrameId;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -449,7 +449,7 @@ public class TimService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long timId = log(preparedStatement, "timID");
+            Long timId = executeAndLog(preparedStatement, "timID");
             return timId;
         } catch (SQLException e) {
             e.printStackTrace();

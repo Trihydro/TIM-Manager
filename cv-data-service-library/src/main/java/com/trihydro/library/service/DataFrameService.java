@@ -17,7 +17,7 @@ public class DataFrameService extends CvDataServiceLibrary {
 	 * @return
 	 */
 	public static Long insertDataFrame(Long timID, DataFrame dFrame) {
-		String url = String.format("/%s/data-frame/add-data-frame/%d", CVRestUrl, timID);
+		String url = String.format("%s/data-frame/add-data-frame/%d", CVRestUrl, timID);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<DataFrame> entity = new HttpEntity<DataFrame>(dFrame, headers);

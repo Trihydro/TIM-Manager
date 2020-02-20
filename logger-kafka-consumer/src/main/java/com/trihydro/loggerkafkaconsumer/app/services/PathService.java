@@ -40,7 +40,7 @@ public class PathService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long pathId = log(preparedStatement, "pathId");
+            Long pathId = executeAndLog(preparedStatement, "pathId");
             return pathId;
         } catch (SQLException e) {
             e.printStackTrace();

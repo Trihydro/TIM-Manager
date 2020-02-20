@@ -43,7 +43,7 @@ public class TimRsuService extends BaseService {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuIndex);
                 fieldNum++;
             }
-            Long timRsuId = log(preparedStatement, "tim rsu");
+            Long timRsuId = executeAndLog(preparedStatement, "tim rsu");
             return timRsuId;
         } catch (SQLException e) {
             e.printStackTrace();

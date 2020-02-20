@@ -42,7 +42,7 @@ public class PathNodeXYService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long pathNodeXYId = log(preparedStatement, "pathnodexyid");
+            Long pathNodeXYId = executeAndLog(preparedStatement, "pathnodexyid");
             return pathNodeXYId;
 
         } catch (SQLException e) {

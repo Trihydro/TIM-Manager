@@ -53,7 +53,7 @@ public class DataFrameItisCodeService extends BaseService {
                 fieldNum++;
             }
 
-            Long dataFrameItisCodeId = log(preparedStatement, "dataFrameItisCode");
+            Long dataFrameItisCodeId = executeAndLog(preparedStatement, "dataFrameItisCode");
             return dataFrameItisCodeId;
         } catch (SQLException e) {
             e.printStackTrace();

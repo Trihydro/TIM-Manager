@@ -45,7 +45,7 @@ public class TestBase<T> {
         when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
         when(mockConnection.prepareStatement(isA(String.class), isA(String[].class))).thenReturn(mockPreparedStatement);
         doReturn(mockConnection).when((BaseService) uut).GetConnectionPool();
-        doReturn(-1l).when((BaseService) uut).log(isA(PreparedStatement.class), isA(String.class));
+        doReturn(-1l).when((BaseService) uut).executeAndLog(isA(PreparedStatement.class), isA(String.class));
         doReturn(true).when((BaseService)uut).updateOrDelete(isA(PreparedStatement.class));
         when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
         when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);

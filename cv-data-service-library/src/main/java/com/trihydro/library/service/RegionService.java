@@ -11,7 +11,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 public class RegionService extends CvDataServiceLibrary {
 
 	public static Long insertRegion(Long dataFrameId, Long pathId, Region region) {
-		String url = String.format("/%s/region/add-region/%d/%d", CVRestUrl, dataFrameId, pathId);
+		String url = String.format("%s/region/add-region/%d/%d", CVRestUrl, dataFrameId, pathId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<Region> entity = new HttpEntity<Region>(region, headers);

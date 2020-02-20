@@ -235,7 +235,7 @@ public class BsmPart2VseService extends BaseService {
 			}
 
 			// execute insert statement
-			Long bsmPart2VseId = log(bsmVsePreparedStatement, "bsmPart2VseId");
+			Long bsmPart2VseId = executeAndLog(bsmVsePreparedStatement, "bsmPart2VseId");
 			return bsmPart2VseId;
 		} catch (SQLException e) {
 			e.printStackTrace();

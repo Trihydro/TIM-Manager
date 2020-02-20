@@ -11,7 +11,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 public class NodeXYService extends CvDataServiceLibrary {
 
     public static Long insertNodeXY(OdeTravelerInformationMessage.NodeXY nodeXY) {
-        String url = String.format("/%s/nodexy/add-nodexy", CVRestUrl);
+        String url = String.format("%s/nodexy/add-nodexy", CVRestUrl);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<OdeTravelerInformationMessage.NodeXY> entity = new HttpEntity<OdeTravelerInformationMessage.NodeXY>(

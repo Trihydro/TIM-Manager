@@ -74,7 +74,7 @@ public class ActiveTimService extends BaseService {
                 fieldNum++;
             }
 
-            Long activeTimId = log(preparedStatement, "active tim");
+            Long activeTimId = executeAndLog(preparedStatement, "active tim");
             return activeTimId;
         } catch (SQLException e) {
             e.printStackTrace();

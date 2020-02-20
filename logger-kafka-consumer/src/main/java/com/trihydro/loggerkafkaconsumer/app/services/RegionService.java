@@ -109,7 +109,7 @@ public class RegionService extends BaseService {
             }
 
             // execute insert statement
-            Long regionId = log(preparedStatement, "regionID");
+            Long regionId = executeAndLog(preparedStatement, "regionID");
             return regionId;
         } catch (SQLException e) {
             e.printStackTrace();

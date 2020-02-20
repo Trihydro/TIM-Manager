@@ -400,7 +400,7 @@ public class BsmPart2SuveService extends BaseService {
 			fieldNum++;
 
 			// execute insert statement
-			Long bsmPart2SuveId = log(bsmSuvePreparedStatement, "bsmPart2SuveId");
+			Long bsmPart2SuveId = executeAndLog(bsmSuvePreparedStatement, "bsmPart2SuveId");
 			return bsmPart2SuveId;
 		} catch (SQLException e) {
 			e.printStackTrace();

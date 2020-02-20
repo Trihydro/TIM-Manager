@@ -31,7 +31,7 @@ public class PathControllerTest extends TestBase<PathController> {
     @Before
     public void setupSubTest() {
         doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        doReturn(-1l).when(uut).log(mockPreparedStatement, "pathId");
+        doReturn(-1l).when(uut).executeAndLog(mockPreparedStatement, "pathId");
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
 

@@ -24,12 +24,12 @@ public class RsuServiceTest extends TestBase<RsuService> {
         assertEquals(1, data.size());
         verify(mockStatement).executeQuery(
                 "select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid order by milepost asc");
-        verify(mockRs).getInt("rsu_id");
-        verify(mockRs).getString("ipv4_address");
-        verify(mockRs).getDouble("latitude");
-        verify(mockRs).getDouble("longitude");
-        verify(mockRs).getString("route");
-        verify(mockRs).getDouble("milepost");
+        verify(mockRs).getInt("RSU_ID");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getDouble("MILEPOST");
         verify(mockStatement).close();
         verify(mockRs).close();
         verify(mockConnection).close();
@@ -38,7 +38,7 @@ public class RsuServiceTest extends TestBase<RsuService> {
     @Test
     public void getRsus_FAIL() throws SQLException {
         // Arrange
-        doThrow(new SQLException()).when(mockRs).getInt("rsu_id");
+        doThrow(new SQLException()).when(mockRs).getInt("RSU_ID");
         // Act
         ArrayList<WydotRsu> data = uut.getRsus();
 

@@ -13,6 +13,8 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TracMessageSent;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +36,7 @@ public class TracMessageSentController extends BaseController {
 	}
 
 	@RequestMapping(value = "/packet-ids", method = RequestMethod.GET, headers = "Accept=application/json")
-	public List<String> SelectPacketIds() {
+	public ResponseEntity<List<String>> SelectPacketIds() {
 
 		List<String> packet_ids = new ArrayList<String>();
 		Connection connection = null;
@@ -49,10 +51,12 @@ public class TracMessageSentController extends BaseController {
 			rs = statement.executeQuery("select PACKET_ID from TRAC_MESSAGE_SENT");
 			// get packet_id values
 			while (rs.next()) {
-				packet_ids.add(rs.getString("packet_id"));
+				packet_ids.add(rs.getString("PACKET_ID"));
 			}
+			return ResponseEntity.ok(packet_ids);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(packet_ids);
 		} finally {
 			try {
 				// close prepared statement
@@ -68,11 +72,10 @@ public class TracMessageSentController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return packet_ids;
 	}
 
 	@RequestMapping(value = "/add-trac-message-sent", method = RequestMethod.POST, headers = "Accept=application/json")
-	public Long InsertTracMessageSent(@RequestBody TracMessageSent tracMessageSent) {
+	public ResponseEntity<Long> InsertTracMessageSent(@RequestBody TracMessageSent tracMessageSent) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 
@@ -85,31 +88,32 @@ public class TracMessageSentController extends BaseController {
 			int fieldNum = 1;
 
 			for (String col : tracMessageOracleTables.getTracMessageSentTable()) {
-				if (col.equals("trac_message_type_id"))
+				if (col.equals("TRAC_MESSAGE_TYPE_ID"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
 							tracMessageSent.getTracMessageTypeId());
-				else if (col.equals("date_time_sent"))
+				else if (col.equals("DATE_TIME_SENT"))
 					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tracMessageSent.getDateTimeSent());
-				else if (col.equals("message_text"))
+				else if (col.equals("MESSAGE_TEXT"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, tracMessageSent.getMessageText());
-				else if (col.equals("packet_id"))
+				else if (col.equals("PACKET_ID"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, tracMessageSent.getPacketId());
-				else if (col.equals("rest_response_code"))
+				else if (col.equals("REST_RESPONSE_CODE"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, tracMessageSent.getRestResponseCode());
-				else if (col.equals("rest_response_message"))
+				else if (col.equals("REST_RESPONSE_MESSAGE"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
 							tracMessageSent.getRestResponseMessage());
-				else if (col.equals("message_sent"))
+				else if (col.equals("MESSAGE_SENT"))
 					sqlNullHandler.setIntegerFromBool(preparedStatement, fieldNum, tracMessageSent.isMessageSent());
-				else if (col.equals("email_sent"))
+				else if (col.equals("EMAIL_SENT"))
 					sqlNullHandler.setIntegerFromBool(preparedStatement, fieldNum, tracMessageSent.isEmailSent());
 				fieldNum++;
 			}
 			// execute insert statement
-			Long tracMessageSentId = log(preparedStatement, "tracMessageSentId");
-			return tracMessageSentId;
+			Long tracMessageSentId = executeAndLog(preparedStatement, "tracMessageSentId");
+			return ResponseEntity.ok(tracMessageSentId);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
 		} finally {
 			try {
 				// close prepared statement
@@ -122,6 +126,5 @@ public class TracMessageSentController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return new Long(0);
 	}
 }

@@ -23,10 +23,10 @@ public class ItisCodeServiceTest extends TestBase<ItisCodeService> {
         // Assert
         assertEquals(1, data.size());
         verify(mockStatement).executeQuery("select * from itis_code");
-        verify(mockRs).getInt("itis_code_id");
-        verify(mockRs).getInt("itis_code");
-        verify(mockRs).getString("description");
-        verify(mockRs).getInt("category_id");
+        verify(mockRs).getInt("ITIS_CODE_ID");
+        verify(mockRs).getInt("ITIS_CODE");
+        verify(mockRs).getString("DESCRIPTION");
+        verify(mockRs).getInt("CATEGORY_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
     }
@@ -34,7 +34,7 @@ public class ItisCodeServiceTest extends TestBase<ItisCodeService> {
     @Test
     public void selectAllItisCodes_FAIL() throws SQLException {
         // Arrange
-        doThrow(new SQLException()).when(mockRs).getInt("itis_code_id");
+        doThrow(new SQLException()).when(mockRs).getInt("ITIS_CODE_ID");
         // Act
         List<ItisCode> data = uut.selectAllItisCodes();
 

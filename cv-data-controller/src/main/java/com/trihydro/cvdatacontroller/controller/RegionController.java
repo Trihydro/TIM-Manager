@@ -157,7 +157,7 @@ public class RegionController extends BaseController {
 			}
 
 			// execute insert statement
-			Long regionId = log(preparedStatement, "regionID");
+			Long regionId = executeAndLog(preparedStatement, "regionID");
 			return ResponseEntity.ok(regionId);
 		} catch (SQLException e) {
 			e.printStackTrace();

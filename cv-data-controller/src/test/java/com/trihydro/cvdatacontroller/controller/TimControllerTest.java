@@ -44,6 +44,8 @@ public class TimControllerTest extends TestBase<TimController> {
         private TimOracleTables mockTimOracleTables;
         @Mock
         private SecurityResultCodeTypeController mockSecurityResultCodeTypeController;
+        @Mock
+        private ResponseEntity<List<SecurityResultCodeType>> mockResponseEntitySecurityResultCodeTypeList;
 
         private String mstFormatedDate = "03-Feb-20 04.00.00.000 PM";
 
@@ -56,7 +58,9 @@ public class TimControllerTest extends TestBase<TimController> {
                 secResultCodeTypes.add(srct);
 
                 doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-                when(mockSecurityResultCodeTypeController.GetSecurityResultCodeTypes()).thenReturn(secResultCodeTypes);
+                doReturn(secResultCodeTypes).when(mockResponseEntitySecurityResultCodeTypeList).getBody();
+                when(mockSecurityResultCodeTypeController.GetSecurityResultCodeTypes())
+                                .thenReturn(mockResponseEntitySecurityResultCodeTypeList);
                 uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
@@ -64,8 +68,6 @@ public class TimControllerTest extends TestBase<TimController> {
         public void AddTim_J2735_SUCCESS() throws SQLException {
                 // Arrange
                 TimInsertModel tim = new TimInsertModel();
-                // tim.setOdeTimMetadata(new OdeMsgMetadata());
-                // tim.setReceivedMessageDetails(new ReceivedMessageDetails());
                 tim.setJ2735TravelerInformationMessage(new OdeTravelerInformationMessage());
                 tim.setRecordType(RecordType.driverAlert);
                 tim.setLogFileName("logFileName");
@@ -94,12 +96,11 @@ public class TimControllerTest extends TestBase<TimController> {
                 OdeMsgMetadata omm = GetOmm();
                 omm.setRecordGeneratedBy(GeneratedBy.TMC);
                 tim.setOdeTimMetadata(omm);
-                // tim.setReceivedMessageDetails(new ReceivedMessageDetails());
                 tim.setRecordType(RecordType.driverAlert);
-                tim.setLogFileName("logFileName");
+                tim.setLogFileName("LOGFILENAME");
                 tim.setSecurityResultCode(SecurityResultCode.success);
-                tim.setSatRecordId("recordId");
-                tim.setRegionName("regionName");
+                tim.setSatRecordId("RECORDID");
+                tim.setRegionName("REGIONNAME");
                 OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
 
                 // Act
@@ -136,10 +137,10 @@ public class TimControllerTest extends TestBase<TimController> {
                 TimInsertModel tim = new TimInsertModel();
                 tim.setReceivedMessageDetails(getRxMsg());
                 tim.setRecordType(RecordType.driverAlert);
-                tim.setLogFileName("logFileName");
+                tim.setLogFileName("LOGFILENAME");
                 tim.setSecurityResultCode(SecurityResultCode.success);
-                tim.setSatRecordId("recordId");
-                tim.setRegionName("regionName");
+                tim.setSatRecordId("RECORDID");
+                tim.setRegionName("REGIONNAME");
                 ReceivedMessageDetails receivedMessageDetails = tim.getReceivedMessageDetails();
 
                 // Act

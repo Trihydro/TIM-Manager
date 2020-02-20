@@ -112,7 +112,7 @@ public class BaseService {
         return result;
     }
 
-    public Long log(PreparedStatement preparedStatement, String type) {
+    public Long executeAndLog(PreparedStatement preparedStatement, String type) {
         Long id = null;
         try {
             if (preparedStatement.executeUpdate() > 0) {

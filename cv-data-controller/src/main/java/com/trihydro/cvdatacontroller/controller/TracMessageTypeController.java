@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.trihydro.library.model.TracMessageType;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 @RestController
 @RequestMapping("trac-message-type")
-public class TracMessageTypeController extends BaseController{
-    @RequestMapping(value = "/GetAll", method = RequestMethod.GET, headers = "Accept=application/json")
-    public List<TracMessageType> GetAll(){
-        List<TracMessageType> tracMessagesType = new ArrayList<TracMessageType>();
+public class TracMessageTypeController extends BaseController {
+	@RequestMapping(value = "/GetAll", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<List<TracMessageType>> GetAll() {
+		List<TracMessageType> tracMessagesType = new ArrayList<TracMessageType>();
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement statement = null;
@@ -34,13 +36,15 @@ public class TracMessageTypeController extends BaseController{
 			// convert to TracMessageSent objects
 			while (rs.next()) {
 				TracMessageType tracMessageType = new TracMessageType();
-				tracMessageType.setTracMessageTypeId(rs.getInt("trac_message_type_id"));
-				tracMessageType.setTracMessageType(rs.getString("trac_message_type"));
-				tracMessageType.setTracMessageDescription(rs.getString("trac_message_description"));
+				tracMessageType.setTracMessageTypeId(rs.getInt("TRAC_MESSAGE_TYPE_ID"));
+				tracMessageType.setTracMessageType(rs.getString("TRAC_MESSAGE_TYPE"));
+				tracMessageType.setTracMessageDescription(rs.getString("TRAC_MESSAGE_DESCRIPTION"));
 				tracMessagesType.add(tracMessageType);
 			}
+			return ResponseEntity.ok(tracMessagesType);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(tracMessagesType);
 		} finally {
 			try {
 				// close prepared statement
@@ -56,6 +60,5 @@ public class TracMessageTypeController extends BaseController{
 				e.printStackTrace();
 			}
 		}
-		return tracMessagesType;
-    }
+	}
 }

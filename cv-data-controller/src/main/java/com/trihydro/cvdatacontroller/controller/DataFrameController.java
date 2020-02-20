@@ -18,6 +18,8 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,17 +37,16 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 public class DataFrameController extends BaseController {
 
 	private TimOracleTables timOracleTables;
-    private SQLNullHandler sqlNullHandler;
+	private SQLNullHandler sqlNullHandler;
 
-    @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler,
-            SecurityResultCodeTypeController _securityResultCodeTypeController) {
-        timOracleTables = _timOracleTables;
-        sqlNullHandler = _sqlNullHandler;
-    }
+	@Autowired
+	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
+		timOracleTables = _timOracleTables;
+		sqlNullHandler = _sqlNullHandler;
+	}
 
-    @RequestMapping(method = RequestMethod.GET, value = "/itis-for-data-frame/{dataFrameId}")
-    public String[] GetItisCodesForDataFrameId(@PathVariable Integer dataFrameId) {
+	@RequestMapping(method = RequestMethod.GET, value = "/itis-for-data-frame/{dataFrameId}")
+	public ResponseEntity<String[]> GetItisCodesForDataFrameId(@PathVariable Integer dataFrameId) {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
@@ -67,8 +68,11 @@ public class DataFrameController extends BaseController {
 			while (rs.next()) {
 				itisCodes.add(rs.getString("ITIS_CODE"));
 			}
+			return ResponseEntity.ok(itisCodes.toArray(new String[itisCodes.size()]));
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(itisCodes.toArray(new String[itisCodes.size()]));
 		} finally {
 			try {
 				// close prepared statement
@@ -84,12 +88,10 @@ public class DataFrameController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-
-		return itisCodes.toArray(new String[itisCodes.size()]);
 	}
 
 	@RequestMapping(value = "/add-data-frame/{timId}", method = RequestMethod.POST, headers = "Accept=application/json")
-    public Long AddDataFrame(@RequestBody DataFrame dFrame, @PathVariable Long timId) {
+	public ResponseEntity<Long> AddDataFrame(@RequestBody DataFrame dFrame, @PathVariable Long timId) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 
@@ -144,10 +146,11 @@ public class DataFrameController extends BaseController {
 				fieldNum++;
 			}
 
-			Long dataFrameId = log(preparedStatement, "dataframe");
-			return dataFrameId;
+			Long dataFrameId = executeAndLog(preparedStatement, "dataframe");
+			return ResponseEntity.ok(dataFrameId);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
 		} finally {
 			try {
 				// close prepared statement
@@ -160,6 +163,5 @@ public class DataFrameController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		return new Long(0);
 	}
 }

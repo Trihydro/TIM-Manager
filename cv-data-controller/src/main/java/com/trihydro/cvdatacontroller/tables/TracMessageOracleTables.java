@@ -16,14 +16,14 @@ public class TracMessageOracleTables extends OracleTables {
             return tracMessageSentTable;
         else {
             tracMessageSentTable = new ArrayList<String>();
-            tracMessageSentTable.add("trac_message_type_id");
-            tracMessageSentTable.add("date_time_sent");
-            tracMessageSentTable.add("message_text");
-            tracMessageSentTable.add("packet_id");
-            tracMessageSentTable.add("rest_response_code");
-            tracMessageSentTable.add("rest_response_message");
-            tracMessageSentTable.add("message_sent");
-            tracMessageSentTable.add("email_sent");
+            tracMessageSentTable.add("TRAC_MESSAGE_TYPE_ID");
+            tracMessageSentTable.add("DATE_TIME_SENT");
+            tracMessageSentTable.add("MESSAGE_TEXT");
+            tracMessageSentTable.add("PACKET_ID");
+            tracMessageSentTable.add("REST_RESPONSE_CODE");
+            tracMessageSentTable.add("REST_RESPONSE_MESSAGE");
+            tracMessageSentTable.add("MESSAGE_SENT");
+            tracMessageSentTable.add("EMAIL_SENT");
             return tracMessageSentTable;
         }
     }
@@ -33,8 +33,8 @@ public class TracMessageOracleTables extends OracleTables {
             return tracMessageTypeTable;
         else {
             tracMessageTypeTable = new ArrayList<String>();
-            tracMessageTypeTable.add("trac_message_type");
-            tracMessageTypeTable.add("trac_message_description");
+            tracMessageTypeTable.add("TRAC_MESSAGE_TYPE");
+            tracMessageTypeTable.add("TRAC_MESSAGE_DESCRIPTION");
             return tracMessageTypeTable;
         }
     }

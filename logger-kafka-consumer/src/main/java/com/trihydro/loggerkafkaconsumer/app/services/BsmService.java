@@ -271,7 +271,7 @@ public class BsmService extends BaseService {
             }
 
             // execute insert statement
-            Long bsmCoreDataId = log(bsmPreparedStatement, "bsmCoreDataId");
+            Long bsmCoreDataId = executeAndLog(bsmPreparedStatement, "bsmCoreDataId");
             return bsmCoreDataId;
         } catch (SQLException e) {
             e.printStackTrace();

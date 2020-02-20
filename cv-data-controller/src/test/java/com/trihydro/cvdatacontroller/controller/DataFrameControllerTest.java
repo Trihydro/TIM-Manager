@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DataFrameControllerTest extends TestBase<DataFrameController> {
@@ -20,15 +22,16 @@ public class DataFrameControllerTest extends TestBase<DataFrameController> {
         selectStatement += " where data_frame_id =  -1";
 
         // Act
-        String[] data = uut.GetItisCodesForDataFrameId(-1);
+        ResponseEntity<String[]> data = uut.GetItisCodesForDataFrameId(-1);
 
         // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getString("ITIS_CODE");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
-        assertEquals(1, data.length);
+        assertEquals(1, data.getBody().length);
     }
 
     // TODO: test AddDataFrame

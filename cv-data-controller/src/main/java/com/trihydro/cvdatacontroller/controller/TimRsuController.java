@@ -58,7 +58,7 @@ public class TimRsuController extends BaseController {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuIndex);
                 fieldNum++;
             }
-            Long timRsuId = log(preparedStatement, "tim rsu");
+            Long timRsuId = executeAndLog(preparedStatement, "tim rsu");
             return ResponseEntity.ok(timRsuId);
         } catch (SQLException e) {
             e.printStackTrace();

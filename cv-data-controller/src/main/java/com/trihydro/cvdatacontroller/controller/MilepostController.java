@@ -45,13 +45,13 @@ public class MilepostController extends BaseController {
 			while (rs.next()) {
 				Milepost milepost = new Milepost();
 				// milepost.setMilepostId(rs.getInt("milepost_id"));
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -103,13 +103,13 @@ public class MilepostController extends BaseController {
 			// convert result to milepost objects
 			while (rs.next()) {
 				Milepost milepost = new Milepost();
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
 				mileposts.add(milepost);
 			}
 
@@ -162,13 +162,13 @@ public class MilepostController extends BaseController {
 			while (rs.next()) {
 				Milepost milepost = new Milepost();
 				// milepost.setMilepostId(rs.getInt("milepost_id"));
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -218,12 +218,12 @@ public class MilepostController extends BaseController {
 			// convert result to milepost objects
 			while (rs.next()) {
 				Milepost milepost = new Milepost();
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -273,13 +273,13 @@ public class MilepostController extends BaseController {
 			// convert result to milepost objects
 			while (rs.next()) {
 				Milepost milepost = new Milepost();
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -320,13 +320,13 @@ public class MilepostController extends BaseController {
 			while (rs.next()) {
 				Milepost milepost = new Milepost();
 				// milepost.setMilepostId(rs.getInt("milepost_id"));
-				milepost.setRoute(rs.getString("route"));
-				milepost.setMilepost(rs.getDouble("milepost"));
-				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setElevation(rs.getDouble("elevation_ft"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {

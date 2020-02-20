@@ -62,7 +62,7 @@ public class NodeXYService extends BaseService {
                         preparedStatement.setString(fieldNum, null);
                 fieldNum++;
             }
-            Long nodeXYId = log(preparedStatement, "nodexy");
+            Long nodeXYId = executeAndLog(preparedStatement, "nodexy");
             return nodeXYId;
         } catch (SQLException e) {
             e.printStackTrace();

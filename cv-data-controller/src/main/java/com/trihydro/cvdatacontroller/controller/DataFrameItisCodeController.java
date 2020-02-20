@@ -65,7 +65,7 @@ public class DataFrameItisCodeController extends BaseController {
                 fieldNum++;
             }
 
-            Long dataFrameItisCodeId = log(preparedStatement, "dataFrameItisCode");
+            Long dataFrameItisCodeId = executeAndLog(preparedStatement, "dataFrameItisCode");
             return ResponseEntity.ok(dataFrameItisCodeId);
         } catch (SQLException e) {
             e.printStackTrace();

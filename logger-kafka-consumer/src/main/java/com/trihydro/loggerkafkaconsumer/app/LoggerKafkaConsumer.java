@@ -69,7 +69,6 @@ public class LoggerKafkaConsumer {
                 Properties props = new Properties();
                 props.put("bootstrap.servers", endpoint);
                 props.put("group.id", loggerConfig.getDepositGroup());
-                props.put("enable.auto.commit", "false");
                 props.put("auto.commit.interval.ms", "1000");
                 props.put("session.timeout.ms", "30000");
                 props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");

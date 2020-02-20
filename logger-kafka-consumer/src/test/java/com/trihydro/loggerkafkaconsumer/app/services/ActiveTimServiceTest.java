@@ -43,7 +43,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         activeTim.setStartDateTime("2020-02-03T16:00:00.000Z");
         activeTim.setEndDateTime("2020-02-03T16:00:00.000Z");
         doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        doReturn(-1l).when(uut).log(mockPreparedStatement, "active tim");
+        doReturn(-1l).when(uut).executeAndLog(mockPreparedStatement, "active tim");
 
         // Act
         Long data = uut.insertActiveTim(activeTim);

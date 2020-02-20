@@ -54,7 +54,6 @@ public class OdeLoggingConsumer {
 		Properties properties = new Properties();
 		properties.put("bootstrap.servers", endpoint);
 		properties.put("group.id", configProperties.getDepositGroup());
-		properties.put("enable.auto.commit", "false");
 		properties.put("auto.commit.interval.ms", "1000");
 		properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
@@ -77,7 +76,6 @@ public class OdeLoggingConsumer {
 				Properties consumerProps = new Properties();
 				consumerProps.put("bootstrap.servers", endpoint);
 				consumerProps.put("group.id", configProperties.getDepositGroup());
-				consumerProps.put("enable.auto.commit", "false");
 				consumerProps.put("auto.commit.interval.ms", "1000");
 				consumerProps.put("session.timeout.ms", "30000");
 				consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");

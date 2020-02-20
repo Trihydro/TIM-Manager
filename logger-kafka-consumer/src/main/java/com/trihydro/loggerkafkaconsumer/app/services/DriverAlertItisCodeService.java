@@ -45,7 +45,7 @@ public class DriverAlertItisCodeService extends BaseService {
                     fieldNum++;
                 }
 
-                Long driverAlertItisCodeId = log(preparedStatement, "driverAlertItisCode");
+                Long driverAlertItisCodeId = executeAndLog(preparedStatement, "driverAlertItisCode");
                 return driverAlertItisCodeId;
             }
 

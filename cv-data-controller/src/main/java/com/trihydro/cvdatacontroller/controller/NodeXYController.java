@@ -73,10 +73,11 @@ public class NodeXYController extends BaseController {
                         preparedStatement.setString(fieldNum, null);
                 fieldNum++;
             }
-            Long nodeXYId = log(preparedStatement, "nodexy");
+            Long nodeXYId = executeAndLog(preparedStatement, "nodexy");
             return ResponseEntity.ok(nodeXYId);
         } catch (SQLException e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
         } finally {
             try {
                 // close prepared statement
@@ -89,6 +90,5 @@ public class NodeXYController extends BaseController {
                 e.printStackTrace();
             }
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
     }
 }

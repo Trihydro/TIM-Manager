@@ -153,7 +153,7 @@ public class DriverAlertService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long driverAlertId = log(preparedStatement, "driverAlertId");
+            Long driverAlertId = executeAndLog(preparedStatement, "driverAlertId");
 
             // add driver_alert_itis_codes
             if (driverAlertId != null && alert.split(",").length > 1) {

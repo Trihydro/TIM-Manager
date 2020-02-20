@@ -10,8 +10,6 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trihydro.library.model.ConfigProperties;
-import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.mongologger.app.loggers.MongoLogger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -26,12 +24,11 @@ public class OdeMongoLoggingConsumer {
 	static PreparedStatement preparedStatement = null;
 	static Statement statement = null;
 	static ObjectMapper mapper;
-	private ConfigProperties configProperties;
+	private BasicConfiguration configProperties;
 
 	@Autowired
-	public OdeMongoLoggingConsumer(ConfigProperties configProperties) throws IOException, SQLException {
+	public OdeMongoLoggingConsumer(BasicConfiguration configProperties) throws IOException, SQLException {
 		this.configProperties = configProperties;
-		CvDataServiceLibrary.setConfig(configProperties);
 		MongoLogger.setConfig(configProperties);
 
 		System.out.println("starting..............");

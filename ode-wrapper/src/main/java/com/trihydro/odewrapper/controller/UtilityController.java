@@ -53,8 +53,8 @@ public class UtilityController extends WydotTimBaseController {
 
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService,SetItisCodes _setItisCodes) {
-                super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
     }
 
     @RequestMapping(value = "/create-sat-tim", method = RequestMethod.POST, headers = "Accept=application/json")

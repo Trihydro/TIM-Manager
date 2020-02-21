@@ -42,8 +42,8 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @Autowired
     public WydotTimRwController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
     }
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -190,11 +190,13 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-            List<String> tempList = new ArrayList<String>(wydotTimBuffer.getAdvisory().length);
-            for (Integer code : wydotTimBuffer.getAdvisory()) {
-                tempList.add(code.toString());
+            if (wydotTimBuffer.getAdvisory() != null) {
+                List<String> tempList = new ArrayList<String>(wydotTimBuffer.getAdvisory().length);
+                for (Integer code : wydotTimBuffer.getAdvisory()) {
+                    tempList.add(code.toString());
+                }
+                wydotTimBuffer.setItisCodes(tempList);
             }
-            wydotTimBuffer.setItisCodes(tempList);
             timsToSend.add(wydotTimBuffer);
 
             // update running buffer distance
@@ -285,7 +287,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
-            ActiveTimService.addItisCodesToActiveTim(activeTim);
+            activeTimService.addItisCodesToActiveTim(activeTim);
         }
 
         return activeTims;

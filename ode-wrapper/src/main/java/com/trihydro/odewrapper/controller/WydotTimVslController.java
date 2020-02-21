@@ -38,8 +38,8 @@ public class WydotTimVslController extends WydotTimBaseController {
 
     @Autowired
     public WydotTimVslController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
     }
 
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -97,7 +97,7 @@ public class WydotTimVslController extends WydotTimBaseController {
 
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
-            ActiveTimService.addItisCodesToActiveTim(activeTim);
+            activeTimService.addItisCodesToActiveTim(activeTim);
         }
 
         return activeTims;

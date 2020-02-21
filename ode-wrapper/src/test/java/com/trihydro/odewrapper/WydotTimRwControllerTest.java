@@ -1,269 +1,188 @@
 package com.trihydro.odewrapper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-
+import com.google.gson.Gson;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
-import com.trihydro.library.model.WydotTravelerInputData;
-import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.TimRsuService;
-import com.trihydro.library.service.TimService;
+import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.controller.WydotTimRwController;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
+import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRwList;
-import com.trihydro.odewrapper.model.WydotTimRw;
+import com.trihydro.odewrapper.service.WydotTimService;
 
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockServletContext;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
-import us.dot.its.jpo.ode.model.OdeLogMetadata;
-
-@Ignore
-@RunWith(SpringRunner.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@WebAppConfiguration
-@SpringBootTest(classes = Application.class)
+@RunWith(MockitoJUnitRunner.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 public class WydotTimRwControllerTest {
 
-	@Autowired
-	private WebApplicationContext wac;
-	private MockMvc mockMvc;
-	private static final String CONTENT_TYPE = "application/json;charset=UTF-8";
+	@Mock
+	BasicConfiguration mockBasicConfiguration;
+	@Mock
+	TimTypeService mockTimTypeService;
+	@Mock
+	WydotTimService mockWydotTimService;
+	@Mock
+	CreateBaseTimUtil mockCreateBaseTimUtil;
+	@Mock
+	SetItisCodes setItisCodes;
 
-	protected static BasicConfiguration configuration;
-	protected static TimTypeService timTypeService;
-	private CreateBaseTimUtil createBaseTimUtil;
+	@InjectMocks
+	@Spy
+	WydotTimRwController uut;
 
-	@Autowired
-	public void setConfiguration(BasicConfiguration configurationRhs, TimTypeService _timTypeService,
-			CreateBaseTimUtil _createBaseTimUtil) {
-		configuration = configurationRhs;
-		timTypeService = _timTypeService;
-		createBaseTimUtil = _createBaseTimUtil;
-	}
+	private Gson gson = new Gson();
 
 	@Before
 	public void setup() throws Exception {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-	}
+		List<ItisCode> itisCodes = new ArrayList<>();
+		ItisCode ic = new ItisCode();
+		ic.setCategoryId(-1);
+		ic.setDescription("description");
+		ic.setItisCode(-2);
+		ic.setItisCodeId(-3);
+		itisCodes.add(ic);
+		List<String> itisCodesIncident = new ArrayList<>();
+		itisCodesIncident.add("531");
+		doReturn(itisCodesIncident).when(setItisCodes).setItisCodesRw(any());
+		doReturn(itisCodes).when(setItisCodes).getItisCodes();
 
-	public static Long getTimTypeId() throws Exception {
-		List<TimType> timTypes = timTypeService.selectAll();
-
-		TimType timType = timTypes.stream().filter(x -> x.getType().equals("RW")).findFirst().orElse(null);
-
-		Long timTypeId = timType.getTimTypeId();
-
-		return timTypeId;
-	}
-
-	@Test
-	public void givenWac_whenServletContext_thenItProvidesGreetController() {
-		ServletContext servletContext = wac.getServletContext();
-
-		Assert.assertNotNull(servletContext);
-		Assert.assertTrue(servletContext instanceof MockServletContext);
-		Assert.assertNotNull(wac.getBean("wydotTimRwController"));
+		doNothing().when(uut).processRequestAsync();
 	}
 
 	@Test
-	public void testCreateRwTim_oneDirection_success2() throws Exception {
+	public void testCreateRwTim_oneDirection_SUCCESS() throws Exception {
 
-		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\": 370,\"direction\": \"eastbound\",\"surface\": \"G\",\"buffers\": [{\"distance\": 1,\"action\": \"leftClosed\",\"units\": \"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\": \"miles\"}],\"schedStart\": \"2016-06-23\",\"delays\": [{\"code\": 19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\": 8399},\"firstDay\": \"20130228\",\"lastDay\": \"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\": \"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\": 8359,\"highway\": \"I-80\"}]}";
+		// Arrange
+		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\":370,\"direction\": \"eastbound\",\"surface\": \"G\",\"buffers\":[{\"distance\": 1,\"action\": \"leftClosed\",\"units\":\"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\":\"miles\"}],\"schedStart\": \"2016-06-23\",\"delays\": [{\"code\":19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\":8399},\"firstDay\": \"20130228\",\"lastDay\":\"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\":\"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\":8359,\"highway\": \"I-80\", \"advisory\":[]}]}";
+		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
-		ResultActions resultActions = this.mockMvc
-				.perform(MockMvcRequestBuilders.post("/rw-tim").contentType(MediaType.APPLICATION_JSON).content(rwJson))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("8359"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"));
+		// Act
+		ResponseEntity<String> data = uut.createRoadContructionTim(timRwList);
 
-		MvcResult mvcResult = resultActions.andReturn();
-		String result = mvcResult.getResponse().getContentAsString();
-		System.out.println(result);
+		// Assert
+		assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		assertNotNull(resultArr);
+		assertEquals(1, resultArr.length);
+		assertEquals("success", resultArr[0].resultMessages.get(0));
+		assertEquals("8359", resultArr[0].clientId);
+		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("I-80", resultArr[0].route);
 	}
 
 	@Test
 	public void testCreateRwTim_bothDirections_NoMileposts() throws Exception {
 
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		// Arrange
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
-		this.mockMvc
-				.perform(MockMvcRequestBuilders.post("/rw-tim").contentType(MediaType.APPLICATION_JSON).content(rwJson))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+		// Act
+		ResponseEntity<String> data = uut.createRoadContructionTim(timRwList);
+
+		// Assert
+		assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		assertNotNull(resultArr);
+		assertEquals(1, resultArr.length);
+		assertEquals("success", resultArr[0].resultMessages.get(0));
+		assertEquals("westbound", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateRwTim_bothDirections_NoItisCodes() throws Exception {
 
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
-		this.mockMvc
-				.perform(MockMvcRequestBuilders.post("/rw-tim").contentType(MediaType.APPLICATION_JSON).content(rwJson))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("15917"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+		// Act
+		ResponseEntity<String> data = uut.createRoadContructionTim(timRwList);
+
+		// Assert
+		assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		assertNotNull(resultArr);
+		assertEquals(1, resultArr.length);
+		assertEquals("success", resultArr[0].resultMessages.get(0));
+		assertEquals("15917", resultArr[0].clientId);
+		assertEquals("I-80", resultArr[0].route);
+		assertEquals("westbound", resultArr[0].direction);
 	}
 
-	@Test
-	public void testCreateRwTim_oneDirection_success() throws Exception {
-
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
-
-		this.mockMvc
-				.perform(MockMvcRequestBuilders.post("/rw-tim").contentType(MediaType.APPLICATION_JSON).content(rwJson))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("15917"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
-	}
-
-	@Test
-	public void testCreateRwTim_oneDirection_NoMileposts() throws Exception {
-
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
-
-		this.mockMvc
-				.perform(MockMvcRequestBuilders.post("/rw-tim").contentType(MediaType.APPLICATION_JSON).content(rwJson))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
-	}
-
-	@Test
-	public void testCreateRwTim_oneDirection_NoItisCodes() throws Exception {
-
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,	\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\": \"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
-
-		this.mockMvc
-				.perform(MockMvcRequestBuilders.post("/rw-tim").contentType(MediaType.APPLICATION_JSON).content(rwJson))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
-	}
-
-	@Ignore
 	@Test
 	public void testDeleteRwTimsByClientId() throws Exception {
-		makeTims();
 
-		List<ActiveTim> activeTimsBeforeDelete = ActiveTimService.getActiveTimsByClientIdDirection("15917",
-				getTimTypeId(), null);
-		assertEquals(1, activeTimsBeforeDelete.size());
+		// Arrange
+		String id = "15917";
 
-		this.mockMvc.perform(MockMvcRequestBuilders.delete("/rw-tim/15917"))
-				.andExpect(MockMvcResultMatchers.status().isOk());
-
-		List<ActiveTim> activeTimsAfterDelete = ActiveTimService.getActiveTimsByClientIdDirection("15917",
-				getTimTypeId(), null);
-		assertEquals(0, activeTimsAfterDelete.size());
+		// Act
+		ResponseEntity<String> data = uut.deleteRoadContructionTim(id);
+		// Assert
+		assertEquals(HttpStatus.OK, data.getStatusCode());
+		assertEquals("success", data.getBody());
 	}
 
-	@Ignore
 	@Test
 	public void testGetRwTims() throws Exception {
 
-		makeTims();
+		// Arrange
+		List<ActiveTim> ats = new ArrayList<>();
+		ActiveTim at = new ActiveTim();
+		at.setActiveTimId(-1l);
+		at.setClientId("clientId");
+		at.setDirection("direction");
+		ats.add(at);
+		doReturn(ats).when(mockWydotTimService).selectTimsByType("RW");
 
-		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/rw-tim"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
-				.andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+		// Act
+		Collection<ActiveTim> data = uut.getRoadConstructionTim();
 
-		MvcResult mvcResult = resultActions.andReturn();
-		String result = mvcResult.getResponse().getContentAsString();
-		System.out.println(result);
+		// Assert
+		assertEquals(1, data.size());
+		assertEquals(at, data.iterator().next());
 	}
 
-	@Ignore
 	@Test
 	public void testGetRwTimsByClientId() throws Exception {
 
-		makeTims();
+		// Arrange
+		String id = "Parking49251";
+		List<ActiveTim> ats = new ArrayList<>();
+		ActiveTim at = new ActiveTim();
+		at.setActiveTimId(-1l);
+		at.setClientId("clientId");
+		at.setDirection("direction");
+		ats.add(at);
+		doReturn(ats).when(mockWydotTimService).selectTimByClientId("RW", id);
 
-		ResultActions resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/rw-tim/Parking49251"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE));
-		// .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("westbound"));
+		// Act
+		Collection<ActiveTim> data = uut.getRoadContructionTimById(id);
 
-		MvcResult mvcResult = resultActions.andReturn();
-		String result = mvcResult.getResponse().getContentAsString();
-		System.out.println(result);
-	}
-
-	private void makeTims() {
-
-		TimRwList timRwList = new TimRwList();
-		List<WydotTimRw> rwList = new ArrayList<WydotTimRw>();
-		WydotTimRw wydotTim = new WydotTimRw();
-
-		wydotTim.setSurface("P");
-		wydotTim.setDirection("westbound");
-		wydotTim.setId("15917");
-		wydotTim.setHighway("I-80");
-		wydotTim.setFromRm(370.0);
-		wydotTim.setToRm(380.0);
-
-		rwList.add(wydotTim);
-		timRwList.setTimRwList(rwList);
-
-		WydotTravelerInputData wydotTravelerInputData = createBaseTimUtil.buildTim(wydotTim, "westbound", "80",
-				configuration);
-
-		OdeLogMetadata odeTimMetadata = new OdeLogMetadata();
-		odeTimMetadata.setOdeReceivedAt(null);
-
-		Long timId = TimService.insertTim(odeTimMetadata, null, wydotTravelerInputData.getTim(), null, null, null, null,
-				null);
-
-		TimRsuService.insertTimRsu(timId, 1, 1);
-
-		ActiveTim activeTim = new ActiveTim();
-		activeTim.setTimId(timId);
-		activeTim.setClientId(wydotTim.getId());
-		activeTim.setDirection("westbound");
-		activeTim.setMilepostStart(wydotTim.getFromRm());
-		activeTim.setMilepostStop(wydotTim.getToRm());
-		activeTim.setStartDateTime(wydotTravelerInputData.getTim().getDataframes()[0].getStartDateTime());
-		activeTim.setRoute(wydotTim.getHighway());
-		try {
-			activeTim.setTimTypeId(getTimTypeId());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		ActiveTimService.insertActiveTim(activeTim);
+		// Assert
+		assertEquals(1, data.size());
+		assertEquals(at, data.iterator().next());
 	}
 
 }

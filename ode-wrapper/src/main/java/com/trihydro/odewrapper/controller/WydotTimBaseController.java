@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
@@ -37,13 +38,15 @@ public abstract class WydotTimBaseController {
     protected TimTypeService timTypeService;
     private TimType timType = null;
     private SetItisCodes setItisCodes;
+    protected ActiveTimService activeTimService;
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
         setItisCodes = _setItisCodes;
+        activeTimService = _activeTimService;
         CvDataServiceLibrary.setCVRestUrl(configuration.getCvRestService());
     }
 
@@ -241,7 +244,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesRw(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesRw(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);

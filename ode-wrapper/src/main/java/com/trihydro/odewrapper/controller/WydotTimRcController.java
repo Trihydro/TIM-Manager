@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.WydotTim;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
@@ -35,8 +36,8 @@ public class WydotTimRcController extends WydotTimBaseController {
 
     @Autowired
     public WydotTimRcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
     }
 
     @RequestMapping(value = "/create-update-rc-tim", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -12,7 +12,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ActiveTimService extends CvDataServiceLibrary {
 
 	public static Long insertActiveTim(ActiveTim activeTim) {
@@ -35,7 +37,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return response.getBody();
 	}
 
-	public static void addItisCodesToActiveTim(ActiveTim activeTim) {
+	public void addItisCodesToActiveTim(ActiveTim activeTim) {
 		String url = String.format("%s/active-tim/itis-codes/%d", CVRestUrl, activeTim.getActiveTimId());
 		ResponseEntity<Integer[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Integer[].class);
 		activeTim.setItisCodes(Arrays.asList(response.getBody()));

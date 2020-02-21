@@ -46,6 +46,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     private ActiveTim aTim;
     private TimUpdateModel[] tumArr;
 
+    private ActiveTimService uut = new ActiveTimService();
+
     @Before
     public void setupSubTest() throws SQLException {
         doReturn(true).when(mockResponseEntityBoolean).getBody();
@@ -125,7 +127,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(mockResponseEntityIntegerArray);
 
         // Act
-        ActiveTimService.addItisCodesToActiveTim(activeTim);
+        uut.addItisCodesToActiveTim(activeTim);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, Integer[].class);

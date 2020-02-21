@@ -234,113 +234,57 @@ public class WydotTimIncidentControllerTest {
 		assertEquals(at, data.iterator().next());
 	}
 
-	// @Test
-	// public void testUpdateIncidentTim_oneDirection_success() throws Exception {
+	@Test
+	public void testUpdateIncidentTim_oneDirection_success() throws Exception {
 
-	// String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":
-	// \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",
-	// \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":
-	// \"OD49251\", \"direction\": \"eastbound\", \"ts\":
-	// \"2018-04-16T19:30:05.000Z\" }]}";
+		// Arrange
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"OD49251\", \"direction\": \"eastbound\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
+		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
-	// this.mockMvc
-	// .perform(MockMvcRequestBuilders.put("/incident-tim").contentType(MediaType.APPLICATION_JSON)
-	// .content(incidentJson))
-	// .andExpect(MockMvcResultMatchers.status().isOk())
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("eastbound"))
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("OD49251"))
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
-	// }
+		// Act
+		ResponseEntity<String> data = uut.updateIncidentTim(til);
 
-	// @Test
-	// public void testUpdateIncidentTim_bothDirections_success() throws Exception {
+		// Assert
+		assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		assertNotNull(resultArr);
+		assertEquals("success", resultArr[0].resultMessages.get(0));
+		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("OD49251", resultArr[0].clientId);
+		assertEquals("I-80", resultArr[0].route);
+	}
 
-	// String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":
-	// \"L\", \"fromRm\": 360, \"problem\": \"crash\", \"effect\": \"leftClosed\",
-	// \"action\": \"caution\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":
-	// \"IN49251\", \"direction\": \"both\" }]}";
+	@Test
+	public void testUpdateIncidentTim_bothDirections_success() throws Exception {
 
-	// this.mockMvc
-	// .perform(MockMvcRequestBuilders.put("/incident-tim").contentType(MediaType.APPLICATION_JSON)
-	// .content(incidentJson))
-	// .andExpect(MockMvcResultMatchers.status().isOk())
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].resultMessages[0]").value("success"))
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].direction").value("both"))
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].clientId").value("IN49251"))
-	// .andExpect(MockMvcResultMatchers.jsonPath("$[0].route").value("I-80"));
-	// }
+		// Arrange
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"crash\", \"effect\": \"leftClosed\",\"action\": \"caution\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"IN49251\", \"direction\": \"both\" }]}";
+		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
-	// @Ignore
-	// @Test
-	// public void testDeleteIncidentTimsByClientId() throws Exception {
+		// Act
+		ResponseEntity<String> data = uut.updateIncidentTim(til);
 
-	// makeTims();
+		// Assert
+		assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		assertNotNull(resultArr);
+		assertEquals("success", resultArr[0].resultMessages.get(0));
+		assertEquals("both", resultArr[0].direction);
+		assertEquals("IN49251", resultArr[0].clientId);
+		assertEquals("I-80", resultArr[0].route);
+	}
 
-	// List<ActiveTim> activeTimsBeforeDelete =
-	// ActiveTimService.getActiveTimsByClientIdDirection("IN49251",
-	// getTimTypeId(), null);
-	// assertEquals(1, activeTimsBeforeDelete.size());
+	@Test
+	public void testDeleteIncidentTimsByClientId() throws Exception {
 
-	// this.mockMvc.perform(MockMvcRequestBuilders.delete("/incident-tim/IN49251"))
-	// .andExpect(MockMvcResultMatchers.status().isOk());
+		// Arrange
+		String incidentId = "IN49251";
 
-	// List<ActiveTim> activeTimsAfterDelete =
-	// ActiveTimService.getActiveTimsByClientIdDirection("IN49251",
-	// getTimTypeId(), null);
-	// assertEquals(0, activeTimsAfterDelete.size());
-	// }
+		// Act
+		ResponseEntity<String> data = uut.deleteIncidentTim(incidentId);
 
-	// private void makeTims() {
-
-	// TimIncidentList timIncidentList = new TimIncidentList();
-	// List<WydotTimIncident> incidentList = new ArrayList<WydotTimIncident>();
-	// WydotTimIncident wydotTim = new WydotTimIncident();
-
-	// wydotTim.setToRm(370.0);
-	// wydotTim.setFromRm(360.0);
-	// wydotTim.setImpact("L");
-	// wydotTim.setProblem("mudslide");
-	// wydotTim.setEffect("leftClosed");
-	// wydotTim.setAction("caution");
-	// wydotTim.setPk(3622);
-	// wydotTim.setHighway("I-80");
-	// wydotTim.setIncidentId("IN49251");
-	// wydotTim.setDirection("both");
-	// wydotTim.setSchedStart("2018-04-16T19:30:05.000Z");
-
-	// incidentList.add(wydotTim);
-	// timIncidentList.setTimIncidentList(incidentList);
-
-	// WydotTravelerInputData wydotTravelerInputData =
-	// createBaseTimUtil.buildTim(wydotTim, "westbound", "80",
-	// configuration);
-
-	// OdeLogMetadata odeTimMetadata = new OdeLogMetadata();
-	// odeTimMetadata.setOdeReceivedAt(null);
-
-	// Long timId = TimService.insertTim(odeTimMetadata, null,
-	// wydotTravelerInputData.getTim(), null, null, null, null,
-	// null);
-
-	// TimRsuService.insertTimRsu(timId, 1, 1);
-
-	// ActiveTim activeTim = new ActiveTim();
-	// activeTim.setTimId(timId);
-	// activeTim.setClientId(wydotTim.getIncidentId());
-	// activeTim.setDirection("westbound");
-	// activeTim.setMilepostStart(wydotTim.getFromRm());
-	// activeTim.setMilepostStop(wydotTim.getToRm());
-	// activeTim.setStartDateTime(wydotTravelerInputData.getTim().getDataframes()[0].getStartDateTime());
-	// activeTim.setPk(wydotTim.getPk());
-	// activeTim.setRoute(wydotTim.getHighway());
-	// try {
-	// activeTim.setTimTypeId(getTimTypeId());
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-
-	// ActiveTimService.insertActiveTim(activeTim);
-	// }
-
+		// Assert
+		assertEquals(HttpStatus.OK, data.getStatusCode());
+		assertEquals("success", data.getBody());
+	}
 }

@@ -22,29 +22,19 @@ import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
-@RunWith(SpringRunner.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@WebAppConfiguration
-@SpringBootTest(classes = Application.class)
+@RunWith(MockitoJUnitRunner.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 public class WydotTimIncidentControllerTest {
-
-	protected static BasicConfiguration configuration;
-	protected static TimTypeService timTypeService;
 
 	@Mock
 	BasicConfiguration mockBasicConfiguration;

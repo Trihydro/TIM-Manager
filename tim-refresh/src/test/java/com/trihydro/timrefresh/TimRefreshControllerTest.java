@@ -85,24 +85,20 @@ public class TimRefreshControllerTest {
     private void setupMilePost() {
         List<Milepost> mps = new ArrayList<Milepost>();
         Milepost startMp = new Milepost();
-        startMp.setMilepostId(-1);
-        startMp.setRoute("route1");
+        startMp.setCommonName("route1");
         startMp.setMilepost(250d);
         startMp.setDirection("eastward");
         startMp.setLatitude(105d);
         startMp.setLongitude(45d);
-        startMp.setElevation(100d);
-        startMp.setBearing(22d);
+        // startMp.setBearing(22d);
 
         Milepost endMp = new Milepost();
-        endMp.setMilepostId(-2);
-        endMp.setRoute("route1");
+        endMp.setCommonName("route1");
         endMp.setMilepost(255d);
         endMp.setDirection("eastward");
         endMp.setLatitude(105d);
         endMp.setLongitude(45d);
-        endMp.setElevation(100d);
-        endMp.setBearing(59d);
+        // endMp.setBearing(59d);
         mps.add(startMp);
         mps.add(endMp);
         Mockito.when(MilepostService.selectMilepostRange(isA(String.class), isA(String.class), isA(Double.class),

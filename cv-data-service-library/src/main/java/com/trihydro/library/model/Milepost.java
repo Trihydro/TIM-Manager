@@ -1,30 +1,19 @@
 package com.trihydro.library.model;
 
-public class Milepost
-{
-    private Integer milepostId;
-    private String route;
+public class Milepost {
+    private String commonName;
     private Double milepost;
     private String direction;
     private Double latitude;
     private Double longitude;
-    private Double elevation;
     private Double bearing;
 
-    public Integer getMilepostId() {
-        return this.milepostId;
+    public String getCommonName() {
+        return commonName;
     }
 
-    public void setMilepostId(Integer milepostId) {
-        this.milepostId = milepostId;
-    }
-
-    public String getRoute() {
-        return route;
-    }
-
-    public void setRoute(String route) {
-        this.route = route;
+    public void setCommonName(String route) {
+        this.commonName = route;
     }
 
     public Double getMilepost() {
@@ -59,14 +48,7 @@ public class Milepost
         this.longitude = longitude;
     }
 
-    public Double getElevation() {
-        return elevation;
-    }
-
-    public void setElevation(Double elevation) {
-        this.elevation = elevation;
-    }
-
+    // TODO: this is used to determine tim direction, but is no longer in the view
     public Double getBearing() {
         return bearing;
     }

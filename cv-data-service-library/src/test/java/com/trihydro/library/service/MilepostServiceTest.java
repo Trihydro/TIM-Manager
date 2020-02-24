@@ -34,7 +34,7 @@ public class MilepostServiceTest extends BaseServiceTest {
         Milepost milepost = new Milepost();
         milepost.setBearing(22d);
         milepost.setDirection("direction");
-        milepost.setRoute("route");
+        milepost.setCommonName("route");
         mileposts[0] = milepost;
         doReturn(mileposts).when(mockResponseEntityMilepostArray).getBody();
         when(mockRestTemplate.getForEntity(url, Milepost[].class)).thenReturn(mockResponseEntityMilepostArray);

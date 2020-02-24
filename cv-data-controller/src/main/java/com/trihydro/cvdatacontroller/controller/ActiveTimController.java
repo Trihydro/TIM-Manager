@@ -431,7 +431,7 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(indices);
 	}
 
-	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}/{direction}", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
 			@PathVariable Long timTypeId, String direction) {
 
@@ -444,7 +444,7 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = GetConnectionPool();
 			statement = connection.createStatement();
-			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "%' and TIM_TYPE_ID = "
+			String query = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
 					+ timTypeId;
 
 			if (direction != null) {
@@ -501,9 +501,13 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = GetConnectionPool();
 			statement = connection.createStatement();
-			rs = statement.executeQuery(
-					"select itis_code from active_tim inner join tim on tim.tim_id = active_tim.tim_id inner join data_frame on tim.tim_id = data_frame.tim_id inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id where active_tim_id = "
-							+ activeTimId);
+			String selectStatement = "select itis_code from active_tim ";
+			selectStatement += "inner join tim on tim.tim_id = active_tim.tim_id ";
+			selectStatement += "inner join data_frame on tim.tim_id = data_frame.tim_id ";
+			selectStatement += "inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id ";
+			selectStatement += "inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id ";
+			selectStatement += "where active_tim_id = " + activeTimId;
+			rs = statement.executeQuery(selectStatement);
 
 			// convert to ActiveTim object
 			while (rs.next()) {

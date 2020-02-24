@@ -3,6 +3,7 @@ package com.trihydro.odewrapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
@@ -64,6 +65,8 @@ public class WydotTimRcControllerTest {
 		itisCodesIncident.add("531");
 		doReturn(itisCodesIncident).when(setItisCodes).setItisCodesRc(any());
 		doReturn(itisCodes).when(setItisCodes).getItisCodes();
+
+		doReturn(true).when(uut).routeSupported(isA(String.class));
 	}
 
 	@Test
@@ -92,6 +95,7 @@ public class WydotTimRcControllerTest {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I70\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"both\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		doReturn(false).when(uut).routeSupported("I70");
 
 		// Act
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
@@ -103,7 +107,6 @@ public class WydotTimRcControllerTest {
 		assertEquals(1, resultArr.length);
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
 		assertEquals("both", resultArr[0].direction);
-		assertEquals("I70", resultArr[0].route);
 	}
 
 	@Test

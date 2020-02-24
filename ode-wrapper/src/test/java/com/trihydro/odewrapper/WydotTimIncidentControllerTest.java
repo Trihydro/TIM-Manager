@@ -3,6 +3,7 @@ package com.trihydro.odewrapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
@@ -66,6 +67,7 @@ public class WydotTimIncidentControllerTest {
 		doReturn(itisCodes).when(setItisCodes).getItisCodes();
 
 		doNothing().when(uut).makeTims(any());
+		doReturn(true).when(uut).routeSupported(isA(String.class));
 	}
 
 	@Test
@@ -95,6 +97,7 @@ public class WydotTimIncidentControllerTest {
 		// Arrange
 		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\":\"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\"}]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
+		doReturn(false).when(uut).routeSupported("I-25");
 
 		// Act
 		ResponseEntity<String> data = uut.createIncidentTim(til);
@@ -107,7 +110,6 @@ public class WydotTimIncidentControllerTest {
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
 		assertEquals("both", resultArr[0].direction);
 		assertEquals("IN49251", resultArr[0].clientId);
-		assertEquals("I-25", resultArr[0].route);
 	}
 
 	@Test
@@ -152,6 +154,7 @@ public class WydotTimIncidentControllerTest {
 
 		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\":\"IN49251\", \"direction\": \"eastbound\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
+		doReturn(false).when(uut).routeSupported("I-25");
 
 		// Act
 		ResponseEntity<String> data = uut.createIncidentTim(til);
@@ -163,7 +166,6 @@ public class WydotTimIncidentControllerTest {
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
 		assertEquals("eastbound", resultArr[0].direction);
 		assertEquals("IN49251", resultArr[0].clientId);
-		assertEquals("I-25", resultArr[0].route);
 	}
 
 	@Test

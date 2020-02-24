@@ -13,6 +13,7 @@ import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.CvDataServiceLibrary;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
@@ -26,6 +27,7 @@ import com.trihydro.odewrapper.model.WydotTimVsl;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 // @RestController
@@ -64,16 +66,10 @@ public abstract class WydotTimBaseController {
 
         result.setClientId(tim.getClientId());
 
-        String route = null;
-        if (tim.getRoute() != null) {
-            route = tim.getRoute().replaceAll("\\D+", "");
+        if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
+            resultMessages.add("route not supported");
+        }else{
             result.setRoute(tim.getRoute());
-        } else {
-            resultMessages.add("route not supported");
-        }
-        // if route is not 80 fail
-        if (!route.equals("80")) {
-            resultMessages.add("route not supported");
         }
         // if direction is not eastbound/westbound/both fail
         if (!tim.getDirection().toLowerCase().equals("eastbound")
@@ -115,17 +111,13 @@ public abstract class WydotTimBaseController {
             tim.setClientId(tim.getIncidentId());
         }
 
-        String route = null;
-        if (tim.getHighway() != null) {
-            route = tim.getHighway().replaceAll("\\D+", "");
+        if (tim.getHighway() == null || !routeSupported(tim.getHighway())) {
+            resultMessages.add("route not supported");
+        }else{
+            tim.setRoute(tim.getHighway());
             result.setRoute(tim.getHighway());
-        } else {
-            resultMessages.add("route not supported");
         }
-        // if route is not 80 fail
-        if (!route.equals("80")) {
-            resultMessages.add("route not supported");
-        }
+
         // if direction is not eastbound/westbound/both fail
         if (!tim.getDirection().toLowerCase().equals("eastbound")
                 && !tim.getDirection().toLowerCase().equals("westbound")
@@ -169,19 +161,13 @@ public abstract class WydotTimBaseController {
             tim.setClientId(tim.getId());
         }
 
-        String route = null;
-        if (tim.getHighway() != null) {
-            route = tim.getHighway().replaceAll("\\D+", "");
-            result.setRoute(tim.getHighway());
-            tim.setRoute(tim.getHighway());
-        } else {
+        if (tim.getHighway() == null || !routeSupported(tim.getHighway())) {
             resultMessages.add("route not supported");
+        }else{
+            tim.setRoute(tim.getHighway());
+            result.setRoute(tim.getHighway());
         }
 
-        // if route is not 80 fail
-        if (!route.equals("80")) {
-            resultMessages.add("route not supported");
-        }
         // if direction is not eastbound/westbound/both fail
         if (!tim.getDirection().toLowerCase().equals("eastbound")
                 && !tim.getDirection().toLowerCase().equals("westbound")
@@ -254,6 +240,13 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
+    public boolean routeSupported(String route) {
+        // REST call out to milepost_vw to determine if route exists
+        String url = String.format("%s/route-exists/%s", configuration.getCvRestService(), route);
+        ResponseEntity<Boolean> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Boolean.class);
+        return response.getBody();
+    }
+
     protected ControllerResult validateInputRc(WydotTimRc tim) {
 
         ControllerResult result = new ControllerResult();
@@ -263,17 +256,10 @@ public abstract class WydotTimBaseController {
         if (tim.getDirection() != null)
             result.setDirection(tim.getDirection());
 
-        String route = null;
-        if (tim.getRoute() != null) {
-            route = tim.getRoute().replaceAll("\\D+", "");
+        if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
+            resultMessages.add("route not supported");
+        }else{
             result.setRoute(tim.getRoute());
-        } else {
-            resultMessages.add("route not supported");
-        }
-
-        // if route is not 80 fail
-        if (!route.equals("80")) {
-            resultMessages.add("route not supported");
         }
         // if direction is not eastbound/westbound/both fail
         if (!tim.getDirection().toLowerCase().equals("eastbound")
@@ -325,18 +311,12 @@ public abstract class WydotTimBaseController {
         if (tim.getDirection() != null)
             result.setDirection(tim.getDirection());
 
-        String route = null;
-        if (tim.getRoute() != null) {
-            route = tim.getRoute().replaceAll("\\D+", "");
-            result.setRoute(tim.getRoute());
-        } else {
+        if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
+        }else{
+            result.setRoute(tim.getRoute());
         }
 
-        // if route is not 80 fail
-        if (!route.equals("80")) {
-            resultMessages.add("route not supported");
-        }
         // if direction is not eastbound/westbound/both fail
         if (!tim.getDirection().toLowerCase().equals("eastbound")
                 && !tim.getDirection().toLowerCase().equals("westbound")
@@ -394,18 +374,12 @@ public abstract class WydotTimBaseController {
             resultMessages.add("Null value for segment");
         }
 
-        String route = null;
-        if (tim.getRoute() != null) {
-            route = tim.getRoute().replaceAll("\\D+", "");
-            result.setRoute(tim.getRoute());
-        } else {
+        if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
+        }else{
+            result.setRoute(tim.getRoute());
         }
 
-        // if route is not 80 fail
-        if (!route.equals("80")) {
-            resultMessages.add("route not supported");
-        }
         // if direction is not eastbound/westbound/both fail
         if (!tim.getDirection().toLowerCase().equals("eastbound")
                 && !tim.getDirection().toLowerCase().equals("westbound")

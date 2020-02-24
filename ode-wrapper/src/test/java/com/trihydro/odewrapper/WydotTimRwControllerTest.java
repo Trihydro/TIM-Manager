@@ -3,6 +3,7 @@ package com.trihydro.odewrapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
@@ -67,6 +68,8 @@ public class WydotTimRwControllerTest {
 		itisCodesIncident.add("531");
 		doReturn(itisCodesIncident).when(setItisCodes).setItisCodesRw(any());
 		doReturn(itisCodes).when(setItisCodes).getItisCodes();
+
+		doReturn(true).when(uut).routeSupported(isA(String.class));
 
 		doNothing().when(uut).processRequestAsync();
 	}

@@ -3,6 +3,7 @@ package com.trihydro.odewrapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
@@ -71,6 +72,7 @@ public class WydotTimParkingControllerTest {
 		doReturn(itisCodes).when(setItisCodes).getItisCodes();
 
 		doNothing().when(uut).processRequest(any());
+		doReturn(true).when(uut).routeSupported(isA(String.class));
 
 		parkingTims = new ArrayList<>();
 		at = new ActiveTim();
@@ -108,6 +110,7 @@ public class WydotTimParkingControllerTest {
 		// Arrange
 		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-70\", \"direction\": \"westbound\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
+		doReturn(false).when(uut).routeSupported("I-70");
 
 		// Act
 		ResponseEntity<String> data = uut.createParkingTim(tpl);
@@ -119,7 +122,6 @@ public class WydotTimParkingControllerTest {
 		assertEquals(1, resultArr.length);
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
 		assertEquals("westbound", resultArr[0].direction);
-		assertEquals("I-70", resultArr[0].route);
 	}
 
 	@Test

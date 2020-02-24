@@ -1,7 +1,10 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -242,5 +245,30 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         verify(mockConnection).close();
         verify(mockRs).close();
         assertEquals(0, milePosts.getBody().size());
+    }
+
+    @Test
+    public void routeExists_SUCCESS() {
+        // Arrange
+
+        // Act
+        ResponseEntity<Boolean> data = uut.routeExists("route");
+
+        // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
+        assertTrue("routeExists failed", data.getBody());
+    }
+
+    @Test
+    public void routeExists_FAIL() throws SQLException {
+        // Arrange
+        doThrow(new SQLException()).when(mockPreparedStatement).executeQuery();
+
+        // Act
+        ResponseEntity<Boolean> data = uut.routeExists("route");
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        assertFalse("routeExists succeeded when exception", data.getBody());
     }
 }

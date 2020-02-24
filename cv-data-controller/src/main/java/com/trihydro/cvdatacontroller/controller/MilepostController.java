@@ -1,6 +1,7 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -256,5 +257,41 @@ public class MilepostController extends BaseController {
 			}
 		}
 		return ResponseEntity.ok(mileposts);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/route-exists/{route}")
+	public ResponseEntity<Boolean> routeExists(@PathVariable String route) {
+		Connection connection = null;
+		ResultSet rs = null;
+		PreparedStatement preparedStatement = null;
+		try {
+
+			connection = GetConnectionPool();
+
+			// build SQL query
+			String statementStr = "select distinct common_name from milepost_vw where common_name = '?'";
+			preparedStatement = connection.prepareStatement(statementStr);
+			preparedStatement.setString(0, route);
+			rs = preparedStatement.executeQuery();
+
+			return ResponseEntity.ok(rs.next());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

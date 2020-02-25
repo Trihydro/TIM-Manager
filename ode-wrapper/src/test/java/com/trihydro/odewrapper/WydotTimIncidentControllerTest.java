@@ -74,7 +74,7 @@ public class WydotTimIncidentControllerTest {
 	public void testCreateIncidentTim_bothDirections_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\": \"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\", \"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\": \"IN49251\", \"direction\": \"b\", \"ts\": \"2018-04-16T19:30:05.000Z\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
 		// Act
@@ -88,14 +88,14 @@ public class WydotTimIncidentControllerTest {
 		assertEquals("success", resultArr[0].resultMessages.get(0));
 		assertEquals("IN49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateIncidentTim_bothDirections_NoMileposts() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\":\"IN49251\", \"direction\": \"both\", \"ts\": \"2018-04-16T19:30:05.000Z\"}]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\":\"IN49251\", \"direction\": \"b\", \"ts\": \"2018-04-16T19:30:05.000Z\"}]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 		doReturn(false).when(uut).routeSupported("I-25");
 
@@ -108,7 +108,7 @@ public class WydotTimIncidentControllerTest {
 		assertNotNull(resultArr);
 
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 		assertEquals("IN49251", resultArr[0].clientId);
 	}
 
@@ -116,7 +116,7 @@ public class WydotTimIncidentControllerTest {
 	public void testCreateIncidentTim_bothDirections_NoItisCodes() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"IN49251\", \"direction\": \"both\", \"schedStart\": \"2018-04-16\" }]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"IN49251\", \"direction\": \"b\", \"schedStart\": \"2018-04-16\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
 		// Act
@@ -127,13 +127,13 @@ public class WydotTimIncidentControllerTest {
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		assertNotNull(resultArr);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateIncidentTim_oneDirection_success() throws Exception {
 
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"OD49251\", \"direction\": \"eastbound\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"OD49251\", \"direction\": \"i\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
 		// Act
@@ -144,7 +144,7 @@ public class WydotTimIncidentControllerTest {
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		assertNotNull(resultArr);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 		assertEquals("OD49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
 	}
@@ -152,7 +152,7 @@ public class WydotTimIncidentControllerTest {
 	@Test
 	public void testCreateIncidentTim_oneDirection_NoMileposts() throws Exception {
 
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\":\"IN49251\", \"direction\": \"eastbound\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-25\", \"incidentId\":\"IN49251\", \"direction\": \"i\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 		doReturn(false).when(uut).routeSupported("I-25");
 
@@ -164,14 +164,14 @@ public class WydotTimIncidentControllerTest {
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		assertNotNull(resultArr);
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 		assertEquals("IN49251", resultArr[0].clientId);
 	}
 
 	@Test
 	public void testCreateIncidentTim_oneDirection_NoItisCodes() throws Exception {
 
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"IN49251\", \"direction\": \"eastbound\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"test\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"IN49251\", \"direction\": \"i\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
 		// Act
@@ -182,7 +182,7 @@ public class WydotTimIncidentControllerTest {
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		assertNotNull(resultArr);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 	}
 
 	@Test
@@ -230,7 +230,7 @@ public class WydotTimIncidentControllerTest {
 	public void testUpdateIncidentTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"OD49251\", \"direction\": \"eastbound\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"fire\", \"effect\": \"test\",\"action\": \"test\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"OD49251\", \"direction\": \"i\", \"ts\":\"2018-04-16T19:30:05.000Z\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
 		// Act
@@ -241,7 +241,7 @@ public class WydotTimIncidentControllerTest {
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		assertNotNull(resultArr);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 		assertEquals("OD49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
 	}
@@ -250,7 +250,7 @@ public class WydotTimIncidentControllerTest {
 	public void testUpdateIncidentTim_bothDirections_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"crash\", \"effect\": \"leftClosed\",\"action\": \"caution\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"IN49251\", \"direction\": \"both\" }]}";
+		String incidentJson = "{\"timIncidentList\": [{ \"toRm\": 370, \"impact\":\"L\", \"fromRm\": 360, \"problem\": \"crash\", \"effect\": \"leftClosed\",\"action\": \"caution\", \"pk\": 3622, \"highway\": \"I-80\", \"incidentId\":\"IN49251\", \"direction\": \"b\" }]}";
 		TimIncidentList til = gson.fromJson(incidentJson, TimIncidentList.class);
 
 		// Act
@@ -261,7 +261,7 @@ public class WydotTimIncidentControllerTest {
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		assertNotNull(resultArr);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 		assertEquals("IN49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
 	}

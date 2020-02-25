@@ -72,10 +72,10 @@ public abstract class WydotTimBaseController {
         } else {
             result.setRoute(tim.getRoute());
         }
-        // if direction is not eastbound/westbound/both fail
-        if (!tim.getDirection().toLowerCase().equals("eastbound")
-                && !tim.getDirection().toLowerCase().equals("westbound")
-                && !tim.getDirection().toLowerCase().equals("both")) {
+        // if direction is not i/d/b fail
+        if (!tim.getDirection().toLowerCase().equals("i")
+                && !tim.getDirection().toLowerCase().equals("d")
+                && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getMileMarker() != null && tim.getMileMarker() < 0) {
@@ -119,10 +119,10 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getHighway());
         }
 
-        // if direction is not eastbound/westbound/both fail
-        if (!tim.getDirection().toLowerCase().equals("eastbound")
-                && !tim.getDirection().toLowerCase().equals("westbound")
-                && !tim.getDirection().toLowerCase().equals("both")) {
+        // if direction is not i/d/b fail
+        if (!tim.getDirection().toLowerCase().equals("i")
+                && !tim.getDirection().toLowerCase().equals("d")
+                && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getIncidentId() == null) {
@@ -169,10 +169,10 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getHighway());
         }
 
-        // if direction is not eastbound/westbound/both fail
-        if (!tim.getDirection().toLowerCase().equals("eastbound")
-                && !tim.getDirection().toLowerCase().equals("westbound")
-                && !tim.getDirection().toLowerCase().equals("both")) {
+        // if direction is not i/d/b fail
+        if (!tim.getDirection().toLowerCase().equals("i")
+                && !tim.getDirection().toLowerCase().equals("d")
+                && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getToRm() != null && tim.getToRm() < 0) {
@@ -262,10 +262,10 @@ public abstract class WydotTimBaseController {
         } else {
             result.setRoute(tim.getRoute());
         }
-        // if direction is not eastbound/westbound/both fail
-        if (!tim.getDirection().toLowerCase().equals("eastbound")
-                && !tim.getDirection().toLowerCase().equals("westbound")
-                && !tim.getDirection().toLowerCase().equals("both")) {
+        // if direction is not i/d/b fail
+        if (!tim.getDirection().toLowerCase().equals("i")
+                && !tim.getDirection().toLowerCase().equals("d")
+                && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getToRm() != null && tim.getToRm() < 0) {
@@ -318,10 +318,10 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
 
-        // if direction is not eastbound/westbound/both fail
-        if (!tim.getDirection().toLowerCase().equals("eastbound")
-                && !tim.getDirection().toLowerCase().equals("westbound")
-                && !tim.getDirection().toLowerCase().equals("both")) {
+        // if direction is not i/d/b fail
+        if (!tim.getDirection().toLowerCase().equals("i")
+                && !tim.getDirection().toLowerCase().equals("d")
+                && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getToRm() != null && tim.getToRm() < 0) {
@@ -381,10 +381,10 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
 
-        // if direction is not eastbound/westbound/both fail
-        if (!tim.getDirection().toLowerCase().equals("eastbound")
-                && !tim.getDirection().toLowerCase().equals("westbound")
-                && !tim.getDirection().toLowerCase().equals("both")) {
+        // if direction is not i/d/b fail
+        if (!tim.getDirection().toLowerCase().equals("i")
+                && !tim.getDirection().toLowerCase().equals("d")
+                && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getToRm() != null && tim.getToRm() < 0) {
@@ -465,11 +465,11 @@ public abstract class WydotTimBaseController {
     public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
             Integer pk) {
 
-        if (wydotTim.getDirection().equals("both")) {
-            // eastbound
-            createSendTims(wydotTim, "eastbound", timType, startDateTime, endDateTime, pk);
-            // westbound
-            createSendTims(wydotTim, "westbound", timType, startDateTime, endDateTime, pk);
+        if (wydotTim.getDirection().equals("b")) {
+            // i
+            createSendTims(wydotTim, "i", timType, startDateTime, endDateTime, pk);
+            // d
+            createSendTims(wydotTim, "d", timType, startDateTime, endDateTime, pk);
         } else {
             createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk);
         }

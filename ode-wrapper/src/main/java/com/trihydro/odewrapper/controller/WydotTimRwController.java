@@ -86,17 +86,17 @@ public class WydotTimRwController extends WydotTimBaseController {
             }
 
             // if bi-directional
-            if (wydotTim.getDirection().equals("both")) {
-                // make eastbound TIMs
-                makeEastboundTims(wydotTim, timPoint);
-                // make westbound TIMs
-                makeWestboundTims(wydotTim, timPoint);
+            if (wydotTim.getDirection().equals("b")) {
+                // make i TIMs
+                makeIncreasingTims(wydotTim, timPoint);
+                // make d TIMs
+                makeDecreasingTims(wydotTim, timPoint);
             }
             // else make one direction TIMs
-            else if (wydotTim.getDirection().equals("eastbound"))
-                makeEastboundTims(wydotTim, timPoint);
+            else if (wydotTim.getDirection().equals("i"))
+                makeIncreasingTims(wydotTim, timPoint);
             else
-                makeWestboundTims(wydotTim, timPoint);
+                makeDecreasingTims(wydotTim, timPoint);
 
             // compile result messages for user
             resultTim.getResultMessages().add("success");
@@ -109,9 +109,9 @@ public class WydotTimRwController extends WydotTimBaseController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void makeEastboundTims(WydotTimRw wydotTim, Double timPoint) {
+    public void makeIncreasingTims(WydotTimRw wydotTim, Double timPoint) {
 
-        // eastbound - add buffer for point TIMs
+        // i - add buffer for point TIMs
         WydotTimRw timOneWay = null;
 
         try {
@@ -127,16 +127,16 @@ public class WydotTimRwController extends WydotTimBaseController {
         if (timPoint != null)
             timOneWay.setFromRm(timPoint - 1);
 
-        timOneWay.setDirection("eastbound");
+        timOneWay.setDirection("i");
         timsToSend.add(timOneWay);
 
         if (timOneWay.getBuffers() != null)
-            makeEastboundBufferTim(timOneWay);
+            makeIncreasingBufferTim(timOneWay);
     }
 
-    public void makeWestboundTims(WydotTimRw wydotTim, Double timPoint) {
+    public void makeDecreasingTims(WydotTimRw wydotTim, Double timPoint) {
 
-        // westbound - add buffer for point TIMs
+        // d - add buffer for point TIMs
 
         WydotTimRw timOneWay = null;
 
@@ -153,18 +153,18 @@ public class WydotTimRwController extends WydotTimBaseController {
         if (timPoint != null)
             timOneWay.setFromRm(timPoint + 1);
 
-        timOneWay.setDirection("westbound");
+        timOneWay.setDirection("d");
         timsToSend.add(timOneWay);
         if (timOneWay.getBuffers() != null)
-            makeWestboundBufferTim(timOneWay);
+            makeDecreasingBufferTim(timOneWay);
     }
 
-    public void makeEastboundBufferTim(WydotTimRw wydotTim) {
+    public void makeIncreasingBufferTim(WydotTimRw wydotTim) {
 
         double bufferBefore = 0;
 
         for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
-            // eastbound
+            // i
             // starts at lower milepost minus the buffer distance
             double bufferStart = Math.min(wydotTim.getToRm(), wydotTim.getFromRm())
                     - wydotTim.getBuffers().get(i).getDistance() - bufferBefore;
@@ -215,12 +215,12 @@ public class WydotTimRwController extends WydotTimBaseController {
         }).start();
     }
 
-    public void makeWestboundBufferTim(WydotTimRw wydotTim) {
+    public void makeDecreasingBufferTim(WydotTimRw wydotTim) {
 
         double bufferBefore = 0;
 
         for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
-            // westbound
+            // d
             // starts at higher milepost plus buffer distance
             double bufferStart = Math.max(wydotTim.getToRm(), wydotTim.getFromRm())
                     + wydotTim.getBuffers().get(i).getDistance() + bufferBefore;

@@ -75,11 +75,11 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     private void setupWydotTims() {
         wydotTims = new ArrayList<>();
         WydotTim wydotTim = new WydotTim();
-        wydotTim.setDirection("westbound");
+        wydotTim.setDirection("d");
         wydotTim.setClientId("unit_test_id1");
         wydotTims.add(wydotTim);
         wydotTim = new WydotTim();
-        wydotTim.setDirection("eastbound");
+        wydotTim.setDirection("i");
         wydotTim.setClientId("unit_test_id2");
         wydotTims.add(wydotTim);
     }

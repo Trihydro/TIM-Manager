@@ -37,7 +37,7 @@ public class ScriptTests {
 
         WydotTimRc tim = new WydotTimRc();
 
-        tim.setDirection("eastbound");
+        tim.setDirection("i");
         tim.setFromRm(370.0);
         tim.setToRm(375.0);
         tim.setRoadCode("ARLI80EI");

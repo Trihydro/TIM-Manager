@@ -139,26 +139,26 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
                     if (wydotTim.getDirection().equals("both")) {
 
-                        // first TIM - eastbound - add buffer for point TIMs
+                        // first TIM - i - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setToRm(timPoint - 1);
 
-                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk());
 
                         // second TIM - westbound - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setToRm(timPoint + 1);
 
-                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
 
-                        // eastbound - add buffer for point TIMs
-                        if (wydotTim.getDirection().equals("eastbound") && timPoint != null)
+                        // i - add buffer for point TIMs
+                        if (wydotTim.getDirection().equals("i") && timPoint != null)
                             wydotTim.setToRm(timPoint - 1);
 
-                        // westbound - add buffer for point TIMs
-                        if (wydotTim.getDirection().equals("westbound") && timPoint != null)
+                        // d - add buffer for point TIMs
+                        if (wydotTim.getDirection().equals("d") && timPoint != null)
                             wydotTim.setToRm(timPoint + 1);
 
                         createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
@@ -221,26 +221,26 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
                     if (wydotTim.getDirection().equals("both")) {
 
-                        // first TIM - eastbound - add buffer for point TIMs
+                        // first TIM - i - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setFromRm(timPoint - 1);
 
-                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk());
 
-                        // second TIM - westbound - add buffer for point TIMs
+                        // second TIM - d - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setFromRm(timPoint + 1);
 
-                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
 
-                        // eastbound - add buffer for point TIMs
-                        if (wydotTim.getDirection().equals("eastbound") && timPoint != null)
+                        // i - add buffer for point TIMs
+                        if (wydotTim.getDirection().toLowerCase().equals("i") && timPoint != null)
                             wydotTim.setFromRm(timPoint - 1);
 
                         // westbound - add buffer for point TIMs
-                        if (wydotTim.getDirection().equals("westbound") && timPoint != null)
+                        if (wydotTim.getDirection().toLowerCase().equals("d") && timPoint != null)
                             wydotTim.setFromRm(timPoint + 1);
 
                         createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,

@@ -77,12 +77,12 @@ public class CreateBaseTimUtil {
         path.setType("xy");
 
         double startingMP = 0, endingMP = 0;
-        if (direction.equals("westbound")) {
+        if (direction.toLowerCase().equals("d")) {
             startingMP = Math.max(wydotTim.getFromRm(), wydotTim.getToRm());
             endingMP = Math.min(wydotTim.getFromRm(), wydotTim.getToRm());
             startingMP = (Math.ceil(startingMP * 10) / 10) + .1;
             endingMP = (Math.floor(endingMP * 10) / 10);
-        } else if (direction.equals("eastbound")) {
+        } else if (direction.toLowerCase().equals("i")) {
             startingMP = Math.min(wydotTim.getFromRm(), wydotTim.getToRm());
             endingMP = Math.max(wydotTim.getFromRm(), wydotTim.getToRm());
             startingMP = (Math.floor(startingMP * 10) / 10) - .1;

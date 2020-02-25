@@ -78,7 +78,7 @@ public class WydotTimRwControllerTest {
 	public void testCreateRwTim_oneDirection_SUCCESS() throws Exception {
 
 		// Arrange
-		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\":370,\"direction\": \"eastbound\",\"surface\": \"G\",\"buffers\":[{\"distance\": 1,\"action\": \"leftClosed\",\"units\":\"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\":\"miles\"}],\"schedStart\": \"2016-06-23\",\"delays\": [{\"code\":19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\":8399},\"firstDay\": \"20130228\",\"lastDay\":\"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\":\"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\":8359,\"highway\": \"I-80\", \"advisory\":[]}]}";
+		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\":370,\"direction\": \"i\",\"surface\": \"G\",\"buffers\":[{\"distance\": 1,\"action\": \"leftClosed\",\"units\":\"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\":\"miles\"}],\"schedStart\": \"2016-06-23\",\"delays\": [{\"code\":19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\":8399},\"firstDay\": \"20130228\",\"lastDay\":\"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\":\"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\":8359,\"highway\": \"I-80\", \"advisory\":[]}]}";
 		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
 		// Act
@@ -91,7 +91,7 @@ public class WydotTimRwControllerTest {
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
 		assertEquals("8359", resultArr[0].clientId);
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 		assertEquals("I-80", resultArr[0].route);
 	}
 
@@ -99,7 +99,7 @@ public class WydotTimRwControllerTest {
 	public void testCreateRwTim_bothDirections_NoMileposts() throws Exception {
 
 		// Arrange
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"d\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
 		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
 		// Act
@@ -111,13 +111,13 @@ public class WydotTimRwControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateRwTim_bothDirections_NoItisCodes() throws Exception {
 
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"westbound\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"d\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
 		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
 		// Act
@@ -131,7 +131,7 @@ public class WydotTimRwControllerTest {
 		assertEquals("success", resultArr[0].resultMessages.get(0));
 		assertEquals("15917", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test

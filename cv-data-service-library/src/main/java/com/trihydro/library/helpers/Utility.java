@@ -178,7 +178,7 @@ public class Utility {
 			System.out.println(gson.toJson(mainRsus));
 		}
 
-		if (direction.equals("eastbound")) {
+		if (direction.toLowerCase().equals("i")) {
 
 			// get rsus at mileposts less than your milepost
 			List<WydotRsu> rsusLower = mainRsus.stream().filter(x -> x.getMilepost() < lowerMilepost)
@@ -205,7 +205,7 @@ public class Utility {
 				entryRsu = rsusLower.stream().max(compMilepost).get();
 			}
 
-		} else { // westbound
+		} else { // d
 
 			// get rsus at mileposts greater than your milepost
 			List<WydotRsu> rsusHigher = mainRsus.stream().filter(x -> x.getMilepost() > higherMilepost)

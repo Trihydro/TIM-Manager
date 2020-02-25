@@ -95,16 +95,20 @@ public class RsuControllerTest extends TestBase<RsuController> {
     }
 
     @Test
-    public void SelectRsusInBuffer_eastboundSUCCESS() throws SQLException {
+    public void SelectRsusInBuffer_iSUCCESS() throws SQLException {
         // Arrange
-        String direction = "eastbound";
+        String direction = "i";
         double startingMilepost = 10d;
         double endingMilepost = 20d;
-        String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing' and rsu_vw.milepost >= "
-                + 5.0 + " and rsu_vw.milepost <= " + endingMilepost + " and rsu_vw.route like '%80%'";
+        String route = "I 80";
+        String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu ";
+        selectStatement += "inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
+        selectStatement += "where rsu_vw.status = 'Existing' and rsu_vw.milepost >= " + 5.0;
+        selectStatement += " and rsu_vw.milepost <= " + endingMilepost + " and rsu_vw.route = '" + route + "'";
 
         // Act
-        ResponseEntity<List<WydotRsu>> data = uut.SelectRsusInBuffer(direction, startingMilepost, endingMilepost);
+        ResponseEntity<List<WydotRsu>> data = uut.SelectRsusInBuffer(direction, startingMilepost, endingMilepost,
+                route);
 
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
@@ -119,16 +123,20 @@ public class RsuControllerTest extends TestBase<RsuController> {
     }
 
     @Test
-    public void SelectRsusInBuffer_westboundSUCCESS() throws SQLException {
+    public void SelectRsusInBuffer_dSUCCESS() throws SQLException {
         // Arrange
-        String direction = "westbound";
+        String direction = "d";
         double startingMilepost = 10d;
         double endingMilepost = 20d;
-        String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing' and rsu_vw.milepost >= "
-                + startingMilepost + "and rsu_vw.milepost <= " + 25.0 + " and rsu_vw.route like '%80%'";
+        String route = "I 80";
+        String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu ";
+        selectStatement += "inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
+        selectStatement += "where rsu_vw.status = 'Existing' and rsu_vw.milepost >= " + startingMilepost;
+        selectStatement += " and rsu_vw.milepost <= " + 25.0 + " and rsu_vw.route = '" + route + "'";
 
         // Act
-        ResponseEntity<List<WydotRsu>> data = uut.SelectRsusInBuffer(direction, startingMilepost, endingMilepost);
+        ResponseEntity<List<WydotRsu>> data = uut.SelectRsusInBuffer(direction, startingMilepost, endingMilepost,
+                route);
 
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
@@ -145,15 +153,19 @@ public class RsuControllerTest extends TestBase<RsuController> {
     @Test
     public void SelectRsusInBuffer_FAIL() throws SQLException {
         // Arrange
-        String direction = "westbound";
+        String direction = "d";
         double startingMilepost = 10d;
         double endingMilepost = 20d;
-        String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing' and rsu_vw.milepost >= "
-                + startingMilepost + "and rsu_vw.milepost <= " + 25.0 + " and rsu_vw.route like '%80%'";
+        String route = "I 80";
+        String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu ";
+        selectStatement += "inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
+        selectStatement += "where rsu_vw.status = 'Existing' and rsu_vw.milepost >= " + startingMilepost;
+        selectStatement += " and rsu_vw.milepost <= " + 25.0 + " and rsu_vw.route = '" + route + "'";
         doThrow(new SQLException()).when(mockRs).getInt("RSU_ID");
 
         // Act
-        ResponseEntity<List<WydotRsu>> data = uut.SelectRsusInBuffer(direction, startingMilepost, endingMilepost);
+        ResponseEntity<List<WydotRsu>> data = uut.SelectRsusInBuffer(direction, startingMilepost, endingMilepost,
+                route);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
@@ -167,8 +179,9 @@ public class RsuControllerTest extends TestBase<RsuController> {
     public void GetFullRsusTimIsOn_SUCCESS() throws SQLException {
         // Arrange
         Long timId = -1l;
-        String selectStatement = "select rsu.*, tim_rsu.rsu_index, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id where tim_rsu.tim_id = "
-                + timId;
+        String selectStatement = "select rsu.*, tim_rsu.rsu_index, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address ";
+        selectStatement += "from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
+        selectStatement += "inner join tim_rsu on tim_rsu.rsu_id = rsu.rsu_id where tim_rsu.tim_id = " + timId;
 
         // Act
         ResponseEntity<List<WydotRsuTim>> data = uut.GetFullRsusTimIsOn(timId);

@@ -2,6 +2,7 @@ package com.trihydro.timrefresh;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
@@ -42,7 +43,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Unit tests for TimRefreshController
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class, DataFrameService.class })
+@PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class,
+        DataFrameService.class })
 public class TimRefreshControllerTest {
     private long timID = 1l;
 
@@ -50,7 +52,7 @@ public class TimRefreshControllerTest {
     public TestName name = new TestName();
 
     @Mock
-    TimRefreshConfiguration configuration;
+    TimRefreshConfiguration mockConfiguration;
     @Mock
     SdwService mockSdwService;
     @Mock
@@ -63,7 +65,8 @@ public class TimRefreshControllerTest {
 
     @Before
     public void setup() {
-        // controllerUnderTest = new TimRefreshController(configuration, mockSdwService);
+        // controllerUnderTest = new TimRefreshController(configuration,
+        // mockSdwService);
 
         PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(WydotTimService.class);
@@ -73,6 +76,9 @@ public class TimRefreshControllerTest {
 
         setupMilePost();
         setupDataFrameService();
+        String[] routes = new String[1];
+        routes[0] = "I 80";
+        doReturn(routes).when(mockConfiguration).getRsuRoutes();
         System.out.println("Executing " + name.getMethodName());
     }
 
@@ -87,7 +93,7 @@ public class TimRefreshControllerTest {
         Milepost startMp = new Milepost();
         startMp.setCommonName("route1");
         startMp.setMilepost(250d);
-        startMp.setDirection("eastward");
+        startMp.setDirection("i");
         startMp.setLatitude(105d);
         startMp.setLongitude(45d);
         // startMp.setBearing(22d);
@@ -95,7 +101,7 @@ public class TimRefreshControllerTest {
         Milepost endMp = new Milepost();
         endMp.setCommonName("route1");
         endMp.setMilepost(255d);
-        endMp.setDirection("eastward");
+        endMp.setDirection("i");
         endMp.setLatitude(105d);
         endMp.setLongitude(45d);
         // endMp.setBearing(59d);
@@ -219,8 +225,8 @@ public class TimRefreshControllerTest {
 
     private TimUpdateModel getTumBase() {
         TimUpdateModel tum = new TimUpdateModel();
-        tum.setRoute("UnitTestRoute");
-        tum.setDirection("eastward");
+        tum.setRoute("I 80");
+        tum.setDirection("i");
         tum.setMilepostStart(1d);
         tum.setMilepostStop(2d);
         tum.setClosedPath(false);
@@ -229,6 +235,7 @@ public class TimRefreshControllerTest {
 
     private TimUpdateModel getRsuTim() {
         TimUpdateModel tum = getTumBase();
+        tum.setRoute("I 80");
         tum.setRsuTarget("DefaultTarget");
         tum.setClosedPath(false);
         tum.setTimId(timID);

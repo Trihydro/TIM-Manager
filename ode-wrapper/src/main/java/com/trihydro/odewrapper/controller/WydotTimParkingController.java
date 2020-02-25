@@ -130,17 +130,17 @@ public class WydotTimParkingController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimParking wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equals("both")) {
+                    if (wydotTim.getDirection().equals("b")) {
 
                         wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
                         wydotTim.setToRm(wydotTim.getMileMarker());
-                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, null);
+                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, null);
 
                         wydotTim.setFromRm(wydotTim.getMileMarker());
                         wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, null);
+                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, null);
                     } else {
-                        if (wydotTim.getDirection().equals("eastbound")) {
+                        if (wydotTim.getDirection().equals("i")) {
                             wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
                             wydotTim.setToRm(wydotTim.getMileMarker());
                         } else {

@@ -117,9 +117,9 @@ public class RsuController extends BaseController {
 		return ResponseEntity.ok(rsus);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/selectRsusInBuffer/{direction}/{startingMilepost}/{endingMilepost}")
+	@RequestMapping(method = RequestMethod.GET, value = "/selectRsusInBuffer/{direction}/{startingMilepost}/{endingMilepost}/{route}")
 	public ResponseEntity<List<WydotRsu>> SelectRsusInBuffer(@PathVariable String direction,
-			@PathVariable Double startingMilepost, @PathVariable Double endingMilepost) {
+			@PathVariable Double startingMilepost, @PathVariable Double endingMilepost, @PathVariable String route) {
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement statement = null;
@@ -130,18 +130,20 @@ public class RsuController extends BaseController {
 			connection = GetConnectionPool();
 			statement = connection.createStatement();
 
-			if (direction.toLowerCase().equals("eastbound")) {
+			if (direction.toLowerCase().equals("i")) {
 				Double startBuffer = startingMilepost - buffer;
-				rs = statement.executeQuery(
-						"select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing' and rsu_vw.milepost >= "
-								+ startBuffer + " and rsu_vw.milepost <= " + endingMilepost
-								+ " and rsu_vw.route like '%80%'");
+				String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu ";
+				selectStatement += "inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
+				selectStatement += "where rsu_vw.status = 'Existing' and rsu_vw.milepost >= " + startBuffer;
+				selectStatement += " and rsu_vw.milepost <= " + endingMilepost + " and rsu_vw.route = '" + route + "'";
+				rs = statement.executeQuery(selectStatement);
 			} else {
 				Double startBuffer = endingMilepost + buffer;
-				rs = statement.executeQuery(
-						"select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid where rsu_vw.status = 'Existing' and rsu_vw.milepost >= "
-								+ startingMilepost + "and rsu_vw.milepost <= " + startBuffer
-								+ " and rsu_vw.route like '%80%'");
+				String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu ";
+				selectStatement += "inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
+				selectStatement += "where rsu_vw.status = 'Existing' and rsu_vw.milepost >= " + startingMilepost;
+				selectStatement += " and rsu_vw.milepost <= " + startBuffer + " and rsu_vw.route = '" + route + "'";
+				rs = statement.executeQuery(selectStatement);
 			}
 
 			while (rs.next()) {

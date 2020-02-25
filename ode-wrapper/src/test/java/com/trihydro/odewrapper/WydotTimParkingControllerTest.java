@@ -87,7 +87,7 @@ public class WydotTimParkingControllerTest {
 	public void testCreateParkingTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 4103, \"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"d\", \"availability\": 4103, \"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
 
 		// Act
@@ -99,7 +99,7 @@ public class WydotTimParkingControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 		assertEquals("Parking49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
 	}
@@ -108,7 +108,7 @@ public class WydotTimParkingControllerTest {
 	public void testCreateParkingTimTim_oneDirection_NoMileposts() throws Exception {
 
 		// Arrange
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-70\", \"direction\": \"westbound\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-70\", \"direction\": \"d\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
 		doReturn(false).when(uut).routeSupported("I-70");
 
@@ -121,14 +121,14 @@ public class WydotTimParkingControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateParkingTim_oneDirection_NoItisCodes() throws Exception {
 
 		// Arrange
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 345678,\"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"d\", \"availability\": 345678,\"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
 
 		// Act
@@ -140,7 +140,7 @@ public class WydotTimParkingControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 		assertEquals("Parking49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
 	}
@@ -148,7 +148,7 @@ public class WydotTimParkingControllerTest {
 	@Test
 	public void testUpdateParkingTim_oneDirection_success() throws Exception {
 
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"d\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
 
 		// Act
@@ -162,7 +162,7 @@ public class WydotTimParkingControllerTest {
 		assertEquals("success", resultArr[0].resultMessages.get(0));
 		assertEquals("Parking49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test

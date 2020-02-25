@@ -82,7 +82,7 @@ public class WydotTimVslControllerTest {
 	public void testCreateVSLTim_bothDirections_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"both\", \"speed\": 45, \"deviceId\": \"V004608\"  }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"b\", \"speed\": 45, \"deviceId\": \"V004608\"  }]}";
 		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
 
 		// Act
@@ -94,14 +94,14 @@ public class WydotTimVslControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateVSLTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360,\"route\": \"I-80\", \"direction\": \"eastbound\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360,\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
 		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
 
 		// Act
@@ -113,7 +113,7 @@ public class WydotTimVslControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 	}
 
 	@Test

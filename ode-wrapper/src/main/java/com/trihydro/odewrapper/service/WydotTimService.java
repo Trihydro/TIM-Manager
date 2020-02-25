@@ -171,7 +171,7 @@ public class WydotTimService {
 
         // FIND ALL RSUS TO SEND TO
         List<WydotRsu> rsus = utility.getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
-                Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), "80");
+                Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), wydotTim.getRoute());
 
         // if no RSUs found
         if (rsus.size() == 0) {

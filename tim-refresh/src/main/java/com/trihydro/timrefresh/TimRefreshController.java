@@ -186,7 +186,7 @@ public class TimRefreshController {
 
             dbRsus = utility.getRsusInBuffer(aTim.getDirection(),
                     Math.min(aTim.getMilepostStart(), aTim.getMilepostStop()),
-                    Math.max(aTim.getMilepostStop(), aTim.getMilepostStart()), "80");
+                    Math.max(aTim.getMilepostStop(), aTim.getMilepostStart()), aTim.getRoute());
 
             // if no RSUs found
             if (dbRsus.size() == 0) {

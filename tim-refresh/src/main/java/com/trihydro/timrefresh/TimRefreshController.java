@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -101,8 +102,10 @@ public class TimRefreshController {
             timToSend.setRequest(new ServiceRequest());
             timToSend.setTim(tim);
 
-            // always try to send to RSU
-            updateAndSendRSU(timToSend, aTim);
+            // try to send to RSU if along route with RSUs
+            if (Arrays.asList(configuration.getRsuRoutes()).contains(aTim.getRoute())) {
+                updateAndSendRSU(timToSend, aTim);
+            }
 
             // only send to SDX if the sat record id exists
             if (!StringUtils.isEmpty(aTim.getSatRecordId()) && !StringUtils.isBlank(aTim.getSatRecordId())) {

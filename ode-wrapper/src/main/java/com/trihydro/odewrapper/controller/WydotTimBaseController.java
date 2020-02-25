@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public abstract class WydotTimBaseController {
 
         if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
-        }else{
+        } else {
             result.setRoute(tim.getRoute());
         }
         // if direction is not eastbound/westbound/both fail
@@ -113,7 +114,7 @@ public abstract class WydotTimBaseController {
 
         if (tim.getHighway() == null || !routeSupported(tim.getHighway())) {
             resultMessages.add("route not supported");
-        }else{
+        } else {
             tim.setRoute(tim.getHighway());
             result.setRoute(tim.getHighway());
         }
@@ -163,7 +164,7 @@ public abstract class WydotTimBaseController {
 
         if (tim.getHighway() == null || !routeSupported(tim.getHighway())) {
             resultMessages.add("route not supported");
-        }else{
+        } else {
             tim.setRoute(tim.getHighway());
             result.setRoute(tim.getHighway());
         }
@@ -258,7 +259,7 @@ public abstract class WydotTimBaseController {
 
         if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
-        }else{
+        } else {
             result.setRoute(tim.getRoute());
         }
         // if direction is not eastbound/westbound/both fail
@@ -313,7 +314,7 @@ public abstract class WydotTimBaseController {
 
         if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
-        }else{
+        } else {
             result.setRoute(tim.getRoute());
         }
 
@@ -376,7 +377,7 @@ public abstract class WydotTimBaseController {
 
         if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
-        }else{
+        } else {
             result.setRoute(tim.getRoute());
         }
 
@@ -504,9 +505,12 @@ public abstract class WydotTimBaseController {
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
                 startDateTime, endDateTime);
-        // send TIM to RSUs
-        wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk,
-                endDateTime);
+
+        if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
+            // send TIM to RSUs
+            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk,
+                    endDateTime);
+        }
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);

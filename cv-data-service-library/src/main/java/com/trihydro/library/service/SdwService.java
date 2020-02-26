@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -14,15 +15,23 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import com.google.gson.Gson;
-// import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.model.SDXQuery;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 
 @Component
 public class SdwService {
@@ -63,6 +72,28 @@ public class SdwService {
             return null;
         }
 
+    }
+
+    public List<AdvisorySituationDataDeposit> getAllSdwRecords() throws RestClientException {
+        List<AdvisorySituationDataDeposit> results = null;
+
+        String url = String.format("%s/api/GetData", configProperties.getSdwRestUrl());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("apikey", configProperties.getSdwApiKey());
+
+        HttpEntity<SDXQuery> entity = new HttpEntity<SDXQuery>(new SDXQuery(), headers);
+        try {
+            ResponseEntity<AdvisorySituationDataDeposit[]> response = RestTemplateProvider.GetRestTemplate()
+                    .exchange(url, HttpMethod.POST, entity, AdvisorySituationDataDeposit[].class);
+
+            results = Arrays.asList(response.getBody());
+        } catch (RestClientException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return results;
     }
 
     public String getNewRecordId() {

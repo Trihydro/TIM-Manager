@@ -133,4 +133,10 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				.getForEntity(CVRestUrl + "/active-tim/not-sent", TimUpdateModel[].class);
 		return Arrays.asList(response.getBody());
 	}
+
+	public List<ActiveTim> getActiveTimsForSDX() {
+		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(CVRestUrl + "/active-tim/all-sdx", ActiveTim[].class);
+		return Arrays.asList(response.getBody());
+	}
 }

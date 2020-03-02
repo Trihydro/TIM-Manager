@@ -23,6 +23,7 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRwList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.gavaghan.geodesy.GeodeticCalculator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +49,8 @@ public class WydotTimRwControllerTest {
 	CreateBaseTimUtil mockCreateBaseTimUtil;
 	@Mock
 	SetItisCodes setItisCodes;
+	@Spy
+	GeodeticCalculator mockGeoCalc;
 
 	@InjectMocks
 	@Spy
@@ -78,7 +81,7 @@ public class WydotTimRwControllerTest {
 	public void testCreateRwTim_oneDirection_SUCCESS() throws Exception {
 
 		// Arrange
-		String rwJson = "{\"timRwList\": [{\"toRm\": 375,\"fromRm\":370,\"direction\": \"i\",\"surface\": \"G\",\"buffers\":[{\"distance\": 1,\"action\": \"leftClosed\",\"units\":\"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\":\"miles\"}],\"schedStart\": \"2016-06-23\",\"delays\": [{\"code\":19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\":8399},\"firstDay\": \"20130228\",\"lastDay\":\"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\":\"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\":8359,\"highway\": \"I-80\", \"advisory\":[]}]}";
+		String rwJson = "{\"timRwList\": [{\"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"direction\": \"i\",\"surface\": \"G\",\"buffers\":[{\"distance\": 1,\"action\": \"leftClosed\",\"units\":\"miles\"},{\"distance\": 0.5,\"action\": \"workers\",\"units\":\"miles\"}],\"schedStart\": \"2016-06-23\",\"delays\": [{\"code\":19,\"debug\": {\"codeStr\": \"1\",\"enabled\": true,\"key\":8399},\"firstDay\": \"20130228\",\"lastDay\":\"20500430\",\"dailyStartTime\": \"0000\",\"id\": 8350,\"dailyEndTime\":\"0000\",\"daysOfWeek\": \"SMTWTFS\"}],\"disabled\": false,\"id\":8359,\"highway\": \"I-80\", \"advisory\":[]}]}";
 		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
 		// Act
@@ -99,7 +102,7 @@ public class WydotTimRwControllerTest {
 	public void testCreateRwTim_bothDirections_NoMileposts() throws Exception {
 
 		// Arrange
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"d\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"d\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
 		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
 		// Act
@@ -117,7 +120,7 @@ public class WydotTimRwControllerTest {
 	@Test
 	public void testCreateRwTim_bothDirections_NoItisCodes() throws Exception {
 
-		String rwJson = "{ \"timRwList\": [ {\"fromRm\": 350,\"toRm\": 360,\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"d\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
+		String rwJson = "{ \"timRwList\": [ {\"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"highway\": \"I-80\",\"pk\": \"15917\",\"id\": \"15917\",\"direction\":\"d\",\"surface\": \"P\",\"schedStart\": \"2018-04-16\"}]}";
 		TimRwList timRwList = gson.fromJson(rwJson, TimRwList.class);
 
 		// Act

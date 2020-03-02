@@ -78,13 +78,13 @@ public class MilepostController extends BaseController {
 	private String translateDirection(String direction) {
 		switch (direction.toLowerCase()) {
 			case "eastward":
-				return "I";
+				return "'I', 'B'";
 
 			case "westward":
-				return "D";
+				return "'D','B'";
 
 			case "both":
-				return "B";
+				return "'B'";
 
 			default:
 				return direction;
@@ -106,15 +106,17 @@ public class MilepostController extends BaseController {
 			statement = connection.createStatement();
 
 			// build SQL query
-			String statementStr = "select * from MILEPOST_VW where direction = '" + translateDirection(direction)
-					+ "' and milepost between " + Math.min(fromMilepost, toMilepost) + " and "
-					+ Math.max(fromMilepost, toMilepost) + " and common_name = '" + commonName + "'";
+			String statementStr = "select * from MILEPOST_VW where direction in (" + translateDirection(direction);
+			statementStr += ") and milepost between " + Math.min(fromMilepost, toMilepost) + " and ";
+			statementStr += Math.max(fromMilepost, toMilepost);
+			statementStr += " and common_name = '" + commonName + "'";
 
 			if (fromMilepost < toMilepost)
-				rs = statement.executeQuery(statementStr + " order by milepost asc");
+				statementStr += " order by milepost asc";
 			else
-				rs = statement.executeQuery(statementStr + " order by milepost desc");
+				statementStr += " order by milepost desc";
 
+			rs = statement.executeQuery(statementStr);
 			// convert result to milepost objects
 			while (rs.next()) {
 				Milepost milepost = new Milepost();
@@ -293,5 +295,143 @@ public class MilepostController extends BaseController {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * Fetch Mileposts within the given latitude range. Factors in direction and
+	 * adds a buffer
+	 * 
+	 * @param direction
+	 * @param startLong
+	 * @param endLong
+	 * @param commonName
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-longitude-range/{direction}/{startLong}/{endLong}/{commonName}")
+	public ResponseEntity<List<Milepost>> getMilepostsByLongitudeRange(@PathVariable String direction,
+			@PathVariable Double startLong, @PathVariable Double endLong, @PathVariable String commonName) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_VW where direction in (";
+			statementStr += translateDirection(direction);
+			statementStr += ") and longitude between ";
+			statementStr += startLong + " and ";
+			statementStr += endLong;
+			statementStr += " and common_name = '" + commonName + "'";
+
+			if (startLong < endLong)
+				statementStr += " order by milepost, longitude";
+			else
+				statementStr += " order by milepost desc, longitude desc";
+
+			rs = statement.executeQuery(statementStr);
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setCommonName(rs.getString("COMMON_NAME"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				// milepost.setBearing(rs.getDouble("BEARING"));
+				mileposts.add(milepost);
+			}
+
+			if (mileposts.size() == 0) {
+				System.out.println("Unable to find mileposts with query: " + statementStr);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(mileposts);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-latitude-range/{direction}/{startLat}/{endLat}/{commonName}")
+	public ResponseEntity<List<Milepost>> getMilepostsByLatitudeRange(@PathVariable String direction,
+			@PathVariable Double startLat, @PathVariable Double endLat, @PathVariable String commonName) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_VW where direction in (";
+			statementStr += translateDirection(direction);
+			statementStr += ") and latitude between ";
+			statementStr += startLat + " and ";
+			statementStr += endLat;
+			statementStr += " and common_name = '" + commonName + "'";
+
+			if (startLat < endLat)
+				statementStr += " order by milepost, latitude";
+			else
+				statementStr += " order by milepost desc, latitude desc";
+
+			rs = statement.executeQuery(statementStr);
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setCommonName(rs.getString("COMMON_NAME"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				// milepost.setBearing(rs.getDouble("BEARING"));
+				mileposts.add(milepost);
+			}
+
+			if (mileposts.size() == 0) {
+				System.out.println("Unable to find mileposts with query: " + statementStr);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(mileposts);
 	}
 }

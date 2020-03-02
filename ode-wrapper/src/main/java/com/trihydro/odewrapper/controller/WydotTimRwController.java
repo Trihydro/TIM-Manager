@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
@@ -20,6 +21,9 @@ import com.trihydro.odewrapper.model.WydotTimRw;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.gavaghan.geodesy.Ellipsoid;
+import org.gavaghan.geodesy.GeodeticCalculator;
+import org.gavaghan.geodesy.GlobalCoordinates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,11 +43,14 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     private static String type = "RW";
     List<WydotTimRw> timsToSend;
+    private GeodeticCalculator calculator;
 
     @Autowired
     public WydotTimRwController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
+            GeodeticCalculator _calc) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+        calculator = _calc;
     }
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -78,25 +85,18 @@ public class WydotTimRwController extends WydotTimBaseController {
             if (wydotTim.getBuffers() != null)
                 wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
 
-            Double timPoint = null;
-
-            // check if its a point TIM
-            if (wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null) {
-                timPoint = wydotTim.getFromRm();
-            }
-
             // if bi-directional
             if (wydotTim.getDirection().equals("b")) {
                 // make i TIMs
-                makeIncreasingTims(wydotTim, timPoint);
+                makeIncreasingTims(wydotTim);
                 // make d TIMs
-                makeDecreasingTims(wydotTim, timPoint);
+                makeDecreasingTims(wydotTim);
             }
             // else make one direction TIMs
             else if (wydotTim.getDirection().equals("i"))
-                makeIncreasingTims(wydotTim, timPoint);
+                makeIncreasingTims(wydotTim);
             else
-                makeDecreasingTims(wydotTim, timPoint);
+                makeDecreasingTims(wydotTim);
 
             // compile result messages for user
             resultTim.getResultMessages().add("success");
@@ -109,7 +109,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void makeIncreasingTims(WydotTimRw wydotTim, Double timPoint) {
+    public void makeIncreasingTims(WydotTimRw wydotTim) {
 
         // i - add buffer for point TIMs
         WydotTimRw timOneWay = null;
@@ -124,9 +124,6 @@ public class WydotTimRwController extends WydotTimBaseController {
             e.printStackTrace();
         }
 
-        if (timPoint != null)
-            timOneWay.setFromRm(timPoint - 1);
-
         timOneWay.setDirection("i");
         timsToSend.add(timOneWay);
 
@@ -134,7 +131,7 @@ public class WydotTimRwController extends WydotTimBaseController {
             makeIncreasingBufferTim(timOneWay);
     }
 
-    public void makeDecreasingTims(WydotTimRw wydotTim, Double timPoint) {
+    public void makeDecreasingTims(WydotTimRw wydotTim) {
 
         // d - add buffer for point TIMs
 
@@ -150,28 +147,49 @@ public class WydotTimRwController extends WydotTimBaseController {
             e.printStackTrace();
         }
 
-        if (timPoint != null)
-            timOneWay.setFromRm(timPoint + 1);
-
         timOneWay.setDirection("d");
         timsToSend.add(timOneWay);
         if (timOneWay.getBuffers() != null)
             makeDecreasingBufferTim(timOneWay);
     }
 
+    private double getIBearingForRoute(String route) {
+        // TODO: this needs to call out to the DIRECTION_EXCEPTION view and compare
+        // mileage to determine direction
+        Integer numericRoute = Integer.parseInt(route.replaceAll("\\D+", ""));
+        if (numericRoute % 2 == 0) {
+            return 270;
+        }
+        return 180;
+    }
+
+    private double getDBearingForRoute(String route) {
+        // TODO: this needs to call out to the DIRECTION_EXCEPTION view and compare
+        // mileage to determine direction
+        Integer numericRoute = Integer.parseInt(route.replaceAll("\\D+", ""));
+        if (numericRoute % 2 == 0) {
+            return 90;
+        }
+        return 0;
+    }
+
     public void makeIncreasingBufferTim(WydotTimRw wydotTim) {
 
-        double bufferBefore = 0;
+        double bufferBefore = 0.000;
+
+        Ellipsoid reference = Ellipsoid.WGS84;
+        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getStartPoint().getLatitude(),
+                wydotTim.getStartPoint().getLongitude());
+        GlobalCoordinates nextCoordinates = null;
+        double bearing = getIBearingForRoute(wydotTim.getRoute());
 
         for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
             // i
             // starts at lower milepost minus the buffer distance
-            double bufferStart = Math.min(wydotTim.getToRm(), wydotTim.getFromRm())
-                    - wydotTim.getBuffers().get(i).getDistance() - bufferBefore;
-            // ends at lower milepost minus previous buffers
-            double bufferEnd = Math.min(wydotTim.getToRm(), wydotTim.getFromRm()) - bufferBefore;
+            nextCoordinates = calculator.calculateEndingGlobalCoordinates(reference, startCoordinates, bearing,
+                    wydotTim.getBuffers().get(i).getDistanceMeters());
 
-            // update start and stopping mileposts
+            // update start and stopping points
             WydotTimRw wydotTimBuffer = null;
 
             try {
@@ -183,8 +201,8 @@ public class WydotTimRwController extends WydotTimBaseController {
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
             }
-            wydotTimBuffer.setFromRm(bufferStart);
-            wydotTimBuffer.setToRm(bufferEnd);
+            wydotTimBuffer.setStartPoint(new Coordinate(nextCoordinates.getLatitude(), nextCoordinates.getLongitude()));
+            wydotTimBuffer.setEndPoint(new Coordinate(startCoordinates.getLatitude(), startCoordinates.getLongitude()));
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
             wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 
@@ -201,31 +219,25 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // update running buffer distance
             bufferBefore = wydotTim.getBuffers().get(i).getDistance();
+            startCoordinates = nextCoordinates;
         }
-    }
-
-    public void processRequestAsync() {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                for (WydotTimRw tim : timsToSend) {
-                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
-                }
-            }
-        }).start();
     }
 
     public void makeDecreasingBufferTim(WydotTimRw wydotTim) {
 
         double bufferBefore = 0;
 
+        Ellipsoid reference = Ellipsoid.WGS84;
+        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getEndPoint().getLatitude(),
+                wydotTim.getEndPoint().getLongitude());
+        GlobalCoordinates nextCoordinates = null;
+        double bearing = getDBearingForRoute(wydotTim.getRoute());
+
         for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
             // d
             // starts at higher milepost plus buffer distance
-            double bufferStart = Math.max(wydotTim.getToRm(), wydotTim.getFromRm())
-                    + wydotTim.getBuffers().get(i).getDistance() + bufferBefore;
-            // ends at higher milepost plus previous buffers
-            double bufferEnd = Math.max(wydotTim.getToRm(), wydotTim.getFromRm()) + bufferBefore;
+            nextCoordinates = calculator.calculateEndingGlobalCoordinates(reference, startCoordinates, bearing,
+                    wydotTim.getBuffers().get(i).getDistanceMeters());
 
             // update start and stopping mileposts
             WydotTimRw wydotTimBuffer = null;
@@ -238,8 +250,9 @@ public class WydotTimRwController extends WydotTimBaseController {
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
             }
-            wydotTimBuffer.setFromRm(bufferStart);
-            wydotTimBuffer.setToRm(bufferEnd);
+            wydotTimBuffer
+                    .setStartPoint(new Coordinate(startCoordinates.getLatitude(), startCoordinates.getLongitude()));
+            wydotTimBuffer.setEndPoint(new Coordinate(nextCoordinates.getLatitude(), nextCoordinates.getLongitude()));
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
             wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 
@@ -254,7 +267,19 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // update running buffer distance
             bufferBefore = wydotTim.getBuffers().get(i).getDistance();
+            startCoordinates = nextCoordinates;
         }
+    }
+
+    public void processRequestAsync() {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+                for (WydotTimRw tim : timsToSend) {
+                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
+                }
+            }
+        }).start();
     }
 
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")

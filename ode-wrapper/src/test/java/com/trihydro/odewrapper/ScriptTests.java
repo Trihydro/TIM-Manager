@@ -38,8 +38,8 @@ public class ScriptTests {
         WydotTimRc tim = new WydotTimRc();
 
         tim.setDirection("i");
-        tim.setFromRm(370.0);
-        tim.setToRm(375.0);
+        // tim.setFromRm(370.0);
+        // tim.setToRm(375.0);
         tim.setRoadCode("ARLI80EI");
         tim.setRoute("I80");
         Integer[] advisories = { 5127, 7040, 2689 };

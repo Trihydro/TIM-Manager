@@ -5,10 +5,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -73,8 +75,7 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i")
-                && !tim.getDirection().toLowerCase().equals("d")
+        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
                 && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
@@ -120,22 +121,18 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i")
-                && !tim.getDirection().toLowerCase().equals("d")
+        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
                 && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getIncidentId() == null) {
             resultMessages.add("Null value for incidentId");
         }
-        if (tim.getToRm() != null && tim.getToRm() < 0) {
-            resultMessages.add("Invalid toRm");
+        if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
+            resultMessages.add("Invalid startPoint");
         }
-        if (tim.getFromRm() < 0) {
-            resultMessages.add("Invalid fromRm");
-        }
-        if (tim.getFromRm() == null) {
-            resultMessages.add("Null value for fromRm");
+        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+            resultMessages.add("Invalid endPoint");
         }
 
         // set itis codes
@@ -170,19 +167,15 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i")
-                && !tim.getDirection().toLowerCase().equals("d")
+        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
                 && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
-        if (tim.getToRm() != null && tim.getToRm() < 0) {
-            resultMessages.add("Invalid toRm");
+        if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
+            resultMessages.add("Invalid startPoint");
         }
-        if (tim.getFromRm() < 0) {
-            resultMessages.add("Invalid fromRm");
-        }
-        if (tim.getFromRm() == null) {
-            resultMessages.add("Null value for fromRm");
+        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+            resultMessages.add("Invalid endPoint");
         }
         if (tim.getHighway() == null) {
             resultMessages.add("Null value for highway");
@@ -263,22 +256,15 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i")
-                && !tim.getDirection().toLowerCase().equals("d")
+        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
                 && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
-        if (tim.getToRm() != null && tim.getToRm() < 0) {
-            resultMessages.add("Invalid toRm");
+        if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
+            resultMessages.add("Invalid startPoint");
         }
-        if (tim.getFromRm() != null && tim.getFromRm() < 0) {
-            resultMessages.add("Invalid fromRm");
-        }
-        if (tim.getFromRm() == null) {
-            resultMessages.add("Null value for fromRm");
-        }
-        if (tim.getToRm() == null) {
-            resultMessages.add("Null value for toRm");
+        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+            resultMessages.add("Invalid endPoint");
         }
         if (tim.getRoute() == null) {
             resultMessages.add("Null value for route");
@@ -319,22 +305,15 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i")
-                && !tim.getDirection().toLowerCase().equals("d")
+        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
                 && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
-        if (tim.getToRm() != null && tim.getToRm() < 0) {
-            resultMessages.add("Invalid toRm");
+        if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
+            resultMessages.add("Invalid startPoint");
         }
-        if (tim.getFromRm() < 0) {
-            resultMessages.add("Invalid fromRm");
-        }
-        if (tim.getFromRm() == null) {
-            resultMessages.add("Null value for fromRm");
-        }
-        if (tim.getToRm() == null) {
-            resultMessages.add("Null value for toRm");
+        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+            resultMessages.add("Invalid endPoint");
         }
         if (tim.getRoute() == null) {
             resultMessages.add("Null value for route");
@@ -382,22 +361,15 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i")
-                && !tim.getDirection().toLowerCase().equals("d")
+        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
                 && !tim.getDirection().toLowerCase().equals("b")) {
             resultMessages.add("direction not supported");
         }
-        if (tim.getToRm() != null && tim.getToRm() < 0) {
-            resultMessages.add("Invalid toRm");
+        if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
+            resultMessages.add("Invalid startPoint");
         }
-        if (tim.getFromRm() < 0) {
-            resultMessages.add("Invalid fromRm");
-        }
-        if (tim.getFromRm() == null) {
-            resultMessages.add("Null value for fromRm");
-        }
-        if (tim.getToRm() == null) {
-            resultMessages.add("Null value for toRm");
+        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+            resultMessages.add("Invalid endPoint");
         }
         if (tim.getRoute() == null) {
             resultMessages.add("Null value for route");
@@ -499,12 +471,15 @@ public abstract class WydotTimBaseController {
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, String direction, TimType timType, String startDateTime,
             String endDateTime, Integer pk) {
-        // build region name for active tim logger to use
-        String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm() + "_"
-                + wydotTim.getToRm();
+        Comparator<Milepost> compMp = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
                 startDateTime, endDateTime);
+
+        Milepost minMp = timToSend.getMileposts().stream().min(compMp).get();
+        Milepost maxMp = timToSend.getMileposts().stream().max(compMp).get();
+        String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + minMp.getMilepost() + "_"
+                + maxMp.getMilepost();
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs

@@ -20,6 +20,7 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.gavaghan.geodesy.GeodeticCalculator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,8 @@ public class WydotTimRcControllerTest {
 	CreateBaseTimUtil mockCreateBaseTimUtil;
 	@Mock
 	SetItisCodes setItisCodes;
+	@Spy
+	GeodeticCalculator mockGeoCalc;
 
 	@InjectMocks
 	@Spy
@@ -73,7 +76,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_bothDirections_success() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350, \"toRm\": 360, \"roadCode\": \"LARI80WQDHLD\", \"direction\": \"b\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578}, \"roadCode\": \"LARI80WQDHLD\", \"direction\": \"b\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -93,7 +96,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_bothDirections_NoMileposts() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I70\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"b\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I70\", \"roadCode\": \"LARI80WQDHLD\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578}, \"direction\":\"b\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 		doReturn(false).when(uut).routeSupported("I70");
 
@@ -113,7 +116,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_bothDirections_NoItisCodes() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"b\",\"advisory\": [11]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"b\",\"advisory\": [11]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -133,7 +136,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"i\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"i\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -153,7 +156,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateVslTim_oneDirection_NoMileposts() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"i\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"i\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -173,7 +176,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_oneDirection_NoItisCodes() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"i\",\"advisory\": [11]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"i\",\"advisory\": [11]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -193,7 +196,7 @@ public class WydotTimRcControllerTest {
 	public void testAllClear() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 360,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 370, \"direction\":\"d\",\"advisory\": [5378]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act

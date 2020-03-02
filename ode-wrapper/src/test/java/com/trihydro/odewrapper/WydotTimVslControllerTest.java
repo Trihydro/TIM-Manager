@@ -24,6 +24,7 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.gavaghan.geodesy.GeodeticCalculator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +53,8 @@ public class WydotTimVslControllerTest {
 	SetItisCodes mockSetItisCodes;
 	@Mock
 	ActiveTimService mockActiveTimService;
+	@Mock
+	GeodeticCalculator mockGeoCalc;
 
 	@InjectMocks
 	@Spy
@@ -82,7 +85,7 @@ public class WydotTimVslControllerTest {
 	public void testCreateVSLTim_bothDirections_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"b\", \"speed\": 45, \"deviceId\": \"V004608\"  }]}";
+		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"b\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
 		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
 
 		// Act
@@ -101,7 +104,7 @@ public class WydotTimVslControllerTest {
 	public void testCreateVSLTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360,\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
 		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
 
 		// Act

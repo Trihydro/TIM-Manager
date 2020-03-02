@@ -87,9 +87,8 @@ public class WydotTimService {
     public WydotTravelerInputData createTim(WydotTim wydotTim, String direction, String timTypeStr,
             String startDateTime, String endDateTime) {
 
-        String route = wydotTim.getRoute().replaceAll("\\D+", "");
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, route, configuration);
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration);
 
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0]
@@ -170,8 +169,11 @@ public class WydotTimService {
             String direction, TimType timType, Integer pk, String endDateTime) {
 
         // FIND ALL RSUS TO SEND TO
-        List<WydotRsu> rsus = utility.getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
-                Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), wydotTim.getRoute());
+        List<WydotRsu> rsus = utility.getRsusByLatLong(direction, wydotTim.getStartPoint(), wydotTim.getEndPoint(),
+                wydotTim.getRoute());
+        // List<WydotRsu> rsus = utility.getRsusInBuffer(direction,
+        // Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
+        // Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), wydotTim.getRoute());
 
         // if no RSUs found
         if (rsus.size() == 0) {

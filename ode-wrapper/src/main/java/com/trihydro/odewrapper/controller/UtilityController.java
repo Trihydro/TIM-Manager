@@ -2,11 +2,13 @@ package com.trihydro.odewrapper.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTim;
@@ -60,13 +62,17 @@ public class UtilityController extends WydotTimBaseController {
     @RequestMapping(value = "/create-sat-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createSatTim(@RequestBody WydotTimList wydotTimList) {
         // build TIM
+        Comparator<Milepost> compMp = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
         for (WydotTim wydotTim : wydotTimList.getTimList()) {
             // send TIM
-            String regionNamePrev = wydotTim.getDirection() + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm()
-                    + "_" + wydotTim.getToRm();
-
             WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, wydotTim.getDirection(), null, null,
                     null);
+
+            Milepost minMp = timToSend.getMileposts().stream().min(compMp).get();
+            Milepost maxMp = timToSend.getMileposts().stream().max(compMp).get();
+
+            String regionNamePrev = wydotTim.getDirection() + "_" + wydotTim.getRoute() + "_" + minMp.getMilepost()
+                    + "_" + maxMp.getMilepost();
 
             wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), getTimType(type),
                     null);

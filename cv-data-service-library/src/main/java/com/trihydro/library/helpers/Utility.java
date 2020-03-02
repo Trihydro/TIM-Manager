@@ -17,9 +17,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.RsuService;
 
+import org.gavaghan.geodesy.Ellipsoid;
+import org.gavaghan.geodesy.GeodeticCalculator;
+import org.gavaghan.geodesy.GeodeticCurve;
+import org.gavaghan.geodesy.GlobalCoordinates;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -160,8 +165,145 @@ public class Utility {
 		return rsus;
 	}
 
-	public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost,
-			String route) {
+	public List<WydotRsu> getRsusByLatLong(String direction, Coordinate startPoint, Coordinate endPoint, String route) {
+		List<WydotRsu> rsus = new ArrayList<>();
+		Comparator<WydotRsu> compLat = (l1, l2) -> Double.compare(l1.getLatitude(), l2.getLatitude());
+		Comparator<WydotRsu> compLong = (l1, l2) -> Double.compare(l1.getLongitude(), l2.getLongitude());
+		WydotRsu entryRsu = null;
+		Integer numericRoute = Integer.parseInt(route.replaceAll("\\D+", ""));
+		// WydotRsu rsuHigher;
+
+		// if there are no rsus on this route
+		List<WydotRsu> mainRsus = getRsusByRoute(route);
+		if (mainRsus.size() == 0) {
+			logWithDate("No RSUs found for route " + route);
+			return rsus;
+		} else {
+			logWithDate("Found " + mainRsus.size() + " RSUs for route " + route);
+		}
+
+		Ellipsoid reference = Ellipsoid.WGS84;
+		if (direction.toLowerCase().equals("i")) {
+
+			// get rsus at mileposts less than your milepost
+			List<WydotRsu> rsusLower = new ArrayList<>();
+			if (numericRoute % 2 == 0) {
+				rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < startPoint.getLongitude())
+						.collect(Collectors.toList());
+			} else {
+				rsusLower = mainRsus.stream().filter(x -> x.getLatitude() < startPoint.getLatitude())
+						.collect(Collectors.toList());
+			}
+
+			if (rsusLower.size() == 0) {
+				// if no rsus found farther west/south than startPoint
+				// find milepost furthest west/south than longitude of TIM location
+				if (numericRoute % 2 == 0) {
+					rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < endPoint.getLongitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusLower.stream().min(compLong).get();
+				} else {
+					rsusLower = mainRsus.stream().filter(x -> x.getLatitude() < endPoint.getLatitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusLower.stream().min(compLat).get();
+				}
+
+				GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
+				GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+				GeodeticCalculator geoCalc = new GeodeticCalculator();
+				GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+				double miles = 0.000621371 * curve.getEllipsoidalDistance();
+
+				if (miles > 20) {
+					// don't send to RSU if its further that X amount of miles away
+					entryRsu = null;
+				}
+			}
+			// else find milepost closest to lowerMilepost
+			else {
+				// get max from that list
+				if (numericRoute % 2 == 0) {
+					entryRsu = rsusLower.stream().max(compLong).get();
+				} else {
+					entryRsu = rsusLower.stream().max(compLat).get();
+				}
+			}
+
+		} else { // d
+
+			List<WydotRsu> rsusHigher = new ArrayList<>();
+			// get rsus at mileposts greater than your milepost
+			if (numericRoute % 2 == 0) {
+				rsusHigher = mainRsus.stream().filter(x -> x.getLongitude() > endPoint.getLongitude())
+						.collect(Collectors.toList());
+			} else {
+				rsusHigher = mainRsus.stream().filter(x -> x.getLatitude() > endPoint.getLatitude())
+						.collect(Collectors.toList());
+			}
+
+			if (rsusHigher.size() == 0) {
+
+				if (numericRoute % 2 == 0) {
+					rsusHigher = mainRsus.stream().filter(x -> x.getLongitude() > startPoint.getLongitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusHigher.stream().max(compLong).get();
+				} else {
+					rsusHigher = mainRsus.stream().filter(x -> x.getLatitude() > startPoint.getLatitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusHigher.stream().max(compLat).get();
+				}
+
+				if (rsusHigher.size() == 0) {
+					logWithDate("No RSUs found higher than 'low' point");
+				}
+
+			} else {
+				if (numericRoute % 2 == 0) {
+					entryRsu = rsusHigher.stream().min(compLong).get();
+				} else {
+					entryRsu = rsusHigher.stream().min(compLat).get();
+				}
+			}
+
+			GlobalCoordinates start = new GlobalCoordinates(endPoint.getLatitude(), endPoint.getLongitude());
+			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+			GeodeticCalculator geoCalc = new GeodeticCalculator();
+			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+			double miles = 0.000621371 * curve.getEllipsoidalDistance();// returns in meters, so convert to miles
+
+			if (miles > 20) {
+				// don't send to RSU if its further than 20 miles away
+				logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
+				entryRsu = null;
+			}
+		}
+
+		if (numericRoute % 2 == 0) {
+			rsus = mainRsus.stream().filter(
+					x -> x.getLongitude() >= startPoint.getLongitude() && x.getLongitude() <= endPoint.getLongitude())
+					.collect(Collectors.toList());
+		} else {
+			rsus = mainRsus.stream().filter(
+					x -> x.getLatitude() >= startPoint.getLatitude() && x.getLatitude() <= endPoint.getLatitude())
+					.collect(Collectors.toList());
+		}
+
+		if (entryRsu != null)
+			rsus.add(entryRsu);
+
+		return rsus;
+	}
+
+	@Deprecated
+	/**
+	 * @deprecated removed in favor of getRsusByLatLong
+	 * @param direction
+	 * @param lowerMilepost
+	 * @param higherMilepost
+	 * @param route
+	 * @return
+	 */
+	public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost, String route) {
 
 		List<WydotRsu> rsus = new ArrayList<>();
 		Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());

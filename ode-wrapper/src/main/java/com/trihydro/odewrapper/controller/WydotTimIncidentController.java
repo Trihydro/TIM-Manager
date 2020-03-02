@@ -126,41 +126,16 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
 
                 for (WydotTimIncident wydotTim : wydotTims) {
-
-                    Double timPoint = null;
-
                     // set route
                     wydotTim.setRoute(wydotTim.getHighway());
 
                     // check if this is a point TIM
-                    if (wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null) {
-                        timPoint = wydotTim.getFromRm();
-                    }
-
-                    if (wydotTim.getDirection().equals("both")) {
-
-                        // first TIM - i - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setToRm(timPoint - 1);
-
+                    if (wydotTim.getDirection().toLowerCase().equals("b")) {
                         createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk());
-
-                        // second TIM - westbound - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setToRm(timPoint + 1);
 
                         createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
-
-                        // i - add buffer for point TIMs
-                        if (wydotTim.getDirection().equals("i") && timPoint != null)
-                            wydotTim.setToRm(timPoint - 1);
-
-                        // d - add buffer for point TIMs
-                        if (wydotTim.getDirection().equals("d") && timPoint != null)
-                            wydotTim.setToRm(timPoint + 1);
-
                         createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
                                 wydotTim.getPk());
                     }
@@ -208,41 +183,17 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimIncident wydotTim : wydotTims) {
-
-                    Double timPoint = null;
-
                     // set route
                     wydotTim.setRoute(wydotTim.getHighway());
 
-                    // check if this is a point TIM
-                    if (wydotTim.getFromRm().equals(wydotTim.getToRm()) || wydotTim.getToRm() == null) {
-                        timPoint = wydotTim.getFromRm();
-                    }
-
-                    if (wydotTim.getDirection().equals("both")) {
-
-                        // first TIM - i - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setFromRm(timPoint - 1);
-
+                    if (wydotTim.getDirection().toLowerCase().equals("b")) {
+                        // if both directions, create and send for each direction (i/d)
+                        // buffers are now handled in CreateBaseTimUtil.buildTim
                         createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk());
-
-                        // second TIM - d - add buffer for point TIMs
-                        if (timPoint != null)
-                            wydotTim.setFromRm(timPoint + 1);
 
                         createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
-
-                        // i - add buffer for point TIMs
-                        if (wydotTim.getDirection().toLowerCase().equals("i") && timPoint != null)
-                            wydotTim.setFromRm(timPoint - 1);
-
-                        // westbound - add buffer for point TIMs
-                        if (wydotTim.getDirection().toLowerCase().equals("d") && timPoint != null)
-                            wydotTim.setFromRm(timPoint + 1);
-
                         createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
                                 wydotTim.getPk());
                     }

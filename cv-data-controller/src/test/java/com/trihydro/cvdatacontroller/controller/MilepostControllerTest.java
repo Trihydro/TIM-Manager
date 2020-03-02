@@ -21,10 +21,14 @@ import org.springframework.http.ResponseEntity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MilepostControllerTest extends TestBase<MilepostController> {
-    private String direction = "direction";
+    private String direction = "both";
     private String commonName = "commonName";
     private double fromMilepost = 0d;
     private double toMilepost = 10d;
+    private double startLong = -105.406993;
+    private double endLong = -105.360182;
+    private double startLat = 42.76202563;
+    private double endLat = 42.76341358;
     private boolean mod = false;
 
     @Test
@@ -62,9 +66,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
     @Test
     public void getMilepostRange_Direction_asc_SUCCESS() throws SQLException {
         // Arrange
-        String statementStr = "select * from MILEPOST_VW where direction = '";
-        statementStr += direction;
-        statementStr += "' and milepost between ";
+        String statementStr = "select * from MILEPOST_VW where direction in ('B')";
+        statementStr += " and milepost between ";
         statementStr += fromMilepost;
         statementStr += " and " + toMilepost;
         statementStr += " and common_name = '";
@@ -86,9 +89,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
     @Test
     public void getMilepostRange_Direction_desc_SUCCESS() throws SQLException {
         // Arrange
-        String statementStr = "select * from MILEPOST_VW where direction = '";
-        statementStr += direction;
-        statementStr += "' and milepost between ";
+        String statementStr = "select * from MILEPOST_VW where direction in ('B')";
+        statementStr += " and milepost between ";
         statementStr += fromMilepost;
         statementStr += " and " + toMilepost;
         statementStr += " and common_name = '";
@@ -110,9 +112,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
     @Test
     public void getMilepostRange_Direction_FAIL() throws SQLException {
         // Arrange
-        String statementStr = "select * from MILEPOST_VW where direction = '";
-        statementStr += direction;
-        statementStr += "' and milepost between ";
+        String statementStr = "select * from MILEPOST_VW where direction in ('B')";
+        statementStr += " and milepost between ";
         statementStr += fromMilepost;
         statementStr += " and " + toMilepost;
         statementStr += " and common_name = '";
@@ -270,5 +271,159 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         assertFalse("routeExists succeeded when exception", data.getBody());
+    }
+
+    @Test
+    public void getMilepostsByLongitudeRange_ascSUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW where direction in ('B') and longitude between ";
+        statementStr += startLong + " and ";
+        statementStr += endLong;
+        statementStr += " and common_name = '" + commonName + "'";
+        statementStr += " order by milepost, longitude";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsByLongitudeRange(direction, startLong, endLong,
+                commonName);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getString("COMMON_NAME");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        // verify(mockRs).getDouble("BEARING");
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostsByLongitudeRange_descSUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW where direction in ('B') and longitude between ";
+        statementStr += endLong + " and ";
+        statementStr += startLong;
+        statementStr += " and common_name = '" + commonName + "'";
+        statementStr += " order by milepost desc, longitude desc";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsByLongitudeRange(direction, endLong, startLong,
+                commonName);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getString("COMMON_NAME");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        // verify(mockRs).getDouble("BEARING");
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostsByLongitudeRange_FAIL() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW where direction in ('B') and longitude between ";
+        statementStr += endLong + " and ";
+        statementStr += startLong;
+        statementStr += " and common_name = '" + commonName + "'";
+        statementStr += " order by milepost desc, longitude desc";
+        doThrow(new SQLException()).when(mockRs).getString("COMMON_NAME");
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsByLongitudeRange(direction, endLong, startLong,
+                commonName);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+        assertEquals(0, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostsByLatitudeRange_ascSUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW where direction in ('B') and latitude between ";
+        statementStr += startLat + " and ";
+        statementStr += endLat;
+        statementStr += " and common_name = '" + commonName + "'";
+        statementStr += " order by milepost, latitude";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsByLatitudeRange(direction, startLat, endLat,
+                commonName);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getString("COMMON_NAME");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        // verify(mockRs).getDouble("BEARING");
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostsByLatitudeRange_descSUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW where direction in ('B') and latitude between ";
+        statementStr += endLat + " and ";
+        statementStr += startLat;
+        statementStr += " and common_name = '" + commonName + "'";
+        statementStr += " order by milepost desc, latitude desc";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsByLatitudeRange(direction, endLat, startLat,
+                commonName);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getString("COMMON_NAME");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        // verify(mockRs).getDouble("BEARING");
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostsByLatitudeRange_FAIL() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW where direction in ('B') and latitude between ";
+        statementStr += endLat + " and ";
+        statementStr += startLat;
+        statementStr += " and common_name = '" + commonName + "'";
+        statementStr += " order by milepost desc, latitude desc";
+        doThrow(new SQLException()).when(mockRs).getString("COMMON_NAME");
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsByLatitudeRange(direction, endLat, startLat,
+                commonName);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+        assertEquals(0, milePosts.getBody().size());
     }
 }

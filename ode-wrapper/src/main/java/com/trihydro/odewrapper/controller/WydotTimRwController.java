@@ -43,14 +43,11 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     private static String type = "RW";
     List<WydotTimRw> timsToSend;
-    private GeodeticCalculator calculator;
 
     @Autowired
     public WydotTimRwController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            GeodeticCalculator _calc) {
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
-        calculator = _calc;
     }
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -182,6 +179,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                 wydotTim.getStartPoint().getLongitude());
         GlobalCoordinates nextCoordinates = null;
         double bearing = getIBearingForRoute(wydotTim.getRoute());
+        GeodeticCalculator calculator = new GeodeticCalculator();
 
         for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
             // i
@@ -232,6 +230,7 @@ public class WydotTimRwController extends WydotTimBaseController {
                 wydotTim.getEndPoint().getLongitude());
         GlobalCoordinates nextCoordinates = null;
         double bearing = getDBearingForRoute(wydotTim.getRoute());
+        GeodeticCalculator calculator = new GeodeticCalculator();
 
         for (int i = 0; i < wydotTim.getBuffers().size(); i++) {
             // d

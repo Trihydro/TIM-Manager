@@ -22,7 +22,6 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
-import org.gavaghan.geodesy.GeodeticCalculator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,8 +45,6 @@ public class WydotTimIncidentControllerTest {
 	TimTypeService mockTimTypeService;
 	@Mock
 	SetItisCodes setItisCodes;
-	@Spy
-	GeodeticCalculator mockGeoCalc;
 
 	@InjectMocks
 	@Spy

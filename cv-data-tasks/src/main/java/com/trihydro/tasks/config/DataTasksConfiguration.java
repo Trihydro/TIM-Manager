@@ -1,11 +1,15 @@
 package com.trihydro.tasks.config;
 
+import com.trihydro.library.model.ConfigProperties;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration {
+@ComponentScan({"com.trihydro.library.helpers", "com.trihydro.library.service"})
+public class DataTasksConfiguration extends ConfigProperties {
 
     private String wrapperUrl;
     private String odeUrl;

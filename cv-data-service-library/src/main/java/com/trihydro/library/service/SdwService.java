@@ -7,10 +7,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -26,6 +29,8 @@ import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.model.SDXDecodeRequest;
+import com.trihydro.library.model.SDXDecodeResponse;
 import com.trihydro.library.model.SDXQuery;
 
 import org.apache.commons.lang3.StringUtils;
@@ -83,7 +88,10 @@ public class SdwService {
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         headers.add("apikey", configProperties.getSdwApiKey());
 
-        HttpEntity<SDXQuery> entity = new HttpEntity<SDXQuery>(new SDXQuery(), headers);
+        SDXQuery request = new SDXQuery();
+        request.setDialogID(156);
+
+        HttpEntity<SDXQuery> entity = new HttpEntity<SDXQuery>(request, headers);
         try {
             ResponseEntity<AdvisorySituationDataDeposit[]> response = RestTemplateProvider.GetRestTemplate()
                     .exchange(url, HttpMethod.POST, entity, AdvisorySituationDataDeposit[].class);
@@ -91,6 +99,63 @@ public class SdwService {
             results = Arrays.asList(response.getBody());
         } catch (RestClientException ex) {
             System.out.println(ex.getMessage());
+        }
+
+        return results;
+    }
+
+    public List<Integer> getItisCodesFromAdvisoryMessage(String advisoryMessage) throws IllegalArgumentException {
+        if (advisoryMessage == null || advisoryMessage.length() < 18) {
+            throw new IllegalArgumentException("messageFrame must be provided and at least 18 characters");
+        }
+
+        List<Integer> results = new ArrayList<Integer>();
+        SDXDecodeResponse decodeResponse = null;
+
+        // Build request
+        String url = String.format("%s/api/decode", configProperties.getSdwRestUrl());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("apikey", configProperties.getSdwApiKey());
+
+        SDXDecodeRequest request = new SDXDecodeRequest();
+        request.setEncodeType("hex");
+        request.setMessageType("MessageFrame");
+        request.setEncodedMsg(advisoryMessage.substring(18));
+
+        // Execute request
+        try {
+            HttpEntity<SDXDecodeRequest> entity = new HttpEntity<SDXDecodeRequest>(request, headers);
+            ResponseEntity<SDXDecodeResponse> response = RestTemplateProvider.GetRestTemplate().exchange(url,
+                    HttpMethod.POST, entity, SDXDecodeResponse.class);
+
+            decodeResponse = response.getBody();
+        } catch (RestClientException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+        // Process request (convert decodedMessage into an array of ITIS codes)
+        Pattern p = Pattern.compile("(<advisory>)(.*)(</advisory>)");
+        Matcher m = p.matcher(decodeResponse.getDecodedMessage());
+
+        if(m.find()) {
+            String advisory = m.group(2);
+            p = Pattern.compile("(<itis>)([0-9]*)(</itis>)");
+            m = p.matcher(advisory);
+
+            while(m.find()) {
+                String itisCode = m.group(2);
+                
+                try {
+                    results.add(Integer.parseInt(itisCode));
+                }
+                catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
 
         return results;

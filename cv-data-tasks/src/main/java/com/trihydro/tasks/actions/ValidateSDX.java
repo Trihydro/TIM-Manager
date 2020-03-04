@@ -41,7 +41,11 @@ public class ValidateSDX {
 
         // Fetch records from SDX
         for (AdvisorySituationDataDeposit asdd : sdwService.getAllSdwRecords()) {
-            sdxRecords.add(new CAdvisorySituationDataDeposit(asdd));
+            List<Integer> itisCodes = sdwService.getItisCodesFromAdvisoryMessage(asdd.getAdvisoryMessage());
+            CAdvisorySituationDataDeposit record = new CAdvisorySituationDataDeposit(asdd);
+            record.setItisCodes(itisCodes);
+
+            sdxRecords.add(record);
         }
 
         Collections.sort(oracleRecords, new SdxComparableSorter());
@@ -96,6 +100,8 @@ public class ValidateSDX {
                     numOutdatedSdxRecords++;
                     toResend.add(oracleRecord);
                 }
+                i++;
+                j++;
             } else if (oracleRecordId > sdxRecordId) {
                 // The current SDX record doesn't have a corresponding Oracle record...
                 numSdxOrphanedRecords++;

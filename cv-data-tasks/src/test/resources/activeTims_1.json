@@ -1,0 +1,36 @@
+[
+  {
+    "activeTimId": 0,
+    "timId": 1,
+    "milepostStart": 0.1,
+    "milepostStop": 5.1,
+    "timType": null,
+    "timTypeId": null,
+    "direction": null,
+    "startDateTime": null,
+    "endDateTime": null,
+    "route": null,
+    "clientId": null,
+    "satRecordId": "00000000",
+    "pk": null,
+    "rsuTarget": null,
+    "itisCodes": [6, 7, 8]
+  },
+  {
+    "activeTimId": 10,
+    "timId": "11",
+    "milepostStart": 10.1,
+    "milepostStop": 15.1,
+    "timType": null,
+    "timTypeId": null,
+    "direction": null,
+    "startDateTime": null,
+    "endDateTime": null,
+    "route": null,
+    "clientId": null,
+    "satRecordId": "FFFFFFFF",
+    "pk": null,
+    "rsuTarget": null,
+    "itisCodes": [16, 17, 18]
+  }
+]

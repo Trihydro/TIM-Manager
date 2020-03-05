@@ -18,21 +18,30 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
+@Component
 public class OdeService {
 
     public static Gson gson = new Gson();
     public static RestTemplate restTemplate = new RestTemplate();
+    private Utility utility;
 
-    public static void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, String odeUrl) {
+    @Autowired
+    public void InjectDependencies(Utility _utility){
+        utility = _utility;
+    }
+
+    public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, String odeUrl) {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
@@ -44,7 +53,7 @@ public class OdeService {
 
         // query failed, don't send TIM
         if (timQuery == null) {
-            Utility.logWithDate(
+            utility.logWithDate(
                     "Returning without sending TIM to RSU. submitTimQuery failed for RSU " + gson.toJson(wydotRsu));
             return;
         }
@@ -56,7 +65,7 @@ public class OdeService {
 
         // send TIM if not a test
         try {
-            Utility.logWithDate("Sending new TIM to RSU");
+            utility.logWithDate("Sending new TIM to RSU");
             restTemplate.postForObject(odeUrl + "/tim", timToSendJson, String.class);
             TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {

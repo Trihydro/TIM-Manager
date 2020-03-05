@@ -5,12 +5,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -20,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,10 +40,14 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ActiveTimController extends BaseController {
 
 	private TimOracleTables timOracleTables;
+	private SQLNullHandler sqlNullHandler;
+	private Utility utility;
 
 	@Autowired
-	public void SetTables(TimOracleTables _timOracleTables) {
+	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler, Utility _utility) {
 		timOracleTables = _timOracleTables;
+		sqlNullHandler = _sqlNullHandler;
+		utility = _utility;
 	}
 
 	// select all ITIS codes
@@ -114,10 +125,10 @@ public class ActiveTimController extends BaseController {
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
 				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-				activeTim.setSspLocationRights(Utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
-				activeTim.setSspTimRights(Utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
-				activeTim.setSspMsgTypes(Utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
-				activeTim.setSspMsgContent(Utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
+				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
+				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
+				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
@@ -371,4 +382,560 @@ public class ActiveTimController extends BaseController {
 
 		return ResponseEntity.ok(activeTims);
 	}
+
+	@RequestMapping(value = "/indices-rsu/{rsuTarget}", method = RequestMethod.GET)
+	public ResponseEntity<List<Integer>> GetActiveTimIndicesByRsu(@PathVariable String rsuTarget) {
+
+		List<Integer> indices = new ArrayList<Integer>();
+
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			String selectStatement = "select tim_rsu.rsu_index from active_tim";
+			selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
+			selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
+			selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
+			selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
+
+			rs = statement.executeQuery(selectStatement);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				indices.add(rs.getInt("RSU_INDEX"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(indices);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(indices);
+	}
+
+	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}/{direction}", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
+			@PathVariable Long timTypeId, String direction) {
+
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+			String query = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
+					+ timTypeId;
+
+			if (direction != null) {
+				query += " and DIRECTION = '" + direction + "'";
+			}
+
+			rs = statement.executeQuery(query);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setPk(rs.getInt("PK"));
+				activeTims.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
+	@RequestMapping(value = "/itis-codes/{activeTimId}", method = RequestMethod.GET)
+	public ResponseEntity<List<Integer>> GetItisCodesForActiveTim(@PathVariable Long activeTimId) {
+		List<Integer> itisCodes = new ArrayList<>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+			String selectStatement = "select itis_code from active_tim ";
+			selectStatement += "inner join tim on tim.tim_id = active_tim.tim_id ";
+			selectStatement += "inner join data_frame on tim.tim_id = data_frame.tim_id ";
+			selectStatement += "inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id ";
+			selectStatement += "inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id ";
+			selectStatement += "where active_tim_id = " + activeTimId;
+			rs = statement.executeQuery(selectStatement);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				itisCodes.add(rs.getInt("ITIS_CODE"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(itisCodes);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(itisCodes);
+	}
+
+	@RequestMapping(value = "/delete-id/{activeTimId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+	public ResponseEntity<Boolean> DeleteActiveTim(Long activeTimId) {
+
+		boolean deleteActiveTimResult = false;
+
+		String deleteSQL = "DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID = ?";
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			preparedStatement = connection.prepareStatement(deleteSQL);
+			preparedStatement.setLong(1, activeTimId);
+
+			// execute delete SQL stetement
+			deleteActiveTimResult = updateOrDelete(preparedStatement);
+
+			System.out.println("Active Tim (active_tim_id " + activeTimId + ") is deleted!");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(deleteActiveTimResult);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(deleteActiveTimResult);
+	}
+
+	@RequestMapping(value = "/delete-ids", method = RequestMethod.DELETE, headers = "Accept=application/json")
+	public ResponseEntity<Boolean> DeleteActiveTimsById(@RequestBody List<Long> activeTimIds) {
+		boolean deleteActiveTimResult = false;
+
+		String deleteSQL = "DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (";
+		for (int i = 0; i < activeTimIds.size(); i++) {
+			deleteSQL += "?,";
+		}
+		deleteSQL = deleteSQL.substring(0, deleteSQL.length() - 1);
+		deleteSQL += ")";
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			preparedStatement = connection.prepareStatement(deleteSQL);
+			for (int i = 0; i < activeTimIds.size(); i++) {
+				preparedStatement.setLong(i + 1, activeTimIds.get(i));
+			}
+
+			// execute delete SQL stetement
+			deleteActiveTimResult = updateOrDelete(preparedStatement);
+
+			System.out.println("Active Tims (active_tim_ids "
+					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") deleted!");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(deleteActiveTimResult);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(deleteActiveTimResult);
+	}
+
+	@RequestMapping(value = "/get-by-wydot-tim/{timTypeId}", method = RequestMethod.POST)
+	public ResponseEntity<List<ActiveTim>> GetActiveTimsByWydotTim(@RequestBody List<? extends WydotTim> wydotTims,
+			@PathVariable Long timTypeId) {
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		WydotTim wydotTim = null;
+
+		try {
+			connection = GetConnectionPool();
+			String query = "select * from active_tim where ";
+			if (timTypeId != null) {
+				query += "TIM_TYPE_ID = ? and (";
+			}
+
+			for (int i = 0; i < wydotTims.size(); i++) {
+				if (i > 0) {
+					query += " OR ";
+				}
+				query += "(CLIENT_ID like ?";
+				wydotTim = wydotTims.get(i);
+				if (wydotTim.getDirection() != null) {
+					query += " and DIRECTION = ?";
+				}
+				query += ")";
+			}
+			if (timTypeId != null) {
+				query += ")";
+			}
+			ps = connection.prepareStatement(query);
+
+			int index = 1;
+			if (timTypeId != null) {
+				ps.setLong(index, timTypeId);
+				index++;
+			}
+			for (int i = 0; i < wydotTims.size(); i++) {
+				wydotTim = wydotTims.get(i);
+
+				// set client id
+				ps.setString(index, wydotTim.getClientId() + "%");
+				index++;
+
+				// set direction
+				if (wydotTim.getDirection() != null) {
+					ps.setString(index, wydotTim.getDirection());
+					index++;
+				}
+			}
+			rs = ps.executeQuery();
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setPk(rs.getInt("PK"));
+				activeTims.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement and result set (rs closed by prepared statement)
+				if (ps != null) {
+					ps.close();
+				}
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
+	@RequestMapping(value = "/tim-type-id/{timTypeId}", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetActiveTimsByType(@PathVariable Long timTypeId) {
+
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+			rs = statement.executeQuery("select * from active_tim where TIM_TYPE_ID = " + timTypeId);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setPk(rs.getInt("PK"));
+				activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
+				activeTims.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
+	@RequestMapping(value = "/all", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetAllActiveTims() {
+		ActiveTim activeTim = null;
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+
+			statement = connection.createStatement();
+
+			String selectStatement = "select * from active_tim";
+
+			rs = statement.executeQuery(selectStatement);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTims.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
+	@RequestMapping(value = "/active-rsu-tim", method = RequestMethod.POST)
+	public ResponseEntity<ActiveTim> GetActiveRsuTim(@RequestBody ActiveRsuTimQueryModel artqm) {
+
+		ActiveTim activeTim = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+			String query = "select * from active_tim";
+			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
+			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
+			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			query += " where ipv4_address = '" + artqm.getIpv4() + "' and client_id = '" + artqm.getClientId()
+					+ "' and active_tim.direction = '" + artqm.getDirection() + "'";
+
+			rs = statement.executeQuery(query);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setPk(rs.getInt("PK"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTim);
+	}
+
+	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	public ResponseEntity<Long> InsertActiveTim(@RequestBody ActiveTim activeTim) {
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		Long activeTimId = 0l;
+		try {
+			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim",
+					timOracleTables.getActiveTimTable());
+
+			// get connection
+			connection = GetConnectionPool();
+
+			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
+			int fieldNum = 1;
+
+			for (String col : timOracleTables.getActiveTimTable()) {
+				if (col.equals("TIM_ID"))
+					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
+				else if (col.equals("MILEPOST_START"))
+					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStart());
+				else if (col.equals("MILEPOST_STOP"))
+					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStop());
+				else if (col.equals("DIRECTION"))
+					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
+				else if (col.equals("TIM_START"))
+					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
+							LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
+				else if (col.equals("TIM_END"))
+					if (activeTim.getEndDateTime() != null)
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
+								LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
+					else
+						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
+				else if (col.equals("TIM_TYPE_ID"))
+					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimTypeId());
+				else if (col.equals("ROUTE"))
+					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getRoute());
+				else if (col.equals("CLIENT_ID"))
+					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getClientId());
+				else if (col.equals("SAT_RECORD_ID"))
+					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getSatRecordId());
+				else if (col.equals("PK"))
+					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
+
+				fieldNum++;
+			}
+
+			activeTimId = executeAndLog(preparedStatement, "active tim");
+			return ResponseEntity.ok(activeTimId);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimId);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }

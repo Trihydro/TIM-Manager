@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -35,6 +36,9 @@ public class CleanupActiveTimsTest {
 
     @Mock
     private RestTemplate mockRestTemplate;
+    
+    @Mock 
+    Utility mockUtility;
 
     @InjectMocks
     public CleanupActiveTims uut;

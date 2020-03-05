@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-@ComponentScan("com.trihydro.cvdatacontroller")
+@ComponentScan({"com.trihydro.cvdatacontroller", "com.trihydro.library.tables", "com.trihydro.library.helpers"})
 public class BasicConfiguration extends ConfigProperties {
 
 }

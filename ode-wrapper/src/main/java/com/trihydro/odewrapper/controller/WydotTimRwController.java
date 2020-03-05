@@ -9,14 +9,18 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRwList;
 import com.trihydro.odewrapper.model.WydotTimRw;
+import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,9 +38,13 @@ import io.swagger.annotations.Api;
 public class WydotTimRwController extends WydotTimBaseController {
 
     private static String type = "RW";
-    // get tim type
-    TimType timType = getTimType(type);
     List<WydotTimRw> timsToSend;
+
+    @Autowired
+    public WydotTimRwController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+    }
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
@@ -182,11 +190,13 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // send buffer tim
             wydotTimBuffer.setAdvisory(wydotTimService.setBufferItisCodes(wydotTimBuffer.getAction()));
-            List<String> tempList = new ArrayList<String>(wydotTimBuffer.getAdvisory().length);
-            for (Integer code : wydotTimBuffer.getAdvisory()) {
-                tempList.add(code.toString());
+            if (wydotTimBuffer.getAdvisory() != null) {
+                List<String> tempList = new ArrayList<String>(wydotTimBuffer.getAdvisory().length);
+                for (Integer code : wydotTimBuffer.getAdvisory()) {
+                    tempList.add(code.toString());
+                }
+                wydotTimBuffer.setItisCodes(tempList);
             }
-            wydotTimBuffer.setItisCodes(tempList);
             timsToSend.add(wydotTimBuffer);
 
             // update running buffer distance
@@ -199,7 +209,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 for (WydotTimRw tim : timsToSend) {
-                    processRequest(tim, timType, tim.getSchedStart(), tim.getSchedEnd(), null);
+                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
                 }
             }
         }).start();
@@ -277,7 +287,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
-            ActiveTimService.addItisCodesToActiveTim(activeTim);
+            activeTimService.addItisCodesToActiveTim(activeTim);
         }
 
         return activeTims;

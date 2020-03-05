@@ -33,6 +33,8 @@ public class BaseController {
     private HikariDataSource hds = null;
     private HikariConfig config;
     private DataControllerConfigProperties dbConfig;
+    private JavaMailSenderImplProvider mailProvider;
+    private Utility utility;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -40,8 +42,11 @@ public class BaseController {
     protected DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void SetConfig(DataControllerConfigProperties props) {
+    public void InjectDependencies(DataControllerConfigProperties props, JavaMailSenderImplProvider _mailProvider,
+            Utility _utility) {
         dbConfig = props;
+        mailProvider = _mailProvider;
+        utility = _utility;
     }
 
     public Connection GetConnectionPool() throws SQLException {
@@ -81,7 +86,7 @@ public class BaseController {
             try {
                 SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body);
             } catch (Exception exception) {
-                Utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
+                utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");
                 exception.printStackTrace();
             }
@@ -112,7 +117,7 @@ public class BaseController {
                 try {
                     if (generatedKeys != null && generatedKeys.next()) {
                         id = generatedKeys.getLong(1);
-                        Utility.logWithDate("------ Generated " + type + " " + id + " --------------");
+                        utility.logWithDate("------ Generated " + type + " " + id + " --------------");
                     }
                 } finally {
                     try {
@@ -148,8 +153,7 @@ public class BaseController {
     }
 
     void SendEmail(String[] to, String[] bcc, String subject, String body) throws MailException, MessagingException {
-        JavaMailSenderImpl mailSender = JavaMailSenderImplProvider.getJSenderImpl(dbConfig.getMailHost(),
-                dbConfig.getMailPort());
+        JavaMailSenderImpl mailSender = mailProvider.getJSenderImpl(dbConfig.getMailHost(), dbConfig.getMailPort());
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
         helper.setSubject(subject);

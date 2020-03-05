@@ -2,21 +2,24 @@ package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
-import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,11 +45,59 @@ public class TimController extends BaseController {
         securityResultCodeTypeController = _securityResultCodeTypeController;
     }
 
-    @RequestMapping(value = "/active-tims", method = RequestMethod.GET, headers = "Accept=application/json")
-    public List<ActiveTim> SelectAllActiveTims() throws Exception {
-        List<ActiveTim> activeTims = ActiveTimService.getAllActiveTims();
-        return activeTims;
+    @RequestMapping(value = "/get-tim", method = RequestMethod.GET)
+    public ResponseEntity<WydotOdeTravelerInformationMessage> GetTim(@PathVariable Long timId) {
+
+        WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();
+
+        Statement statement = null;
+        ResultSet rs = null;
+        Connection connection = null;
+
+        try {
+            // build SQL statement
+            connection = GetConnectionPool();
+            statement = connection.createStatement();
+            rs = statement.executeQuery("select * from tim where tim_id = " + timId);
+
+            // convert to DriverAlertType objects
+            while (rs.next()) {
+                tim.setPacketID(rs.getString("PACKET_ID"));
+                tim.setMsgCnt(rs.getInt("MSG_CNT"));
+                tim.setTimeStamp(rs.getString("TIME_STAMP"));
+                tim.setUrlB(rs.getString("URL_B"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(tim);
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return ResponseEntity.ok(tim);
     }
+
+    // TODO: this may be used in the tim creator...should call out to the
+    // activeTimController instead
+    // @RequestMapping(value = "/active-tims", method = RequestMethod.GET, headers =
+    // "Accept=application/json")
+    // public List<ActiveTim> SelectAllActiveTims() throws Exception {
+    // List<ActiveTim> activeTims = ActiveTimService.getAllActiveTims();
+    // return activeTims;
+    // }
 
     @RequestMapping(value = "/add-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public Long AddTim(@RequestBody TimInsertModel tim) {

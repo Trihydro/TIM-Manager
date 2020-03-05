@@ -1,13 +1,5 @@
 package com.trihydro.library.service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-
-import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 
@@ -63,139 +55,10 @@ public class TimService extends CvDataServiceLibrary {
 		return response.getBody();
 	}
 
-	public static boolean updateTimSatRecordId(Long timId, String satRecordId) {
-		PreparedStatement preparedStatement = null;
-		Connection connection = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			preparedStatement = connection.prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
-			preparedStatement.setString(1, satRecordId);
-			preparedStatement.setLong(2, timId);
-			return updateOrDelete(preparedStatement);
-		} catch (Exception ex) {
-			return false;
-		} finally {
-			try {
-				if (preparedStatement != null)
-					preparedStatement.close();
-
-				if (connection != null)
-					connection.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public static Long getTimId(String packetId, Timestamp timeStamp) {
-		ResultSet rs = null;
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		Long id = null;
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			preparedStatement = connection
-					.prepareStatement("select tim_id from tim where packet_id = ? and time_stamp = ?");
-			preparedStatement.setString(1, packetId);
-			preparedStatement.setTimestamp(2, timeStamp);
-
-			rs = preparedStatement.executeQuery();
-			if (rs.next()) {
-				id = rs.getLong("tim_id");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (preparedStatement != null)
-					preparedStatement.close();
-
-				if (connection != null)
-					connection.close();
-			} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-		}
-		return id;
-	}
-
 	public static WydotOdeTravelerInformationMessage getTim(Long timId) {
-
-		WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();
-
-		Statement statement = null;
-		ResultSet rs = null;
-		Connection connection = null;
-
-		try {
-			// build SQL statement
-			connection = DbUtility.getConnectionPool();
-			statement = connection.createStatement();
-			rs = statement.executeQuery("select * from tim where tim_id = " + timId);
-
-			// convert to DriverAlertType objects
-			while (rs.next()) {
-				tim.setPacketID(rs.getString("PACKET_ID"));
-				tim.setMsgCnt(rs.getInt("MSG_CNT"));
-				tim.setTimeStamp(rs.getString("TIME_STAMP"));
-				tim.setUrlB(rs.getString("URL_B"));
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return tim;
-	}
-
-	public static boolean deleteTim(Long timId) {
-
-		boolean deleteTimResult = false;
-		PreparedStatement preparedStatement = null;
-		Connection connection = null;
-		String deleteSQL = "DELETE FROM TIM WHERE TIM_ID = ?";
-
-		try {
-			connection = DbUtility.getConnectionPool();
-			preparedStatement = connection.prepareStatement(deleteSQL);
-			preparedStatement.setLong(1, timId);
-
-			// execute delete SQL stetement
-			deleteTimResult = updateOrDelete(preparedStatement);
-
-			System.out.println("Tim is deleted!");
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				// close prepared statement
-				if (preparedStatement != null)
-					preparedStatement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return deleteTimResult;
+		String url = String.format("%s/get-tim/%d", CVRestUrl, timId);
+		ResponseEntity<WydotOdeTravelerInformationMessage> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(url, WydotOdeTravelerInformationMessage.class);
+		return response.getBody();
 	}
 }

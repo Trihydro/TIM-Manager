@@ -18,13 +18,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SetItisCodes {
-    private static List<IncidentChoice> incidentProblems;
-    private static List<IncidentChoice> incidentEffects;
-    private static List<IncidentChoice> incidentActions;
+    private List<IncidentChoice> incidentProblems;
+    private List<IncidentChoice> incidentEffects;
+    private List<IncidentChoice> incidentActions;
 
-    private static List<ItisCode> itisCodes;
+    private List<ItisCode> itisCodes;
 
-    public static List<ItisCode> getItisCodes() {
+    public List<ItisCode> getItisCodes() {
         if (itisCodes != null)
             return itisCodes;
         else {
@@ -33,7 +33,7 @@ public class SetItisCodes {
         }
     }
 
-    public static List<String> setItisCodesFromAdvisoryArray(WydotTimRc wydotTim) {
+    public List<String> setItisCodesFromAdvisoryArray(WydotTimRc wydotTim) {
 
         // check to see if code exists
 
@@ -48,7 +48,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesRc(WydotTimRc wydotTim) {
+    public List<String> setItisCodesRc(WydotTimRc wydotTim) {
 
         List<String> items = new ArrayList<String>();
 
@@ -70,7 +70,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesVsl(WydotTimVsl wydotTim) {
+    public List<String> setItisCodesVsl(WydotTimVsl wydotTim) {
 
         List<String> items = new ArrayList<String>();
 
@@ -94,7 +94,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> setItisCodesParking(WydotTimParking wydotTim) {
+    public List<String> setItisCodesParking(WydotTimParking wydotTim) {
 
         // check to see if code exists
         List<String> items = new ArrayList<String>();
@@ -111,11 +111,11 @@ public class SetItisCodes {
         if (wydotTim.getExit() != null) {
             items.add("11794");
             int exitItisCodeNumber;
-            if(wydotTim.getExit().toLowerCase().equals("turnout") || wydotTim.getExit().toLowerCase().equals("parking")){
-                exitItisCodeNumber = convertNumberToItisCode((int)Math.round(wydotTim.getMileMarker()));
+            if (wydotTim.getExit().toLowerCase().equals("turnout")
+                    || wydotTim.getExit().toLowerCase().equals("parking")) {
+                exitItisCodeNumber = convertNumberToItisCode((int) Math.round(wydotTim.getMileMarker()));
                 items.add(String.valueOf(exitItisCodeNumber));
-            }
-            else{
+            } else {
                 List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
                 exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
                 items.add(String.valueOf(exitItisCodeNumber));
@@ -123,7 +123,7 @@ public class SetItisCodes {
                     items.add(list.get(1));
                     System.out.println("list: " + list.get(1));
                 }
-            }                                  
+            }
         } else {
             items.add("7986");
             System.out.println("rest area");
@@ -132,7 +132,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<String> splitExitNumberFromLetter(String exit) {
+    public List<String> splitExitNumberFromLetter(String exit) {
 
         List<String> list = new ArrayList<String>();
         String exitNumber = "";
@@ -152,7 +152,7 @@ public class SetItisCodes {
         return list;
     }
 
-    public static List<String> setItisCodesFromAvailability(WydotTimParking wydotTim) {
+    public List<String> setItisCodesFromAvailability(WydotTimParking wydotTim) {
 
         // check to see if code exists
         List<String> items = new ArrayList<String>();
@@ -175,12 +175,12 @@ public class SetItisCodes {
         return items;
     }
 
-    private static int convertNumberToItisCode(int number) {
+    private int convertNumberToItisCode(int number) {
         int itisCode = number + 12544;
         return itisCode;
     }
 
-    public static List<String> setItisCodesIncident(WydotTimIncident wydotTim) {
+    public List<String> setItisCodesIncident(WydotTimIncident wydotTim) {
         List<String> items = new ArrayList<String>();
 
         // action
@@ -228,7 +228,7 @@ public class SetItisCodes {
         return items;
     }
 
-    public static List<IncidentChoice> getIncidentProblems() {
+    public List<IncidentChoice> getIncidentProblems() {
         if (incidentProblems != null)
             return incidentProblems;
         else {
@@ -237,7 +237,7 @@ public class SetItisCodes {
         }
     }
 
-    public static List<IncidentChoice> getIncidentEffects() {
+    public List<IncidentChoice> getIncidentEffects() {
         if (incidentEffects != null)
             return incidentEffects;
         else {
@@ -246,7 +246,7 @@ public class SetItisCodes {
         }
     }
 
-    public static List<IncidentChoice> getIncidentActions() {
+    public List<IncidentChoice> getIncidentActions() {
         if (incidentActions != null)
             return incidentActions;
         else {
@@ -255,7 +255,7 @@ public class SetItisCodes {
         }
     }
 
-    public static List<String> setItisCodesRw(WydotTim wydotTim) {
+    public List<String> setItisCodesRw(WydotTim wydotTim) {
 
         List<String> items = new ArrayList<String>();
 

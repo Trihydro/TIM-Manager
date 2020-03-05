@@ -1,7 +1,6 @@
 package com.trihydro.cvdatacontroller;
 
 import com.trihydro.cvdatacontroller.config.BasicConfiguration;
-import com.trihydro.library.service.CvDataServiceLibrary;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +14,6 @@ public class Application {
     @Autowired
     public void setConfiguration(BasicConfiguration configurationRhs) {
         configuration = configurationRhs;
-        CvDataServiceLibrary.setConfig(configuration);
     }
 
     public static void main(String[] args) {

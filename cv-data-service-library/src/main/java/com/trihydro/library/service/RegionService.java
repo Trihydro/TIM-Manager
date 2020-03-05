@@ -15,7 +15,7 @@ public class RegionService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<Region> entity = new HttpEntity<Region>(region, headers);
-		ResponseEntity<Long> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+		ResponseEntity<Long> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity,
 				Long.class);
 		return response.getBody();
 	}

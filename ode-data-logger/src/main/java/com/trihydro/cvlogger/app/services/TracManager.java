@@ -34,13 +34,15 @@ public class TracManager {
 	private JsonToJavaConverter jsonToJava;
 	private TracMessageTypeService tracMessageTypeService;
 	private TracMessageSentService tracMessageSentService;
+	private JavaMailSenderImplProvider mailProvider;
 
 	@Autowired
 	public void InjectDependencies(JsonToJavaConverter _jsonToJava, TracMessageTypeService _tracMessageTypeService,
-			TracMessageSentService _tracMessageSentService) {
+			TracMessageSentService _tracMessageSentService, JavaMailSenderImplProvider _mailProvider) {
 		jsonToJava = _jsonToJava;
 		tracMessageTypeService = _tracMessageTypeService;
 		tracMessageSentService = _tracMessageSentService;
+		mailProvider = _mailProvider;
 	}
 
 	public boolean isDnMsgInTrac(String packetId) {
@@ -195,7 +197,7 @@ public class TracManager {
 			try {
 				System.out.println("Message failed to submit to TRAC. Sending email to "
 						+ String.join(",", message.getTo()) + ". BCC to " + String.join(",", message.getBcc()));
-				JavaMailSenderImplProvider.getJSenderImpl(config.getMailHost(), config.getMailPort()).send(message);
+				mailProvider.getJSenderImpl(config.getMailHost(), config.getMailPort()).send(message);
 				emailSent = true;
 			} catch (Exception ex) {
 				System.out.println(

@@ -20,7 +20,7 @@ public class MilepostService extends CvDataServiceLibrary {
 	 */
 	public static List<Milepost> selectMilepostRange(String direction, String route, Double fromMilepost,
 			Double toMilepost) {
-		String url = String.format("%s/get-milepost-range/%s/%d/%d/%s", CVRestUrl, direction, fromMilepost, toMilepost,
+		String url = String.format("%s/get-milepost-range/%s/%f/%f/%s", CVRestUrl, direction, fromMilepost, toMilepost,
 				route);
 		ResponseEntity<Milepost[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
 				Milepost[].class);

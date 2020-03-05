@@ -28,12 +28,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BaseService {
 
     private HikariDataSource hds = null;
     private HikariConfig config;
     private LoggerConfiguration dbConfig;
+    private JavaMailSenderImplProvider mailProvider;
+    private Utility utility;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -41,8 +45,10 @@ public class BaseService {
     public DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(LoggerConfiguration _loggerConfiguration) {
+    public void InjectDependencies(LoggerConfiguration _loggerConfiguration, JavaMailSenderImplProvider _mailProvider, Utility _utility) {
         dbConfig = _loggerConfiguration;
+        mailProvider = _mailProvider;
+        utility=_utility;
     }
 
     public Connection GetConnectionPool() throws SQLException {
@@ -83,7 +89,7 @@ public class BaseService {
             try {
                 SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body);
             } catch (Exception exception) {
-                Utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
+                utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");
                 exception.printStackTrace();
             }
@@ -114,7 +120,7 @@ public class BaseService {
                 try {
                     if (generatedKeys != null && generatedKeys.next()) {
                         id = generatedKeys.getLong(1);
-                        Utility.logWithDate("------ Generated " + type + " " + id + " --------------");
+                        utility.logWithDate("------ Generated " + type + " " + id + " --------------");
                     }
                 } finally {
                     try {
@@ -191,8 +197,7 @@ public class BaseService {
     }
 
     void SendEmail(String[] to, String[] bcc, String subject, String body) throws MailException, MessagingException {
-        JavaMailSenderImpl mailSender = JavaMailSenderImplProvider.getJSenderImpl(dbConfig.getMailHost(),
-                dbConfig.getMailPort());
+        JavaMailSenderImpl mailSender = mailProvider.getJSenderImpl(dbConfig.getMailHost(), dbConfig.getMailPort());
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
         helper.setSubject(subject);

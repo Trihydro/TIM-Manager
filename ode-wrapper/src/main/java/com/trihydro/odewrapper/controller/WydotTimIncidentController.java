@@ -8,11 +8,16 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
+import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
+import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,8 +35,12 @@ import io.swagger.annotations.Api;
 public class WydotTimIncidentController extends WydotTimBaseController {
 
     private static String type = "I";
-    // get tim type
-    TimType timType = getTimType(type);
+
+    @Autowired
+    public WydotTimIncidentController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+    }
 
     @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createIncidentTim(@RequestBody TimIncidentList timIncidentList) {
@@ -94,7 +103,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 resultList.add(resultTim);
                 continue;
             }
-            
+
             // make tims
             timsToSend.add(wydotTim);
 
@@ -115,6 +124,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
+
                 for (WydotTimIncident wydotTim : wydotTims) {
 
                     Double timPoint = null;
@@ -133,13 +143,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (timPoint != null)
                             wydotTim.setToRm(timPoint - 1);
 
-                        createSendTims(wydotTim, "eastbound", timType, startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, wydotTim.getPk());
 
                         // second TIM - westbound - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setToRm(timPoint + 1);
 
-                        createSendTims(wydotTim, "westbound", timType, startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
 
@@ -151,7 +161,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (wydotTim.getDirection().equals("westbound") && timPoint != null)
                             wydotTim.setToRm(timPoint + 1);
 
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType, startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
+                                wydotTim.getPk());
                     }
                 }
             }
@@ -187,12 +198,6 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         // get active TIMs
         List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("I", incidentId);
-
-        // // add ITIS codes to TIMs
-        // for (ActiveTim activeTim : activeTims) {
-        // ActiveTimService.addItisCodesToActiveTim(activeTim);
-        // }
-
         return activeTims;
     }
 
@@ -201,9 +206,6 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-
-                // get tim type
-                TimType timType = getTimType(type);
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimIncident wydotTim : wydotTims) {
 
@@ -223,13 +225,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (timPoint != null)
                             wydotTim.setFromRm(timPoint - 1);
 
-                        createSendTims(wydotTim, "eastbound", timType, startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, wydotTim.getPk());
 
                         // second TIM - westbound - add buffer for point TIMs
                         if (timPoint != null)
                             wydotTim.setFromRm(timPoint + 1);
 
-                        createSendTims(wydotTim, "westbound", timType, startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, wydotTim.getPk());
                     } else {
                         // single direction TIM
 
@@ -241,7 +243,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                         if (wydotTim.getDirection().equals("westbound") && timPoint != null)
                             wydotTim.setFromRm(timPoint + 1);
 
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType, startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
+                                wydotTim.getPk());
                     }
                 }
             }

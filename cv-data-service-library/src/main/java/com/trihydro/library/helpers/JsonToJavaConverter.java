@@ -4,8 +4,6 @@ import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -48,11 +46,9 @@ import us.dot.its.jpo.ode.util.JsonUtils;
 @Component
 public class JsonToJavaConverter {
 
-    static PreparedStatement preparedStatement = null;
-    static Statement statement = null;
-    static ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
-    static {
+    public JsonToJavaConverter() {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -124,8 +120,7 @@ public class JsonToJavaConverter {
         return spve;
     }
 
-    public J2735SupplementalVehicleExtensions convertJ2735SupplementalVehicleExtensionsJsonToJava(String value,
-            int i) {
+    public J2735SupplementalVehicleExtensions convertJ2735SupplementalVehicleExtensionsJsonToJava(String value, int i) {
 
         JsonNode part2Node = getPart2Node(value, i);
         J2735SupplementalVehicleExtensions suve = null;
@@ -232,8 +227,7 @@ public class JsonToJavaConverter {
         return odeTimMetadata;
     }
 
-    private OdeTravelerInformationMessage.DataFrame.Region getRegion(JsonNode geoPath)
-            throws JsonProcessingException {
+    private OdeTravelerInformationMessage.DataFrame.Region getRegion(JsonNode geoPath) throws JsonProcessingException {
         if (geoPath == null) {
             return null;
         }

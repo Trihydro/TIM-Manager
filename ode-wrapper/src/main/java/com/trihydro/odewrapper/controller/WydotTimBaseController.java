@@ -11,6 +11,8 @@ import com.google.gson.Gson;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
@@ -24,30 +26,30 @@ import com.trihydro.odewrapper.model.WydotTimVsl;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
-import springfox.documentation.annotations.ApiIgnore;
-
-@RestController
-@ApiIgnore
+@Component
 public abstract class WydotTimBaseController {
 
     protected static BasicConfiguration configuration;
+    protected WydotTimService wydotTimService;
+    protected TimTypeService timTypeService;
+    private TimType timType = null;
+    private SetItisCodes setItisCodes;
+    protected ActiveTimService activeTimService;
 
-    @Autowired
-    public void setConfiguration(BasicConfiguration configurationRhs) {
-        configuration = configurationRhs;
+    public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        configuration = _basicConfiguration;
+        wydotTimService = _wydotTimService;
+        timTypeService = _timTypeService;
+        setItisCodes = _setItisCodes;
+        activeTimService = _activeTimService;
+        CvDataServiceLibrary.setCVRestUrl(configuration.getCvRestService());
     }
 
-    // services
-    protected final WydotTimService wydotTimService;
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
-
-    WydotTimBaseController() {
-        this.wydotTimService = new WydotTimService(configuration);
-    }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {
 
@@ -88,7 +90,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesParking(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesParking(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -98,7 +100,7 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
-    protected ControllerResult validateInputIncident(WydotTimIncident tim) {
+    public ControllerResult validateInputIncident(WydotTimIncident tim) {
 
         ControllerResult result = new ControllerResult();
         List<String> resultMessages = new ArrayList<String>();
@@ -142,7 +144,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesIncident(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesIncident(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -240,7 +242,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesRw(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesRw(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -302,7 +304,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesRc(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesRc(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -364,7 +366,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesVsl(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesVsl(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -431,7 +433,7 @@ public abstract class WydotTimBaseController {
         }
 
         // set itis codes
-        List<String> itisCodes = SetItisCodes.setItisCodesFromAdvisoryArray(tim);
+        List<String> itisCodes = setItisCodes.setItisCodesFromAdvisoryArray(tim);
         if (itisCodes.size() == 0)
             resultMessages.add("No ITIS codes found");
         result.setItisCodes(itisCodes);
@@ -498,17 +500,21 @@ public abstract class WydotTimBaseController {
 
     public TimType getTimType(String timTypeName) {
 
-        // get tim type
-        TimType timType = getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst().orElse(null);
+        if (timType != null && timType.getType() == timTypeName) {
+            return timType;
+        } else {
+            // get tim type
+            timType = getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst().orElse(null);
 
-        return timType;
+            return timType;
+        }
     }
 
     public List<TimType> getTimTypes() {
         if (timTypes != null)
             return timTypes;
         else {
-            timTypes = TimTypeService.selectAll();
+            timTypes = timTypeService.selectAll();
             return timTypes;
         }
     }

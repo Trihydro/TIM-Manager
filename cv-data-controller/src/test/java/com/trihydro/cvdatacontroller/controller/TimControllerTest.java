@@ -1,7 +1,9 @@
 package com.trihydro.cvdatacontroller.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +14,7 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
+import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
@@ -20,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
@@ -76,6 +80,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 Long timId = uut.AddTim(tim);
 
                 // Assert
+                assertEquals(new Long(-1), timId);
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, j2735.getMsgCnt());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, j2735.getPacketID());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, j2735.getUrlB());
@@ -104,6 +109,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 // Assert
                 // j2735 fields are skipped, we start at index 5 after those
                 // See timOracleTables.getTimTable() for ordering
+                assertEquals(new Long(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5,
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
@@ -142,6 +148,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 // Assert
                 // See timOracleTables.getTimTable() for ordering
+                assertEquals(new Long(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6,
                                 receivedMessageDetails.getLocationData().getElevation());// RMD_LD_ELEVATION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7,
@@ -157,6 +164,45 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockPreparedStatement).setInt(13, -1);// SECURITY_RESULT_CODE
                 verify(mockPreparedStatement).close();
                 verify(mockConnection).close();
+        }
+
+        @Test
+        public void GetTim_SUCCESS() throws SQLException {
+                // Arrange
+                Long timId = -1l;
+                String selectStatement = "select * from tim where tim_id = " + timId;
+
+                // Act
+                ResponseEntity<WydotOdeTravelerInformationMessage> data = uut.GetTim(timId);
+
+                // Assert
+                assertEquals(HttpStatus.OK, data.getStatusCode());
+                verify(mockStatement).executeQuery(selectStatement);
+                verify(mockRs).getString("PACKET_ID");
+                verify(mockRs).getInt("MSG_CNT");
+                verify(mockRs).getString("TIME_STAMP");
+                verify(mockRs).getString("URL_B");
+                verify(mockStatement).close();
+                verify(mockConnection).close();
+                verify(mockRs).close();
+        }
+
+        @Test
+        public void GetTim_FAIL() throws SQLException {
+                // Arrange
+                Long timId = -1l;
+                String selectStatement = "select * from tim where tim_id = " + timId;
+                doThrow(new SQLException()).when(mockRs).getString("PACKET_ID");
+
+                // Act
+                ResponseEntity<WydotOdeTravelerInformationMessage> data = uut.GetTim(timId);
+
+                // Assert
+                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+                verify(mockStatement).executeQuery(selectStatement);
+                verify(mockStatement).close();
+                verify(mockConnection).close();
+                verify(mockRs).close();
         }
 
         private ReceivedMessageDetails getRxMsg() {

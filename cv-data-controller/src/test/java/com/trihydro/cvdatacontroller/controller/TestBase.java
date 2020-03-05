@@ -33,14 +33,16 @@ public class TestBase<T> {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0].getTypeName();
+        String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]
+                .getTypeName();
         Class<?> clazz = Class.forName(className);
-        uut = spy((T)clazz.newInstance());
+        uut = spy((T) clazz.newInstance());
         when(mockConnection.createStatement()).thenReturn(mockStatement);
         when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
         when(mockConnection.prepareStatement(isA(String.class), isA(String[].class))).thenReturn(mockPreparedStatement);
-        doReturn(mockConnection).when((BaseController)uut).GetConnectionPool();
-        doReturn(-1l).when((BaseController)uut).executeAndLog(isA(PreparedStatement.class), isA(String.class));
+        doReturn(mockConnection).when((BaseController) uut).GetConnectionPool();
+        doReturn(-1l).when((BaseController) uut).executeAndLog(isA(PreparedStatement.class), isA(String.class));
+        doReturn(true).when((BaseController) uut).updateOrDelete(mockPreparedStatement);
         when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
         when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
         when(mockRs.next()).thenReturn(true).thenReturn(false);

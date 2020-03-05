@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimRsu;
@@ -197,8 +198,9 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
-            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(wydotTim.getClientId(), wydotTim.getDirection(),
+            ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(wydotTim.getDirection(), wydotTim.getClientId(),
                     rsu.getRsuTarget());
+            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(artqm);
 
             // if active tims exist, update tim
             if (activeTim != null) {

@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -650,7 +651,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         query += "' and active_tim.direction = '" + direction + "'";
 
         // Act
-        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(clientId, direction, ipv4Address);
+        ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(direction, clientId, ipv4Address);
+        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(artqm);
 
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
@@ -687,7 +689,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         doThrow(new SQLException()).when(mockStatement).executeQuery(query);
 
         // Act
-        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(clientId, direction, ipv4Address);
+        ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(direction, clientId, ipv4Address);
+        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(artqm);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());

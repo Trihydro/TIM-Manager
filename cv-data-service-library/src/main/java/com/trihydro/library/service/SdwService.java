@@ -79,26 +79,22 @@ public class SdwService {
 
     }
 
-    public List<AdvisorySituationDataDeposit> getAllSdwRecords() throws RestClientException {
+    public List<AdvisorySituationDataDeposit> getMsgsForOdeUser() throws RestClientException {
         List<AdvisorySituationDataDeposit> results = null;
 
-        String url = String.format("%s/api/GetData", configProperties.getSdwRestUrl());
+        String url = String.format("%s/api/deposited-by-me/156", configProperties.getSdwRestUrl());
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         headers.add("apikey", configProperties.getSdwApiKey());
 
-        SDXQuery request = new SDXQuery();
-        request.setDialogID(156);
-
-        HttpEntity<SDXQuery> entity = new HttpEntity<SDXQuery>(request, headers);
+        HttpEntity<SDXQuery> entity = new HttpEntity<SDXQuery>(null, headers);
         try {
             ResponseEntity<AdvisorySituationDataDeposit[]> response = RestTemplateProvider.GetRestTemplate()
-                    .exchange(url, HttpMethod.POST, entity, AdvisorySituationDataDeposit[].class);
+                    .exchange(url, HttpMethod.GET, entity, AdvisorySituationDataDeposit[].class);
 
             results = Arrays.asList(response.getBody());
         } catch (RestClientException ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
 
         return results;

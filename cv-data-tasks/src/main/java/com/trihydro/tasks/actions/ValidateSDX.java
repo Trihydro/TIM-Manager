@@ -40,7 +40,7 @@ public class ValidateSDX {
         }
 
         // Fetch records from SDX
-        for (AdvisorySituationDataDeposit asdd : sdwService.getAllSdwRecords()) {
+        for (AdvisorySituationDataDeposit asdd : sdwService.getMsgsForOdeUser()) {
             List<Integer> itisCodes = sdwService.getItisCodesFromAdvisoryMessage(asdd.getAdvisoryMessage());
             CAdvisorySituationDataDeposit record = new CAdvisorySituationDataDeposit(asdd);
             record.setItisCodes(itisCodes);

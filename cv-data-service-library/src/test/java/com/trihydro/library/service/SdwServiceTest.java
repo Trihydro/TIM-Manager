@@ -74,8 +74,8 @@ public class SdwServiceTest extends BaseServiceTest {
     @Mock
     Utility mockUtility;
 
-    // @Mock
-    // RestTemplateProvider mockRestTemplateProvider;
+    @Mock
+    ResponseEntity<AdvisorySituationDataDeposit[]> mockAsddResponse;
 
     @Mock
     ResponseEntity<SDXDecodeResponse> mockDecodeResponse;
@@ -274,5 +274,40 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         assertNull(result);
+    }
+
+    @Test
+    public void getMsgsForOdeUser_success() {
+        // Arrange
+        AdvisorySituationDataDeposit[] response = new AdvisorySituationDataDeposit[] {
+                new AdvisorySituationDataDeposit() };
+
+        String url = "http://localhost:12230/api/deposited-by-me/156";
+        when(mockRestTemplate.exchange(eq(url), eq(HttpMethod.GET), isA(HttpEntity.class),
+                eq(AdvisorySituationDataDeposit[].class))).thenReturn(mockAsddResponse);
+        when(mockAsddResponse.getBody()).thenReturn(response);
+
+        // Act
+        List<AdvisorySituationDataDeposit> results = sdwService.getMsgsForOdeUser();
+
+        // Assert
+        assertEquals(1, results.size());
+        verify(mockRestTemplate).exchange(eq(url), eq(HttpMethod.GET), isA(HttpEntity.class),
+                eq(AdvisorySituationDataDeposit[].class));
+    }
+
+    @Test
+    public void getMsgsForOdeUser_handlesRestClientException() {
+        // Arrange
+        String url = "http://localhost:12230/api/deposited-by-me/156";
+        when(mockRestTemplate.exchange(eq(url), eq(HttpMethod.GET), isA(HttpEntity.class),
+                eq(AdvisorySituationDataDeposit[].class)))
+                        .thenThrow(new RestClientException("something went wrong..."));
+
+        // Act
+        List<AdvisorySituationDataDeposit> results = sdwService.getMsgsForOdeUser();
+
+        // Assert
+        assertNull(results);
     }
 }

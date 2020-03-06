@@ -10,10 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 import com.trihydro.cvdatacontroller.model.DataControllerConfigProperties;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.zaxxer.hikari.HikariConfig;
@@ -21,9 +19,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -35,6 +30,7 @@ public class BaseController {
     private DataControllerConfigProperties dbConfig;
     private JavaMailSenderImplProvider mailProvider;
     private Utility utility;
+    private EmailHelper emailHelper;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -43,10 +39,11 @@ public class BaseController {
 
     @Autowired
     public void InjectDependencies(DataControllerConfigProperties props, JavaMailSenderImplProvider _mailProvider,
-            Utility _utility) {
+            Utility _utility, EmailHelper _emailHelper) {
         dbConfig = props;
         mailProvider = _mailProvider;
         utility = _utility;
+        emailHelper = _emailHelper;
     }
 
     public Connection GetConnectionPool() throws SQLException {
@@ -63,10 +60,7 @@ public class BaseController {
             config.setPassword(dbConfig.getDbPassword());
             config.setJdbcUrl(dbConfig.getDbUrl());
             config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(20);// formula: connections = ((core_count*2) + effective_spindle_count)
-                                          // https://stackoverflow.com/questions/28987540/why-does-hikaricp-recommend-fixed-size-pool-for-better-performance
-                                          // we have 8 cores and are limiting the container to run on a single 'drive'
-                                          // which gives us 17 pool size. we round up here
+            config.setMaximumPoolSize(dbConfig.getPoolSize());// splitting pool size between here and the kafka consumer
             config.setMaxLifetime(600000);// setting a maxLifetime of 10 minutes (defaults to 30), to help avoid
                                           // connection issues
 
@@ -84,7 +78,8 @@ public class BaseController {
             body += "<br/>Stacktrace: ";
             body += ExceptionUtils.getStackTrace(ex);
             try {
-                SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body);
+                emailHelper.SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body,
+                        dbConfig.getMailPort(), dbConfig.getMailHost(), dbConfig.getFromEmail());
             } catch (Exception exception) {
                 utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");
@@ -150,19 +145,5 @@ public class BaseController {
             e1.printStackTrace();
         }
         return convertedDate;
-    }
-
-    void SendEmail(String[] to, String[] bcc, String subject, String body) throws MailException, MessagingException {
-        JavaMailSenderImpl mailSender = mailProvider.getJSenderImpl(dbConfig.getMailHost(), dbConfig.getMailPort());
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-        helper.setSubject(subject);
-        helper.setTo(to);
-        helper.setFrom(dbConfig.getFromEmail());
-        if (bcc != null)
-            helper.setBcc(bcc);
-        helper.setText(body, true);
-
-        mailSender.send(mimeMessage);
     }
 }

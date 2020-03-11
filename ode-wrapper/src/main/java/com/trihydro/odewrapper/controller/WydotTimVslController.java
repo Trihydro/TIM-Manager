@@ -8,13 +8,17 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
 import com.trihydro.odewrapper.model.WydotTimVsl;
+import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,14 +35,18 @@ import io.swagger.annotations.Api;
 public class WydotTimVslController extends WydotTimBaseController {
 
     private static String type = "VSL";
-    // get tim type
-    TimType timType = getTimType(type);
+
+    @Autowired
+    public WydotTimVslController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+    }
 
     @RequestMapping(value = "/vsl-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createUpdateVslTim(@RequestBody TimVslList timVslList) {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();       
+        Date date = new Date();
 
         System.out.println(dateFormat.format(date) + " - Create/Update VSL TIM");
         String post = gson.toJson(timVslList);
@@ -58,7 +66,7 @@ public class WydotTimVslController extends WydotTimBaseController {
             }
 
             // add TIM to list for processing later
-            timsToSend.add(wydotTim);            
+            timsToSend.add(wydotTim);
 
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
@@ -75,7 +83,7 @@ public class WydotTimVslController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, timType, startTime, null, null);
+                    processRequest(tim, getTimType(type), startTime, null, null);
                 }
             }
         }).start();
@@ -89,7 +97,7 @@ public class WydotTimVslController extends WydotTimBaseController {
 
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
-            ActiveTimService.addItisCodesToActiveTim(activeTim);
+            activeTimService.addItisCodesToActiveTim(activeTim);
         }
 
         return activeTims;

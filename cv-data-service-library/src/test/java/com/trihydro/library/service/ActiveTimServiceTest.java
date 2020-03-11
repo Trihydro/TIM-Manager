@@ -1,71 +1,76 @@
 package com.trihydro.library.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import com.trihydro.library.helpers.DbUtility;
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ DbUtility.class })
-public class ActiveTimServiceTest {
+public class ActiveTimServiceTest extends BaseServiceTest {
     @Mock
-    private Connection mockConnection;
+    private ResponseEntity<TimUpdateModel[]> mockResponseEntity;
     @Mock
-    private Statement mockStatement;
+    private ResponseEntity<Boolean> mockResponseEntityBoolean;
     @Mock
-    private PreparedStatement mockPreparedStatement;
+    private ResponseEntity<ActiveTim[]> mockResponseEntityActiveTims;
     @Mock
-    private ResultSet mockRs;
+    private ResponseEntity<Integer[]> mockResponseEntityIntegerArray;
     @Mock
-    private SQLException sqlException;
+    private ResponseEntity<TimUpdateModel[]> mockResponseEntityTimUpdateModelArray;
+    @Mock
+    private ResponseEntity<ActiveTim> mockResponseEntityActiveTim;
 
     private Long timTypeId = -1l;
     private List<WydotTim> wydotTims;
+    private ActiveTim[] aTims;
+    private ActiveTim aTim;
+    private TimUpdateModel[] tumArr;
+
+    private ActiveTimService uut = new ActiveTimService();
 
     @Before
-    public void setup() throws SQLException {
-        PowerMockito.mockStatic(DbUtility.class);
-        Mockito.when(DbUtility.getConnectionPool()).thenReturn(mockConnection);
-        Mockito.when(mockConnection.createStatement()).thenReturn(mockStatement);
-        Mockito.when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
-        Mockito.when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
-        Mockito.when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
-        Mockito.when(mockRs.next()).thenReturn(true).thenReturn(false);
+    public void setupSubTest() throws SQLException {
+        doReturn(true).when(mockResponseEntityBoolean).getBody();
+        Integer[] intArray = new Integer[3];
+        intArray[0] = 0;
+        intArray[1] = 1;
+        intArray[2] = 2;
+        when(mockResponseEntityIntegerArray.getBody()).thenReturn(intArray);
 
-        setupBasicActiveTimDatabaseReturn();
-    }
+        aTims = new ActiveTim[1];
+        aTim = new ActiveTim();
+        aTim.setActiveTimId(-1l);
+        aTims[0] = aTim;
+        doReturn(aTims).when(mockResponseEntityActiveTims).getBody();
+        doReturn(aTim).when(mockResponseEntityActiveTim).getBody();
 
-    private void setupBasicActiveTimDatabaseReturn() throws SQLException {
-        Mockito.when(mockRs.getLong("TIM_ID")).thenReturn(1l);
-        Mockito.when(mockRs.getDouble("MILEPOST_START")).thenReturn(1d);
-        Mockito.when(mockRs.getDouble("MILEPOST_STOP")).thenReturn(2d);
-        Mockito.when(mockRs.getString("DIRECTION")).thenReturn("both");
-        Mockito.when(mockRs.getString("ROUTE")).thenReturn("I 80");
-        Mockito.when(mockRs.getString("CLIENT_ID")).thenReturn("123");
-        Mockito.when(mockRs.getString("SAT_RECORD_ID")).thenReturn("HEX");
-        Mockito.when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(1l);
+        tumArr = new TimUpdateModel[1];
+        TimUpdateModel tum = new TimUpdateModel();
+        tum.setActiveTimId(-1l);
+        tum.setClientId("testClient");
+        tumArr[0] = tum;
+        when(mockResponseEntityTimUpdateModelArray.getBody()).thenReturn(tumArr);
     }
 
     private void setupWydotTims() {
@@ -81,90 +86,260 @@ public class ActiveTimServiceTest {
     }
 
     @Test
-    public void getActiveTimsMissingItisCodes() throws SQLException {
-        List<ActiveTim> ats = ActiveTimService.getActiveTimsMissingItisCodes();
-        assertEquals(1, ats.size());
-        ActiveTim tim = ats.get(0);
-        assertEquals((long) tim.getTimId(), 1l);
-        assertEquals((double) tim.getMilepostStart(), 1d, 0);
-        assertEquals((double) tim.getMilepostStop(), 2d, 0);
-        assertEquals(tim.getDirection(), "both");
-        assertEquals(tim.getRoute(), "I 80");
-        assertEquals(tim.getClientId(), "123");
-        assertEquals(tim.getSatRecordId(), "HEX");
-        assertEquals((long) tim.getActiveTimId(), 1l);
+    public void insertActiveTim() {
+        // Arrange
+        ActiveTim activeTim = new ActiveTim();
+        HttpEntity<ActiveTim> entity = getEntity(activeTim, ActiveTim.class);
+        String url = "null/active-tim/add";
+        when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, Long.class)).thenReturn(mockResponseEntityLong);
+
+        // Act
+        Long data = ActiveTimService.insertActiveTim(activeTim);
+
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
+        assertEquals(new Long(1), data);
     }
 
     @Test
-    public void getActiveTimsNotSent() {
-        List<ActiveTim> ats = ActiveTimService.getActiveTimsNotSent();
-        assertEquals(1, ats.size());
-        ActiveTim tim = ats.get(0);
-        assertEquals((long) tim.getTimId(), 1l);
-        assertEquals((double) tim.getMilepostStart(), 1d, 0);
-        assertEquals((double) tim.getMilepostStop(), 2d, 0);
-        assertEquals(tim.getDirection(), "both");
-        assertEquals(tim.getRoute(), "I 80");
-        assertEquals(tim.getClientId(), "123");
-        assertEquals(tim.getSatRecordId(), "HEX");
-        assertEquals((long) tim.getActiveTimId(), 1l);
+    public void updateActiveTim_SatRecordId() {
+        // Arrange
+        Long activeTimId = -1l;
+        String satRecordId = "asdf";
+        HttpEntity<String> entity = getEntity(null, String.class);
+        String url = String.format("null/active-tim/update-sat-record-id/%d/%s", activeTimId, satRecordId);
+        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
+                .thenReturn(mockResponseEntityBoolean);
+
+        // Act
+        Boolean data = ActiveTimService.updateActiveTim_SatRecordId(activeTimId, satRecordId);
+
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
+        assertTrue("Update failed when should have succeeded", data);
+    }
+
+    @Test
+    public void addItisCodesToActiveTim() {
+        // Arrange
+        ActiveTim activeTim = new ActiveTim();
+        activeTim.setActiveTimId(-1l);
+        String url = String.format("null/active-tim/itis-codes/%d", activeTim.getActiveTimId());
+        when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(mockResponseEntityIntegerArray);
+
+        // Act
+        uut.addItisCodesToActiveTim(activeTim);
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, Integer[].class);
+        assertEquals(3, activeTim.getItisCodes().size());
+        assertEquals(new Integer(0), activeTim.getItisCodes().get(0));
+        assertEquals(new Integer(1), activeTim.getItisCodes().get(1));
+        assertEquals(new Integer(2), activeTim.getItisCodes().get(2));
+    }
+
+    @Test
+    public void deleteActiveTim() {
+        // Arrange
+        Long activeTimId = -1l;
+        String url = String.format("null/active-tim/delete-id/%d", activeTimId);
+        HttpEntity<String> entity = getEntity(null, String.class);
+        when(mockRestTemplate.exchange(url, HttpMethod.DELETE, entity, Boolean.class))
+                .thenReturn(mockResponseEntityBoolean);
+
+        // Act
+        boolean data = ActiveTimService.deleteActiveTim(activeTimId);
+
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.DELETE, entity, Boolean.class);
+        assertTrue("Reported failure when success", data);
     }
 
     @Test
     public void deleteActiveTimsById() throws SQLException {
-        Mockito.when(mockPreparedStatement.executeUpdate()).thenReturn(2);
+        // Arrange
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1l);
         activeTimIds.add(-2l);
+        HttpEntity<List<Long>> entity = new HttpEntity<List<Long>>(activeTimIds, getDefaultHeaders());
+        when(mockRestTemplate.exchange("null/active-tim/delete-ids", HttpMethod.DELETE, entity, Boolean.class))
+                .thenReturn(mockResponseEntityBoolean);
+
+        // Act
         boolean success = ActiveTimService.deleteActiveTimsById(activeTimIds);
+
+        // Assert
         assertTrue(success);
-        verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (?,?)");
-        verify(mockPreparedStatement).setLong(1, -1l);
-        verify(mockPreparedStatement).setLong(2, -2l);
     }
 
     @Test
-    public void getActiveTimsByWydotTim_handleException() throws SQLException {
+    public void getActiveTimIndicesByRsu() {
         // Arrange
-        setupWydotTims();
-        Mockito.when(DbUtility.getConnectionPool()).thenThrow(sqlException);
+        String rsuTarget = "10.10.10.10";
+        String url = String.format("null/active-tim/indices-rsu/%s", rsuTarget);
+        when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(mockResponseEntityIntegerArray);
 
         // Act
-        List<ActiveTim> aTims = ActiveTimService.getActiveTimsByWydotTim(wydotTims, timTypeId);
+        List<Integer> data = ActiveTimService.getActiveTimIndicesByRsu(rsuTarget);
 
         // Assert
-        assertTrue(aTims.isEmpty());
-        verify(sqlException).printStackTrace();
-        PowerMockito.verifyNoMoreInteractions(mockConnection);
-        PowerMockito.verifyNoMoreInteractions(mockPreparedStatement);
+        verify(mockRestTemplate).getForEntity(url, Integer[].class);
+        assertEquals(3, data.size());
+        assertEquals(new Integer(0), data.get(0));
+        assertEquals(new Integer(1), data.get(1));
+        assertEquals(new Integer(2), data.get(2));
     }
 
     @Test
-    public void getActiveTimsByWydotTim_success() throws SQLException {
+    public void getActiveTimsByWydotTim() throws SQLException {
         // Arrange
         setupWydotTims();
+        HttpEntity<List<WydotTim>> entity = new HttpEntity<List<WydotTim>>(wydotTims, getDefaultHeaders());
+        when(mockRestTemplate.exchange("null/active-tim/get-by-wydot-tim/" + timTypeId, HttpMethod.PUT, entity,
+                ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
-        List<ActiveTim> aTims = ActiveTimService.getActiveTimsByWydotTim(wydotTims, timTypeId);
+        List<ActiveTim> data = ActiveTimService.getActiveTimsByWydotTim(wydotTims, timTypeId);
 
         // Assert
-        assertFalse(aTims.isEmpty());
-        assertEquals(1, aTims.size());
-        String sql = "select * from active_tim where TIM_TYPE_ID = ? and (";
-        sql += "(CLIENT_ID like ? and DIRECTION = ?)";
-        sql += " OR ";
-        sql += "(CLIENT_ID like ? and DIRECTION = ?)";
-        sql += ")";
-        verify(mockConnection).prepareStatement(sql);
-        int index = 1;
-        verify(mockPreparedStatement).setLong(index, timTypeId);
-        index++;
-        for (int i = 0; i < wydotTims.size(); i++) {
-            verify(mockPreparedStatement).setString(index, wydotTims.get(i).getClientId() + "%");
-            index++;
-            verify(mockPreparedStatement).setString(index, wydotTims.get(i).getDirection());
-            index++;
-        }
-        verify(mockPreparedStatement).executeQuery();
+        assertNotNull(data);
+        assertEquals(1, data.size());
+        assertEquals(aTim, data.get(0));
+    }
+
+    @Test
+    public void getActiveTimsByClientIdDirection() {
+        // Arrange
+        String clientId = "clientId";
+        String direction = "westward";
+        String url = String.format("null/active-tim/client-id-direction/%s/%d/%s", clientId, timTypeId, direction);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+
+        // Act
+        List<ActiveTim> data = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timTypeId, direction);
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
+        assertEquals(Arrays.asList(aTims), data);
+    }
+
+    @Test
+    public void getExpiredActiveTims() {
+        // Arrange
+        String url = String.format("null/active-tim/expired");
+        when(mockRestTemplate.getForEntity(url, TimUpdateModel[].class))
+                .thenReturn(mockResponseEntityTimUpdateModelArray);
+
+        // Act
+        List<ActiveTim> data = ActiveTimService.getExpiredActiveTims();
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, TimUpdateModel[].class);
+        assertEquals(1, data.size());
+        assertEquals(Arrays.asList(tumArr), data);
+    }
+
+    @Test
+    public void getActivesTimByType() {
+        // Arrange
+        String url = String.format("null/active-tim/tim-type-id/%d", timTypeId);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+
+        // Act
+        List<ActiveTim> data = ActiveTimService.getActivesTimByType(timTypeId);
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
+        assertEquals(Arrays.asList(aTims), data);
+    }
+
+    @Test
+    public void getActiveRsuTim() {
+        // Arrange
+        String clientId = "clientId";
+        String direction = "westward";
+        String ipv4Address = "10.10.10.10";
+        String url = String.format("null/active-tim/active-rsu-tim");
+        ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(direction, clientId, ipv4Address);
+        HttpEntity<ActiveRsuTimQueryModel> entity = getEntity(artqm, ActiveRsuTimQueryModel.class);
+        when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, ActiveTim.class))
+                .thenReturn(mockResponseEntityActiveTim);
+
+        // Act
+        ActiveTim data = ActiveTimService.getActiveRsuTim(artqm);
+
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, ActiveTim.class);
+        assertEquals(aTim, data);
+    }
+
+    @Test
+    public void getExpiringActiveTims() {
+        // Arrange
+        String url = String.format("null/active-tim/expiring");
+        when(mockRestTemplate.getForEntity(url, TimUpdateModel[].class))
+                .thenReturn(mockResponseEntityTimUpdateModelArray);
+
+        // Act
+        List<TimUpdateModel> data = ActiveTimService.getExpiringActiveTims();
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, TimUpdateModel[].class);
+        assertEquals(1, data.size());
+        assertEquals(Arrays.asList(tumArr), data);
+    }
+
+    @Test
+    public void getActiveTimsMissingItisCodes() throws SQLException {
+        // Arrange
+        TimUpdateModel[] tums = new TimUpdateModel[1];
+        TimUpdateModel tum = new TimUpdateModel();
+        tum.setTimId(1l);
+        tum.setMilepostStart(1d);
+        tum.setMilepostStop(2d);
+        tum.setDirection("both");
+        tum.setRoute("I 80");
+        tum.setClientId("123");
+        tum.setSatRecordId("HEX");
+        tum.setActiveTimId(1l);
+        tums[0] = tum;
+
+        when(mockRestTemplate.getForEntity("null/active-tim/missing-itis", TimUpdateModel[].class))
+                .thenReturn(mockResponseEntity);
+        when(mockResponseEntity.getBody()).thenReturn(tums);
+        // Act
+        List<ActiveTim> ats = ActiveTimService.getActiveTimsMissingItisCodes();
+
+        // Assert
+        assertEquals(1, ats.size());
+        ActiveTim tim = ats.get(0);
+        assertEquals(tum, tim);
+    }
+
+    @Test
+    public void getActiveTimsNotSent() {
+        // Arrange
+        TimUpdateModel[] tums = new TimUpdateModel[1];
+        TimUpdateModel tum = new TimUpdateModel();
+        tum.setTimId(1l);
+        tum.setMilepostStart(1d);
+        tum.setMilepostStop(2d);
+        tum.setDirection("both");
+        tum.setRoute("I 80");
+        tum.setClientId("123");
+        tum.setSatRecordId("HEX");
+        tum.setActiveTimId(1l);
+        tums[0] = tum;
+        when(mockRestTemplate.getForEntity("null/active-tim/not-sent", TimUpdateModel[].class))
+                .thenReturn(mockResponseEntity);
+        when(mockResponseEntity.getBody()).thenReturn(tums);
+
+        // Act
+        List<ActiveTim> ats = ActiveTimService.getActiveTimsNotSent();
+
+        // Assert
+        assertEquals(1, ats.size());
+        ActiveTim tim = ats.get(0);
+        assertEquals(tum, tim);
     }
 }

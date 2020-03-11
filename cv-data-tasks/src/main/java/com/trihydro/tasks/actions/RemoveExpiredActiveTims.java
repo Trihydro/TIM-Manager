@@ -7,27 +7,29 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
-import com.trihydro.tasks.config.BasicConfiguration;
+import com.trihydro.tasks.config.DataTasksConfiguration;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpHeaders;
 
 public class RemoveExpiredActiveTims implements Runnable {
-    private BasicConfiguration configuration;
+    private DataTasksConfiguration configuration;
+    private Utility utility;
 
-    public RemoveExpiredActiveTims(BasicConfiguration configuration) {
+    public RemoveExpiredActiveTims(DataTasksConfiguration configuration, Utility _utility) {
         this.configuration = configuration;
+        utility = _utility;
     }
 
     public void run() {
-        Utility.logWithDate("RemoveExpiredActiveTims - Running...");
+        utility.logWithDate("RemoveExpiredActiveTims - Running...");
 
         try {
             // select active tims
             List<ActiveTim> activeTims = ActiveTimService.getExpiredActiveTims();
-            Utility.logWithDate("RemoveExpiredActiveTims - Found " + activeTims.size() + " expired Active TIMs");
+            utility.logWithDate("RemoveExpiredActiveTims - Found " + activeTims.size() + " expired Active TIMs");
 
             // delete active tims from rsus
             HttpHeaders headers = new HttpHeaders();
@@ -42,7 +44,7 @@ public class RemoveExpiredActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                Utility.logWithDate("RemoveExpiredActiveTims - Deleting ActiveTim: { activeTimId: "
+                utility.logWithDate("RemoveExpiredActiveTims - Deleting ActiveTim: { activeTimId: "
                         + activeTim.getActiveTimId() + " }");
                 RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);

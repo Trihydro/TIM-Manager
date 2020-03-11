@@ -1,18 +1,22 @@
 package com.trihydro.library.tables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class BsmOracleTables extends OracleTables {
-    
-    private static List<String> bsmCoreDataTable;
-    private static List<String> bsmPart2SuveTable;
-    private static List<String> bsmPart2VseTable;
-    private static List<String> bsmPart2SpveTable;
 
-    public static List<String> getBsmCoreDataTable(){
-        if(bsmCoreDataTable != null)
+    private List<String> bsmCoreDataTable;
+    private List<String> bsmPart2SuveTable;
+    private List<String> bsmPart2VseTable;
+    private List<String> bsmPart2SpveTable;
+
+    public List<String> getBsmCoreDataTable() {
+        if (bsmCoreDataTable != null)
             return bsmCoreDataTable;
-        else{
+        else {
             bsmCoreDataTable = new ArrayList<String>();
 
             bsmCoreDataTable.add("ID");
@@ -55,15 +59,15 @@ public class BsmOracleTables extends OracleTables {
             bsmCoreDataTable.add("SCHEMA_VERSION");
             bsmCoreDataTable.add("RECORD_GENERATED_BY");
             bsmCoreDataTable.add("BSM_SOURCE");
-            
+
             return bsmCoreDataTable;
         }
     }
 
-    public static List<String> getBsmPart2SuveTable(){
-        if(bsmPart2SuveTable != null)
+    public List<String> getBsmPart2SuveTable() {
+        if (bsmPart2SuveTable != null)
             return bsmPart2SuveTable;
-        else{
+        else {
             bsmPart2SuveTable = new ArrayList<String>();
             bsmPart2SuveTable.add("BSM_CORE_DATA_ID");
             bsmPart2SuveTable.add("ID");
@@ -118,8 +122,8 @@ public class BsmOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getBsmPart2VseTable(){
-        if(bsmPart2VseTable != null)
+    public List<String> getBsmPart2VseTable() {
+        if (bsmPart2VseTable != null)
             return bsmPart2VseTable;
         else {
             bsmPart2VseTable = new ArrayList<String>();
@@ -157,8 +161,8 @@ public class BsmOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getBsmPart2SpveTable(){
-        if(bsmPart2SpveTable != null)
+    public List<String> getBsmPart2SpveTable() {
+        if (bsmPart2SpveTable != null)
             return bsmPart2SpveTable;
         else {
             bsmPart2SpveTable = new ArrayList<String>();
@@ -186,5 +190,3 @@ public class BsmOracleTables extends OracleTables {
         }
     }
 }
-
-

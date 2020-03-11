@@ -13,6 +13,7 @@ import com.trihydro.library.service.MilepostService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
@@ -25,7 +26,14 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 @Component
 public class CreateBaseTimUtil {
 
-    public static WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, String route,
+    private Utility utility;
+
+    @Autowired
+    public void InjectDependencies(Utility _utility) {
+        utility = _utility;
+    }
+
+    public WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, String route,
             BasicConfiguration config) {
 
         // build TIM object with data
@@ -146,7 +154,7 @@ public class CreateBaseTimUtil {
             node.setNodeLong(new BigDecimal(timToSend.getMileposts().get(j).getLongitude()));
             node.setDelta("node-LatLon");
             nodes.add(node);
-            timDirection |= Utility.getDirection(timToSend.getMileposts().get(j).getBearing());
+            timDirection |= utility.getDirection(timToSend.getMileposts().get(j).getBearing());
         }
 
         // set direction based on bearings

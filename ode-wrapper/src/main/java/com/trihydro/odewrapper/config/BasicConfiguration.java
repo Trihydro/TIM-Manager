@@ -15,9 +15,18 @@ public class BasicConfiguration extends ConfigProperties {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth;
+    private String cvRestService;
 
     public TimeToLive getSdwTtl() {
         return sdwTtl;
+    }
+
+    public String getCvRestService() {
+        return cvRestService;
+    }
+
+    public void setCvRestService(String cvRestService) {
+        this.cvRestService = cvRestService;
     }
 
     public BigDecimal getDefaultLaneWidth() {

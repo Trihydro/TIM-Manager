@@ -20,15 +20,18 @@ import com.google.gson.Gson;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.RsuService;
 
-public class Utility {
-	public static Gson gson = new Gson();
+import org.springframework.stereotype.Component;
 
-	public static void logWithDate(String msg) {
+@Component
+public class Utility {
+	public Gson gson = new Gson();
+
+	public void logWithDate(String msg) {
 		Date date = new Date();
 		System.out.println(date + " " + msg);
 	}
 
-	public static int getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime) {
+	public int getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime) {
 
 		int duration = getMinutesDurationWithSimpleDateFormat(startDateTime, endDateTime);
 		if (duration == -1) {
@@ -51,7 +54,7 @@ public class Utility {
 	 * @return The duration in minutes between the two given dates. If parsing
 	 *         fails, returns -1
 	 */
-	private static int getMinutesDurationWithZonedDateTime(String startDateTime, String endDateTime) {
+	private int getMinutesDurationWithZonedDateTime(String startDateTime, String endDateTime) {
 		try {
 			ZonedDateTime zdtStart = ZonedDateTime.parse(startDateTime);
 			ZonedDateTime zdtEnd = ZonedDateTime.parse(endDateTime);
@@ -74,7 +77,7 @@ public class Utility {
 	 * @return The duration in minutes between the two given dates. If parsing
 	 *         fails, returns -1
 	 */
-	private static int getMinutesDurationWithSimpleDateFormat(String startDateTime, String endDateTime) {
+	private int getMinutesDurationWithSimpleDateFormat(String startDateTime, String endDateTime) {
 		try {
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yy HH.MM.SS");
 			Date startDate = simpleDateFormat.parse(startDateTime);
@@ -96,7 +99,7 @@ public class Utility {
 	 * @param key The key value to use to get data from the ResultSet
 	 * @return Short value defaulted to 1 if not found
 	 */
-	public static short GetShortValueFromResultSet(ResultSet rs, String key) {
+	public short GetShortValueFromResultSet(ResultSet rs, String key) {
 		try {
 			String value = rs.getString(key);
 			if (value != null) {
@@ -108,7 +111,7 @@ public class Utility {
 		return (short) 1;
 	}
 
-	public static int getDirection(Double bearing) {
+	public int getDirection(Double bearing) {
 
 		int direction = 0;
 
@@ -148,8 +151,8 @@ public class Utility {
 		return direction;
 	}
 
-	private static ArrayList<WydotRsu> getRsusByRoute(String route) {
-		ArrayList<WydotRsu> rsus = RsuService.selectRsusByRoute(route);
+	private List<WydotRsu> getRsusByRoute(String route) {
+		List<WydotRsu> rsus = RsuService.selectRsusByRoute(route);
 		for (WydotRsu rsu : rsus) {
 			rsu.setRsuRetries(3);
 			rsu.setRsuTimeout(5000);
@@ -157,7 +160,7 @@ public class Utility {
 		return rsus;
 	}
 
-	public static List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost,
+	public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost,
 			String route) {
 
 		List<WydotRsu> rsus = new ArrayList<>();
@@ -166,12 +169,12 @@ public class Utility {
 		// WydotRsu rsuHigher;
 
 		// if there are no rsus on this route
-		ArrayList<WydotRsu> mainRsus = getRsusByRoute(route);
+		List<WydotRsu> mainRsus = getRsusByRoute(route);
 		if (mainRsus.size() == 0) {
-			Utility.logWithDate("No RSUs found for route " + route);
+			logWithDate("No RSUs found for route " + route);
 			return rsus;
 		} else {
-			Utility.logWithDate("Found the following RSUs for route " + route + ": ");
+			logWithDate("Found the following RSUs for route " + route + ": ");
 			System.out.println(gson.toJson(mainRsus));
 		}
 
@@ -209,12 +212,12 @@ public class Utility {
 					.collect(Collectors.toList());
 
 			if (rsusHigher.size() == 0) {
-				Utility.logWithDate("No RSUs found higher than 'high' milepost " + higherMilepost);
+				logWithDate("No RSUs found higher than 'high' milepost " + higherMilepost);
 				rsusHigher = mainRsus.stream().filter(x -> x.getMilepost() > lowerMilepost)
 						.collect(Collectors.toList());
 
 				if (rsusHigher.size() == 0) {
-					Utility.logWithDate("No RSUs found higher than 'low' milepost: " + lowerMilepost);
+					logWithDate("No RSUs found higher than 'low' milepost: " + lowerMilepost);
 				}
 
 				// get min from that list
@@ -225,7 +228,7 @@ public class Utility {
 
 			if (entryRsu != null && (entryRsu.getMilepost() - higherMilepost) > 20) {
 				// don't send to RSU if its further than 20 miles away
-				Utility.logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
+				logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
 				entryRsu = null;
 			}
 		}
@@ -240,14 +243,16 @@ public class Utility {
 	}
 
 	/**
-	 * Creates a connection with authentication via an apikey and returning JSON. Used to send HTTP requests to the SDX api
+	 * Creates a connection with authentication via an apikey and returning JSON.
+	 * Used to send HTTP requests to the SDX api
+	 * 
 	 * @param method The HTTP method to use (GET,POST,PUT,DELETE)
-	 * @param url The URL to send the request to
+	 * @param url    The URL to send the request to
 	 * @param apiKey The apikey value to apply in the header
 	 * @return
 	 * @throws IOException
 	 */
-	public static HttpURLConnection getSdxUrlConnection(String method, URL url, String apiKey) throws IOException {
+	public HttpURLConnection getSdxUrlConnection(String method, URL url, String apiKey) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod(method);
 		conn.setRequestProperty("Accept", "application/json");

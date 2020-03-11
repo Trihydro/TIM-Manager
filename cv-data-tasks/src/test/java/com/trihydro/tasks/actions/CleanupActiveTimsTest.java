@@ -7,10 +7,11 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
-import com.trihydro.tasks.config.BasicConfiguration;
+import com.trihydro.tasks.config.DataTasksConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +32,13 @@ import org.springframework.web.client.RestTemplate;
 public class CleanupActiveTimsTest {
 
     @Mock
-    private BasicConfiguration mockConfig;
+    private DataTasksConfiguration mockConfig;
 
     @Mock
     private RestTemplate mockRestTemplate;
+    
+    @Mock 
+    Utility mockUtility;
 
     @InjectMocks
     public CleanupActiveTims uut;

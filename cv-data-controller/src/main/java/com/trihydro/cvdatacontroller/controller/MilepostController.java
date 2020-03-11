@@ -1,56 +1,305 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
-import com.trihydro.library.service.MilepostService;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.trihydro.library.model.Milepost;
 
-import java.util.List;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @ApiIgnore
-public class MilepostController {
+public class MilepostController extends BaseController {
 
-	@RequestMapping(value="/mileposts",method = RequestMethod.GET,headers="Accept=application/json")
-  	public List<Milepost> getMileposts() { 
-   		List<Milepost> mileposts = MilepostService.selectAll();
-   		return mileposts;
-  	}
+	@RequestMapping(value = "/mileposts", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<List<Milepost>> getMileposts() {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
 
-  	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
-  	public List<Milepost> getMilepostRange(@PathVariable String direction, @PathVariable String route, @PathVariable Double fromMilepost, @PathVariable Double toMilepost) { 
-   		List<Milepost> mileposts = MilepostService.selectMilepostRange(direction, route, fromMilepost, toMilepost);
-   		return mileposts;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			// build statement SQL query
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			String sqlQuery = "select * from MILEPOST_VW where MOD(milepost, 1) = 0 order by milepost asc";
+			rs = statement.executeQuery(sqlQuery);
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				// milepost.setMilepostId(rs.getInt("milepost_id"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(mileposts);
 	}
-	
+
+	// TODO: after the view updates are completed, we need to update anything with
+	// the milepost_vw
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
+	public ResponseEntity<List<Milepost>> getMilepostRange(@PathVariable String direction, @PathVariable String route,
+			@PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_VW where direction = '" + direction
+					+ "' and milepost between " + Math.min(fromMilepost, toMilepost) + " and "
+					+ Math.max(fromMilepost, toMilepost) + " and route like '%" + route + "%'";
+
+			if (fromMilepost < toMilepost)
+				rs = statement.executeQuery(statementStr + " order by milepost asc");
+			else
+				rs = statement.executeQuery(statementStr + " order by milepost desc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
+				mileposts.add(milepost);
+			}
+
+			if (mileposts.size() == 0) {
+				System.out.println("Unable to find mileposts with query: " + statementStr);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(mileposts);
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/mileposts-route/{route}/{mod}")
-	public List<Milepost> getMilepostsRoute(@PathVariable String route, @PathVariable Boolean mod) { 
-		 List<Milepost> mileposts = MilepostService.getMilepostsRoute(route, mod);
-		 return mileposts;
+	public ResponseEntity<List<Milepost>> getMilepostsRoute(@PathVariable String route, @PathVariable Boolean mod) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			// build statement SQL query
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build statement SQL query
+			String sqlString = "select * from MILEPOST_VW where route like '%" + route + "%'";
+
+			if (mod)
+				sqlString += " and MOD(milepost, 1) = 0";
+
+			rs = statement.executeQuery(sqlString);
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				// milepost.setMilepostId(rs.getInt("milepost_id"));
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(mileposts);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-range-no-direction/{fromMilepost}/{toMilepost}/{route}")
-  	public List<Milepost> getMilepostRange(@PathVariable String route, @PathVariable Double fromMilepost, @PathVariable Double toMilepost) { 
-   		List<Milepost> mileposts = MilepostService.selectMilepostRangeNoDirection(route, fromMilepost, toMilepost);
-   		return mileposts;
+	public ResponseEntity<List<Milepost>> getMilepostRangeNoDirection(@PathVariable String route,
+			@PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_VW where milepost between "
+					+ Math.min(fromMilepost, toMilepost) + " and " + Math.max(fromMilepost, toMilepost)
+					+ " and route like '%" + route + "%'";
+
+			if (fromMilepost < toMilepost)
+				rs = statement.executeQuery(statementStr + " order by milepost asc");
+			else
+				rs = statement.executeQuery(statementStr + " order by milepost desc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(mileposts);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{start}/{end}/{route}")
-  	public List<Milepost> getMilepostTestRange(@PathVariable String direction, @PathVariable String route, @PathVariable Double start, @PathVariable Double end) { 
-   		List<Milepost> mileposts = MilepostService.selectMilepostTestRange(direction, route, start, end);
-   		return mileposts;
-	}
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{fromMilepost}/{toMilepost}/{route}")
+	public ResponseEntity<List<Milepost>> getMilepostTestRange(@PathVariable String direction,
+			@PathVariable String route, @PathVariable Double fromMilepost, @PathVariable Double toMilepost) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
 
-	@RequestMapping(value="/mileposts-test",method = RequestMethod.GET,headers="Accept=application/json")
-	public List<Milepost> getMilepostsTest() { 
-		 List<Milepost> mileposts = MilepostService.selectAllTest();
-		 return mileposts;
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_TEST where direction = '" + direction
+					+ "' and milepost between " + Math.min(fromMilepost, toMilepost) + " and "
+					+ Math.max(fromMilepost, toMilepost) + " and route like '%" + route + "%'";
+
+			if (fromMilepost < toMilepost)
+				rs = statement.executeQuery(statementStr + " order by milepost asc");
+			else
+				rs = statement.executeQuery(statementStr + " order by milepost desc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setRoute(rs.getString("ROUTE"));
+				milepost.setMilepost(rs.getDouble("MILEPOST"));
+				milepost.setDirection(rs.getString("DIRECTION"));
+				milepost.setLatitude(rs.getDouble("LATITUDE"));
+				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setElevation(rs.getDouble("ELEVATION_FT"));
+				milepost.setBearing(rs.getDouble("BEARING"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(mileposts);
 	}
-	  
 }

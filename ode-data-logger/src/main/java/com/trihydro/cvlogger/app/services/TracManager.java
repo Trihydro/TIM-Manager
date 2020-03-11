@@ -4,15 +4,16 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.cvlogger.app.converters.JsonToJavaConverter;
+import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
-import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.model.TracMessageSent;
 import com.trihydro.library.model.TracMessageType;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TracMessageSentService;
 import com.trihydro.library.service.TracMessageTypeService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,8 +31,22 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 @Component
 public class TracManager {
 
+	private JsonToJavaConverter jsonToJava;
+	private TracMessageTypeService tracMessageTypeService;
+	private TracMessageSentService tracMessageSentService;
+	private JavaMailSenderImplProvider mailProvider;
+
+	@Autowired
+	public void InjectDependencies(JsonToJavaConverter _jsonToJava, TracMessageTypeService _tracMessageTypeService,
+			TracMessageSentService _tracMessageSentService, JavaMailSenderImplProvider _mailProvider) {
+		jsonToJava = _jsonToJava;
+		tracMessageTypeService = _tracMessageTypeService;
+		tracMessageSentService = _tracMessageSentService;
+		mailProvider = _mailProvider;
+	}
+
 	public boolean isDnMsgInTrac(String packetId) {
-		List<String> packetIds = TracMessageSentService.selectPacketIds();
+		List<String> packetIds = tracMessageSentService.selectPacketIds();
 		return packetIds.contains(packetId);
 	}
 
@@ -39,7 +54,7 @@ public class TracManager {
 			boolean messageSent, boolean emailSent) {
 
 		// get trac message types
-		List<TracMessageType> tracMessageTypes = TracMessageTypeService.selectAll();
+		List<TracMessageType> tracMessageTypes = tracMessageTypeService.selectAll();
 
 		// get message type equal to distress notification
 		TracMessageType tracMessageType = tracMessageTypes.stream().filter(x -> x.getTracMessageType().equals("DN"))
@@ -62,12 +77,12 @@ public class TracManager {
 		tracMessageSent.setEmailSent(emailSent);
 		System.out.println("packet id: " + packetId);
 		// log in db
-		Long tracMessageSentId = TracMessageSentService.insertTracMessageSent(tracMessageSent);
+		Long tracMessageSentId = tracMessageSentService.insertTracMessageSent(tracMessageSent);
 		return tracMessageSentId;
 	}
 
-	public void submitDNMsgToTrac(String value, ConfigProperties config) {
-		OdeTimPayload payload = JsonToJavaConverter.convertTimPayloadJsonToJava(value);
+	public void submitDNMsgToTrac(String value, DataLoggerConfiguration config) {
+		OdeTimPayload payload = jsonToJava.convertTimPayloadJsonToJava(value);
 
 		// check if packetId is in trac message sent table
 		if (isDnMsgInTrac(payload.getTim().getPacketID())) {
@@ -76,7 +91,7 @@ public class TracManager {
 			return;
 		}
 
-		OdeLogMetadata metadata = JsonToJavaConverter.convertTimMetadataJsonToJava(value);
+		OdeLogMetadata metadata = jsonToJava.convertTimMetadataJsonToJava(value);
 
 		// add to db and sent to trac
 		// lat and long come from the dataframes.regions.anchorPosition
@@ -107,7 +122,7 @@ public class TracManager {
 				+ longitude + "</a></b>";
 
 		// Query parameters
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(config.getGetTracUrl())
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(config.getTracUrl())
 				.queryParam("priority", "1").queryParam("description", descUrl)
 				.queryParam("createdBy", "Connected Vehicle Emergency Notification").queryParam("source", "CV System");
 
@@ -182,7 +197,7 @@ public class TracManager {
 			try {
 				System.out.println("Message failed to submit to TRAC. Sending email to "
 						+ String.join(",", message.getTo()) + ". BCC to " + String.join(",", message.getBcc()));
-				JavaMailSenderImplProvider.getJSenderImpl(config.getMailHost(), config.getMailPort()).send(message);
+				mailProvider.getJSenderImpl(config.getMailHost(), config.getMailPort()).send(message);
 				emailSent = true;
 			} catch (Exception ex) {
 				System.out.println(

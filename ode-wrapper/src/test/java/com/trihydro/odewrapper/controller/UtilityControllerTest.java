@@ -25,6 +25,7 @@ import com.trihydro.odewrapper.service.WydotTimService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -33,18 +34,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ OdeService.class, TimTypeService.class, UtilityController.class })
+@PrepareForTest({ OdeService.class, TimTypeService.class, UtilityController.class, WydotTimBaseController.class })
 public class UtilityControllerTest {
     @Mock
-    BasicConfiguration configuration;
-
+    BasicConfiguration mockConfiguration;
     @Mock
-    WydotTimService wydotTimService;
-
+    WydotTimService mockWydotTimService;
     @Mock
-    TimQuery timQuery;
+    TimQuery mockTimQuery;
+    @Mock
+    TimTypeService mockTimTypeService;
 
+    @InjectMocks
     private UtilityController uut;
+
     private ArrayList<WydotRsu> wydotRsus;
     private String rsuTarget = "a.b.c.d";
     private String rsuTarget2 = "1.2.3.4";
@@ -54,12 +57,12 @@ public class UtilityControllerTest {
     public void setup() throws Exception {
         PowerMockito.mockStatic(OdeService.class);
         PowerMockito.mockStatic(TimTypeService.class);
-        PowerMockito.whenNew(WydotTimService.class).withAnyArguments().thenReturn(wydotTimService);
+        // PowerMockito.whenNew(WydotTimService.class).withAnyArguments().thenReturn(wydotTimService);
 
         List<Integer> indices = new ArrayList<>();
         indices.add(1);
         indices.add(2);
-        when(timQuery.getIndicies_set()).thenReturn(indices);
+        when(mockTimQuery.getIndicies_set()).thenReturn(indices);
 
         List<TimType> timTypes = new ArrayList<>();
         TimType tt = new TimType();
@@ -67,9 +70,9 @@ public class UtilityControllerTest {
         tt.setDescription("test");
         tt.setTimTypeId(-1l);
         timTypes.add(tt);
-        when(TimTypeService.selectAll()).thenReturn(timTypes);
+        when(mockTimTypeService.selectAll()).thenReturn(timTypes);
 
-        uut = new UtilityController(configuration);
+        // uut = new UtilityController(configuration);
 
         wydotRsus = new ArrayList<>();
         WydotRsu wydotRsu = new WydotRsu();
@@ -110,7 +113,7 @@ public class UtilityControllerTest {
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
 
-        when(wydotTimService.getRsus()).thenReturn(new ArrayList<>());
+        when(mockWydotTimService.getRsus()).thenReturn(new ArrayList<>());
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -132,7 +135,7 @@ public class UtilityControllerTest {
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
 
-        when(wydotTimService.getRsus()).thenReturn(wydotRsus);
+        when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
 
         when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class))).thenReturn(null);
 
@@ -156,10 +159,10 @@ public class UtilityControllerTest {
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
 
-        when(configuration.getOdeUrl()).thenReturn("ode_url");
-        when(wydotTimService.getRsus()).thenReturn(wydotRsus);
+        when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
+        when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
         when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
-                .thenReturn(timQuery);
+                .thenReturn(mockTimQuery);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -172,7 +175,7 @@ public class UtilityControllerTest {
         assertFalse(returnMessages.isEmpty());
         assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
         assertEquals(true, returnMessages.get(0).success);
-        verify(wydotTimService, times(2)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
+        verify(mockWydotTimService, times(2)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
     }
 
     @Test
@@ -182,10 +185,10 @@ public class UtilityControllerTest {
         addresses[0] = rsuTarget;
         addresses[1] = rsuTarget2;
 
-        when(configuration.getOdeUrl()).thenReturn("ode_url");
-        when(wydotTimService.getRsus()).thenReturn(wydotRsus);
+        when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
+        when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
         when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
-                .thenReturn(timQuery);
+                .thenReturn(mockTimQuery);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -199,6 +202,6 @@ public class UtilityControllerTest {
         assertEquals(2, returnMessages.size());
         assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
         assertEquals(true, returnMessages.get(0).success);
-        verify(wydotTimService, times(4)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
+        verify(mockWydotTimService, times(4)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
     }
 }

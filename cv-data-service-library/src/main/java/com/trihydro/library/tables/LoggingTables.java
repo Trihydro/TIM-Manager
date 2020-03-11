@@ -1,11 +1,15 @@
 package com.trihydro.library.tables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class LoggingTables extends OracleTables {
-    private static List<String> httpLoggingTable;
+    private List<String> httpLoggingTable;
 
-    public static List<String> getHttpLoggingTable() {
+    public List<String> getHttpLoggingTable() {
         if (httpLoggingTable == null) {
             httpLoggingTable = new ArrayList<String>();
 

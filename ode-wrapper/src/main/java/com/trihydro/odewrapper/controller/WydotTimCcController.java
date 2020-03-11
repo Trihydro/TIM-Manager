@@ -6,12 +6,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
+import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTimRc;
+import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,8 +33,12 @@ import io.swagger.annotations.Api;
 public class WydotTimCcController extends WydotTimBaseController {
 
     private static String type = "CC";
-    // get tim type
-    TimType timType = getTimType(type);
+
+    @Autowired
+    public WydotTimCcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+    }
 
     @RequestMapping(value = "/cc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createChainControlTim(@RequestBody TimRcList timRcList) {
@@ -80,7 +89,7 @@ public class WydotTimCcController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, timType, startTime, null, null);
+                    processRequest(tim, getTimType(type), startTime, null, null);
                 }
             }
         }).start();

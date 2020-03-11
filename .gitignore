@@ -5,6 +5,7 @@ cv-data-service-library/target
 ode-wrapper/target
 cv-data-controller/target
 cv-data-tasks/target
+logger-kafka-consumer/target
 
 ode-data-logger/**/*.class
 ode-mongo-logger/**/*.class

@@ -8,12 +8,16 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.TimType;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.TimTypeService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimParkingList;
 import com.trihydro.odewrapper.model.WydotTimParking;
+import com.trihydro.odewrapper.service.WydotTimService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,8 +35,12 @@ import io.swagger.annotations.Api;
 public class WydotTimParkingController extends WydotTimBaseController {
 
     private static String type = "P";
-    // get tim type
-    TimType timType = getTimType(type);
+
+    @Autowired
+    public WydotTimParkingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+    }
 
     @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createParkingTim(@RequestBody TimParkingList timParkingList) {
@@ -97,7 +105,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
         // add ITIS codes to TIMs
         for (ActiveTim activeTim : activeTims) {
-            ActiveTimService.addItisCodesToActiveTim(activeTim);
+            activeTimService.addItisCodesToActiveTim(activeTim);
         }
 
         return activeTims;
@@ -121,17 +129,16 @@ public class WydotTimParkingController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
-
                 for (WydotTimParking wydotTim : wydotTims) {
                     if (wydotTim.getDirection().equals("both")) {
 
                         wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
                         wydotTim.setToRm(wydotTim.getMileMarker());
-                        createSendTims(wydotTim, "eastbound", timType, startTime, null, null);
+                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, null);
 
                         wydotTim.setFromRm(wydotTim.getMileMarker());
                         wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        createSendTims(wydotTim, "westbound", timType, startTime, null, null);
+                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, null);
                     } else {
                         if (wydotTim.getDirection().equals("eastbound")) {
                             wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
@@ -140,7 +147,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
                             wydotTim.setFromRm(wydotTim.getMileMarker());
                             wydotTim.setToRm(wydotTim.getMileMarker() + 10);
                         }
-                        createSendTims(wydotTim, wydotTim.getDirection(), timType, startTime, null, null);
+                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null, null);
                     }
                 }
             }

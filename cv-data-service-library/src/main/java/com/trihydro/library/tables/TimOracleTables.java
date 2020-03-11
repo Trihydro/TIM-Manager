@@ -1,22 +1,26 @@
 package com.trihydro.library.tables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class TimOracleTables extends OracleTables {
 
-    private static List<String> timTable;
-    private static List<String> dataFrameTable;
-    private static List<String> pathTable;
-    private static List<String> regionTable;
-    private static List<String> nodeXYTable;
-    private static List<String> pathNodeXYTable;
+    private List<String> timTable;
+    private List<String> dataFrameTable;
+    private List<String> pathTable;
+    private List<String> regionTable;
+    private List<String> nodeXYTable;
+    private List<String> pathNodeXYTable;
     private List<String> timTypeTable;
-    private static List<String> activeTimTable;
-    private static List<String> timRsuTable;
-    private static List<String> dataFrameItisCodeTable;
-    private static List<String> driverAlertItisCodeTable;
+    private List<String> activeTimTable;
+    private List<String> timRsuTable;
+    private List<String> dataFrameItisCodeTable;
+    private List<String> driverAlertItisCodeTable;
 
-    public static List<String> getTimTable() {
+    public List<String> getTimTable() {
         if (timTable != null)
             return timTable;
         else {
@@ -52,7 +56,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getDataFrameTable() {
+    public List<String> getDataFrameTable() {
         if (dataFrameTable != null)
             return dataFrameTable;
         else {
@@ -80,7 +84,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getPathTable() {
+    public List<String> getPathTable() {
         if (pathTable != null)
             return pathTable;
         else {
@@ -90,7 +94,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getRegionTable() {
+    public List<String> getRegionTable() {
         if (regionTable != null)
             return regionTable;
         else {
@@ -119,7 +123,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getPathNodeXYTable() {
+    public List<String> getPathNodeXYTable() {
         if (pathNodeXYTable != null)
             return pathNodeXYTable;
         else {
@@ -130,7 +134,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getNodeXYTable() {
+    public List<String> getNodeXYTable() {
         if (nodeXYTable != null)
             return nodeXYTable;
         else {
@@ -157,7 +161,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getActiveTimTable() {
+    public List<String> getActiveTimTable() {
         if (activeTimTable != null)
             return activeTimTable;
         else {
@@ -177,7 +181,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getTimRsuTable() {
+    public List<String> getTimRsuTable() {
         if (timRsuTable != null)
             return timRsuTable;
         else {
@@ -189,7 +193,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getDataFrameItisCodeTable() {
+    public List<String> getDataFrameItisCodeTable() {
         if (dataFrameItisCodeTable != null)
             return dataFrameItisCodeTable;
         else {
@@ -201,7 +205,7 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
-    public static List<String> getDriverAlertItisCodeTable() {
+    public List<String> getDriverAlertItisCodeTable() {
         if (driverAlertItisCodeTable != null)
             return driverAlertItisCodeTable;
         else {

@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -114,12 +113,13 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].setDurationTime(120);
         }
 
+        // set PacketId to a random 18 character hex value
         Random rand = new Random();
-        int randomNum = rand.nextInt(1000000) + 100000;
-        String packetIdHexString = Integer.toHexString(randomNum);
-        packetIdHexString = String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0"))
-                + packetIdHexString;
-        timToSend.getTim().setPacketID(packetIdHexString);
+        StringBuffer sb = new StringBuffer();
+        while (sb.length() < 18) {
+            sb.append(Integer.toHexString(rand.nextInt()));
+        }
+        timToSend.getTim().setPacketID(sb.toString().substring(0, 18));
 
         return timToSend;
     }

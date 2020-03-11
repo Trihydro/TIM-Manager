@@ -13,9 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
@@ -25,9 +23,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -38,6 +33,7 @@ public class BaseService {
     private LoggerConfiguration dbConfig;
     private JavaMailSenderImplProvider mailProvider;
     private Utility utility;
+    private EmailHelper emailHelper;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -45,10 +41,12 @@ public class BaseService {
     public DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(LoggerConfiguration _loggerConfiguration, JavaMailSenderImplProvider _mailProvider, Utility _utility) {
+    public void InjectDependencies(LoggerConfiguration _loggerConfiguration, JavaMailSenderImplProvider _mailProvider,
+            Utility _utility, EmailHelper _emailHelper) {
         dbConfig = _loggerConfiguration;
         mailProvider = _mailProvider;
-        utility=_utility;
+        utility = _utility;
+        emailHelper = _emailHelper;
     }
 
     public Connection GetConnectionPool() throws SQLException {
@@ -87,7 +85,8 @@ public class BaseService {
             body += "<br/>Stacktrace: ";
             body += ExceptionUtils.getStackTrace(ex);
             try {
-                SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body);
+                emailHelper.SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body,
+                        dbConfig.getMailPort(), dbConfig.getMailHost(), dbConfig.getFromEmail());
             } catch (Exception exception) {
                 utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");
@@ -194,19 +193,5 @@ public class BaseService {
         }
 
         return securityResultCodeTypes;
-    }
-
-    void SendEmail(String[] to, String[] bcc, String subject, String body) throws MailException, MessagingException {
-        JavaMailSenderImpl mailSender = mailProvider.getJSenderImpl(dbConfig.getMailHost(), dbConfig.getMailPort());
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-        helper.setSubject(subject);
-        helper.setTo(to);
-        helper.setFrom(dbConfig.getFromEmail());
-        if (bcc != null)
-            helper.setBcc(bcc);
-        helper.setText(body, true);
-
-        mailSender.send(mimeMessage);
     }
 }

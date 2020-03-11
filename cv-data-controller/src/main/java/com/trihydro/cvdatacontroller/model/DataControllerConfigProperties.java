@@ -17,8 +17,18 @@ public class DataControllerConfigProperties {
     private String mailHost;
     private int mailPort;
 
+    private int poolSize;
+
     public String getDbDriver() {
         return dbDriver;
+    }
+
+    public int getPoolSize() {
+        return poolSize;
+    }
+
+    public void setPoolSize(int poolSize) {
+        this.poolSize = poolSize;
     }
 
     public int getMailPort() {

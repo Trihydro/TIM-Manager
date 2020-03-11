@@ -276,7 +276,7 @@ public class WydotTimService {
                     String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
                     try {
                         emailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
-                                configuration);
+                                configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
                     } catch (Exception ex) {
                         utility.logWithDate(body + ", and the email failed to send to support");
                         ex.printStackTrace();

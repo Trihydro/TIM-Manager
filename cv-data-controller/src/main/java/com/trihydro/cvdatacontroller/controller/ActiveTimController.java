@@ -434,7 +434,7 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}/{direction}", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
-			@PathVariable Long timTypeId, String direction) {
+			@PathVariable Long timTypeId, @PathVariable String direction) {
 
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -536,7 +536,7 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/delete-id/{activeTimId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
-	public ResponseEntity<Boolean> DeleteActiveTim(Long activeTimId) {
+	public ResponseEntity<Boolean> DeleteActiveTim(@PathVariable Long activeTimId) {
 
 		boolean deleteActiveTimResult = false;
 

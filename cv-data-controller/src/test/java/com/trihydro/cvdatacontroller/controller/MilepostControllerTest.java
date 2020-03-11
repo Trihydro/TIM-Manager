@@ -325,45 +325,4 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         verify(mockRs).close();
         assertEquals(0, milePosts.getBody().size());
     }
-
-    @Test
-    public void getMilepostsTest_SUCCESS() throws SQLException {
-        // Arrange
-        String statementStr = "select * from MILEPOST_TEST order by milepost asc";
-
-        // Act
-        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsTest();
-
-        // Assert
-        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
-        verify(mockStatement).executeQuery(statementStr);
-        verify(mockRs).getString("ROUTE");
-        verify(mockRs).getDouble("MILEPOST");
-        verify(mockRs).getString("DIRECTION");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
-        verify(mockRs).getDouble("ELEVATION_FT");
-        verify(mockRs).getDouble("BEARING");
-        verify(mockStatement).close();
-        verify(mockConnection).close();
-        assertEquals(1, milePosts.getBody().size());
-    }
-
-    @Test
-    public void getMilepostsTest_FAIL() throws SQLException {
-        // Arrange
-        String statementStr = "select * from MILEPOST_TEST order by milepost asc";
-        when(mockRs.getString(isA(String.class))).thenThrow(new SQLException());
-
-        // Act
-        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostsTest();
-
-        // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
-        verify(mockStatement).executeQuery(statementStr);
-        verify(mockStatement).close();
-        verify(mockConnection).close();
-        verify(mockRs).close();
-        assertEquals(0, milePosts.getBody().size());
-    }
 }

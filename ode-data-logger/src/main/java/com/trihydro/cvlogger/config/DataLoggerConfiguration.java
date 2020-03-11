@@ -1,9 +1,11 @@
 package com.trihydro.cvlogger.config;
 
+import com.trihydro.library.model.ConfigProperties;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class DataLoggerConfiguration {
+public class DataLoggerConfiguration extends ConfigProperties {
     private String kafkaHostServer;
     private String tracUrl;
 

@@ -1,5 +1,6 @@
 package com.trihydro.tasks.actions;
 
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +10,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.SdwService;
+import com.trihydro.tasks.config.EmailConfiguration;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.SdxComparableSorter;
@@ -19,13 +21,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ValidateSDX {
     private EmailHelper mailHelper;
+    private EmailConfiguration emailConfig;
     private SdwService sdwService;
     private ActiveTimService activeTimService;
 
     @Autowired
-    public void InjectDependencies(EmailHelper _mailHelper, SdwService _sdwService,
-            ActiveTimService _activeTimService) {
+    public void InjectDependencies(EmailHelper _mailHelper, SdwService _sdwService, ActiveTimService _activeTimService,
+            EmailConfiguration _emailConfig) {
         mailHelper = _mailHelper;
+        emailConfig = _emailConfig;
         sdwService = _sdwService;
         activeTimService = _activeTimService;
     }
@@ -114,6 +118,9 @@ public class ValidateSDX {
                 i++;
             }
         }
+
+        String email = emailConfig.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
+                numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords);
     }
 
     private boolean sameItisCodes(List<Integer> o1, List<Integer> o2) {

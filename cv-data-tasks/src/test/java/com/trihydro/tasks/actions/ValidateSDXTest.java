@@ -64,7 +64,7 @@ public class ValidateSDXTest {
         uut.run();
 
         // Services were called
-        verify(mockSdwService).getAllSdwRecords();
+        verify(mockSdwService).getMsgsForOdeUser();
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // No email was sent
@@ -78,7 +78,7 @@ public class ValidateSDXTest {
         AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
 
         // Arrange service responses
-        when(mockSdwService.getAllSdwRecords()).thenReturn(Arrays.asList(asdds));
+        when(mockSdwService.getMsgsForOdeUser()).thenReturn(Arrays.asList(asdds));
         when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
         // Return ITIS codes for ASDDs
         doReturn(Arrays.asList(8,7,6)).when(mockSdwService).getItisCodesFromAdvisoryMessage("0");
@@ -88,7 +88,7 @@ public class ValidateSDXTest {
         uut.run();
 
         // Services were called
-        verify(mockSdwService).getAllSdwRecords();
+        verify(mockSdwService).getMsgsForOdeUser();
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // No email was sent
@@ -96,6 +96,8 @@ public class ValidateSDXTest {
                 Matchers.any());
 
     }
+
+    // TODO: ArgumentCaptor: https://stackoverflow.com/questions/36253040/example-of-mockitos-argumentcaptor
 
     <T> T importJsonArray(String fileName, Class<T> clazz) {
         InputStream is = ValidateSDXTest.class.getResourceAsStream(fileName);

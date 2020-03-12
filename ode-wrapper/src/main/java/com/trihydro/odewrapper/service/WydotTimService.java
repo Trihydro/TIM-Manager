@@ -119,7 +119,7 @@ public class WydotTimService {
         while (sb.length() < 18) {
             sb.append(Integer.toHexString(rand.nextInt()));
         }
-        timToSend.getTim().setPacketID(sb.toString().substring(0, 18));
+        timToSend.getTim().setPacketID(sb.toString().substring(0, 18).toUpperCase());
 
         return timToSend;
     }

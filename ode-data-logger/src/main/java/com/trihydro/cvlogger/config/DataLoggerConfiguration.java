@@ -67,8 +67,8 @@ public class DataLoggerConfiguration {
         return kafkaHostServer;
     }
 
-    public void setKafkaHostServer(String hostname) {
-        this.kafkaHostServer = hostname;
+    public void setKafkaHostServer(String kafkaHostServer) {
+        this.kafkaHostServer = kafkaHostServer;
     }
 
     public String getCvRestService() {

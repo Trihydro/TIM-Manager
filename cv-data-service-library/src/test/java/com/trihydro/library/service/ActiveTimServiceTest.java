@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -258,14 +259,17 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         String clientId = "clientId";
         String direction = "westward";
         String ipv4Address = "10.10.10.10";
-        String url = String.format("null/active-tim/active-rsu-tim/%s/%s/%s", clientId, direction, ipv4Address);
-        when(mockRestTemplate.getForEntity(url, ActiveTim.class)).thenReturn(mockResponseEntityActiveTim);
+        String url = String.format("null/active-tim/active-rsu-tim");
+        ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(direction, clientId, ipv4Address);
+        HttpEntity<ActiveRsuTimQueryModel> entity = getEntity(artqm, ActiveRsuTimQueryModel.class);
+        when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, ActiveTim.class))
+                .thenReturn(mockResponseEntityActiveTim);
 
         // Act
-        ActiveTim data = ActiveTimService.getActiveRsuTim(clientId, direction, ipv4Address);
+        ActiveTim data = ActiveTimService.getActiveRsuTim(artqm);
 
         // Assert
-        verify(mockRestTemplate).getForEntity(url, ActiveTim.class);
+        verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, ActiveTim.class);
         assertEquals(aTim, data);
     }
 

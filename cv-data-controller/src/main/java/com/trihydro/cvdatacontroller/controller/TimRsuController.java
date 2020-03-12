@@ -77,8 +77,8 @@ public class TimRsuController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/tim-id", method = RequestMethod.GET)
-    public ResponseEntity<List<TimRsu>> GetTimRsusByTimId(Long timId) {
+    @RequestMapping(value = "/tim-id/{timId}", method = RequestMethod.GET)
+    public ResponseEntity<List<TimRsu>> GetTimRsusByTimId(@PathVariable Long timId) {
 
         Statement statement = null;
         Connection connection = null;

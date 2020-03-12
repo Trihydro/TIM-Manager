@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-// import com.trihydro.library.helpers.DbUtility;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.ConfigProperties;
@@ -65,6 +64,13 @@ public class SdwService {
 
     }
 
+    /**
+     * Returns a pseudo-random 4 byte hex value representing recordId. This 4 byte
+     * limitation comes from asn1_codec SEMI_v2.3.0_070616.asn found at
+     * https://github.com/usdot-jpo-ode/asn1_codec/blob/master/asn1c_combined/SEMI_v2.3.0_070616.asn
+     * 
+     * @return
+     */
     public String getNewRecordId() {
         String hexChars = "ABCDEF1234567890";
         StringBuilder hexStrB = new StringBuilder();
@@ -109,7 +115,7 @@ public class SdwService {
 
             InputStreamReader isr = new InputStreamReader(conn.getInputStream());
             BufferedReader br = new BufferedReader(isr);
-            String objString = br.lines().collect(Collectors.joining());// br.readLine();
+            String objString = br.lines().collect(Collectors.joining());
             ObjectMapper mapper = new ObjectMapper();
             TypeReference<HashMap<Integer, Boolean>> typeRef = new TypeReference<HashMap<Integer, Boolean>>() {
             };

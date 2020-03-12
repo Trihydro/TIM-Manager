@@ -33,8 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-// @RestController
-// @ApiIgnore
 @Component
 public abstract class WydotTimBaseController {
 

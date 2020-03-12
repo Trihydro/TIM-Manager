@@ -3,6 +3,7 @@ package com.trihydro.library.service;
 import java.util.Arrays;
 import java.util.List;
 
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -104,10 +105,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	// get Active TIMs by client ID direction
-	public static ActiveTim getActiveRsuTim(String clientId, String direction, String ipv4Address) {
-		String url = String.format("%s/active-tim/active-rsu-tim/%s/%s/%s", CVRestUrl, clientId, direction,
-				ipv4Address);
-		ResponseEntity<ActiveTim> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, ActiveTim.class);
+	public static ActiveTim getActiveRsuTim(ActiveRsuTimQueryModel artqm) {
+		String url = String.format("%s/active-tim/active-rsu-tim", CVRestUrl);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<ActiveRsuTimQueryModel> entity = new HttpEntity<ActiveRsuTimQueryModel>(artqm, headers);
+		ResponseEntity<ActiveTim> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST,
+				entity, ActiveTim.class);
 		return response.getBody();
 	}
 

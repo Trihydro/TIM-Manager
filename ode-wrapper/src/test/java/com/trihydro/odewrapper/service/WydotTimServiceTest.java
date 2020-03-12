@@ -151,7 +151,8 @@ public class WydotTimServiceTest {
 
         // Assert
         verify(mockEmailHelper).SendEmail(mockBasicConfiguration.getAlertAddresses(), null, subject, body,
-                mockBasicConfiguration);
+                mockBasicConfiguration.getMailPort(), mockBasicConfiguration.getMailHost(),
+                mockBasicConfiguration.getFromEmail());
         PowerMockito.verifyStatic();
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-2l);

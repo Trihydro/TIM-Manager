@@ -3,8 +3,6 @@ package com.trihydro.library.helpers;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import com.trihydro.library.model.ConfigProperties;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -33,15 +31,14 @@ public class EmailHelper {
      * @throws MailException
      * @throws MessagingException
      */
-    public void SendEmail(String[] to, String[] bcc, String subject, String body, ConfigProperties properties)
-            throws MailException, MessagingException {
-        JavaMailSenderImpl mailSender = mailProvider.getJSenderImpl(properties.getMailHost(),
-                properties.getMailPort());
+    public void SendEmail(String[] to, String[] bcc, String subject, String body, Integer mailPort, String mailHost,
+            String from) throws MailException, MessagingException {
+        JavaMailSenderImpl mailSender = mailProvider.getJSenderImpl(mailHost, mailPort);
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
         helper.setSubject(subject);
         helper.setTo(to);
-        helper.setFrom(properties.getFromEmail());
+        helper.setFrom(from);
         if (bcc != null)
             helper.setBcc(bcc);
         helper.setText(body, true);

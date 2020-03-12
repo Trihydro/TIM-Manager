@@ -1,13 +1,20 @@
 package com.trihydro.cvlogger;
 
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
+import com.trihydro.library.helpers.JavaMailSenderImplProvider;
+import com.trihydro.library.helpers.JsonToJavaConverter;
+import com.trihydro.library.service.CvDataServiceLibrary;
+import com.trihydro.library.service.RestTemplateProvider;
+import com.trihydro.library.service.TracMessageSentService;
+import com.trihydro.library.service.TracMessageTypeService;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 
-@ComponentScan({ "com.trihydro.cvlogger", "com.trihydro.library.helpers", "com.trihydro.library.service" })
+@Import({ JsonToJavaConverter.class, RestTemplateProvider.class, CvDataServiceLibrary.class,
+        TracMessageSentService.class, TracMessageTypeService.class, JavaMailSenderImplProvider.class })
 @SpringBootApplication
 @EnableConfigurationProperties(DataLoggerConfiguration.class)
 public class Application {

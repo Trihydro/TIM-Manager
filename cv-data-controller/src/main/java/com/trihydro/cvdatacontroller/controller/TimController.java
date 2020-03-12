@@ -45,7 +45,7 @@ public class TimController extends BaseController {
         securityResultCodeTypeController = _securityResultCodeTypeController;
     }
 
-    @RequestMapping(value = "/get-tim", method = RequestMethod.GET)
+    @RequestMapping(value = "/get-tim/{timId}", method = RequestMethod.GET)
     public ResponseEntity<WydotOdeTravelerInformationMessage> GetTim(@PathVariable Long timId) {
 
         WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();

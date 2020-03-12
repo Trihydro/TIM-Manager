@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -324,10 +325,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetActiveTimsByClientIdDirection_SUCCESS() throws SQLException {
         // Arrange
-        String clientId = "";
+        String clientId = "clientId";
         Long timTypeId = -1l;
         String direction = "eastward";
-        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "%' and TIM_TYPE_ID = "
+        String selectStatement = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
 
@@ -356,10 +357,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetActiveTimsByClientIdDirection_FAIL() throws SQLException {
         // Arrange
-        String clientId = "";
+        String clientId = "clientId";
         Long timTypeId = -1l;
         String direction = "eastward";
-        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "%' and TIM_TYPE_ID = "
+        String selectStatement = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
@@ -379,8 +380,12 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetItisCodesForActiveTim_SUCCESS() throws SQLException {
         // Arrange
         Long activeTimId = -1l;
-        String selectStatement = "select itis_code from active_tim inner join tim on tim.tim_id = active_tim.tim_id inner join data_frame on tim.tim_id = data_frame.tim_id inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id where active_tim_id = "
-                + activeTimId;
+        String selectStatement = "select itis_code from active_tim ";
+        selectStatement += "inner join tim on tim.tim_id = active_tim.tim_id ";
+        selectStatement += "inner join data_frame on tim.tim_id = data_frame.tim_id ";
+        selectStatement += "inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id ";
+        selectStatement += "inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id ";
+        selectStatement += "where active_tim_id = " + activeTimId;
 
         // Act
         ResponseEntity<List<Integer>> data = uut.GetItisCodesForActiveTim(activeTimId);
@@ -646,7 +651,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         query += "' and active_tim.direction = '" + direction + "'";
 
         // Act
-        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(clientId, direction, ipv4Address);
+        ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(direction, clientId, ipv4Address);
+        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(artqm);
 
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
@@ -683,7 +689,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         doThrow(new SQLException()).when(mockStatement).executeQuery(query);
 
         // Act
-        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(clientId, direction, ipv4Address);
+        ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(direction, clientId, ipv4Address);
+        ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(artqm);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());

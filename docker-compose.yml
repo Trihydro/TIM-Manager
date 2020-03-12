@@ -124,6 +124,7 @@ services:
       DEPOSIT_TOPIC: ${BSM_TOPIC}
       DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
     logging:
       options:
@@ -142,6 +143,7 @@ services:
       DEPOSIT_TOPIC: ${BSM_TOPIC}
       DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
     logging:
       options:
@@ -200,6 +202,7 @@ services:
       DEPOSIT_TOPIC: ${TIM_TOPIC}
       DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
     logging:
       options:
@@ -218,6 +221,7 @@ services:
       DEPOSIT_TOPIC: ${TIM_TOPIC}
       DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
     logging:
       options:
@@ -276,6 +280,7 @@ services:
       DEPOSIT_TOPIC: ${DA_TOPIC}
       DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
     logging:
       options:
@@ -294,6 +299,7 @@ services:
       DEPOSIT_TOPIC: ${DA_TOPIC}
       DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
     logging:
       options:
@@ -312,6 +318,7 @@ services:
       DEPOSIT_TOPIC: ${DN_TOPIC}
       DEPOSIT_GROUP: ${DN_GROUP}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
     logging:
       options:
@@ -334,3 +341,24 @@ services:
         max-size: 50m
     ports:
       - '8081:8081'
+
+  logger-kafka-consumer:
+    build: logger-kafka-consumer
+    restart: always
+    environment:
+      DEPOSIT_GROUP: ${DBCONSUMER_DEPOSIT_GROUP}
+      DEPOSIT_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
+      KAFKA_HOST_SERVER: ${DBCONSUMER_KAFKA_HOST_SERVER}
+      DB_DRIVER: ${DBCONSUMER_DB_DRIVER}
+      DB_URL: ${DBCONSUMER_DB_URL}
+      DB_USERNAME: ${DBCONSUMER_DB_USERNAME}
+      DB_PASSWORD: ${DBCONSUMER_DB_PASSWORD}
+      ALERT_ADDRESSES: ${DBCONSUMER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${DBCONSUMER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      POOL_SIZE: ${DBCONSUMER_POOL_SIZE}
+      ENV: ${DBCONSUMER_ENV}
+    logging:
+      options:
+        max-size: 50m

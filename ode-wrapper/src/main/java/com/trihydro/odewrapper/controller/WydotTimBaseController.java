@@ -28,8 +28,6 @@ import com.trihydro.odewrapper.service.WydotTimService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-// @RestController
-// @ApiIgnore
 @Component
 public abstract class WydotTimBaseController {
 

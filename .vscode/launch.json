@@ -78,7 +78,7 @@
       "type": "java",
       "name": "TIM Refresh (Launch)",
       "request": "launch",
-      "args": "--spring.profiles.active=dev",
+      "args": "--spring.profiles.active=local",
       "cwd": "${workspaceRoot}/tim-refresh",
       "mainClass": "com.trihydro.timrefresh.Application"
     }

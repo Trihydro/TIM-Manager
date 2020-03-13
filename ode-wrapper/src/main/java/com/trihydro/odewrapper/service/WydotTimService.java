@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +17,7 @@ import java.util.stream.Stream;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimRsu;
@@ -113,12 +113,13 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].setDurationTime(120);
         }
 
+        // set PacketId to a random 18 character hex value
         Random rand = new Random();
-        int randomNum = rand.nextInt(1000000) + 100000;
-        String packetIdHexString = Integer.toHexString(randomNum);
-        packetIdHexString = String.join("", Collections.nCopies(18 - packetIdHexString.length(), "0"))
-                + packetIdHexString;
-        timToSend.getTim().setPacketID(packetIdHexString);
+        StringBuffer sb = new StringBuffer();
+        while (sb.length() < 18) {
+            sb.append(Integer.toHexString(rand.nextInt()));
+        }
+        timToSend.getTim().setPacketID(sb.toString().substring(0, 18).toUpperCase());
 
         return timToSend;
     }
@@ -197,8 +198,9 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
-            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(wydotTim.getClientId(), wydotTim.getDirection(),
+            ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(wydotTim.getDirection(), wydotTim.getClientId(),
                     rsu.getRsuTarget());
+            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(artqm);
 
             // if active tims exist, update tim
             if (activeTim != null) {
@@ -274,7 +276,7 @@ public class WydotTimService {
                     String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
                     try {
                         emailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
-                                configuration);
+                                configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
                     } catch (Exception ex) {
                         utility.logWithDate(body + ", and the email failed to send to support");
                         ex.printStackTrace();

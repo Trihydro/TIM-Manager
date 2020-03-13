@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -434,7 +435,7 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}/{direction}", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
-			@PathVariable Long timTypeId, String direction) {
+			@PathVariable Long timTypeId, @PathVariable String direction) {
 
 		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -536,7 +537,7 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/delete-id/{activeTimId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
-	public ResponseEntity<Boolean> DeleteActiveTim(Long activeTimId) {
+	public ResponseEntity<Boolean> DeleteActiveTim(@PathVariable Long activeTimId) {
 
 		boolean deleteActiveTimResult = false;
 
@@ -892,9 +893,8 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(results);
 	}
 
-	@RequestMapping(value = "/active-rsu-tim/{clientId}/{direction}/{ipv4Address}", method = RequestMethod.GET)
-	public ResponseEntity<ActiveTim> GetActiveRsuTim(@PathVariable String clientId, @PathVariable String direction,
-			@PathVariable String ipv4Address) {
+	@RequestMapping(value = "/active-rsu-tim", method = RequestMethod.POST)
+	public ResponseEntity<ActiveTim> GetActiveRsuTim(@RequestBody ActiveRsuTimQueryModel artqm) {
 
 		ActiveTim activeTim = null;
 		Connection connection = null;
@@ -908,8 +908,8 @@ public class ActiveTimController extends BaseController {
 			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
 			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
 			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-			query += " where ipv4_address = '" + ipv4Address + "' and client_id = '" + clientId
-					+ "' and active_tim.direction = '" + direction + "'";
+			query += " where ipv4_address = '" + artqm.getIpv4() + "' and client_id = '" + artqm.getClientId()
+					+ "' and active_tim.direction = '" + artqm.getDirection() + "'";
 
 			rs = statement.executeQuery(query);
 

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-@ComponentScan({"com.trihydro.library.helpers", "com.trihydro.library.service"})
-public class DataTasksConfiguration extends ConfigProperties {
+@ComponentScan({"com.trihydro.tasks.config", "com.trihydro.library.helpers"})
+public class DataTasksConfiguration {
 
     private String wrapperUrl;
     private String odeUrl;

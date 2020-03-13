@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -68,8 +69,8 @@ public class ValidateSDXTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // No email was sent
-        verify(mockEmailHelper, times(0)).SendEmail(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(),
-                Matchers.any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(),
+                any(), any(), any());
     }
 
     @Test
@@ -92,8 +93,8 @@ public class ValidateSDXTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // No email was sent
-        verify(mockEmailHelper, times(0)).SendEmail(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(),
-                Matchers.any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(),
+                any(), any(), any());
 
     }
 

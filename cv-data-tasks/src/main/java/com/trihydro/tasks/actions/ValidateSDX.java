@@ -10,6 +10,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.SdwService;
+import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.config.EmailConfiguration;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
@@ -22,16 +23,18 @@ import org.springframework.stereotype.Component;
 public class ValidateSDX {
     private EmailHelper mailHelper;
     private EmailConfiguration emailConfig;
+    private DataTasksConfiguration config;
     private SdwService sdwService;
     private ActiveTimService activeTimService;
 
     @Autowired
     public void InjectDependencies(EmailHelper _mailHelper, SdwService _sdwService, ActiveTimService _activeTimService,
-            EmailConfiguration _emailConfig) {
+            EmailConfiguration _emailConfig, DataTasksConfiguration _config) {
         mailHelper = _mailHelper;
-        emailConfig = _emailConfig;
         sdwService = _sdwService;
         activeTimService = _activeTimService;
+        emailConfig = _emailConfig;
+        config = _config;
     }
 
     public void run() {
@@ -75,12 +78,14 @@ public class ValidateSDX {
             if (i == oracleRecords.size()) {
                 // Any remaining sdx records don't have a corresponding oracle record
                 deleteFromSdx.addAll(sdxRecords.subList(j, sdxRecords.size() - 1));
+                numSdxOrphanedRecords += sdxRecords.size() - j;
                 j = sdxRecords.size();
                 continue;
             }
             if (j == sdxRecords.size()) {
                 // Any remaining oracle records don't have a corresponding sdx record
                 toResend.addAll(oracleRecords.subList(i, oracleRecords.size() - 1));
+                numRecordsNotOnSdx += oracleRecords.size() - i;
                 i = oracleRecords.size();
                 continue;
             }
@@ -119,8 +124,17 @@ public class ValidateSDX {
             }
         }
 
-        String email = emailConfig.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
-                numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords);
+        if (toResend.size() > 0 || deleteFromSdx.size() > 0 || invOracleRecords.size() > 0) {
+            String email = emailConfig.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
+                    numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords);
+
+            try {
+                mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Validation Results", email,
+                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     private boolean sameItisCodes(List<Integer> o1, List<Integer> o2) {

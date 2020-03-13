@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EmailConfiguration {
-    private String formatMain;
+    private String formatSdxMain;
     private String formatSection;
 
     public EmailConfiguration() throws IOException {
-        formatMain = readFile("email-templates/main.html");
+        formatSdxMain = readFile("email-templates/sdx-main.html");
         formatSection = readFile("email-templates/section.html");
     }
 
@@ -30,7 +30,7 @@ public class EmailConfiguration {
             List<CActiveTim> toResend, List<CAdvisorySituationDataDeposit> deleteFromSdx,
             List<CActiveTim> invOracleRecords) {
         // Create summary
-        String body = formatMain.replaceAll("\\{num-stale\\}", Integer.toString(numOutdatedSdx));
+        String body = formatSdxMain.replaceAll("\\{num-stale\\}", Integer.toString(numOutdatedSdx));
         body = body.replaceAll("\\{num-sdx-orphaned\\}", Integer.toString(numSdxOrphaned));
         body = body.replaceAll("\\{num-not-present-sdx\\}", Integer.toString(numNotOnSdx));
         body = body.replaceAll("\\{num-inv-oracle\\}", Integer.toString(invOracleRecords.size()));

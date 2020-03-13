@@ -28,10 +28,10 @@ import org.springframework.http.ResponseEntity;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
-import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.SDXDecodeRequest;
 import com.trihydro.library.model.SDXDecodeResponse;
 import com.trihydro.library.model.SDXQuery;
+import com.trihydro.library.model.SdwProps;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +41,11 @@ import org.springframework.web.client.RestClientException;
 @Component
 public class SdwService {
     public Gson gson = new Gson();
-    private ConfigProperties configProperties;
+    private SdwProps configProperties;
     private Utility utility;
 
     @Autowired
-    public void InjectDependencies(ConfigProperties _config, Utility _utility) {
+    public void InjectDependencies(SdwProps _config, Utility _utility) {
         configProperties = _config;
         utility = _utility;
     }

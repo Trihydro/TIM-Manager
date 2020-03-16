@@ -77,14 +77,14 @@ public class ValidateSDX {
             // corresponding action
             if (i == oracleRecords.size()) {
                 // Any remaining sdx records don't have a corresponding oracle record
-                deleteFromSdx.addAll(sdxRecords.subList(j, sdxRecords.size() - 1));
+                deleteFromSdx.addAll(sdxRecords.subList(j, sdxRecords.size()));
                 numSdxOrphanedRecords += sdxRecords.size() - j;
                 j = sdxRecords.size();
                 continue;
             }
             if (j == sdxRecords.size()) {
                 // Any remaining oracle records don't have a corresponding sdx record
-                toResend.addAll(oracleRecords.subList(i, oracleRecords.size() - 1));
+                toResend.addAll(oracleRecords.subList(i, oracleRecords.size()));
                 numRecordsNotOnSdx += oracleRecords.size() - i;
                 i = oracleRecords.size();
                 continue;

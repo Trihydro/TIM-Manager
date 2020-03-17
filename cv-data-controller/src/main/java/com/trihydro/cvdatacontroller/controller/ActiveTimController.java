@@ -16,6 +16,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.PopulatedRsu;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
@@ -870,6 +871,94 @@ public class ActiveTimController extends BaseController {
 
 			if (activeTim != null) {
 				results.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(results);
+	}
+
+	/**
+	 * Gets Active TIMs, grouped by RSU. Note that the ActiveTims for each RSU are ordered
+	 * by RSU index. 
+	 * @return
+	 */
+	@RequestMapping(value = "/rsus-with-active-tims", method = RequestMethod.GET)
+	public ResponseEntity<List<PopulatedRsu>> GetAllActiveRsuTims() {
+		List<PopulatedRsu> results = new ArrayList<PopulatedRsu>();
+		PopulatedRsu rsu = null;
+		ActiveTim activeTim = null;
+
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			String query = "select active_tim.*, rsu_vw.ipv4_address, rsu_vw.deviceid, tim_rsu.rsu_index from active_tim";
+			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
+			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
+			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			query += " where sat_record_id is null";
+			query += " order by rsu_vw.deviceid, tim_rsu.rsu_index";
+
+			rs = statement.executeQuery(query);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				Long deviceId = rs.getLong("DEVICEID");
+				if(rsu == null || !rsu.getDeviceId().equals(deviceId)) {
+					if(rsu != null) {
+						results.add(rsu);
+					}
+
+					// Create PopulatedRsu record
+					rsu = new PopulatedRsu();
+					rsu.setDeviceId(deviceId);
+					rsu.setIpv4Address(rs.getString("IPV4_ADDRESS"));
+					rsu.setRsuActiveTims(new ArrayList<ActiveTim>());
+				}
+
+				// Create ActiveTim record
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setPk(rs.getInt("PK"));
+				activeTim.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				activeTim.setRsuIndex(rs.getInt("RSU_INDEX"));
+
+				rsu.getRsuActiveTims().add(activeTim);
+			}
+
+			if(rsu != null) {
+				results.add(rsu);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

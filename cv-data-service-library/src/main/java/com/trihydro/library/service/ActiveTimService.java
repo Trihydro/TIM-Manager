@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.PopulatedRsu;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 
@@ -141,6 +142,12 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	public List<ActiveTim> getActiveTimsForSDX() {
 		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate()
 				.getForEntity(CVRestUrl + "/active-tim/all-sdx", ActiveTim[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	public List<PopulatedRsu> getRsusWithActiveTims() {
+		ResponseEntity<PopulatedRsu[]> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(CVRestUrl + "/active-tim/rsus-with-active-tims", PopulatedRsu[].class);
 		return Arrays.asList(response.getBody());
 	}
 }

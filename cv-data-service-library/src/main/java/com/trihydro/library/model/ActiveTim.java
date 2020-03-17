@@ -18,15 +18,8 @@ public class ActiveTim {
     private String satRecordId;
     private Integer pk;
     private String rsuTarget;
+    private Integer rsuIndex;
     private List<Integer> itisCodes;
-
-    public List<Integer> getItisCodes(){
-        return itisCodes;
-    }
-
-    public void setItisCodes(List<Integer> itisCodes){
-        this.itisCodes = itisCodes;
-    }
 
     public Long getActiveTimId() {
         return this.activeTimId;
@@ -138,5 +131,21 @@ public class ActiveTim {
 
     public void setRsuTarget(String rsuTarget) {
         this.rsuTarget = rsuTarget;
+    }
+
+    public Integer getRsuIndex() {
+        return this.rsuIndex;
+    }
+
+    public void setRsuIndex(Integer rsuIndex) {
+        this.rsuIndex = rsuIndex;
+    }
+
+    public List<Integer> getItisCodes(){
+        return itisCodes;
+    }
+
+    public void setItisCodes(List<Integer> itisCodes){
+        this.itisCodes = itisCodes;
     }
 }

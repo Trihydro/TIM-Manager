@@ -20,21 +20,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidateSDX {
-    private EmailHelper mailHelper;
-    private EmailConfiguration emailConfig;
+public class ValidateSDX implements Runnable {
     private DataTasksConfiguration config;
     private SdwService sdwService;
     private ActiveTimService activeTimService;
+    private EmailHelper mailHelper;
+    private EmailConfiguration emailConfig;
 
     @Autowired
-    public void InjectDependencies(EmailHelper _mailHelper, SdwService _sdwService, ActiveTimService _activeTimService,
-            EmailConfiguration _emailConfig, DataTasksConfiguration _config) {
-        mailHelper = _mailHelper;
+    public void InjectDependencies(DataTasksConfiguration _config, SdwService _sdwService,
+            ActiveTimService _activeTimService, EmailConfiguration _emailConfig, EmailHelper _mailHelper) {
+        config = _config;
         sdwService = _sdwService;
         activeTimService = _activeTimService;
         emailConfig = _emailConfig;
-        config = _config;
+        mailHelper = _mailHelper;
     }
 
     public void run() {

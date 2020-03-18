@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
+import com.trihydro.tasks.models.Collision;
+import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -15,10 +18,14 @@ import org.springframework.stereotype.Component;
 public class EmailConfiguration {
     private String formatSdxMain;
     private String formatSection;
+    private String formatRsuMain;
+    private String formatRsuResults;
 
     public EmailConfiguration() throws IOException {
         formatSdxMain = readFile("email-templates/sdx-main.html");
         formatSection = readFile("email-templates/section.html");
+        formatRsuMain = readFile("email-templates/rsu-main.html");
+        formatRsuResults = readFile("email-templates/rsu-results.html");
     }
 
     private String readFile(String path) throws IOException {
@@ -54,7 +61,7 @@ public class EmailConfiguration {
         }
 
         // ActiveTims to resend to SDX
-        if(toResend.size() > 0) {
+        if (toResend.size() > 0) {
             String section = formatSection.replaceAll("\\{title\\}", "ActiveTims to resend to SDX");
             section = section.replaceAll("\\{headers\\}", getHeader("ACTIVE_TIM_ID", "SAT_RECORD_ID"));
 
@@ -69,7 +76,7 @@ public class EmailConfiguration {
         }
 
         // Orphaned records to delete from SDX
-        if(deleteFromSdx.size() > 0) {
+        if (deleteFromSdx.size() > 0) {
             String section = formatSection.replaceAll("\\{title\\}", "Orphaned records to delete from SDX");
             section = section.replaceAll("\\{headers\\}", getHeader("recordId"));
 
@@ -85,6 +92,69 @@ public class EmailConfiguration {
         body = body.replaceAll("\\{summary-tables\\}", content);
 
         return body;
+    }
+
+    public String generateRsuSummaryEmail(List<String> unresponsiveRsus, List<RsuValidationResult> rsusWithErrors,
+            List<String> unexpectedErrors) {
+        String body = formatRsuMain;
+
+        // List RSUs that couldn't be verified
+        String failedIpAddresses = String.join(", ", unresponsiveRsus);
+        body = body.replaceAll("\\{failedIpAddresses\\}", failedIpAddresses);
+
+        // Populate RSUs With Errors section (if applicable)
+        String rsuResults = "";
+        for (RsuValidationResult rsuResult : rsusWithErrors) {
+            rsuResults += getRsuResult(rsuResult);
+        }
+        body = body.replaceAll("\\{rsusWithErrors\\}", rsuResults);
+
+        // List unexpected errors
+        String errorList = "";
+        for (String error : unexpectedErrors) {
+            errorList += "<li>" + error + "</li>";
+        }
+        body = body.replaceAll("\\{errorsList\\}", errorList);
+
+        return body;
+    }
+
+    private String getRsuResult(RsuValidationResult result) {
+        String section = formatRsuResults.replaceAll("\\{ipv4Address\\}", result.getRsu());
+
+        // List unaccounted for indexes
+        String unaccountedForIndexes = "";
+        for (Integer index : result.getUnaccountedForIndices()) {
+            if (!unaccountedForIndexes.equals("")) {
+                unaccountedForIndexes += ", ";
+            }
+            unaccountedForIndexes += index.toString();
+        }
+        section = section.replaceAll("\\{unaccountedIndexes\\}", unaccountedForIndexes);
+
+        // List Active TIMs missing from RSU
+        String rowsMissingTims = "";
+        for (ActiveTim tim : result.getMissingFromRsu()) {
+            rowsMissingTims += getRow(tim.getActiveTimId().toString(), tim.getRsuIndex().toString());
+        }
+        section = section.replaceAll("\\{rowsMissingTims\\}", rowsMissingTims);
+
+        // List Active TIMs claiming same index
+        String rowsCollisions = "";
+        for (Collision collision : result.getCollisions()) {
+            String activeTimIds = "";
+            for (ActiveTim tim : collision.getTims()) {
+                if (!activeTimIds.equals("")) {
+                    activeTimIds += ", ";
+                }
+                activeTimIds += tim.getActiveTimId().toString();
+            }
+
+            rowsCollisions += getRow(collision.getIndex().toString(), activeTimIds);
+        }
+        section = section.replaceAll("\\{rowsCollisions\\}", rowsCollisions);
+
+        return section;
     }
 
     private String getHeader(String... values) {

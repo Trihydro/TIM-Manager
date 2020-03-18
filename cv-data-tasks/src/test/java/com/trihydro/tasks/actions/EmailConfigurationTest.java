@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
@@ -11,6 +12,8 @@ import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.tasks.config.EmailConfiguration;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
+import com.trihydro.tasks.models.Collision;
+import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.junit.Test;
 
@@ -28,8 +31,8 @@ public class EmailConfigurationTest {
         String emailBody = uut.generateSdxSummaryEmail(1, 2, 3, toResend, deleteFromSdx, invOracleRecords);
 
         // Assert
-        assertTrue("Number of stale records on SDX (different ITIS codes than ActiveTim): 2",
-                emailBody.matches("[\\s\\S]*Number of stale records on SDX \\(different ITIS codes than ActiveTim\\):</td>\\s*<td>2[\\s\\S]*"));
+        assertTrue("Number of stale records on SDX (different ITIS codes than ActiveTim): 2", emailBody.matches(
+                "[\\s\\S]*Number of stale records on SDX \\(different ITIS codes than ActiveTim\\):</td>\\s*<td>2[\\s\\S]*"));
         assertTrue("Number of messages on SDX without corresponding Oracle record: 1", emailBody.matches(
                 "[\\s\\S]*Number of messages on SDX without corresponding Oracle record:</td>\\s*<td>1[\\s\\S]*"));
         assertTrue("Number of Oracle records without corresponding message in SDX: 3", emailBody.matches(
@@ -107,7 +110,98 @@ public class EmailConfigurationTest {
         // Assert
         assertTrue("<h3>Orphaned records to delete from SDX</h3>",
                 emailBody.matches("[\\s\\S]*<h3>Orphaned records to delete from SDX</h3>[\\s\\S]*"));
-        assertTrue("<tr><td>-200</td></tr>",
-                emailBody.matches("[\\s\\S]*<tr><td>-200</td></tr>[\\s\\S]*"));
+        assertTrue("<tr><td>-200</td></tr>", emailBody.matches("[\\s\\S]*<tr><td>-200</td></tr>[\\s\\S]*"));
+    }
+
+    @Test
+    public void generateRsuSummaryEmail_success() throws IOException {
+        // Arrange
+        EmailConfiguration uut = new EmailConfiguration();
+
+        List<String> unresponsiveRsus = new ArrayList<>();
+        List<String> unexpectedErrors = new ArrayList<>();
+        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
+
+        unresponsiveRsus.add("10.145.0.0");
+
+        // Act
+        String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
+
+        // Assert
+        assertTrue("Unable to verify the following RSUs 10.145.0.0",
+                emailBody.matches("[\\s\\S]*<div class=\"indent\"><p>10.145.0.0</p></div>[\\s\\S]*"));
+    }
+
+    @Test
+    public void generateRsuSummaryEmail_invalidRsu() throws IOException {
+        // Arrange
+        EmailConfiguration uut = new EmailConfiguration();
+
+        List<String> unresponsiveRsus = new ArrayList<>();
+        List<String> unexpectedErrors = new ArrayList<>();
+        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
+
+        RsuValidationResult invalidRsu = new RsuValidationResult("10.145.0.0");
+
+        // ActiveTim missing from RSU
+        ActiveTim missing = new ActiveTim() {
+            {
+                setActiveTimId(1l);
+                setRsuIndex(1);
+            }
+        };
+        invalidRsu.setMissingFromRsu(Arrays.asList(missing));
+
+        // 2 ActiveTims, collided at index 2 on RSU
+        ActiveTim coll1 = new ActiveTim() {
+            {
+                setActiveTimId(2l);
+            }
+        };
+        ActiveTim coll2 = new ActiveTim() {
+            {
+                setActiveTimId(3l);
+            }
+        };
+        Collision c = new Collision(2, Arrays.asList(coll1, coll2));
+        invalidRsu.setCollisions(Arrays.asList(c));
+
+        // Unaccounted for RSU index
+        invalidRsu.setUnaccountedForIndices(Arrays.asList(3));
+
+        rsusWithErrors.add(invalidRsu);
+
+        // Act
+        String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
+
+        // Assert
+        assertTrue("<h3>RSUs with Errors</h3><h4>10.145.0.0</h4>",
+                emailBody.matches("[\\s\\S]*<h3>RSUs with Errors</h3>\\s*<h4>10.145.0.0</h4>[\\s\\S]*"));
+        assertTrue("... Populated Indexes w/o ActiveTim record ... 3 ...",
+                emailBody.matches("[\\s\\S]*Populated Indexes w/o ActiveTim record[\\s\\S]*3[\\s\\S]*"));
+        assertTrue("... Active TIMs missing from RSU ... <tr><td>1</td><td>1</td></tr> ...", emailBody
+                .matches("[\\s\\S]*Active TIMs missing from RSU[\\s\\S]*<tr><td>1</td><td>1</td></tr>[\\s\\S]*"));
+        assertTrue("... Active TIMs claiming same index ... <tr><td>2</td><td>2, 3</td></tr> ...", emailBody
+                .matches("[\\s\\S]*Active TIMs claiming same index[\\s\\S]*<tr><td>2</td><td>2, 3</td></tr>[\\s\\S]*"));
+    }
+
+    @Test
+    public void generateRsuSummaryEmail_unexpectedError() throws IOException {
+        // Arrange
+        EmailConfiguration uut = new EmailConfiguration();
+
+        List<String> unresponsiveRsus = new ArrayList<>();
+        List<String> unexpectedErrors = new ArrayList<>();
+        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
+
+        unexpectedErrors.add("10.145.0.0: InterruptedException");
+
+        // Act
+        String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
+
+        // Assert
+        assertTrue("... <h3>Unexpected Errors Processing RSUs</h3> ... <li>10.145.0.0: InterruptedException</li> ...",
+                emailBody.matches(
+                        "[\\s\\S]*<h3>Unexpected Errors Processing RSUs</h3>\\s*<ul>\\s*<li>10.145.0.0: InterruptedException</li>\\s*</ul>[\\s\\S]*"));
     }
 }

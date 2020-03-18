@@ -1,0 +1,39 @@
+<h4>{ipv4Address}</h4>
+<ul>
+  <li>
+    Populated Indexes w/o ActiveTim record
+    <table>
+      <tr>
+        <td>{unaccountedIndexes}</td>
+      </tr>
+    </table>
+  </li>
+  <li>
+    Active TIMs missing from RSU
+    <table>
+      <thead>
+        <tr>
+          <th>ActiveTimId</th>
+          <th>Expected Index</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rowsMissingTims}
+      </tbody>
+    </table>
+  </li>
+  <li>
+    Active TIMs claiming same index
+    <table>
+      <thead>
+        <tr>
+          <th>Index</th>
+          <th>ActiveTimIds</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rowsCollisions}
+      </tbody>
+    </table>
+  </li>
+</ul>

@@ -6,14 +6,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import com.trihydro.cvdatacontroller.services.MilepostService;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.WydotTim;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +29,13 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @ApiIgnore
 public class MilepostController extends BaseController {
+
+	private MilepostService milepostService;
+
+	@Autowired
+	public void InjectDependencies(MilepostService _milepostService) {
+		this.milepostService = _milepostService;
+	}
 
 	@RequestMapping(value = "/mileposts", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<Milepost>> getMileposts() {
@@ -39,7 +51,7 @@ public class MilepostController extends BaseController {
 			connection = GetConnectionPool();
 			statement = connection.createStatement();
 
-			String sqlQuery = "select * from MILEPOST_VW where MOD(milepost, 1) = 0 order by milepost asc";
+			String sqlQuery = "select * from MILEPOST_VW_NEW where MOD(milepost, 1) = 0 order by milepost asc";
 			rs = statement.executeQuery(sqlQuery);
 
 			// convert result to milepost objects
@@ -433,5 +445,36 @@ public class MilepostController extends BaseController {
 			}
 		}
 		return ResponseEntity.ok(mileposts);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/get-by-common-name/{commonName}/{limit}")
+	public ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> getMilepostsByCommonName(
+			@PathVariable String commonName, @PathVariable Integer limit) {
+		return ResponseEntity.ok(milepostService.getMilepostsByCommonNameWithLimit(commonName, limit));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/get-milepost-start-end")
+	public ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> getMilepostsByStartEndPoint(
+			@RequestBody WydotTim wydotTim) {
+
+		Collection<com.trihydro.cvdatacontroller.model.Milepost> data = milepostService.getPath(wydotTim.getRoute(),
+				wydotTim.getStartPoint().getLatitude(), wydotTim.getStartPoint().getLongitude(),
+				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude());
+		return ResponseEntity.ok(data);
+		/*
+		 * match(startMp:Milepost{CommonName: 'I 80'}) where startMp.Direction in ['D',
+		 * 'B'] with startMp, distance(point({longitude:-105.53655624389648,
+		 * latitude:41.291092826662975}), point({longitude:startMp.Longitude,
+		 * latitude:startMp.Latitude})) as d1 with startMp, d1 ORDER BY d1 ASC LIMIT 1
+		 * 
+		 * match(endMp:Milepost{CommonName: 'I 80'}) where endMp.Direction in ['D', 'B']
+		 * with startMp, endMp, distance(point({longitude:-104.088324,
+		 * latitude:41.170684}), point({longitude:endMp.Longitude,
+		 * latitude:endMp.Latitude})) as d2 with startMp, endMp, d2 ORDER BY d2 ASC
+		 * LIMIT 1
+		 * 
+		 * with startMp, endMp call algo.shortestPath.stream(startMp,endMp) yield nodeId
+		 * match(other:Milepost) where id(other) = nodeId return other;
+		 */
 	}
 }

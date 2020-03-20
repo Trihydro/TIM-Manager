@@ -1,0 +1,1 @@
+docker exec -it milepost-graph-db_milepost-graph_1 bash -c "cat import/import.cql | bin/cypher-shell"

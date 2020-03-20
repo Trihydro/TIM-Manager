@@ -2,10 +2,10 @@ package com.trihydro.odewrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,8 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -61,7 +60,6 @@ public class WydotTimVslControllerTest {
 
 	@Before
 	public void setup() throws Exception {
-		PowerMockito.mockStatic(ActiveTimService.class);
 		List<ItisCode> itisCodes = new ArrayList<>();
 		ItisCode ic = new ItisCode();
 		ic.setCategoryId(-1);
@@ -71,11 +69,11 @@ public class WydotTimVslControllerTest {
 		itisCodes.add(ic);
 		List<String> itisCodesIncident = new ArrayList<>();
 		itisCodesIncident.add("531");
-		doReturn(itisCodesIncident).when(mockSetItisCodes).setItisCodesVsl(any());
-		doReturn(itisCodes).when(mockSetItisCodes).getItisCodes();
+		lenient().doReturn(itisCodesIncident).when(mockSetItisCodes).setItisCodesVsl(any());
+		lenient().doReturn(itisCodes).when(mockSetItisCodes).getItisCodes();
 
-		doNothing().when(uut).processRequestAsync(any());
-		doReturn(true).when(uut).routeSupported(isA(String.class));
+		lenient().doNothing().when(uut).processRequestAsync(any());
+		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 	}
 
 	@Test

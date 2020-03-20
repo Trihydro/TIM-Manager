@@ -34,7 +34,7 @@ import io.swagger.annotations.Api;
 @Api(description = "Incidents")
 public class WydotTimIncidentController extends WydotTimBaseController {
 
-    private static String type = "I";
+    private String type = "I";
 
     @Autowired
     public WydotTimIncidentController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,

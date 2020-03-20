@@ -2,10 +2,10 @@ package com.trihydro.odewrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -66,12 +66,12 @@ public class WydotTimRwControllerTest {
 		itisCodes.add(ic);
 		List<String> itisCodesIncident = new ArrayList<>();
 		itisCodesIncident.add("531");
-		doReturn(itisCodesIncident).when(setItisCodes).setItisCodesRw(any());
-		doReturn(itisCodes).when(setItisCodes).getItisCodes();
+		lenient().doReturn(itisCodesIncident).when(setItisCodes).setItisCodesRw(any());
+		lenient().doReturn(itisCodes).when(setItisCodes).getItisCodes();
 
-		doReturn(true).when(uut).routeSupported(isA(String.class));
+		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 
-		doNothing().when(uut).processRequestAsync();
+		lenient().doNothing().when(uut).processRequestAsync();
 	}
 
 	@Test

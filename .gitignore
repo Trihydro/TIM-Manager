@@ -23,6 +23,7 @@ cv-data-tasks/**/*.class
 *.launch
 .settings/
 *.sublime-workspace
+.factorypath
 
 # IDE - VSCode
 .vscode/*

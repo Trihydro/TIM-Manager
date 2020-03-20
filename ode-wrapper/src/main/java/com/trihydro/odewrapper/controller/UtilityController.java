@@ -51,7 +51,7 @@ public class UtilityController extends WydotTimBaseController {
         String errMessage;
     }
 
-    private static String type = "TEST";
+    private String type = "TEST";
 
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,

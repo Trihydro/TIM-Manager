@@ -34,7 +34,7 @@ import io.swagger.annotations.Api;
 @Api(description = "Variable Speed Limits")
 public class WydotTimVslController extends WydotTimBaseController {
 
-    private static String type = "VSL";
+    private String type = "VSL";
 
     @Autowired
     public WydotTimVslController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,

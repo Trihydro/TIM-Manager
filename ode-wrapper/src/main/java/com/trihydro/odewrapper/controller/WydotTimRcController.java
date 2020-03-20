@@ -32,7 +32,7 @@ import io.swagger.annotations.Api;
 @Api(description = "Road Conditions")
 public class WydotTimRcController extends WydotTimBaseController {
 
-    private static String type = "RC";
+    private String type = "RC";
 
     @Autowired
     public WydotTimRcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,

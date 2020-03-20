@@ -41,7 +41,7 @@ import io.swagger.annotations.Api;
 @Api(description = "Road Construction")
 public class WydotTimRwController extends WydotTimBaseController {
 
-    private static String type = "RW";
+    private String type = "RW";
     List<WydotTimRw> timsToSend;
 
     @Autowired

@@ -12,7 +12,6 @@ import java.util.TimeZone;
 
 import com.trihydro.cvdatacontroller.model.DataControllerConfigProperties;
 import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -27,8 +26,8 @@ public class BaseController {
 
     private HikariDataSource hds = null;
     private HikariConfig config;
-    private DataControllerConfigProperties dbConfig;
-    private JavaMailSenderImplProvider mailProvider;
+    protected DataControllerConfigProperties dbConfig;
+    // private JavaMailSenderImplProvider mailProvider;
     private Utility utility;
     private EmailHelper emailHelper;
 
@@ -38,10 +37,10 @@ public class BaseController {
     protected DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(DataControllerConfigProperties props, JavaMailSenderImplProvider _mailProvider,
+    public void InjectDependencies(DataControllerConfigProperties props, //JavaMailSenderImplProvider _mailProvider,
             Utility _utility, EmailHelper _emailHelper) {
         dbConfig = props;
-        mailProvider = _mailProvider;
+        // mailProvider = _mailProvider;
         utility = _utility;
         emailHelper = _emailHelper;
     }

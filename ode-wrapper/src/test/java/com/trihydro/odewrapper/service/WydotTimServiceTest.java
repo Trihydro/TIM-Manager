@@ -1,6 +1,6 @@
 package com.trihydro.odewrapper.service;
 
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -125,13 +125,10 @@ public class WydotTimServiceTest {
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         ActiveTimService.deleteActiveTim(-1l);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         ActiveTimService.deleteActiveTim(-2l);
-        // verify(restTemplate).exchange(any(String.class), any(HttpMethod.class),
-        // Matchers.<HttpEntity<String>>any(),
-        // Matchers.<Class<String>>any());
     }
 
     @Test
@@ -153,11 +150,11 @@ public class WydotTimServiceTest {
         verify(mockEmailHelper).SendEmail(mockBasicConfiguration.getAlertAddresses(), null, subject, body,
                 mockBasicConfiguration.getMailPort(), mockBasicConfiguration.getMailHost(),
                 mockBasicConfiguration.getFromEmail());
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-2l);
         ActiveTimService.deleteActiveTimsById(delIds);
-        PowerMockito.verifyStatic(never());
+        PowerMockito.verifyStatic(TimRsuService.class, never());
         TimRsuService.getTimRsusByTimId(isA(Long.class));
     }
 
@@ -174,12 +171,12 @@ public class WydotTimServiceTest {
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-1l);
         delIds.add(-2l);
         ActiveTimService.deleteActiveTimsById(delIds);
-        PowerMockito.verifyStatic(never());
+        PowerMockito.verifyStatic(TimRsuService.class, never());
         TimRsuService.getTimRsusByTimId(isA(Long.class));
     }
 }

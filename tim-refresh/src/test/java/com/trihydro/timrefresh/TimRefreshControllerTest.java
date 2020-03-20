@@ -1,7 +1,7 @@
 package com.trihydro.timrefresh;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -119,7 +119,7 @@ public class TimRefreshControllerTest {
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions, called once
-        PowerMockito.verifyStatic(VerificationModeFactory.times(1));
+        PowerMockito.verifyStatic(ActiveTimService.class, VerificationModeFactory.times(1));
         // verify getExpiringActiveTims called once
         ActiveTimService.getExpiringActiveTims();
 
@@ -147,7 +147,7 @@ public class TimRefreshControllerTest {
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(RsuService.class);
         RsuService.getFullRsusTimIsOn(timID);
 
         PowerMockito.verifyNoMoreInteractions(RsuService.class);
@@ -177,10 +177,10 @@ public class TimRefreshControllerTest {
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(RsuService.class);
         RsuService.getFullRsusTimIsOn(timID);
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.updateTimOnRsu(any(WydotTravelerInputData.class));
 
         PowerMockito.verifyNoMoreInteractions(RsuService.class);
@@ -202,20 +202,20 @@ public class TimRefreshControllerTest {
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         ActiveTimService.getExpiringActiveTims();
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(MilepostService.class);
         MilepostService.selectMilepostRange(any(), any(), any(), any());
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.getServiceRegion(any());
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.updateTimOnSdw(any());
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(RsuService.class);
         RsuService.getFullRsusTimIsOn(any());
 
         PowerMockito.verifyNoMoreInteractions(MilepostService.class);

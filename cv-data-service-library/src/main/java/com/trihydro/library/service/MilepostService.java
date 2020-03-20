@@ -4,7 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.WydotTim;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -30,21 +35,13 @@ public class MilepostService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
-	public List<Milepost> getMilepostsByLongitudeRange(String direction, Double startLong, Double endLong,
-			String commonName) {
-		String url = String.format("%s/get-milepost-longitude-range/%s/%f/%f/%s", CVRestUrl, direction, startLong,
-				endLong, commonName);
-		ResponseEntity<Milepost[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
-				Milepost[].class);
-		return Arrays.asList(response.getBody());
-	}
-
-	public List<Milepost> getMilepostsByLatitudeRange(String direction, Double startLat, Double endLat,
-			String commonName) {
-		String url = String.format("%s/get-milepost-latitude-range/%s/%f/%f/%s", CVRestUrl, direction, startLat, endLat,
-				commonName);
-		ResponseEntity<Milepost[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
-				Milepost[].class);
+	public List<Milepost> getMilepostsByStartEndPoint(WydotTim wydotTim) {
+		String url = String.format("%s/get-milepost-start-end", CVRestUrl);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<WydotTim> entity = new HttpEntity<WydotTim>(wydotTim, headers);
+		ResponseEntity<Milepost[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST,
+				entity, Milepost[].class);
 		return Arrays.asList(response.getBody());
 	}
 }

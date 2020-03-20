@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -78,31 +77,12 @@ public class CreateBaseTimUtil {
         path.setScale(0);
         path.setType("xy");
 
-        Integer numericRoute = Integer.parseInt(wydotTim.getRoute().replaceAll("\\D+", ""));
-        List<Milepost> mileposts = new ArrayList<>();
-        Coordinate startPoint = wydotTim.getStartPoint();
-        Coordinate endPoint = wydotTim.getEndPoint();
-        if (numericRoute % 2 == 0) {
-            // even routes are east/west
-            // give ~.1 mile buffer
-            if (direction.toLowerCase() == "i") {
-                startPoint.setLongitude(startPoint.getLongitude() - .002);
-            } else if (direction.toLowerCase() == "d") {
-                endPoint.setLongitude(endPoint.getLongitude() + .002);
-            }
-            mileposts = milepostService.getMilepostsByLongitudeRange(direction, startPoint.getLongitude(),
-                    endPoint.getLongitude(), wydotTim.getRoute());
-        } else {
-            // odd routes are north/south
-            // give ~.1 mile buffer
-            if (direction.toLowerCase() == "i") {
-                startPoint.setLatitude(startPoint.getLatitude() - .002);
-            } else if (direction.toLowerCase() == "d") {
-                endPoint.setLatitude(endPoint.getLatitude() + .002);
-            }
-            mileposts = milepostService.getMilepostsByLatitudeRange(direction, startPoint.getLatitude(),
-                    endPoint.getLatitude(), wydotTim.getRoute());
-        }
+        // Integer numericRoute =
+        // Integer.parseInt(wydotTim.getRoute().replaceAll("\\D+", ""));
+        // Coordinate startPoint = wydotTim.getStartPoint();
+        // Coordinate endPoint = wydotTim.getEndPoint();
+        // TODO: add in direction
+        List<Milepost> mileposts = milepostService.getMilepostsByStartEndPoint(wydotTim);
         timToSend.setMileposts(mileposts);
 
         List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();

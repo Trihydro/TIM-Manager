@@ -16,6 +16,7 @@ public class TimOracleTables extends OracleTables {
     private List<String> pathNodeXYTable;
     private List<String> timTypeTable;
     private List<String> activeTimTable;
+    private List<String> activeTimHoldingTable;
     private List<String> timRsuTable;
     private List<String> dataFrameItisCodeTable;
     private List<String> driverAlertItisCodeTable;
@@ -178,6 +179,24 @@ public class TimOracleTables extends OracleTables {
             activeTimTable.add("SAT_RECORD_ID");
             activeTimTable.add("PK");
             return activeTimTable;
+        }
+    }
+
+    public List<String> getActiveTimHoldingTable() {
+        if (activeTimHoldingTable != null)
+            return activeTimHoldingTable;
+        else {
+            activeTimHoldingTable = new ArrayList<String>();
+            activeTimHoldingTable.add("ACTIVE_TIM_HOLDING_ID");
+            activeTimHoldingTable.add("CLIENT_ID");
+            activeTimHoldingTable.add("DIRECTION");
+            activeTimHoldingTable.add("RSU_TARGET");
+            activeTimHoldingTable.add("SAT_RECORD_ID");
+            activeTimHoldingTable.add("START_LATITUDE");
+            activeTimHoldingTable.add("START_LONGITUDE");
+            activeTimHoldingTable.add("END_LATITUDE");
+            activeTimHoldingTable.add("END_LONGITUDE");
+            return activeTimHoldingTable;
         }
     }
 

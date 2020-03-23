@@ -19,6 +19,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
@@ -26,6 +27,7 @@ import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -63,11 +65,12 @@ public class WydotTimService {
     private Utility utility;
     private OdeService odeService;
     private CreateBaseTimUtil createBaseTimUtil;
+    private ActiveTimHoldingService activeTimHoldingService;
 
     @Autowired
     public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
             TimTypeService _timTypeService, SdwService _sdwService, Utility _utility, OdeService _odeService,
-            CreateBaseTimUtil _createBaseTimUtil) {
+            CreateBaseTimUtil _createBaseTimUtil, ActiveTimHoldingService _activeTimHoldingService) {
         configuration = configurationRhs;
         emailHelper = _emailHelper;
         timTypeService = _timTypeService;
@@ -75,6 +78,7 @@ public class WydotTimService {
         utility = _utility;
         odeService = _odeService;
         createBaseTimUtil = _createBaseTimUtil;
+        activeTimHoldingService = _activeTimHoldingService;
     }
 
     public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
@@ -135,11 +139,18 @@ public class WydotTimService {
         // filter by SAT TIMs
         activeSatTims = activeSatTims.stream().filter(x -> x.getSatRecordId() != null).collect(Collectors.toList());
 
+        String recordId = activeSatTims != null && activeSatTims.size() > 0 ? activeSatTims.get(0).getSatRecordId()
+                : sdwService.getNewRecordId();
+
+        // save new active_tim_holding record
+        ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, activeSatTims.get(0).getSatRecordId());
+        activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
+
         if (activeSatTims != null && activeSatTims.size() > 0) {
 
             WydotOdeTravelerInformationMessage tim = TimService.getTim(activeSatTims.get(0).getTimId());
 
-            String regionNameTemp = regionNamePrev + "_SAT-" + activeSatTims.get(0).getSatRecordId() + "_"
+            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_"
                     + timType.getType();
             if (wydotTim.getClientId() != null)
                 regionNameTemp += "_" + wydotTim.getClientId();
@@ -151,7 +162,6 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
         } else {
-            String recordId = sdwService.getNewRecordId();
             String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
 
             if (wydotTim.getClientId() != null)
@@ -203,6 +213,10 @@ public class WydotTimService {
             ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(wydotTim.getDirection(), wydotTim.getClientId(),
                     rsu.getRsuTarget());
             ActiveTim activeTim = ActiveTimService.getActiveRsuTim(artqm);
+
+            // save new active_tim_holding record
+            ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null);
+            activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
             // if active tims exist, update tim
             if (activeTim != null) {

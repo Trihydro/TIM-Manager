@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 services:
   ode_wrapper:
     build: ode-wrapper
@@ -26,7 +26,7 @@ services:
       # SERVER_SSL_KEY_STORE_TYPE: ${WRAPPER_SERVER_SSL_KEY_STORE_TYPE}
       # SERVER_SSL_KEY_ALIAS: ${WRAPPER_SERVER_SSL_KEY_ALIAS}
     ports:
-      - '7777:7777'
+      - "7777:7777"
 
   cv-data-tasks:
     build: cv-data-tasks
@@ -54,7 +54,7 @@ services:
     build: cv-data-controller
     restart: always
     ports:
-      - '8888:8888'
+      - "8888:8888"
     environment:
       SERVER_PORT: ${CONTROLLER_SERVER_PORT}
       CONFIG_DB_DRIVER: ${CONTROLLER_CONFIG_DB_DRIVER}
@@ -65,11 +65,25 @@ services:
       CONFIG_ODE_URL: ${CONTROLLER_CONFIG_ODE_URL}
       CONFIG_ENV: ${CONTROLLER_CONFIG_ENV}
 
+  rsu-data-controller:
+    build: rsu-data-controller
+    restart: always
+    ports:
+      - "8898:8898"
+    environment:
+      SERVER_PORT: ${RSUCONTROLLER_SERVER_PORT}
+      CONFIG_SNMP_RETRIES: ${RSUCONTROLLER_CONFIG_SNMP_RETRIES}
+      CONFIG_SNMP_TIMEOUT_SECONDS: ${RSUCONTROLLER_CONFIG_SNMP_TIMEOUT_SECONDS}
+      CONFIG_SNMP_USER_NAME: ${RSUCONTROLLER_CONFIG_SNMP_USER_NAME}
+      CONFIG_SNMP_AUTH_PASSPHRASE: ${RSUCONTROLLER_CONFIG_SNMP_AUTH_PASSPHRASE}
+      CONFIG_SNMP_AUTH_PROTOCOL: ${RSUCONTROLLER_CONFIG_SNMP_AUTH_PROTOCOL}
+      CONFIG_SNMP_SECURITY_LEVEL: ${RSUCONTROLLER_CONFIG_SNMP_SECURITY_LEVEL}
+
   angular:
     build: timBuilder
     restart: always
     ports:
-      - '4200:4200'
+      - "4200:4200"
 
   bsm_logger_mongo:
     build: ode-mongo-logger
@@ -331,7 +345,7 @@ services:
       options:
         max-size: 50m
     ports:
-      - '9999:9999'
+      - "9999:9999"
 
   smdm:
     build: smdm
@@ -340,7 +354,7 @@ services:
       options:
         max-size: 50m
     ports:
-      - '8081:8081'
+      - "8081:8081"
 
   logger-kafka-consumer:
     build: logger-kafka-consumer

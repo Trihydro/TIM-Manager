@@ -10,23 +10,25 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.trihydro.rsudatacontroller.config.BasicConfiguration;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.process.ProcessFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ImageBanner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RsuService {
     private static final String oid_rsuSRMDeliveryStart = "1.0.15628.4.1.4.1.7";
-
     private static final DateTimeFormatter rsuDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     private ProcessFactory processFactory;
+    private BasicConfiguration config;
 
     @Autowired
-    public void InjectDependencies(ProcessFactory processFactory) {
+    public void InjectDependencies(ProcessFactory processFactory, BasicConfiguration config) {
         this.processFactory = processFactory;
+        this.config = config;
     }
 
     /**
@@ -37,43 +39,34 @@ public class RsuService {
      * @throws Exception if unable to invoke command to perform SNMP communication
      */
     public List<RsuTim> getAllDeliveryStartTimes(String rsuIpv4Address) throws Exception {
-        Process p = null; // OBFUSCATED until I move this to the config
-        
-        String snmpWalkOutput = "iso.0.15628.4.1.4.1.7.2 = Hex-STRING: 07 E4 03 14 11 3B \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.3 = Hex-STRING: 07 E4 03 14 13 1E \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.4 = Hex-STRING: 07 E4 03 14 13 1E \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.5 = Hex-STRING: 07 E4 03 14 13 1E \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.6 = Hex-STRING: 07 E4 03 14 13 1E \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.7 = Hex-STRING: 07 E4 03 14 0E 20 \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.8 = Hex-STRING: 07 E4 03 14 0E 20 \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.9 = Hex-STRING: 07 E4 03 14 11 09 \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.10 = Hex-STRING: 07 E4 03 0E 0E 2A \n";
-        snmpWalkOutput += "iso.0.15628.4.1.4.1.7.11 = Hex-STRING: 07 E4 03 14 11 09 \n"; //getProcessOutput(p);
+        Process p = processFactory.buildAndStartProcess("snmpwalk", "-v", "3", "-r",
+                Integer.toString(config.getSnmpRetries()), "-t", Integer.toString(config.getSnmpTimeoutSeconds()), "-u",
+                config.getSnmpUserName(), "-l", config.getSnmpSecurityLevel(), "-a", config.getSnmpAuthProtocol(), "-A",
+                config.getSnmpAuthPassphrase(), rsuIpv4Address, oid_rsuSRMDeliveryStart);
+
+        String snmpWalkOutput = getProcessOutput(p);
 
         // If timeout occurred, return null
-        if(snmpWalkOutput.matches("snmpwalk: Timeout")) {
+        if (snmpWalkOutput.matches("snmpwalk: Timeout")) {
             return null;
         }
 
         List<RsuTim> tims = new ArrayList<>();
 
         Pattern ip = Pattern.compile("\\.(\\d*) =");
-        Pattern hp = Pattern.compile("Hex-STRING: ((?:[0-9|A-F]{2} )*)");
+        Pattern hp = Pattern.compile("Hex-STRING: ((?:[0-9|A-F]{2}\\s?)*)");
         Matcher im;
         Matcher hm;
-        for(String line : snmpWalkOutput.split("\n")) {
+        for (String line : snmpWalkOutput.split("\n")) {
             im = ip.matcher(line);
             hm = hp.matcher(line);
 
-            if(im.find() && hm.find()) {
+            if (im.find() && hm.find()) {
                 RsuTim tim = new RsuTim();
                 tim.setIndex(Integer.parseInt(im.group(1)));
                 tim.setDeliveryStartTime(hexStringToDateTime(hm.group(1)));
 
                 tims.add(tim);
-            }
-            else {
-                // throw exception?
             }
         }
         return tims;
@@ -96,7 +89,7 @@ public class RsuService {
 
     private String hexStringToDateTime(String hexString) {
         String[] octets = hexString.split(" ");
-        if(octets.length != 6) {
+        if (octets.length != 6) {
             return null;
         }
 

@@ -5,7 +5,7 @@ RUN apt-get update && \
  apt-get install -y openjdk-8-jdk
 
 # Install snmpwalk
-RUN apt-get install -y snmpwalk
+RUN apt-get install -y snmp
 
 # Clean up
 RUN apt-get autoremove -y \

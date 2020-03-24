@@ -2,9 +2,11 @@ package com.trihydro.rsudatacontroller.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.config.BasicConfiguration;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.process.ProcessFactory;
@@ -33,6 +36,9 @@ public class RsuServiceTest {
 
     @Mock
     BasicConfiguration mockConfig;
+
+    @Mock
+    Utility mockUtility;
 
     @InjectMocks
     RsuService uut;
@@ -120,6 +126,7 @@ public class RsuServiceTest {
 
         // Assert
         assertNull(results);
+        verify(mockUtility).logWithDate(any());
     }
 
     @Test(expected = RuntimeException.class)

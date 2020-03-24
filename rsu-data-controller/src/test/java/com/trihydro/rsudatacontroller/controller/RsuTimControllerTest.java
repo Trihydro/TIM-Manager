@@ -1,11 +1,14 @@
 package com.trihydro.rsudatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.service.RsuService;
 
@@ -20,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 public class RsuTimControllerTest {
     @Mock
     RsuService mockRsuService;
+
+    @Mock
+    Utility mockUtility;
 
     @InjectMocks
     RsuTimController uut;
@@ -62,6 +68,7 @@ public class RsuTimControllerTest {
         // Assert
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getStatusCode());
         assertEquals(null, result.getBody());
+        verify(mockUtility).logWithDate(any());
     }
 
     @Test
@@ -75,5 +82,6 @@ public class RsuTimControllerTest {
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
         assertEquals(null, result.getBody());
+        verify(mockUtility).logWithDate(any());
     }
 }

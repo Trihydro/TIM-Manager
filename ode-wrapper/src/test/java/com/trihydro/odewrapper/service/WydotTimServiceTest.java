@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.service;
 
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -140,8 +140,7 @@ public class WydotTimServiceTest {
         sdxDelResults.put(-2032126074, true);
         String subject = "SDX Delete Fail";
         String body = "The following recordIds failed to delete from the SDX: -1032012897";
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class)))
-                .thenReturn(sdxDelResults);
+        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
@@ -164,8 +163,7 @@ public class WydotTimServiceTest {
         List<ActiveTim> activeTims = getActiveTims(true);
         HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
         sdxDelResults.put(-1032012897, null);
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class)))
-                .thenReturn(sdxDelResults);
+        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);

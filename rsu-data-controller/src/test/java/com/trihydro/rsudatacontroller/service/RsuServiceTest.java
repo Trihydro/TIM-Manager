@@ -2,8 +2,7 @@ package com.trihydro.rsudatacontroller.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyVararg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -133,7 +132,7 @@ public class RsuServiceTest {
     public void getAllDeliveryStartTimes_throwsRuntimeException() throws Exception {
         // Arrange
         doThrow(new RuntimeException("unable to find snmpwalk command")).when(mockProcessFactory)
-                .buildAndStartProcess(anyVararg());
+                .buildAndStartProcess(any());
 
         // Act
         uut.getAllDeliveryStartTimes("0.0.0.0");

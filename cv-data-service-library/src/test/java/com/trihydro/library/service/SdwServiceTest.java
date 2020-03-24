@@ -4,7 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 
 import java.io.BufferedReader;
@@ -16,7 +17,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,14 +76,14 @@ public class SdwServiceTest {
     @Test
     public void getSdwDataByRecordId_nullRecordId() {
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId(null);
-        Assert.isNull(asdd);
+        Assert.isNull(asdd, "AdvisorySituationDeposit should be null");
     }
 
     @Test
     public void getSdwDataByRecordId_nullApiKey() {
         Mockito.when(mockConfig.getSdwApiKey()).thenReturn(null);
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId("record");
-        Assert.isNull(asdd);
+        Assert.isNull(asdd, "AdvisorySituationDeposit should be null");
     }
 
     @Test
@@ -92,7 +92,7 @@ public class SdwServiceTest {
         Mockito.when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenThrow(new IOException());
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId("record");
-        Assert.isNull(asdd);
+        Assert.isNull(asdd, "AdvisorySituationDeposit should be null");
     }
 
     @Test
@@ -156,7 +156,7 @@ public class SdwServiceTest {
         HashMap<Integer, Boolean> hMap = new HashMap<Integer, Boolean>();
         hMap.put(-1, true);
 
-        Mockito.when(mockStringStream.collect(isA(Collector.class))).thenReturn("{\"-1101625306\":null}");
+        Mockito.when(mockStringStream.collect(any())).thenReturn("{\"-1101625306\":null}");
         Mockito.when(mockBufferedReader.lines()).thenReturn(mockStringStream);
         PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(mockISReader);
         PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(mockBufferedReader);

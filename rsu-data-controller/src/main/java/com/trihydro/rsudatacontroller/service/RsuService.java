@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.config.BasicConfiguration;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.process.ProcessFactory;
@@ -24,11 +25,13 @@ public class RsuService {
 
     private ProcessFactory processFactory;
     private BasicConfiguration config;
+    private Utility utility;
 
     @Autowired
-    public void InjectDependencies(ProcessFactory processFactory, BasicConfiguration config) {
+    public void InjectDependencies(ProcessFactory processFactory, BasicConfiguration config, Utility utility) {
         this.processFactory = processFactory;
         this.config = config;
+        this.utility = utility;
     }
 
     /**
@@ -48,6 +51,7 @@ public class RsuService {
 
         // If timeout occurred, return null
         if (snmpWalkOutput.matches("snmpwalk: Timeout")) {
+            utility.logWithDate("SNMP Timeout occurred (RSU: " + rsuIpv4Address + ")");
             return null;
         }
 

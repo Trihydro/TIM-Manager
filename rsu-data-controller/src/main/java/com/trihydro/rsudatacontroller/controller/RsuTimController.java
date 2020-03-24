@@ -2,6 +2,7 @@ package com.trihydro.rsudatacontroller.controller;
 
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.service.RsuService;
 
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("rsu")
 public class RsuTimController {
     private RsuService rsuService;
+    private Utility utility;
 
     @Autowired
-    public void InjectDependencies(RsuService rsuService) {
+    public void InjectDependencies(RsuService rsuService, Utility utility) {
         this.rsuService = rsuService;
+        this.utility = utility;
     }
 
     /**
@@ -41,10 +44,13 @@ public class RsuTimController {
         try {
             results = rsuService.getAllDeliveryStartTimes(ipv4Address);
         } catch (Exception ex) {
+            utility.logWithDate("Error invoking or reading from SNMP process: ");
+            ex.printStackTrace();
             return ResponseEntity.status(500).body(null);
         }
 
         if (results == null) {
+            utility.logWithDate("Responding with HTTP 422 (RSU: " + ipv4Address + ")");
             return ResponseEntity.unprocessableEntity().body(null);
         }
 

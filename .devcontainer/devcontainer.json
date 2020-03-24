@@ -8,7 +8,7 @@
   },
 
   // Ports forwarded from container
-  "appPort": [7777, 8888, 4200, 9999, 8081],
+  "appPort": [7777, 8888, 8898, 4200, 9999, 8081],
 
   // Extensions to install in container
   "extensions": [

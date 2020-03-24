@@ -8,6 +8,13 @@
       "type": "java",
       "name": "CodeLens (Launch) - Application",
       "request": "launch",
+      "mainClass": "com.trihydro.rsudatacontroller.Application",
+      "projectName": "rsu-data-controller"
+    },
+    {
+      "type": "java",
+      "name": "CodeLens (Launch) - Application",
+      "request": "launch",
       "mainClass": "com.trihydro.library.Application",
       "projectName": "cv-data-service-library"
     },
@@ -19,6 +26,14 @@
       "args": "--spring.profiles.active=dev",
       "mainClass": "com.trihydro.cvdatacontroller.Application",
       "projectName": "cv-data-controller"
+    },
+    {
+      "type": "java",
+      "name": "RSU Data Controller (Launch)",
+      "request": "launch",
+      "cwd": "${workspaceRoot}/rsu-data-controller",
+      "args": "--spring.profiles.active=dev",
+      "mainClass": "com.trihydro.rsudatacontroller.Application"
     },
     {
       "type": "java",

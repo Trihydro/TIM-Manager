@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimOracleTables;
@@ -29,12 +28,10 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         private TimOracleTables mockTimOracleTables = new TimOracleTables();
         @Mock
         private SQLNullHandler mockSqlNullHandler;
-        @Mock
-        private Utility mockUtility;
 
         @Before
         public void setupSubTest() throws SQLException {
-                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockUtility);
+                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
                 doReturn("insert query statement").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
                 doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("insert query statement",
                                 new String[] { "active_tim_holding_id" });

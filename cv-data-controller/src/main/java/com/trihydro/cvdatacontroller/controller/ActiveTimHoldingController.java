@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.tables.TimOracleTables;
 
@@ -27,13 +26,11 @@ import springfox.documentation.annotations.ApiIgnore;
 public class ActiveTimHoldingController extends BaseController {
     private TimOracleTables timOracleTables;
     private SQLNullHandler sqlNullHandler;
-    private Utility utility;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler, Utility _utility) {
+    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
-        utility = _utility;
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)

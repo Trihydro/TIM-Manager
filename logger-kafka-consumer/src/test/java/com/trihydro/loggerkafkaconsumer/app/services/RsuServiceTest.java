@@ -10,7 +10,10 @@ import java.util.ArrayList;
 import com.trihydro.library.model.WydotRsu;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class RsuServiceTest extends TestBase<RsuService> {
 
     @Test

@@ -10,7 +10,10 @@ import java.util.List;
 import com.trihydro.library.model.DriverAlertType;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DriverAlertTypeServiceTest extends TestBase<DriverAlertTypeService> {
 
     @Test

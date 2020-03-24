@@ -5,14 +5,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -29,8 +30,10 @@ import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
@@ -48,6 +51,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TimServiceTest extends TestBase<TimService> {
 
     @Mock
@@ -97,9 +101,9 @@ public class TimServiceTest extends TestBase<TimService> {
         rsu.setMilepost(99d);
         rsu.setRsuTarget("rsuTarget");
         rsus.add(rsu);
-        doReturn(rsus).when(mockRsuService).getRsus();
+        lenient().doReturn(rsus).when(mockRsuService).getRsus();
 
-        doReturn(pathId).when(mockPathService).InsertPath();
+        lenient().doReturn(pathId).when(mockPathService).InsertPath();
     }
 
     @Test
@@ -117,10 +121,10 @@ public class TimServiceTest extends TestBase<TimService> {
         uut.addTimToOracleDB(odeData);
 
         // Assert
-        verifyZeroInteractions(mockDataFrameService);
-        verifyZeroInteractions(mockRegionService);
-        verifyZeroInteractions(mockTimRsuService);
-        verifyZeroInteractions(mockDataFrameItisCodeService);
+        verifyNoInteractions(mockDataFrameService);
+        verifyNoInteractions(mockRegionService);
+        verifyNoInteractions(mockTimRsuService);
+        verifyNoInteractions(mockDataFrameItisCodeService);
         // verify only these were called on the uut
         verify(uut).InjectDependencies(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any());
@@ -186,10 +190,7 @@ public class TimServiceTest extends TestBase<TimService> {
         dataFrame.getRegions()[0].setPath(null);
         dataFrame.getRegions()[0].setGeometry(new Geometry());
         Long dataFrameId = -1l;
-        Long nodeXYId = -2l;
-        doReturn(pathId).when(mockPathService).InsertPath();
-        doReturn(nodeXYId).when(mockNodeXYService).AddNodeXY(isA(OdeTravelerInformationMessage.NodeXY.class));
-
+        
         // Act
         uut.addRegion(dataFrame, dataFrameId);
 
@@ -197,7 +198,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(mockPathService, never()).InsertPath();
         verify(mockRegionService, never()).AddRegion(dataFrameId, pathId, dataFrame.getRegions()[0]);
         verify(mockNodeXYService, never()).AddNodeXY(isA(NodeXY.class));
-        verify(mockPathNodeXYService, never()).insertPathNodeXY(nodeXYId, pathId);
+        verify(mockPathNodeXYService, never()).insertPathNodeXY(any(), any());
         verify(mockRegionService).AddRegion(dataFrameId, null, dataFrame.getRegions()[0]);
         verifyNoMoreInteractions(mockRegionService);
     }
@@ -211,7 +212,7 @@ public class TimServiceTest extends TestBase<TimService> {
         uut.addDataFrameItis(dataFrame, dataFrameId);
 
         // Assert
-        verifyZeroInteractions(mockDataFrameItisCodeService);
+        verifyNoInteractions(mockDataFrameItisCodeService);
     }
 
     @Test
@@ -406,7 +407,6 @@ public class TimServiceTest extends TestBase<TimService> {
         assertEquals("-1", data);
     }
 
-    // ******************************************* //
     private ActiveTim getActiveTim() {
         ActiveTim aTim = new ActiveTim();
         aTim.setRsuTarget("rsuTarget");

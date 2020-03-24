@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -21,9 +21,12 @@ import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
     @Spy
@@ -153,8 +156,6 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
     @Test
     public void getActiveSatTim_FAIL() throws SQLException {
         // Arrange
-        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(99l);
-        when(mockRs.getLong("TIM_ID")).thenReturn(-99l);
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
 
         // Act
@@ -196,8 +197,6 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
     @Test
     public void getActiveRsuTim_FAIL() throws SQLException {
         // Arrange
-        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(99l);
-        when(mockRs.getLong("TIM_ID")).thenReturn(-99l);
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
 
         // Act

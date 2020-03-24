@@ -1,7 +1,7 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -20,8 +20,10 @@ import com.trihydro.library.tables.BsmOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
@@ -44,6 +46,7 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSize;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
+@RunWith(MockitoJUnitRunner.class)
 public class BsmServiceTest extends TestBase<BsmService> {
 
     @Spy
@@ -217,12 +220,6 @@ public class BsmServiceTest extends TestBase<BsmService> {
         // Arrange
         OdeBsmMetadata metadata = getMetadata();
         J2735Bsm bsm = getBsmPayload("VehicleSafetyExtensions");
-        List<SecurityResultCodeType> srcts = new ArrayList<>();
-        SecurityResultCodeType srct = new SecurityResultCodeType();
-        srct.setSecurityResultCodeType("success");
-        srct.setSecurityResultCodeTypeId(-1);
-        srcts.add(srct);
-        doReturn(srcts).when(uut).GetSecurityResultCodeTypes();
         doThrow(new SQLException()).when(mockPreparedStatement).setString(1, bsm.getCoreData().getId());
         // Act
         Long data = uut.addBSMCoreData(metadata, bsm);
@@ -231,7 +228,6 @@ public class BsmServiceTest extends TestBase<BsmService> {
         assertEquals(new Long(0), data);
     }
 
-    // ******************************************* //
     private OdeData getOdeData(String partIIName) {
         OdeData odeData = new OdeData(getMetadata(), getMsgPayload(partIIName));
         return odeData;

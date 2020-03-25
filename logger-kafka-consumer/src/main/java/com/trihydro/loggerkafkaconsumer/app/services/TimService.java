@@ -252,11 +252,13 @@ public class TimService extends BaseService {
             // save TIM RSU in DB
             WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
                     .findFirst().orElse(null);
-            timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
+            if (rsu != null) {
+                timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
+            }
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getRsuTarget());
         } else {
-            // SDW tim, fetch holding
+            // SDX tim, fetch holding
             ath = activeTimHoldingService.getSdxActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getSatRecordId());
         }

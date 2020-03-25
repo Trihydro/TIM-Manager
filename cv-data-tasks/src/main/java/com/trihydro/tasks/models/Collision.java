@@ -2,13 +2,11 @@ package com.trihydro.tasks.models;
 
 import java.util.List;
 
-import com.trihydro.library.model.ActiveTim;
-
 public class Collision {
     private Integer index;
-    private List<ActiveTim> tims;
+    private List<EnvActiveTim> tims;
 
-    public Collision(Integer index, List<ActiveTim> tims) {
+    public Collision(Integer index, List<EnvActiveTim> tims) {
         this.index = index;
         this.tims = tims;
     }
@@ -21,11 +19,11 @@ public class Collision {
         this.index = index;
     }
 
-    public List<ActiveTim> getTims() {
+    public List<EnvActiveTim> getTims() {
         return tims;
     }
 
-    public void setTims(List<ActiveTim> tims) {
+    public void setTims(List<EnvActiveTim> tims) {
         this.tims = tims;
     }
 }

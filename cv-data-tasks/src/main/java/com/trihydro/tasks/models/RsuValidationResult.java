@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.PopulatedRsu;
 
 public class RsuValidationResult {
     private String rsuAddress;
     private boolean rsuUnresponsive;
     private List<Collision> collisions = new ArrayList<>();
-    private List<ActiveTim> missingFromRsu = new ArrayList<>();
+    private List<EnvActiveTim> missingFromRsu = new ArrayList<>();
     private List<Integer> unaccountedForIndices = new ArrayList<>();
 
     public RsuValidationResult(String rsuAddress) {
@@ -37,11 +36,11 @@ public class RsuValidationResult {
         this.collisions = collisions;
     }
 
-    public List<ActiveTim> getMissingFromRsu() {
+    public List<EnvActiveTim> getMissingFromRsu() {
         return missingFromRsu;
     }
 
-    public void setMissingFromRsu(List<ActiveTim> missingFromRsu) {
+    public void setMissingFromRsu(List<EnvActiveTim> missingFromRsu) {
         this.missingFromRsu = missingFromRsu;
     }
 

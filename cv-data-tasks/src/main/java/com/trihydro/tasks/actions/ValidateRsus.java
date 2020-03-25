@@ -16,6 +16,7 @@ import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.config.EmailConfiguration;
 import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.Environment;
+import com.trihydro.tasks.models.PopulatedRsu;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,39 +47,39 @@ public class ValidateRsus implements Runnable {
         // same set while maintaining ordering before proceeding.
         TreeSet<EnvActiveTim> activeTims = new TreeSet<>();
 
-        // Backup ActiveTimService endpoint
-        // This task must be executed seperately from the others, due to the static
-        // CVRestUrl.
-        String oldEndpoint = ActiveTimService.getCVRestUrl();
         try {
             // Fetch records for dev
-            ActiveTimService.setCVRestUrl(config.getCvRestServiceDev());
-            for (ActiveTim activeTim : activeTimService.getActiveRsuTims()) {
+            for (ActiveTim activeTim : activeTimService.getActiveRsuTims(config.getCvRestServiceDev())) {
                 activeTims.add(new EnvActiveTim(activeTim, Environment.DEV));
             }
 
             // Fetch records for prod
-            ActiveTimService.setCVRestUrl(config.getCvRestServiceProd());
-            for (ActiveTim activeTim : activeTimService.getActiveRsuTims()) {
+            for (ActiveTim activeTim : activeTimService.getActiveRsuTims(config.getCvRestServiceProd())) {
                 activeTims.add(new EnvActiveTim(activeTim, Environment.PROD));
             }
         } catch (Exception ex) {
             utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records:");
             ex.printStackTrace();
             return;
-        } finally {
-            // Restore ActiveTimService to old state
-            ActiveTimService.setCVRestUrl(oldEndpoint);
         }
 
-        // TODO: start here: build out PopulatedRsu objects w/ logic from ActiveTimService
+        // DEBUGGING
+        // activeTims.forEach((record) -> {
+        //     System.out.println(record.getActiveTim().getRsuTarget() + " " + record.getEnvironment() + " " + record.getActiveTim().getActiveTimId());
+        // });
 
-        // List<PopulatedRsu> rsusWithRecords =
-        // activeTimService.getRsusWithActiveTims();
+        // Organize ActiveTim records by RSU
+        List<PopulatedRsu> rsusWithRecords = getRsusFromActiveTims(activeTims);
 
         if (rsusWithRecords.size() == 0) {
             return;
         }
+
+        // DEBUGGING
+        // rsusWithRecords.forEach((rec) -> {
+        //     System.out.println(rec.getIpv4Address() + ": " + Integer.toString(rec.getRsuActiveTims().size()));
+        // });
+
         // TODO: Is there a best practice for retrieving and using a ThreadPool?
         // TODO: Change to thread pool
         ExecutorService workerThreadPool = Executors.newSingleThreadExecutor();
@@ -145,5 +146,28 @@ public class ValidateRsus implements Runnable {
             threadPool.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    private List<PopulatedRsu> getRsusFromActiveTims(TreeSet<EnvActiveTim> activeTims) {
+        List<PopulatedRsu> rsusWithRecords = new ArrayList<>();
+        PopulatedRsu rsu = null;
+
+        for (EnvActiveTim record : activeTims) {
+            if (rsu == null || !rsu.getIpv4Address().equals(record.getActiveTim().getRsuTarget())) {
+                if (rsu != null) {
+                    rsusWithRecords.add(rsu);
+                }
+
+                // Create new PopulatedRsu record
+                rsu = new PopulatedRsu(record.getActiveTim().getRsuTarget());
+            }
+            rsu.getRsuActiveTims().add(record);
+        }
+
+        if (rsu != null) {
+            rsusWithRecords.add(rsu);
+        }
+
+        return rsusWithRecords;
     }
 }

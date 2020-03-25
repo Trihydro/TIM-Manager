@@ -9,6 +9,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
+import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.springframework.core.io.ClassPathResource;
@@ -134,7 +135,8 @@ public class EmailConfiguration {
 
         // List Active TIMs missing from RSU
         String rowsMissingTims = "";
-        for (ActiveTim tim : result.getMissingFromRsu()) {
+        for (EnvActiveTim record : result.getMissingFromRsu()) {
+            ActiveTim tim = record.getActiveTim();
             rowsMissingTims += getRow(tim.getActiveTimId().toString(), tim.getRsuIndex().toString());
         }
         section = section.replaceAll("\\{rowsMissingTims\\}", rowsMissingTims);
@@ -143,11 +145,11 @@ public class EmailConfiguration {
         String rowsCollisions = "";
         for (Collision collision : result.getCollisions()) {
             String activeTimIds = "";
-            for (ActiveTim tim : collision.getTims()) {
+            for (EnvActiveTim record : collision.getTims()) {
                 if (!activeTimIds.equals("")) {
                     activeTimIds += ", ";
                 }
-                activeTimIds += tim.getActiveTimId().toString();
+                activeTimIds += record.getActiveTim().getActiveTimId().toString();
             }
 
             rowsCollisions += getRow(collision.getIndex().toString(), activeTimIds);

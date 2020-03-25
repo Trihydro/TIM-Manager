@@ -1,18 +1,14 @@
 package com.trihydro.tasks.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PopulatedRsu {
-    private Long deviceId;
     private String ipv4Address;
-    private List<EnvActiveTim> rsuActiveTims;
+    private List<EnvActiveTim> rsuActiveTims = new ArrayList<>();
 
-    public Long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
+    public PopulatedRsu(String ipv4Address) {
+        this.ipv4Address = ipv4Address;
     }
 
     public String getIpv4Address() {

@@ -8,12 +8,13 @@ import java.util.concurrent.Callable;
 
 import com.google.gson.Gson;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.PopulatedRsu;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.models.Collision;
+import com.trihydro.tasks.models.EnvActiveTim;
+import com.trihydro.tasks.models.PopulatedRsu;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 public class ValidateRsu implements Callable<RsuValidationResult> {
@@ -58,11 +59,11 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         // Check if there are any ActiveTims claiming the same index
         calculateCollisions();
 
-        for (ActiveTim tim : rsu.getRsuActiveTims()) {
+        for (EnvActiveTim record : rsu.getRsuActiveTims()) {
             // TODO: should we check for null rsuIndex?
-            int pos = rsuIndices.indexOf(tim.getRsuIndex());
+            int pos = rsuIndices.indexOf(record.getActiveTim().getRsuIndex());
             if (pos < 0) {
-                result.getMissingFromRsu().add(tim);
+                result.getMissingFromRsu().add(record);
             } else {
                 rsuIndices.remove(pos);
             }
@@ -80,18 +81,19 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
     }
 
     private void calculateCollisions() {
-        Map<Integer, List<ActiveTim>> indexAssignments = new HashMap<>();
+        Map<Integer, List<EnvActiveTim>> indexAssignments = new HashMap<>();
 
         // Iterate over the Active Tims on this rsu. Group by assigned rsu index
-        for (ActiveTim tim : rsu.getRsuActiveTims()) {
+        for (EnvActiveTim record : rsu.getRsuActiveTims()) {
+            int currentIndex = record.getActiveTim().getRsuIndex();
             // If this RSU index isn't present in the map, initialize value
             // to be an empty list of ActiveTims.
-            if (!indexAssignments.containsKey(tim.getRsuIndex())) {
-                indexAssignments.put(tim.getRsuIndex(), new ArrayList<>());
+            if (!indexAssignments.containsKey(currentIndex)) {
+                indexAssignments.put(currentIndex, new ArrayList<>());
             }
 
             // Push Active Tim onto map at that index
-            indexAssignments.get(tim.getRsuIndex()).add(tim);
+            indexAssignments.get(currentIndex).add(record);
         }
 
         // Iterate over indexes and find any that have > 1 Active Tim assigned
@@ -111,6 +113,6 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
 
     private void removeCollisionFromRsu(Integer index) {
         rsuIndices.remove(index);
-        rsu.getRsuActiveTims().removeIf((t) -> t.getRsuIndex().equals(index));
+        rsu.getRsuActiveTims().removeIf((t) -> t.getActiveTim().getRsuIndex().equals(index));
     }
 }

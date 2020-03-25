@@ -48,7 +48,7 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
     // }
 
     private ApiInfo metaData() {
-        ApiInfo apiInfo = new ApiInfo("WYDOT Connected Vehicle REST API", "API Endpoints to create and manage CV TIMs from WYDOT Applications.", "1.0", "Terms of service", new Contact("Trihydro", "www.trihydro.com", "kperry@trihydro.com"), "Apache License Version 2.0", "https://www.apache.org/licenses/LICENSE-2.0", Collections.emptyList());
+        ApiInfo apiInfo = new ApiInfo("WYDOT Connected Vehicle REST API", "API Endpoints to create and manage CV TIMs from WYDOT Applications.", "1.0", "Terms of service", new Contact("Trihydro", "www.trihydro.com", "bpayne@trihydro.com"), "Apache License Version 2.0", "https://www.apache.org/licenses/LICENSE-2.0", Collections.emptyList());
         return apiInfo;
     }
 

@@ -66,7 +66,7 @@ public class WydotTimIncidentControllerTest {
 		lenient().doReturn(itisCodesIncident).when(setItisCodes).setItisCodesIncident(any());
 		lenient().doReturn(itisCodes).when(setItisCodes).getItisCodes();
 
-		lenient().doNothing().when(uut).makeTims(any());
+		lenient().doNothing().when(uut).makeTimsAsync(any());
 		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 	}
 

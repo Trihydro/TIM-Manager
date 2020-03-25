@@ -71,7 +71,7 @@ public class WydotTimParkingControllerTest {
 		lenient().doReturn(itisCodesIncident).when(setItisCodes).setItisCodesParking(any());
 		lenient().doReturn(itisCodes).when(setItisCodes).getItisCodes();
 
-		lenient().doNothing().when(uut).processRequest(any());
+		lenient().doNothing().when(uut).processRequestAsync(any());
 		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 
 		parkingTims = new ArrayList<>();

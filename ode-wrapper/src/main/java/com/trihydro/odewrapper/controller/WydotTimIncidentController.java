@@ -74,7 +74,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-        makeTims(timsToSend);
+        makeTimsAsync(timsToSend);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -113,13 +113,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         wydotTimService.deleteWydotTimsByType(timIncidentList.getTimIncidentList(), type);
 
         // make tims and send them
-        makeTims(timsToSend);
+        makeTimsAsync(timsToSend);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void makeTims(List<WydotTimIncident> wydotTims) {
+    public void makeTimsAsync(List<WydotTimIncident> wydotTims) {
 
         new Thread(new Runnable() {
             public void run() {
@@ -174,31 +174,5 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         // get active TIMs
         List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("I", incidentId);
         return activeTims;
-    }
-
-    // asynchronous TIM creation
-    public void processRequest(List<WydotTimIncident> wydotTims) {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-                for (WydotTimIncident wydotTim : wydotTims) {
-                    // set route
-                    wydotTim.setRoute(wydotTim.getHighway());
-
-                    if (wydotTim.getDirection().toLowerCase().equals("b")) {
-                        // if both directions, create and send for each direction (i/d)
-                        // buffers are now handled in CreateBaseTimUtil.buildTim
-                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk());
-
-                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk());
-                    } else {
-                        // single direction TIM
-                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
-                                wydotTim.getPk());
-                    }
-                }
-            }
-        }).start();
     }
 }

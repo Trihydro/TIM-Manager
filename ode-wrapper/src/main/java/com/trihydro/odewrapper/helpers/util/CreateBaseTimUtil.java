@@ -77,8 +77,9 @@ public class CreateBaseTimUtil {
         path.setScale(0);
         path.setType("xy");
 
-        // TODO: add in direction
-        List<Milepost> mileposts = milepostService.getMilepostsByStartEndPoint(wydotTim);
+        // assume the given start/stop points are correct and send them on to calculate
+        // mileposts
+        List<Milepost> mileposts = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
         timToSend.setMileposts(mileposts);
 
         List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();

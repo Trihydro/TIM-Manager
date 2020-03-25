@@ -73,7 +73,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-        processRequest(validTims);
+        processRequestAsync(validTims);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -125,7 +125,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void processRequest(List<WydotTimParking> wydotTims) {
+    public void processRequestAsync(List<WydotTimParking> wydotTims) {
         new Thread(new Runnable() {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();

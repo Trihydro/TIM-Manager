@@ -1,11 +1,15 @@
 package com.trihydro.library.model;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Coordinate
  */
 public class Coordinate {
 
+    @ApiModelProperty(required = true)
     private Double latitude;
+    @ApiModelProperty(required = true)
     private Double longitude;
 
     public Coordinate(double lat, double lon) {
@@ -29,6 +33,7 @@ public class Coordinate {
         this.latitude = latitude;
     }
 
+    @ApiModelProperty(hidden = true)
     public Boolean isValid() {
         return latitude != null && longitude != null;
     }

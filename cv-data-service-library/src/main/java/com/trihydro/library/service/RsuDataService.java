@@ -1,6 +1,8 @@
 package com.trihydro.library.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.trihydro.library.model.RsuDataServiceProps;
@@ -33,7 +35,10 @@ public class RsuDataService {
         if(response.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
             return null;
         }
+        
+        List<RsuIndexInfo> result = new ArrayList<>();
+        Collections.addAll(result, response.getBody());
 
-        return Arrays.asList(response.getBody());
+        return result;
     }
 }

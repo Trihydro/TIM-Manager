@@ -1,5 +1,6 @@
 package com.trihydro.tasks.config;
 
+import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -7,12 +8,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps {
+public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps {
 
-    private String odeUrl;
     private String cvRestService;
     private String cvRestServiceDev;    // Temporary
     private String cvRestServiceProd;   // Temporary
+    private String rsuDataServiceUrl;
     private String wrapperUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
@@ -21,13 +22,6 @@ public class DataTasksConfiguration implements SdwProps {
     private String mailHost;
     private int mailPort;
 
-    public String getOdeUrl() {
-        return odeUrl;
-    }
-
-    public void setOdeUrl(String odeUrl) {
-        this.odeUrl = odeUrl;
-    }
 
     public String getCvRestService() {
         return cvRestService;
@@ -51,6 +45,14 @@ public class DataTasksConfiguration implements SdwProps {
 
     public void setCvRestServiceProd(String cvRestServiceProd) {
         this.cvRestServiceProd = cvRestServiceProd;
+    }
+
+    public String getRsuDataServiceUrl() {
+        return rsuDataServiceUrl;
+    }
+
+    public void setRsuDataServiceUrl(String rsuDataServiceUrl) {
+        this.rsuDataServiceUrl = rsuDataServiceUrl;
     }
 
     public String getWrapperUrl() {

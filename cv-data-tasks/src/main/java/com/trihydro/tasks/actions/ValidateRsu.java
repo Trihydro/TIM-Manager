@@ -1,16 +1,21 @@
 package com.trihydro.tasks.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.RsuIndexInfo;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.EnvActiveTim;
@@ -18,19 +23,29 @@ import com.trihydro.tasks.models.PopulatedRsu;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 public class ValidateRsu implements Callable<RsuValidationResult> {
-    private DataTasksConfiguration config;
+    private RsuDataService rsuDataService;
 
     private PopulatedRsu rsu;
-    private List<Integer> rsuIndices;
+    private List<RsuIndexInfo> rsuIndices;
     private RsuValidationResult result;
 
-    public ValidateRsu(PopulatedRsu rsu, DataTasksConfiguration config) {
+    public ValidateRsu(PopulatedRsu rsu, RsuDataService rsuDataService) {
         this.rsu = rsu;
-        this.config = config;
+        this.rsuDataService = rsuDataService;
     }
 
     public PopulatedRsu getRsu() {
         return rsu;
+    }
+
+    private static Comparator<RsuIndexInfo> findByIndex;
+
+    static {
+        findByIndex = new Comparator<RsuIndexInfo>() {
+            public int compare(RsuIndexInfo o1, RsuIndexInfo o2) {
+                return o1.getIndex().compareTo(o2.getIndex());
+            }
+        };
     }
 
     @Override
@@ -38,33 +53,29 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         System.out.println("Processing " + rsu.getIpv4Address());
 
         result = new RsuValidationResult(rsu.getIpv4Address());
-        // Retrieve set indices from RSU
-        WydotRsu wyRsu = new WydotRsu();
-        // TODO: push these values to a config?
-        wyRsu.setRsuTarget(rsu.getIpv4Address());
-        wyRsu.setRsuRetries(3);
-        wyRsu.setRsuTimeout(5000);
 
-        TimQuery odeResult = OdeService.submitTimQuery(wyRsu, 0, config.getOdeUrl());
+        // Retrieve info for populates indexes on RSU
+        rsuIndices = rsuDataService.getRsuDeliveryStartTimes(rsu.getIpv4Address());
 
         // Check if error occurred querying indices.
-        // If it did, return null.
-        if (odeResult == null) {
+        if (rsuIndices == null) {
             result.setRsuUnresponsive(true);
             return result;
         }
 
-        rsuIndices = odeResult.getIndicies_set();
-
         // Check if there are any ActiveTims claiming the same index
         calculateCollisions();
 
+        // Verify ActiveTims against RSU index info
         for (EnvActiveTim record : rsu.getRsuActiveTims()) {
             // TODO: should we check for null rsuIndex?
-            int pos = rsuIndices.indexOf(record.getActiveTim().getRsuIndex());
+            ActiveTim tim = record.getActiveTim();
+            int pos = Collections.binarySearch(rsuIndices, new RsuIndexInfo(tim.getRsuIndex(), null), findByIndex);
+
             if (pos < 0) {
                 result.getMissingFromRsu().add(record);
             } else {
+                // TODO: verify deliveryStart
                 rsuIndices.remove(pos);
             }
         }
@@ -72,7 +83,8 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         // Check if there are any remaining, unaccounted for
         // indices on the RSU
         if (rsuIndices.size() > 0) {
-            result.setUnaccountedForIndices(rsuIndices);
+            result.setUnaccountedForIndices(
+                    rsuIndices.stream().map((item) -> item.getIndex()).collect(Collectors.toList()));
         }
 
         Gson gson = new Gson();
@@ -112,7 +124,11 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
     }
 
     private void removeCollisionFromRsu(Integer index) {
-        rsuIndices.remove(index);
+        int pos = Collections.binarySearch(rsuIndices, new RsuIndexInfo(index, null), findByIndex);
+        if(pos >= 0) {
+            rsuIndices.remove(pos);
+        }
+        
         rsu.getRsuActiveTims().removeIf((t) -> t.getActiveTim().getRsuIndex().equals(index));
     }
 }

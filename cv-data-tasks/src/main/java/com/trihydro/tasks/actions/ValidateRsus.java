@@ -12,6 +12,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.config.EmailConfiguration;
 import com.trihydro.tasks.models.EnvActiveTim;
@@ -26,15 +27,18 @@ import org.springframework.stereotype.Component;
 public class ValidateRsus implements Runnable {
     private DataTasksConfiguration config;
     private ActiveTimService activeTimService;
+    private RsuDataService rsuDataService;
     private EmailConfiguration emailConfig;
     private EmailHelper mailHelper;
     private Utility utility;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
-            EmailConfiguration _emailConfig, EmailHelper _mailHelper, Utility _utility) {
+            RsuDataService _rsuDataService, EmailConfiguration _emailConfig, EmailHelper _mailHelper,
+            Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
+        rsuDataService = _rsuDataService;
         emailConfig = _emailConfig;
         mailHelper = _mailHelper;
         utility = _utility;
@@ -65,7 +69,8 @@ public class ValidateRsus implements Runnable {
 
         // DEBUGGING
         // activeTims.forEach((record) -> {
-        //     System.out.println(record.getActiveTim().getRsuTarget() + " " + record.getEnvironment() + " " + record.getActiveTim().getActiveTimId());
+        // System.out.println(record.getActiveTim().getRsuTarget() + " " +
+        // record.getEnvironment() + " " + record.getActiveTim().getActiveTimId());
         // });
 
         // Organize ActiveTim records by RSU
@@ -77,7 +82,8 @@ public class ValidateRsus implements Runnable {
 
         // DEBUGGING
         // rsusWithRecords.forEach((rec) -> {
-        //     System.out.println(rec.getIpv4Address() + ": " + Integer.toString(rec.getRsuActiveTims().size()));
+        // System.out.println(rec.getIpv4Address() + ": " +
+        // Integer.toString(rec.getRsuActiveTims().size()));
         // });
 
         // TODO: Is there a best practice for retrieving and using a ThreadPool?
@@ -86,7 +92,7 @@ public class ValidateRsus implements Runnable {
 
         List<ValidateRsu> tasks = new ArrayList<>();
         for (PopulatedRsu rsu : rsusWithRecords) {
-            tasks.add(new ValidateRsu(rsu, config));
+            tasks.add(new ValidateRsu(rsu, rsuDataService));
         }
         List<Future<RsuValidationResult>> futureResults = null;
         try {

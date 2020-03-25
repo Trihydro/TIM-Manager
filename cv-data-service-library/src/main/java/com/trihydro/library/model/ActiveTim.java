@@ -19,12 +19,30 @@ public class ActiveTim {
     private Integer pk;
     private String rsuTarget;
     private List<Integer> itisCodes;
+    private Coordinate startPoint;
+    private Coordinate endPoint;
 
-    public List<Integer> getItisCodes(){
+    public List<Integer> getItisCodes() {
         return itisCodes;
     }
 
-    public void setItisCodes(List<Integer> itisCodes){
+    public Coordinate getEndPoint() {
+        return endPoint;
+    }
+
+    public void setEndPoint(Coordinate endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public Coordinate getStartPoint() {
+        return startPoint;
+    }
+
+    public void setStartPoint(Coordinate startPoint) {
+        this.startPoint = startPoint;
+    }
+
+    public void setItisCodes(List<Integer> itisCodes) {
         this.itisCodes = itisCodes;
     }
 

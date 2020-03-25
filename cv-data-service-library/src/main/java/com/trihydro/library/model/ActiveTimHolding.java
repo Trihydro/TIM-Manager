@@ -1,6 +1,7 @@
 package com.trihydro.library.model;
 
 public class ActiveTimHolding {
+    private Long activeTimHoldingId;
     private String direction;
     private String clientId;
     private String satRecordId;
@@ -10,6 +11,14 @@ public class ActiveTimHolding {
 
     public String getDirection() {
         return this.direction;
+    }
+
+    public Long getActiveTimHoldingId() {
+        return activeTimHoldingId;
+    }
+
+    public void setActiveTimHoldingId(Long activeTimHoldingId) {
+        this.activeTimHoldingId = activeTimHoldingId;
     }
 
     public Coordinate getEndPoint() {
@@ -44,7 +53,7 @@ public class ActiveTimHolding {
         return this.satRecordId;
     }
 
-    public void setSatRecord(String satRecordId) {
+    public void setSatRecordId(String satRecordId) {
         this.satRecordId = satRecordId;
     }
 

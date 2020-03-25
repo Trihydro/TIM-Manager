@@ -82,6 +82,8 @@ public class TimServiceTest extends TestBase<TimService> {
     NodeXYService mockNodeXYService;
     @Mock
     private Utility mockUtility;
+    @Mock
+    private ActiveTimHoldingService mockActiveTimHoldingService;
 
     private WydotRsu rsu;
     private Long pathId = -99l;
@@ -90,7 +92,8 @@ public class TimServiceTest extends TestBase<TimService> {
     public void setupSubTest() {
         uut.InjectDependencies(mockActiveTimService, mockTimOracleTables, mockSqlNullHandler, mockPathService,
                 mockRegionService, mockDataFrameService, mockRsuService, mockTts, mockItisCodesService,
-                mockTimRsuService, mockDataFrameItisCodeService, mockPathNodeXYService, mockNodeXYService, mockUtility);
+                mockTimRsuService, mockDataFrameItisCodeService, mockPathNodeXYService, mockNodeXYService, mockUtility,
+                mockActiveTimHoldingService);
 
         ArrayList<WydotRsu> rsus = new ArrayList<>();
         rsu = new WydotRsu();
@@ -105,6 +108,31 @@ public class TimServiceTest extends TestBase<TimService> {
 
         lenient().doReturn(pathId).when(mockPathService).InsertPath();
     }
+
+    //TODO: finish test after merge
+    // @Test
+    // public void addActiveTimToOracleDB_SUCCESS() {
+    //     // Arrange
+    //     OdeData odeData = getOdeData();
+    //     ActiveTim aTim = new ActiveTim();
+    //     aTim.setSatRecordId("satRecordId");
+    //     Long timId = -1l;
+    //     Long dataFrameId = -2l;
+    //     DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
+
+    //     doReturn(getActiveTim()).when(uut).setActiveTimByRegionName(isA(String.class));
+    //     doReturn(timId).when(uut).AddTim(odeData.getMetadata(), null, ((OdeTimPayload) odeData.getPayload()).getTim(),
+    //             null, null, null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
+    //     doReturn(dataFrameId).when(mockDataFrameService).AddDataFrame(dFrames[0], timId);
+    //     doNothing().when(uut).addRegion(any(), any());
+    //     doNothing().when(uut).addDataFrameItis(any(), any());
+    //     // doReturn(pathId).when(mockPathService).InsertPath();
+    //     doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
+
+    //     // Act
+
+    //     // Assert
+    // }
 
     @Test
     public void addTimToOracleDB_addTimFAIL() {
@@ -127,7 +155,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verifyNoInteractions(mockDataFrameItisCodeService);
         // verify only these were called on the uut
         verify(uut).InjectDependencies(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any());
+                any(), any(), any(), any());
         verify(uut).addTimToOracleDB(odeData);
         verify(uut).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verifyNoMoreInteractions(uut);
@@ -190,7 +218,7 @@ public class TimServiceTest extends TestBase<TimService> {
         dataFrame.getRegions()[0].setPath(null);
         dataFrame.getRegions()[0].setGeometry(new Geometry());
         Long dataFrameId = -1l;
-        
+
         // Act
         uut.addRegion(dataFrame, dataFrameId);
 

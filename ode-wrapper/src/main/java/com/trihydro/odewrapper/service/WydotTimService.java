@@ -150,8 +150,7 @@ public class WydotTimService {
 
             WydotOdeTravelerInformationMessage tim = TimService.getTim(activeSatTims.get(0).getTimId());
 
-            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_"
-                    + timType.getType();
+            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
             if (wydotTim.getClientId() != null)
                 regionNameTemp += "_" + wydotTim.getClientId();
 
@@ -180,11 +179,9 @@ public class WydotTimService {
             String direction, TimType timType, Integer pk, String endDateTime) {
 
         // FIND ALL RSUS TO SEND TO
+        // TODO: should this query a graph db instead to follow with milepost?
         List<WydotRsu> rsus = utility.getRsusByLatLong(direction, wydotTim.getStartPoint(), wydotTim.getEndPoint(),
                 wydotTim.getRoute());
-        // List<WydotRsu> rsus = utility.getRsusInBuffer(direction,
-        // Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
-        // Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), wydotTim.getRoute());
 
         // if no RSUs found
         if (rsus.size() == 0) {

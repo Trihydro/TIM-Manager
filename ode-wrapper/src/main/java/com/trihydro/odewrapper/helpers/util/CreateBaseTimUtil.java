@@ -77,10 +77,6 @@ public class CreateBaseTimUtil {
         path.setScale(0);
         path.setType("xy");
 
-        // Integer numericRoute =
-        // Integer.parseInt(wydotTim.getRoute().replaceAll("\\D+", ""));
-        // Coordinate startPoint = wydotTim.getStartPoint();
-        // Coordinate endPoint = wydotTim.getEndPoint();
         // TODO: add in direction
         List<Milepost> mileposts = milepostService.getMilepostsByStartEndPoint(wydotTim);
         timToSend.setMileposts(mileposts);

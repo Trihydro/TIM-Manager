@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.PopulatedRsu;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 
@@ -117,6 +116,16 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	/**
+	 * Fetch all ActiveTims for RSUs from cv-data-controller
+	 * @return List of ActiveTims (including RSU address and index)
+	 */
+	public List<ActiveTim> getActiveRsuTims() {
+		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(CVRestUrl + "/active-tim/active-rsu-tims", ActiveTim[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	/**
 	 * Calls out to the cv-data-controller REST function to fetch expiring TIMs
 	 * 
 	 * @return List of TimUpdateModel representing all TIMs expiring within 1 day
@@ -145,9 +154,9 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
-	public List<PopulatedRsu> getRsusWithActiveTims() {
-		ResponseEntity<PopulatedRsu[]> response = RestTemplateProvider.GetRestTemplate()
-				.getForEntity(CVRestUrl + "/active-tim/rsus-with-active-tims", PopulatedRsu[].class);
-		return Arrays.asList(response.getBody());
-	}
+	// public List<PopulatedRsu> getRsusWithActiveTims() {
+	// 	ResponseEntity<PopulatedRsu[]> response = RestTemplateProvider.GetRestTemplate()
+	// 			.getForEntity(CVRestUrl + "/active-tim/rsus-with-active-tims", PopulatedRsu[].class);
+	// 	return Arrays.asList(response.getBody());
+	// }
 }

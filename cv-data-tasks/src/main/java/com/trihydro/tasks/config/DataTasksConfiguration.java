@@ -11,6 +11,8 @@ public class DataTasksConfiguration implements SdwProps {
 
     private String odeUrl;
     private String cvRestService;
+    private String cvRestServiceDev;    // Temporary
+    private String cvRestServiceProd;   // Temporary
     private String wrapperUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
@@ -33,6 +35,22 @@ public class DataTasksConfiguration implements SdwProps {
 
     public void setCvRestService(String cvRestService) {
         this.cvRestService = cvRestService;
+    }
+
+    public String getCvRestServiceDev() {
+        return cvRestServiceDev;
+    }
+
+    public void setCvRestServiceDev(String cvRestServiceDev) {
+        this.cvRestServiceDev = cvRestServiceDev;
+    }
+
+    public String getCvRestServiceProd() {
+        return cvRestServiceProd;
+    }
+
+    public void setCvRestServiceProd(String cvRestServiceProd) {
+        this.cvRestServiceProd = cvRestServiceProd;
     }
 
     public String getWrapperUrl() {

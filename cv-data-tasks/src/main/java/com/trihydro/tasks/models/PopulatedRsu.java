@@ -1,11 +1,11 @@
-package com.trihydro.library.model;
+package com.trihydro.tasks.models;
 
 import java.util.List;
 
 public class PopulatedRsu {
     private Long deviceId;
     private String ipv4Address;
-    private List<ActiveTim> rsuActiveTims;
+    private List<EnvActiveTim> rsuActiveTims;
 
     public Long getDeviceId() {
         return deviceId;
@@ -23,11 +23,11 @@ public class PopulatedRsu {
         this.ipv4Address = ipv4Address;
     }
 
-    public List<ActiveTim> getRsuActiveTims() {
+    public List<EnvActiveTim> getRsuActiveTims() {
         return rsuActiveTims;
     }
 
-    public void setRsuActiveTims(List<ActiveTim> rsuActiveTims) {
+    public void setRsuActiveTims(List<EnvActiveTim> rsuActiveTims) {
         this.rsuActiveTims = rsuActiveTims;
     }
 }

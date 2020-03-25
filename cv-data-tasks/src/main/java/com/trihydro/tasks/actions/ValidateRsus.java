@@ -1,20 +1,21 @@
 package com.trihydro.tasks.actions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.model.PopulatedRsu;
+import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.config.EmailConfiguration;
+import com.trihydro.tasks.models.EnvActiveTim;
+import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,19 +27,54 @@ public class ValidateRsus implements Runnable {
     private ActiveTimService activeTimService;
     private EmailConfiguration emailConfig;
     private EmailHelper mailHelper;
+    private Utility utility;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
-            EmailConfiguration _emailConfig, EmailHelper _mailHelper) {
+            EmailConfiguration _emailConfig, EmailHelper _mailHelper, Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
         emailConfig = _emailConfig;
         mailHelper = _mailHelper;
+        utility = _utility;
     }
 
     public void run() {
-        // Fetch RSUs with ActiveTim records from Oracle
-        List<PopulatedRsu> rsusWithRecords = activeTimService.getRsusWithActiveTims();
+        // The data structure being used here is temporary. Since we have RSUs shared
+        // between our dev and prod environment, we need to fetch Active Tims from both
+        // the dev and prod Oracle db. THEN we need to merge those records into the
+        // same set while maintaining ordering before proceeding.
+        TreeSet<EnvActiveTim> activeTims = new TreeSet<>();
+
+        // Backup ActiveTimService endpoint
+        // This task must be executed seperately from the others, due to the static
+        // CVRestUrl.
+        String oldEndpoint = ActiveTimService.getCVRestUrl();
+        try {
+            // Fetch records for dev
+            ActiveTimService.setCVRestUrl(config.getCvRestServiceDev());
+            for (ActiveTim activeTim : activeTimService.getActiveRsuTims()) {
+                activeTims.add(new EnvActiveTim(activeTim, Environment.DEV));
+            }
+
+            // Fetch records for prod
+            ActiveTimService.setCVRestUrl(config.getCvRestServiceProd());
+            for (ActiveTim activeTim : activeTimService.getActiveRsuTims()) {
+                activeTims.add(new EnvActiveTim(activeTim, Environment.PROD));
+            }
+        } catch (Exception ex) {
+            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records:");
+            ex.printStackTrace();
+            return;
+        } finally {
+            // Restore ActiveTimService to old state
+            ActiveTimService.setCVRestUrl(oldEndpoint);
+        }
+
+        // TODO: start here: build out PopulatedRsu objects w/ logic from ActiveTimService
+
+        // List<PopulatedRsu> rsusWithRecords =
+        // activeTimService.getRsusWithActiveTims();
 
         if (rsusWithRecords.size() == 0) {
             return;
@@ -102,7 +138,7 @@ public class ValidateRsus implements Runnable {
         threadPool.shutdown();
         try {
             // TODO add to config
-            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+            if (!threadPool.awaitTermination(300, TimeUnit.SECONDS)) {
                 threadPool.shutdownNow();
             }
         } catch (InterruptedException ex) {

@@ -35,7 +35,7 @@ public class MilepostService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
-	public List<Milepost> getMilepostsByStartEndPoint(WydotTim wydotTim) {
+	public List<Milepost> getMilepostsByStartEndPointDirection(WydotTim wydotTim) {
 		String url = String.format("%s/get-milepost-start-end", CVRestUrl);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

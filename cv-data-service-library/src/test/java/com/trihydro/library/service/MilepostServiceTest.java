@@ -59,7 +59,7 @@ public class MilepostServiceTest extends BaseServiceTest {
         Milepost[] mileposts = new Milepost[1];
         Milepost milepost = new Milepost();
         milepost.setBearing(22d);
-        milepost.setDirection("direction");
+        milepost.setDirection("B");
         milepost.setCommonName("route");
         mileposts[0] = milepost;
         doReturn(mileposts).when(mockResponseEntityMilepostArray).getBody();
@@ -68,7 +68,7 @@ public class MilepostServiceTest extends BaseServiceTest {
         when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, Milepost[].class)).thenReturn(mockResponseEntityMilepostArray);
 
         // Act
-        List<Milepost> data =mps.getMilepostsByStartEndPoint(wydotTim);
+        List<Milepost> data =mps.getMilepostsByStartEndPointDirection(wydotTim);
     
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Milepost[].class);

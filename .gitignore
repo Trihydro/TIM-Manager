@@ -4,6 +4,7 @@ tim-refresh/target
 cv-data-service-library/target
 ode-wrapper/target
 cv-data-controller/target
+rsu-data-controller/target
 cv-data-tasks/target
 logger-kafka-consumer/target
 

@@ -14,6 +14,9 @@ RUN apt-get -y install openjdk-8-jdk
 # Install Maven
 RUN apt-get -y install maven
 
+# Install snmp (rsu-data-controller dependency)
+RUN apt-get -y install snmp
+
 # Clean up
 RUN apt-get autoremove -y \
     && apt-get clean -y \

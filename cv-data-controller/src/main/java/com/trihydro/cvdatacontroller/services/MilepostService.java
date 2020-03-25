@@ -23,8 +23,8 @@ public class MilepostService {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Milepost> getPath(String commonName, Double startLat, Double startLong, Double endLat,
-            Double endLong) {
-        return milepostRepository.getPath(commonName, startLat, startLong, endLat, endLong);
+    public Collection<Milepost> getPathWithBuffer(String commonName, Double startLat, Double startLong, Double endLat,
+            Double endLong, String direction) {
+        return milepostRepository.getPathWithBuffer(commonName, startLat, startLong, endLat, endLong, direction);
     }
 }

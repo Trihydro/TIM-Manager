@@ -453,28 +453,20 @@ public class MilepostController extends BaseController {
 		return ResponseEntity.ok(milepostService.getMilepostsByCommonNameWithLimit(commonName, limit));
 	}
 
+	/**
+	 * Gets a collection of Mileposts between a start and end point, along the given
+	 * route. Includes a buffer point ahead of start point as an anchor
+	 * 
+	 * @param wydotTim
+	 * @return Collection of Milepost objects representing the path
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/get-milepost-start-end")
 	public ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> getMilepostsByStartEndPoint(
 			@RequestBody WydotTim wydotTim) {
 
-		Collection<com.trihydro.cvdatacontroller.model.Milepost> data = milepostService.getPath(wydotTim.getRoute(),
-				wydotTim.getStartPoint().getLatitude(), wydotTim.getStartPoint().getLongitude(),
-				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude());
+		Collection<com.trihydro.cvdatacontroller.model.Milepost> data = milepostService.getPathWithBuffer(
+				wydotTim.getRoute(), wydotTim.getStartPoint().getLatitude(), wydotTim.getStartPoint().getLongitude(),
+				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude(), wydotTim.getDirection());
 		return ResponseEntity.ok(data);
-		/*
-		 * match(startMp:Milepost{CommonName: 'I 80'}) where startMp.Direction in ['D',
-		 * 'B'] with startMp, distance(point({longitude:-105.53655624389648,
-		 * latitude:41.291092826662975}), point({longitude:startMp.Longitude,
-		 * latitude:startMp.Latitude})) as d1 with startMp, d1 ORDER BY d1 ASC LIMIT 1
-		 * 
-		 * match(endMp:Milepost{CommonName: 'I 80'}) where endMp.Direction in ['D', 'B']
-		 * with startMp, endMp, distance(point({longitude:-104.088324,
-		 * latitude:41.170684}), point({longitude:endMp.Longitude,
-		 * latitude:endMp.Latitude})) as d2 with startMp, endMp, d2 ORDER BY d2 ASC
-		 * LIMIT 1
-		 * 
-		 * with startMp, endMp call algo.shortestPath.stream(startMp,endMp) yield nodeId
-		 * match(other:Milepost) where id(other) = nodeId return other;
-		 */
 	}
 }

@@ -195,32 +195,23 @@ public class TimService extends BaseService {
 
         String satRecordId = activeTim.getSatRecordId();
 
-        // save TIM
-        Long timId = AddTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null, satRecordId,
-                name);
+        // see if TIM exists already
+        java.sql.Timestamp ts = null;
+        if (StringUtils.isNotEmpty(tim.getTimeStamp()) && StringUtils.isNotBlank(tim.getTimeStamp())) {
+            ts = java.sql.Timestamp.valueOf(LocalDateTime.parse(tim.getTimeStamp(), DateTimeFormatter.ISO_DATE_TIME));
+        }
+        Long timId = getTimId(tim.getPacketID(), ts);
 
-        if (timId != null) {
-            // we inserted a new TIM, add additional data
-            Long dataFrameId = dataFrameService.AddDataFrame(dframes[0], timId);
-            addRegion(dframes[0], dataFrameId);
-            addDataFrameItis(dframes[0], dataFrameId);
-        } else {
-            // TIM failed to insert, assume it exists and we need to fetch it
-            java.sql.Timestamp ts = null;
-            if (StringUtils.isNotEmpty(tim.getTimeStamp()) && StringUtils.isNotBlank(tim.getTimeStamp())) {
-                ts = java.sql.Timestamp
-                        .valueOf(LocalDateTime.parse(tim.getTimeStamp(), DateTimeFormatter.ISO_DATE_TIME));
-            }
+        if (timId == null) {
+            // TIM doesn't currently exist. Add it.
+            timId = AddTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null, satRecordId,
+                    name);
 
-            timId = getTimId(tim.getPacketID(), ts);
             if (timId != null) {
-                utility.logWithDate("TIM already exists, tim_id " + timId);
-
-                // ensure we handle a new satRecordId
-                if (satRecordId != null && satRecordId != "") {
-                    updateTimSatRecordId(timId, satRecordId);
-                    utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
-                }
+                // we inserted a new TIM, add additional data
+                Long dataFrameId = dataFrameService.AddDataFrame(dframes[0], timId);
+                addRegion(dframes[0], dataFrameId);
+                addDataFrameItis(dframes[0], dataFrameId);
             } else {
                 // failed to insert new tim and failed to fetch existing, log and return
                 utility.logWithDate(
@@ -228,6 +219,14 @@ public class TimService extends BaseService {
                                 + gson.toJson(odeData));
                 return;
             }
+        } else {
+            utility.logWithDate("TIM already exists, tim_id " + timId);
+        }
+
+        // ensure we handle a new satRecordId
+        if (satRecordId != null && satRecordId != "") {
+            updateTimSatRecordId(timId, satRecordId);
+            utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
         }
 
         OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();

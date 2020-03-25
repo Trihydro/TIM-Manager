@@ -204,8 +204,8 @@ public class ActiveTimService extends BaseService {
             query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
             query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
             query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-            query += " where ipv4_address = '" + ipv4Address + "' and client_id = '" + clientId
-                    + "' and active_tim.direction = '" + direction + "'";
+            query += " where sat_record_id is null and ipv4_address = '" + ipv4Address + "' and client_id = '"
+                    + clientId + "' and active_tim.direction = '" + direction + "'";
 
             rs = statement.executeQuery(query);
 

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps {
 
     private String cvRestService;
-    private String cvRestServiceDev;    // Temporary
-    private String cvRestServiceProd;   // Temporary
+    private String cvRestServiceDev; // Temporary
+    private String cvRestServiceProd; // Temporary
     private String rsuDataServiceUrl;
     private String wrapperUrl;
     private String sdwRestUrl;
@@ -21,7 +21,15 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps {
     private String fromEmail;
     private String mailHost;
     private int mailPort;
+    private boolean runRsuValidation;
+    private int rsuValThreadPoolSize = 1;
+    private int rsuValTimeoutSeconds = 300; // 76 RSUs, 20s timeout each... Could still finish processing with up to 20%
+                                            // of RSUs down in a pool w/ single thread
 
+    private int removeExpiredPeriodMinutes = 240;
+    private int cleanupPeriodMinutes = 240;
+    private int sdxValidationPeriodMinutes = 240;
+    private int rsuValidationPeriodMinutes = 240;
 
     public String getCvRestService() {
         return cvRestService;
@@ -109,5 +117,73 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps {
 
     public void setMailPort(int mailPort) {
         this.mailPort = mailPort;
+    }
+
+    public boolean getRunRsuValidation() {
+        return runRsuValidation;
+    }
+
+    public void setRunRsuValidation(boolean runRsuValidation) {
+        this.runRsuValidation = runRsuValidation;
+    }
+
+    public int getRsuValThreadPoolSize() {
+        return rsuValThreadPoolSize;
+    }
+
+    public void setRsuValThreadPoolSize(int rsuValThreadPoolSize) {
+        if (rsuValThreadPoolSize > 0) {
+            this.rsuValThreadPoolSize = rsuValThreadPoolSize;
+        }
+    }
+
+    public int getRsuValTimeoutSeconds() {
+        return rsuValTimeoutSeconds;
+    }
+
+    public void setRsuValTimeoutSeconds(int rsuValTimeoutSeconds) {
+        if (rsuValTimeoutSeconds > 0) {
+            this.rsuValTimeoutSeconds = rsuValTimeoutSeconds;
+        }
+    }
+
+    public int getRemoveExpiredPeriodMinutes() {
+        return removeExpiredPeriodMinutes;
+    }
+
+    public void setRemoveExpiredPeriodMinutes(int removeExpiredPeriodMinutes) {
+        if (removeExpiredPeriodMinutes > 0) {
+            this.removeExpiredPeriodMinutes = removeExpiredPeriodMinutes;
+        }
+    }
+
+    public int getCleanupPeriodMinutes() {
+        return cleanupPeriodMinutes;
+    }
+
+    public void setCleanupPeriodMinutes(int cleanupPeriodMinutes) {
+        if (cleanupPeriodMinutes > 0) {
+            this.cleanupPeriodMinutes = cleanupPeriodMinutes;
+        }
+    }
+
+    public int getSdxValidationPeriodMinutes() {
+        return sdxValidationPeriodMinutes;
+    }
+
+    public void setSdxValidationPeriodMinutes(int sdxValidationPeriodMinutes) {
+        if (sdxValidationPeriodMinutes > 0) {
+            this.sdxValidationPeriodMinutes = sdxValidationPeriodMinutes;
+        }
+    }
+
+    public int getRsuValidationPeriodMinutes() {
+        return rsuValidationPeriodMinutes;
+    }
+
+    public void setRsuValidationPeriodMinutes(int rsuValidationPeriodMinutes) {
+        if (rsuValidationPeriodMinutes > 0) {
+            this.rsuValidationPeriodMinutes = rsuValidationPeriodMinutes;
+        }
     }
 }

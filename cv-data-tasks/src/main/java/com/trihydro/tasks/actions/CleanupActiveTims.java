@@ -10,18 +10,22 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CleanupActiveTims implements Runnable {
     private DataTasksConfiguration configuration;
     private Utility utility;
 
-    public CleanupActiveTims(DataTasksConfiguration configuration, Utility _utility) {
+    @Autowired
+    public void InjectDependencies(DataTasksConfiguration configuration, Utility _utility) {
         this.configuration = configuration;
-        utility=_utility;
+        utility = _utility;
     }
 
     public void run() {

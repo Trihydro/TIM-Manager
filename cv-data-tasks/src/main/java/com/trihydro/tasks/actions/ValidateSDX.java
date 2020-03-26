@@ -1,11 +1,11 @@
 package com.trihydro.tasks.actions;
 
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.service.ActiveTimService;
@@ -26,18 +26,34 @@ public class ValidateSDX implements Runnable {
     private ActiveTimService activeTimService;
     private EmailHelper mailHelper;
     private EmailConfiguration emailConfig;
+    private Utility utility;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, SdwService _sdwService,
-            ActiveTimService _activeTimService, EmailConfiguration _emailConfig, EmailHelper _mailHelper) {
+            ActiveTimService _activeTimService, EmailConfiguration _emailConfig, EmailHelper _mailHelper,
+            Utility _utility) {
         config = _config;
         sdwService = _sdwService;
         activeTimService = _activeTimService;
         emailConfig = _emailConfig;
         mailHelper = _mailHelper;
+        utility = _utility;
     }
 
     public void run() {
+        utility.logWithDate("ValidateSDX - Running...");
+        
+        try {
+            validateSdx();
+        } catch (Exception ex) {
+            utility.logWithDate("Error while validating SDX:");
+            ex.printStackTrace();
+            // don't rethrow error, or the task won't be reran until the service is
+            // restarted.
+        }
+    }
+
+    private void validateSdx() {
         List<CActiveTim> oracleRecords = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> sdxRecords = new ArrayList<>();
 

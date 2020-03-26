@@ -45,6 +45,19 @@ public class ValidateRsus implements Runnable {
     }
 
     public void run() {
+        utility.logWithDate("ValidateRsus - Running...");
+        
+        try {
+            validateRsus();
+        } catch (Exception ex) {
+            utility.logWithDate("Error while validating RSUs:");
+            ex.printStackTrace();
+            // don't rethrow error, or the task won't be reran until the service is
+            // restarted.
+        }
+    }
+
+    private void validateRsus() {
         // The data structure being used here is temporary. Since we have RSUs shared
         // between our dev and prod environment, we need to fetch Active Tims from both
         // the dev and prod Oracle db. THEN we need to merge those records into the
@@ -86,8 +99,7 @@ public class ValidateRsus implements Runnable {
         // Integer.toString(rec.getRsuActiveTims().size()));
         // });
 
-        // TODO: Change to thread pool
-        ExecutorService workerThreadPool = Executors.newSingleThreadExecutor();
+        ExecutorService workerThreadPool = Executors.newFixedThreadPool(config.getRsuValThreadPoolSize());
 
         // Map each RSU to an asynchronous "task" that will validate that RSU
         List<ValidateRsu> tasks = new ArrayList<>();
@@ -128,7 +140,8 @@ public class ValidateRsus implements Runnable {
                 continue;
             }
 
-            // We were able to validate this RSU. If any oddities were found, queue this RSU for the report
+            // We were able to validate this RSU. If any oddities were found, queue this RSU
+            // for the report
             if (result.getCollisions().size() > 0 || result.getMissingFromRsu().size() > 0
                     || result.getUnaccountedForIndices().size() > 0 || result.getStaleIndexes().size() > 0) {
                 rsusWithErrors.add(result);
@@ -139,7 +152,7 @@ public class ValidateRsus implements Runnable {
         if (unresponsiveRsus.size() > 0 || rsusWithErrors.size() > 0 || unexpectedErrors.size() > 0) {
             // ... generate and send email
             String email = emailConfig.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
-            
+
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Validation Results", email,
                         config.getMailPort(), config.getMailHost(), config.getFromEmail());
@@ -152,9 +165,9 @@ public class ValidateRsus implements Runnable {
     private void awaitTerminationAfterShutdown(ExecutorService threadPool) {
         threadPool.shutdown(); // Tell threadpool to shut down after executing all queued tasks.
         try {
-            // TODO add to config
-            if (!threadPool.awaitTermination(300, TimeUnit.SECONDS)) {
-                // Threadpool took too long to shut down. Force close (may yield incomplete tasks)
+            if (!threadPool.awaitTermination(config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS)) {
+                // Threadpool took too long to shut down. Force close (may yield incomplete
+                // tasks)
                 threadPool.shutdownNow();
             }
         } catch (InterruptedException ex) {
@@ -163,14 +176,16 @@ public class ValidateRsus implements Runnable {
         }
     }
 
-    // This method groups activeTim records by RSU (specifically, the RSU's ipv4 address)
+    // This method groups activeTim records by RSU (specifically, the RSU's ipv4
+    // address)
     private List<PopulatedRsu> getRsusFromActiveTims(TreeSet<EnvActiveTim> activeTims) {
         List<PopulatedRsu> rsusWithRecords = new ArrayList<>();
         PopulatedRsu rsu = null;
 
         // Due to the TreeSet, the records in activeTims are sorted by rsuTarget.
         for (EnvActiveTim record : activeTims) {
-            // If we don't have an RSU yet, or this record is the first one for the next RSU...
+            // If we don't have an RSU yet, or this record is the first one for the next
+            // RSU...
             if (rsu == null || !rsu.getIpv4Address().equals(record.getActiveTim().getRsuTarget())) {
                 if (rsu != null) {
                     rsusWithRecords.add(rsu);

@@ -1,7 +1,6 @@
 package com.trihydro.tasks;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,63 +12,77 @@ import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.CvDataServiceLibrary;
+import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
 import com.trihydro.tasks.actions.RemoveExpiredActiveTims;
+import com.trihydro.tasks.actions.ValidateRsus;
 import com.trihydro.tasks.actions.ValidateSDX;
 import com.trihydro.tasks.config.DataTasksConfiguration;
-import com.trihydro.tasks.config.EmailConfiguration;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class })
+@Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
+        RsuDataService.class })
 public class Application {
+    protected static DataTasksConfiguration config;
 
-	protected static DataTasksConfiguration configuration;
-	private Utility utility;
+    private RemoveExpiredActiveTims removeExpiredActiveTims;
+    private CleanupActiveTims cleanupActiveTims;
+    private ValidateSDX sdxValidator;
+    private ValidateRsus rsuValidator;
 
-    private ApplicationContext appContext;
+    @Autowired
+    public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
+            CleanupActiveTims _cleanupActiveTims, ValidateSDX _sdxValidator, ValidateRsus _rsuValidator) {
+        config = _config;
+        removeExpiredActiveTims = _removeExpiredActiveTims;
+        cleanupActiveTims = _cleanupActiveTims;
+        sdxValidator = _sdxValidator;
+        rsuValidator = _rsuValidator;
 
-	// TODO: remove from here
-	private ValidateSDX sdxValidator;
+        CvDataServiceLibrary.setCVRestUrl(config.getCvRestService());
+    }
 
-	@Autowired
-	public void InjectDependencies(DataTasksConfiguration configurationRhs, Utility _utility,
-			ValidateSDX _sdxValidator, ApplicationContext _appContext) {
-		configuration = configurationRhs;
-		utility = _utility;
-		sdxValidator = _sdxValidator;
-		appContext = _appContext;
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 
-		CvDataServiceLibrary.setCVRestUrl(configuration.getCvRestService());
-	}
+    @PostConstruct
+    public void run() throws IOException {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+        // DEBUG - requires ApplicationContext bean
+        // String[] beans = appContext.getBeanDefinitionNames();
+        // Arrays.sort(beans);
+        // for (String bean : beans) {
+        // System.out.println(bean);
+        // }
 
-	@PostConstruct
-	public void run() throws IOException {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 
-		String[] beans = appContext.getBeanDefinitionNames();
-        Arrays.sort(beans);
-        for (String bean : beans) {
-            System.out.println(bean);
+        // Remove Expired Active Tims
+        scheduledExecutorService.scheduleAtFixedRate(removeExpiredActiveTims, 0, config.getRemoveExpiredPeriodMinutes(),
+                TimeUnit.MINUTES);
+
+        // Cleanup Active Tims
+        scheduledExecutorService.scheduleAtFixedRate(cleanupActiveTims, 0, config.getCleanupPeriodMinutes(),
+                TimeUnit.MINUTES);
+
+        // SDX Validator
+        scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 0, config.getSdxValidationPeriodMinutes(),
+                TimeUnit.MINUTES);
+
+        // RSU Validator
+        // Since we're validating Active Tims from both environments in the same task,
+        // we only want this running in 1 environment, or else we'll receive duplicate
+        // emails
+        if (config.getRunRsuValidation()) {
+            scheduledExecutorService.scheduleAtFixedRate(rsuValidator, 0, config.getRsuValidationPeriodMinutes(),
+                    TimeUnit.MINUTES);
         }
-
-		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
-		// scheduledExecutorService.scheduleAtFixedRate(new
-		// RemoveExpiredActiveTims(configuration, utility), 0, 4,
-		// TimeUnit.HOURS);
-		// scheduledExecutorService.scheduleAtFixedRate(new
-		// CleanupActiveTims(configuration, utility), 0, 4,
-		// TimeUnit.HOURS);
-
-		sdxValidator.run();
-	}
+    }
 }

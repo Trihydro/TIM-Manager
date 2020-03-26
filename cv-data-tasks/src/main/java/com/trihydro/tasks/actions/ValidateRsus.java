@@ -86,16 +86,18 @@ public class ValidateRsus implements Runnable {
         // Integer.toString(rec.getRsuActiveTims().size()));
         // });
 
-        // TODO: Is there a best practice for retrieving and using a ThreadPool?
         // TODO: Change to thread pool
         ExecutorService workerThreadPool = Executors.newSingleThreadExecutor();
 
+        // Map each RSU to an asynchronous "task" that will validate that RSU
         List<ValidateRsu> tasks = new ArrayList<>();
         for (PopulatedRsu rsu : rsusWithRecords) {
             tasks.add(new ValidateRsu(rsu, rsuDataService));
         }
+
         List<Future<RsuValidationResult>> futureResults = null;
         try {
+            // Invoke all validation tasks, and wait for them to complete
             futureResults = workerThreadPool.invokeAll(tasks);
             awaitTerminationAfterShutdown(workerThreadPool);
         } catch (InterruptedException e) {
@@ -106,32 +108,38 @@ public class ValidateRsus implements Runnable {
         List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
         List<String> unexpectedErrors = new ArrayList<>();
 
+        // Go through the validation results, and collect results to be reported
         for (int i = 0; i < futureResults.size(); i++) {
             RsuValidationResult result = null;
 
             try {
                 result = futureResults.get(i).get();
             } catch (Exception ex) {
+                // Something went wrong, and the validation task for this RSU wasn't completed.
                 ex.printStackTrace();
                 // "10.145.xx.xx: What went wrong..."
                 unexpectedErrors.add(tasks.get(i).getRsu().getIpv4Address() + ": " + ex.getMessage());
                 continue;
             }
 
+            // Check if we were able to initiate a SNMP session with the RSU
             if (result.getRsuUnresponsive()) {
                 unresponsiveRsus.add(result.getRsu());
                 continue;
             }
 
+            // We were able to validate this RSU. If any oddities were found, queue this RSU for the report
             if (result.getCollisions().size() > 0 || result.getMissingFromRsu().size() > 0
-                    || result.getUnaccountedForIndices().size() > 0) {
+                    || result.getUnaccountedForIndices().size() > 0 || result.getStaleIndexes().size() > 0) {
                 rsusWithErrors.add(result);
             }
         }
 
+        // If we have any metrics to report...
         if (unresponsiveRsus.size() > 0 || rsusWithErrors.size() > 0 || unexpectedErrors.size() > 0) {
+            // ... generate and send email
             String email = emailConfig.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
-
+            
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Validation Results", email,
                         config.getMailPort(), config.getMailHost(), config.getFromEmail());
@@ -142,10 +150,11 @@ public class ValidateRsus implements Runnable {
     }
 
     private void awaitTerminationAfterShutdown(ExecutorService threadPool) {
-        threadPool.shutdown();
+        threadPool.shutdown(); // Tell threadpool to shut down after executing all queued tasks.
         try {
             // TODO add to config
             if (!threadPool.awaitTermination(300, TimeUnit.SECONDS)) {
+                // Threadpool took too long to shut down. Force close (may yield incomplete tasks)
                 threadPool.shutdownNow();
             }
         } catch (InterruptedException ex) {
@@ -154,11 +163,14 @@ public class ValidateRsus implements Runnable {
         }
     }
 
+    // This method groups activeTim records by RSU (specifically, the RSU's ipv4 address)
     private List<PopulatedRsu> getRsusFromActiveTims(TreeSet<EnvActiveTim> activeTims) {
         List<PopulatedRsu> rsusWithRecords = new ArrayList<>();
         PopulatedRsu rsu = null;
 
+        // Due to the TreeSet, the records in activeTims are sorted by rsuTarget.
         for (EnvActiveTim record : activeTims) {
+            // If we don't have an RSU yet, or this record is the first one for the next RSU...
             if (rsu == null || !rsu.getIpv4Address().equals(record.getActiveTim().getRsuTarget())) {
                 if (rsu != null) {
                     rsusWithRecords.add(rsu);

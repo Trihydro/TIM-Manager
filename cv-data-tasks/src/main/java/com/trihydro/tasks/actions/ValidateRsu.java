@@ -9,14 +9,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.RsuIndexInfo;
-import com.trihydro.library.model.TimQuery;
-import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuDataService;
-import com.trihydro.tasks.config.DataTasksConfiguration;
+import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.PopulatedRsu;
@@ -66,29 +62,39 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         // Check if there are any ActiveTims claiming the same index
         calculateCollisions();
 
-        // Verify ActiveTims against RSU index info
+        // Verify Active TIMs
         for (EnvActiveTim record : rsu.getRsuActiveTims()) {
-            // TODO: should we check for null rsuIndex?
             ActiveTim tim = record.getActiveTim();
+
+            // Check if index claimed by ActiveTim is populated on RSU
             int pos = Collections.binarySearch(rsuIndices, new RsuIndexInfo(tim.getRsuIndex(), null), findByIndex);
 
             if (pos < 0) {
                 result.getMissingFromRsu().add(record);
             } else {
-                // TODO: verify deliveryStart
+                // We've mapped an ActiveTim to the RSU index. Remove this RSU index
+                // from the list of indexes, since we've accounted for it
                 rsuIndices.remove(pos);
+
+                RsuIndexInfo rsuInfo = rsuIndices.get(pos);
+                if(!tim.getStartDateTime().equals(rsuInfo.getDeliveryStartTime())) {
+                    // The message at this index on the RSU is stale. 
+                    result.getStaleIndexes().add(new ActiveTimMapping(record, rsuInfo));
+                }
             }
         }
 
         // Check if there are any remaining, unaccounted for
-        // indices on the RSU
+        // indexes on the RSU
         if (rsuIndices.size() > 0) {
             result.setUnaccountedForIndices(
                     rsuIndices.stream().map((item) -> item.getIndex()).collect(Collectors.toList()));
         }
 
-        Gson gson = new Gson();
-        System.out.println(gson.toJson(result));
+        // DEBUG
+        // Gson gson = new Gson();
+        // System.out.println(gson.toJson(result));
+
         return result;
     }
 

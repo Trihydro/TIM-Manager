@@ -6,10 +6,13 @@ import java.nio.file.Files;
 import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.RsuIndexInfo;
+import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.EnvActiveTim;
+import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.springframework.core.io.ClassPathResource;
@@ -92,6 +95,9 @@ public class EmailConfiguration {
 
         body = body.replaceAll("\\{summary-tables\\}", content);
 
+        // Remove unnecessary whitespace
+        body = body.replaceAll("\\s*\n\\s*", "");
+
         return body;
     }
 
@@ -117,32 +123,48 @@ public class EmailConfiguration {
         }
         body = body.replaceAll("\\{errorsList\\}", errorList);
 
+        // Remove unnecessary whitespace
+        body = body.replaceAll("\\s*\n\\s*", "");
+
         return body;
     }
 
     private String getRsuResult(RsuValidationResult result) {
         String section = formatRsuResults.replaceAll("\\{ipv4Address\\}", result.getRsu());
+        String subSection = "";
 
         // List unaccounted for indexes
-        String unaccountedForIndexes = "";
+        subSection = "";
         for (Integer index : result.getUnaccountedForIndices()) {
-            if (!unaccountedForIndexes.equals("")) {
-                unaccountedForIndexes += ", ";
+            if (!subSection.equals("")) {
+                subSection += ", ";
             }
-            unaccountedForIndexes += index.toString();
+            subSection += index.toString();
         }
-        section = section.replaceAll("\\{unaccountedIndexes\\}", unaccountedForIndexes);
+        section = section.replaceAll("\\{unaccountedIndexes\\}", subSection);
 
         // List Active TIMs missing from RSU
-        String rowsMissingTims = "";
+        subSection = "";
         for (EnvActiveTim record : result.getMissingFromRsu()) {
             ActiveTim tim = record.getActiveTim();
-            rowsMissingTims += getRow(tim.getActiveTimId().toString(), tim.getRsuIndex().toString());
+            subSection += getRow(record.getEnvironment().toString(), tim.getActiveTimId().toString(),
+                    tim.getRsuIndex().toString());
         }
-        section = section.replaceAll("\\{rowsMissingTims\\}", rowsMissingTims);
+        section = section.replaceAll("\\{rowsMissingTims\\}", subSection);
+
+        // List Stale TIMs on RSU
+        subSection = "";
+        for (ActiveTimMapping staleTim : result.getStaleIndexes()) {
+            Environment env = staleTim.getEnvTim().getEnvironment();
+            ActiveTim tim = staleTim.getEnvTim().getActiveTim();
+            RsuIndexInfo rsuIndex = staleTim.getRsuIndexInfo();
+            subSection += getRow(env.toString(), tim.getActiveTimId().toString(), rsuIndex.getIndex().toString(),
+                    tim.getStartDateTime(), rsuIndex.getDeliveryStartTime());
+        }
+        section = section.replaceAll("\\{rowsStaleTims\\}", subSection);
 
         // List Active TIMs claiming same index
-        String rowsCollisions = "";
+        subSection = "";
         for (Collision collision : result.getCollisions()) {
             String activeTimIds = "";
             for (EnvActiveTim record : collision.getTims()) {
@@ -150,11 +172,12 @@ public class EmailConfiguration {
                     activeTimIds += ", ";
                 }
                 activeTimIds += record.getActiveTim().getActiveTimId().toString();
+                activeTimIds += " (" + record.getEnvironment().toString() + ")";
             }
 
-            rowsCollisions += getRow(collision.getIndex().toString(), activeTimIds);
+            subSection += getRow(collision.getIndex().toString(), activeTimIds);
         }
-        section = section.replaceAll("\\{rowsCollisions\\}", rowsCollisions);
+        section = section.replaceAll("\\{rowsCollisions\\}", subSection);
 
         return section;
     }

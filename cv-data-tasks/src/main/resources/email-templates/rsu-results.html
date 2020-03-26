@@ -1,7 +1,7 @@
 <h4>{ipv4Address}</h4>
 <ul>
   <li>
-    Populated Indexes w/o ActiveTim record
+    Populated indexes without record
     <table>
       <tr>
         <td>{unaccountedIndexes}</td>
@@ -13,7 +13,8 @@
     <table>
       <thead>
         <tr>
-          <th>ActiveTimId</th>
+          <th>Environment</th>
+          <th>Id</th>
           <th>Expected Index</th>
         </tr>
       </thead>
@@ -23,12 +24,29 @@
     </table>
   </li>
   <li>
-    Active TIMs claiming same index
+    Stale TIMs on RSU
+    <table>
+      <thead>
+        <tr>
+          <th>Environment</th>
+          <th>ActiveTim Id</th>
+          <th>Index</th>
+          <th>Start (Expected)</th>
+          <th>Start (Actual)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rowsStaleTims}
+      </tbody>
+    </table>
+  </li>
+  <li>
+    Active TIM index collisions
     <table>
       <thead>
         <tr>
           <th>Index</th>
-          <th>ActiveTimIds</th>
+          <th>Ids</th>
         </tr>
       </thead>
       <tbody>

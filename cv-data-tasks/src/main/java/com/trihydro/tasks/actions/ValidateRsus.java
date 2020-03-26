@@ -46,7 +46,7 @@ public class ValidateRsus implements Runnable {
 
     public void run() {
         utility.logWithDate("ValidateRsus - Running...");
-        
+
         try {
             validateRsus();
         } catch (Exception ex) {
@@ -110,8 +110,8 @@ public class ValidateRsus implements Runnable {
         List<Future<RsuValidationResult>> futureResults = null;
         try {
             // Invoke all validation tasks, and wait for them to complete
-            futureResults = workerThreadPool.invokeAll(tasks);
-            awaitTerminationAfterShutdown(workerThreadPool);
+            futureResults = workerThreadPool.invokeAll(tasks, config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS);
+            shutDownThreadPool(workerThreadPool);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -130,7 +130,8 @@ public class ValidateRsus implements Runnable {
                 // Something went wrong, and the validation task for this RSU wasn't completed.
                 ex.printStackTrace();
                 // "10.145.xx.xx: What went wrong..."
-                unexpectedErrors.add(tasks.get(i).getRsu().getIpv4Address() + ": " + ex.getMessage());
+                unexpectedErrors
+                        .add(tasks.get(i).getRsu().getIpv4Address() + ": " + ex.toString() + " - " + ex.getMessage());
                 continue;
             }
 
@@ -162,10 +163,10 @@ public class ValidateRsus implements Runnable {
         }
     }
 
-    private void awaitTerminationAfterShutdown(ExecutorService threadPool) {
-        threadPool.shutdown(); // Tell threadpool to shut down after executing all queued tasks.
+    private void shutDownThreadPool(ExecutorService threadPool) {
+        threadPool.shutdown(); // Tell threadpool to stop accepting tasks and shut down
         try {
-            if (!threadPool.awaitTermination(config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS)) {
+            if (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
                 // Threadpool took too long to shut down. Force close (may yield incomplete
                 // tasks)
                 threadPool.shutdownNow();

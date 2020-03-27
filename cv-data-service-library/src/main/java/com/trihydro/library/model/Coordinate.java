@@ -12,6 +12,9 @@ public class Coordinate {
     @ApiModelProperty(required = true)
     private Double longitude;
 
+    public Coordinate() {
+    }
+
     public Coordinate(double lat, double lon) {
         this.latitude = lat;
         this.longitude = lon;

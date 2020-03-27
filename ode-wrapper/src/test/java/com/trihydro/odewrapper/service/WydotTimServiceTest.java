@@ -15,6 +15,7 @@ import javax.mail.MessagingException;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
@@ -90,11 +91,11 @@ public class WydotTimServiceTest {
             aTim.setSatRecordId("C27CBB9F");
             aTim2.setSatRecordId("86E03786");
         } else {
-            aTim.setMilepostStart(1d);
-            aTim.setMilepostStop(2d);
+            aTim.setStartPoint(new Coordinate(1, 2));
+            aTim.setEndPoint(new Coordinate(3, 4));
             aTim.setTimId(-10l);
-            aTim2.setMilepostStart(3d);
-            aTim2.setMilepostStop(4d);
+            aTim2.setStartPoint(new Coordinate(5, 6));
+            aTim2.setEndPoint(new Coordinate(7, 8));
             aTim2.setTimId(-20l);
         }
         activeTims.add(aTim);

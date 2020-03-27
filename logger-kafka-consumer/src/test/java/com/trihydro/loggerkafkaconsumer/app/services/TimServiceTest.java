@@ -460,8 +460,6 @@ public class TimServiceTest extends TestBase<TimService> {
         assertNotNull(data);
         assertNotNull(data.getDirection());
         assertNotNull(data.getRoute());
-        assertNotNull(data.getMilepostStart());
-        assertNotNull(data.getMilepostStop());
         assertNotNull(data.getRsuTarget());
         assertNotNull(data.getTimType());
         assertNotNull(data.getTimTypeId());
@@ -484,8 +482,6 @@ public class TimServiceTest extends TestBase<TimService> {
         assertNotNull(data);
         assertNotNull(data.getDirection());
         assertNotNull(data.getRoute());
-        assertNotNull(data.getMilepostStart());
-        assertNotNull(data.getMilepostStop());
         assertNotNull(data.getSatRecordId());
         assertNotNull(data.getTimType());
         assertNotNull(data.getTimTypeId());

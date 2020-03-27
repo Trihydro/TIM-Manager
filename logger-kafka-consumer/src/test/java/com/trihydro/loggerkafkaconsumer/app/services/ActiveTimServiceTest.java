@@ -44,6 +44,8 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
     public void insertActiveTim_SUCCESS() throws SQLException {
         // Arrange
         ActiveTim activeTim = new ActiveTim();
+        activeTim.setStartPoint(new Coordinate(-1, -2));
+        activeTim.setEndPoint(new Coordinate(-3, -4));
         activeTim.setStartDateTime("2020-02-03T16:00:00.000Z");
         activeTim.setEndDateTime("2020-02-03T16:00:00.000Z");
         doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
@@ -55,8 +57,6 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         // Assert
         assertEquals(new Long(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 2, activeTim.getMilepostStart());// MILEPOST_START
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 3, activeTim.getMilepostStop());// MILEPOST_STOP
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTim.getDirection());// DIRECTION
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 5, java.sql.Timestamp// TIM_START
                 .valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
@@ -67,6 +67,10 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 9, activeTim.getClientId());// CLIENT_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 10, activeTim.getSatRecordId());// SAT_RECORD_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 11, activeTim.getPk());// PK
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 12, activeTim.getStartPoint().getLatitude());// START_LATITUDE
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 13, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 14, activeTim.getEndPoint().getLatitude());// END_LATITUDE
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 15, activeTim.getEndPoint().getLongitude());// END_LONGITUDE
         verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 12, activeTim.getStartPoint().getLatitude());// START_LATITUDE
         verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 13, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
         verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 14, activeTim.getEndPoint().getLatitude());// END_LATITUDE

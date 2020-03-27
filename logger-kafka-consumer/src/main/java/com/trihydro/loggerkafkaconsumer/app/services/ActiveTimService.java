@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +46,6 @@ public class ActiveTimService extends BaseService {
             for (String col : timOracleTables.getActiveTimTable()) {
                 if (col.equals("TIM_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
-                else if (col.equals("MILEPOST_START"))
-                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStart());
-                else if (col.equals("MILEPOST_STOP"))
-                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStop());
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
                 else if (col.equals("TIM_START"))
@@ -199,10 +196,24 @@ public class ActiveTimService extends BaseService {
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
                 activeTim.setStartDateTime(rs.getString("TIM_START"));
-                activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-                activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));
+                
+                Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				double startLat = rs.getDouble("START_LATITUDE");
+				double startLon = rs.getDouble("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
+
+				double endLat = rs.getDouble("END_LATITUDE");
+				double endLon = rs.getDouble("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -254,10 +265,24 @@ public class ActiveTimService extends BaseService {
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
                 activeTim.setStartDateTime(rs.getString("TIM_START"));
-                activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-                activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));
+
+                Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				double startLat = rs.getDouble("START_LATITUDE");
+				double startLon = rs.getDouble("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
+
+				double endLat = rs.getDouble("END_LATITUDE");
+				double endLon = rs.getDouble("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
             e.printStackTrace();

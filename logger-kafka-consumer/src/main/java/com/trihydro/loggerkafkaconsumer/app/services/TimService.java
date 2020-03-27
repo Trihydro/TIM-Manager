@@ -581,17 +581,9 @@ public class TimService extends BaseService {
             activeTim.setRoute(splitName[1]);
         else
             return activeTim;
-        if (splitName.length > 2)
-            activeTim.setMilepostStart(Double.parseDouble(splitName[2]));
-        else
-            return activeTim;
-        if (splitName.length > 3)
-            activeTim.setMilepostStop(Double.parseDouble(splitName[3]));
-        else
-            return activeTim;
-        if (splitName.length > 4) {
+        if (splitName.length > 2) {
             // if this is an RSU TIM
-            String[] hyphen_array = splitName[4].split("-");
+            String[] hyphen_array = splitName[2].split("-");
             if (hyphen_array.length > 1) {
                 if (hyphen_array[0].equals("SAT")) {
                     activeTim.setSatRecordId(hyphen_array[1]);
@@ -601,21 +593,21 @@ public class TimService extends BaseService {
             }
         } else
             return activeTim;
-        if (splitName.length > 5) {
-            TimType timType = getTimType((splitName[5]));
+        if (splitName.length > 3) {
+            TimType timType = getTimType((splitName[3]));
             activeTim.setTimType(timType.getType());
             activeTim.setTimTypeId(timType.getTimTypeId());
         } else
             return activeTim;
 
-        if (splitName.length > 6)
-            activeTim.setClientId(splitName[6]);
+        if (splitName.length > 4)
+            activeTim.setClientId(splitName[4]);
         else
             return activeTim;
 
-        if (splitName.length > 7) {
+        if (splitName.length > 5) {
             try {
-                Integer pk = Integer.valueOf(splitName[7]);
+                Integer pk = Integer.valueOf(splitName[5]);
                 activeTim.setPk(pk);
             } catch (NumberFormatException ex) {
                 // the pk won't get set here

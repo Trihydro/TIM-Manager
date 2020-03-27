@@ -5,12 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -469,15 +467,10 @@ public abstract class WydotTimBaseController {
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, String direction, TimType timType, String startDateTime,
             String endDateTime, Integer pk) {
-        Comparator<Milepost> compMp = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
                 startDateTime, endDateTime);
-
-        Milepost minMp = timToSend.getMileposts().stream().min(compMp).get();
-        Milepost maxMp = timToSend.getMileposts().stream().max(compMp).get();
-        String regionNamePrev = direction + "_" + wydotTim.getRoute() + "_" + minMp.getMilepost() + "_"
-                + maxMp.getMilepost();
+        String regionNamePrev = direction + "_" + wydotTim.getRoute();
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs

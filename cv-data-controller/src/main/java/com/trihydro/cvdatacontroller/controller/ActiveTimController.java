@@ -15,6 +15,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
@@ -91,10 +92,24 @@ public class ActiveTimController extends BaseController {
 				activeTim.setStartDateTime(rs.getString("TIM_START"));
 				activeTim.setEndDateTime(rs.getString("TIM_END"));
 				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
 				activeTim.setClientId(rs.getString("CLIENT_ID"));
 				activeTim.setRoute(rs.getString("ROUTE"));
+
+				Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				double startLat = rs.getDouble("START_LATITUDE");
+				double startLon = rs.getDouble("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
+
+				double endLat = rs.getDouble("END_LATITUDE");
+				double endLon = rs.getDouble("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
 
 				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START"));
 				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END"));
@@ -199,7 +214,6 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/missing-itis", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsMissingItisCodes() {
-		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
@@ -240,19 +254,7 @@ public class ActiveTimController extends BaseController {
 
 			rs = statement.executeQuery(selectStatement);
 
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTims.add(activeTim);
-			}
+			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -276,7 +278,6 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/not-sent", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsNotSent() {
-		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
@@ -294,19 +295,7 @@ public class ActiveTimController extends BaseController {
 
 			rs = statement.executeQuery(selectStatement);
 
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTims.add(activeTim);
-			}
+			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -330,7 +319,6 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/expired", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims() {
-		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
@@ -341,26 +329,12 @@ public class ActiveTimController extends BaseController {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID, ROUTE from active_tim";
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE from active_tim";
 			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
 			selectStatement += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 
 			rs = statement.executeQuery(selectStatement);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setTimType(rs.getString("TYPE"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTims.add(activeTim);
-			}
+			activeTims = getActiveTimFromRS(rs, true);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -435,8 +409,6 @@ public class ActiveTimController extends BaseController {
 	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}/{direction}", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
 			@PathVariable Long timTypeId, @PathVariable String direction) {
-
-		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
@@ -453,23 +425,7 @@ public class ActiveTimController extends BaseController {
 			}
 
 			rs = statement.executeQuery(query);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTim.setEndDateTime(rs.getString("TIM_END"));
-				activeTim.setStartDateTime(rs.getString("TIM_START"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setPk(rs.getInt("PK"));
-				activeTims.add(activeTim);
-			}
+			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -625,7 +581,6 @@ public class ActiveTimController extends BaseController {
 	@RequestMapping(value = "/get-by-wydot-tim/{timTypeId}", method = RequestMethod.POST)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByWydotTim(@RequestBody List<? extends WydotTim> wydotTims,
 			@PathVariable Long timTypeId) {
-		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		PreparedStatement ps = null;
@@ -674,23 +629,7 @@ public class ActiveTimController extends BaseController {
 				}
 			}
 			rs = ps.executeQuery();
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTim.setEndDateTime(rs.getString("TIM_END"));
-				activeTim.setStartDateTime(rs.getString("TIM_START"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setPk(rs.getInt("PK"));
-				activeTims.add(activeTim);
-			}
+			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -713,8 +652,6 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/tim-type-id/{timTypeId}", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByType(@PathVariable Long timTypeId) {
-
-		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
@@ -724,24 +661,7 @@ public class ActiveTimController extends BaseController {
 			connection = GetConnectionPool();
 			statement = connection.createStatement();
 			rs = statement.executeQuery("select * from active_tim where TIM_TYPE_ID = " + timTypeId);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTim.setEndDateTime(rs.getString("TIM_END"));
-				activeTim.setStartDateTime(rs.getString("TIM_START"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setPk(rs.getInt("PK"));
-				activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
-				activeTims.add(activeTim);
-			}
+			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -766,7 +686,6 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/all", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetAllActiveTims() {
-		ActiveTim activeTim = null;
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
@@ -780,18 +699,7 @@ public class ActiveTimController extends BaseController {
 			String selectStatement = "select * from active_tim";
 
 			rs = statement.executeQuery(selectStatement);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTims.add(activeTim);
-			}
+			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -833,21 +741,9 @@ public class ActiveTimController extends BaseController {
 					+ "' and active_tim.direction = '" + artqm.getDirection() + "'";
 
 			rs = statement.executeQuery(query);
-
-			// convert to ActiveTim object
-			while (rs.next()) {
-				activeTim = new ActiveTim();
-				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-				activeTim.setClientId(rs.getString("CLIENT_ID"));
-				activeTim.setDirection(rs.getString("DIRECTION"));
-				activeTim.setEndDateTime(rs.getString("TIM_END"));
-				activeTim.setStartDateTime(rs.getString("TIM_START"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
-				activeTim.setRoute(rs.getString("ROUTE"));
-				activeTim.setPk(rs.getInt("PK"));
+			List<ActiveTim> activeTims = getActiveTimFromRS(rs, false);
+			if (activeTims.size() > 0) {
+				activeTim = activeTims.get(activeTims.size() - 1);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -890,10 +786,6 @@ public class ActiveTimController extends BaseController {
 			for (String col : timOracleTables.getActiveTimTable()) {
 				if (col.equals("TIM_ID"))
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
-				else if (col.equals("MILEPOST_START"))
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStart());
-				else if (col.equals("MILEPOST_STOP"))
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStop());
 				else if (col.equals("DIRECTION"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
 				else if (col.equals("TIM_START"))
@@ -915,6 +807,27 @@ public class ActiveTimController extends BaseController {
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getSatRecordId());
 				else if (col.equals("PK"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
+				else if (col.equals("START_LATITUDE")) {
+					Double start_lat = null;
+					if (activeTim.getStartPoint() != null)
+						start_lat = activeTim.getStartPoint().getLatitude();
+					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lat);
+				} else if (col.equals("START_LONGITUDE")) {
+					Double start_lon = null;
+					if (activeTim.getStartPoint() != null)
+						start_lon = activeTim.getStartPoint().getLongitude();
+					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lon);
+				} else if (col.equals("END_LATITUDE")) {
+					Double end_lat = null;
+					if (activeTim.getEndPoint() != null)
+						end_lat = activeTim.getEndPoint().getLatitude();
+					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lat);
+				} else if (col.equals("END_LONGITUDE")) {
+					Double end_lon = null;
+					if (activeTim.getEndPoint() != null)
+						end_lon = activeTim.getEndPoint().getLongitude();
+					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lon);
+				}
 
 				fieldNum++;
 			}
@@ -936,6 +849,50 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private List<ActiveTim> getActiveTimFromRS(ResultSet rs, boolean includeType) throws SQLException {
+		List<ActiveTim> activeTims = new ArrayList<>();
+		ActiveTim activeTim = null;
+
+		// convert to ActiveTim object
+		while (rs.next()) {
+			activeTim = new ActiveTim();
+			activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+			activeTim.setTimId(rs.getLong("TIM_ID"));
+			activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+			activeTim.setClientId(rs.getString("CLIENT_ID"));
+			activeTim.setDirection(rs.getString("DIRECTION"));
+			activeTim.setEndDateTime(rs.getString("TIM_END"));
+			activeTim.setStartDateTime(rs.getString("TIM_START"));
+			activeTim.setRoute(rs.getString("ROUTE"));
+			activeTim.setPk(rs.getInt("PK"));
+			activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
+
+			if (includeType) {
+				activeTim.setTimType(rs.getString("TYPE"));
+			}
+
+			Coordinate startPoint = null;
+			Coordinate endPoint = null;
+			double startLat = rs.getDouble("START_LATITUDE");
+			double startLon = rs.getDouble("START_LONGITUDE");
+			if (!rs.wasNull()) {
+				startPoint = new Coordinate(startLat, startLon);
+			}
+			activeTim.setStartPoint(startPoint);
+
+			double endLat = rs.getDouble("END_LATITUDE");
+			double endLon = rs.getDouble("END_LONGITUDE");
+			if (!rs.wasNull()) {
+				endPoint = new Coordinate(endLat, endLon);
+			}
+			activeTim.setEndPoint(endPoint);
+
+			activeTims.add(activeTim);
+		}
+
+		return activeTims;
 	}
 
 }

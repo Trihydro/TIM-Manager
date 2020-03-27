@@ -1,6 +1,7 @@
 package com.trihydro.timrefresh;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.TimeToLive;
@@ -59,15 +61,14 @@ public class TimRefreshControllerTest {
     Utility mockUtility;
     @Mock
     OdeService mockOdeService;
+    @Mock
+    MilepostService mockMilepostService;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
 
     @Before
     public void setup() {
-        // controllerUnderTest = new TimRefreshController(configuration,
-        // mockSdwService);
-
         PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(WydotTimService.class);
         PowerMockito.mockStatic(RsuService.class);
@@ -107,8 +108,7 @@ public class TimRefreshControllerTest {
         // endMp.setBearing(59d);
         mps.add(startMp);
         mps.add(endMp);
-        Mockito.when(MilepostService.selectMilepostRange(isA(String.class), isA(String.class), isA(Double.class),
-                isA(Double.class))).thenReturn(mps);
+        doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
     }
 
     @Test
@@ -140,8 +140,7 @@ public class TimRefreshControllerTest {
         arrLst.add(tum);
         when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(RsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
-        when(mockUtility.getRsusInBuffer(isA(String.class), isA(double.class), isA(double.class), isA(String.class)))
-                .thenReturn(rsus);
+        doReturn(rsus).when(mockUtility).getRsusByLatLong(anyString(), any(), any(), anyString());
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
@@ -205,9 +204,6 @@ public class TimRefreshControllerTest {
         PowerMockito.verifyStatic(ActiveTimService.class);
         ActiveTimService.getExpiringActiveTims();
 
-        PowerMockito.verifyStatic(MilepostService.class);
-        MilepostService.selectMilepostRange(any(), any(), any(), any());
-
         PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.getServiceRegion(any());
 
@@ -227,8 +223,8 @@ public class TimRefreshControllerTest {
         TimUpdateModel tum = new TimUpdateModel();
         tum.setRoute("I 80");
         tum.setDirection("i");
-        tum.setMilepostStart(1d);
-        tum.setMilepostStop(2d);
+        tum.setStartPoint(new Coordinate(-1, -2));
+        tum.setEndPoint(new Coordinate(-3, -4));
         tum.setClosedPath(false);
         return tum;
     }

@@ -23,6 +23,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
@@ -143,8 +144,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getString("CLIENT_ID");
@@ -198,8 +201,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getString("CLIENT_ID");
@@ -233,7 +238,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetExpiredActiveTims_SUCCESS() throws SQLException {
         // Arrange
-        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID, ROUTE from active_tim";
+        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE from active_tim";
         statementStr += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
         statementStr += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 
@@ -246,8 +251,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getString("SAT_RECORD_ID");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("TYPE");
         verify(mockRs).getString("CLIENT_ID");
         verify(mockRs).getString("ROUTE");
@@ -260,7 +267,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetExpiredActiveTims_FAIL() throws SQLException {
         // Arrange
-        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, MILEPOST_START, MILEPOST_STOP, TYPE, CLIENT_ID, ROUTE from active_tim";
+        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE from active_tim";
         statementStr += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
         statementStr += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
         when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException());
@@ -345,8 +352,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockStatement).close();
@@ -516,8 +525,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockPreparedStatement).close();
@@ -567,8 +578,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockRs).getLong("TIM_TYPE_ID");
@@ -611,8 +624,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getString("SAT_RECORD_ID");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("CLIENT_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -665,8 +680,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getDouble("START_LATITUDE");
+        verify(mockRs).getDouble("START_LONGITUDE");
+        verify(mockRs).getDouble("END_LATITUDE");
+        verify(mockRs).getDouble("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockStatement).close();
@@ -704,6 +721,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void InsertActiveTim_SUCCESS() throws SQLException {
         // Arrange
         ActiveTim activeTim = new ActiveTim();
+        activeTim.setStartPoint(new Coordinate(-1, -2));
+        activeTim.setEndPoint(new Coordinate(-3, -4));
         String startTime = Instant.now().toString();
         String endTime = Instant.now().plusSeconds(60).toString();
         activeTim.setStartDateTime(startTime);
@@ -715,8 +734,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 2, activeTim.getMilepostStart());// MILEPOST_START
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 3, activeTim.getMilepostStop());// MILEPOST_STOP
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTim.getDirection());// DIRECTION
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 5, java.sql.Timestamp
                 .valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));// TIM_START
@@ -727,6 +744,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 9, activeTim.getClientId());// CLIENT_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 10, activeTim.getSatRecordId());// SAT_RECORD_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 11, activeTim.getPk());// PK
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 12, activeTim.getStartPoint().getLatitude());// START_LATITUDE
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 13, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 14, activeTim.getEndPoint().getLatitude());// END_LATITUDE
+        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 15, activeTim.getEndPoint().getLongitude());// END_LONGITUDE
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
 

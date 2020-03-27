@@ -11,6 +11,10 @@ public class TimUpdateModel extends ActiveTim {
     private Timestamp endDate_Timestamp;
     private String packetId;
 
+    // Coordinates
+    private Coordinate startPoint;
+    private Coordinate endPoint;
+
     // Tim Type properties
     private String timTypeName;
     private String timTypeDescription;
@@ -37,6 +41,22 @@ public class TimUpdateModel extends ActiveTim {
     private short sspMsgContent;
     private String dfContent;
     private String url;
+
+    public Coordinate getStartPoint() {
+        return this.startPoint;
+    }
+
+    public void setStartPoint(Coordinate startPoint) {
+        this.startPoint = startPoint;
+    }
+
+    public Coordinate getEndPoint() {
+        return this.endPoint;
+    }
+
+    public void setEndPoint(Coordinate endPoint) {
+        this.endPoint = endPoint;
+    }
 
     public BigDecimal getLaneWidth() {
         return laneWidth;

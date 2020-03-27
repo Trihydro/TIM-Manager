@@ -295,8 +295,6 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         TimUpdateModel[] tums = new TimUpdateModel[1];
         TimUpdateModel tum = new TimUpdateModel();
         tum.setTimId(1l);
-        tum.setMilepostStart(1d);
-        tum.setMilepostStop(2d);
         tum.setDirection("both");
         tum.setRoute("I 80");
         tum.setClientId("123");
@@ -322,8 +320,6 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         TimUpdateModel[] tums = new TimUpdateModel[1];
         TimUpdateModel tum = new TimUpdateModel();
         tum.setTimId(1l);
-        tum.setMilepostStart(1d);
-        tum.setMilepostStop(2d);
         tum.setDirection("both");
         tum.setRoute("I 80");
         tum.setClientId("123");

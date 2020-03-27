@@ -147,31 +147,21 @@ public class WydotTimService {
         activeTimHolding.setDirection(direction);// we are overriding the direction from the tim here
         activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
+        String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
+        if (wydotTim.getClientId() != null)
+            regionNameTemp += "_" + wydotTim.getClientId();
+
+        // add on wydot primary key if it exists
+        if (pk != null)
+            regionNameTemp += "_" + pk;
+
+        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
+
         if (activeSatTims != null && activeSatTims.size() > 0) {
 
             WydotOdeTravelerInformationMessage tim = TimService.getTim(activeSatTims.get(0).getTimId());
-
-            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
-            if (wydotTim.getClientId() != null)
-                regionNameTemp += "_" + wydotTim.getClientId();
-
-            // add on wydot primary key if it exists
-            if (pk != null)
-                regionNameTemp += "_" + pk;
-
-            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
         } else {
-            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
-
-            if (wydotTim.getClientId() != null)
-                regionNameTemp += "_" + wydotTim.getClientId();
-
-            // add on wydot primary key if it exists
-            if (pk != null)
-                regionNameTemp += "_" + pk;
-
-            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             sendNewTimToSdw(timToSend, recordId);
         }
     }

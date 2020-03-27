@@ -15,6 +15,7 @@ import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
@@ -57,14 +58,16 @@ public class TimRefreshController {
     private SdwService sdwService;
     private Utility utility;
     private OdeService odeService;
+    private MilepostService milepostService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
-            OdeService _odeService) {
+            OdeService _odeService, MilepostService _milepostService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
         odeService = _odeService;
+        milepostService = _milepostService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -85,10 +88,13 @@ public class TimRefreshController {
             }
 
             // Mileposts
-            String route = aTim.getRoute().replaceAll("\\D+", "");// get just the numeric value for the 'like' statement
-                                                                  // to avoid issues with differing formats
-            List<Milepost> mps = MilepostService.selectMilepostRange(aTim.getDirection(), route,
-                    aTim.getMilepostStart(), aTim.getMilepostStop());
+            WydotTim wydotTim = new WydotTim();
+            wydotTim.setRoute(aTim.getRoute());
+            wydotTim.setDirection(aTim.getDirection());
+            wydotTim.setStartPoint(aTim.getStartPoint());
+            wydotTim.setEndPoint(aTim.getEndPoint());
+            List<Milepost> mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+
             if (mps.size() == 0) {
                 System.out.println("Unable to send TIM to SDW, no mileposts found to determine service area");
                 continue;
@@ -184,9 +190,8 @@ public class TimRefreshController {
         if (wydotRsus == null || wydotRsus.size() <= 0) {
             utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
 
-            dbRsus = utility.getRsusInBuffer(aTim.getDirection(),
-                    Math.min(aTim.getMilepostStart(), aTim.getMilepostStop()),
-                    Math.max(aTim.getMilepostStop(), aTim.getMilepostStart()), aTim.getRoute());
+            dbRsus = utility.getRsusByLatLong(aTim.getDirection(), aTim.getStartPoint(), aTim.getEndPoint(),
+                    aTim.getRoute());
 
             // if no RSUs found
             if (dbRsus.size() == 0) {
@@ -384,9 +389,6 @@ public class TimRefreshController {
     private String getBaseRegionName(TimUpdateModel aTim, String middle) {
         String regionName = aTim.getDirection();
         regionName += "_" + aTim.getRoute();
-        regionName += "_" + aTim.getMilepostStart();
-        regionName += "_" + aTim.getMilepostStop();
-
         regionName += middle;// SAT_xxx or RSU_xxx
 
         String timType = aTim.getTimTypeName();

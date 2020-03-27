@@ -51,11 +51,9 @@ public class ActiveTimHoldingController extends BaseController {
             int fieldNum = 1;
 
             for (String col : timOracleTables.getActiveTimHoldingTable()) {
-                // if (col.equals("ACTIVE_TIM_HOLDING_ID")) {
-                // sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-                // activeTimHolding.getPk());
-                // } else
-                if (col.equals("CLIENT_ID")) {
+                if (col.equals("ACTIVE_TIM_HOLDING_ID")) {
+                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTimHolding.getActiveTimHoldingId());
+                } else if (col.equals("CLIENT_ID")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getClientId());
                 } else if (col.equals("DIRECTION")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getDirection());

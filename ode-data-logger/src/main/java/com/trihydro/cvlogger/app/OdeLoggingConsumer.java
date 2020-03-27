@@ -12,6 +12,7 @@ import java.util.Properties;
 import com.google.gson.Gson;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.library.service.CvDataServiceLibrary;
 
@@ -32,11 +33,14 @@ public class OdeLoggingConsumer {
 	static Statement statement = null;
 	private DataLoggerConfiguration configProperties;
 	private TracManager tracManager;
+	private Utility utility;
 
 	@Autowired
-	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TracManager _tracManager) throws IOException {
+	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TracManager _tracManager, Utility _utility)
+			throws IOException {
 		this.configProperties = configProperties;
 		tracManager = _tracManager;
+		utility = _utility;
 		CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
 		System.out.println("starting..............");
 		setupTopic();
@@ -94,8 +98,12 @@ public class OdeLoggingConsumer {
 						ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
 						for (ConsumerRecord<String, String> record : records) {
 							if (consumerTopic.equals("topic.OdeDNMsgJson")) {
+								utility.logWithDate("Found DNMsgJson, submitting to Trac");
 								tracManager.submitDNMsgToTrac(record.value(), configProperties);
 							} else {
+								String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
+										record.topic(), producerTopic);
+								utility.logWithDate(logTxt);
 								TopicDataWrapper tdw = new TopicDataWrapper();
 								tdw.setTopic(record.topic());
 								tdw.setData(record.value());

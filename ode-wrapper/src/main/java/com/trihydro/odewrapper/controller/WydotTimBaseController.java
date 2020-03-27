@@ -437,9 +437,9 @@ public abstract class WydotTimBaseController {
 
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
             // i
-            createSendTims(wydotTim, "i", timType, startDateTime, endDateTime, pk);
+            createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk);
             // d
-            createSendTims(wydotTim, "d", timType, startDateTime, endDateTime, pk);
+            createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk);
         } else {
             createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk);
         }
@@ -481,12 +481,11 @@ public abstract class WydotTimBaseController {
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs
-            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk,
-                    endDateTime);
+            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endDateTime);
         }
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), timType, pk);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, direction, timType, pk);
     }
 }

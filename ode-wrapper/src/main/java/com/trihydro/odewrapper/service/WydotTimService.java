@@ -144,6 +144,7 @@ public class WydotTimService {
 
         // save new active_tim_holding record
         ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId);
+        activeTimHolding.setDirection(direction);// we are overriding the direction from the tim here
         activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
         if (activeSatTims != null && activeSatTims.size() > 0) {
@@ -213,6 +214,7 @@ public class WydotTimService {
 
             // save new active_tim_holding record
             ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null);
+            activeTimHolding.setDirection(direction);
             activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
             // if active tims exist, update tim

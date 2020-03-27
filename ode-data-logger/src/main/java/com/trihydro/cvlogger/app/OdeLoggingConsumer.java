@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
@@ -32,7 +30,6 @@ public class OdeLoggingConsumer {
 
 	static PreparedStatement preparedStatement = null;
 	static Statement statement = null;
-	static ObjectMapper mapper;
 	private DataLoggerConfiguration configProperties;
 	private TracManager tracManager;
 
@@ -42,9 +39,6 @@ public class OdeLoggingConsumer {
 		tracManager = _tracManager;
 		CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
 		System.out.println("starting..............");
-
-		mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		setupTopic();
 		startKafkaConsumerAsync();
 	}

@@ -95,6 +95,7 @@ public class LoggerKafkaConsumer {
                                 e.printStackTrace();
                             }
                             if (tdw != null && tdw.getData() != null) {
+                                utility.logWithDate(String.format("Found data for topic: %s", tdw.getTopic()));
                                 switch (tdw.getTopic()) {
                                     case "topic.OdeTimJson":
                                         odeData = timDataConverter.processTimJson(tdw.getData());

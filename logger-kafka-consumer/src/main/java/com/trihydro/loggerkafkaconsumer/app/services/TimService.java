@@ -88,7 +88,7 @@ public class TimService extends BaseService {
 
         try {
 
-            System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
+            utility.logWithDate("Called addTimToOracleDB");
 
             Long timId = AddTim(odeData.getMetadata(),
                     ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),

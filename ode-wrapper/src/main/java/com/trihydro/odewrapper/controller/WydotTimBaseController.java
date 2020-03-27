@@ -435,7 +435,7 @@ public abstract class WydotTimBaseController {
     public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
             Integer pk) {
 
-        if (wydotTim.getDirection().equals("b")) {
+        if (wydotTim.getDirection().equalsIgnoreCase("b")) {
             // i
             createSendTims(wydotTim, "i", timType, startDateTime, endDateTime, pk);
             // d

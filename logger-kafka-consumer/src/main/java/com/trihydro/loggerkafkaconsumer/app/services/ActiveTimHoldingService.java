@@ -9,6 +9,9 @@ import java.sql.Statement;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ActiveTimHoldingService extends BaseService {
 
     public ActiveTimHolding getRsuActiveTimHolding(String clientId, String direction, String ipv4Address) {

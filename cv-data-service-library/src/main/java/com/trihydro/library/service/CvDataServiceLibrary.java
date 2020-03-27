@@ -1,5 +1,8 @@
 package com.trihydro.library.service;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class CvDataServiceLibrary {
 
     protected static String CVRestUrl;

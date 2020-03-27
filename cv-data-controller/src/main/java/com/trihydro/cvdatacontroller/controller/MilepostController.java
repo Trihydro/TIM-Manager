@@ -283,9 +283,10 @@ public class MilepostController extends BaseController {
 			connection = GetConnectionPool();
 
 			// build SQL query
-			String statementStr = "select distinct common_name from milepost_vw where common_name = '?'";
+			// TODO: this view name might change later
+			String statementStr = "select distinct common_name from milepost_vw_new where common_name = ?";
 			preparedStatement = connection.prepareStatement(statementStr);
-			preparedStatement.setString(0, route);
+			preparedStatement.setString(1, route);
 			rs = preparedStatement.executeQuery();
 
 			return ResponseEntity.ok(rs.next());

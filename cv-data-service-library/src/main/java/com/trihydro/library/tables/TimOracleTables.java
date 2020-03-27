@@ -178,6 +178,10 @@ public class TimOracleTables extends OracleTables {
             activeTimTable.add("CLIENT_ID");
             activeTimTable.add("SAT_RECORD_ID");
             activeTimTable.add("PK");
+            activeTimTable.add("START_LATITUDE");
+            activeTimTable.add("START_LONGITUDE");
+            activeTimTable.add("END_LATITUDE");
+            activeTimTable.add("END_LONGITUDE");
             return activeTimTable;
         }
     }

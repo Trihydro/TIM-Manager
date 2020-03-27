@@ -2,7 +2,9 @@ package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTimHolding;
@@ -38,7 +40,7 @@ public class ActiveTimHoldingController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        Long activeTimId = 0l;
+        Long activeTimHoldingId = 0l;
         try {
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim_holding",
                     timOracleTables.getActiveTimHoldingTable());
@@ -86,11 +88,42 @@ public class ActiveTimHoldingController extends BaseController {
                 fieldNum++;
             }
 
-            activeTimId = executeAndLog(preparedStatement, "active tim holding");
-            return ResponseEntity.ok(activeTimId);
+            activeTimHoldingId = executeAndLog(preparedStatement, "active tim holding");
+
+            if (activeTimHoldingId == null) {
+                // this already exists, fetch it and return the id
+                Statement statement = null;
+                ResultSet rs = null;
+                try {
+                    statement = connection.createStatement();
+                    String query = "select active_tim_holding_id from active_tim_holding";
+                    query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() + "' and client_id = '"
+                            + activeTimHolding.getClientId() + "' and direction = '" + activeTimHolding.getDirection()
+                            + "'";
+
+                    rs = statement.executeQuery(query);
+                    while (rs.next()) {
+                        activeTimHoldingId = rs.getLong("ACTIVE_TIM_HOLDING_ID");
+                    }
+                    return ResponseEntity.ok(activeTimHoldingId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
+                } finally {
+                    try {
+                        if (statement != null)
+                            statement.close();
+                        if (rs != null)
+                            rs.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return ResponseEntity.ok(activeTimHoldingId);
         } catch (SQLException e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimId);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
         } finally {
             try {
                 // close prepared statement

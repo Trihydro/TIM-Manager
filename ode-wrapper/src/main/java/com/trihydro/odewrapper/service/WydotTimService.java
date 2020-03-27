@@ -143,7 +143,7 @@ public class WydotTimService {
                 : sdwService.getNewRecordId();
 
         // save new active_tim_holding record
-        ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, activeSatTims.get(0).getSatRecordId());
+        ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId);
         activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
         if (activeSatTims != null && activeSatTims.size() > 0) {

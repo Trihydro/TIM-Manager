@@ -5,15 +5,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -83,6 +89,11 @@ public class ActiveTimHoldingController extends BaseController {
                         sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getEndPoint().getLongitude());
                     }
+                } else if (col.equals("RSU_INDEX")) {
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
+                } else if (col.equals("DATE_CREATED")) {
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
+                            LocalDateTime.parse(activeTimHolding.getDateCreated(), DateTimeFormatter.ISO_DATE_TIME)));
                 }
 
                 fieldNum++;
@@ -145,4 +156,58 @@ public class ActiveTimHoldingController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "/get-rsu", method = RequestMethod.GET)
+    public ResponseEntity<List<ActiveTimHolding>> getActiveTimHoldingForRsu(@PathVariable String ipv4Address) {
+        ActiveTimHolding activeTimHolding = null;
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        List<ActiveTimHolding> holdings = new ArrayList<>();
+
+        try {
+            connection = GetConnectionPool();
+            statement = connection.createStatement();
+            String query = "select * from active_tim_holding ";
+            query += " where rsu_target = '" + ipv4Address + "'";
+            rs = statement.executeQuery(query);
+
+            // convert to ActiveTim object
+            while (rs.next()) {
+                activeTimHolding = new ActiveTimHolding();
+                activeTimHolding.setActiveTimHoldingId(rs.getLong("ACTIVE_TIM_HOLDING_ID"));
+                activeTimHolding.setClientId(rs.getString("CLIENT_ID"));
+                activeTimHolding.setDirection(rs.getString("DIRECTION"));
+                activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
+                activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+                activeTimHolding
+                        .setStartPoint(new Coordinate(rs.getDouble("START_LATITUDE"), rs.getDouble("START_LONGITUDE")));
+                activeTimHolding
+                        .setEndPoint(new Coordinate(rs.getDouble("END_LATITUDE"), rs.getDouble("END_LONGITUDE")));
+                activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
+                int rsu_index = rs.getInt("RSU_INDEX");
+                if (!rs.wasNull()) {
+                    activeTimHolding.setRsuIndex(rsu_index);
+                }
+                holdings.add(activeTimHolding);
+            }
+            return ResponseEntity.ok(holdings);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

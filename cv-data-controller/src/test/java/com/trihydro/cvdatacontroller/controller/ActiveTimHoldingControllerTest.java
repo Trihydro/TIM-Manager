@@ -1,12 +1,16 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTimHolding;
@@ -61,6 +65,10 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                                 activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
                 verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
+                verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
+                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTimHolding.getDateCreated(),
+                                                DateTimeFormatter.ISO_DATE_TIME)));// DATE_CREATED
         }
 
         @Test
@@ -98,6 +106,10 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                                 activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
                 verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
+                verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
+                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTimHolding.getDateCreated(),
+                                                DateTimeFormatter.ISO_DATE_TIME)));// DATE_CREATED
 
                 verify(mockStatement).executeQuery(query);
         }
@@ -137,6 +149,10 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                                 activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
                 verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
+                verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
+                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTimHolding.getDateCreated(),
+                                                DateTimeFormatter.ISO_DATE_TIME)));// DATE_CREATED
 
                 verify(mockStatement).executeQuery(query);
         }
@@ -160,4 +176,47 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
 
         }
 
+        @Test
+        public void getActiveTimHoldingForRsu_SUCCESS() throws SQLException {
+                // Arrange
+
+                // Act
+                ResponseEntity<List<ActiveTimHolding>> data = uut.getActiveTimHoldingForRsu("ipv4Address");
+
+                // Assert
+                assertEquals(HttpStatus.OK, data.getStatusCode());
+                assertNotNull(data.getBody());
+                assertEquals(1, data.getBody().size());
+                verify(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+                verify(mockRs).getString("CLIENT_ID");
+                verify(mockRs).getString("DIRECTION");
+                verify(mockRs).getString("RSU_TARGET");
+                verify(mockRs).getString("SAT_RECORD_ID");
+                verify(mockRs).getDouble("START_LATITUDE");
+                verify(mockRs).getDouble("START_LONGITUDE");
+                verify(mockRs).getDouble("END_LATITUDE");
+                verify(mockRs).getDouble("END_LONGITUDE");
+                verify(mockRs).getString("DATE_CREATED");
+                verify(mockRs).getInt("RSU_INDEX");
+                verify(mockStatement).close();
+                verify(mockConnection).close();
+                verify(mockRs).close();
+        }
+
+        @Test
+        public void getActiveTimHoldingForRsu_FAIL() throws SQLException {
+                // Arrange
+                doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+
+                // Act
+                ResponseEntity<List<ActiveTimHolding>> data = uut.getActiveTimHoldingForRsu("ipv4Address");
+
+                // Assert
+                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+                assertNotNull(data.getBody());
+                assertEquals(0, data.getBody().size());
+                verify(mockStatement).close();
+                verify(mockConnection).close();
+                verify(mockRs).close();
+        }
 }

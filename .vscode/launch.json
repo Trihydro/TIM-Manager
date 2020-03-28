@@ -107,6 +107,10 @@
     {
       "name": "Tim Refresh Compound Launch",
       "configurations": ["CV Data Controller (Launch)", "TIM Refresh (Launch)"]
+    },
+    {
+      "name": "CV Data Tasks Compound Launch",
+      "configurations": ["CV Data Tasks (Launch)", "CV Data Controller (Launch)"]
     }
   ]
 }

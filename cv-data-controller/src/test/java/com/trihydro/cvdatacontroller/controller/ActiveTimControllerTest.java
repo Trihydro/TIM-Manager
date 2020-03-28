@@ -653,6 +653,47 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     }
 
     @Test
+    public void GetActiveRsuTims_SUCCESS() throws SQLException {
+        // Act
+        ResponseEntity<List<ActiveTim>> data = uut.GetActiveRsuTims();
+
+        // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
+        verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockRs).getLong("TIM_ID");
+        verify(mockRs).getDouble("MILEPOST_START");
+        verify(mockRs).getDouble("MILEPOST_STOP");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getString("TIM_START");
+        verify(mockRs).getString("TIM_END");
+        verify(mockRs).getLong("TIM_TYPE_ID");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getString("CLIENT_ID");
+        verify(mockRs).getInt("PK");
+        verify(mockRs).getString("IPV4_ADDRESS");
+        verify(mockRs).getInt("RSU_INDEX");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void GetActiveRsuTims_FAIL() throws SQLException {
+        // Arrange
+        doThrow(new SQLException()).when(mockStatement).executeQuery(any());
+
+        // Act
+        ResponseEntity<List<ActiveTim>> data = uut.GetActiveRsuTims();
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        assertNull(data.getBody());
+        verify(mockStatement).executeQuery(any());
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
     public void GetActiveRsuTim_SUCCESS() throws SQLException {
         // Arrange
         String clientId = "clientid";

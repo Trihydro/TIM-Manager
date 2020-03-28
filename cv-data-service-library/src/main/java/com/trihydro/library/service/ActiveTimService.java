@@ -116,6 +116,26 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	/**
+	 * Fetch all ActiveTims for RSUs from cv-data-controller
+	 * 
+	 * @return List of ActiveTims (including RSU address and index)
+	 */
+	public List<ActiveTim> getActiveRsuTims() {
+		return getActiveRsuTims(CVRestUrl);
+	}
+
+	/**
+	 * Fetch all ActiveTims for RSUs from the specified endpoint
+	 * 
+	 * @return List of ActiveTims (including RSU address and index)
+	 */
+	public List<ActiveTim> getActiveRsuTims(String endpoint) {
+		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(endpoint + "/active-tim/active-rsu-tims", ActiveTim[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	/**
 	 * Calls out to the cv-data-controller REST function to fetch expiring TIMs
 	 * 
 	 * @return List of TimUpdateModel representing all TIMs expiring within 1 day
@@ -135,6 +155,12 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	public static List<ActiveTim> getActiveTimsNotSent() {
 		ResponseEntity<TimUpdateModel[]> response = RestTemplateProvider.GetRestTemplate()
 				.getForEntity(CVRestUrl + "/active-tim/not-sent", TimUpdateModel[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	public List<ActiveTim> getActiveTimsForSDX() {
+		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate()
+				.getForEntity(CVRestUrl + "/active-tim/all-sdx", ActiveTim[].class);
 		return Arrays.asList(response.getBody());
 	}
 }

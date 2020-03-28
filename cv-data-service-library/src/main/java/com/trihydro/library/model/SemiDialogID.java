@@ -3,6 +3,8 @@ package com.trihydro.library.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 // Per SEMI_v2.3.0_070616 ASN.1 spec, there's room for additional DialogIDs
 public enum SemiDialogID {
     VehSitData(154), // 0x009A Vehicle Situation Data Deposit
@@ -29,6 +31,7 @@ public enum SemiDialogID {
         }
     }
 
+    @JsonCreator
     public static SemiDialogID valueOf(int semiDialogId) {
         return map.get(semiDialogId);
     }

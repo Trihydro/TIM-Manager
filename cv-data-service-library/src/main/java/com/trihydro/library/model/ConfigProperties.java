@@ -1,6 +1,6 @@
 package com.trihydro.library.model;
 
-public class ConfigProperties {
+public class ConfigProperties implements SdwProps {
 
     private String odeUrl;
     private String dbDriver;

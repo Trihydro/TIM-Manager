@@ -31,6 +31,10 @@ import org.springframework.stereotype.Component;
 public class Utility {
 	public Gson gson = new Gson();
 
+	public <T> void logWithDate(String msg, Class<T> clazz) {
+		logWithDate(clazz.getSimpleName() + ": " + msg);
+	}
+
 	public void logWithDate(String msg) {
 		Date date = new Date();
 		System.out.println(date + " " + msg);

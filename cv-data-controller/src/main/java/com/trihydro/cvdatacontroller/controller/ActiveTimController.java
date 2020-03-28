@@ -722,6 +722,154 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(activeTims);
 	}
 
+	@RequestMapping(value = "/all-sdx", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetAllActiveSDXTims() {
+		List<ActiveTim> results = new ArrayList<ActiveTim>();
+		ActiveTim activeTim = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			String query = "select active_tim.*, itis_code.itis_code from active_tim";
+			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
+			query += " where sat_record_id is not null";
+			query += " order by active_tim.active_tim_id";
+
+			rs = statement.executeQuery(query);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				Long activeTimId = rs.getLong("ACTIVE_TIM_ID");
+
+				// If we're looking at the first record or the record doesn't have
+				// the same ACTIVE_TIM_ID as the record we just processed...
+				if (activeTim == null || !activeTim.getActiveTimId().equals(activeTimId)) {
+					if (activeTim != null) {
+						results.add(activeTim);
+					}
+
+					// Create a new record and set the ActiveTim properties.
+					activeTim = new ActiveTim();
+					activeTim.setActiveTimId(activeTimId);
+					activeTim.setTimId(rs.getLong("TIM_ID"));
+					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+					activeTim.setDirection(rs.getString("DIRECTION"));
+					activeTim.setStartDateTime(rs.getString("TIM_START"));
+					activeTim.setEndDateTime(rs.getString("TIM_END"));
+					activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
+					activeTim.setRoute(rs.getString("ROUTE"));
+					activeTim.setClientId(rs.getString("CLIENT_ID"));
+					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTim.setPk(rs.getInt("PK"));
+					activeTim.setItisCodes(new ArrayList<Integer>());
+				}
+
+				// Add the ITIS code to the ActiveTim's ITIS codes
+				activeTim.getItisCodes().add(rs.getInt("ITIS_CODE"));
+			}
+
+			if (activeTim != null) {
+				results.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(results);
+	}
+
+	/**
+	 * Get all ActiveTims (including RSU address and RSU Index)
+	 * 
+	 * @return List of ActiveTims, sorted by RSU and RSU Index
+	 */
+	@RequestMapping(value = "/active-rsu-tims", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetActiveRsuTims() {
+		List<ActiveTim> results = new ArrayList<ActiveTim>();
+		ActiveTim activeTim = null;
+
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			String query = "select active_tim.*, rsu_vw.ipv4_address, tim_rsu.rsu_index from active_tim";
+			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
+			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
+			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			query += " where sat_record_id is null";
+			query += " order by rsu_vw.ipv4_address, tim_rsu.rsu_index";
+
+			rs = statement.executeQuery(query);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				// Create ActiveTim record
+				activeTim = new ActiveTim();
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
+				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setPk(rs.getInt("PK"));
+				activeTim.setRsuTarget(rs.getString("IPV4_ADDRESS"));
+				activeTim.setRsuIndex(rs.getInt("RSU_INDEX"));
+
+				results.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(results);
+	}
+
 	@RequestMapping(value = "/active-rsu-tim", method = RequestMethod.POST)
 	public ResponseEntity<ActiveTim> GetActiveRsuTim(@RequestBody ActiveRsuTimQueryModel artqm) {
 

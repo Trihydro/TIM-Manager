@@ -16,13 +16,10 @@ public class ActiveTim {
     private String satRecordId;
     private Integer pk;
     private String rsuTarget;
+    private Integer rsuIndex;
     private List<Integer> itisCodes;
     private Coordinate startPoint;
     private Coordinate endPoint;
-
-    public List<Integer> getItisCodes() {
-        return itisCodes;
-    }
 
     public Coordinate getEndPoint() {
         return endPoint;
@@ -38,10 +35,6 @@ public class ActiveTim {
 
     public void setStartPoint(Coordinate startPoint) {
         this.startPoint = startPoint;
-    }
-
-    public void setItisCodes(List<Integer> itisCodes) {
-        this.itisCodes = itisCodes;
     }
 
     public Long getActiveTimId() {
@@ -138,5 +131,21 @@ public class ActiveTim {
 
     public void setRsuTarget(String rsuTarget) {
         this.rsuTarget = rsuTarget;
+    }
+
+    public Integer getRsuIndex() {
+        return this.rsuIndex;
+    }
+
+    public void setRsuIndex(Integer rsuIndex) {
+        this.rsuIndex = rsuIndex;
+    }
+
+    public List<Integer> getItisCodes(){
+        return itisCodes;
+    }
+
+    public void setItisCodes(List<Integer> itisCodes){
+        this.itisCodes = itisCodes;
     }
 }

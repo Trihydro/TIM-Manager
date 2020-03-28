@@ -1,0 +1,21 @@
+{
+  "ipv4Address": "0.0.0.0",
+  "rsuActiveTims": [
+    {
+      "environment": "DEV",
+      "activeTim": { "rsuTarget": "0.0.0.0", "rsuIndex": 1, "activeTimId": 10 }
+    },
+    {
+      "environment": "DEV",
+      "activeTim": { "rsuTarget": "0.0.0.0", "rsuIndex": 1, "activeTimId": 11 }
+    },
+    {
+      "environment": "DEV",
+      "activeTim": { "rsuTarget": "0.0.0.0", "rsuIndex": 2, "activeTimId": 12 }
+    },
+    {
+      "environment": "DEV",
+      "activeTim": { "rsuTarget": "0.0.0.0", "rsuIndex": 2, "activeTimId": 13 }
+    }
+  ]
+}

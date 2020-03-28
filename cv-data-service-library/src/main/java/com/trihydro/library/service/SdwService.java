@@ -7,9 +7,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -17,20 +21,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
-import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.model.SDXDecodeRequest;
+import com.trihydro.library.model.SDXDecodeResponse;
+import com.trihydro.library.model.SDXQuery;
+import com.trihydro.library.model.SdwProps;
+import com.trihydro.library.model.SemiDialogID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 
 @Component
 public class SdwService {
     public Gson gson = new Gson();
-    private ConfigProperties configProperties;
+    private SdwProps configProperties;
     private Utility utility;
 
     @Autowired
-    public void InjectDependencies(ConfigProperties _config, Utility _utility) {
+    public void InjectDependencies(SdwProps _config, Utility _utility) {
         configProperties = _config;
         utility = _utility;
     }
@@ -62,6 +76,89 @@ public class SdwService {
             return null;
         }
 
+    }
+
+    /**
+     * Fetches messages deposited into the SDX, by the ODE User (identified by
+     * apikey).
+     * 
+     * @param type Type of message to retrieve
+     */
+    public List<AdvisorySituationDataDeposit> getMsgsForOdeUser(SemiDialogID type) throws RestClientException {
+        List<AdvisorySituationDataDeposit> results = null;
+
+        String url = String.format("%s/api/deposited-by-me/%d", configProperties.getSdwRestUrl(), type.getValue());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("apikey", configProperties.getSdwApiKey());
+
+        HttpEntity<SDXQuery> entity = new HttpEntity<SDXQuery>(null, headers);
+        try {
+            ResponseEntity<AdvisorySituationDataDeposit[]> response = RestTemplateProvider.GetRestTemplate()
+                    .exchange(url, HttpMethod.GET, entity, AdvisorySituationDataDeposit[].class);
+
+            results = Arrays.asList(response.getBody());
+        } catch (RestClientException ex) {
+            ex.printStackTrace();
+        }
+
+        return results;
+    }
+
+    public List<Integer> getItisCodesFromAdvisoryMessage(String advisoryMessage) throws IllegalArgumentException {
+        if (advisoryMessage == null || advisoryMessage.length() < 18) {
+            throw new IllegalArgumentException("messageFrame must be provided and at least 18 characters");
+        }
+
+        List<Integer> results = new ArrayList<Integer>();
+        SDXDecodeResponse decodeResponse = null;
+
+        // Build request
+        String url = String.format("%s/api/decode", configProperties.getSdwRestUrl());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.add("apikey", configProperties.getSdwApiKey());
+
+        SDXDecodeRequest request = new SDXDecodeRequest();
+        request.setEncodeType("hex");
+        request.setMessageType("MessageFrame");
+        request.setEncodedMsg(advisoryMessage.substring(18));
+
+        // Execute request
+        try {
+            HttpEntity<SDXDecodeRequest> entity = new HttpEntity<SDXDecodeRequest>(request, headers);
+            ResponseEntity<SDXDecodeResponse> response = RestTemplateProvider.GetRestTemplate().exchange(url,
+                    HttpMethod.POST, entity, SDXDecodeResponse.class);
+
+            decodeResponse = response.getBody();
+        } catch (RestClientException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+        // Process request (convert decodedMessage into an array of ITIS codes)
+        Pattern p = Pattern.compile("(<advisory>)(.*)(</advisory>)");
+        Matcher m = p.matcher(decodeResponse.getDecodedMessage());
+
+        if (m.find()) {
+            String advisory = m.group(2);
+            p = Pattern.compile("(<itis>)([0-9]*)(</itis>)");
+            m = p.matcher(advisory);
+
+            while (m.find()) {
+                String itisCode = m.group(2);
+
+                try {
+                    results.add(Integer.parseInt(itisCode));
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        return results;
     }
 
     /**

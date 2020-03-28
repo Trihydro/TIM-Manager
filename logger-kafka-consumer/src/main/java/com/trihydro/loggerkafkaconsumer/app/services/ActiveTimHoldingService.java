@@ -114,6 +114,11 @@ public class ActiveTimHoldingService extends BaseService {
     }
 
     public Boolean deleteActiveTimHolding(Long activeTimHoldingId) {
+        if (activeTimHoldingId == null || activeTimHoldingId < 0) {
+            // if we don't have a valid pk, we can't delete
+            return false;
+        }
+
         String updateTableSQL = "DELETE ACTIVE_TIM_HOLDING WHERE ACTIVE_TIM_HOLDING_ID = ?";
         Connection connection = null;
         PreparedStatement preparedStatement = null;

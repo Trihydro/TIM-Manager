@@ -40,7 +40,7 @@ This will install Neo4j in a docker container without authentication and expose 
 6687: bolt
 ```
 
-To view the database in browser navigate to http://localhost:6674/browser. 
+To view the database in browser navigate to http://localhost:6474/browser. 
 
 ## 🎈 Usage <a name="usage"></a>
 

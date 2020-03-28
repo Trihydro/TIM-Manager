@@ -113,7 +113,6 @@ public class ActiveTimHoldingController extends BaseController {
                     while (rs.next()) {
                         activeTimHoldingId = rs.getLong("ACTIVE_TIM_HOLDING_ID");
                     }
-                    return ResponseEntity.ok(activeTimHoldingId);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class ActiveTimHoldingService extends BaseService {
 
     public ActiveTimHolding getRsuActiveTimHolding(String clientId, String direction, String ipv4Address) {
-
         ActiveTimHolding activeTimHolding = null;
         Connection connection = null;
         Statement statement = null;

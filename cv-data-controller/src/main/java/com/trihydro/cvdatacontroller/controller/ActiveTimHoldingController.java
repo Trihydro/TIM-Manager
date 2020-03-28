@@ -97,9 +97,17 @@ public class ActiveTimHoldingController extends BaseController {
                 try {
                     statement = connection.createStatement();
                     String query = "select active_tim_holding_id from active_tim_holding";
-                    query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() + "' and client_id = '"
-                            + activeTimHolding.getClientId() + "' and direction = '" + activeTimHolding.getDirection()
-                            + "'";
+                    if (activeTimHolding.getSatRecordId() != null && activeTimHolding.getSatRecordId() != "") {
+                        // sat tim
+                        query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() + "' and client_id = '"
+                                + activeTimHolding.getClientId() + "' and direction = '"
+                                + activeTimHolding.getDirection() + "'";
+                    } else {
+                        // rsu tim
+                        query += " where rsu_target = '" + activeTimHolding.getRsuTarget() + "' and client_id = '"
+                                + activeTimHolding.getClientId() + "' and direction = '"
+                                + activeTimHolding.getDirection() + "'";
+                    }
 
                     rs = statement.executeQuery(query);
                     while (rs.next()) {

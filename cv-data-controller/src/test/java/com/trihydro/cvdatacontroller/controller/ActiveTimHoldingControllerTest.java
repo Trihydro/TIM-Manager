@@ -64,6 +64,84 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         }
 
         @Test
+        public void InsertActiveTimHolding_ExistingSDX() throws SQLException {
+                // Arrange
+                ActiveTimHolding activeTimHolding = new ActiveTimHolding();
+                activeTimHolding.setSatRecordId("satRecordId");
+                activeTimHolding.setClientId("clientId");
+                activeTimHolding.setDirection("direction");
+                activeTimHolding.setStartPoint(new Coordinate(1, 2));
+                activeTimHolding.setEndPoint(new Coordinate(5, 6));
+                doReturn(null).when(uut).executeAndLog(mockPreparedStatement, "active tim holding");
+                doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+
+                String query = "select active_tim_holding_id from active_tim_holding";
+                query += " where sat_record_id = '" + activeTimHolding.getSatRecordId();
+                query += "' and client_id = '" + activeTimHolding.getClientId();
+                query += "' and direction = '" + activeTimHolding.getDirection() + "'";
+
+                // Act
+                ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
+
+                // Assert
+                assertEquals(HttpStatus.OK, data.getStatusCode());
+                assertEquals(new Long(-99), data.getBody());
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTimHolding.getClientId());// CLIENT_ID
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, activeTimHolding.getSatRecordId());// SAT_RECORD_ID
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 6,
+                                activeTimHolding.getStartPoint().getLatitude());// START_LATITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 7,
+                                activeTimHolding.getStartPoint().getLongitude());// START_LONGITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 8,
+                                activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
+                                activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
+
+                verify(mockStatement).executeQuery(query);
+        }
+
+        @Test
+        public void InsertActiveTimHolding_ExistingRSU() throws SQLException {
+                // Arrange
+                ActiveTimHolding activeTimHolding = new ActiveTimHolding();
+                activeTimHolding.setRsuTargetId("10.10.10.1");
+                activeTimHolding.setClientId("clientId");
+                activeTimHolding.setDirection("direction");
+                activeTimHolding.setStartPoint(new Coordinate(1, 2));
+                activeTimHolding.setEndPoint(new Coordinate(5, 6));
+                doReturn(null).when(uut).executeAndLog(mockPreparedStatement, "active tim holding");
+                doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+
+                String query = "select active_tim_holding_id from active_tim_holding";
+                query += " where rsu_target = '" + activeTimHolding.getRsuTarget();
+                query += "' and client_id = '" + activeTimHolding.getClientId();
+                query += "' and direction = '" + activeTimHolding.getDirection() + "'";
+
+                // Act
+                ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
+
+                // Assert
+                assertEquals(HttpStatus.OK, data.getStatusCode());
+                assertEquals(new Long(-99), data.getBody());
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTimHolding.getClientId());// CLIENT_ID
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, activeTimHolding.getSatRecordId());// SAT_RECORD_ID
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 6,
+                                activeTimHolding.getStartPoint().getLatitude());// START_LATITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 7,
+                                activeTimHolding.getStartPoint().getLongitude());// START_LONGITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 8,
+                                activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
+                                activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
+
+                verify(mockStatement).executeQuery(query);
+        }
+
+        @Test
         public void InsertActiveTimHolding_FAIL() throws SQLException {
                 // Arrange
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();

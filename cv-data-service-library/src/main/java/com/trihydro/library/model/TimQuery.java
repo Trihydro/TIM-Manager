@@ -15,7 +15,7 @@ public class TimQuery {
     }
 
     public void appendIndex(Integer index) {
-        if (index != null || !indicies_set.contains(index)) {
+        if (index != null && !indicies_set.contains(index)) {
             indicies_set.add(index);
         }
     }

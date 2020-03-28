@@ -21,6 +21,7 @@ import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
@@ -202,14 +203,13 @@ public class WydotTimService {
                     rsu.getRsuTarget());
             ActiveTim activeTim = ActiveTimService.getActiveRsuTim(artqm);
 
-            // save new active_tim_holding record
+            // create new active_tim_holding record
             ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null);
             activeTimHolding.setDirection(direction);
-            activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
             // if active tims exist, update tim
             if (activeTim != null) {
-
+                activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
                 WydotOdeTravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());
 
                 // update TIM rsu
@@ -219,10 +219,21 @@ public class WydotTimService {
                 updateTimOnRsu(timToSend, activeTim.getTimId(), tim, rsu.getRsuId(), endDateTime);
             } else {
                 // send new tim to rsu
+                // first fetch existing active_tim_holding records
+                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
+                        .getActiveTimHoldingForRsu(rsu.getRsuTarget());
+
+                TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
+                // append existing holding indices
+                existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
+                Integer nextRsuIndex = OdeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+                activeTimHolding.setRsuIndex(nextRsuIndex);
+                activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
+
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                odeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl());
+                odeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl(), nextRsuIndex);
             }
         }
     }

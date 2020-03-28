@@ -661,8 +661,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
-        verify(mockRs).getDouble("MILEPOST_START");
-        verify(mockRs).getDouble("MILEPOST_STOP");
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_START");
         verify(mockRs).getString("TIM_END");

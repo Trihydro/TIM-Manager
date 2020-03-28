@@ -758,8 +758,6 @@ public class ActiveTimController extends BaseController {
 					activeTim = new ActiveTim();
 					activeTim.setActiveTimId(activeTimId);
 					activeTim.setTimId(rs.getLong("TIM_ID"));
-					activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-					activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
 					activeTim.setDirection(rs.getString("DIRECTION"));
 					activeTim.setStartDateTime(rs.getString("TIM_START"));
 					activeTim.setEndDateTime(rs.getString("TIM_END"));
@@ -769,6 +767,21 @@ public class ActiveTimController extends BaseController {
 					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
 					activeTim.setPk(rs.getInt("PK"));
 					activeTim.setItisCodes(new ArrayList<Integer>());
+					Coordinate startPoint = null;
+					Coordinate endPoint = null;
+					double startLat = rs.getDouble("START_LATITUDE");
+					double startLon = rs.getDouble("START_LONGITUDE");
+					if (!rs.wasNull()) {
+						startPoint = new Coordinate(startLat, startLon);
+					}
+					activeTim.setStartPoint(startPoint);
+
+					double endLat = rs.getDouble("END_LATITUDE");
+					double endLon = rs.getDouble("END_LONGITUDE");
+					if (!rs.wasNull()) {
+						endPoint = new Coordinate(endLat, endLon);
+					}
+					activeTim.setEndPoint(endPoint);
 				}
 
 				// Add the ITIS code to the ActiveTim's ITIS codes
@@ -833,8 +846,6 @@ public class ActiveTimController extends BaseController {
 				activeTim = new ActiveTim();
 				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
 				activeTim.setTimId(rs.getLong("TIM_ID"));
-				activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-				activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
 				activeTim.setDirection(rs.getString("DIRECTION"));
 				activeTim.setStartDateTime(rs.getString("TIM_START"));
 				activeTim.setEndDateTime(rs.getString("TIM_END"));
@@ -845,7 +856,21 @@ public class ActiveTimController extends BaseController {
 				activeTim.setPk(rs.getInt("PK"));
 				activeTim.setRsuTarget(rs.getString("IPV4_ADDRESS"));
 				activeTim.setRsuIndex(rs.getInt("RSU_INDEX"));
+				Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				double startLat = rs.getDouble("START_LATITUDE");
+				double startLon = rs.getDouble("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
 
+				double endLat = rs.getDouble("END_LATITUDE");
+				double endLon = rs.getDouble("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
 				results.add(activeTim);
 			}
 		} catch (SQLException e) {

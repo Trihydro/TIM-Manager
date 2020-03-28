@@ -34,7 +34,7 @@ import io.swagger.annotations.Api;
 @Api(description = "Parking")
 public class WydotTimParkingController extends WydotTimBaseController {
 
-    private String type = "P";
+    private final String type = "P";
 
     @Autowired
     public WydotTimParkingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,

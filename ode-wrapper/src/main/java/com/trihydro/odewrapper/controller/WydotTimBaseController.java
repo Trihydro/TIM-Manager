@@ -231,7 +231,7 @@ public abstract class WydotTimBaseController {
     }
 
     public boolean routeSupported(String route) {
-        // REST call out to milepost_vw to determine if route exists
+        // REST call out to milepost_vw_new to determine if route exists
         String url = String.format("%s/route-exists/%s", configuration.getCvRestService(), route);
         ResponseEntity<Boolean> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Boolean.class);
         return response.getBody();

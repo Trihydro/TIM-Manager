@@ -26,32 +26,6 @@ public class MilepostServiceTest extends BaseServiceTest {
     private ResponseEntity<Milepost[]> mockResponseEntityMilepostArray;
 
     @Test
-    public void selectMilepostRange() {
-        // Arrange
-        String direction = "westward";
-        String route = "route";
-        Double fromMilepost = 10.0;
-        Double toMilepost = 20.0;
-        String url = String.format("null/get-milepost-range/%s/%f/%f/%s", direction, fromMilepost, toMilepost, route);
-        Milepost[] mileposts = new Milepost[1];
-        Milepost milepost = new Milepost();
-        milepost.setBearing(22d);
-        milepost.setDirection("direction");
-        milepost.setCommonName("route");
-        mileposts[0] = milepost;
-        doReturn(mileposts).when(mockResponseEntityMilepostArray).getBody();
-        when(mockRestTemplate.getForEntity(url, Milepost[].class)).thenReturn(mockResponseEntityMilepostArray);
-
-        // Act
-        List<Milepost> data = MilepostService.selectMilepostRange(direction, route, fromMilepost, toMilepost);
-
-        // Assert
-        verify(mockRestTemplate).getForEntity(url, Milepost[].class);
-        assertEquals(1, data.size());
-        assertEquals(milepost, data.get(0));
-    }
-
-    @Test
     public void getMilepostsByStartEndPoint(){
         // Arrange
         MilepostService mps = new MilepostService();

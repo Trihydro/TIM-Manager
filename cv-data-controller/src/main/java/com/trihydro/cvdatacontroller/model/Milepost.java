@@ -17,11 +17,15 @@ public class Milepost {
     private String CommonName;
 
     public Long getId() {
-		return id;
+        return id;
     }
-    
+
     public Double getLatitude() {
         return Latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.Latitude = latitude;
     }
 
     public String getCommonName() {
@@ -55,9 +59,4 @@ public class Milepost {
     public void setMilepost(Double milepost) {
         this.Milepost = milepost;
     }
-
-    public void setLatitude(Double latitude) {
-        this.Latitude = latitude;
-    }
-
 }

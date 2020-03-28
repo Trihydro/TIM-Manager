@@ -117,64 +117,6 @@ public class RsuController extends BaseController {
 		return ResponseEntity.ok(rsus);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/selectRsusInBuffer/{direction}/{startingMilepost}/{endingMilepost}/{route}")
-	public ResponseEntity<List<WydotRsu>> SelectRsusInBuffer(@PathVariable String direction,
-			@PathVariable Double startingMilepost, @PathVariable Double endingMilepost, @PathVariable String route) {
-		Connection connection = null;
-		ResultSet rs = null;
-		Statement statement = null;
-		List<WydotRsu> rsus = new ArrayList<WydotRsu>();
-		int buffer = 5;
-
-		try {
-			connection = GetConnectionPool();
-			statement = connection.createStatement();
-
-			if (direction.toLowerCase().equals("i")) {
-				Double startBuffer = startingMilepost - buffer;
-				String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu ";
-				selectStatement += "inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
-				selectStatement += "where rsu_vw.status = 'Existing' and rsu_vw.milepost >= " + startBuffer;
-				selectStatement += " and rsu_vw.milepost <= " + endingMilepost + " and rsu_vw.route = '" + route + "'";
-				rs = statement.executeQuery(selectStatement);
-			} else {
-				Double startBuffer = endingMilepost + buffer;
-				String selectStatement = "select rsu.*, rsu_vw.latitude, rsu_vw.longitude, rsu_vw.ipv4_address from rsu ";
-				selectStatement += "inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid ";
-				selectStatement += "where rsu_vw.status = 'Existing' and rsu_vw.milepost >= " + startingMilepost;
-				selectStatement += " and rsu_vw.milepost <= " + startBuffer + " and rsu_vw.route = '" + route + "'";
-				rs = statement.executeQuery(selectStatement);
-			}
-
-			while (rs.next()) {
-				WydotRsu rsu = new WydotRsu();
-				rsu.setRsuId(rs.getInt("RSU_ID"));
-				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
-				rsu.setLatitude(rs.getDouble("LATITUDE"));
-				rsu.setLongitude(rs.getDouble("LONGITUDE"));
-				rsus.add(rsu);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(rsus);
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		return ResponseEntity.ok(rsus);
-	}
-
 	@RequestMapping(method = RequestMethod.GET, value = "/rsus-for-tim/{timId}")
 	public ResponseEntity<List<WydotRsuTim>> GetFullRsusTimIsOn(@PathVariable Long timId) {
 		List<WydotRsuTim> rsus = new ArrayList<WydotRsuTim>();

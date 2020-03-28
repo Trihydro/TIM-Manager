@@ -44,7 +44,7 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         query += " where startMp.Direction in " + dirQuery;
         query += " with startMp, distance(point({longitude:$startLong,latitude:$startLat}), point({longitude:startMp.Longitude,latitude:startMp.Latitude})) as d1 ";
         query += " with startMp, d1 ORDER BY d1 ASC LIMIT 1";
-        query += " match(startAdjust:Milepost)-[rel]->(startMp)";
+        query += " optional match(startAdjust:Milepost)-->(startMp)";
         query += " with coalesce(startAdjust, startMp) as newStart";// coalesce gets first non-null in list
         query += " match(endMp:Milepost{CommonName: $commonName})";
         query += " where endMp.Direction in " + dirQuery;

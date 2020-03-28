@@ -115,8 +115,8 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockUtility)
-                .logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from DEV:");
+        verify(mockUtility).logWithDate(
+                "Unable to validate RSUs - error occurred while fetching Oracle records from DEV:", ValidateRsus.class);
     }
 
     @Test

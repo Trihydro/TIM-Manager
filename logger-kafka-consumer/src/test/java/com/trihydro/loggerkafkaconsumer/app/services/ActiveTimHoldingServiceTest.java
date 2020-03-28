@@ -43,8 +43,6 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
     @Test
     public void getActiveTimHolding_FAIL() throws SQLException {
         // Arrange
-        long athId = 99l;
-        when(mockRs.getLong("ACTIVE_TIM_HOLDING_ID")).thenReturn(athId);
         String query = "select * from active_tim_holding";
         query += " where rsu_target = 'ipv4Address' and client_id = 'clientId' and direction = 'direction'";
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
@@ -83,8 +81,6 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
     @Test
     public void getSdxActiveTimHolding_FAIL() throws SQLException {
         // Arrange
-        long athId = 99l;
-        when(mockRs.getLong("ACTIVE_TIM_HOLDING_ID")).thenReturn(athId);
         String query = "select * from active_tim_holding";
         query += " where sat_record_id = 'satRecordId' and client_id = 'clientId' and direction = 'direction'";
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");

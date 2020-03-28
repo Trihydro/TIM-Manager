@@ -2,23 +2,18 @@ package com.trihydro.odewrapper.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,34 +46,10 @@ public class UtilityController extends WydotTimBaseController {
         String errMessage;
     }
 
-    private String type = "TEST";
-
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
-    }
-
-    @RequestMapping(value = "/create-sat-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createSatTim(@RequestBody WydotTimList wydotTimList) {
-        // build TIM
-        Comparator<Milepost> compMp = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
-        for (WydotTim wydotTim : wydotTimList.getTimList()) {
-            // send TIM
-            WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, wydotTim.getDirection(), null, null,
-                    null);
-
-            Milepost minMp = timToSend.getMileposts().stream().min(compMp).get();
-            Milepost maxMp = timToSend.getMileposts().stream().max(compMp).get();
-
-            String regionNamePrev = wydotTim.getDirection() + "_" + wydotTim.getRoute() + "_" + minMp.getMilepost()
-                    + "_" + maxMp.getMilepost();
-
-            wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), getTimType(type),
-                    null);
-
-        }
-        return ResponseEntity.status(HttpStatus.OK).body("ok");
     }
 
     @RequestMapping(value = "/all-rsus-tim-check", method = RequestMethod.GET, headers = "Accept=application/json")

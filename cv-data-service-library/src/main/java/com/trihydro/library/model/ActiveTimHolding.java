@@ -1,16 +1,40 @@
 package com.trihydro.library.model;
 
+import java.time.Instant;
+
 public class ActiveTimHolding {
     private Long activeTimHoldingId;
     private String direction;
     private String clientId;
     private String satRecordId;
     private String rsuTarget;
+    private Integer rsuIndex;
     private Coordinate startPoint;
     private Coordinate endPoint;
+    private String dateCreated;
 
     public String getDirection() {
         return this.direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
+    public String getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(String dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Integer getRsuIndex() {
+        return rsuIndex;
+    }
+
+    public void setRsuIndex(Integer rsuIndex) {
+        this.rsuIndex = rsuIndex;
     }
 
     public Long getActiveTimHoldingId() {
@@ -35,10 +59,6 @@ public class ActiveTimHolding {
 
     public void setStartPoint(Coordinate startPoint) {
         this.startPoint = startPoint;
-    }
-
-    public void setDirection(String direction) {
-        this.direction = direction;
     }
 
     public String getClientId() {
@@ -66,6 +86,7 @@ public class ActiveTimHolding {
     }
 
     public ActiveTimHolding() {
+        this.dateCreated = Instant.now().toString();
     }
 
     public ActiveTimHolding(WydotTim tim, String rsuTarget, String satRecordId) {
@@ -75,5 +96,6 @@ public class ActiveTimHolding {
         this.satRecordId = satRecordId;
         this.startPoint = tim.getStartPoint();
         this.endPoint = tim.getEndPoint();
+        this.dateCreated = Instant.now().toString();
     }
 }

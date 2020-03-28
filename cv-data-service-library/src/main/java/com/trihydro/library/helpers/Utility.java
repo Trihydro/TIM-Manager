@@ -186,6 +186,11 @@ public class Utility {
 		if (direction.toLowerCase().equals("i")) {
 
 			// get rsus at mileposts less than your milepost
+			// Note that in the future this logic may need to be refactored.
+			// Currently we rely on east/west routes to be even-numbered and nort/south
+			// routes to be odd-numbered. If we add additional RSUs, we'll need to consult
+			// the databse for exceptions to this rule. Currently, RSUs only exist along
+			// I 80 and parts of I 25
 			List<WydotRsu> rsusLower = new ArrayList<>();
 			if (numericRoute % 2 == 0) {
 				rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < startPoint.getLongitude())
@@ -207,26 +212,25 @@ public class Utility {
 							.collect(Collectors.toList());
 					entryRsu = rsusLower.stream().min(compLat).get();
 				}
-
-				GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
-				GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
-				GeodeticCalculator geoCalc = new GeodeticCalculator();
-				GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
-				double miles = 0.000621371 * curve.getEllipsoidalDistance();
-
-				if (miles > 20) {
-					// don't send to RSU if its further that X amount of miles away
-					entryRsu = null;
-				}
-			}
-			// else find milepost closest to lowerMilepost
-			else {
+			} else {
+				// else find milepost closest to lowerMilepost
 				// get max from that list
 				if (numericRoute % 2 == 0) {
 					entryRsu = rsusLower.stream().max(compLong).get();
 				} else {
 					entryRsu = rsusLower.stream().max(compLat).get();
 				}
+			}
+
+			GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
+			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+			GeodeticCalculator geoCalc = new GeodeticCalculator();
+			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+			double miles = 0.000621371 * curve.getEllipsoidalDistance();
+
+			if (miles > 20) {
+				// don't send to RSU if its further that X amount of miles away
+				entryRsu = null;
 			}
 
 		} else { // d

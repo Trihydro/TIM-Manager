@@ -10,13 +10,16 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
@@ -59,15 +62,18 @@ public class TimRefreshController {
     private Utility utility;
     private OdeService odeService;
     private MilepostService milepostService;
+    private ActiveTimHoldingService activeTimHoldingService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
-            OdeService _odeService, MilepostService _milepostService) {
+            OdeService _odeService, MilepostService _milepostService,
+            ActiveTimHoldingService _activeTimHoldingService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
         odeService = _odeService;
         milepostService = _milepostService;
+        activeTimHoldingService = _activeTimHoldingService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -235,7 +241,26 @@ public class TimRefreshController {
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, dbRsus.get(i)));
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
-                odeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl());
+
+                // get next index
+                // first fetch existing active_tim_holding records
+                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
+                        .getActiveTimHoldingForRsu(dbRsus.get(i).getRsuTarget());
+                TimQuery timQuery = OdeService.submitTimQuery(dbRsus.get(i), 0, configuration.getOdeUrl());
+                existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
+                Integer nextRsuIndex = OdeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+
+                // create new active_tim_holding record, to account for any index changes
+                WydotTim wydotTim = new WydotTim();
+                wydotTim.setClientId(aTim.getClientId());
+                wydotTim.setDirection(aTim.getDirection());
+                wydotTim.setStartPoint(aTim.getStartPoint());
+                wydotTim.setEndPoint(aTim.getEndPoint());
+                ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, dbRsus.get(i).getRsuTarget(), null);
+                activeTimHolding.setRsuIndex(nextRsuIndex);
+                activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
+
+                odeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl(), nextRsuIndex);
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
             }

@@ -87,42 +87,28 @@ public class MilepostController extends BaseController {
 		return ResponseEntity.ok(mileposts);
 	}
 
-	private String translateDirection(String direction) {
-		switch (direction.toLowerCase()) {
-			case "eastward":
-				return "'I', 'B'";
-
-			case "westward":
-				return "'D','B'";
-
-			case "both":
-				return "'B'";
-
-			default:
-				return direction;
-		}
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/route-exists/{route}")
-	public ResponseEntity<Boolean> routeExists(@PathVariable String route) {
+	@RequestMapping(value = "/routes", method = RequestMethod.GET)
+	public ResponseEntity<List<String>> getRoutes() {
 		Connection connection = null;
 		ResultSet rs = null;
 		PreparedStatement preparedStatement = null;
+		List<String> routes = new ArrayList<>();
 		try {
 
 			connection = GetConnectionPool();
 
 			// build SQL query
-			// TODO: this view name might change later
-			String statementStr = "select distinct common_name from milepost_vw_new where common_name = ?";
+			String statementStr = "select distinct common_name from milepost_vw_new";
 			preparedStatement = connection.prepareStatement(statementStr);
-			preparedStatement.setString(1, route);
 			rs = preparedStatement.executeQuery();
 
-			return ResponseEntity.ok(rs.next());
+			while (rs.next()) {
+				routes.add(rs.getString("COMMON_NAME"));
+			}
+			return ResponseEntity.ok(routes);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(routes);
 		} finally {
 			try {
 				// close prepared statement

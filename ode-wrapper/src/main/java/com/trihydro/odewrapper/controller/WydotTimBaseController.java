@@ -41,6 +41,8 @@ public abstract class WydotTimBaseController {
     private SetItisCodes setItisCodes;
     protected ActiveTimService activeTimService;
 
+    private List<String> routes = new ArrayList<>();
+
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
         configuration = _basicConfiguration;
@@ -231,10 +233,14 @@ public abstract class WydotTimBaseController {
     }
 
     public boolean routeSupported(String route) {
-        // REST call out to milepost_vw_new to determine if route exists
-        String url = String.format("%s/route-exists/%s", configuration.getCvRestService(), route);
-        ResponseEntity<Boolean> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Boolean.class);
-        return response.getBody();
+        // call out to REST service to get all routes once, then use that
+        if (routes.size() == 0) {
+            String url = String.format("%s/routes", configuration.getCvRestService());
+            ResponseEntity<String[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+                    String[].class);
+            routes = Arrays.asList(response.getBody());
+        }
+        return routes.contains(route);
     }
 
     protected ControllerResult validateInputRc(WydotTimRc tim) {

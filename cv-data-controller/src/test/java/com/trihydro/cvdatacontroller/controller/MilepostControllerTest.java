@@ -1,9 +1,8 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,14 +12,12 @@ import java.util.List;
 
 import com.trihydro.library.model.Milepost;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class MilepostControllerTest extends TestBase<MilepostController> {
     @Test
@@ -56,27 +53,29 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
     }
 
     @Test
-    public void routeExists_SUCCESS() {
+    public void getRoutes_SUCCESS() throws SQLException {
         // Arrange
+        doReturn("common name").when(mockRs).getString("COMMON_NAME");
 
         // Act
-        ResponseEntity<Boolean> data = uut.routeExists("route");
+        ResponseEntity<List<String>> data = uut.getRoutes();
 
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertTrue("routeExists failed", data.getBody());
+        assertEquals(1, data.getBody().size());
     }
 
     @Test
-    public void routeExists_FAIL() throws SQLException {
+    public void getRoutes_FAIL() throws SQLException {
         // Arrange
-        doThrow(new SQLException()).when(mockPreparedStatement).executeQuery();
+        doThrow(new SQLException()).when(mockRs).getString("COMMON_NAME");
 
         // Act
-        ResponseEntity<Boolean> data = uut.routeExists("route");
+        ResponseEntity<List<String>> data = uut.getRoutes();
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertFalse("routeExists succeeded when exception", data.getBody());
+        assertEquals(0, data.getBody().size());
     }
+
 }

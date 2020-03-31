@@ -42,7 +42,7 @@ public class ValidateSDX implements Runnable {
 
     public void run() {
         utility.logWithDate("ValidateSDX - Running...");
-        
+
         try {
             validateSdx();
         } catch (Exception ex) {
@@ -119,7 +119,7 @@ public class ValidateSDX implements Runnable {
                 continue;
             }
 
-            if (oracleRecordId == sdxRecordId) {
+            if (oracleRecordId.equals(sdxRecordId)) {
                 // make sure the messages are the same
                 if (!sameItisCodes(oracleRecord.getItisCodes(), sdxRecord.getItisCodes())) {
                     numOutdatedSdxRecords++;
@@ -163,7 +163,7 @@ public class ValidateSDX implements Runnable {
                 boolean inBoth = false;
 
                 for (int j = 0; j < o2.size(); j++) {
-                    if (o1.get(i) == o2.get(j)) {
+                    if (o1.get(i) != null && o1.get(i).equals(o2.get(j))) {
                         inBoth = true;
                         break;
                     }

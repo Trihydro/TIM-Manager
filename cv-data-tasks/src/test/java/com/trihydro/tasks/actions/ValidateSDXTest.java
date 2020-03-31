@@ -1,5 +1,6 @@
 package com.trihydro.tasks.actions;
 
+import static com.trihydro.tasks.TestHelper.importJsonArray;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -8,16 +9,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.mail.MessagingException;
 
-import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.service.ActiveTimService;
@@ -35,12 +33,10 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.mail.MailException;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ValidateSDX.class })
 public class ValidateSDXTest {
     // Mocked dependencies
     @Mock
@@ -53,6 +49,8 @@ public class ValidateSDXTest {
     private EmailConfiguration mockEmailConfig;
     @Mock
     private DataTasksConfiguration mockConfig;
+    @Mock
+    private Utility mockUtility;
 
     // Argument Captors
     @Captor
@@ -65,24 +63,6 @@ public class ValidateSDXTest {
     // Unit under test
     @InjectMocks
     ValidateSDX uut;
-
-    Gson gson = new Gson();
-
-    // Helper method to import json files
-    private <T> T importJsonArray(String fileName, Class<T> clazz) {
-        InputStream is = ValidateSDXTest.class.getResourceAsStream(fileName);
-        InputStreamReader isr = new InputStreamReader(is);
-
-        T data = gson.fromJson(isr, clazz);
-
-        try {
-            isr.close();
-        } catch (IOException ex) {
-
-        }
-
-        return data;
-    }
 
     @Before
     public void setup() {

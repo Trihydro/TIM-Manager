@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +14,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.config.EmailConfiguration;
+import com.trihydro.tasks.helpers.ExecutorFactory;
 import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.PopulatedRsu;
@@ -28,17 +28,19 @@ public class ValidateRsus implements Runnable {
     private DataTasksConfiguration config;
     private ActiveTimService activeTimService;
     private RsuDataService rsuDataService;
+    private ExecutorFactory executorFactory;
     private EmailConfiguration emailConfig;
     private EmailHelper mailHelper;
     private Utility utility;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
-            RsuDataService _rsuDataService, EmailConfiguration _emailConfig, EmailHelper _mailHelper,
-            Utility _utility) {
+            RsuDataService _rsuDataService, ExecutorFactory _executorFactory, EmailConfiguration _emailConfig,
+            EmailHelper _mailHelper, Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
         rsuDataService = _rsuDataService;
+        executorFactory = _executorFactory;
         emailConfig = _emailConfig;
         mailHelper = _mailHelper;
         utility = _utility;
@@ -80,6 +82,11 @@ public class ValidateRsus implements Runnable {
             return;
         }
 
+        // If there isn't anything to verify, exit early.
+        if (activeTims.size() == 0) {
+            return;
+        }
+
         // DEBUGGING
         // activeTims.forEach((record) -> {
         // System.out.println(record.getActiveTim().getRsuTarget() + " " +
@@ -89,17 +96,13 @@ public class ValidateRsus implements Runnable {
         // Organize ActiveTim records by RSU
         List<PopulatedRsu> rsusWithRecords = getRsusFromActiveTims(activeTims);
 
-        if (rsusWithRecords.size() == 0) {
-            return;
-        }
-
         // DEBUGGING
         // rsusWithRecords.forEach((rec) -> {
         // System.out.println(rec.getIpv4Address() + ": " +
         // Integer.toString(rec.getRsuActiveTims().size()));
         // });
 
-        ExecutorService workerThreadPool = Executors.newFixedThreadPool(config.getRsuValThreadPoolSize());
+        ExecutorService workerThreadPool = executorFactory.getFixedThreadPool(config.getRsuValThreadPoolSize());
 
         // Map each RSU to an asynchronous "task" that will validate that RSU
         List<ValidateRsu> tasks = new ArrayList<>();
@@ -107,12 +110,15 @@ public class ValidateRsus implements Runnable {
             tasks.add(new ValidateRsu(rsu, rsuDataService));
         }
 
+        utility.logWithDate("Validating " + tasks.size() + " RSUs...");
+
         List<Future<RsuValidationResult>> futureResults = null;
         try {
             // Invoke all validation tasks, and wait for them to complete
             futureResults = workerThreadPool.invokeAll(tasks, config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS);
             shutDownThreadPool(workerThreadPool);
         } catch (InterruptedException e) {
+            utility.logWithDate("Error while executing validation tasks:");
             e.printStackTrace();
         }
 
@@ -127,11 +133,12 @@ public class ValidateRsus implements Runnable {
             try {
                 result = futureResults.get(i).get();
             } catch (Exception ex) {
+                String rsuIpv4Address = tasks.get(i).getRsu().getIpv4Address();
                 // Something went wrong, and the validation task for this RSU wasn't completed.
+                utility.logWithDate("Error while validating RSU " + rsuIpv4Address + ":");
                 ex.printStackTrace();
                 // "10.145.xx.xx: What went wrong..."
-                unexpectedErrors
-                        .add(tasks.get(i).getRsu().getIpv4Address() + ": " + ex.toString() + " - " + ex.getMessage());
+                unexpectedErrors.add(rsuIpv4Address + ": " + ex.toString() + " - " + ex.getMessage());
                 continue;
             }
 

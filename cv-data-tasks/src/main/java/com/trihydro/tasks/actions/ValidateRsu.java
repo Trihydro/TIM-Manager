@@ -46,8 +46,6 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
 
     @Override
     public RsuValidationResult call() {
-        System.out.println("Processing " + rsu.getIpv4Address());
-
         result = new RsuValidationResult(rsu.getIpv4Address());
 
         // Retrieve info for populates indexes on RSU
@@ -74,13 +72,14 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
             } else {
                 // We've mapped an ActiveTim to the RSU index. Remove this RSU index
                 // from the list of indexes, since we've accounted for it
-                rsuIndices.remove(pos);
-
                 RsuIndexInfo rsuInfo = rsuIndices.get(pos);
-                if(!tim.getStartDateTime().equals(rsuInfo.getDeliveryStartTime())) {
-                    // The message at this index on the RSU is stale. 
+
+                if (!tim.getStartDateTime().equals(rsuInfo.getDeliveryStartTime())) {
+                    // The message at this index on the RSU is stale.
                     result.getStaleIndexes().add(new ActiveTimMapping(record, rsuInfo));
                 }
+
+                rsuIndices.remove(pos);
             }
         }
 
@@ -131,10 +130,10 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
 
     private void removeCollisionFromRsu(Integer index) {
         int pos = Collections.binarySearch(rsuIndices, new RsuIndexInfo(index, null), findByIndex);
-        if(pos >= 0) {
+        if (pos >= 0) {
             rsuIndices.remove(pos);
         }
-        
+
         rsu.getRsuActiveTims().removeIf((t) -> t.getActiveTim().getRsuIndex().equals(index));
     }
 }

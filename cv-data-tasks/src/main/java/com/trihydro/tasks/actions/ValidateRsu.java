@@ -90,10 +90,6 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
                     rsuIndices.stream().map((item) -> item.getIndex()).collect(Collectors.toList()));
         }
 
-        // DEBUG
-        // Gson gson = new Gson();
-        // System.out.println(gson.toJson(result));
-
         return result;
     }
 

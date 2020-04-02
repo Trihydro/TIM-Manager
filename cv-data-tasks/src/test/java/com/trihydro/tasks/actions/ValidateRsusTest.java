@@ -25,7 +25,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
-import com.trihydro.tasks.config.EmailConfiguration;
+import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.ExecutorFactory;
 import com.trihydro.tasks.models.RsuValidationResult;
 
@@ -49,7 +49,7 @@ public class ValidateRsusTest {
     @Mock
     private ExecutorFactory mockExecutorFactory;
     @Mock
-    private EmailConfiguration mockEmailConfig;
+    private EmailFormatter mockEmailFormatter;
     @Mock
     private EmailHelper mockMailHelper;
     @Mock
@@ -115,7 +115,8 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockUtility).logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records:");
+        verify(mockUtility)
+                .logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from DEV:");
     }
 
     @Test
@@ -160,7 +161,7 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockEmailConfig).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
+        verify(mockEmailFormatter).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
                 unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
@@ -187,7 +188,7 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockEmailConfig).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
+        verify(mockEmailFormatter).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
                 unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 

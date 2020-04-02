@@ -2,7 +2,12 @@ package com.trihydro.library.service;
 
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
+
+import com.google.gson.Gson;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -43,5 +48,21 @@ public class BaseServiceTest {
     protected <T> HttpEntity<T> getEntity(Object body, Class<T> clazz) {
         HttpEntity<T> entity = new HttpEntity<T>((T) body, getDefaultHeaders());
         return entity;
+    }
+
+    protected <T> T importJsonObject(String fileName, Class<T> clazz) {
+        InputStream is = BaseServiceTest.class.getResourceAsStream(fileName);
+        InputStreamReader isr = new InputStreamReader(is);
+
+        Gson gson = new Gson();
+        T data = gson.fromJson(isr, clazz);
+
+        try {
+            isr.close();
+        } catch (IOException ex) {
+
+        }
+
+        return data;
     }
 }

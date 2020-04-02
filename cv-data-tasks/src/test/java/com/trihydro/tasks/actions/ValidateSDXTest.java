@@ -18,10 +18,11 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.SemiDialogID;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
-import com.trihydro.tasks.config.EmailConfiguration;
+import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 
@@ -46,7 +47,7 @@ public class ValidateSDXTest {
     @Mock
     private ActiveTimService mockActiveTimService;
     @Mock
-    private EmailConfiguration mockEmailConfig;
+    private EmailFormatter mockEmailFormatter;
     @Mock
     private DataTasksConfiguration mockConfig;
     @Mock
@@ -75,7 +76,7 @@ public class ValidateSDXTest {
         uut.run();
 
         // Services were called
-        verify(mockSdwService).getMsgsForOdeUser();
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // No email was sent
@@ -88,7 +89,7 @@ public class ValidateSDXTest {
         AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
 
         // Arrange service responses
-        when(mockSdwService.getMsgsForOdeUser()).thenReturn(Arrays.asList(asdds));
+        when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
         when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
         // Return ITIS codes for ASDDs
         doReturn(Arrays.asList(8, 7, 6)).when(mockSdwService).getItisCodesFromAdvisoryMessage("0");
@@ -99,7 +100,7 @@ public class ValidateSDXTest {
 
         // Assert
         // Services were called
-        verify(mockSdwService).getMsgsForOdeUser();
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
         verify(mockActiveTimService).getActiveTimsForSDX();
         verify(mockSdwService, times(2)).getItisCodesFromAdvisoryMessage(any());
 
@@ -116,7 +117,7 @@ public class ValidateSDXTest {
         AdvisorySituationDataDeposit[] asdds = new AdvisorySituationDataDeposit[0];
 
         // Arrange service responses
-        when(mockSdwService.getMsgsForOdeUser()).thenReturn(Arrays.asList(asdds));
+        when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
         when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
 
         // Act
@@ -128,14 +129,14 @@ public class ValidateSDXTest {
         // - toResend to contain 2 records
 
         // Services were called
-        verify(mockSdwService).getMsgsForOdeUser();
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // Email was sent
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
         // Email had expected counts
-        verify(mockEmailConfig).generateSdxSummaryEmail(eq(0), eq(0), eq(2), toResendCaptor.capture(),
+        verify(mockEmailFormatter).generateSdxSummaryEmail(eq(0), eq(0), eq(2), toResendCaptor.capture(),
                 deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
 
         assertEquals(2, toResendCaptor.getValue().size());
@@ -151,7 +152,7 @@ public class ValidateSDXTest {
         AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
 
         // Arrange service responses
-        when(mockSdwService.getMsgsForOdeUser()).thenReturn(Arrays.asList(asdds));
+        when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
         when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
 
         // Act
@@ -163,14 +164,14 @@ public class ValidateSDXTest {
         // - deleteFromSdx to contain 2 records
 
         // Services were called
-        verify(mockSdwService).getMsgsForOdeUser();
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // Email was sent
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
         // Email had expected counts
-        verify(mockEmailConfig).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
+        verify(mockEmailFormatter).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
                 deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
 
         assertEquals(0, toResendCaptor.getValue().size());
@@ -189,7 +190,7 @@ public class ValidateSDXTest {
         AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_2.json", AdvisorySituationDataDeposit[].class);
 
         // Arrange service responses
-        when(mockSdwService.getMsgsForOdeUser()).thenReturn(Arrays.asList(asdds));
+        when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
         when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
         // Return ITIS codes for ASDDs
         doReturn(Arrays.asList(8, 7, 6)).when(mockSdwService).getItisCodesFromAdvisoryMessage("0");
@@ -209,7 +210,7 @@ public class ValidateSDXTest {
         // - invOracleRecords count: 0
 
         // Services were called
-        verify(mockSdwService).getMsgsForOdeUser();
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
         verify(mockActiveTimService).getActiveTimsForSDX();
         verify(mockSdwService, times(3)).getItisCodesFromAdvisoryMessage(any());
 
@@ -217,7 +218,7 @@ public class ValidateSDXTest {
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
         // Email had expected counts
-        verify(mockEmailConfig).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),
+        verify(mockEmailFormatter).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),
                 deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
 
         assertEquals(2, toResendCaptor.getValue().size());

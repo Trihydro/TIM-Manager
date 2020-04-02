@@ -13,7 +13,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
-import com.trihydro.tasks.config.EmailConfiguration;
+import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.ExecutorFactory;
 import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.Environment;
@@ -29,19 +29,19 @@ public class ValidateRsus implements Runnable {
     private ActiveTimService activeTimService;
     private RsuDataService rsuDataService;
     private ExecutorFactory executorFactory;
-    private EmailConfiguration emailConfig;
+    private EmailFormatter emailFormatter;
     private EmailHelper mailHelper;
     private Utility utility;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
-            RsuDataService _rsuDataService, ExecutorFactory _executorFactory, EmailConfiguration _emailConfig,
+            RsuDataService _rsuDataService, ExecutorFactory _executorFactory, EmailFormatter _emailFormatter,
             EmailHelper _mailHelper, Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
         rsuDataService = _rsuDataService;
         executorFactory = _executorFactory;
-        emailConfig = _emailConfig;
+        emailFormatter = _emailFormatter;
         mailHelper = _mailHelper;
         utility = _utility;
     }
@@ -71,13 +71,19 @@ public class ValidateRsus implements Runnable {
             for (ActiveTim activeTim : activeTimService.getActiveRsuTims(config.getCvRestServiceDev())) {
                 activeTims.add(new EnvActiveTim(activeTim, Environment.DEV));
             }
+        } catch (Exception ex) {
+            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from DEV:");
+            ex.printStackTrace();
+            return;
+        }
 
+        try {
             // Fetch records for prod
             for (ActiveTim activeTim : activeTimService.getActiveRsuTims(config.getCvRestServiceProd())) {
                 activeTims.add(new EnvActiveTim(activeTim, Environment.PROD));
             }
         } catch (Exception ex) {
-            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records:");
+            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from PROD:");
             ex.printStackTrace();
             return;
         }
@@ -87,20 +93,8 @@ public class ValidateRsus implements Runnable {
             return;
         }
 
-        // DEBUGGING
-        // activeTims.forEach((record) -> {
-        // System.out.println(record.getActiveTim().getRsuTarget() + " " +
-        // record.getEnvironment() + " " + record.getActiveTim().getActiveTimId());
-        // });
-
         // Organize ActiveTim records by RSU
         List<PopulatedRsu> rsusWithRecords = getRsusFromActiveTims(activeTims);
-
-        // DEBUGGING
-        // rsusWithRecords.forEach((rec) -> {
-        // System.out.println(rec.getIpv4Address() + ": " +
-        // Integer.toString(rec.getRsuActiveTims().size()));
-        // });
 
         ExecutorService workerThreadPool = executorFactory.getFixedThreadPool(config.getRsuValThreadPoolSize());
 
@@ -159,10 +153,10 @@ public class ValidateRsus implements Runnable {
         // If we have any metrics to report...
         if (unresponsiveRsus.size() > 0 || rsusWithErrors.size() > 0 || unexpectedErrors.size() > 0) {
             // ... generate and send email
-            String email = emailConfig.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
+            String email = emailFormatter.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
 
             try {
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Validation Results", email,
+                mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Results", email,
                         config.getMailPort(), config.getMailHost(), config.getFromEmail());
             } catch (Exception ex) {
                 ex.printStackTrace();

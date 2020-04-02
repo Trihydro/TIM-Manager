@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.RsuIndexInfo;
 
@@ -16,10 +17,12 @@ import org.springframework.web.client.HttpClientErrorException;
 @Component
 public class RsuDataService {
     private RsuDataServiceProps config;
+    private Utility utility;
 
     @Autowired
-    public void InjectDependencies(RsuDataServiceProps config) {
+    public void InjectDependencies(RsuDataServiceProps config, Utility utility) {
         this.config = config;
+        this.utility = utility;
     }
 
     /**
@@ -36,6 +39,7 @@ public class RsuDataService {
             response = RestTemplateProvider.GetRestTemplate().getForEntity(url, RsuIndexInfo[].class);
         } catch (HttpClientErrorException ex) {
             if (ex.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
+                utility.logWithDate("RSU " + ipv4Address + " is unresponsive");
                 return null;
             }
 

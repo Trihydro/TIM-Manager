@@ -1,4 +1,4 @@
-package com.trihydro.tasks.configuration;
+package com.trihydro.tasks.helpers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.RsuIndexInfo;
-import com.trihydro.tasks.config.EmailConfiguration;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
@@ -24,11 +23,11 @@ import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.junit.Test;
 
-public class EmailConfigurationTest {
+public class EmailFormatterTest {
     @Test
     public void generateSdxSummaryEmail_success() throws IOException {
         // Arrange
-        EmailConfiguration uut = new EmailConfiguration();
+        EmailFormatter uut = new EmailFormatter();
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
@@ -51,7 +50,7 @@ public class EmailConfigurationTest {
     @Test
     public void generateSdxSummaryEmail_withInvOracleRecordsSection() throws IOException {
         // Arrange
-        EmailConfiguration uut = new EmailConfiguration();
+        EmailFormatter uut = new EmailFormatter();
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
@@ -76,7 +75,7 @@ public class EmailConfigurationTest {
     @Test
     public void generateSdxSummaryEmail_withToResendSection() throws IOException {
         // Arrange
-        EmailConfiguration uut = new EmailConfiguration();
+        EmailFormatter uut = new EmailFormatter();
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
@@ -101,7 +100,7 @@ public class EmailConfigurationTest {
     @Test
     public void generateSdxSummaryEmail_withStaleSdxSection() throws IOException {
         // Arrange
-        EmailConfiguration uut = new EmailConfiguration();
+        EmailFormatter uut = new EmailFormatter();
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
@@ -123,7 +122,7 @@ public class EmailConfigurationTest {
     @Test
     public void generateRsuSummaryEmail_success() throws IOException {
         // Arrange
-        EmailConfiguration uut = new EmailConfiguration();
+        EmailFormatter uut = new EmailFormatter();
 
         List<String> unresponsiveRsus = new ArrayList<>();
         List<String> unexpectedErrors = new ArrayList<>();
@@ -142,7 +141,7 @@ public class EmailConfigurationTest {
     @Test
     public void generateRsuSummaryEmail_invalidRsu() throws IOException {
         // Arrange
-        EmailConfiguration uut = new EmailConfiguration();
+        EmailFormatter uut = new EmailFormatter();
 
         List<String> unresponsiveRsus = new ArrayList<>();
         List<String> unexpectedErrors = new ArrayList<>();
@@ -214,7 +213,7 @@ public class EmailConfigurationTest {
     @Test
     public void generateRsuSummaryEmail_unexpectedError() throws IOException {
         // Arrange
-        EmailConfiguration uut = new EmailConfiguration();
+        EmailFormatter uut = new EmailFormatter();
 
         List<String> unresponsiveRsus = new ArrayList<>();
         List<String> unexpectedErrors = new ArrayList<>();

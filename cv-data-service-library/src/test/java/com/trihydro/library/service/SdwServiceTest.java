@@ -29,6 +29,7 @@ import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.SDXDecodeRequest;
 import com.trihydro.library.model.SDXDecodeResponse;
+import com.trihydro.library.model.SemiDialogID;
 
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
@@ -84,11 +85,9 @@ public class SdwServiceTest extends BaseServiceTest {
     SdwService sdwService;
 
     @Before
-    public void setup() throws SQLException {
+    public void setupSubTest() throws SQLException {
         Mockito.when(mockConfig.getSdwRestUrl()).thenReturn("http://localhost:12230");
         Mockito.when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
-
-        super.setup();
     }
 
     @Test
@@ -209,10 +208,32 @@ public class SdwServiceTest extends BaseServiceTest {
         List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("000000000000000000");
 
         // Assert
+        assertEquals(3, result.size());
         assertTrue(result.contains(268));
         assertTrue(result.contains(12619));
         assertTrue(result.contains(8720));
-        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void getItisCodesFromAdvisoryMessage_realData() {
+        // Arrange
+        // request contains real, PER-encoded MessageFrame, and response contains the
+        // corresponding response from the SDX's /api/decode endpoint
+        SDXDecodeRequest request = importJsonObject("/sdxDecodeRequest.json", SDXDecodeRequest.class);
+        SDXDecodeResponse response = importJsonObject("/sdxDecodeResponse.json", SDXDecodeResponse.class);
+
+        String url = "http://localhost:12230/api/decode";
+        when(mockRestTemplate.exchange(eq(url), eq(HttpMethod.POST), isA(HttpEntity.class),
+                eq(SDXDecodeResponse.class))).thenReturn(mockDecodeResponse);
+        when(mockDecodeResponse.getBody()).thenReturn(response);
+
+        // Act
+        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage(request.getEncodedMsg());
+
+        // Assert
+        assertEquals(2, result.size());
+        assertTrue(result.contains(5895));
+        assertTrue(result.contains(5907));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -248,9 +269,9 @@ public class SdwServiceTest extends BaseServiceTest {
         List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("000000000000000000");
 
         // Assert
+        assertEquals(2, result.size());
         assertTrue(result.contains(268));
         assertTrue(result.contains(8720));
-        assertEquals(2, result.size());
     }
 
     @Test
@@ -288,7 +309,7 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockAsddResponse.getBody()).thenReturn(response);
 
         // Act
-        List<AdvisorySituationDataDeposit> results = sdwService.getMsgsForOdeUser();
+        List<AdvisorySituationDataDeposit> results = sdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
 
         // Assert
         assertEquals(1, results.size());
@@ -305,7 +326,7 @@ public class SdwServiceTest extends BaseServiceTest {
                         .thenThrow(new RestClientException("something went wrong..."));
 
         // Act
-        List<AdvisorySituationDataDeposit> results = sdwService.getMsgsForOdeUser();
+        List<AdvisorySituationDataDeposit> results = sdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
 
         // Assert
         assertNull(results);

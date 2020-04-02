@@ -1,4 +1,4 @@
-package com.trihydro.tasks.config;
+package com.trihydro.tasks.helpers;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,13 +19,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EmailConfiguration {
+public class EmailFormatter {
     private String formatSdxMain;
     private String formatSection;
     private String formatRsuMain;
     private String formatRsuResults;
 
-    public EmailConfiguration() throws IOException {
+    public EmailFormatter() throws IOException {
         formatSdxMain = readFile("email-templates/sdx-main.html");
         formatSection = readFile("email-templates/section.html");
         formatRsuMain = readFile("email-templates/rsu-main.html");

@@ -8,10 +8,11 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.SemiDialogID;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
-import com.trihydro.tasks.config.EmailConfiguration;
+import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.SdxComparableSorter;
@@ -25,17 +26,17 @@ public class ValidateSDX implements Runnable {
     private SdwService sdwService;
     private ActiveTimService activeTimService;
     private EmailHelper mailHelper;
-    private EmailConfiguration emailConfig;
+    private EmailFormatter emailFormatter;
     private Utility utility;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, SdwService _sdwService,
-            ActiveTimService _activeTimService, EmailConfiguration _emailConfig, EmailHelper _mailHelper,
+            ActiveTimService _activeTimService, EmailFormatter _emailFormatter, EmailHelper _mailHelper,
             Utility _utility) {
         config = _config;
         sdwService = _sdwService;
         activeTimService = _activeTimService;
-        emailConfig = _emailConfig;
+        emailFormatter = _emailFormatter;
         mailHelper = _mailHelper;
         utility = _utility;
     }
@@ -63,7 +64,7 @@ public class ValidateSDX implements Runnable {
         }
 
         // Fetch records from SDX
-        for (AdvisorySituationDataDeposit asdd : sdwService.getMsgsForOdeUser()) {
+        for (AdvisorySituationDataDeposit asdd : sdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)) {
             List<Integer> itisCodes = sdwService.getItisCodesFromAdvisoryMessage(asdd.getAdvisoryMessage());
             CAdvisorySituationDataDeposit record = new CAdvisorySituationDataDeposit(asdd);
             record.setItisCodes(itisCodes);
@@ -141,7 +142,7 @@ public class ValidateSDX implements Runnable {
         }
 
         if (toResend.size() > 0 || deleteFromSdx.size() > 0 || invOracleRecords.size() > 0) {
-            String email = emailConfig.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
+            String email = emailFormatter.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
                     numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords);
 
             try {

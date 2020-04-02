@@ -117,6 +117,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	/**
 	 * Fetch all ActiveTims for RSUs from cv-data-controller
+	 * 
 	 * @return List of ActiveTims (including RSU address and index)
 	 */
 	public List<ActiveTim> getActiveRsuTims() {
@@ -125,6 +126,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	/**
 	 * Fetch all ActiveTims for RSUs from the specified endpoint
+	 * 
 	 * @return List of ActiveTims (including RSU address and index)
 	 */
 	public List<ActiveTim> getActiveRsuTims(String endpoint) {
@@ -161,10 +163,4 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				.getForEntity(CVRestUrl + "/active-tim/all-sdx", ActiveTim[].class);
 		return Arrays.asList(response.getBody());
 	}
-
-	// public List<PopulatedRsu> getRsusWithActiveTims() {
-	// 	ResponseEntity<PopulatedRsu[]> response = RestTemplateProvider.GetRestTemplate()
-	// 			.getForEntity(CVRestUrl + "/active-tim/rsus-with-active-tims", PopulatedRsu[].class);
-	// 	return Arrays.asList(response.getBody());
-	// }
 }

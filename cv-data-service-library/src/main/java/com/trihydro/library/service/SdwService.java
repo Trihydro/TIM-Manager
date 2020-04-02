@@ -12,19 +12,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
@@ -32,9 +25,15 @@ import com.trihydro.library.model.SDXDecodeRequest;
 import com.trihydro.library.model.SDXDecodeResponse;
 import com.trihydro.library.model.SDXQuery;
 import com.trihydro.library.model.SdwProps;
+import com.trihydro.library.model.SemiDialogID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
@@ -79,10 +78,16 @@ public class SdwService {
 
     }
 
-    public List<AdvisorySituationDataDeposit> getMsgsForOdeUser() throws RestClientException {
+    /**
+     * Fetches messages deposited into the SDX, by the ODE User (identified by
+     * apikey).
+     * 
+     * @param type Type of message to retrieve
+     */
+    public List<AdvisorySituationDataDeposit> getMsgsForOdeUser(SemiDialogID type) throws RestClientException {
         List<AdvisorySituationDataDeposit> results = null;
 
-        String url = String.format("%s/api/deposited-by-me/156", configProperties.getSdwRestUrl());
+        String url = String.format("%s/api/deposited-by-me/%d", configProperties.getSdwRestUrl(), type.getValue());
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         headers.add("apikey", configProperties.getSdwApiKey());
@@ -137,18 +142,17 @@ public class SdwService {
         Pattern p = Pattern.compile("(<advisory>)(.*)(</advisory>)");
         Matcher m = p.matcher(decodeResponse.getDecodedMessage());
 
-        if(m.find()) {
+        if (m.find()) {
             String advisory = m.group(2);
             p = Pattern.compile("(<itis>)([0-9]*)(</itis>)");
             m = p.matcher(advisory);
 
-            while(m.find()) {
+            while (m.find()) {
                 String itisCode = m.group(2);
-                
+
                 try {
                     results.add(Integer.parseInt(itisCode));
-                }
-                catch (NumberFormatException ex) {
+                } catch (NumberFormatException ex) {
                     ex.printStackTrace();
                 }
             }

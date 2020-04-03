@@ -8,8 +8,9 @@ public class CAdvisorySituationDataDeposit implements ISdxComparable {
     private AdvisorySituationDataDeposit asdd;
     private List<Integer> itisCodes;
 
-    public CAdvisorySituationDataDeposit(AdvisorySituationDataDeposit asdd) {
+    public CAdvisorySituationDataDeposit(AdvisorySituationDataDeposit asdd, List<Integer> itisCodes) {
         this.asdd = asdd;
+        this.itisCodes = itisCodes;
     }
 
     public AdvisorySituationDataDeposit getAsdd() {

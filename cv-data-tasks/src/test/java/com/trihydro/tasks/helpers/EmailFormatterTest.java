@@ -108,7 +108,7 @@ public class EmailFormatterTest {
 
         AdvisorySituationDataDeposit invAsdd = new AdvisorySituationDataDeposit();
         invAsdd.setRecordId(-200);
-        deleteFromSdx.add(new CAdvisorySituationDataDeposit(invAsdd));
+        deleteFromSdx.add(new CAdvisorySituationDataDeposit(invAsdd, null));
 
         // Act
         String emailBody = uut.generateSdxSummaryEmail(1, 0, 0, toResend, deleteFromSdx, invOracleRecords);

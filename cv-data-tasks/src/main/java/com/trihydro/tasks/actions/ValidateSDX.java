@@ -66,8 +66,7 @@ public class ValidateSDX implements Runnable {
         // Fetch records from SDX
         for (AdvisorySituationDataDeposit asdd : sdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)) {
             List<Integer> itisCodes = sdwService.getItisCodesFromAdvisoryMessage(asdd.getAdvisoryMessage());
-            CAdvisorySituationDataDeposit record = new CAdvisorySituationDataDeposit(asdd);
-            record.setItisCodes(itisCodes);
+            CAdvisorySituationDataDeposit record = new CAdvisorySituationDataDeposit(asdd, itisCodes);
 
             sdxRecords.add(record);
         }

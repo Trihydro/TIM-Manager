@@ -1,6 +1,6 @@
 package com.trihydro.tasks.actions;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -65,6 +64,6 @@ public class CleanupActiveTimsTest {
 
         // assert exchange called twice
         verify(mockRestTemplate, Mockito.times(2)).exchange(any(String.class), any(HttpMethod.class),
-                Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
+                Mockito.<HttpEntity<String>>any(), Mockito.<Class<String>>any());
     }
 }

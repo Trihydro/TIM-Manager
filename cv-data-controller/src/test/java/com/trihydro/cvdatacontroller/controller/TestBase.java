@@ -1,9 +1,8 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import java.lang.reflect.ParameterizedType;
 import java.sql.Connection;
@@ -13,11 +12,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class TestBase<T> {
     @Mock
     protected Connection mockConnection;
@@ -37,14 +33,14 @@ public class TestBase<T> {
                 .getTypeName();
         Class<?> clazz = Class.forName(className);
         uut = spy((T) clazz.newInstance());
-        when(mockConnection.createStatement()).thenReturn(mockStatement);
-        when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
-        when(mockConnection.prepareStatement(isA(String.class), isA(String[].class))).thenReturn(mockPreparedStatement);
-        doReturn(mockConnection).when((BaseController) uut).GetConnectionPool();
-        doReturn(-1l).when((BaseController) uut).executeAndLog(isA(PreparedStatement.class), isA(String.class));
-        doReturn(true).when((BaseController) uut).updateOrDelete(mockPreparedStatement);
-        when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
-        when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
-        when(mockRs.next()).thenReturn(true).thenReturn(false);
+        lenient().when(mockConnection.createStatement()).thenReturn(mockStatement);
+        lenient().when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
+        lenient().when(mockConnection.prepareStatement(isA(String.class), isA(String[].class))).thenReturn(mockPreparedStatement);
+        lenient().doReturn(mockConnection).when((BaseController) uut).GetConnectionPool();
+        lenient().doReturn(-1l).when((BaseController) uut).executeAndLog(isA(PreparedStatement.class), isA(String.class));
+        lenient().doReturn(true).when((BaseController) uut).updateOrDelete(mockPreparedStatement);
+        lenient().when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
+        lenient().when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
+        lenient().when(mockRs.next()).thenReturn(true).thenReturn(false);
     }
 }

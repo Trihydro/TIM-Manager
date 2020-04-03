@@ -12,12 +12,15 @@ import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 
+@RunWith(MockitoJUnitRunner.class)
 public class RegionServiceTest extends TestBase<RegionService> {
 
     @Spy

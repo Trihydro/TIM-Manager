@@ -37,11 +37,11 @@ public class OdeService {
     private Utility utility;
 
     @Autowired
-    public void InjectDependencies(Utility _utility){
+    public void InjectDependencies(Utility _utility) {
         utility = _utility;
     }
 
-    public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, String odeUrl) {
+    public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, String odeUrl, Integer index) {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
@@ -49,17 +49,15 @@ public class OdeService {
         timToSend.getTim().setMsgCnt(1);
 
         WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
-        TimQuery timQuery = submitTimQuery(wydotRsu, 0, odeUrl);
 
         // query failed, don't send TIM
-        if (timQuery == null) {
+        if (index == null) {
             utility.logWithDate(
                     "Returning without sending TIM to RSU. submitTimQuery failed for RSU " + gson.toJson(wydotRsu));
             return;
         }
 
-        timToSend.getRequest().getRsus()[0]
-                .setRsuIndex(findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set()));
+        timToSend.getRequest().getRsus()[0].setRsuIndex(index);
 
         String timToSendJson = gson.toJson(timToSend);
 
@@ -75,8 +73,7 @@ public class OdeService {
         }
     }
 
-    //TODO: if this returns 0, we should NOT send it to the RSU
-    protected static int findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
+    public static Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
 
         List<Integer> setIndexList = new ArrayList<Integer>();
 
@@ -90,7 +87,7 @@ public class OdeService {
             }
         }
 
-        return 0;
+        return null;
     }
 
     public static TimQuery submitTimQuery(WydotRsu rsu, int counter, String odeUrl) {

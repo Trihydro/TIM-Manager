@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimType;
@@ -57,6 +58,7 @@ public class TimService extends BaseService {
     private PathNodeXYService pathNodeXYService;
     private NodeXYService nodeXYService;
     private Utility utility;
+    private ActiveTimHoldingService activeTimHoldingService;
 
     @Autowired
     public void InjectDependencies(ActiveTimService _ats, TimOracleTables _timOracleTables,
@@ -64,7 +66,7 @@ public class TimService extends BaseService {
             DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
             ItisCodeService _itisCodesService, TimRsuService _timRsuService,
             DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
-            NodeXYService _nodeXYService, Utility _utility) {
+            NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService) {
         activeTimService = _ats;
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
@@ -79,13 +81,14 @@ public class TimService extends BaseService {
         pathNodeXYService = _pathNodeXYService;
         nodeXYService = _nodeXYService;
         utility = _utility;
+        activeTimHoldingService = _athService;
     }
 
     public void addTimToOracleDB(OdeData odeData) {
 
         try {
 
-            System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
+            utility.logWithDate("Called addTimToOracleDB");
 
             Long timId = AddTim(odeData.getMetadata(),
                     ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
@@ -242,12 +245,22 @@ public class TimService extends BaseService {
         activeTim.setStartDateTime(dframes[0].getStartDateTime());
         activeTim.setTimId(timId);
 
+        ActiveTimHolding ath = null;
+
         // if this is an RSU TIM
         if (activeTim.getRsuTarget() != null && firstRsu != null) {
             // save TIM RSU in DB
             WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
                     .findFirst().orElse(null);
-            timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
+            if (rsu != null) {
+                timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
+            }
+            ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
+                    activeTim.getRsuTarget());
+        } else {
+            // SDX tim, fetch holding
+            ath = activeTimHoldingService.getSdxActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
+                    activeTim.getSatRecordId());
         }
 
         // set end time if duration is not indefinite
@@ -255,6 +268,12 @@ public class TimService extends BaseService {
             ZonedDateTime zdt = ZonedDateTime.parse(dframes[0].getStartDateTime());
             zdt = zdt.plus(dframes[0].getDurationTime(), ChronoUnit.MINUTES);
             activeTim.setEndDateTime(zdt.toString());
+        }
+
+        // set activeTim start/end points from holding table
+        if (ath != null) {
+            activeTim.setStartPoint(ath.getStartPoint());
+            activeTim.setEndPoint(ath.getEndPoint());
         }
 
         // if true, TIM came from WYDOT
@@ -282,6 +301,11 @@ public class TimService extends BaseService {
             // just log for now
             System.out.println("Inserting new active_tim, no TimType found - not from WYDOT application");
             activeTimService.insertActiveTim(activeTim);
+        }
+
+        // remove active_tim_holding now that we've saved its values
+        if (ath != null) {
+            activeTimHoldingService.deleteActiveTimHolding(ath.getActiveTimHoldingId());
         }
     }
 
@@ -557,17 +581,9 @@ public class TimService extends BaseService {
             activeTim.setRoute(splitName[1]);
         else
             return activeTim;
-        if (splitName.length > 2)
-            activeTim.setMilepostStart(Double.parseDouble(splitName[2]));
-        else
-            return activeTim;
-        if (splitName.length > 3)
-            activeTim.setMilepostStop(Double.parseDouble(splitName[3]));
-        else
-            return activeTim;
-        if (splitName.length > 4) {
+        if (splitName.length > 2) {
             // if this is an RSU TIM
-            String[] hyphen_array = splitName[4].split("-");
+            String[] hyphen_array = splitName[2].split("-");
             if (hyphen_array.length > 1) {
                 if (hyphen_array[0].equals("SAT")) {
                     activeTim.setSatRecordId(hyphen_array[1]);
@@ -577,21 +593,21 @@ public class TimService extends BaseService {
             }
         } else
             return activeTim;
-        if (splitName.length > 5) {
-            TimType timType = getTimType((splitName[5]));
+        if (splitName.length > 3) {
+            TimType timType = getTimType((splitName[3]));
             activeTim.setTimType(timType.getType());
             activeTim.setTimTypeId(timType.getTimTypeId());
         } else
             return activeTim;
 
-        if (splitName.length > 6)
-            activeTim.setClientId(splitName[6]);
+        if (splitName.length > 4)
+            activeTim.setClientId(splitName[4]);
         else
             return activeTim;
 
-        if (splitName.length > 7) {
+        if (splitName.length > 5) {
             try {
-                Integer pk = Integer.valueOf(splitName[7]);
+                Integer pk = Integer.valueOf(splitName[5]);
                 activeTim.setPk(pk);
             } catch (NumberFormatException ex) {
                 // the pk won't get set here

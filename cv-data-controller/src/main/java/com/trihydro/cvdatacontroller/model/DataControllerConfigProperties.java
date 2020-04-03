@@ -1,10 +1,12 @@
 package com.trihydro.cvdatacontroller.model;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
+@ComponentScan({ "com.trihydro.cvdatacontroller", "com.trihydro.library.tables", "com.trihydro.library.helpers" })
 public class DataControllerConfigProperties {
     private String dbDriver;
     private String dbUrl;

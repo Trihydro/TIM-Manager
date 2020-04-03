@@ -19,13 +19,16 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -63,11 +66,12 @@ public class WydotTimService {
     private Utility utility;
     private OdeService odeService;
     private CreateBaseTimUtil createBaseTimUtil;
+    private ActiveTimHoldingService activeTimHoldingService;
 
     @Autowired
     public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
             TimTypeService _timTypeService, SdwService _sdwService, Utility _utility, OdeService _odeService,
-            CreateBaseTimUtil _createBaseTimUtil) {
+            CreateBaseTimUtil _createBaseTimUtil, ActiveTimHoldingService _activeTimHoldingService) {
         configuration = configurationRhs;
         emailHelper = _emailHelper;
         timTypeService = _timTypeService;
@@ -75,6 +79,7 @@ public class WydotTimService {
         utility = _utility;
         odeService = _odeService;
         createBaseTimUtil = _createBaseTimUtil;
+        activeTimHoldingService = _activeTimHoldingService;
     }
 
     public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
@@ -87,9 +92,8 @@ public class WydotTimService {
     public WydotTravelerInputData createTim(WydotTim wydotTim, String direction, String timTypeStr,
             String startDateTime, String endDateTime) {
 
-        String route = wydotTim.getRoute().replaceAll("\\D+", "");
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, route, configuration);
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration);
 
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0]
@@ -136,33 +140,29 @@ public class WydotTimService {
         // filter by SAT TIMs
         activeSatTims = activeSatTims.stream().filter(x -> x.getSatRecordId() != null).collect(Collectors.toList());
 
+        String recordId = activeSatTims != null && activeSatTims.size() > 0 ? activeSatTims.get(0).getSatRecordId()
+                : sdwService.getNewRecordId();
+
+        // save new active_tim_holding record
+        ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId);
+        activeTimHolding.setDirection(direction);// we are overriding the direction from the tim here
+        activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
+
+        String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
+        if (wydotTim.getClientId() != null)
+            regionNameTemp += "_" + wydotTim.getClientId();
+
+        // add on wydot primary key if it exists
+        if (pk != null)
+            regionNameTemp += "_" + pk;
+
+        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
+
         if (activeSatTims != null && activeSatTims.size() > 0) {
 
             WydotOdeTravelerInformationMessage tim = TimService.getTim(activeSatTims.get(0).getTimId());
-
-            String regionNameTemp = regionNamePrev + "_SAT-" + activeSatTims.get(0).getSatRecordId() + "_"
-                    + timType.getType();
-            if (wydotTim.getClientId() != null)
-                regionNameTemp += "_" + wydotTim.getClientId();
-
-            // add on wydot primary key if it exists
-            if (pk != null)
-                regionNameTemp += "_" + pk;
-
-            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
         } else {
-            String recordId = sdwService.getNewRecordId();
-            String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
-
-            if (wydotTim.getClientId() != null)
-                regionNameTemp += "_" + wydotTim.getClientId();
-
-            // add on wydot primary key if it exists
-            if (pk != null)
-                regionNameTemp += "_" + pk;
-
-            timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
             sendNewTimToSdw(timToSend, recordId);
         }
     }
@@ -171,8 +171,9 @@ public class WydotTimService {
             String direction, TimType timType, Integer pk, String endDateTime) {
 
         // FIND ALL RSUS TO SEND TO
-        List<WydotRsu> rsus = utility.getRsusInBuffer(direction, Math.min(wydotTim.getToRm(), wydotTim.getFromRm()),
-                Math.max(wydotTim.getToRm(), wydotTim.getFromRm()), "80");
+        // TODO: should this query a graph db instead to follow with milepost?
+        List<WydotRsu> rsus = utility.getRsusByLatLong(direction, wydotTim.getStartPoint(), wydotTim.getEndPoint(),
+                wydotTim.getRoute());
 
         // if no RSUs found
         if (rsus.size() == 0) {
@@ -202,9 +203,13 @@ public class WydotTimService {
                     rsu.getRsuTarget());
             ActiveTim activeTim = ActiveTimService.getActiveRsuTim(artqm);
 
+            // create new active_tim_holding record
+            ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null);
+            activeTimHolding.setDirection(direction);
+
             // if active tims exist, update tim
             if (activeTim != null) {
-
+                activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
                 WydotOdeTravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());
 
                 // update TIM rsu
@@ -214,10 +219,21 @@ public class WydotTimService {
                 updateTimOnRsu(timToSend, activeTim.getTimId(), tim, rsu.getRsuId(), endDateTime);
             } else {
                 // send new tim to rsu
+                // first fetch existing active_tim_holding records
+                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
+                        .getActiveTimHoldingForRsu(rsu.getRsuTarget());
+
+                TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
+                // append existing holding indices
+                existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
+                Integer nextRsuIndex = OdeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+                activeTimHolding.setRsuIndex(nextRsuIndex);
+                activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
+
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                odeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl());
+                odeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl(), nextRsuIndex);
             }
         }
     }

@@ -32,7 +32,7 @@ import io.swagger.annotations.Api;
 @Api(description = "Chain Controls")
 public class WydotTimCcController extends WydotTimBaseController {
 
-    private static String type = "CC";
+    private final String type = "CC";
 
     @Autowired
     public WydotTimCcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,

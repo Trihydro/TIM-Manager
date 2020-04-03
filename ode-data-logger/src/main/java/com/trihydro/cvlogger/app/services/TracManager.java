@@ -137,8 +137,8 @@ public class TracManager {
 		while (!msgSent && count < 2) {
 			try {
 				ResponseEntity<String> response = RestTemplateProvider.GetRestTemplate().exchange(
-						builder.buildAndExpand().toUri(), HttpMethod.POST,
-						new HttpEntity<String>(null, responseHeaders), String.class);
+						builder.build().toUri(), HttpMethod.POST, new HttpEntity<String>(null, responseHeaders),
+						String.class);
 				msgSent = true;
 				responseCode = response.getStatusCode().value();
 				responseText = response.getBody();

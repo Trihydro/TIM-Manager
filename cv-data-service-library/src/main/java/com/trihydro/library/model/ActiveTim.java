@@ -6,8 +6,6 @@ public class ActiveTim {
 
     private Long activeTimId;
     private Long timId;
-    private Double milepostStart;
-    private Double milepostStop;
     private String timType;
     private Long timTypeId;
     private String direction;
@@ -20,6 +18,24 @@ public class ActiveTim {
     private String rsuTarget;
     private Integer rsuIndex;
     private List<Integer> itisCodes;
+    private Coordinate startPoint;
+    private Coordinate endPoint;
+
+    public Coordinate getEndPoint() {
+        return endPoint;
+    }
+
+    public void setEndPoint(Coordinate endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public Coordinate getStartPoint() {
+        return startPoint;
+    }
+
+    public void setStartPoint(Coordinate startPoint) {
+        this.startPoint = startPoint;
+    }
 
     public Long getActiveTimId() {
         return this.activeTimId;
@@ -35,22 +51,6 @@ public class ActiveTim {
 
     public void setTimId(Long timId) {
         this.timId = timId;
-    }
-
-    public Double getMilepostStart() {
-        return this.milepostStart;
-    }
-
-    public void setMilepostStart(Double milepostStart) {
-        this.milepostStart = milepostStart;
-    }
-
-    public Double getMilepostStop() {
-        return this.milepostStop;
-    }
-
-    public void setMilepostStop(Double milepostStop) {
-        this.milepostStop = milepostStop;
     }
 
     public String getTimType() {

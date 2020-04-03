@@ -17,11 +17,14 @@ import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DataFrameServiceTest extends TestBase<DataFrameService> {
 
     @Spy

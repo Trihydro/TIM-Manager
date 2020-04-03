@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.loggerkafkaconsumer.config.LoggerConfiguration;
@@ -31,7 +30,6 @@ public class BaseService {
     private HikariDataSource hds = null;
     private HikariConfig config;
     private LoggerConfiguration dbConfig;
-    private JavaMailSenderImplProvider mailProvider;
     private Utility utility;
     private EmailHelper emailHelper;
 
@@ -41,10 +39,9 @@ public class BaseService {
     public DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(LoggerConfiguration _loggerConfiguration, JavaMailSenderImplProvider _mailProvider,
-            Utility _utility, EmailHelper _emailHelper) {
+    public void InjectDependencies(LoggerConfiguration _loggerConfiguration, Utility _utility,
+            EmailHelper _emailHelper) {
         dbConfig = _loggerConfiguration;
-        mailProvider = _mailProvider;
         utility = _utility;
         emailHelper = _emailHelper;
     }

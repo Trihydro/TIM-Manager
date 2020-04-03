@@ -2,9 +2,10 @@ package com.trihydro.odewrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -67,10 +68,11 @@ public class WydotTimParkingControllerTest {
 		itisCodes.add(ic);
 		List<String> itisCodesIncident = new ArrayList<>();
 		itisCodesIncident.add("531");
-		doReturn(itisCodesIncident).when(setItisCodes).setItisCodesParking(any());
-		doReturn(itisCodes).when(setItisCodes).getItisCodes();
+		lenient().doReturn(itisCodesIncident).when(setItisCodes).setItisCodesParking(any());
+		lenient().doReturn(itisCodes).when(setItisCodes).getItisCodes();
 
-		doNothing().when(uut).processRequest(any());
+		lenient().doNothing().when(uut).processRequestAsync(any());
+		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 
 		parkingTims = new ArrayList<>();
 		at = new ActiveTim();
@@ -78,14 +80,14 @@ public class WydotTimParkingControllerTest {
 		at.setClientId("clientId");
 		at.setDirection("direction");
 		parkingTims.add(at);
-		doReturn(parkingTims).when(mockWydotTimService).selectTimsByType("P");
+		lenient().doReturn(parkingTims).when(mockWydotTimService).selectTimsByType("P");
 	}
 
 	@Test
 	public void testCreateParkingTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 4103, \"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360, \"route\": \"I-80\", \"direction\": \"d\", \"availability\": 4103, \"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
 
 		// Act
@@ -97,7 +99,7 @@ public class WydotTimParkingControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 		assertEquals("Parking49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
 	}
@@ -106,8 +108,9 @@ public class WydotTimParkingControllerTest {
 	public void testCreateParkingTimTim_oneDirection_NoMileposts() throws Exception {
 
 		// Arrange
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-70\", \"direction\": \"westbound\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-70\", \"direction\": \"d\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
+		doReturn(false).when(uut).routeSupported("I-70");
 
 		// Act
 		ResponseEntity<String> data = uut.createParkingTim(tpl);
@@ -118,15 +121,14 @@ public class WydotTimParkingControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
-		assertEquals("I-70", resultArr[0].route);
+		assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateParkingTim_oneDirection_NoItisCodes() throws Exception {
 
 		// Arrange
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 345678,\"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"d\", \"availability\": 345678,\"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
 
 		// Act
@@ -138,7 +140,7 @@ public class WydotTimParkingControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 		assertEquals("Parking49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
 	}
@@ -146,7 +148,7 @@ public class WydotTimParkingControllerTest {
 	@Test
 	public void testUpdateParkingTim_oneDirection_success() throws Exception {
 
-		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"westbound\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
+		String parkingJson = "{\"timParkingList\": [{ \"mileMarker\": 360,\"route\": \"I-80\", \"direction\": \"d\", \"availability\": 4103,\"clientId\": \"Parking49251\" }]}";
 		TimParkingList tpl = gson.fromJson(parkingJson, TimParkingList.class);
 
 		// Act
@@ -160,7 +162,7 @@ public class WydotTimParkingControllerTest {
 		assertEquals("success", resultArr[0].resultMessages.get(0));
 		assertEquals("Parking49251", resultArr[0].clientId);
 		assertEquals("I-80", resultArr[0].route);
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test

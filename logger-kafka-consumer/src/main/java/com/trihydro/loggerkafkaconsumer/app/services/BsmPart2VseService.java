@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.BsmOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,20 +15,18 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 @Component
 public class BsmPart2VseService extends BaseService {
 
-    private BsmOracleTables bsmOracleTables;
-    private SQLNullHandler sqlNullHandler;
+	private BsmOracleTables bsmOracleTables;
 
-    @Autowired
-    public void InjectDependencies(BsmOracleTables _bsmOracleTables, SQLNullHandler _sqlNullHandler) {
-        bsmOracleTables = _bsmOracleTables;
-        sqlNullHandler = _sqlNullHandler;
-    }
+	@Autowired
+	public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
+		bsmOracleTables = _bsmOracleTables;
+	}
 
 	public Long insertBSMPart2VSE(J2735BsmPart2Content part2Content, J2735VehicleSafetyExtensions vse,
 			Long bsmCoreDataId) {
 
 		String bsmVseInsertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_part2_vse",
-        bsmOracleTables.getBsmPart2VseTable());
+				bsmOracleTables.getBsmPart2VseTable());
 		PreparedStatement bsmVsePreparedStatement = null;
 		Connection connection = null;
 

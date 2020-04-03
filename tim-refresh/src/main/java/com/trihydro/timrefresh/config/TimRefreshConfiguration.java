@@ -18,9 +18,18 @@ public class TimRefreshConfiguration extends ConfigProperties {
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth;
     private String cvRestService;
+    private String[] rsuRoutes;
 
     public TimeToLive getSdwTtl() {
         return sdwTtl;
+    }
+
+    public String[] getRsuRoutes() {
+        return rsuRoutes;
+    }
+
+    public void setRsuRoutes(String[] rsuRoutes) {
+        this.rsuRoutes = rsuRoutes;
     }
 
     public String getCvRestService() {

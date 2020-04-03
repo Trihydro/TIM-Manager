@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.BsmOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +17,10 @@ public class BsmPart2SpveService extends BaseService {
 
     private BsmOracleTables bsmOracleTables;
     //TODO: refactor code to use sqlNullHandler
-    private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(BsmOracleTables _bsmOracleTables, SQLNullHandler _sqlNullHandler) {
+    public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
         bsmOracleTables = _bsmOracleTables;
-        sqlNullHandler = _sqlNullHandler;
     }
 
     public Long insertBSMPart2SPVE(J2735BsmPart2Content part2Content, J2735SpecialVehicleExtensions spve,

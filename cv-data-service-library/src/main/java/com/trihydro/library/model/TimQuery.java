@@ -13,4 +13,10 @@ public class TimQuery {
     public List<Integer> getIndicies_set() {
         return this.indicies_set;
     }
+
+    public void appendIndex(Integer index) {
+        if (index != null && !indicies_set.contains(index)) {
+            indicies_set.add(index);
+        }
+    }
 }

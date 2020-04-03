@@ -1,7 +1,9 @@
 package com.trihydro.timrefresh;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
@@ -10,6 +12,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.TimeToLive;
@@ -42,7 +45,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Unit tests for TimRefreshController
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class, DataFrameService.class })
+@PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class,
+        DataFrameService.class })
 public class TimRefreshControllerTest {
     private long timID = 1l;
 
@@ -50,21 +54,21 @@ public class TimRefreshControllerTest {
     public TestName name = new TestName();
 
     @Mock
-    TimRefreshConfiguration configuration;
+    TimRefreshConfiguration mockConfiguration;
     @Mock
     SdwService mockSdwService;
     @Mock
     Utility mockUtility;
     @Mock
     OdeService mockOdeService;
+    @Mock
+    MilepostService mockMilepostService;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
 
     @Before
     public void setup() {
-        // controllerUnderTest = new TimRefreshController(configuration, mockSdwService);
-
         PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(WydotTimService.class);
         PowerMockito.mockStatic(RsuService.class);
@@ -73,6 +77,9 @@ public class TimRefreshControllerTest {
 
         setupMilePost();
         setupDataFrameService();
+        String[] routes = new String[1];
+        routes[0] = "I 80";
+        doReturn(routes).when(mockConfiguration).getRsuRoutes();
         System.out.println("Executing " + name.getMethodName());
     }
 
@@ -85,28 +92,23 @@ public class TimRefreshControllerTest {
     private void setupMilePost() {
         List<Milepost> mps = new ArrayList<Milepost>();
         Milepost startMp = new Milepost();
-        startMp.setMilepostId(-1);
-        startMp.setRoute("route1");
+        startMp.setCommonName("route1");
         startMp.setMilepost(250d);
-        startMp.setDirection("eastward");
+        startMp.setDirection("i");
         startMp.setLatitude(105d);
         startMp.setLongitude(45d);
-        startMp.setElevation(100d);
-        startMp.setBearing(22d);
+        // startMp.setBearing(22d);
 
         Milepost endMp = new Milepost();
-        endMp.setMilepostId(-2);
-        endMp.setRoute("route1");
+        endMp.setCommonName("route1");
         endMp.setMilepost(255d);
-        endMp.setDirection("eastward");
+        endMp.setDirection("i");
         endMp.setLatitude(105d);
         endMp.setLongitude(45d);
-        endMp.setElevation(100d);
-        endMp.setBearing(59d);
+        // endMp.setBearing(59d);
         mps.add(startMp);
         mps.add(endMp);
-        Mockito.when(MilepostService.selectMilepostRange(isA(String.class), isA(String.class), isA(Double.class),
-                isA(Double.class))).thenReturn(mps);
+        doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
     }
 
     @Test
@@ -117,7 +119,7 @@ public class TimRefreshControllerTest {
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions, called once
-        PowerMockito.verifyStatic(VerificationModeFactory.times(1));
+        PowerMockito.verifyStatic(ActiveTimService.class, VerificationModeFactory.times(1));
         // verify getExpiringActiveTims called once
         ActiveTimService.getExpiringActiveTims();
 
@@ -138,14 +140,13 @@ public class TimRefreshControllerTest {
         arrLst.add(tum);
         when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(RsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
-        when(mockUtility.getRsusInBuffer(isA(String.class), isA(double.class), isA(double.class), isA(String.class)))
-                .thenReturn(rsus);
+        doReturn(rsus).when(mockUtility).getRsusByLatLong(anyString(), any(), any(), anyString());
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(RsuService.class);
         RsuService.getFullRsusTimIsOn(timID);
 
         PowerMockito.verifyNoMoreInteractions(RsuService.class);
@@ -175,10 +176,10 @@ public class TimRefreshControllerTest {
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(RsuService.class);
         RsuService.getFullRsusTimIsOn(timID);
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.updateTimOnRsu(any(WydotTravelerInputData.class));
 
         PowerMockito.verifyNoMoreInteractions(RsuService.class);
@@ -200,20 +201,17 @@ public class TimRefreshControllerTest {
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         ActiveTimService.getExpiringActiveTims();
 
-        PowerMockito.verifyStatic();
-        MilepostService.selectMilepostRange(any(), any(), any(), any());
-
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.getServiceRegion(any());
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.updateTimOnSdw(any());
 
         // verify static functions were called
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(RsuService.class);
         RsuService.getFullRsusTimIsOn(any());
 
         PowerMockito.verifyNoMoreInteractions(MilepostService.class);
@@ -223,16 +221,17 @@ public class TimRefreshControllerTest {
 
     private TimUpdateModel getTumBase() {
         TimUpdateModel tum = new TimUpdateModel();
-        tum.setRoute("UnitTestRoute");
-        tum.setDirection("eastward");
-        tum.setMilepostStart(1d);
-        tum.setMilepostStop(2d);
+        tum.setRoute("I 80");
+        tum.setDirection("i");
+        tum.setStartPoint(new Coordinate(-1, -2));
+        tum.setEndPoint(new Coordinate(-3, -4));
         tum.setClosedPath(false);
         return tum;
     }
 
     private TimUpdateModel getRsuTim() {
         TimUpdateModel tum = getTumBase();
+        tum.setRoute("I 80");
         tum.setRsuTarget("DefaultTarget");
         tum.setClosedPath(false);
         tum.setTimId(timID);

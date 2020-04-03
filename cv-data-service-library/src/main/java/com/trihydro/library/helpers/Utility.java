@@ -17,9 +17,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.RsuService;
 
+import org.gavaghan.geodesy.Ellipsoid;
+import org.gavaghan.geodesy.GeodeticCalculator;
+import org.gavaghan.geodesy.GeodeticCurve;
+import org.gavaghan.geodesy.GlobalCoordinates;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -164,11 +169,12 @@ public class Utility {
 		return rsus;
 	}
 
-	public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost, String route) {
-
+	public List<WydotRsu> getRsusByLatLong(String direction, Coordinate startPoint, Coordinate endPoint, String route) {
 		List<WydotRsu> rsus = new ArrayList<>();
-		Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());
+		Comparator<WydotRsu> compLat = (l1, l2) -> Double.compare(l1.getLatitude(), l2.getLatitude());
+		Comparator<WydotRsu> compLong = (l1, l2) -> Double.compare(l1.getLongitude(), l2.getLongitude());
 		WydotRsu entryRsu = null;
+		Integer numericRoute = Integer.parseInt(route.replaceAll("\\D+", ""));
 		// WydotRsu rsuHigher;
 
 		// if there are no rsus on this route
@@ -177,67 +183,118 @@ public class Utility {
 			logWithDate("No RSUs found for route " + route);
 			return rsus;
 		} else {
-			logWithDate("Found the following RSUs for route " + route + ": ");
-			System.out.println(gson.toJson(mainRsus));
+			logWithDate("Found " + mainRsus.size() + " RSUs for route " + route);
 		}
 
-		if (direction.equals("eastbound")) {
+		Ellipsoid reference = Ellipsoid.WGS84;
+		if (direction.toLowerCase().equals("i")) {
 
 			// get rsus at mileposts less than your milepost
-			List<WydotRsu> rsusLower = mainRsus.stream().filter(x -> x.getMilepost() < lowerMilepost)
-					.collect(Collectors.toList());
+			// Note that in the future this logic may need to be refactored.
+			// Currently we rely on east/west routes to be even-numbered and nort/south
+			// routes to be odd-numbered. If we add additional RSUs, we'll need to consult
+			// the databse for exceptions to this rule. Currently, RSUs only exist along
+			// I 80 and parts of I 25
+			List<WydotRsu> rsusLower = new ArrayList<>();
+			if (numericRoute % 2 == 0) {
+				rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < startPoint.getLongitude())
+						.collect(Collectors.toList());
+			} else {
+				rsusLower = mainRsus.stream().filter(x -> x.getLatitude() < startPoint.getLatitude())
+						.collect(Collectors.toList());
+			}
 
 			if (rsusLower.size() == 0) {
-				// if no rsus found farther west than lowerMilepost
-				// example: higherMilepost = 12, lowerMilepost = 2, no RSUs at mileposts < 2
-				// find milepost furthest west than milepost of TIM location
-				rsusLower = mainRsus.stream().filter(x -> x.getMilepost() < higherMilepost)
-						.collect(Collectors.toList());
-
-				// example: RSU at milepost 7.5 found
-				entryRsu = rsusLower.stream().min(compMilepost).get();
-
-				if ((lowerMilepost - entryRsu.getMilepost()) > 20) {
-					// don't send to RSU if its further that X amount of miles away
-					entryRsu = null;
+				// if no rsus found farther west/south than startPoint
+				// find milepost furthest west/south than longitude of TIM location
+				if (numericRoute % 2 == 0) {
+					rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < endPoint.getLongitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusLower.stream().min(compLong).get();
+				} else {
+					rsusLower = mainRsus.stream().filter(x -> x.getLatitude() < endPoint.getLatitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusLower.stream().min(compLat).get();
+				}
+			} else {
+				// else find milepost closest to lowerMilepost
+				// get max from that list
+				if (numericRoute % 2 == 0) {
+					entryRsu = rsusLower.stream().max(compLong).get();
+				} else {
+					entryRsu = rsusLower.stream().max(compLat).get();
 				}
 			}
-			// else find milepost closest to lowerMilepost
-			else {
-				// get max from that list
-				entryRsu = rsusLower.stream().max(compMilepost).get();
+
+			GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
+			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+			GeodeticCalculator geoCalc = new GeodeticCalculator();
+			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+			double miles = 0.000621371 * curve.getEllipsoidalDistance();
+
+			if (miles > 20) {
+				// don't send to RSU if its further that X amount of miles away
+				entryRsu = null;
 			}
 
-		} else { // westbound
+		} else { // d
 
+			List<WydotRsu> rsusHigher = new ArrayList<>();
 			// get rsus at mileposts greater than your milepost
-			List<WydotRsu> rsusHigher = mainRsus.stream().filter(x -> x.getMilepost() > higherMilepost)
-					.collect(Collectors.toList());
+			if (numericRoute % 2 == 0) {
+				rsusHigher = mainRsus.stream().filter(x -> x.getLongitude() > endPoint.getLongitude())
+						.collect(Collectors.toList());
+			} else {
+				rsusHigher = mainRsus.stream().filter(x -> x.getLatitude() > endPoint.getLatitude())
+						.collect(Collectors.toList());
+			}
 
 			if (rsusHigher.size() == 0) {
-				logWithDate("No RSUs found higher than 'high' milepost " + higherMilepost);
-				rsusHigher = mainRsus.stream().filter(x -> x.getMilepost() > lowerMilepost)
-						.collect(Collectors.toList());
 
-				if (rsusHigher.size() == 0) {
-					logWithDate("No RSUs found higher than 'low' milepost: " + lowerMilepost);
+				if (numericRoute % 2 == 0) {
+					rsusHigher = mainRsus.stream().filter(x -> x.getLongitude() > startPoint.getLongitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusHigher.stream().max(compLong).get();
+				} else {
+					rsusHigher = mainRsus.stream().filter(x -> x.getLatitude() > startPoint.getLatitude())
+							.collect(Collectors.toList());
+					entryRsu = rsusHigher.stream().max(compLat).get();
 				}
 
-				// get min from that list
-				entryRsu = rsusHigher.stream().max(compMilepost).get();
+				if (rsusHigher.size() == 0) {
+					logWithDate("No RSUs found higher than 'low' point");
+				}
+
 			} else {
-				entryRsu = rsusHigher.stream().min(compMilepost).get();
+				if (numericRoute % 2 == 0) {
+					entryRsu = rsusHigher.stream().min(compLong).get();
+				} else {
+					entryRsu = rsusHigher.stream().min(compLat).get();
+				}
 			}
 
-			if (entryRsu != null && (entryRsu.getMilepost() - higherMilepost) > 20) {
+			GlobalCoordinates start = new GlobalCoordinates(endPoint.getLatitude(), endPoint.getLongitude());
+			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+			GeodeticCalculator geoCalc = new GeodeticCalculator();
+			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+			double miles = 0.000621371 * curve.getEllipsoidalDistance();// returns in meters, so convert to miles
+
+			if (miles > 20) {
 				// don't send to RSU if its further than 20 miles away
 				logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
 				entryRsu = null;
 			}
 		}
 
-		rsus = mainRsus.stream().filter(x -> x.getMilepost() >= lowerMilepost && x.getMilepost() <= higherMilepost)
-				.collect(Collectors.toList());
+		if (numericRoute % 2 == 0) {
+			rsus = mainRsus.stream().filter(
+					x -> x.getLongitude() >= startPoint.getLongitude() && x.getLongitude() <= endPoint.getLongitude())
+					.collect(Collectors.toList());
+		} else {
+			rsus = mainRsus.stream().filter(
+					x -> x.getLatitude() >= startPoint.getLatitude() && x.getLatitude() <= endPoint.getLatitude())
+					.collect(Collectors.toList());
+		}
 
 		if (entryRsu != null)
 			rsus.add(entryRsu);

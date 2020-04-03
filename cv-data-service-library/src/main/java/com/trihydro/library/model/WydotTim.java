@@ -9,17 +9,15 @@ public class WydotTim implements Cloneable {
 	@ApiModelProperty(required = true)
 	private String direction;
 	@ApiModelProperty(required = true)
-	private Double fromRm;
+	private Coordinate startPoint;
 	@ApiModelProperty(required = true)
-	private Double toRm;
+	private Coordinate endPoint;
 	@ApiModelProperty(required = true)
 	private String route;
 	@ApiModelProperty(required = true)
 	private List<String> itisCodes;
 	@ApiModelProperty(required = true)
 	private String clientId;
-	@ApiModelProperty(required = true)
-	private String lrsRoute;
 
 	@Override
 	public WydotTim clone() throws CloneNotSupportedException {
@@ -32,14 +30,6 @@ public class WydotTim implements Cloneable {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
-	}
-
-	public String getLrsRoute() {
-		return this.lrsRoute;
-	}
-
-	public void setLrsRoute(String lrsRoute) {
-		this.lrsRoute = lrsRoute;
 	}
 
 	public List<String> getItisCodes() {
@@ -58,20 +48,20 @@ public class WydotTim implements Cloneable {
 		this.direction = direction;
 	}
 
-	public Double getFromRm() {
-		return this.fromRm;
+	public Coordinate getStartPoint() {
+		return this.startPoint;
 	}
 
-	public void setFromRm(Double fromRm) {
-		this.fromRm = fromRm;
+	public void setStartPoint(Coordinate startPoint) {
+		this.startPoint = startPoint;
 	}
 
-	public Double getToRm() {
-		return this.toRm;
+	public Coordinate getEndPoint() {
+		return this.endPoint;
 	}
 
-	public void setToRm(Double toRm) {
-		this.toRm = toRm;
+	public void setEndPoint(Coordinate endPoint) {
+		this.endPoint = endPoint;
 	}
 
 	public String getRoute() {

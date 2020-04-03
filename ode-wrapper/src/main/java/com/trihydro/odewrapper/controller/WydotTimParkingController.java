@@ -34,7 +34,7 @@ import io.swagger.annotations.Api;
 @Api(description = "Parking")
 public class WydotTimParkingController extends WydotTimBaseController {
 
-    private static String type = "P";
+    private final String type = "P";
 
     @Autowired
     public WydotTimParkingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
@@ -73,7 +73,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
-        processRequest(validTims);
+        processRequestAsync(validTims);
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -125,28 +125,15 @@ public class WydotTimParkingController extends WydotTimBaseController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-    public void processRequest(List<WydotTimParking> wydotTims) {
+    public void processRequestAsync(List<WydotTimParking> wydotTims) {
         new Thread(new Runnable() {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimParking wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equals("both")) {
-
-                        wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
-                        wydotTim.setToRm(wydotTim.getMileMarker());
-                        createSendTims(wydotTim, "eastbound", getTimType(type), startTime, null, null);
-
-                        wydotTim.setFromRm(wydotTim.getMileMarker());
-                        wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        createSendTims(wydotTim, "westbound", getTimType(type), startTime, null, null);
+                    if (wydotTim.getDirection().equals("b")) {
+                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, null);
+                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, null);
                     } else {
-                        if (wydotTim.getDirection().equals("eastbound")) {
-                            wydotTim.setFromRm(wydotTim.getMileMarker() - 10);
-                            wydotTim.setToRm(wydotTim.getMileMarker());
-                        } else {
-                            wydotTim.setFromRm(wydotTim.getMileMarker());
-                            wydotTim.setToRm(wydotTim.getMileMarker() + 10);
-                        }
                         createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null, null);
                     }
                 }

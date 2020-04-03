@@ -10,7 +10,10 @@ import java.util.List;
 import com.trihydro.library.model.TimType;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TimTypeServiceTest extends TestBase<TimTypeService> {
 
     @Test

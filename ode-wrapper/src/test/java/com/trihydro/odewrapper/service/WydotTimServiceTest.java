@@ -1,6 +1,7 @@
 package com.trihydro.odewrapper.service;
 
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +15,7 @@ import javax.mail.MessagingException;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
@@ -29,7 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -90,11 +91,11 @@ public class WydotTimServiceTest {
             aTim.setSatRecordId("C27CBB9F");
             aTim2.setSatRecordId("86E03786");
         } else {
-            aTim.setMilepostStart(1d);
-            aTim.setMilepostStop(2d);
+            aTim.setStartPoint(new Coordinate(1, 2));
+            aTim.setEndPoint(new Coordinate(3, 4));
             aTim.setTimId(-10l);
-            aTim2.setMilepostStart(3d);
-            aTim2.setMilepostStop(4d);
+            aTim2.setStartPoint(new Coordinate(5, 6));
+            aTim2.setEndPoint(new Coordinate(7, 8));
             aTim2.setTimId(-20l);
         }
         activeTims.add(aTim);
@@ -125,13 +126,10 @@ public class WydotTimServiceTest {
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         ActiveTimService.deleteActiveTim(-1l);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         ActiveTimService.deleteActiveTim(-2l);
-        // verify(restTemplate).exchange(any(String.class), any(HttpMethod.class),
-        // Matchers.<HttpEntity<String>>any(),
-        // Matchers.<Class<String>>any());
     }
 
     @Test
@@ -143,8 +141,7 @@ public class WydotTimServiceTest {
         sdxDelResults.put(-2032126074, true);
         String subject = "SDX Delete Fail";
         String body = "The following recordIds failed to delete from the SDX: -1032012897";
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class)))
-                .thenReturn(sdxDelResults);
+        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
@@ -153,11 +150,11 @@ public class WydotTimServiceTest {
         verify(mockEmailHelper).SendEmail(mockBasicConfiguration.getAlertAddresses(), null, subject, body,
                 mockBasicConfiguration.getMailPort(), mockBasicConfiguration.getMailHost(),
                 mockBasicConfiguration.getFromEmail());
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-2l);
         ActiveTimService.deleteActiveTimsById(delIds);
-        PowerMockito.verifyStatic(never());
+        PowerMockito.verifyStatic(TimRsuService.class, never());
         TimRsuService.getTimRsusByTimId(isA(Long.class));
     }
 
@@ -167,19 +164,18 @@ public class WydotTimServiceTest {
         List<ActiveTim> activeTims = getActiveTims(true);
         HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
         sdxDelResults.put(-1032012897, null);
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(Matchers.anyListOf(String.class)))
-                .thenReturn(sdxDelResults);
+        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-1l);
         delIds.add(-2l);
         ActiveTimService.deleteActiveTimsById(delIds);
-        PowerMockito.verifyStatic(never());
+        PowerMockito.verifyStatic(TimRsuService.class, never());
         TimRsuService.getTimRsusByTimId(isA(Long.class));
     }
 }

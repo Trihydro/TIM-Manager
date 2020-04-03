@@ -5,14 +5,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -22,6 +27,8 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
@@ -29,18 +36,24 @@ import com.trihydro.library.tables.TimOracleTables;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import us.dot.its.jpo.ode.model.OdeData;
+import us.dot.its.jpo.ode.model.OdeDataType;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.SecurityResultCode;
 import us.dot.its.jpo.ode.model.OdeLogMsgMetadataLocation;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
+import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.SerialId;
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
+import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
@@ -48,6 +61,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TimServiceTest extends TestBase<TimService> {
 
     @Mock
@@ -78,6 +92,8 @@ public class TimServiceTest extends TestBase<TimService> {
     NodeXYService mockNodeXYService;
     @Mock
     private Utility mockUtility;
+    @Mock
+    private ActiveTimHoldingService mockActiveTimHoldingService;
 
     private WydotRsu rsu;
     private Long pathId = -99l;
@@ -86,7 +102,8 @@ public class TimServiceTest extends TestBase<TimService> {
     public void setupSubTest() {
         uut.InjectDependencies(mockActiveTimService, mockTimOracleTables, mockSqlNullHandler, mockPathService,
                 mockRegionService, mockDataFrameService, mockRsuService, mockTts, mockItisCodesService,
-                mockTimRsuService, mockDataFrameItisCodeService, mockPathNodeXYService, mockNodeXYService, mockUtility);
+                mockTimRsuService, mockDataFrameItisCodeService, mockPathNodeXYService, mockNodeXYService, mockUtility,
+                mockActiveTimHoldingService);
 
         ArrayList<WydotRsu> rsus = new ArrayList<>();
         rsu = new WydotRsu();
@@ -97,9 +114,138 @@ public class TimServiceTest extends TestBase<TimService> {
         rsu.setMilepost(99d);
         rsu.setRsuTarget("rsuTarget");
         rsus.add(rsu);
-        doReturn(rsus).when(mockRsuService).getRsus();
+        lenient().doReturn(rsus).when(mockRsuService).getRsus();
 
-        doReturn(pathId).when(mockPathService).InsertPath();
+        lenient().doReturn(pathId).when(mockPathService).InsertPath();
+    }
+
+    @Test
+    public void addActiveTimToOracleDB_newRsuTimSUCCESS() {
+        // Arrange
+        OdeData odeData = getOdeData_requestMsgData();
+        ActiveTim aTim = getActiveTim();
+        Long timId = -1l;
+        Long dataFrameId = -2l;
+        DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
+
+        doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
+        doReturn(null).when(uut).getTimId(nullable(String.class), any());
+        doReturn(timId).when(uut).AddTim(odeData.getMetadata(), null, ((OdeTimPayload) odeData.getPayload()).getTim(),
+                null, null, null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
+        doReturn(dataFrameId).when(mockDataFrameService).AddDataFrame(dFrames[0], timId);
+        doNothing().when(uut).addRegion(any(), any());
+        doNothing().when(uut).addDataFrameItis(any(), any());
+        doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
+        doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
+                anyString(), anyString());
+
+        // Act
+        uut.addActiveTimToOracleDB(odeData);
+
+        // Assert
+        verify(uut).AddTim(odeData.getMetadata(), null, ((OdeTimPayload) odeData.getPayload()).getTim(), null, null,
+                null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
+        verify(mockDataFrameService).AddDataFrame(dFrames[0], timId);
+        verify(uut).addRegion(dFrames[0], dataFrameId);
+        verify(uut).addDataFrameItis(dFrames[0], dataFrameId);
+        verify(mockActiveTimHoldingService).getRsuActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
+                aTim.getRsuTarget());
+        verify(mockActiveTimService).insertActiveTim(any());
+        verify(mockActiveTimHoldingService).deleteActiveTimHolding(-1l);
+    }
+
+    @Test
+    public void addActiveTimToOracleDB_existingRsuTimSUCCESS() {
+        // Arrange
+        OdeData odeData = getOdeData_requestMsgData();
+        ActiveTim aTim = getActiveTim();
+
+        doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
+        doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
+        doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
+        doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
+                anyString(), anyString());
+
+        // Act
+        uut.addActiveTimToOracleDB(odeData);
+
+        // Assert
+        verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(mockDataFrameService, never()).AddDataFrame(any(), any());
+        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addDataFrameItis(any(), any());
+        verify(mockActiveTimHoldingService).getRsuActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
+                aTim.getRsuTarget());
+        verify(mockActiveTimService).insertActiveTim(any());
+        verify(mockActiveTimHoldingService).deleteActiveTimHolding(-1l);
+    }
+
+    @Test
+    public void addActiveTimToOracleDB_newSDXTimSUCCESS() {
+        // Arrange
+        OdeData odeData = getOdeData_requestMsgData();
+        ActiveTim aTim = getActiveTim();
+        aTim.setSatRecordId("satRecordId");
+        aTim.setRsuTarget(null);
+        ((OdeRequestMsgMetadata) odeData.getMetadata()).getRequest().setRsus(new RSU[0]);
+        Long timId = -1l;
+        Long dataFrameId = -2l;
+        DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
+
+        doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
+        doReturn(null).when(uut).getTimId(nullable(String.class), any());
+        doReturn(timId).when(uut).AddTim(odeData.getMetadata(), null, ((OdeTimPayload) odeData.getPayload()).getTim(),
+                null, null, null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
+        doReturn(dataFrameId).when(mockDataFrameService).AddDataFrame(dFrames[0], timId);
+        doNothing().when(uut).addRegion(any(), any());
+        doNothing().when(uut).addDataFrameItis(any(), any());
+        doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
+        doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
+                anyString(), anyString());
+
+        // Act
+        uut.addActiveTimToOracleDB(odeData);
+
+        // Assert
+        verify(uut).AddTim(odeData.getMetadata(), null, ((OdeTimPayload) odeData.getPayload()).getTim(), null, null,
+                null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
+        verify(mockDataFrameService).AddDataFrame(dFrames[0], timId);
+        verify(uut).addRegion(dFrames[0], dataFrameId);
+        verify(uut).addDataFrameItis(dFrames[0], dataFrameId);
+        verify(uut).updateTimSatRecordId(anyLong(), anyString());
+        verify(mockActiveTimHoldingService).getSdxActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
+                aTim.getSatRecordId());
+        verify(mockActiveTimService).insertActiveTim(any());
+        verify(mockActiveTimHoldingService).deleteActiveTimHolding(-1l);
+    }
+
+    @Test
+    public void addActiveTimToOracleDB_existingSDXTimSUCCESS() {
+        // Arrange
+        OdeData odeData = getOdeData_requestMsgData();
+        ActiveTim aTim = getActiveTim();
+        aTim.setSatRecordId("satRecordId");
+        aTim.setRsuTarget(null);
+        ((OdeRequestMsgMetadata) odeData.getMetadata()).getRequest().setRsus(new RSU[0]);
+
+        doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
+        doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
+        doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
+        doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
+                anyString(), anyString());
+
+        // Act
+        uut.addActiveTimToOracleDB(odeData);
+
+        // Assert
+        verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(mockDataFrameService, never()).AddDataFrame(any(), any());
+        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addDataFrameItis(any(), any());
+        verify(mockActiveTimHoldingService).getSdxActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
+                aTim.getSatRecordId());
+        verify(mockActiveTimService).insertActiveTim(any());
+        verify(mockActiveTimHoldingService).deleteActiveTimHolding(-1l);
     }
 
     @Test
@@ -117,13 +263,13 @@ public class TimServiceTest extends TestBase<TimService> {
         uut.addTimToOracleDB(odeData);
 
         // Assert
-        verifyZeroInteractions(mockDataFrameService);
-        verifyZeroInteractions(mockRegionService);
-        verifyZeroInteractions(mockTimRsuService);
-        verifyZeroInteractions(mockDataFrameItisCodeService);
+        verifyNoInteractions(mockDataFrameService);
+        verifyNoInteractions(mockRegionService);
+        verifyNoInteractions(mockTimRsuService);
+        verifyNoInteractions(mockDataFrameItisCodeService);
         // verify only these were called on the uut
         verify(uut).InjectDependencies(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any());
+                any(), any(), any(), any());
         verify(uut).addTimToOracleDB(odeData);
         verify(uut).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verifyNoMoreInteractions(uut);
@@ -186,9 +332,6 @@ public class TimServiceTest extends TestBase<TimService> {
         dataFrame.getRegions()[0].setPath(null);
         dataFrame.getRegions()[0].setGeometry(new Geometry());
         Long dataFrameId = -1l;
-        Long nodeXYId = -2l;
-        doReturn(pathId).when(mockPathService).InsertPath();
-        doReturn(nodeXYId).when(mockNodeXYService).AddNodeXY(isA(OdeTravelerInformationMessage.NodeXY.class));
 
         // Act
         uut.addRegion(dataFrame, dataFrameId);
@@ -197,7 +340,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(mockPathService, never()).InsertPath();
         verify(mockRegionService, never()).AddRegion(dataFrameId, pathId, dataFrame.getRegions()[0]);
         verify(mockNodeXYService, never()).AddNodeXY(isA(NodeXY.class));
-        verify(mockPathNodeXYService, never()).insertPathNodeXY(nodeXYId, pathId);
+        verify(mockPathNodeXYService, never()).insertPathNodeXY(any(), any());
         verify(mockRegionService).AddRegion(dataFrameId, null, dataFrame.getRegions()[0]);
         verifyNoMoreInteractions(mockRegionService);
     }
@@ -211,7 +354,7 @@ public class TimServiceTest extends TestBase<TimService> {
         uut.addDataFrameItis(dataFrame, dataFrameId);
 
         // Assert
-        verifyZeroInteractions(mockDataFrameItisCodeService);
+        verifyNoInteractions(mockDataFrameItisCodeService);
     }
 
     @Test
@@ -317,8 +460,6 @@ public class TimServiceTest extends TestBase<TimService> {
         assertNotNull(data);
         assertNotNull(data.getDirection());
         assertNotNull(data.getRoute());
-        assertNotNull(data.getMilepostStart());
-        assertNotNull(data.getMilepostStop());
         assertNotNull(data.getRsuTarget());
         assertNotNull(data.getTimType());
         assertNotNull(data.getTimTypeId());
@@ -341,8 +482,6 @@ public class TimServiceTest extends TestBase<TimService> {
         assertNotNull(data);
         assertNotNull(data.getDirection());
         assertNotNull(data.getRoute());
-        assertNotNull(data.getMilepostStart());
-        assertNotNull(data.getMilepostStop());
         assertNotNull(data.getSatRecordId());
         assertNotNull(data.getTimType());
         assertNotNull(data.getTimTypeId());
@@ -406,16 +545,55 @@ public class TimServiceTest extends TestBase<TimService> {
         assertEquals("-1", data);
     }
 
-    // ******************************************* //
+    private ActiveTimHolding getActiveTimHolding() {
+        ActiveTimHolding ath = new ActiveTimHolding();
+        ath.setActiveTimHoldingId(-1l);
+        ath.setClientId("clientId");
+        ath.setDirection("direction");
+        ath.setStartPoint(new Coordinate(-1, -2));
+        ath.setEndPoint(new Coordinate(-3, -4));
+        return ath;
+    }
+
     private ActiveTim getActiveTim() {
         ActiveTim aTim = new ActiveTim();
+        aTim.setClientId("clientId");
+        aTim.setDirection("direction");
+        aTim.setTimType("timType");
         aTim.setRsuTarget("rsuTarget");
         return aTim;
+    }
+
+    private OdeData getOdeData_requestMsgData() {
+        OdeData odeData = new OdeData(getReqMsgMetadata(), getMsgPayload());
+        return odeData;
     }
 
     private OdeData getOdeData() {
         OdeData odeData = new OdeData(getMetadata(), getMsgPayload());
         return odeData;
+    }
+
+    private OdeRequestMsgMetadata getReqMsgMetadata() {
+        OdeRequestMsgMetadata metadata = new OdeRequestMsgMetadata();
+        metadata.setOdeReceivedAt("2020-02-10T17:00:00.000Z[UTC]");
+        metadata.setRecordGeneratedAt("2020-02-10T17:00:00.000Z[UTC]");
+        metadata.setRecordGeneratedBy(GeneratedBy.TMC);
+        metadata.setSerialId(getSerialId());
+        metadata.setPayloadType(OdeDataType.TravelerInformationMessage);
+        metadata.setRequest(getRequest());
+        return metadata;
+    }
+
+    private ServiceRequest getRequest() {
+        ServiceRequest sr = new ServiceRequest();
+        RSU[] rsus = new RSU[1];
+        RSU rsu = new RSU();
+        rsu.setRsuTarget("127.0.0.1");
+        rsus[0] = rsu;
+        sr.setRsus(rsus);
+
+        return sr;
     }
 
     private OdeLogMetadata getMetadata() {
@@ -473,6 +651,7 @@ public class TimServiceTest extends TestBase<TimService> {
 
         dFrame.setRegions(regions);
         dFrame.setItems(new String[] { "asdf" });
+        dFrame.setDurationTime(32000);
         dFrames[0] = dFrame;
 
         return dFrames;

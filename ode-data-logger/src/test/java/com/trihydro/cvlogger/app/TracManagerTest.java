@@ -2,7 +2,9 @@ package com.trihydro.cvlogger.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +33,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -85,15 +86,14 @@ public class TracManagerTest {
                 tmts.add(tmt);
                 when(mockTrackMessageTypeService.selectAll()).thenReturn(tmts);
                 when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
-                when(mockJavaMailSenderImplProvider.getJSenderImpl(Matchers.any(String.class), Matchers.any(int.class)))
-                                .thenReturn(jmsi);
+                when(mockJavaMailSenderImplProvider.getJSenderImpl(anyString(), anyInt())).thenReturn(jmsi);
         }
 
         @Test
         public void TestSubmitDNMsgToTrac_SuccessFirstRound() throws IOException, URISyntaxException {
                 // setup
-                when(restTemplate.exchange(any(URI.class), Matchers.any(HttpMethod.class),
-                                Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any()))
+                when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
+                                Mockito.<Class<String>>any()))
                                                 .thenReturn(new ResponseEntity<String>("ok", HttpStatus.OK));
 
                 String value = new String(Files.readAllBytes(
@@ -108,8 +108,8 @@ public class TracManagerTest {
                 verify(mockTracMessageSentService).selectPacketIds();
 
                 // assert exchange called once
-                verify(restTemplate).exchange(any(URI.class), any(HttpMethod.class), Matchers.<HttpEntity<String>>any(),
-                                Matchers.<Class<String>>any());
+                verify(restTemplate).exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<String>>any(),
+                                Mockito.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
@@ -122,9 +122,8 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_SuccessSecondRound() throws IOException, URISyntaxException {
                 // setup
-                when(restTemplate.exchange(any(URI.class), Matchers.any(HttpMethod.class),
-                                Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any()))
-                                                .thenThrow(new RestClientException("error"))
+                when(restTemplate.exchange(any(URI.class), Mockito.any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
+                                Mockito.<Class<String>>any())).thenThrow(new RestClientException("error"))
                                                 .thenReturn(new ResponseEntity<String>("ok", HttpStatus.OK));
 
                 String value = new String(Files.readAllBytes(
@@ -139,21 +138,22 @@ public class TracManagerTest {
                 verify(mockTracMessageSentService).selectPacketIds();
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(2)).exchange(any(URI.class), any(HttpMethod.class),
-                                Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
+                                Mockito.<HttpEntity<String>>any(), Mockito.<Class<String>>any());
                 verify(mockTracMessageSentService).insertTracMessageSent(any(TracMessageSent.class));
         }
 
         @Test
         public void TestSubmitDNMsgToTrac_ErrorSendEmail() throws IOException, URISyntaxException {
                 // setup
-                when(restTemplate.exchange(any(URI.class), Matchers.any(HttpMethod.class),
-                                Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any()))
-                                                .thenThrow(new RestClientException("error"));
+                when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
+                                Mockito.<Class<String>>any())).thenThrow(new RestClientException("error"));
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
                 DataLoggerConfiguration config = new DataLoggerConfiguration();
-                config.setTracUrl("");
+                config.setTracUrl("http://test.com");
+                config.setMailHost("mailHost");
+                config.setMailPort(22);
                 String[] addresses = new String[1];
                 addresses[0] = "email@test.com";
                 config.setAlertAddresses(addresses);
@@ -165,7 +165,7 @@ public class TracManagerTest {
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(2)).exchange(any(URI.class), any(HttpMethod.class),
-                                Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
+                                Mockito.<HttpEntity<String>>any(), Mockito.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
@@ -180,14 +180,16 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_ServerErrorSendEmail() throws IOException, URISyntaxException {
                 // setup
-                when(restTemplate.exchange(any(URI.class), Matchers.any(HttpMethod.class),
-                                Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any())).thenReturn(
+                when(restTemplate.exchange(any(URI.class), Mockito.any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
+                                Mockito.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
 
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
                 DataLoggerConfiguration config = new DataLoggerConfiguration();
-                config.setTracUrl("");
+                config.setTracUrl("http://test.com");
+                config.setMailHost("mailHost");
+                config.setMailPort(22);
                 String[] addresses = new String[1];
                 addresses[0] = "email@test.com";
                 config.setAlertAddresses(addresses);
@@ -199,7 +201,7 @@ public class TracManagerTest {
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(1)).exchange(any(URI.class), any(HttpMethod.class),
-                                Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
+                                Mockito.<HttpEntity<String>>any(), Mockito.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
@@ -214,8 +216,8 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_ServerErrorSendEmailFail() throws IOException, URISyntaxException {
                 // setup
-                when(restTemplate.exchange(any(URI.class), Matchers.any(HttpMethod.class),
-                                Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any())).thenReturn(
+                when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
+                                Mockito.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
 
                 doThrow(new MailSendException("Exception")).when(jmsi).send(any(SimpleMailMessage.class));
@@ -223,7 +225,9 @@ public class TracManagerTest {
                 String value = new String(Files.readAllBytes(
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
                 DataLoggerConfiguration config = new DataLoggerConfiguration();
-                config.setTracUrl("");
+                config.setTracUrl("http://test.com");
+                config.setMailHost("mailHost");
+                config.setMailPort(22);
                 String[] addresses = new String[1];
                 addresses[0] = "email@test.com";
                 config.setAlertAddresses(addresses);
@@ -235,7 +239,7 @@ public class TracManagerTest {
 
                 // assert exchange called once
                 verify(restTemplate, Mockito.times(1)).exchange(any(URI.class), any(HttpMethod.class),
-                                Matchers.<HttpEntity<String>>any(), Matchers.<Class<String>>any());
+                                Mockito.<HttpEntity<String>>any(), Mockito.<Class<String>>any());
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
@@ -250,8 +254,8 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_ServerErrorCheckEmail() throws IOException, URISyntaxException {
                 // setup
-                when(restTemplate.exchange(any(URI.class), Matchers.any(HttpMethod.class),
-                                Matchers.<HttpEntity<?>>any(), Matchers.<Class<String>>any())).thenReturn(
+                when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
+                                Mockito.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
 
                 doThrow(new MailSendException("Exception")).when(jmsi).send(any(SimpleMailMessage.class));
@@ -260,6 +264,8 @@ public class TracManagerTest {
                                 Paths.get(getClass().getResource("/distressNotification_OdeOutput.json").toURI())));
                 DataLoggerConfiguration config = new DataLoggerConfiguration();
                 config.setTracUrl("");
+                config.setMailHost("mailHost");
+                config.setMailPort(22);
                 String[] addresses = new String[3];
                 addresses[0] = "email@test.com";
                 addresses[1] = "email2@test.com";

@@ -4,17 +4,22 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
+import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
@@ -56,14 +61,19 @@ public class TimRefreshController {
     private SdwService sdwService;
     private Utility utility;
     private OdeService odeService;
+    private MilepostService milepostService;
+    private ActiveTimHoldingService activeTimHoldingService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
-            OdeService _odeService) {
+            OdeService _odeService, MilepostService _milepostService,
+            ActiveTimHoldingService _activeTimHoldingService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
         odeService = _odeService;
+        milepostService = _milepostService;
+        activeTimHoldingService = _activeTimHoldingService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -84,10 +94,13 @@ public class TimRefreshController {
             }
 
             // Mileposts
-            String route = aTim.getRoute().replaceAll("\\D+", "");// get just the numeric value for the 'like' statement
-                                                                  // to avoid issues with differing formats
-            List<Milepost> mps = MilepostService.selectMilepostRange(aTim.getDirection(), route,
-                    aTim.getMilepostStart(), aTim.getMilepostStop());
+            WydotTim wydotTim = new WydotTim();
+            wydotTim.setRoute(aTim.getRoute());
+            wydotTim.setDirection(aTim.getDirection());
+            wydotTim.setStartPoint(aTim.getStartPoint());
+            wydotTim.setEndPoint(aTim.getEndPoint());
+            List<Milepost> mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+
             if (mps.size() == 0) {
                 System.out.println("Unable to send TIM to SDW, no mileposts found to determine service area");
                 continue;
@@ -101,8 +114,10 @@ public class TimRefreshController {
             timToSend.setRequest(new ServiceRequest());
             timToSend.setTim(tim);
 
-            // always try to send to RSU
-            updateAndSendRSU(timToSend, aTim);
+            // try to send to RSU if along route with RSUs
+            if (Arrays.asList(configuration.getRsuRoutes()).contains(aTim.getRoute())) {
+                updateAndSendRSU(timToSend, aTim);
+            }
 
             // only send to SDX if the sat record id exists
             if (!StringUtils.isEmpty(aTim.getSatRecordId()) && !StringUtils.isBlank(aTim.getSatRecordId())) {
@@ -181,9 +196,8 @@ public class TimRefreshController {
         if (wydotRsus == null || wydotRsus.size() <= 0) {
             utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
 
-            dbRsus = utility.getRsusInBuffer(aTim.getDirection(),
-                    Math.min(aTim.getMilepostStart(), aTim.getMilepostStop()),
-                    Math.max(aTim.getMilepostStop(), aTim.getMilepostStart()), "80");
+            dbRsus = utility.getRsusByLatLong(aTim.getDirection(), aTim.getStartPoint(), aTim.getEndPoint(),
+                    aTim.getRoute());
 
             // if no RSUs found
             if (dbRsus.size() == 0) {
@@ -227,7 +241,26 @@ public class TimRefreshController {
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, dbRsus.get(i)));
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
-                odeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl());
+
+                // get next index
+                // first fetch existing active_tim_holding records
+                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
+                        .getActiveTimHoldingForRsu(dbRsus.get(i).getRsuTarget());
+                TimQuery timQuery = OdeService.submitTimQuery(dbRsus.get(i), 0, configuration.getOdeUrl());
+                existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
+                Integer nextRsuIndex = OdeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+
+                // create new active_tim_holding record, to account for any index changes
+                WydotTim wydotTim = new WydotTim();
+                wydotTim.setClientId(aTim.getClientId());
+                wydotTim.setDirection(aTim.getDirection());
+                wydotTim.setStartPoint(aTim.getStartPoint());
+                wydotTim.setEndPoint(aTim.getEndPoint());
+                ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, dbRsus.get(i).getRsuTarget(), null);
+                activeTimHolding.setRsuIndex(nextRsuIndex);
+                activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
+
+                odeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), configuration.getOdeUrl(), nextRsuIndex);
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
             }
@@ -381,9 +414,6 @@ public class TimRefreshController {
     private String getBaseRegionName(TimUpdateModel aTim, String middle) {
         String regionName = aTim.getDirection();
         regionName += "_" + aTim.getRoute();
-        regionName += "_" + aTim.getMilepostStart();
-        regionName += "_" + aTim.getMilepostStop();
-
         regionName += middle;// SAT_xxx or RSU_xxx
 
         String timType = aTim.getTimTypeName();

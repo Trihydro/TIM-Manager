@@ -1,10 +1,10 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -35,8 +35,8 @@ public class PathNodeXYControllerTest extends TestBase<PathNodeXYController> {
 
     @Before
     public void setupSubTest() {
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        doReturn(-1l).when(uut).executeAndLog(mockPreparedStatement, "pathId");
+        lenient().doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        lenient().doReturn(-1l).when(uut).executeAndLog(mockPreparedStatement, "pathId");
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
 

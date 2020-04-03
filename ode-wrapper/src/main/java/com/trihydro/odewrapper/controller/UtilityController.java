@@ -9,14 +9,11 @@ import java.util.stream.Stream;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.odewrapper.model.WydotTimList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,30 +46,10 @@ public class UtilityController extends WydotTimBaseController {
         String errMessage;
     }
 
-    private static String type = "TEST";
-
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
-    }
-
-    @RequestMapping(value = "/create-sat-tim", method = RequestMethod.POST, headers = "Accept=application/json")
-    public ResponseEntity<String> createSatTim(@RequestBody WydotTimList wydotTimList) {
-        // build TIM
-        for (WydotTim wydotTim : wydotTimList.getTimList()) {
-            // send TIM
-            String regionNamePrev = wydotTim.getDirection() + "_" + wydotTim.getRoute() + "_" + wydotTim.getFromRm()
-                    + "_" + wydotTim.getToRm();
-
-            WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, wydotTim.getDirection(), null, null,
-                    null);
-
-            wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, wydotTim.getDirection(), getTimType(type),
-                    null);
-
-        }
-        return ResponseEntity.status(HttpStatus.OK).body("ok");
     }
 
     @RequestMapping(value = "/all-rsus-tim-check", method = RequestMethod.GET, headers = "Accept=application/json")

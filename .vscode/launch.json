@@ -24,7 +24,8 @@
       "request": "launch",
       "cwd": "${workspaceRoot}/cv-data-controller",
       "args": "--spring.profiles.active=dev",
-      "mainClass": "com.trihydro.cvdatacontroller.Application"
+      "mainClass": "com.trihydro.cvdatacontroller.Application",
+      "projectName": "cv-data-controller"
     },
     {
       "type": "java",

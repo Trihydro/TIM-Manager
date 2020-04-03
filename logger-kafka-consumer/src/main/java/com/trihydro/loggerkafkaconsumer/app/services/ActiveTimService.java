@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimOracleTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +46,6 @@ public class ActiveTimService extends BaseService {
             for (String col : timOracleTables.getActiveTimTable()) {
                 if (col.equals("TIM_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
-                else if (col.equals("MILEPOST_START"))
-                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStart());
-                else if (col.equals("MILEPOST_STOP"))
-                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, activeTim.getMilepostStop());
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
                 else if (col.equals("TIM_START"))
@@ -70,6 +67,27 @@ public class ActiveTimService extends BaseService {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getSatRecordId());
                 else if (col.equals("PK"))
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
+                else if (col.equals("START_LATITUDE")) {
+                    Double start_lat = null;
+                    if (activeTim.getStartPoint() != null)
+                        start_lat = activeTim.getStartPoint().getLatitude();
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lat);
+                } else if (col.equals("START_LONGITUDE")) {
+                    Double start_lon = null;
+                    if (activeTim.getStartPoint() != null)
+                        start_lon = activeTim.getStartPoint().getLongitude();
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lon);
+                } else if (col.equals("END_LATITUDE")) {
+                    Double end_lat = null;
+                    if (activeTim.getEndPoint() != null)
+                        end_lat = activeTim.getEndPoint().getLatitude();
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lat);
+                } else if (col.equals("END_LONGITUDE")) {
+                    Double end_lon = null;
+                    if (activeTim.getEndPoint() != null)
+                        end_lon = activeTim.getEndPoint().getLongitude();
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lon);
+                }
 
                 fieldNum++;
             }
@@ -97,28 +115,42 @@ public class ActiveTimService extends BaseService {
     public boolean updateActiveTim(ActiveTim activeTim) {
 
         boolean activeTimIdResult = false;
-        String updateTableSQL = "UPDATE ACTIVE_TIM SET TIM_ID = ?, MILEPOST_START = ?, MILEPOST_STOP = ?, TIM_START = ?, TIM_END = ?, PK = ?"
-                + " WHERE ACTIVE_TIM_ID = ?";
+        String updateTableSQL = "UPDATE ACTIVE_TIM SET TIM_ID = ?, START_LATITUDE = ?, START_LONGITUDE = ?, END_LATITUDE = ?,";
+        updateTableSQL += "END_LONGITUDE = ?, TIM_START = ?, TIM_END = ?, PK = ? WHERE ACTIVE_TIM_ID = ?";
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
+        Double start_lat = null;
+        Double start_lon = null;
+        Double end_lat = null;
+        Double end_lon = null;
+        if (activeTim.getStartPoint() != null) {
+            start_lat = activeTim.getStartPoint().getLatitude();
+            start_lon = activeTim.getStartPoint().getLongitude();
+        }
+        if (activeTim.getEndPoint() != null) {
+            end_lat = activeTim.getEndPoint().getLatitude();
+            end_lon = activeTim.getEndPoint().getLongitude();
+        }
         try {
             connection = GetConnectionPool();
             preparedStatement = connection.prepareStatement(updateTableSQL);
             sqlNullHandler.setLongOrNull(preparedStatement, 1, activeTim.getTimId());
-            sqlNullHandler.setDoubleOrNull(preparedStatement, 2, activeTim.getMilepostStart());
-            sqlNullHandler.setDoubleOrNull(preparedStatement, 3, activeTim.getMilepostStop());
-            sqlNullHandler.setTimestampOrNull(preparedStatement, 4, java.sql.Timestamp
+            sqlNullHandler.setDoubleOrNull(preparedStatement, 2, start_lat);
+            sqlNullHandler.setDoubleOrNull(preparedStatement, 3, start_lon);
+            sqlNullHandler.setDoubleOrNull(preparedStatement, 4, end_lat);
+            sqlNullHandler.setDoubleOrNull(preparedStatement, 5, end_lon);
+            sqlNullHandler.setTimestampOrNull(preparedStatement, 6, java.sql.Timestamp
                     .valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 
             if (activeTim.getEndDateTime() == null)
-                preparedStatement.setString(5, null);
+                preparedStatement.setString(7, null);
             else
-                sqlNullHandler.setTimestampOrNull(preparedStatement, 5, java.sql.Timestamp
+                sqlNullHandler.setTimestampOrNull(preparedStatement, 7, java.sql.Timestamp
                         .valueOf(LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 
-            sqlNullHandler.setIntegerOrNull(preparedStatement, 6, activeTim.getPk());
-            sqlNullHandler.setLongOrNull(preparedStatement, 7, activeTim.getActiveTimId());
+            sqlNullHandler.setIntegerOrNull(preparedStatement, 8, activeTim.getPk());
+            sqlNullHandler.setLongOrNull(preparedStatement, 9, activeTim.getActiveTimId());
             activeTimIdResult = updateOrDelete(preparedStatement);
             System.out.println("------ Updated active_tim with id: " + activeTim.getActiveTimId() + " --------------");
         } catch (SQLException e) {
@@ -164,10 +196,24 @@ public class ActiveTimService extends BaseService {
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
                 activeTim.setStartDateTime(rs.getString("TIM_START"));
-                activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-                activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));
+                
+                Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				double startLat = rs.getDouble("START_LATITUDE");
+				double startLon = rs.getDouble("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
+
+				double endLat = rs.getDouble("END_LATITUDE");
+				double endLon = rs.getDouble("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -219,10 +265,24 @@ public class ActiveTimService extends BaseService {
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
                 activeTim.setStartDateTime(rs.getString("TIM_START"));
-                activeTim.setMilepostStart(rs.getDouble("MILEPOST_START"));
-                activeTim.setMilepostStop(rs.getDouble("MILEPOST_STOP"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));
+
+                Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				double startLat = rs.getDouble("START_LATITUDE");
+				double startLon = rs.getDouble("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
+
+				double endLat = rs.getDouble("END_LATITUDE");
+				double endLon = rs.getDouble("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
             e.printStackTrace();

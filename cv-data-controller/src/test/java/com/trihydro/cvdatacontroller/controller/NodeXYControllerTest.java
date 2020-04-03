@@ -1,9 +1,9 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -33,11 +33,12 @@ public class NodeXYControllerTest extends TestBase<NodeXYController> {
 
     @Before
     public void setupSubTest() throws SQLException {
-        doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
-                any());
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("", new String[] { "region_id" });
-        doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
+        lenient().doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(),
+                any(), any());
+        lenient().doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        lenient().doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("",
+                new String[] { "region_id" });
+        lenient().doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
 

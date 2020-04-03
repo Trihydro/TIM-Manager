@@ -2,8 +2,10 @@ package com.trihydro.odewrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -62,15 +64,17 @@ public class WydotTimRcControllerTest {
 		itisCodes.add(ic);
 		List<String> itisCodesIncident = new ArrayList<>();
 		itisCodesIncident.add("531");
-		doReturn(itisCodesIncident).when(setItisCodes).setItisCodesRc(any());
-		doReturn(itisCodes).when(setItisCodes).getItisCodes();
+		lenient().doReturn(itisCodesIncident).when(setItisCodes).setItisCodesRc(any());
+		lenient().doReturn(itisCodes).when(setItisCodes).getItisCodes();
+
+		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 	}
 
 	@Test
 	public void testCreateRcTim_bothDirections_success() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350, \"toRm\": 360, \"roadCode\": \"LARI80WQDHLD\", \"direction\": \"both\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578}, \"roadCode\": \"LARI80WQDHLD\", \"direction\": \"b\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -82,7 +86,7 @@ public class WydotTimRcControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 		assertEquals("I80", resultArr[0].route);
 	}
 
@@ -90,8 +94,9 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_bothDirections_NoMileposts() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I70\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"both\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I70\", \"roadCode\": \"LARI80WQDHLD\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578}, \"direction\":\"b\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		doReturn(false).when(uut).routeSupported("I70");
 
 		// Act
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
@@ -102,15 +107,14 @@ public class WydotTimRcControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
-		assertEquals("I70", resultArr[0].route);
+		assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateRcTim_bothDirections_NoItisCodes() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"both\",\"advisory\": [11]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"b\",\"advisory\": [11]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -122,7 +126,7 @@ public class WydotTimRcControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 		assertEquals("I80", resultArr[0].route);
 	}
 
@@ -130,7 +134,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"eastbound\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"i\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -142,7 +146,7 @@ public class WydotTimRcControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 		assertEquals("I80", resultArr[0].route);
 	}
 
@@ -150,7 +154,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateVslTim_oneDirection_NoMileposts() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"eastbound\",\"advisory\": [4871]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"i\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -162,7 +166,7 @@ public class WydotTimRcControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 		assertEquals("I80", resultArr[0].route);
 	}
 
@@ -170,7 +174,7 @@ public class WydotTimRcControllerTest {
 	public void testCreateRcTim_oneDirection_NoItisCodes() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 350,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 360, \"direction\":\"eastbound\",\"advisory\": [11]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"i\",\"advisory\": [11]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -182,7 +186,7 @@ public class WydotTimRcControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 		assertEquals("I80", resultArr[0].route);
 	}
 
@@ -190,7 +194,7 @@ public class WydotTimRcControllerTest {
 	public void testAllClear() throws Exception {
 
 		// Arrange
-		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"fromRm\": 360,\"roadCode\": \"LARI80WQDHLD\", \"toRm\": 370, \"direction\":\"westbound\",\"advisory\": [5378]} ]}";
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 
 		// Act
@@ -202,7 +206,7 @@ public class WydotTimRcControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("westbound", resultArr[0].direction);
+		assertEquals("d", resultArr[0].direction);
 		assertEquals("I80", resultArr[0].route);
 	}
 }

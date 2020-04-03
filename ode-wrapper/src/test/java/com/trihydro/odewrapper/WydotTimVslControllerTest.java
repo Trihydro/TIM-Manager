@@ -2,9 +2,10 @@ package com.trihydro.odewrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,8 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -60,7 +60,6 @@ public class WydotTimVslControllerTest {
 
 	@Before
 	public void setup() throws Exception {
-		PowerMockito.mockStatic(ActiveTimService.class);
 		List<ItisCode> itisCodes = new ArrayList<>();
 		ItisCode ic = new ItisCode();
 		ic.setCategoryId(-1);
@@ -70,17 +69,18 @@ public class WydotTimVslControllerTest {
 		itisCodes.add(ic);
 		List<String> itisCodesIncident = new ArrayList<>();
 		itisCodesIncident.add("531");
-		doReturn(itisCodesIncident).when(mockSetItisCodes).setItisCodesVsl(any());
-		doReturn(itisCodes).when(mockSetItisCodes).getItisCodes();
+		lenient().doReturn(itisCodesIncident).when(mockSetItisCodes).setItisCodesVsl(any());
+		lenient().doReturn(itisCodes).when(mockSetItisCodes).getItisCodes();
 
-		doNothing().when(uut).processRequestAsync(any());
+		lenient().doNothing().when(uut).processRequestAsync(any());
+		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 	}
 
 	@Test
 	public void testCreateVSLTim_bothDirections_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360, \"route\": \"I-80\", \"direction\": \"both\", \"speed\": 45, \"deviceId\": \"V004608\"  }]}";
+		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"b\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
 		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
 
 		// Act
@@ -92,14 +92,14 @@ public class WydotTimVslControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("both", resultArr[0].direction);
+		assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
 	public void testCreateVSLTim_oneDirection_success() throws Exception {
 
 		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"toRm\": 370, \"fromRm\": 360,\"route\": \"I-80\", \"direction\": \"eastbound\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\" }]}";
 		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
 
 		// Act
@@ -111,7 +111,7 @@ public class WydotTimVslControllerTest {
 		assertNotNull(resultArr);
 		assertEquals(1, resultArr.length);
 		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("eastbound", resultArr[0].direction);
+		assertEquals("i", resultArr[0].direction);
 	}
 
 	@Test

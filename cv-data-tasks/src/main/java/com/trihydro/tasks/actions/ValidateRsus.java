@@ -47,12 +47,12 @@ public class ValidateRsus implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("ValidateRsus - Running...");
+        utility.logWithDate("Running...", this.getClass());
 
         try {
             validateRsus();
         } catch (Exception ex) {
-            utility.logWithDate("Error while validating RSUs:");
+            utility.logWithDate("Error while validating RSUs:", this.getClass());
             ex.printStackTrace();
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
@@ -72,7 +72,8 @@ public class ValidateRsus implements Runnable {
                 activeTims.add(new EnvActiveTim(activeTim, Environment.DEV));
             }
         } catch (Exception ex) {
-            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from DEV:");
+            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from DEV:",
+                    this.getClass());
             ex.printStackTrace();
             return;
         }
@@ -83,7 +84,8 @@ public class ValidateRsus implements Runnable {
                 activeTims.add(new EnvActiveTim(activeTim, Environment.PROD));
             }
         } catch (Exception ex) {
-            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from PROD:");
+            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from PROD:",
+                    this.getClass());
             ex.printStackTrace();
             return;
         }
@@ -104,7 +106,7 @@ public class ValidateRsus implements Runnable {
             tasks.add(new ValidateRsu(rsu, rsuDataService));
         }
 
-        utility.logWithDate("Validating " + tasks.size() + " RSUs...");
+        utility.logWithDate("Validating " + tasks.size() + " RSUs...", this.getClass());
 
         List<Future<RsuValidationResult>> futureResults = null;
         try {
@@ -112,7 +114,7 @@ public class ValidateRsus implements Runnable {
             futureResults = workerThreadPool.invokeAll(tasks, config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS);
             shutDownThreadPool(workerThreadPool);
         } catch (InterruptedException e) {
-            utility.logWithDate("Error while executing validation tasks:");
+            utility.logWithDate("Error while executing validation tasks:", this.getClass());
             e.printStackTrace();
         }
 
@@ -129,7 +131,7 @@ public class ValidateRsus implements Runnable {
             } catch (Exception ex) {
                 String rsuIpv4Address = tasks.get(i).getRsu().getIpv4Address();
                 // Something went wrong, and the validation task for this RSU wasn't completed.
-                utility.logWithDate("Error while validating RSU " + rsuIpv4Address + ":");
+                utility.logWithDate("Error while validating RSU " + rsuIpv4Address + ":", this.getClass());
                 ex.printStackTrace();
                 // "10.145.xx.xx: What went wrong..."
                 unexpectedErrors.add(rsuIpv4Address + ": " + ex.toString() + " - " + ex.getMessage());

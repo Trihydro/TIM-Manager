@@ -41,12 +41,12 @@ public class ValidateSDX implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("ValidateSDX - Running...");
+        utility.logWithDate("Running...", this.getClass());
 
         try {
             validateSdx();
         } catch (Exception ex) {
-            utility.logWithDate("Error while validating SDX:");
+            utility.logWithDate("Error while validating SDX:", this.getClass());
             ex.printStackTrace();
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.

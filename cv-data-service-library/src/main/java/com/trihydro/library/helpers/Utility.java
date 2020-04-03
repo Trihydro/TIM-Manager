@@ -26,6 +26,10 @@ import org.springframework.stereotype.Component;
 public class Utility {
 	public Gson gson = new Gson();
 
+	public <T> void logWithDate(String msg, Class<T> clazz) {
+		logWithDate(clazz.getSimpleName() + ": " + msg);
+	}
+
 	public void logWithDate(String msg) {
 		Date date = new Date();
 		System.out.println(date + " " + msg);
@@ -160,8 +164,7 @@ public class Utility {
 		return rsus;
 	}
 
-	public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost,
-			String route) {
+	public List<WydotRsu> getRsusInBuffer(String direction, Double lowerMilepost, Double higherMilepost, String route) {
 
 		List<WydotRsu> rsus = new ArrayList<>();
 		Comparator<WydotRsu> compMilepost = (l1, l2) -> Double.compare(l1.getMilepost(), l2.getMilepost());

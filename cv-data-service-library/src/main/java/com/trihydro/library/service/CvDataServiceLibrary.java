@@ -4,9 +4,9 @@ public class CvDataServiceLibrary {
 
     protected static String CVRestUrl;
 
-    // public static void setConfig(ConfigProperties config) {
-    //     DbUtility.setConfig(config);
-    // }
+    public static String getCVRestUrl() {
+        return CVRestUrl;
+    }
 
     public static void setCVRestUrl(String url) {
         CVRestUrl = url;

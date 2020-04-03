@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
 
-public class CActiveTim implements ISdxComparable {
+public class CActiveTim extends SdxComparable {
     private ActiveTim activeTim;
 
     public CActiveTim(ActiveTim activeTim) {

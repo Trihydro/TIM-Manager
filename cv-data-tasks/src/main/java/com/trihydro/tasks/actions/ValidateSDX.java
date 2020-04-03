@@ -15,7 +15,6 @@ import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
-import com.trihydro.tasks.models.SdxComparableSorter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -71,8 +70,8 @@ public class ValidateSDX implements Runnable {
             sdxRecords.add(record);
         }
 
-        Collections.sort(oracleRecords, new SdxComparableSorter());
-        Collections.sort(sdxRecords, new SdxComparableSorter());
+        Collections.sort(oracleRecords);
+        Collections.sort(sdxRecords);
 
         // Actions to perform
         List<CActiveTim> toResend = new ArrayList<CActiveTim>();

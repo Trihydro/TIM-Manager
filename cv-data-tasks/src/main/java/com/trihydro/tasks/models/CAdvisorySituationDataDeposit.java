@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 
-public class CAdvisorySituationDataDeposit implements ISdxComparable {
+public class CAdvisorySituationDataDeposit extends SdxComparable {
     private AdvisorySituationDataDeposit asdd;
     private List<Integer> itisCodes;
 

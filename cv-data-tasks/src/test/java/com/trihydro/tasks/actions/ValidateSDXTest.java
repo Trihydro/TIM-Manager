@@ -28,16 +28,13 @@ import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockitoAnnotations;
 import org.springframework.mail.MailException;
 
-@RunWith(PowerMockRunner.class)
 public class ValidateSDXTest {
     // Mocked dependencies
     @Mock
@@ -67,8 +64,7 @@ public class ValidateSDXTest {
 
     @Before
     public void setup() {
-        // We shouldn't be calling any statics, but as a safeguard...
-        PowerMockito.mockStatic(ActiveTimService.class);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test

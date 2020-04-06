@@ -1,6 +1,6 @@
 package com.trihydro.library.model;
 
-public class ConfigProperties implements SdwProps {
+public class ConfigProperties implements SdwProps, RsuDataServiceProps {
 
     private String odeUrl;
     private String dbDriver;
@@ -26,6 +26,7 @@ public class ConfigProperties implements SdwProps {
 
     private String depositTopic;
     private String depositGroup;
+    private String rsuDataServiceUrl;
 
     public String getOdeUrl() {
         return odeUrl;
@@ -189,5 +190,13 @@ public class ConfigProperties implements SdwProps {
 
     public String getGetTracUrl() {
         return this.tracUrl;
+    }
+
+    public String getRsuDataServiceUrl() {
+        return rsuDataServiceUrl;
+    }
+
+    public void setRsuDataServiceUrl(String rsuDataServiceUrl) {
+        this.rsuDataServiceUrl = rsuDataServiceUrl;
     }
 }

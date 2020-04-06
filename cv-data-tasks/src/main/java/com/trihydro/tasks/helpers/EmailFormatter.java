@@ -1,9 +1,11 @@
 package com.trihydro.tasks.helpers;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.RsuIndexInfo;
@@ -15,7 +17,6 @@ import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.RsuValidationResult;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,15 +27,19 @@ public class EmailFormatter {
     private String formatRsuResults;
 
     public EmailFormatter() throws IOException {
-        formatSdxMain = readFile("email-templates/sdx-main.html");
-        formatSection = readFile("email-templates/section.html");
-        formatRsuMain = readFile("email-templates/rsu-main.html");
-        formatRsuResults = readFile("email-templates/rsu-results.html");
+        formatSdxMain = readFile("/email-templates/sdx-main.html");
+        formatSection = readFile("/email-templates/section.html");
+        formatRsuMain = readFile("/email-templates/rsu-main.html");
+        formatRsuResults = readFile("/email-templates/rsu-results.html");
     }
 
     private String readFile(String path) throws IOException {
-        File tmp = new ClassPathResource(path).getFile();
-        return new String(Files.readAllBytes(tmp.toPath()));
+        String file = null;
+        try (InputStream inputStream = getClass().getResourceAsStream(path);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            file = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
+        return file;
     }
 
     public String generateSdxSummaryEmail(int numSdxOrphaned, int numOutdatedSdx, int numNotOnSdx,

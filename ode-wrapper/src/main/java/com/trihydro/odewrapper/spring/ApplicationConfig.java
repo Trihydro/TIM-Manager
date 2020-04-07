@@ -7,8 +7,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebMvc
 @Configuration
-@ComponentScan({ "com.trihydro.odewrapper.controller", "com.trihydro.library.helpers", "com.trihydro.library.service",
-        "com.trihydro.library.tables" })
+@ComponentScan(basePackages = { "com.trihydro.odewrapper.controller", "com.trihydro.library.helpers",
+        "com.trihydro.library.service", "com.trihydro.library.tables" })
 public class ApplicationConfig implements WebMvcConfigurer {
     public ApplicationConfig() {
         super();

@@ -339,15 +339,6 @@ services:
       options:
         max-size: 50m
 
-  ode-wrapper-docs:
-    build: ode-wrapper-docs/swagger-ui-master
-    restart: always
-    logging:
-      options:
-        max-size: 50m
-    ports:
-      - "9999:9999"
-
   smdm:
     build: smdm
     restart: always

@@ -6,13 +6,13 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class WydotTim implements Cloneable {
 
-	@ApiModelProperty(required = true)
+	@ApiModelProperty(value = "Expected values are I, D, B", required = true)
 	private String direction;
 	@ApiModelProperty(required = true)
 	private Coordinate startPoint;
 	@ApiModelProperty(required = true)
 	private Coordinate endPoint;
-	@ApiModelProperty(required = true)
+	@ApiModelProperty(value = "The common name for the selected route", required = true)
 	private String route;
 	@ApiModelProperty(required = true)
 	private List<String> itisCodes;

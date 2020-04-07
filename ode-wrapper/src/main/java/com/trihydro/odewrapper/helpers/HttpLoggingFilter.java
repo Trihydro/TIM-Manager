@@ -64,10 +64,16 @@ public class HttpLoggingFilter implements Filter {
             BufferedRequestWrapper bufferedRequest = new BufferedRequestWrapper(httpServletRequest);
             BufferedResponseWrapper bufferedResponse = new BufferedResponseWrapper(httpServletResponse);
 
+            String servletPath = httpServletRequest.getServletPath();
+            if (servletPath.contains("swagger") || servletPath.contains("api-docs")) {
+                chain.doFilter(bufferedRequest, bufferedResponse);
+                return;
+            }
+
             final StringBuilder logMessage = new StringBuilder("REST Request - ").append("[HTTP METHOD:")
-                    .append(httpServletRequest.getMethod()).append("] [PATH INFO:")
-                    .append(httpServletRequest.getServletPath()).append("] [REQUEST PARAMETERS:").append(requestMap)
-                    .append("] [REQUEST BODY:").append(bufferedRequest.getRequestBody()).append("] [REMOTE ADDRESS:")
+                    .append(httpServletRequest.getMethod()).append("] [PATH INFO:").append(servletPath)
+                    .append("] [REQUEST PARAMETERS:").append(requestMap).append("] [REQUEST BODY:")
+                    .append(bufferedRequest.getRequestBody()).append("] [REMOTE ADDRESS:")
                     .append(httpServletRequest.getRemoteAddr()).append("]");
 
             chain.doFilter(bufferedRequest, bufferedResponse);

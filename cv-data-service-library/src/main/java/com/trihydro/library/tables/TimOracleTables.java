@@ -168,8 +168,6 @@ public class TimOracleTables extends OracleTables {
         else {
             activeTimTable = new ArrayList<String>();
             activeTimTable.add("TIM_ID");
-            activeTimTable.add("MILEPOST_START");
-            activeTimTable.add("MILEPOST_STOP");
             activeTimTable.add("DIRECTION");
             activeTimTable.add("TIM_START");
             activeTimTable.add("TIM_END");

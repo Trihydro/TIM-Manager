@@ -10,11 +10,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class IncidentChoicesService extends CvDataServiceLibrary {
 
-	public static List<IncidentChoice> selectAllIncidentActions() {
-		String url = String.format("%s/incident-choice/incident-actions", CVRestUrl);
+	public List<IncidentChoice> selectAllIncidentActions() {
+		String url = String.format("%s/incident-choice/incident-actions", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -23,8 +25,8 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
-	public static List<IncidentChoice> selectAllIncidentEffects() {
-		String url = String.format("%s/incident-choice/incident-effects", CVRestUrl);
+	public List<IncidentChoice> selectAllIncidentEffects() {
+		String url = String.format("%s/incident-choice/incident-effects", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -33,8 +35,8 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
-	public static List<IncidentChoice> selectAllIncidentProblems() {
-		String url = String.format("%s/incident-choice/incident-problems", CVRestUrl);
+	public List<IncidentChoice> selectAllIncidentProblems() {
+		String url = String.format("%s/incident-choice/incident-problems", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

@@ -5,7 +5,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DataFrameService extends CvDataServiceLibrary {
 
 	/**
@@ -15,8 +17,8 @@ public class DataFrameService extends CvDataServiceLibrary {
 	 * @param dataFrameId
 	 * @return String array of all ITIS codes associated with dataFrameId
 	 */
-	public static String[] getItisCodesForDataFrameId(Integer dataFrameId) {
-		String url = String.format("%s/data-frame/itis-for-data-frame/%d", CVRestUrl, dataFrameId);
+	public String[] getItisCodesForDataFrameId(Integer dataFrameId) {
+		String url = String.format("%s/data-frame/itis-for-data-frame/%d", config.getCvRestService(), dataFrameId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

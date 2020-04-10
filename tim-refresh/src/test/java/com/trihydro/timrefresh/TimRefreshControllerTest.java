@@ -64,6 +64,8 @@ public class TimRefreshControllerTest {
     MilepostService mockMilepostService;
     @Mock
     ActiveTimService mockActiveTimService;
+    @Mock
+    DataFrameService mockDataFrameService;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
@@ -86,7 +88,7 @@ public class TimRefreshControllerTest {
     private void setupDataFrameService() {
         String[] itisCodes = new String[1];
         itisCodes[0] = "1";
-        Mockito.when(DataFrameService.getItisCodesForDataFrameId(isA(Integer.class))).thenReturn(itisCodes);
+        Mockito.when(mockDataFrameService.getItisCodesForDataFrameId(isA(Integer.class))).thenReturn(itisCodes);
     }
 
     private void setupMilePost() {

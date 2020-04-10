@@ -5,11 +5,9 @@ import java.util.List;
 
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,16 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActiveTimService {
-	private CVRestServiceProps config;
-
-	@Autowired
-	public void InjectDependencies(CVRestServiceProps _cvRestServviceProps) {
-		this.config = _cvRestServviceProps;
-	}
-
+public class ActiveTimService extends CvDataServiceLibrary {
 	public Boolean updateActiveTim_SatRecordId(Long activeTimId, String satRecordId) {
-		String url = String.format("%s/active-tim/update-sat-record-id/%d/%s", config.getCvRestService(), activeTimId, satRecordId);
+		String url = String.format("%s/active-tim/update-sat-record-id/%d/%s", config.getCvRestService(), activeTimId,
+				satRecordId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -37,7 +29,8 @@ public class ActiveTimService {
 	}
 
 	public void addItisCodesToActiveTim(ActiveTim activeTim) {
-		String url = String.format("%s/active-tim/itis-codes/%d", config.getCvRestService(), activeTim.getActiveTimId());
+		String url = String.format("%s/active-tim/itis-codes/%d", config.getCvRestService(),
+				activeTim.getActiveTimId());
 		ResponseEntity<Integer[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Integer[].class);
 		activeTim.setItisCodes(Arrays.asList(response.getBody()));
 	}
@@ -81,8 +74,8 @@ public class ActiveTimService {
 
 	// get Active TIMs by client ID direction
 	public List<ActiveTim> getActiveTimsByClientIdDirection(String clientId, Long timTypeId, String direction) {
-		String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", config.getCvRestService(), clientId, timTypeId,
-				direction);
+		String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", config.getCvRestService(), clientId,
+				timTypeId, direction);
 		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
 				ActiveTim[].class);
 		return Arrays.asList(response.getBody());

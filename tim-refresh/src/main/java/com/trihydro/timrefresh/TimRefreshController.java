@@ -64,11 +64,12 @@ public class TimRefreshController {
     private MilepostService milepostService;
     private ActiveTimHoldingService activeTimHoldingService;
     private ActiveTimService activeTimService;
+    private DataFrameService dataFrameService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
-            ActiveTimService _activeTimService) {
+            ActiveTimService _activeTimService, DataFrameService _dataFrameService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -76,6 +77,7 @@ public class TimRefreshController {
         milepostService = _milepostService;
         activeTimHoldingService = _activeTimHoldingService;
         activeTimService = _activeTimService;
+        dataFrameService = _dataFrameService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -345,7 +347,7 @@ public class TimRefreshController {
             df.setDurationTime(32000);
         }
 
-        df.setItems(DataFrameService.getItisCodesForDataFrameId(aTim.getDataFrameId()));
+        df.setItems(dataFrameService.getItisCodesForDataFrameId(aTim.getDataFrameId()));
         return df;
     }
 

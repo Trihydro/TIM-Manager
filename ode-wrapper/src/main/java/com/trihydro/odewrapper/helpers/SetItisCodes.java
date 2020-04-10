@@ -23,6 +23,7 @@ public class SetItisCodes {
     private List<IncidentChoice> incidentEffects;
     private List<IncidentChoice> incidentActions;
     private IncidentChoicesService incidentChoicesService;
+    private ItisCodeService itisCodeService;
 
     private List<ItisCode> itisCodes;
 
@@ -30,9 +31,14 @@ public class SetItisCodes {
         if (itisCodes != null)
             return itisCodes;
         else {
-            itisCodes = ItisCodeService.selectAll();
+            itisCodes = itisCodeService.selectAll();
             return itisCodes;
         }
+    }
+
+    @Autowired
+    public void InjectDependencies(ItisCodeService _itisCodeService) {
+        itisCodeService = _itisCodeService;
     }
 
     @Autowired

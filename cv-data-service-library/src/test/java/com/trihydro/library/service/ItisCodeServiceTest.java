@@ -7,10 +7,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.ItisCode;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +25,23 @@ public class ItisCodeServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<ItisCode[]> mockResponseEntityItisCodeArray;
 
+    private String baseUrl = "baseUrl";
+
+    @Mock
+    private CVRestServiceProps mockConfig;
+
+    @InjectMocks
+    private ItisCodeService uut;
+
+    @Before
+    public void setupSubTest() {
+        doReturn(baseUrl).when(mockConfig).getCvRestService();
+    }
+
     @Test
     public void selectAll() {
         // Arrange
-        String url = String.format("null/itiscodes");
+        String url = String.format("%s/itiscodes", baseUrl);
         ItisCode[] ics = new ItisCode[1];
         ItisCode ic = new ItisCode();
         ic.setCategoryId(-1);
@@ -36,7 +52,7 @@ public class ItisCodeServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, ItisCode[].class)).thenReturn(mockResponseEntityItisCodeArray);
 
         // Act
-        List<ItisCode> data = ItisCodeService.selectAll();
+        List<ItisCode> data = uut.selectAll();
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, ItisCode[].class);

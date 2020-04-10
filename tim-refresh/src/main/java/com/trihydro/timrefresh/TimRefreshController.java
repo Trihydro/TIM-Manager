@@ -66,12 +66,13 @@ public class TimRefreshController {
     private ActiveTimService activeTimService;
     private DataFrameService dataFrameService;
     private PathNodeXYService pathNodeXYService;
+    private RegionService regionService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, DataFrameService _dataFrameService,
-            PathNodeXYService _pathNodeXYService) {
+            PathNodeXYService _pathNodeXYService, RegionService _regionService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -81,6 +82,7 @@ public class TimRefreshController {
         activeTimService = _activeTimService;
         dataFrameService = _dataFrameService;
         pathNodeXYService = _pathNodeXYService;
+        regionService = _regionService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -308,7 +310,7 @@ public class TimRefreshController {
         String regionName = getSATRegionName(aTim, recordId);
 
         // Update region.name in database
-        RegionService.updateRegionName(new Long(aTim.getRegionId()), regionName);
+        regionService.updateRegionName(new Long(aTim.getRegionId()), regionName);
         // Update active_tim.
         activeTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);

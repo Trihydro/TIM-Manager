@@ -24,6 +24,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
@@ -66,6 +67,8 @@ public class TimRefreshControllerTest {
     ActiveTimService mockActiveTimService;
     @Mock
     DataFrameService mockDataFrameService;
+    @Mock
+    RegionService mockRegionService;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;

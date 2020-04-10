@@ -7,20 +7,30 @@ import static org.mockito.Mockito.verify;
 import java.sql.Timestamp;
 import java.time.Instant;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.HttpLoggingModel;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ LoggingService.class })
 public class LoggingServiceTest extends BaseServiceTest {
 
+    @Mock
+    private CVRestServiceProps mockConfig;
+
+    @InjectMocks
     private LoggingService uut = new LoggingService();
+
+    private String baseUrl = "baseUrl";
+
+    @Before
+    public void setupSubTest() {
+        doReturn(baseUrl).when(mockConfig).getCvRestService();
+    }
 
     @Test
     public void LogHttpRequest() {
@@ -35,7 +45,7 @@ public class LoggingServiceTest extends BaseServiceTest {
         httpLoggingModel.setResponseTime(responseTime);
 
         HttpEntity<HttpLoggingModel> entity = getEntity(httpLoggingModel, HttpLoggingModel.class);
-        String url = "null/http-logging/add-http-logging";
+        String url = String.format("%s/http-logging/add-http-logging", baseUrl);
         doReturn(mockResponseEntityLong).when(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
 
         // Act

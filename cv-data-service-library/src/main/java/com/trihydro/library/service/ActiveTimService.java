@@ -5,9 +5,11 @@ import java.util.List;
 
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,9 +18,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActiveTimService extends CvDataServiceLibrary {
+public class ActiveTimService {
+	private CVRestServiceProps config;
+
+	@Autowired
+	public void InjectDependencies(CVRestServiceProps _cvRestServviceProps) {
+		this.config = _cvRestServviceProps;
+	}
+
 	public Boolean updateActiveTim_SatRecordId(Long activeTimId, String satRecordId) {
-		String url = String.format("%s/active-tim/update-sat-record-id/%d/%s", CVRestUrl, activeTimId, satRecordId);
+		String url = String.format("%s/active-tim/update-sat-record-id/%d/%s", config.getCvRestService(), activeTimId, satRecordId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -28,13 +37,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public void addItisCodesToActiveTim(ActiveTim activeTim) {
-		String url = String.format("%s/active-tim/itis-codes/%d", CVRestUrl, activeTim.getActiveTimId());
+		String url = String.format("%s/active-tim/itis-codes/%d", config.getCvRestService(), activeTim.getActiveTimId());
 		ResponseEntity<Integer[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Integer[].class);
 		activeTim.setItisCodes(Arrays.asList(response.getBody()));
 	}
 
 	public boolean deleteActiveTim(Long activeTimId) {
-		String url = String.format("%s/active-tim/delete-id/%d", CVRestUrl, activeTimId);
+		String url = String.format("%s/active-tim/delete-id/%d", config.getCvRestService(), activeTimId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -44,7 +53,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public boolean deleteActiveTimsById(List<Long> activeTimIds) {
-		String url = String.format("%s/active-tim/delete-ids", CVRestUrl);
+		String url = String.format("%s/active-tim/delete-ids", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<List<Long>> entity = new HttpEntity<List<Long>>(activeTimIds, headers);
@@ -55,13 +64,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	// utility
 	public List<Integer> getActiveTimIndicesByRsu(String rsuTarget) {
-		String url = String.format("%s/active-tim/indices-rsu/%s", CVRestUrl, rsuTarget);
+		String url = String.format("%s/active-tim/indices-rsu/%s", config.getCvRestService(), rsuTarget);
 		ResponseEntity<Integer[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url, Integer[].class);
 		return Arrays.asList(response.getBody());
 	}
 
 	public List<ActiveTim> getActiveTimsByWydotTim(List<? extends WydotTim> wydotTims, Long timTypeId) {
-		String url = String.format("%s/active-tim/get-by-wydot-tim/%d", CVRestUrl, timTypeId);
+		String url = String.format("%s/active-tim/get-by-wydot-tim/%d", config.getCvRestService(), timTypeId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<List<? extends WydotTim>> entity = new HttpEntity<List<? extends WydotTim>>(wydotTims, headers);
@@ -72,7 +81,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	// get Active TIMs by client ID direction
 	public List<ActiveTim> getActiveTimsByClientIdDirection(String clientId, Long timTypeId, String direction) {
-		String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", CVRestUrl, clientId, timTypeId,
+		String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", config.getCvRestService(), clientId, timTypeId,
 				direction);
 		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
 				ActiveTim[].class);
@@ -81,13 +90,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	public List<ActiveTim> getExpiredActiveTims() {
 		ResponseEntity<TimUpdateModel[]> response = RestTemplateProvider.GetRestTemplate()
-				.getForEntity(CVRestUrl + "/active-tim/expired", TimUpdateModel[].class);
+				.getForEntity(config.getCvRestService() + "/active-tim/expired", TimUpdateModel[].class);
 		return Arrays.asList(response.getBody());
 	}
 
 	// for GETs
 	public List<ActiveTim> getActivesTimByType(Long timTypeId) {
-		String url = String.format("%s/active-tim/tim-type-id/%d", CVRestUrl, timTypeId);
+		String url = String.format("%s/active-tim/tim-type-id/%d", config.getCvRestService(), timTypeId);
 		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
 				ActiveTim[].class);
 		return Arrays.asList(response.getBody());
@@ -95,7 +104,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	// get Active TIMs by client ID direction
 	public ActiveTim getActiveRsuTim(ActiveRsuTimQueryModel artqm) {
-		String url = String.format("%s/active-tim/active-rsu-tim", CVRestUrl);
+		String url = String.format("%s/active-tim/active-rsu-tim", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<ActiveRsuTimQueryModel> entity = new HttpEntity<ActiveRsuTimQueryModel>(artqm, headers);
@@ -110,7 +119,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	 * @return List of ActiveTims (including RSU address and index)
 	 */
 	public List<ActiveTim> getActiveRsuTims() {
-		return getActiveRsuTims(CVRestUrl);
+		return getActiveRsuTims(config.getCvRestService());
 	}
 
 	/**
@@ -131,25 +140,25 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	 */
 	public List<TimUpdateModel> getExpiringActiveTims() {
 		ResponseEntity<TimUpdateModel[]> response = RestTemplateProvider.GetRestTemplate()
-				.getForEntity(CVRestUrl + "/active-tim/expiring", TimUpdateModel[].class);
+				.getForEntity(config.getCvRestService() + "/active-tim/expiring", TimUpdateModel[].class);
 		return Arrays.asList(response.getBody());
 	}
 
 	public List<ActiveTim> getActiveTimsMissingItisCodes() {
 		ResponseEntity<TimUpdateModel[]> response = RestTemplateProvider.GetRestTemplate()
-				.getForEntity(CVRestUrl + "/active-tim/missing-itis", TimUpdateModel[].class);
+				.getForEntity(config.getCvRestService() + "/active-tim/missing-itis", TimUpdateModel[].class);
 		return Arrays.asList(response.getBody());
 	}
 
 	public List<ActiveTim> getActiveTimsNotSent() {
 		ResponseEntity<TimUpdateModel[]> response = RestTemplateProvider.GetRestTemplate()
-				.getForEntity(CVRestUrl + "/active-tim/not-sent", TimUpdateModel[].class);
+				.getForEntity(config.getCvRestService() + "/active-tim/not-sent", TimUpdateModel[].class);
 		return Arrays.asList(response.getBody());
 	}
 
 	public List<ActiveTim> getActiveTimsForSDX() {
 		ResponseEntity<ActiveTim[]> response = RestTemplateProvider.GetRestTemplate()
-				.getForEntity(CVRestUrl + "/active-tim/all-sdx", ActiveTim[].class);
+				.getForEntity(config.getCvRestService() + "/active-tim/all-sdx", ActiveTim[].class);
 		return Arrays.asList(response.getBody());
 	}
 }

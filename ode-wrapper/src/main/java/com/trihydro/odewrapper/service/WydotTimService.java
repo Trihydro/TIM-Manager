@@ -226,10 +226,10 @@ public class WydotTimService {
                 List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
                         .getActiveTimHoldingForRsu(rsu.getRsuTarget());
 
-                TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
+                TimQuery timQuery = odeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
                 // append existing holding indices
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
-                Integer nextRsuIndex = OdeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+                Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
                 activeTimHolding.setRsuIndex(nextRsuIndex);
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
@@ -431,7 +431,7 @@ public class WydotTimService {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         TimRsu timRsu = TimRsuService.getTimRsu(timId, rsuId);
         timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
-        timToSend.getRequest().setSnmp(OdeService.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
+        timToSend.getRequest().setSnmp(odeService.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
         String timToSendJson = gson.toJson(updatedTim);
 

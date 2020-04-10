@@ -215,7 +215,7 @@ public class TimRefreshController {
                 : "";
         String endTimeString = aTim.getEndDate_Timestamp() != null ? aTim.getEndDate_Timestamp().toInstant().toString()
                 : "";
-        SNMP snmp = OdeService.getSnmp(startTimeString, endTimeString, timToSend);
+        SNMP snmp = odeService.getSnmp(startTimeString, endTimeString, timToSend);
         timToSend.getRequest().setSnmp(snmp);
 
         RSU[] rsus = new RSU[1];
@@ -250,9 +250,9 @@ public class TimRefreshController {
                 // first fetch existing active_tim_holding records
                 List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
                         .getActiveTimHoldingForRsu(dbRsus.get(i).getRsuTarget());
-                TimQuery timQuery = OdeService.submitTimQuery(dbRsus.get(i), 0, configuration.getOdeUrl());
+                TimQuery timQuery = odeService.submitTimQuery(dbRsus.get(i), 0, configuration.getOdeUrl());
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
-                Integer nextRsuIndex = OdeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+                Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
 
                 // create new active_tim_holding record, to account for any index changes
                 WydotTim wydotTim = new WydotTim();

@@ -73,7 +73,7 @@ public class OdeService {
         }
     }
 
-    public static Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
+    public Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
 
         List<Integer> setIndexList = new ArrayList<Integer>();
 
@@ -90,7 +90,7 @@ public class OdeService {
         return null;
     }
 
-    public static TimQuery submitTimQuery(WydotRsu rsu, int counter, String odeUrl) {
+    public TimQuery submitTimQuery(WydotRsu rsu, int counter, String odeUrl) {
 
         // stop if this fails twice
         if (counter == 2)
@@ -132,7 +132,7 @@ public class OdeService {
         return timQuery;
     }
 
-    public static SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
+    public SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
         snmp.setRsuid("83");// RSU wants hex 83, and the ODE is expecting a hex value to parse. This parses

@@ -2,7 +2,7 @@ package com.trihydro.odewrapper.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ OdeService.class, TimTypeService.class, UtilityController.class, WydotTimBaseController.class })
+@PrepareForTest({ TimTypeService.class, UtilityController.class, WydotTimBaseController.class })
 public class UtilityControllerTest {
     @Mock
     BasicConfiguration mockConfiguration;
@@ -44,6 +44,8 @@ public class UtilityControllerTest {
     TimQuery mockTimQuery;
     @Mock
     TimTypeService mockTimTypeService;
+    @Mock
+    OdeService mockOdeService;
 
     @InjectMocks
     private UtilityController uut;
@@ -55,9 +57,7 @@ public class UtilityControllerTest {
 
     @Before
     public void setup() throws Exception {
-        PowerMockito.mockStatic(OdeService.class);
         PowerMockito.mockStatic(TimTypeService.class);
-        // PowerMockito.whenNew(WydotTimService.class).withAnyArguments().thenReturn(wydotTimService);
 
         List<Integer> indices = new ArrayList<>();
         indices.add(1);
@@ -137,7 +137,8 @@ public class UtilityControllerTest {
 
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
 
-        when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class))).thenReturn(null);
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
+                .thenReturn(null);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -161,7 +162,7 @@ public class UtilityControllerTest {
 
         when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
                 .thenReturn(mockTimQuery);
 
         // Act
@@ -187,7 +188,7 @@ public class UtilityControllerTest {
 
         when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(OdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
                 .thenReturn(mockTimQuery);
 
         // Act

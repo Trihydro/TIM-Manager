@@ -65,11 +65,13 @@ public class TimRefreshController {
     private ActiveTimHoldingService activeTimHoldingService;
     private ActiveTimService activeTimService;
     private DataFrameService dataFrameService;
+    private PathNodeXYService pathNodeXYService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
-            ActiveTimService _activeTimService, DataFrameService _dataFrameService) {
+            ActiveTimService _activeTimService, DataFrameService _dataFrameService,
+            PathNodeXYService _pathNodeXYService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -78,6 +80,7 @@ public class TimRefreshController {
         activeTimHoldingService = _activeTimHoldingService;
         activeTimService = _activeTimService;
         dataFrameService = _dataFrameService;
+        pathNodeXYService = _pathNodeXYService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -397,7 +400,7 @@ public class TimRefreshController {
         region.setDescription(regionDescrip);
 
         if (aTim.getPathId() != null) {
-            NodeXY[] nodes = PathNodeXYService.GetNodeXYForPath(aTim.getPathId());
+            NodeXY[] nodes = pathNodeXYService.GetNodeXYForPath(aTim.getPathId());
             if (nodes == null || nodes.length == 0) {
                 nodes = buildNodePathFromMileposts(mps);
             }

@@ -20,11 +20,14 @@ import org.springframework.stereotype.Component;
 public class RemoveExpiredActiveTims implements Runnable {
     private DataTasksConfiguration configuration;
     private Utility utility;
+    private ActiveTimService activeTimService;
 
     @Autowired
-    public void InjectDependencies(DataTasksConfiguration configuration, Utility _utility) {
+    public void InjectDependencies(DataTasksConfiguration configuration, Utility _utility,
+            ActiveTimService _activeTimService) {
         this.configuration = configuration;
         utility = _utility;
+        activeTimService = _activeTimService;
     }
 
     public void run() {
@@ -32,7 +35,7 @@ public class RemoveExpiredActiveTims implements Runnable {
 
         try {
             // select active tims
-            List<ActiveTim> activeTims = ActiveTimService.getExpiredActiveTims();
+            List<ActiveTim> activeTims = activeTimService.getExpiredActiveTims();
             utility.logWithDate("Found " + activeTims.size() + " expired Active TIMs", this.getClass());
 
             // delete active tims from rsus

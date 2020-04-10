@@ -63,7 +63,7 @@ public class UtilityController extends WydotTimBaseController {
         // get all RSUs
         for (WydotRsu rsu : wydotTimService.getRsus()) {
 
-            List<Integer> activeTimIndicies = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
+            List<Integer> activeTimIndicies = activeTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
             Collections.sort(activeTimIndicies);
 
             RsuCheckResults rsuCheckResults = new RsuCheckResults();
@@ -117,7 +117,7 @@ public class UtilityController extends WydotTimBaseController {
             }
         }
 
-        rsuCheckResults.activeTimIndicesList = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
+        rsuCheckResults.activeTimIndicesList = activeTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
 
         if (rsuCheckResults.queryList.size() != 0 || rsuCheckResults.rsuIndexList.size() != 0
                 || rsuCheckResults.activeTimIndicesList.size() != 0) {

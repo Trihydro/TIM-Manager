@@ -86,22 +86,6 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void insertActiveTim() {
-        // Arrange
-        ActiveTim activeTim = new ActiveTim();
-        HttpEntity<ActiveTim> entity = getEntity(activeTim, ActiveTim.class);
-        String url = "null/active-tim/add";
-        when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, Long.class)).thenReturn(mockResponseEntityLong);
-
-        // Act
-        Long data = ActiveTimService.insertActiveTim(activeTim);
-
-        // Assert
-        verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
-        assertEquals(new Long(1), data);
-    }
-
-    @Test
     public void updateActiveTim_SatRecordId() {
         // Arrange
         Long activeTimId = -1l;
@@ -112,7 +96,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 .thenReturn(mockResponseEntityBoolean);
 
         // Act
-        Boolean data = ActiveTimService.updateActiveTim_SatRecordId(activeTimId, satRecordId);
+        Boolean data = uut.updateActiveTim_SatRecordId(activeTimId, satRecordId);
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
@@ -148,7 +132,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 .thenReturn(mockResponseEntityBoolean);
 
         // Act
-        boolean data = ActiveTimService.deleteActiveTim(activeTimId);
+        boolean data = uut.deleteActiveTim(activeTimId);
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.DELETE, entity, Boolean.class);
@@ -166,7 +150,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 .thenReturn(mockResponseEntityBoolean);
 
         // Act
-        boolean success = ActiveTimService.deleteActiveTimsById(activeTimIds);
+        boolean success = uut.deleteActiveTimsById(activeTimIds);
 
         // Assert
         assertTrue(success);
@@ -180,7 +164,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(mockResponseEntityIntegerArray);
 
         // Act
-        List<Integer> data = ActiveTimService.getActiveTimIndicesByRsu(rsuTarget);
+        List<Integer> data = uut.getActiveTimIndicesByRsu(rsuTarget);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, Integer[].class);
@@ -199,7 +183,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
-        List<ActiveTim> data = ActiveTimService.getActiveTimsByWydotTim(wydotTims, timTypeId);
+        List<ActiveTim> data = uut.getActiveTimsByWydotTim(wydotTims, timTypeId);
 
         // Assert
         assertNotNull(data);
@@ -216,7 +200,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
-        List<ActiveTim> data = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timTypeId, direction);
+        List<ActiveTim> data = uut.getActiveTimsByClientIdDirection(clientId, timTypeId, direction);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
@@ -231,7 +215,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 .thenReturn(mockResponseEntityTimUpdateModelArray);
 
         // Act
-        List<ActiveTim> data = ActiveTimService.getExpiredActiveTims();
+        List<ActiveTim> data = uut.getExpiredActiveTims();
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, TimUpdateModel[].class);
@@ -246,7 +230,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
-        List<ActiveTim> data = ActiveTimService.getActivesTimByType(timTypeId);
+        List<ActiveTim> data = uut.getActivesTimByType(timTypeId);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
@@ -266,7 +250,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 .thenReturn(mockResponseEntityActiveTim);
 
         // Act
-        ActiveTim data = ActiveTimService.getActiveRsuTim(artqm);
+        ActiveTim data = uut.getActiveRsuTim(artqm);
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, ActiveTim.class);
@@ -281,7 +265,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 .thenReturn(mockResponseEntityTimUpdateModelArray);
 
         // Act
-        List<TimUpdateModel> data = ActiveTimService.getExpiringActiveTims();
+        List<TimUpdateModel> data = uut.getExpiringActiveTims();
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, TimUpdateModel[].class);
@@ -306,7 +290,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
                 .thenReturn(mockResponseEntity);
         when(mockResponseEntity.getBody()).thenReturn(tums);
         // Act
-        List<ActiveTim> ats = ActiveTimService.getActiveTimsMissingItisCodes();
+        List<ActiveTim> ats = uut.getActiveTimsMissingItisCodes();
 
         // Assert
         assertEquals(1, ats.size());
@@ -331,7 +315,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         when(mockResponseEntity.getBody()).thenReturn(tums);
 
         // Act
-        List<ActiveTim> ats = ActiveTimService.getActiveTimsNotSent();
+        List<ActiveTim> ats = uut.getActiveTimsNotSent();
 
         // Assert
         assertEquals(1, ats.size());

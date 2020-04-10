@@ -27,7 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ActiveTimService.class, RestTemplateProvider.class })
+@PrepareForTest({ RestTemplateProvider.class })
 public class CleanupActiveTimsTest {
 
     @Mock
@@ -39,23 +39,25 @@ public class CleanupActiveTimsTest {
     @Mock 
     Utility mockUtility;
 
+    @Mock
+    ActiveTimService mockActiveTimService;
+
     @InjectMocks
     public CleanupActiveTims uut;
 
     @Before
     public void setup() {
-        PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(RestTemplateProvider.class);
 
         when(RestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 
         List<ActiveTim> itisTims = new ArrayList<ActiveTim>();
         itisTims.add(new ActiveTim());
-        Mockito.when(ActiveTimService.getActiveTimsMissingItisCodes()).thenReturn(itisTims);
+        Mockito.when(mockActiveTimService.getActiveTimsMissingItisCodes()).thenReturn(itisTims);
 
         List<ActiveTim> notSentTims = new ArrayList<ActiveTim>();
         notSentTims.add(new ActiveTim());
-        Mockito.when(ActiveTimService.getActiveTimsNotSent()).thenReturn(notSentTims);
+        Mockito.when(mockActiveTimService.getActiveTimsNotSent()).thenReturn(notSentTims);
     }
 
     @Test

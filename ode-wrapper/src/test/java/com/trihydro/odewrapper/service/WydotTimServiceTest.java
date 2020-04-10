@@ -64,6 +64,9 @@ public class WydotTimServiceTest {
     @Mock
     RestTemplate restTemplate;
 
+    @Mock
+    ActiveTimService mockActiveTimService;
+
     @InjectMocks
     WydotTimService uut;
 
@@ -126,10 +129,8 @@ public class WydotTimServiceTest {
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic(ActiveTimService.class);
-        ActiveTimService.deleteActiveTim(-1l);
-        PowerMockito.verifyStatic(ActiveTimService.class);
-        ActiveTimService.deleteActiveTim(-2l);
+        verify(mockActiveTimService).deleteActiveTim(-1l);
+        verify(mockActiveTimService).deleteActiveTim(-2l);
     }
 
     @Test
@@ -150,10 +151,9 @@ public class WydotTimServiceTest {
         verify(mockEmailHelper).SendEmail(mockBasicConfiguration.getAlertAddresses(), null, subject, body,
                 mockBasicConfiguration.getMailPort(), mockBasicConfiguration.getMailHost(),
                 mockBasicConfiguration.getFromEmail());
-        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-2l);
-        ActiveTimService.deleteActiveTimsById(delIds);
+        verify(mockActiveTimService).deleteActiveTimsById(delIds);
         PowerMockito.verifyStatic(TimRsuService.class, never());
         TimRsuService.getTimRsusByTimId(isA(Long.class));
     }
@@ -170,11 +170,10 @@ public class WydotTimServiceTest {
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-1l);
         delIds.add(-2l);
-        ActiveTimService.deleteActiveTimsById(delIds);
+        verify(mockActiveTimService).deleteActiveTimsById(delIds);
         PowerMockito.verifyStatic(TimRsuService.class, never());
         TimRsuService.getTimRsusByTimId(isA(Long.class));
     }

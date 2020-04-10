@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
@@ -36,7 +37,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -45,8 +45,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Unit tests for TimRefreshController
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ActiveTimService.class, WydotTimService.class, RsuService.class, MilepostService.class,
-        DataFrameService.class })
+@PrepareForTest({ WydotTimService.class, RsuService.class, MilepostService.class, DataFrameService.class })
 public class TimRefreshControllerTest {
     private long timID = 1l;
 
@@ -63,13 +62,14 @@ public class TimRefreshControllerTest {
     OdeService mockOdeService;
     @Mock
     MilepostService mockMilepostService;
+    @Mock
+    ActiveTimService mockActiveTimService;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
 
     @Before
     public void setup() {
-        PowerMockito.mockStatic(ActiveTimService.class);
         PowerMockito.mockStatic(WydotTimService.class);
         PowerMockito.mockStatic(RsuService.class);
         PowerMockito.mockStatic(MilepostService.class);
@@ -114,14 +114,12 @@ public class TimRefreshControllerTest {
     @Test
     public void TestPerformTaskUsingCron_NoData() {
         // setup return
-        Mockito.when(ActiveTimService.getExpiringActiveTims()).thenReturn(new ArrayList<TimUpdateModel>());
+        Mockito.when(mockActiveTimService.getExpiringActiveTims()).thenReturn(new ArrayList<TimUpdateModel>());
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
-        // verify static functions, called once
-        PowerMockito.verifyStatic(ActiveTimService.class, VerificationModeFactory.times(1));
         // verify getExpiringActiveTims called once
-        ActiveTimService.getExpiringActiveTims();
+        verify(mockActiveTimService).getExpiringActiveTims();
 
         // verify no further interactions on ActiveTimService
         PowerMockito.verifyNoMoreInteractions(ActiveTimService.class);
@@ -138,7 +136,7 @@ public class TimRefreshControllerTest {
         ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
         TimUpdateModel tum = getRsuTim();
         arrLst.add(tum);
-        when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(RsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
         doReturn(rsus).when(mockUtility).getRsusByLatLong(anyString(), any(), any(), anyString());
 
@@ -169,7 +167,7 @@ public class TimRefreshControllerTest {
         TimUpdateModel tum = getRsuTim();
         arrLst.add(tum);
 
-        when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(RsuService.getFullRsusTimIsOn(any(long.class))).thenReturn(wydotRsuTims);
 
         // call the function to test
@@ -194,15 +192,14 @@ public class TimRefreshControllerTest {
         TimUpdateModel tum = getSdwTim();
         arrLst.add(tum);
 
-        when(ActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockSdwService.getSdwDataByRecordId(any(String.class))).thenReturn(getAdvisorySituationDataDeposit());
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic(ActiveTimService.class);
-        ActiveTimService.getExpiringActiveTims();
+        verify(mockActiveTimService).getExpiringActiveTims();
 
         PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.getServiceRegion(any());

@@ -63,17 +63,19 @@ public class TimRefreshController {
     private OdeService odeService;
     private MilepostService milepostService;
     private ActiveTimHoldingService activeTimHoldingService;
+    private ActiveTimService activeTimService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
-            OdeService _odeService, MilepostService _milepostService,
-            ActiveTimHoldingService _activeTimHoldingService) {
+            OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
+            ActiveTimService _activeTimService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
         odeService = _odeService;
         milepostService = _milepostService;
         activeTimHoldingService = _activeTimHoldingService;
+        activeTimService = _activeTimService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -81,7 +83,7 @@ public class TimRefreshController {
         System.out.println("Regular task performed using Cron at " + dateFormat.format(new Date()));
 
         // fetch Active_TIM that are expiring within 24 hrs
-        List<TimUpdateModel> expiringTims = ActiveTimService.getExpiringActiveTims();
+        List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
         System.out.println(expiringTims.size() + " expiring TIMs found");
 
@@ -303,7 +305,7 @@ public class TimRefreshController {
         // Update region.name in database
         RegionService.updateRegionName(new Long(aTim.getRegionId()), regionName);
         // Update active_tim.
-        ActiveTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
+        activeTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
         WydotTimService.sendNewTimToSdw(timToSend, recordId, mps);
     }

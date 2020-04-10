@@ -67,11 +67,13 @@ public class WydotTimService {
     private OdeService odeService;
     private CreateBaseTimUtil createBaseTimUtil;
     private ActiveTimHoldingService activeTimHoldingService;
+    private ActiveTimService activeTimService;
 
     @Autowired
     public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
             TimTypeService _timTypeService, SdwService _sdwService, Utility _utility, OdeService _odeService,
-            CreateBaseTimUtil _createBaseTimUtil, ActiveTimHoldingService _activeTimHoldingService) {
+            CreateBaseTimUtil _createBaseTimUtil, ActiveTimHoldingService _activeTimHoldingService,
+            ActiveTimService _activeTimService) {
         configuration = configurationRhs;
         emailHelper = _emailHelper;
         timTypeService = _timTypeService;
@@ -80,6 +82,7 @@ public class WydotTimService {
         odeService = _odeService;
         createBaseTimUtil = _createBaseTimUtil;
         activeTimHoldingService = _activeTimHoldingService;
+        activeTimService = _activeTimService;
     }
 
     public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
@@ -134,7 +137,7 @@ public class WydotTimService {
         List<ActiveTim> activeSatTims = null;
 
         // find active TIMs by client Id and direction
-        activeSatTims = ActiveTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
+        activeSatTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
                 timType.getTimTypeId(), direction);
 
         // filter by SAT TIMs
@@ -201,7 +204,7 @@ public class WydotTimService {
             // look for active tim on this rsu
             ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(wydotTim.getDirection(), wydotTim.getClientId(),
                     rsu.getRsuTarget());
-            ActiveTim activeTim = ActiveTimService.getActiveRsuTim(artqm);
+            ActiveTim activeTim = activeTimService.getActiveRsuTim(artqm);
 
             // create new active_tim_holding record
             ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null);
@@ -262,7 +265,7 @@ public class WydotTimService {
                 }
             }
             // delete active tim
-            ActiveTimService.deleteActiveTim(activeTim.getActiveTimId());
+            activeTimService.deleteActiveTim(activeTim.getActiveTimId());
         }
 
         if (satTims != null && satTims.size() > 0) {
@@ -300,7 +303,7 @@ public class WydotTimService {
                 }
             }
 
-            ActiveTimService.deleteActiveTimsById(activeSatTimIds);
+            activeTimService.deleteActiveTimsById(activeSatTimIds);
         }
     }
 
@@ -308,7 +311,7 @@ public class WydotTimService {
 
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
-        activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction);
+        activeTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction);
         utility.logWithDate(activeTims.size() + " active_tim found for deletion");
 
         deleteTimsFromRsusAndSdx(activeTims);
@@ -319,7 +322,7 @@ public class WydotTimService {
     public boolean deleteWydotTimsByType(List<? extends WydotTim> wydotTims, String timTypeStr) {
         List<ActiveTim> aTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
-        aTims = ActiveTimService.getActiveTimsByWydotTim(wydotTims, timType.getTimTypeId());
+        aTims = activeTimService.getActiveTimsByWydotTim(wydotTims, timType.getTimTypeId());
         deleteTimsFromRsusAndSdx(aTims);
 
         return true;
@@ -329,7 +332,7 @@ public class WydotTimService {
 
         TimType timType = getTimType(timTypeStr);
 
-        List<ActiveTim> activeTims = ActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(),
+        List<ActiveTim> activeTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(),
                 null);
 
         return activeTims;
@@ -339,7 +342,7 @@ public class WydotTimService {
 
         TimType timType = getTimType(timTypeStr);
 
-        List<ActiveTim> activeTims = ActiveTimService.getActivesTimByType(timType.getTimTypeId());
+        List<ActiveTim> activeTims = activeTimService.getActivesTimByType(timType.getTimTypeId());
 
         return activeTims;
     }

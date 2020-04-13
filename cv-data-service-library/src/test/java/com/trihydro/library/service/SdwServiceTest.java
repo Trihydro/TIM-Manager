@@ -246,7 +246,7 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockDecodeResponse.getBody()).thenReturn(null);
 
         // Act
-        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("");
+        sdwService.getItisCodesFromAdvisoryMessage("");
     }
 
     @Test

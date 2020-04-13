@@ -32,15 +32,14 @@ public class CleanupActiveTimsTest {
 
     @Mock
     private DataTasksConfiguration mockConfig;
-
     @Mock
     private RestTemplate mockRestTemplate;
-    
-    @Mock 
+    @Mock
     Utility mockUtility;
-
     @Mock
     ActiveTimService mockActiveTimService;
+    @Mock
+    RestTemplateProvider mockRestTemplateProvider;
 
     @InjectMocks
     public CleanupActiveTims uut;
@@ -49,7 +48,7 @@ public class CleanupActiveTimsTest {
     public void setup() {
         PowerMockito.mockStatic(RestTemplateProvider.class);
 
-        when(RestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
+        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 
         List<ActiveTim> itisTims = new ArrayList<ActiveTim>();
         itisTims.add(new ActiveTim());

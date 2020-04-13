@@ -13,29 +13,23 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 @Ignore
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ RestTemplateProvider.class })
+@RunWith(MockitoJUnitRunner.class)
 public class BaseServiceTest {
     @Mock
     protected RestTemplate mockRestTemplate;
     @Mock
-    protected ResponseEntity<Long> mockResponseEntityLong;
+    protected RestTemplateProvider mockRestTemplateProvider;
 
     @Before
     public void setup() throws SQLException {
-        PowerMockito.mockStatic(RestTemplateProvider.class);
-        when(RestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
-        when(mockResponseEntityLong.getBody()).thenReturn(1l);
+        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
     }
 
     protected HttpHeaders getDefaultHeaders() {

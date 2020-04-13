@@ -20,7 +20,7 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<IncidentChoice[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET,
+		ResponseEntity<IncidentChoice[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET,
 				entity, IncidentChoice[].class);
 		return Arrays.asList(response.getBody());
 	}
@@ -30,7 +30,7 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<IncidentChoice[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET,
+		ResponseEntity<IncidentChoice[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET,
 				entity, IncidentChoice[].class);
 		return Arrays.asList(response.getBody());
 	}
@@ -40,7 +40,7 @@ public class IncidentChoicesService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<IncidentChoice[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET,
+		ResponseEntity<IncidentChoice[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET,
 				entity, IncidentChoice[].class);
 		return Arrays.asList(response.getBody());
 	}

@@ -25,11 +25,18 @@ import org.gavaghan.geodesy.Ellipsoid;
 import org.gavaghan.geodesy.GeodeticCalculator;
 import org.gavaghan.geodesy.GeodeticCurve;
 import org.gavaghan.geodesy.GlobalCoordinates;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Utility {
 	public Gson gson = new Gson();
+	private RsuService rsuService;
+
+	@Autowired
+	public void InjectDependencies(RsuService _rsuService) {
+		this.rsuService = _rsuService;
+	}
 
 	public <T> void logWithDate(String msg, Class<T> clazz) {
 		logWithDate(clazz.getSimpleName() + ": " + msg);
@@ -161,7 +168,7 @@ public class Utility {
 	}
 
 	private List<WydotRsu> getRsusByRoute(String route) {
-		List<WydotRsu> rsus = RsuService.selectRsusByRoute(route);
+		List<WydotRsu> rsus = rsuService.selectRsusByRoute(route);
 		for (WydotRsu rsu : rsus) {
 			rsu.setRsuRetries(3);
 			rsu.setRsuTimeout(5000);

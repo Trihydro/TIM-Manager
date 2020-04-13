@@ -12,23 +12,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class RsuService extends CvDataServiceLibrary {
 
-	public static List<WydotRsu> selectAll() {
-		String url = String.format("%s/rsus", CVRestUrl);
-		ResponseEntity<WydotRsu[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+	public List<WydotRsu> selectAll() {
+		String url = String.format("%s/rsus", config.getCvRestService());
+		ResponseEntity<WydotRsu[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
 				WydotRsu[].class);
 		return Arrays.asList(response.getBody());
 	}
 
-	public static List<WydotRsu> selectRsusByRoute(String route) {
-		String url = String.format("%s/rsus-by-route/%s", CVRestUrl, route);
-		ResponseEntity<WydotRsu[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+	public List<WydotRsu> selectRsusByRoute(String route) {
+		String url = String.format("%s/rsus-by-route/%s", config.getCvRestService(), route);
+		ResponseEntity<WydotRsu[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
 				WydotRsu[].class);
 		return Arrays.asList(response.getBody());
 	}
 
-	public static List<WydotRsuTim> getFullRsusTimIsOn(Long timId) {
-		String url = String.format("%s/rsus-for-tim/%d", CVRestUrl, timId);
-		ResponseEntity<WydotRsuTim[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+	public List<WydotRsuTim> getFullRsusTimIsOn(Long timId) {
+		String url = String.format("%s/rsus-for-tim/%d", config.getCvRestService(), timId);
+		ResponseEntity<WydotRsuTim[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
 				WydotRsuTim[].class);
 		return Arrays.asList(response.getBody());
 	}

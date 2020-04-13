@@ -21,13 +21,15 @@ public class RemoveExpiredActiveTims implements Runnable {
     private DataTasksConfiguration configuration;
     private Utility utility;
     private ActiveTimService activeTimService;
+    private RestTemplateProvider restTemplateProvider;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration configuration, Utility _utility,
-            ActiveTimService _activeTimService) {
+            ActiveTimService _activeTimService, RestTemplateProvider _restTemplateProvider) {
         this.configuration = configuration;
         utility = _utility;
         activeTimService = _activeTimService;
+        restTemplateProvider = _restTemplateProvider;
     }
 
     public void run() {
@@ -53,7 +55,7 @@ public class RemoveExpiredActiveTims implements Runnable {
 
                 utility.logWithDate("Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }",
                         this.getClass());
-                RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
+                restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {

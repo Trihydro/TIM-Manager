@@ -3,13 +3,16 @@ package com.trihydro.library.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TracMessageSent;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpEntity;
@@ -21,9 +24,14 @@ import org.springframework.http.ResponseEntity;
 public class TracMessageSentServiceTest extends BaseServiceTest {
 
     @Mock
+    protected ResponseEntity<Long> mockResponseEntityLong;
+    @Mock
     private ResponseEntity<String[]> mockResponseEntityStringArray;
+    @Mock
+    protected CVRestServiceProps cVRestServiceProps;
 
-    private TracMessageSentService uut = new TracMessageSentService();
+    @InjectMocks
+    private TracMessageSentService uut;
 
     @Test
     public void selectPacketIds() {
@@ -50,6 +58,7 @@ public class TracMessageSentServiceTest extends BaseServiceTest {
         tracMessageSent.setMessageText("messageText");
         String url = "null/trac-message/add-trac-message-sent";
         HttpEntity<TracMessageSent> entity = getEntity(tracMessageSent, TracMessageSent.class);
+        when(mockResponseEntityLong.getBody()).thenReturn(1l);
         doReturn(mockResponseEntityLong).when(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
 
         // Act

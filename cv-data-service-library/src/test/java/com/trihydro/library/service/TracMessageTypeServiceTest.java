@@ -6,10 +6,12 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TracMessageType;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +22,11 @@ public class TracMessageTypeServiceTest extends BaseServiceTest {
 
     @Mock
     private ResponseEntity<TracMessageType[]> mockResponseEntityTracMessageTypeArray;
-
-    private TracMessageTypeService uut = new TracMessageTypeService();
+    @Mock
+    protected CVRestServiceProps cVRestServiceProps;
+    
+    @InjectMocks
+    private TracMessageTypeService uut;
 
     @Test
     public void selectAll() {

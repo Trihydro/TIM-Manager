@@ -11,6 +11,7 @@ import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
@@ -51,8 +52,8 @@ public class UtilityController extends WydotTimBaseController {
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            OdeService _odeService) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+            OdeService _odeService, RestTemplateProvider _restTemplateProvider) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService, _restTemplateProvider);
         this.odeService = _odeService;
     }
 

@@ -11,7 +11,6 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
@@ -44,8 +43,6 @@ public class Application {
                 cleanupActiveTims = _cleanupActiveTims;
                 sdxValidator = _sdxValidator;
                 rsuValidator = _rsuValidator;
-
-                CvDataServiceLibrary.setCVRestUrl(config.getCvRestService());
         }
 
         public static void main(String[] args) {

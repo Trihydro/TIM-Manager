@@ -32,15 +32,14 @@ public class RemoveExpiredActiveTimsTest {
 
     @Mock
     private DataTasksConfiguration mockConfig;
-
     @Mock
     private RestTemplate mockRestTemplate;
-
     @Mock
     Utility mockUtility;
-
     @Mock
     ActiveTimService mockActiveTimService;
+    @Mock
+    RestTemplateProvider mockRestTemplateProvider;
 
     @InjectMocks
     public RemoveExpiredActiveTims uut;
@@ -49,7 +48,7 @@ public class RemoveExpiredActiveTimsTest {
     public void setup() {
         PowerMockito.mockStatic(RestTemplateProvider.class);
 
-        when(RestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
+        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 
         List<ActiveTim> expiredTims = new ArrayList<ActiveTim>();
         expiredTims.add(new ActiveTim());

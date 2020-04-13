@@ -6,19 +6,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ RestTemplateProvider.class })
 public class RsuServiceTest extends BaseServiceTest {
 
     @Mock
@@ -26,6 +23,12 @@ public class RsuServiceTest extends BaseServiceTest {
 
     @Mock
     protected ResponseEntity<WydotRsuTim[]> mockResponseEntityWydotRsuTimArray;
+
+    @Mock
+    protected CVRestServiceProps cVRestServiceProps;
+
+    @InjectMocks
+    private RsuService uut;
 
     @Before
     public void setupSubtest() {
@@ -41,7 +44,7 @@ public class RsuServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, WydotRsu[].class)).thenReturn(mockResponseEntityWydotRsuArray);
 
         // Act
-        List<WydotRsu> data = RsuService.selectAll();
+        List<WydotRsu> data = uut.selectAll();
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, WydotRsu[].class);
@@ -56,7 +59,7 @@ public class RsuServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, WydotRsu[].class)).thenReturn(mockResponseEntityWydotRsuArray);
 
         // Act
-        List<WydotRsu> data = RsuService.selectRsusByRoute(route);
+        List<WydotRsu> data = uut.selectRsusByRoute(route);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, WydotRsu[].class);
@@ -75,7 +78,7 @@ public class RsuServiceTest extends BaseServiceTest {
         when(mockRestTemplate.getForEntity(url, WydotRsuTim[].class)).thenReturn(mockResponseEntityWydotRsuTimArray);
 
         // Act
-        List<WydotRsuTim> data = RsuService.getFullRsusTimIsOn(timId);
+        List<WydotRsuTim> data = uut.getFullRsusTimIsOn(timId);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, WydotRsuTim[].class);

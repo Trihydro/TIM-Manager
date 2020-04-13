@@ -5,31 +5,13 @@ import com.trihydro.library.model.CVRestServiceProps;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class CvDataServiceLibrary {
-    /**
-     * @deprecated
-     */
-    protected static String CVRestUrl;
-
-    /**
-     * @deprecated
-     * @return
-     */
-    public static String getCVRestUrl() {
-        return CVRestUrl;
-    }
-
-    /**
-     * @deprecated
-     * @param url
-     */
-    public static void setCVRestUrl(String url) {
-        CVRestUrl = url;
-    }
-
     protected CVRestServiceProps config;
+    protected RestTemplateProvider restTemplateProvider;
 
     @Autowired
-    public void InjectDependencies(CVRestServiceProps _cvRestServviceProps) {
+    public void InjectDependencies(CVRestServiceProps _cvRestServviceProps,
+            RestTemplateProvider _restTemplateProvider) {
         this.config = _cvRestServviceProps;
+        this.restTemplateProvider = _restTemplateProvider;
     }
 }

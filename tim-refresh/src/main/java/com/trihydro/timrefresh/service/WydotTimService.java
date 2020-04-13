@@ -25,11 +25,12 @@ public class WydotTimService {
     protected static TimRefreshConfiguration configuration;
 
     @Autowired
-    public void setConfiguration(TimRefreshConfiguration configurationRhs) {
+    public void setConfiguration(TimRefreshConfiguration configurationRhs, RestTemplateProvider _restTemplateProvider) {
         configuration = configurationRhs;
+        restTemplate = _restTemplateProvider.GetRestTemplate();
     }
 
-    public static RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
+    public static RestTemplate restTemplate;
     public static Gson gson = new Gson();
 
     public static void updateTimOnRsu(WydotTravelerInputData timToSend) {

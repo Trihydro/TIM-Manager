@@ -69,6 +69,8 @@ public class TimRefreshControllerTest {
     DataFrameService mockDataFrameService;
     @Mock
     RegionService mockRegionService;
+    @Mock
+    RsuService mockRsuService;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
@@ -142,15 +144,14 @@ public class TimRefreshControllerTest {
         TimUpdateModel tum = getRsuTim();
         arrLst.add(tum);
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-        when(RsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
+        when(mockRsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
         doReturn(rsus).when(mockUtility).getRsusByLatLong(anyString(), any(), any(), anyString());
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic(RsuService.class);
-        RsuService.getFullRsusTimIsOn(timID);
+        verify(mockRsuService).getFullRsusTimIsOn(timID);
 
         PowerMockito.verifyNoMoreInteractions(RsuService.class);
         PowerMockito.verifyNoMoreInteractions(WydotTimService.class);
@@ -173,14 +174,13 @@ public class TimRefreshControllerTest {
         arrLst.add(tum);
 
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-        when(RsuService.getFullRsusTimIsOn(any(long.class))).thenReturn(wydotRsuTims);
+        when(mockRsuService.getFullRsusTimIsOn(any(long.class))).thenReturn(wydotRsuTims);
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        PowerMockito.verifyStatic(RsuService.class);
-        RsuService.getFullRsusTimIsOn(timID);
+        verify(mockRsuService).getFullRsusTimIsOn(timID);
 
         PowerMockito.verifyStatic(WydotTimService.class);
         WydotTimService.updateTimOnRsu(any(WydotTravelerInputData.class));
@@ -213,8 +213,7 @@ public class TimRefreshControllerTest {
         WydotTimService.updateTimOnSdw(any());
 
         // verify static functions were called
-        PowerMockito.verifyStatic(RsuService.class);
-        RsuService.getFullRsusTimIsOn(any());
+        verify(mockRsuService).getFullRsusTimIsOn(any());
 
         PowerMockito.verifyNoMoreInteractions(MilepostService.class);
         PowerMockito.verifyNoMoreInteractions(ActiveTimService.class);

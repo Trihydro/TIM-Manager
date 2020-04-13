@@ -15,7 +15,7 @@ public class PathNodeXYService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<NodeXY[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity,
+		ResponseEntity<NodeXY[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity,
 				NodeXY[].class);
 		return response.getBody();
 	}

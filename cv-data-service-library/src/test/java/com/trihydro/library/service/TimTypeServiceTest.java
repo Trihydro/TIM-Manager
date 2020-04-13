@@ -6,10 +6,12 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimType;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +22,11 @@ public class TimTypeServiceTest extends BaseServiceTest {
 
     @Mock
     private ResponseEntity<TimType[]> mockResponseEntityTimTypeArray;
+    @Mock
+    protected CVRestServiceProps cVRestServiceProps;
 
-    private TimTypeService uut = new TimTypeService();
+    @InjectMocks
+    private TimTypeService uut;
 
     @Test
     public void selectAll() {

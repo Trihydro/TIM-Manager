@@ -22,7 +22,7 @@ public class DataFrameService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<String[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity,
+		ResponseEntity<String[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity,
 				String[].class);
 		return response.getBody();
 	}

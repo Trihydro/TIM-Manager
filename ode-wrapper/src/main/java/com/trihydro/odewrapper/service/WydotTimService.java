@@ -68,12 +68,16 @@ public class WydotTimService {
     private CreateBaseTimUtil createBaseTimUtil;
     private ActiveTimHoldingService activeTimHoldingService;
     private ActiveTimService activeTimService;
+    private TimRsuService timRsuService;
+    private RsuService rsuService;
+    private TimService timService;
 
     @Autowired
     public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
             TimTypeService _timTypeService, SdwService _sdwService, Utility _utility, OdeService _odeService,
             CreateBaseTimUtil _createBaseTimUtil, ActiveTimHoldingService _activeTimHoldingService,
-            ActiveTimService _activeTimService) {
+            ActiveTimService _activeTimService, TimRsuService _timRsuService,
+            RestTemplateProvider _restTemplateProvider, RsuService _rsuService, TimService _timService) {
         configuration = configurationRhs;
         emailHelper = _emailHelper;
         timTypeService = _timTypeService;
@@ -83,9 +87,13 @@ public class WydotTimService {
         createBaseTimUtil = _createBaseTimUtil;
         activeTimHoldingService = _activeTimHoldingService;
         activeTimService = _activeTimService;
+        timRsuService = _timRsuService;
+        restTemplate = _restTemplateProvider.GetRestTemplate();
+        rsuService = _rsuService;
+        timService = _timService;
     }
 
-    public RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
+    public RestTemplate restTemplate;
     public Gson gson = new Gson();
     private List<WydotRsu> rsus;
     private List<TimType> timTypes;
@@ -163,7 +171,7 @@ public class WydotTimService {
 
         if (activeSatTims != null && activeSatTims.size() > 0) {
 
-            WydotOdeTravelerInformationMessage tim = TimService.getTim(activeSatTims.get(0).getTimId());
+            WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTims.get(0).getTimId());
             updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
         } else {
             sendNewTimToSdw(timToSend, recordId);
@@ -213,7 +221,7 @@ public class WydotTimService {
             // if active tims exist, update tim
             if (activeTim != null) {
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
-                WydotOdeTravelerInformationMessage tim = TimService.getTim(activeTim.getTimId());
+                WydotOdeTravelerInformationMessage tim = timService.getTim(activeTim.getTimId());
 
                 // update TIM rsu
                 // add rsu to tim
@@ -253,7 +261,7 @@ public class WydotTimService {
 
         for (ActiveTim activeTim : rsuTims) {
             // get RSU TIM is on
-            List<TimRsu> timRsus = TimRsuService.getTimRsusByTimId(activeTim.getTimId());
+            List<TimRsu> timRsus = timRsuService.getTimRsusByTimId(activeTim.getTimId());
             // get full RSU
 
             if (timRsus.size() > 0) {
@@ -351,7 +359,7 @@ public class WydotTimService {
         if (rsus != null)
             return rsus;
         else {
-            rsus = RsuService.selectAll();
+            rsus = rsuService.selectAll();
             for (WydotRsu rsu : rsus) {
                 rsu.setRsuRetries(2);
                 rsu.setRsuTimeout(2000);
@@ -429,7 +437,7 @@ public class WydotTimService {
 
         // set rsu index here
         DataFrame df = timToSend.getTim().getDataframes()[0];
-        TimRsu timRsu = TimRsuService.getTimRsu(timId, rsuId);
+        TimRsu timRsu = timRsuService.getTimRsu(timId, rsuId);
         timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
         timToSend.getRequest().setSnmp(odeService.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 

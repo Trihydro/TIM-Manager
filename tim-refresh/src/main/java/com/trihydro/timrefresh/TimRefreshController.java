@@ -67,12 +67,13 @@ public class TimRefreshController {
     private DataFrameService dataFrameService;
     private PathNodeXYService pathNodeXYService;
     private RegionService regionService;
+    private RsuService rsuService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, DataFrameService _dataFrameService,
-            PathNodeXYService _pathNodeXYService, RegionService _regionService) {
+            PathNodeXYService _pathNodeXYService, RegionService _regionService, RsuService _rsuService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -83,6 +84,7 @@ public class TimRefreshController {
         dataFrameService = _dataFrameService;
         pathNodeXYService = _pathNodeXYService;
         regionService = _regionService;
+        rsuService = _rsuService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -200,7 +202,7 @@ public class TimRefreshController {
     }
 
     private void updateAndSendRSU(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
-        List<WydotRsuTim> wydotRsus = RsuService.getFullRsusTimIsOn(aTim.getTimId());
+        List<WydotRsuTim> wydotRsus = rsuService.getFullRsusTimIsOn(aTim.getTimId());
         List<WydotRsu> dbRsus = new ArrayList<WydotRsu>();
         if (wydotRsus == null || wydotRsus.size() <= 0) {
             utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());

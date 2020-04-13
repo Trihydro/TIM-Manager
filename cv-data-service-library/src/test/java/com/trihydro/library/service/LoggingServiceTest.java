@@ -3,6 +3,7 @@ package com.trihydro.library.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -16,9 +17,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 public class LoggingServiceTest extends BaseServiceTest {
 
+    @Mock
+    protected ResponseEntity<Long> mockResponseEntityLong;
     @Mock
     private CVRestServiceProps mockConfig;
 
@@ -46,6 +50,7 @@ public class LoggingServiceTest extends BaseServiceTest {
 
         HttpEntity<HttpLoggingModel> entity = getEntity(httpLoggingModel, HttpLoggingModel.class);
         String url = String.format("%s/http-logging/add-http-logging", baseUrl);
+        when(mockResponseEntityLong.getBody()).thenReturn(1l);
         doReturn(mockResponseEntityLong).when(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
 
         // Act

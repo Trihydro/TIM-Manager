@@ -21,7 +21,7 @@ public class MilepostService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<WydotTim> entity = new HttpEntity<WydotTim>(wydotTim, headers);
-		ResponseEntity<Milepost[]> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST,
+		ResponseEntity<Milepost[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST,
 				entity, Milepost[].class);
 		return Arrays.asList(response.getBody());
 	}

@@ -11,7 +11,7 @@ public class ItisCodeService extends CvDataServiceLibrary {
 
 	public List<ItisCode> selectAll() {
 		String url = String.format("%s/itiscodes", config.getCvRestService());
-		ResponseEntity<ItisCode[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+		ResponseEntity<ItisCode[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
 				ItisCode[].class);
 		return Arrays.asList(response.getBody());
 	}

@@ -183,7 +183,7 @@ public class WydotTimService {
 
         // FIND ALL RSUS TO SEND TO
         // TODO: should this query a graph db instead to follow with milepost?
-        List<WydotRsu> rsus = utility.getRsusByLatLong(direction, wydotTim.getStartPoint(), wydotTim.getEndPoint(),
+        List<WydotRsu> rsus = rsuService.getRsusByLatLong(direction, wydotTim.getStartPoint(), wydotTim.getEndPoint(),
                 wydotTim.getRoute());
 
         // if no RSUs found

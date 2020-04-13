@@ -145,7 +145,7 @@ public class TimRefreshControllerTest {
         arrLst.add(tum);
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockRsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
-        doReturn(rsus).when(mockUtility).getRsusByLatLong(anyString(), any(), any(), anyString());
+        doReturn(rsus).when(mockRsuService).getRsusByLatLong(anyString(), any(), any(), anyString());
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();

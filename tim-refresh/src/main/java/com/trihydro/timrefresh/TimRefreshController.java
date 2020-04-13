@@ -207,7 +207,7 @@ public class TimRefreshController {
         if (wydotRsus == null || wydotRsus.size() <= 0) {
             utility.logWithDate("RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
 
-            dbRsus = utility.getRsusByLatLong(aTim.getDirection(), aTim.getStartPoint(), aTim.getEndPoint(),
+            dbRsus = rsuService.getRsusByLatLong(aTim.getDirection(), aTim.getStartPoint(), aTim.getEndPoint(),
                     aTim.getRoute());
 
             // if no RSUs found

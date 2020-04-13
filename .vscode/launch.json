@@ -80,8 +80,8 @@
       "name": "Data Logger TIM (Launch)",
       "request": "launch",
       "cwd": "${workspaceRoot}/ode-data-logger",
-      "args": "-g testGroup -t topic.OdeTimJson -type string -p config-dev.properties",
-      "mainClass": "com.trihydro.cvlogger.app.OdeLoggingConsumer"
+      "args": "--spring.profiles.active=dev",
+      "mainClass": "com.trihydro.cvlogger.Application"
     },
     {
       "type": "java",

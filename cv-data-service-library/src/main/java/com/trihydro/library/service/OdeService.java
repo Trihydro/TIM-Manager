@@ -32,13 +32,14 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 @Component
 public class OdeService {
 
-    public static Gson gson = new Gson();
-    public static RestTemplate restTemplate = new RestTemplate();
+    public Gson gson = new Gson();
+    public RestTemplate restTemplate;
     private Utility utility;
 
     @Autowired
-    public void InjectDependencies(Utility _utility) {
+    public void InjectDependencies(Utility _utility, RestTemplateProvider _restTemplateProvider) {
         utility = _utility;
+        restTemplate = _restTemplateProvider.GetRestTemplate();
     }
 
     public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, String odeUrl, Integer index) {

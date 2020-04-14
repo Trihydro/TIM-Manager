@@ -19,14 +19,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class OdeMongoLoggingConsumer {
 
-	static PreparedStatement preparedStatement = null;
-	static Statement statement = null;
+	PreparedStatement preparedStatement = null;
+	Statement statement = null;
 	private BasicConfiguration configProperties;
+	private MongoLogger mongoLogger;
 
 	@Autowired
-	public OdeMongoLoggingConsumer(BasicConfiguration configProperties) throws IOException, SQLException {
+	public OdeMongoLoggingConsumer(BasicConfiguration configProperties, MongoLogger _mongoLogger)
+			throws IOException, SQLException {
 		this.configProperties = configProperties;
-		MongoLogger.setConfig(configProperties);
+		mongoLogger = _mongoLogger;
 
 		System.out.println("starting..............");
 		startKafkaConsumerAsync();
@@ -64,11 +66,11 @@ public class OdeMongoLoggingConsumer {
 							String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
 
 							if (topic.equals("topic.OdeTimJson")) {
-								MongoLogger.logTim(recStringArr);
+								mongoLogger.logTim(recStringArr);
 							} else if (topic.equals("topic.OdeBsmJson")) {
-								MongoLogger.logBsm(recStringArr);
+								mongoLogger.logBsm(recStringArr);
 							} else if (topic.equals("topic.OdeDriverAlertJson")) {
-								MongoLogger.logDriverAlert(recStringArr);
+								mongoLogger.logDriverAlert(recStringArr);
 							}
 						}
 					}

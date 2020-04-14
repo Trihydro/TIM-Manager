@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
@@ -38,15 +40,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-/**
- * Unit tests for TimRefreshController
- */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ WydotTimService.class, RsuService.class, MilepostService.class, DataFrameService.class })
+@RunWith(MockitoJUnitRunner.class)
 public class TimRefreshControllerTest {
     private long timID = 1l;
 
@@ -71,17 +67,14 @@ public class TimRefreshControllerTest {
     RegionService mockRegionService;
     @Mock
     RsuService mockRsuService;
+    @Mock
+    WydotTimService mockWydotTimService;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
 
     @Before
     public void setup() {
-        PowerMockito.mockStatic(WydotTimService.class);
-        PowerMockito.mockStatic(RsuService.class);
-        PowerMockito.mockStatic(MilepostService.class);
-        PowerMockito.mockStatic(DataFrameService.class);
-
         setupMilePost();
         setupDataFrameService();
         String[] routes = new String[1];
@@ -127,12 +120,10 @@ public class TimRefreshControllerTest {
 
         // verify getExpiringActiveTims called once
         verify(mockActiveTimService).getExpiringActiveTims();
-
         // verify no further interactions on ActiveTimService
-        PowerMockito.verifyNoMoreInteractions(ActiveTimService.class);
-
+        verifyNoMoreInteractions(mockActiveTimService);
         // verify nothing on WyDotTimService was called
-        PowerMockito.verifyZeroInteractions(WydotTimService.class);
+        verifyNoInteractions(mockWydotTimService);
     }
 
     @Test
@@ -150,11 +141,11 @@ public class TimRefreshControllerTest {
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
-        // verify static functions were called
+        // verify functions were called
         verify(mockRsuService).getFullRsusTimIsOn(timID);
-
-        PowerMockito.verifyNoMoreInteractions(RsuService.class);
-        PowerMockito.verifyNoMoreInteractions(WydotTimService.class);
+        verify(mockRsuService).getRsusByLatLong(anyString(), any(), any(), anyString());
+        verifyNoMoreInteractions(mockRsuService);
+        verifyNoMoreInteractions(mockWydotTimService);
     }
 
     @Test
@@ -181,12 +172,10 @@ public class TimRefreshControllerTest {
 
         // verify static functions were called
         verify(mockRsuService).getFullRsusTimIsOn(timID);
+        verify(mockWydotTimService).updateTimOnRsu(any(WydotTravelerInputData.class));
 
-        PowerMockito.verifyStatic(WydotTimService.class);
-        WydotTimService.updateTimOnRsu(any(WydotTravelerInputData.class));
-
-        PowerMockito.verifyNoMoreInteractions(RsuService.class);
-        PowerMockito.verifyNoMoreInteractions(WydotTimService.class);
+        verifyNoMoreInteractions(mockRsuService);
+        verifyNoMoreInteractions(mockWydotTimService);
     }
 
     @Test
@@ -203,21 +192,16 @@ public class TimRefreshControllerTest {
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
-        // verify static functions were called
+        // verify functions were called
         verify(mockActiveTimService).getExpiringActiveTims();
-
-        PowerMockito.verifyStatic(WydotTimService.class);
-        WydotTimService.getServiceRegion(any());
-
-        PowerMockito.verifyStatic(WydotTimService.class);
-        WydotTimService.updateTimOnSdw(any());
-
-        // verify static functions were called
+        verify(mockWydotTimService).getServiceRegion(any());
+        verify(mockWydotTimService).updateTimOnSdw(any());
         verify(mockRsuService).getFullRsusTimIsOn(any());
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
 
-        PowerMockito.verifyNoMoreInteractions(MilepostService.class);
-        PowerMockito.verifyNoMoreInteractions(ActiveTimService.class);
-        PowerMockito.verifyNoMoreInteractions(WydotTimService.class);
+        verifyNoMoreInteractions(mockMilepostService);
+        verifyNoMoreInteractions(mockActiveTimService);
+        verifyNoMoreInteractions(mockWydotTimService);
     }
 
     private TimUpdateModel getTumBase() {

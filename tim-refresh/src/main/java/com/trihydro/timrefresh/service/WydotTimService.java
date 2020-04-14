@@ -22,7 +22,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 @Component
 public class WydotTimService {
 
-    protected static TimRefreshConfiguration configuration;
+    protected TimRefreshConfiguration configuration;
 
     @Autowired
     public void setConfiguration(TimRefreshConfiguration configurationRhs, RestTemplateProvider _restTemplateProvider) {
@@ -30,16 +30,16 @@ public class WydotTimService {
         restTemplate = _restTemplateProvider.GetRestTemplate();
     }
 
-    public static RestTemplate restTemplate;
-    public static Gson gson = new Gson();
+    public RestTemplate restTemplate;
+    public Gson gson = new Gson();
 
-    public static void updateTimOnRsu(WydotTravelerInputData timToSend) {
+    public void updateTimOnRsu(WydotTravelerInputData timToSend) {
 
         String timToSendJson = gson.toJson(timToSend);
         restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
     }
 
-    public static void updateTimOnSdw(WydotTravelerInputData timToSend) {
+    public void updateTimOnSdw(WydotTravelerInputData timToSend) {
         String timToSendJson = gson.toJson(timToSend);
 
         // send TIM
@@ -50,7 +50,7 @@ public class WydotTimService {
         }
     }
 
-    public static void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps) {
+    public void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps) {
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
@@ -80,7 +80,7 @@ public class WydotTimService {
         }
     }
 
-    public static WydotTravelerInputData updateTim(WydotTravelerInputData timToSend, Long timId,
+    public WydotTravelerInputData updateTim(WydotTravelerInputData timToSend, Long timId,
             WydotOdeTravelerInformationMessage tim) {
 
         // set TIM packetId
@@ -96,7 +96,7 @@ public class WydotTimService {
         return timToSend;
     }
 
-    public static OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {
+    public OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {
 
         Comparator<Milepost> compLat = (l1, l2) -> Double.compare(l1.getLatitude(), l2.getLatitude());
         Comparator<Milepost> compLong = (l1, l2) -> Double.compare(l1.getLongitude(), l2.getLongitude());

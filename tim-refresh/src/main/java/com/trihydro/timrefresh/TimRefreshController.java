@@ -55,8 +55,8 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 @Component
 public class TimRefreshController {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-    public static Gson gson = new Gson();
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    public Gson gson = new Gson();
     protected TimRefreshConfiguration configuration;
     private SdwService sdwService;
     private Utility utility;
@@ -68,12 +68,14 @@ public class TimRefreshController {
     private PathNodeXYService pathNodeXYService;
     private RegionService regionService;
     private RsuService rsuService;
+    private WydotTimService wydotTimService;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, DataFrameService _dataFrameService,
-            PathNodeXYService _pathNodeXYService, RegionService _regionService, RsuService _rsuService) {
+            PathNodeXYService _pathNodeXYService, RegionService _regionService, RsuService _rsuService,
+            WydotTimService _WydotTimService) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -85,6 +87,7 @@ public class TimRefreshController {
         pathNodeXYService = _pathNodeXYService;
         regionService = _regionService;
         rsuService = _rsuService;
+        wydotTimService = _WydotTimService;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -243,7 +246,7 @@ public class TimRefreshController {
 
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
                 System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
-                WydotTimService.updateTimOnRsu(timToSend);
+                wydotTimService.updateTimOnRsu(timToSend);
             }
         } else {
             // we don't have any existing RSUs, but some fall within the boundary so send
@@ -290,7 +293,7 @@ public class TimRefreshController {
         }
 
         // fetch all mileposts, get service region by bounding box
-        OdeGeoRegion serviceRegion = WydotTimService.getServiceRegion(mps);
+        OdeGeoRegion serviceRegion = wydotTimService.getServiceRegion(mps);
 
         // we are saving our ttl unencoded at the root level of the object as an int
         // representing the enum
@@ -303,7 +306,7 @@ public class TimRefreshController {
         // set sdw block in TIM
         utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
-        WydotTimService.updateTimOnSdw(timToSend);
+        wydotTimService.updateTimOnSdw(timToSend);
     }
 
     private void updateAndSendNewSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
@@ -316,7 +319,7 @@ public class TimRefreshController {
         // Update active_tim.
         activeTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
-        WydotTimService.sendNewTimToSdw(timToSend, recordId, mps);
+        wydotTimService.sendNewTimToSdw(timToSend, recordId, mps);
     }
 
     private DataFrame getDataFrame(TimUpdateModel aTim, String nowAsISO, List<Milepost> mps) {

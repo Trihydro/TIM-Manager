@@ -143,6 +143,23 @@ public class MilepostController extends BaseController {
 	public ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> getMilepostsByStartEndPoint(
 			@RequestBody WydotTim wydotTim) {
 
+		// check startPoint
+		if (wydotTim.getStartPoint() == null || wydotTim.getStartPoint().getLatitude() == null
+				|| wydotTim.getStartPoint().getLongitude() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
+		// check endpoint
+		if (wydotTim.getEndPoint() == null || wydotTim.getEndPoint().getLatitude() == null
+				|| wydotTim.getEndPoint().getLongitude() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
+		// check direction, route
+		if (wydotTim.getDirection() == null || wydotTim.getRoute() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
 		Collection<com.trihydro.cvdatacontroller.model.Milepost> data = milepostService.getPathWithBuffer(
 				wydotTim.getRoute(), wydotTim.getStartPoint().getLatitude(), wydotTim.getStartPoint().getLongitude(),
 				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude(), wydotTim.getDirection());

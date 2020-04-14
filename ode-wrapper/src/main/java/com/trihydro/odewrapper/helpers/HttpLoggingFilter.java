@@ -30,8 +30,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.HttpLoggingModel;
 import com.trihydro.library.service.LoggingService;
+import com.trihydro.odewrapper.config.BasicConfiguration;
 
 import org.apache.commons.io.output.TeeOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +44,14 @@ import org.springframework.stereotype.Component;
 public class HttpLoggingFilter implements Filter {
 
     private LoggingService loggingService;
+    private BasicConfiguration basicConfiguration;
+    private Utility utility;
 
     @Autowired
-    public void InjectDependencies(LoggingService _loggingService) {
+    public void InjectDependencies(LoggingService _loggingService, BasicConfiguration _basicConfiguration, Utility _utility) {
         loggingService = _loggingService;
+        basicConfiguration = _basicConfiguration;
+        utility = _utility;
     }
 
     @Override
@@ -78,8 +84,21 @@ public class HttpLoggingFilter implements Filter {
 
             chain.doFilter(bufferedRequest, bufferedResponse);
             logMessage.append(" [RESPONSE CODE:").append(bufferedResponse.getStatus()).append("]");
-            logMessage.append(" [RESPONSE:").append(bufferedResponse.getContent()).append("]");
-            System.out.println(logMessage.toString());
+
+            // before adding the response, check that it wont go beyond our max size
+            String respContent = bufferedResponse.getContent();
+            if (logMessage.length() + respContent.length() < (basicConfiguration.getHttpLoggingMaxSize() - 12)) {
+                logMessage.append(" [RESPONSE:").append(respContent).append("]");
+            } else {
+                // truncate the response...
+                int maxResponseSize = basicConfiguration.getHttpLoggingMaxSize() - 12 - logMessage.length();
+                if (maxResponseSize > 0) {
+                    String serverResponse = respContent.substring(0, maxResponseSize - 3);
+                    serverResponse += "...";
+                    logMessage.append(" [RESPONSE:").append(serverResponse).append("]");
+                }
+            }
+            utility.logWithDate(logMessage.toString());
             HttpLoggingModel httpLoggingModel = new HttpLoggingModel();
             httpLoggingModel.setRequest(logMessage.toString());
             httpLoggingModel.setRequestTime(requestTime);
@@ -234,6 +253,7 @@ public class HttpLoggingFilter implements Filter {
 
         public BufferedResponseWrapper(HttpServletResponse response) {
             original = response;
+            bos = new ByteArrayOutputStream();
         }
 
         public String getContent() {

@@ -17,9 +17,18 @@ public class BasicConfiguration extends ConfigProperties {
     private BigDecimal defaultLaneWidth;
     private String cvRestService;
     private String[] rsuRoutes;
+    private Integer httpLoggingMaxSize;
 
     public TimeToLive getSdwTtl() {
         return sdwTtl;
+    }
+
+    public Integer getHttpLoggingMaxSize() {
+        return httpLoggingMaxSize;
+    }
+
+    public void setHttpLoggingMaxSize(Integer httpLoggingMaxSize) {
+        this.httpLoggingMaxSize = httpLoggingMaxSize;
     }
 
     public String[] getRsuRoutes() {

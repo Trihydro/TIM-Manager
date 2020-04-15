@@ -55,7 +55,6 @@ public class HttpLoggingFilterTest {
 
     @Before
     public void setup() throws ServletException, IOException {
-        doReturn("/").when(mockHttpServletRequest).getRequestURI();
         Enumeration<String> paramNames = Collections.emptyEnumeration();
         doReturn(paramNames).when(mockHttpServletRequest).getParameterNames();
         doReturn(mockServletInputStream).when(mockHttpServletRequest).getInputStream();
@@ -92,7 +91,6 @@ public class HttpLoggingFilterTest {
         // Arrange
         doReturn("/").when(mockHttpServletRequest).getServletPath();
         doReturn(2000).when(mockBasicConfiguration).getHttpLoggingMaxSize();
-        doReturn(mockServletOutputStream).when(mockHttpServletResponse).getOutputStream();
 
         // Act
         uut.doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
@@ -106,7 +104,6 @@ public class HttpLoggingFilterTest {
         // Arrange
         doReturn("/").when(mockHttpServletRequest).getServletPath();
         doReturn(137).when(mockBasicConfiguration).getHttpLoggingMaxSize();
-        doReturn(mockServletOutputStream).when(mockHttpServletResponse).getOutputStream();
 
         // Act
         uut.doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);

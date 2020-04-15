@@ -156,7 +156,7 @@ public class ActiveTimHoldingController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/get-rsu", method = RequestMethod.GET)
+    @RequestMapping(value = "/get-rsu/{ipv4Address}", method = RequestMethod.GET)
     public ResponseEntity<List<ActiveTimHolding>> getActiveTimHoldingForRsu(@PathVariable String ipv4Address) {
         ActiveTimHolding activeTimHolding = null;
         Connection connection = null;

@@ -2,6 +2,7 @@ package com.trihydro.library.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimRsu;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,10 +25,17 @@ public class TimRsuServiceTest extends BaseServiceTest {
     @Mock
     protected ResponseEntity<TimRsu> mockResponseEntityTimRsu;
     @Mock
-    protected CVRestServiceProps cVRestServiceProps;
+    protected CVRestServiceProps mockCVRestServiceProps;
+
+    private String baseUrl = "baseUrl";
 
     @InjectMocks
     private TimRsuService uut;
+
+    @Before
+    public void setupSubTest() {
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+    }
 
     @Test
     public void getTimRsusByTimId() {
@@ -36,7 +45,7 @@ public class TimRsuServiceTest extends BaseServiceTest {
         TimRsu timRsu = new TimRsu();
         timRsus[0] = timRsu;
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("null/tim-rsu/tim-id/%d", timId);
+        String url = String.format("%s/tim-rsu/tim-id/%d", baseUrl, timId);
         when(mockResponseEntityTimRsuArray.getBody()).thenReturn(timRsus);
         when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, TimRsu[].class))
                 .thenReturn(mockResponseEntityTimRsuArray);
@@ -55,7 +64,7 @@ public class TimRsuServiceTest extends BaseServiceTest {
         Long timId = -1l;
         int rsuId = -2;
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("null/tim-rsu/tim-rsu/%d/%d", timId, rsuId);
+        String url = String.format("%s/tim-rsu/tim-rsu/%d/%d", baseUrl, timId, rsuId);
         when(mockResponseEntityTimRsu.getBody()).thenReturn(new TimRsu());
         when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, TimRsu.class)).thenReturn(mockResponseEntityTimRsu);
 

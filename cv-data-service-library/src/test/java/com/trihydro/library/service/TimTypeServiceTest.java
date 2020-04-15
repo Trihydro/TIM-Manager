@@ -22,15 +22,19 @@ public class TimTypeServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<TimType[]> mockResponseEntityTimTypeArray;
     @Mock
-    protected CVRestServiceProps cVRestServiceProps;
+    protected CVRestServiceProps mockCVRestServiceProps;
 
     @InjectMocks
     private TimTypeService uut;
 
+    private String baseUrl = "baseUrl";
+
     @Test
     public void selectAll() {
         // Arrange
-        String url = "null/tim-type/tim-types";
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+
+        String url = String.format("%s/tim-type/tim-types", baseUrl);
         TimType[] ttArr = new TimType[1];
         TimType tt = new TimType();
         tt.setDescription("description");

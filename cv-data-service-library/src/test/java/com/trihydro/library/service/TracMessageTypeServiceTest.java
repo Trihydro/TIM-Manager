@@ -22,15 +22,18 @@ public class TracMessageTypeServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<TracMessageType[]> mockResponseEntityTracMessageTypeArray;
     @Mock
-    protected CVRestServiceProps cVRestServiceProps;
-    
+    protected CVRestServiceProps mockCVRestServiceProps;
+
     @InjectMocks
     private TracMessageTypeService uut;
+
+    private String baseUrl = "baseUrl";
 
     @Test
     public void selectAll() {
         // Arrange
-        String url = "null/trac-message-type/GetAll";
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+        String url = String.format("%s/trac-message-type/GetAll", baseUrl);
         TracMessageType[] tmtArr = new TracMessageType[1];
         TracMessageType tmt = new TracMessageType();
         tmt.setTracMessageDescription("tracMessageDescription");

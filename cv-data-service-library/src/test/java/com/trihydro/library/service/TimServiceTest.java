@@ -1,6 +1,7 @@
 package com.trihydro.library.service;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +30,9 @@ public class TimServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<WydotOdeTravelerInformationMessage> mockWydotOdeTravelerInformationMessage;
     @Mock
-    protected CVRestServiceProps cVRestServiceProps;
+    protected CVRestServiceProps mockCVRestServiceProps;
+
+    private String baseUrl = "baseUrl";
 
     @InjectMocks
     private TimService uut;
@@ -37,8 +40,10 @@ public class TimServiceTest extends BaseServiceTest {
     @Test
     public void getTim() {
         // Arrange
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+
         Long timId = -1l;
-        String url = String.format("null/get-tim/%d", timId);
+        String url = String.format("%s/get-tim/%d", baseUrl, timId);
         when(mockWydotOdeTravelerInformationMessage.getBody()).thenReturn(new WydotOdeTravelerInformationMessage());
         when(mockRestTemplate.getForEntity(url, WydotOdeTravelerInformationMessage.class))
                 .thenReturn(mockWydotOdeTravelerInformationMessage);

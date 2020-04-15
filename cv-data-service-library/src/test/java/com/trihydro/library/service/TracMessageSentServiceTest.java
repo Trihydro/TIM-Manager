@@ -27,15 +27,19 @@ public class TracMessageSentServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<String[]> mockResponseEntityStringArray;
     @Mock
-    protected CVRestServiceProps cVRestServiceProps;
+    protected CVRestServiceProps mockCVRestServiceProps;
 
     @InjectMocks
     private TracMessageSentService uut;
 
+    private String baseUrl = "baseUrl";
+
     @Test
     public void selectPacketIds() {
         // Arrange
-        String url = "null/trac-message/packet-ids";
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+
+        String url = String.format("%s/trac-message/packet-ids", baseUrl);
         String[] stringArr = new String[1];
         stringArr[0] = "test";
         doReturn(stringArr).when(mockResponseEntityStringArray).getBody();

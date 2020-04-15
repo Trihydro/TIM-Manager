@@ -29,7 +29,7 @@ public class TmddService {
         this.gsonFactory = _gsonFactory;
     }
 
-    public List<FullEventUpdate> getTmddEvents() {
+    public List<FullEventUpdate> getTmddEvents() throws Exception {
         // Prepare request
         String url = String.format("%s/tmdd/all", config.getTmddUrl());
         HttpHeaders headers = new HttpHeaders();
@@ -45,8 +45,13 @@ public class TmddService {
         Gson gson = gsonFactory.getTmddDeserializer();
 
         // Remove root
-        JsonArray abbrBody = gson.fromJson(body, JsonObject.class).get("ns2:fEUMsg").getAsJsonObject().get("FEU")
-                .getAsJsonArray();
+        JsonArray abbrBody = null;
+        try {
+            abbrBody = gson.fromJson(body, JsonObject.class).get("ns2:fEUMsg").getAsJsonObject().get("FEU")
+                    .getAsJsonArray();
+        } catch (Exception ex) {
+            throw new Exception("Response from TMDD doesn't have the expected structure", ex);
+        }
 
         // Deserialize response
         Type type = new TypeToken<List<FullEventUpdate>>() {

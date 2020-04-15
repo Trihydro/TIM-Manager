@@ -20,20 +20,26 @@ public class D_EventType implements JsonDeserializer<EventType> {
     @Override
     public EventType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
-        if (!json.isJsonObject()) {
+        if (!json.isJsonNull() && !json.isJsonObject()) {
             throw new JsonParseException("Failed parsing JSON source: not an " + EventType.class.getSimpleName());
         }
 
-        JsonObject obj = json.getAsJsonObject();
-        Set<String> members = obj.keySet();
-        if (members.size() != 1) {
-            throw new JsonParseException("Failed parsing JSON source: too many members");
+        EventType result = null;
+
+        if (json.isJsonObject()) {
+            JsonObject obj = json.getAsJsonObject();
+            Set<String> members = obj.keySet();
+            if (members.size() != 1) {
+                throw new JsonParseException("Failed parsing JSON source: too many members");
+            }
+
+            String name = members.iterator().next();
+            String type = obj.get(name).getAsString();
+
+            result = new EventType(name, type);
         }
 
-        String name = members.iterator().next();
-        String type = obj.get(name).getAsString();
-
-        return new EventType(name, type);
+        return result;
     }
 
 }

@@ -27,6 +27,12 @@ public class SetItisCodes {
 
     private List<ItisCode> itisCodes;
 
+    @Autowired
+    public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService) {
+        itisCodeService = _itisCodeService;
+        incidentChoicesService = _incidentChoicesService;
+    }
+
     public List<ItisCode> getItisCodes() {
         if (itisCodes != null)
             return itisCodes;
@@ -34,16 +40,6 @@ public class SetItisCodes {
             itisCodes = itisCodeService.selectAll();
             return itisCodes;
         }
-    }
-
-    @Autowired
-    public void InjectDependencies(ItisCodeService _itisCodeService) {
-        itisCodeService = _itisCodeService;
-    }
-
-    @Autowired
-    public void InjectDependencies(IncidentChoicesService _incidentChoicesService) {
-        incidentChoicesService = _incidentChoicesService;
     }
 
     public List<String> setItisCodesFromAdvisoryArray(WydotTimRc wydotTim) {

@@ -39,7 +39,6 @@ import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 @RunWith(StrictStubs.class)
@@ -86,7 +85,7 @@ public class TimRefreshControllerTest {
     private void setupDataFrameService() {
         String[] itisCodes = new String[1];
         itisCodes[0] = "1";
-        Mockito.when(mockDataFrameService.getItisCodesForDataFrameId(isA(Integer.class))).thenReturn(itisCodes);
+        when(mockDataFrameService.getItisCodesForDataFrameId(isA(Integer.class))).thenReturn(itisCodes);
     }
 
     private void setupMilePost() {
@@ -114,7 +113,7 @@ public class TimRefreshControllerTest {
     @Test
     public void TestPerformTaskUsingCron_NoData() {
         // setup return
-        Mockito.when(mockActiveTimService.getExpiringActiveTims()).thenReturn(new ArrayList<TimUpdateModel>());
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(new ArrayList<TimUpdateModel>());
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 

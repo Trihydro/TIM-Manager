@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestTemplate;
@@ -73,7 +72,7 @@ public class WydotTimServiceTest {
     public void setup() {
         String[] addresses = new String[1];
         addresses[0] = "unit@test.com";
-        Mockito.when(mockBasicConfiguration.getAlertAddresses()).thenReturn(addresses);
+        when(mockBasicConfiguration.getAlertAddresses()).thenReturn(addresses);
     }
 
     private List<ActiveTim> getActiveTims(boolean isSat) {
@@ -115,7 +114,7 @@ public class WydotTimServiceTest {
         wydotRsu.setRsuId(-10);
         wydotRsu.setRsuIndex(-1);
         allRsus.add(wydotRsu);
-        Mockito.when(mockRsuService.selectAll()).thenReturn(allRsus);
+        when(mockRsuService.selectAll()).thenReturn(allRsus);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
@@ -134,7 +133,7 @@ public class WydotTimServiceTest {
         sdxDelResults.put(-2032126074, true);
         String subject = "SDX Delete Fail";
         String body = "The following recordIds failed to delete from the SDX: -1032012897";
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
+        when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
@@ -155,7 +154,7 @@ public class WydotTimServiceTest {
         List<ActiveTim> activeTims = getActiveTims(true);
         HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
         sdxDelResults.put(-1032012897, null);
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
+        when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);

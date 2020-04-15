@@ -13,7 +13,6 @@ import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
@@ -23,20 +22,19 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 public class WydotTimService {
 
     protected TimRefreshConfiguration configuration;
+    private RestTemplateProvider restTemplateProvider;
+    private Gson gson = new Gson();
 
     @Autowired
     public void setConfiguration(TimRefreshConfiguration configurationRhs, RestTemplateProvider _restTemplateProvider) {
         configuration = configurationRhs;
-        restTemplate = _restTemplateProvider.GetRestTemplate();
+        restTemplateProvider = _restTemplateProvider;
     }
-
-    public RestTemplate restTemplate;
-    public Gson gson = new Gson();
 
     public void updateTimOnRsu(WydotTravelerInputData timToSend) {
 
         String timToSendJson = gson.toJson(timToSend);
-        restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+        restTemplateProvider.GetRestTemplate().put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
     }
 
     public void updateTimOnSdw(WydotTravelerInputData timToSend) {
@@ -44,7 +42,8 @@ public class WydotTimService {
 
         // send TIM
         try {
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
         }
@@ -72,7 +71,8 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(timToSend);
 
         try {
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
             System.out.println("Successfully sent POST to ODE to send new TIM: " + timToSendJson);
         } catch (RuntimeException targetException) {
             System.out.println("Failed to POST new SDX TIM: " + timToSendJson);

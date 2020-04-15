@@ -40,9 +40,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class TimRefreshControllerTest {
     private long timID = 1l;
 

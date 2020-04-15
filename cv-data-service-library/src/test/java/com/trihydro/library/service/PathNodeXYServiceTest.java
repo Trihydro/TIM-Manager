@@ -52,7 +52,7 @@ public class PathNodeXYServiceTest extends BaseServiceTest {
                 NodeXY[].class);
 
         // Act
-        NodeXY[] data = uut.GetNodeXYForPath(pathId);
+        NodeXY[] data = uut.getNodeXYForPath(pathId);
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, NodeXY[].class);

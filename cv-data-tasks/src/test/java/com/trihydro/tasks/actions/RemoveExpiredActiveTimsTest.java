@@ -19,15 +19,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ RestTemplateProvider.class })
+@RunWith(StrictStubs.class)
 public class RemoveExpiredActiveTimsTest {
 
     @Mock
@@ -46,14 +43,12 @@ public class RemoveExpiredActiveTimsTest {
 
     @Before
     public void setup() {
-        PowerMockito.mockStatic(RestTemplateProvider.class);
-
         when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 
         List<ActiveTim> expiredTims = new ArrayList<ActiveTim>();
         expiredTims.add(new ActiveTim());
         expiredTims.add(new ActiveTim());
-        Mockito.when(mockActiveTimService.getExpiredActiveTims()).thenReturn(expiredTims);
+        when(mockActiveTimService.getExpiredActiveTims()).thenReturn(expiredTims);
     }
 
     @Test

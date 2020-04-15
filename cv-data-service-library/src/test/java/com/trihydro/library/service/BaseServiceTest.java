@@ -13,14 +13,14 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 @Ignore
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class BaseServiceTest {
     @Mock
     protected RestTemplate mockRestTemplate;

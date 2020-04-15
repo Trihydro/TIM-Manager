@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmMetadata.BsmSource;
@@ -43,7 +43,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.DistanceUnits.DistanceUnitsEnu
 /**
  * Unit tests for JSON to Java Object Converters.
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class JsonToJavaConverterTest {
 
     private JsonToJavaConverter jsonToJava;

@@ -407,7 +407,7 @@ public class TimRefreshController {
         region.setDescription(regionDescrip);
 
         if (aTim.getPathId() != null) {
-            NodeXY[] nodes = pathNodeXYService.GetNodeXYForPath(aTim.getPathId());
+            NodeXY[] nodes = pathNodeXYService.getNodeXYForPath(aTim.getPathId());
             if (nodes == null || nodes.length == 0) {
                 nodes = buildNodePathFromMileposts(mps);
             }

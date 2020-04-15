@@ -49,7 +49,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
@@ -88,13 +87,13 @@ public class WydotTimService {
         activeTimHoldingService = _activeTimHoldingService;
         activeTimService = _activeTimService;
         timRsuService = _timRsuService;
-        restTemplate = _restTemplateProvider.GetRestTemplate();
+        restTemplateProvider = _restTemplateProvider;
         rsuService = _rsuService;
         timService = _timService;
     }
 
-    public RestTemplate restTemplate;
-    public Gson gson = new Gson();
+    private RestTemplateProvider restTemplateProvider;
+    private Gson gson = new Gson();
     private List<WydotRsu> rsus;
     private List<TimType> timTypes;
     WydotRsu[] rsuArr = new WydotRsu[1];
@@ -412,7 +411,7 @@ public class WydotTimService {
 
         try {
             utility.logWithDate("Sending new TIM to SDW. sat_record_id: " + recordId);
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             System.out.println("Failed to send new TIM to SDW");
             targetException.printStackTrace();
@@ -445,7 +444,7 @@ public class WydotTimService {
 
         try {
             utility.logWithDate("Updating TIM on RSU. tim_id: " + timId);
-            restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RestClientException ex) {
             utility.logWithDate("Failed to send update to RSU");
         }
@@ -474,7 +473,7 @@ public class WydotTimService {
         // send TIM
         try {
             utility.logWithDate("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
         } catch (RuntimeException targetException) {
             utility.logWithDate("exception updating tim on SDW");
             targetException.printStackTrace();
@@ -507,7 +506,7 @@ public class WydotTimService {
 
         try {
             utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
-            restTemplate.exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
+            restTemplateProvider.GetRestTemplate().exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
                     entity, String.class);
         } catch (HttpClientErrorException e) {
             System.out.println(e.getMessage());

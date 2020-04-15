@@ -9,9 +9,9 @@ public class CvDataServiceLibrary {
     protected RestTemplateProvider restTemplateProvider;
 
     @Autowired
-    public void InjectDependencies(CVRestServiceProps _cvRestServviceProps,
+    public void InjectDependencies(CVRestServiceProps _cvRestServiceProps,
             RestTemplateProvider _restTemplateProvider) {
-        this.config = _cvRestServviceProps;
+        this.config = _cvRestServiceProps;
         this.restTemplateProvider = _restTemplateProvider;
     }
 }

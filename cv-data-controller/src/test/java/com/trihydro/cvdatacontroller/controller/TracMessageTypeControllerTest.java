@@ -10,11 +10,11 @@ import com.trihydro.library.model.TracMessageType;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class TracMessageTypeControllerTest extends TestBase<TracMessageTypeController> {
     @Test
     public void GetAll_Success() throws SQLException {

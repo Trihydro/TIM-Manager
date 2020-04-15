@@ -15,10 +15,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(StrictStubs.class)
 
 public class ItisCodeServiceTest extends BaseServiceTest {
 

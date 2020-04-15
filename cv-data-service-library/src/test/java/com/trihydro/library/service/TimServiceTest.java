@@ -11,14 +11,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.ResponseEntity;
 
 import us.dot.its.jpo.ode.model.OdeMsgMetadata;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(StrictStubs.class)
 public class TimServiceTest extends BaseServiceTest {
     @Mock
     private OdeMsgMetadata odeTimMetadata;

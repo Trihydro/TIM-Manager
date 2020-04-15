@@ -12,7 +12,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 @Component
 public class PathNodeXYService extends CvDataServiceLibrary {
 
-	public NodeXY[] GetNodeXYForPath(int pathId) {
+	public NodeXY[] getNodeXYForPath(int pathId) {
 		String url = String.format("%s/path-node-xy/get-nodexy-path/%d", config.getCvRestService(), pathId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

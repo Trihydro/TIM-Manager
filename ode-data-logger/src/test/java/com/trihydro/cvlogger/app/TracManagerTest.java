@@ -36,9 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -52,8 +50,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Unit tests for TimRefreshController
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ RestTemplateProvider.class, JavaMailSenderImplProvider.class })
+@RunWith(StrictStubs.class)
 public class TracManagerTest {
 
         @Mock
@@ -78,9 +75,6 @@ public class TracManagerTest {
 
         @Before
         public void setup() {
-                PowerMockito.mockStatic(RestTemplateProvider.class);
-                PowerMockito.mockStatic(JavaMailSenderImplProvider.class);
-
                 List<TracMessageType> tmts = new ArrayList<TracMessageType>();
                 TracMessageType tmt = new TracMessageType();
                 tmt.setTracMessageType("DN");

@@ -2,46 +2,39 @@ package com.trihydro.library.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimRsu;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ RestTemplateProvider.class })
 public class TimRsuServiceTest extends BaseServiceTest {
     @Mock
     protected ResponseEntity<TimRsu[]> mockResponseEntityTimRsuArray;
     @Mock
     protected ResponseEntity<TimRsu> mockResponseEntityTimRsu;
+    @Mock
+    protected CVRestServiceProps mockCVRestServiceProps;
 
-    @Test
-    public void insertTimRsu() {
-        // Arrange
-        Long timId = -1l;
-        int rsuId = -2;
-        int rsuIndex = -3;
-        HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("null/tim-rsu/add-tim-rsu/%d/%d/%d", timId, rsuId, rsuIndex);
-        when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, Long.class)).thenReturn(mockResponseEntityLong);
+    private String baseUrl = "baseUrl";
 
-        // Act
-        Long data = TimRsuService.insertTimRsu(timId, rsuId, rsuIndex);
+    @InjectMocks
+    private TimRsuService uut;
 
-        // Assert
-        verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
-        assertEquals(new Long(1), data);
+    @Before
+    public void setupSubTest() {
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
     }
 
     @Test
@@ -52,13 +45,13 @@ public class TimRsuServiceTest extends BaseServiceTest {
         TimRsu timRsu = new TimRsu();
         timRsus[0] = timRsu;
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("null/tim-rsu/tim-id/%d", timId);
+        String url = String.format("%s/tim-rsu/tim-id/%d", baseUrl, timId);
         when(mockResponseEntityTimRsuArray.getBody()).thenReturn(timRsus);
         when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, TimRsu[].class))
                 .thenReturn(mockResponseEntityTimRsuArray);
 
         // Act
-        List<TimRsu> data = TimRsuService.getTimRsusByTimId(timId);
+        List<TimRsu> data = uut.getTimRsusByTimId(timId);
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, TimRsu[].class);
@@ -71,12 +64,12 @@ public class TimRsuServiceTest extends BaseServiceTest {
         Long timId = -1l;
         int rsuId = -2;
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("null/tim-rsu/tim-rsu/%d/%d", timId, rsuId);
+        String url = String.format("%s/tim-rsu/tim-rsu/%d/%d", baseUrl, timId, rsuId);
         when(mockResponseEntityTimRsu.getBody()).thenReturn(new TimRsu());
         when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, TimRsu.class)).thenReturn(mockResponseEntityTimRsu);
 
         // Act
-        TimRsu data = TimRsuService.getTimRsu(timId, rsuId);
+        TimRsu data = uut.getTimRsu(timId, rsuId);
 
         // Assert
         assertNotNull(data);

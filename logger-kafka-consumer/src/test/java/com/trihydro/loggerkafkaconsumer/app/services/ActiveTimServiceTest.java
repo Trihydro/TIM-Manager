@@ -25,9 +25,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
     @Spy

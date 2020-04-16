@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
@@ -25,7 +25,7 @@ import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.SerialId;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class DriverAlertDataConverterTest {
 
     @Spy

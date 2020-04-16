@@ -6,27 +6,35 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimType;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(PowerMockRunner.class)
-
+@RunWith(StrictStubs.class)
 public class TimTypeServiceTest extends BaseServiceTest {
 
     @Mock
     private ResponseEntity<TimType[]> mockResponseEntityTimTypeArray;
+    @Mock
+    protected CVRestServiceProps mockCVRestServiceProps;
 
-    private TimTypeService uut = new TimTypeService();
+    @InjectMocks
+    private TimTypeService uut;
+
+    private String baseUrl = "baseUrl";
 
     @Test
     public void selectAll() {
         // Arrange
-        String url = "null/tim-type/tim-types";
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+
+        String url = String.format("%s/tim-type/tim-types", baseUrl);
         TimType[] ttArr = new TimType[1];
         TimType tt = new TimType();
         tt.setDescription("description");

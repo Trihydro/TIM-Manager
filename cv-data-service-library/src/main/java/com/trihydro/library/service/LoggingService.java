@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component;
 public class LoggingService extends CvDataServiceLibrary {
 
     public Long LogHttpRequest(HttpLoggingModel httpLoggingModel) {
-        String url = String.format("%s/http-logging/add-http-logging", CVRestUrl);
+        String url = String.format("%s/http-logging/add-http-logging", config.getCvRestService());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<HttpLoggingModel> entity = new HttpEntity<HttpLoggingModel>(httpLoggingModel, headers);
-        ResponseEntity<Long> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity,
+        ResponseEntity<Long> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity,
                 Long.class);
         return response.getBody();
     }

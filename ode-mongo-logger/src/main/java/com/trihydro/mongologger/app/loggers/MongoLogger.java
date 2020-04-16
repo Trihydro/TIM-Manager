@@ -1,29 +1,32 @@
 package com.trihydro.mongologger.app.loggers;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import org.bson.Document;
-
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.trihydro.library.model.ConfigProperties;
-import com.mongodb.MongoCredential;
-import com.mongodb.MongoClientSettings;
 
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoClient;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MongoLogger {
 
-        private static String serverAddress;
-        private static String username;
-        private static String password;
-        private static String databaseName;
-        private static MongoCredential credential;
+        private String serverAddress;
+        private String username;
+        private String password;
+        private String databaseName;
+        private MongoCredential credential;
 
-        public static void setConfig(ConfigProperties config){
+        @Autowired
+        public void InjectDependencies(ConfigProperties config) {
                 username = config.getMongoUsername(); // the user name
                 databaseName = config.getMongoDatabase(); // the name of the database in which the user is defined
                 password = config.getMongoPassword(); // the password as a character array
@@ -31,31 +34,31 @@ public class MongoLogger {
                 credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
         }
 
-        public static void logTim(String[] timRecord) {
-                MongoLogger.logMultipleToCollection(timRecord, "tim");
+        public void logTim(String[] timRecord) {
+                logMultipleToCollection(timRecord, "tim");
         }
 
-        public static void logBsm(String[] bsmRecord) {
-                MongoLogger.logMultipleToCollection(bsmRecord, "bsm");
+        public void logBsm(String[] bsmRecord) {
+                logMultipleToCollection(bsmRecord, "bsm");
         }
 
-        public static void logDriverAlert(String[] driverAlertRecord) {
-                MongoLogger.logMultipleToCollection(driverAlertRecord, "driverAlert");
+        public void logDriverAlert(String[] driverAlertRecord) {
+                logMultipleToCollection(driverAlertRecord, "driverAlert");
         }
 
-        public static void logMultipleToCollection(String[] records, String collectionName){
+        public void logMultipleToCollection(String[] records, String collectionName) {
                 ArrayList<Document> docs = new ArrayList<Document>();
-                
+
                 for (String rec : records) {
-                        docs.add(Document.parse(rec));     
+                        docs.add(Document.parse(rec));
                 }
 
-                if(docs.size() > 0){
+                if (docs.size() > 0) {
                         MongoClient mongoClient = MongoClients.create(MongoClientSettings.builder()
-                        .applyToClusterSettings(
-                                builder -> builder.hosts(Arrays.asList(new ServerAddress(serverAddress, 27017))))
-                        .credential(credential).build());
-                        
+                                        .applyToClusterSettings(builder -> builder
+                                                        .hosts(Arrays.asList(new ServerAddress(serverAddress, 27017))))
+                                        .credential(credential).build());
+
                         MongoDatabase database = mongoClient.getDatabase(databaseName);
                         MongoCollection<Document> collection = database.getCollection(collectionName);
                         collection.insertMany(docs);

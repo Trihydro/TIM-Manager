@@ -13,7 +13,6 @@ import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
@@ -22,34 +21,35 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 @Component
 public class WydotTimService {
 
-    protected static TimRefreshConfiguration configuration;
+    protected TimRefreshConfiguration configuration;
+    private RestTemplateProvider restTemplateProvider;
+    private Gson gson = new Gson();
 
     @Autowired
-    public void setConfiguration(TimRefreshConfiguration configurationRhs) {
+    public void setConfiguration(TimRefreshConfiguration configurationRhs, RestTemplateProvider _restTemplateProvider) {
         configuration = configurationRhs;
+        restTemplateProvider = _restTemplateProvider;
     }
 
-    public static RestTemplate restTemplate = RestTemplateProvider.GetRestTemplate();
-    public static Gson gson = new Gson();
-
-    public static void updateTimOnRsu(WydotTravelerInputData timToSend) {
+    public void updateTimOnRsu(WydotTravelerInputData timToSend) {
 
         String timToSendJson = gson.toJson(timToSend);
-        restTemplate.put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+        restTemplateProvider.GetRestTemplate().put(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
     }
 
-    public static void updateTimOnSdw(WydotTravelerInputData timToSend) {
+    public void updateTimOnSdw(WydotTravelerInputData timToSend) {
         String timToSendJson = gson.toJson(timToSend);
 
         // send TIM
         try {
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
         } catch (RuntimeException targetException) {
             System.out.println("exception");
         }
     }
 
-    public static void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps) {
+    public void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps) {
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
@@ -71,7 +71,8 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(timToSend);
 
         try {
-            restTemplate.postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
             System.out.println("Successfully sent POST to ODE to send new TIM: " + timToSendJson);
         } catch (RuntimeException targetException) {
             System.out.println("Failed to POST new SDX TIM: " + timToSendJson);
@@ -79,7 +80,7 @@ public class WydotTimService {
         }
     }
 
-    public static WydotTravelerInputData updateTim(WydotTravelerInputData timToSend, Long timId,
+    public WydotTravelerInputData updateTim(WydotTravelerInputData timToSend, Long timId,
             WydotOdeTravelerInformationMessage tim) {
 
         // set TIM packetId
@@ -95,7 +96,7 @@ public class WydotTimService {
         return timToSend;
     }
 
-    public static OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {
+    public OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {
 
         Comparator<Milepost> compLat = (l1, l2) -> Double.compare(l1.getLatitude(), l2.getLatitude());
         Comparator<Milepost> compLong = (l1, l2) -> Double.compare(l1.getLongitude(), l2.getLongitude());

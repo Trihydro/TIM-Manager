@@ -3,32 +3,43 @@ package com.trihydro.library.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TracMessageSent;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(PowerMockRunner.class)
-
+@RunWith(StrictStubs.class)
 public class TracMessageSentServiceTest extends BaseServiceTest {
 
     @Mock
+    protected ResponseEntity<Long> mockResponseEntityLong;
+    @Mock
     private ResponseEntity<String[]> mockResponseEntityStringArray;
+    @Mock
+    protected CVRestServiceProps mockCVRestServiceProps;
 
-    private TracMessageSentService uut = new TracMessageSentService();
+    @InjectMocks
+    private TracMessageSentService uut;
+
+    private String baseUrl = "baseUrl";
 
     @Test
     public void selectPacketIds() {
         // Arrange
-        String url = "null/trac-message/packet-ids";
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+
+        String url = String.format("%s/trac-message/packet-ids", baseUrl);
         String[] stringArr = new String[1];
         stringArr[0] = "test";
         doReturn(stringArr).when(mockResponseEntityStringArray).getBody();
@@ -50,6 +61,7 @@ public class TracMessageSentServiceTest extends BaseServiceTest {
         tracMessageSent.setMessageText("messageText");
         String url = "null/trac-message/add-trac-message-sent";
         HttpEntity<TracMessageSent> entity = getEntity(tracMessageSent, TracMessageSent.class);
+        when(mockResponseEntityLong.getBody()).thenReturn(1l);
         doReturn(mockResponseEntityLong).when(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
 
         // Act

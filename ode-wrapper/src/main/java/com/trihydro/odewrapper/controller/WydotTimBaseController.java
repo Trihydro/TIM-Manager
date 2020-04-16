@@ -13,7 +13,6 @@ import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
@@ -40,17 +39,19 @@ public abstract class WydotTimBaseController {
     private TimType timType = null;
     private SetItisCodes setItisCodes;
     protected ActiveTimService activeTimService;
+    protected RestTemplateProvider restTemplateProvider;
 
     private List<String> routes = new ArrayList<>();
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
+            RestTemplateProvider _restTemplateProvider) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
         setItisCodes = _setItisCodes;
         activeTimService = _activeTimService;
-        CvDataServiceLibrary.setCVRestUrl(configuration.getCvRestService());
+        restTemplateProvider = _restTemplateProvider;
     }
 
     protected static Gson gson = new Gson();
@@ -236,7 +237,7 @@ public abstract class WydotTimBaseController {
         // call out to REST service to get all routes once, then use that
         if (routes.size() == 0) {
             String url = String.format("%s/routes", configuration.getCvRestService());
-            ResponseEntity<String[]> response = RestTemplateProvider.GetRestTemplate().getForEntity(url,
+            ResponseEntity<String[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
                     String[].class);
             routes = Arrays.asList(response.getBody());
         }

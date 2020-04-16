@@ -14,7 +14,6 @@ import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
-import com.trihydro.library.service.CvDataServiceLibrary;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -41,7 +40,6 @@ public class OdeLoggingConsumer {
 		this.configProperties = configProperties;
 		tracManager = _tracManager;
 		utility = _utility;
-		CvDataServiceLibrary.setCVRestUrl(configProperties.getCvRestService());
 		System.out.println("starting..............");
 		setupTopic();
 		startKafkaConsumerAsync();

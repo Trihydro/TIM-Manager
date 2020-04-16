@@ -2,6 +2,7 @@ package com.trihydro.timrefresh.config;
 
 import java.math.BigDecimal;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.ConfigProperties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,7 +14,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 @Component
 @ConfigurationProperties("config")
 @ComponentScan({ "com.trihydro.timrefresh", "com.trihydro.library.service", "com.trihydro.library.helpers" })
-public class TimRefreshConfiguration extends ConfigProperties {
+public class TimRefreshConfiguration extends ConfigProperties implements CVRestServiceProps {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth;

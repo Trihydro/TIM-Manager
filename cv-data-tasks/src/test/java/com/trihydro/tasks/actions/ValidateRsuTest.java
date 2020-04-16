@@ -17,20 +17,16 @@ import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.PopulatedRsu;
 import com.trihydro.tasks.models.RsuValidationResult;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.web.client.RestClientException;
 
+@RunWith(StrictStubs.class)
 public class ValidateRsuTest {
     @Mock
     private RsuDataService mockRsuDataService;
-
-    @Before
-    public void initMocks() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void call_noMessages() {

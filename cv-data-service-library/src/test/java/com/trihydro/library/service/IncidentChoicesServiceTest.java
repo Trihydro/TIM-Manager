@@ -7,18 +7,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.IncidentChoice;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-
-@RunWith(PowerMockRunner.class)
 
 public class IncidentChoicesServiceTest extends BaseServiceTest {
 
@@ -26,6 +24,14 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
     private ResponseEntity<IncidentChoice[]> mockResponseEntityIncidentChoiceArray;
 
     private IncidentChoice ic;
+
+    private String baseUrl = "baseUrl";
+
+    @Mock
+    private CVRestServiceProps mockConfig;
+
+    @InjectMocks
+    private IncidentChoicesService uut;
 
     @Before
     public void setupSubTest() {
@@ -35,18 +41,20 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
         ic.setDescription("description");
         icArr[0] = ic;
         doReturn(icArr).when(mockResponseEntityIncidentChoiceArray).getBody();
+
+        doReturn(baseUrl).when(mockConfig).getCvRestService();
     }
 
     @Test
     public void selectAllIncidentActions() {
         // Arrange
-        String url = "null/incident-choice/incident-actions";
+        String url = String.format("%s/incident-choice/incident-actions", baseUrl);
         HttpEntity<String> entity = getEntity(null, String.class);
         when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, IncidentChoice[].class))
                 .thenReturn(mockResponseEntityIncidentChoiceArray);
 
         // Act
-        List<IncidentChoice> data = IncidentChoicesService.selectAllIncidentActions();
+        List<IncidentChoice> data = uut.selectAllIncidentActions();
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, IncidentChoice[].class);
@@ -57,13 +65,13 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
     @Test
     public void selectAllIncidentEffects() {
         // Arrange
-        String url = "null/incident-choice/incident-effects";
+        String url = String.format("%s/incident-choice/incident-effects", baseUrl);
         HttpEntity<String> entity = getEntity(null, String.class);
         when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, IncidentChoice[].class))
                 .thenReturn(mockResponseEntityIncidentChoiceArray);
 
         // Act
-        List<IncidentChoice> data = IncidentChoicesService.selectAllIncidentEffects();
+        List<IncidentChoice> data = uut.selectAllIncidentEffects();
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, IncidentChoice[].class);
@@ -72,19 +80,19 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void selectAllIncidentProblems(){
-       // Arrange
-       String url = "null/incident-choice/incident-problems";
-       HttpEntity<String> entity = getEntity(null, String.class);
-       when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, IncidentChoice[].class))
-               .thenReturn(mockResponseEntityIncidentChoiceArray);
+    public void selectAllIncidentProblems() {
+        // Arrange
+        String url = String.format("%s/incident-choice/incident-problems", baseUrl);
+        HttpEntity<String> entity = getEntity(null, String.class);
+        when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, IncidentChoice[].class))
+                .thenReturn(mockResponseEntityIncidentChoiceArray);
 
-       // Act
-       List<IncidentChoice> data = IncidentChoicesService.selectAllIncidentProblems();
+        // Act
+        List<IncidentChoice> data = uut.selectAllIncidentProblems();
 
-       // Assert
-       verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, IncidentChoice[].class);
-       assertEquals(1, data.size());
-       assertEquals(ic, data.get(0));
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, IncidentChoice[].class);
+        assertEquals(1, data.size());
+        assertEquals(ic, data.get(0));
     }
 }

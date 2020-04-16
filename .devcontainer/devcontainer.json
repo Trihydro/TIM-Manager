@@ -19,7 +19,9 @@
     "redhat.java",
     "vscjava.vscode-maven",
     "esbenp.prettier-vscode",
-    "visualstudioexptteam.vscodeintellicode"
+    "visualstudioexptteam.vscodeintellicode",
+    "mhutchie.git-graph",
+    "ms-vsts.team"
   ],
 
   // Run post-create script after container is running and directory is mapped

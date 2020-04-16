@@ -27,12 +27,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 public class WydotTimRcControllerTest {
 

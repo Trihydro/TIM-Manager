@@ -11,6 +11,7 @@ import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
@@ -46,10 +47,14 @@ public class UtilityController extends WydotTimBaseController {
         String errMessage;
     }
 
+    private OdeService odeService;
+
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
+            OdeService _odeService, RestTemplateProvider _restTemplateProvider) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService, _restTemplateProvider);
+        this.odeService = _odeService;
     }
 
     @RequestMapping(value = "/all-rsus-tim-check", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -63,14 +68,14 @@ public class UtilityController extends WydotTimBaseController {
         // get all RSUs
         for (WydotRsu rsu : wydotTimService.getRsus()) {
 
-            List<Integer> activeTimIndicies = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
+            List<Integer> activeTimIndicies = activeTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
             Collections.sort(activeTimIndicies);
 
             RsuCheckResults rsuCheckResults = new RsuCheckResults();
             rsuCheckResults.activeTimIndicesList = activeTimIndicies;
             rsuCheckResults.rsuTarget = rsu.getRsuTarget();
 
-            TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
+            TimQuery timQuery = odeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
             if (timQuery == null || timQuery.getIndicies_set() == null) {
                 rsuCheckResultsList.add(rsuCheckResults);
                 continue;
@@ -108,7 +113,7 @@ public class UtilityController extends WydotTimBaseController {
         System.out.println(rsu.getRsuTarget());
         rsuCheckResults.rsuTarget = rsu.getRsuTarget();
 
-        com.trihydro.library.model.TimQuery timQuery = OdeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
+        com.trihydro.library.model.TimQuery timQuery = odeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
 
         if (timQuery != null && timQuery.getIndicies_set().size() > 0) {
             for (int index : timQuery.getIndicies_set()) {
@@ -117,7 +122,7 @@ public class UtilityController extends WydotTimBaseController {
             }
         }
 
-        rsuCheckResults.activeTimIndicesList = ActiveTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
+        rsuCheckResults.activeTimIndicesList = activeTimService.getActiveTimIndicesByRsu(rsu.getRsuTarget());
 
         if (rsuCheckResults.queryList.size() != 0 || rsuCheckResults.rsuIndexList.size() != 0
                 || rsuCheckResults.activeTimIndicesList.size() != 0) {
@@ -154,7 +159,7 @@ public class UtilityController extends WydotTimBaseController {
             if (rsu != null) {
 
                 // query for used indexes, then send delete for each one
-                TimQuery tq = OdeService.submitTimQuery(rsu, 1, configuration.getOdeUrl());
+                TimQuery tq = odeService.submitTimQuery(rsu, 1, configuration.getOdeUrl());
                 if (tq != null) {
 
                     for (Integer index : tq.getIndicies_set()) {

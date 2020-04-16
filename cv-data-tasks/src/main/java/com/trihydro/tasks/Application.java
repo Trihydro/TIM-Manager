@@ -11,7 +11,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CvDataServiceLibrary;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
-                RsuDataService.class })
+                RsuDataService.class, RestTemplateProvider.class })
 public class Application {
         protected static DataTasksConfiguration config;
 
@@ -44,8 +44,6 @@ public class Application {
                 cleanupActiveTims = _cleanupActiveTims;
                 sdxValidator = _sdxValidator;
                 rsuValidator = _rsuValidator;
-
-                CvDataServiceLibrary.setCVRestUrl(config.getCvRestService());
         }
 
         public static void main(String[] args) {

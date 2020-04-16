@@ -18,11 +18,14 @@ import org.springframework.web.client.HttpClientErrorException;
 public class RsuDataService {
     private RsuDataServiceProps config;
     private Utility utility;
+    private RestTemplateProvider restTemplateProvider;
 
     @Autowired
-    public void InjectDependencies(RsuDataServiceProps config, Utility utility) {
+    public void InjectDependencies(RsuDataServiceProps config, Utility utility,
+            RestTemplateProvider _restTemplateProvider) {
         this.config = config;
         this.utility = utility;
+        this.restTemplateProvider = _restTemplateProvider;
     }
 
     /**
@@ -36,7 +39,7 @@ public class RsuDataService {
         ResponseEntity<RsuIndexInfo[]> response = null;
 
         try {
-            response = RestTemplateProvider.GetRestTemplate().getForEntity(url, RsuIndexInfo[].class);
+            response = restTemplateProvider.GetRestTemplate().getForEntity(url, RsuIndexInfo[].class);
         } catch (HttpClientErrorException ex) {
             if (ex.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
                 utility.logWithDate("RSU " + ipv4Address + " is unresponsive");

@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.mongologger.app.loggers.MongoLogger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -21,20 +19,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class OdeMongoLoggingConsumer {
 
-	static PreparedStatement preparedStatement = null;
-	static Statement statement = null;
-	static ObjectMapper mapper;
+	PreparedStatement preparedStatement = null;
+	Statement statement = null;
 	private BasicConfiguration configProperties;
+	private MongoLogger mongoLogger;
 
 	@Autowired
-	public OdeMongoLoggingConsumer(BasicConfiguration configProperties) throws IOException, SQLException {
+	public OdeMongoLoggingConsumer(BasicConfiguration configProperties, MongoLogger _mongoLogger)
+			throws IOException, SQLException {
 		this.configProperties = configProperties;
-		MongoLogger.setConfig(configProperties);
+		mongoLogger = _mongoLogger;
 
 		System.out.println("starting..............");
-
-		mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		startKafkaConsumerAsync();
 	}
 
@@ -66,14 +62,16 @@ public class OdeMongoLoggingConsumer {
 							recStrings.add(record.value());
 						}
 
-						String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
+						if (recStrings.size() > 0) {
+							String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
 
-						if (topic.equals("topic.OdeTimJson")) {
-							MongoLogger.logTim(recStringArr);
-						} else if (topic.equals("topic.OdeBsmJson")) {
-							MongoLogger.logBsm(recStringArr);
-						} else if (topic.equals("topic.OdeDriverAlertJson")) {
-							MongoLogger.logDriverAlert(recStringArr);
+							if (topic.equals("topic.OdeTimJson")) {
+								mongoLogger.logTim(recStringArr);
+							} else if (topic.equals("topic.OdeBsmJson")) {
+								mongoLogger.logBsm(recStringArr);
+							} else if (topic.equals("topic.OdeDriverAlertJson")) {
+								mongoLogger.logDriverAlert(recStringArr);
+							}
 						}
 					}
 				} finally {

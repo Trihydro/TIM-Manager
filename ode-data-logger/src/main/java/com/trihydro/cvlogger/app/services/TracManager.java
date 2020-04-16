@@ -35,14 +35,17 @@ public class TracManager {
 	private TracMessageTypeService tracMessageTypeService;
 	private TracMessageSentService tracMessageSentService;
 	private JavaMailSenderImplProvider mailProvider;
+	private RestTemplateProvider restTemplateProvider;
 
 	@Autowired
 	public void InjectDependencies(JsonToJavaConverter _jsonToJava, TracMessageTypeService _tracMessageTypeService,
-			TracMessageSentService _tracMessageSentService, JavaMailSenderImplProvider _mailProvider) {
+			TracMessageSentService _tracMessageSentService, JavaMailSenderImplProvider _mailProvider,
+			RestTemplateProvider _restTemplateProvider) {
 		jsonToJava = _jsonToJava;
 		tracMessageTypeService = _tracMessageTypeService;
 		tracMessageSentService = _tracMessageSentService;
 		mailProvider = _mailProvider;
+		restTemplateProvider = _restTemplateProvider;
 	}
 
 	public boolean isDnMsgInTrac(String packetId) {
@@ -136,7 +139,7 @@ public class TracManager {
 		int count = 0;
 		while (!msgSent && count < 2) {
 			try {
-				ResponseEntity<String> response = RestTemplateProvider.GetRestTemplate().exchange(
+				ResponseEntity<String> response = restTemplateProvider.GetRestTemplate().exchange(
 						builder.build().toUri(), HttpMethod.POST, new HttpEntity<String>(null, responseHeaders),
 						String.class);
 				msgSent = true;

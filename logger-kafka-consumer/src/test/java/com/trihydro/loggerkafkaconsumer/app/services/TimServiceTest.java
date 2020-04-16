@@ -39,7 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeDataType;
@@ -61,7 +61,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class TimServiceTest extends TestBase<TimService> {
 
     @Mock
@@ -135,7 +135,6 @@ public class TimServiceTest extends TestBase<TimService> {
         doReturn(dataFrameId).when(mockDataFrameService).AddDataFrame(dFrames[0], timId);
         doNothing().when(uut).addRegion(any(), any());
         doNothing().when(uut).addDataFrameItis(any(), any());
-        doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
         doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
                 anyString(), anyString());
 
@@ -162,7 +161,6 @@ public class TimServiceTest extends TestBase<TimService> {
 
         doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
         doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
-        doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
         doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
                 anyString(), anyString());
 
@@ -447,7 +445,7 @@ public class TimServiceTest extends TestBase<TimService> {
     @Test
     public void setActiveTimByRegionName_RsuSUCCESS() {
         // Arrange
-        String regionName = "any_Prairie Center Cir_108.82122_108.66974_RSU-10.145.1.100_RC_clientId";
+        String regionName = "I_Prairie Center Cir_RSU-10.145.1.100_RC_clientId";
         TimType timType = new TimType();
         timType.setType("RC");
         timType.setTimTypeId(-1l);
@@ -469,7 +467,7 @@ public class TimServiceTest extends TestBase<TimService> {
     @Test
     public void setActiveTimByRegionName_SatSUCCESS() {
         // Arrange
-        String regionName = "any_Prairie Center Cir_108.82122_108.66974_SAT-satId_RC_clientId";
+        String regionName = "I_Prairie Center Cir_SAT-satId_RC_clientId";
         TimType timType = new TimType();
         timType.setType("RC");
         timType.setTimTypeId(-1l);

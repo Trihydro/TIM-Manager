@@ -1,12 +1,20 @@
 package com.trihydro.cvdatacontroller.model;
 
+import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.JavaMailSenderImplProvider;
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.tables.LoggingTables;
+import com.trihydro.library.tables.TimOracleTables;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-@ComponentScan({ "com.trihydro.cvdatacontroller", "com.trihydro.library.tables", "com.trihydro.library.helpers" })
+@Import({ TimOracleTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
+        JavaMailSenderImplProvider.class, LoggingTables.class })
 public class DataControllerConfigProperties {
     private String dbDriver;
     private String dbUrl;

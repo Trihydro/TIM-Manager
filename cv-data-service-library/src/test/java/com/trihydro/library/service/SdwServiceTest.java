@@ -37,7 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -86,8 +85,8 @@ public class SdwServiceTest extends BaseServiceTest {
 
     @Before
     public void setupSubTest() throws SQLException {
-        Mockito.when(mockConfig.getSdwRestUrl()).thenReturn("http://localhost:12230");
-        Mockito.when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
+        when(mockConfig.getSdwRestUrl()).thenReturn("http://localhost:12230");
+        when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
     }
 
     @Test
@@ -98,15 +97,15 @@ public class SdwServiceTest extends BaseServiceTest {
 
     @Test
     public void getSdwDataByRecordId_nullApiKey() {
-        Mockito.when(mockConfig.getSdwApiKey()).thenReturn(null);
+        when(mockConfig.getSdwApiKey()).thenReturn(null);
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId("record");
         Assert.isNull(asdd, "AdvisorySituationDeposit should be null");
     }
 
     @Test
     public void getSdwDataByRecordId_handleException() throws IOException {
-        Mockito.when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
-        Mockito.when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
+        when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
+        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenThrow(new IOException());
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId("record");
         Assert.isNull(asdd, "AdvisorySituationDeposit should be null");
@@ -114,12 +113,12 @@ public class SdwServiceTest extends BaseServiceTest {
 
     @Test
     public void getSdwDataByRecordId_success() throws IOException, Exception {
-        Mockito.when(mockBufferedReader.readLine()).thenReturn("testValue");
-        Mockito.when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
-        Mockito.when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
+        when(mockBufferedReader.readLine()).thenReturn("testValue");
+        when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
+        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenReturn(mockUrlConn);
         AdvisorySituationDataDeposit asdd_orig = new AdvisorySituationDataDeposit();
-        Mockito.when(mockObjMapper.readValue("testValue", AdvisorySituationDataDeposit.class)).thenReturn(asdd_orig);
+        when(mockObjMapper.readValue("testValue", AdvisorySituationDataDeposit.class)).thenReturn(asdd_orig);
 
         PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(mockISReader);
         PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(mockBufferedReader);
@@ -152,7 +151,7 @@ public class SdwServiceTest extends BaseServiceTest {
     public void deleteSdxDataBySatRecordId_nullApiKey() {
         List<String> satNames = new ArrayList<String>();
         satNames.add("A9184436");
-        Mockito.when(mockConfig.getSdwApiKey()).thenReturn(null);
+        when(mockConfig.getSdwApiKey()).thenReturn(null);
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
         verify(mockUtility).logWithDate("Attempting to delete satellite records failed due to null apiKey");
         assertNull(results);
@@ -162,7 +161,7 @@ public class SdwServiceTest extends BaseServiceTest {
     public void deleteSdxDataBySatRecordId_handleException() throws IOException {
         List<String> satNames = new ArrayList<String>();
         satNames.add("A9184436");
-        Mockito.when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
+        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenThrow(new IOException());
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
         assertNull(results);
@@ -175,13 +174,13 @@ public class SdwServiceTest extends BaseServiceTest {
         HashMap<Integer, Boolean> hMap = new HashMap<Integer, Boolean>();
         hMap.put(-1, true);
 
-        Mockito.when(mockStringStream.collect(any())).thenReturn("{\"-1101625306\":null}");
-        Mockito.when(mockBufferedReader.lines()).thenReturn(mockStringStream);
+        when(mockStringStream.collect(any())).thenReturn("{\"-1101625306\":null}");
+        when(mockBufferedReader.lines()).thenReturn(mockStringStream);
         PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(mockISReader);
         PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(mockBufferedReader);
-        Mockito.when(mockUrlConn.getOutputStream()).thenReturn(mockOutputStream);
-        Mockito.when(mockUrlConn.getResponseCode()).thenReturn(200);
-        Mockito.when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
+        when(mockUrlConn.getOutputStream()).thenReturn(mockOutputStream);
+        when(mockUrlConn.getResponseCode()).thenReturn(200);
+        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
                 .thenReturn(mockUrlConn);
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
         assertNotNull(results);
@@ -246,7 +245,7 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockDecodeResponse.getBody()).thenReturn(null);
 
         // Act
-        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("");
+        sdwService.getItisCodesFromAdvisoryMessage("");
     }
 
     @Test

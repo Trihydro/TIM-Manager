@@ -18,7 +18,7 @@ import us.dot.its.jpo.ode.util.JsonUtils;
 @Component
 public class TimDataConverter {
 
-    public static Gson gson = new Gson();
+    public Gson gson = new Gson();
     private JsonToJavaConverter jsonToJava;
 
     @Autowired

@@ -42,11 +42,13 @@ public class SdwService {
     public Gson gson = new Gson();
     private SdwProps configProperties;
     private Utility utility;
+    private RestTemplateProvider restTemplateProvider;
 
     @Autowired
-    public void InjectDependencies(SdwProps _config, Utility _utility) {
+    public void InjectDependencies(SdwProps _config, Utility _utility, RestTemplateProvider _restTemplateProvider) {
         configProperties = _config;
         utility = _utility;
+        restTemplateProvider = _restTemplateProvider;
     }
 
     public AdvisorySituationDataDeposit getSdwDataByRecordId(String recordId) {
@@ -94,7 +96,7 @@ public class SdwService {
 
         HttpEntity<SDXQuery> entity = new HttpEntity<SDXQuery>(null, headers);
         try {
-            ResponseEntity<AdvisorySituationDataDeposit[]> response = RestTemplateProvider.GetRestTemplate()
+            ResponseEntity<AdvisorySituationDataDeposit[]> response = restTemplateProvider.GetRestTemplate()
                     .exchange(url, HttpMethod.GET, entity, AdvisorySituationDataDeposit[].class);
 
             results = Arrays.asList(response.getBody());
@@ -129,7 +131,7 @@ public class SdwService {
         // Execute request
         try {
             HttpEntity<SDXDecodeRequest> entity = new HttpEntity<SDXDecodeRequest>(request, headers);
-            ResponseEntity<SDXDecodeResponse> response = RestTemplateProvider.GetRestTemplate().exchange(url,
+            ResponseEntity<SDXDecodeResponse> response = restTemplateProvider.GetRestTemplate().exchange(url,
                     HttpMethod.POST, entity, SDXDecodeResponse.class);
 
             decodeResponse = response.getBody();

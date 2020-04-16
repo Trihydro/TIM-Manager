@@ -19,40 +19,36 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ActiveTimService.class, RestTemplateProvider.class })
+@RunWith(StrictStubs.class)
 public class RemoveExpiredActiveTimsTest {
 
     @Mock
     private DataTasksConfiguration mockConfig;
-
     @Mock
     private RestTemplate mockRestTemplate;
-
     @Mock
     Utility mockUtility;
+    @Mock
+    ActiveTimService mockActiveTimService;
+    @Mock
+    RestTemplateProvider mockRestTemplateProvider;
 
     @InjectMocks
     public RemoveExpiredActiveTims uut;
 
     @Before
     public void setup() {
-        PowerMockito.mockStatic(ActiveTimService.class);
-        PowerMockito.mockStatic(RestTemplateProvider.class);
-
-        when(RestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
+        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 
         List<ActiveTim> expiredTims = new ArrayList<ActiveTim>();
         expiredTims.add(new ActiveTim());
         expiredTims.add(new ActiveTim());
-        Mockito.when(ActiveTimService.getExpiredActiveTims()).thenReturn(expiredTims);
+        when(mockActiveTimService.getExpiredActiveTims()).thenReturn(expiredTims);
     }
 
     @Test

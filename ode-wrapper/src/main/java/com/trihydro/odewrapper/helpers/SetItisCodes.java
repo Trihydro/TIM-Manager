@@ -14,6 +14,7 @@ import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,14 +22,22 @@ public class SetItisCodes {
     private List<IncidentChoice> incidentProblems;
     private List<IncidentChoice> incidentEffects;
     private List<IncidentChoice> incidentActions;
+    private IncidentChoicesService incidentChoicesService;
+    private ItisCodeService itisCodeService;
 
     private List<ItisCode> itisCodes;
+
+    @Autowired
+    public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService) {
+        itisCodeService = _itisCodeService;
+        incidentChoicesService = _incidentChoicesService;
+    }
 
     public List<ItisCode> getItisCodes() {
         if (itisCodes != null)
             return itisCodes;
         else {
-            itisCodes = ItisCodeService.selectAll();
+            itisCodes = itisCodeService.selectAll();
             return itisCodes;
         }
     }
@@ -232,7 +241,7 @@ public class SetItisCodes {
         if (incidentProblems != null)
             return incidentProblems;
         else {
-            incidentProblems = IncidentChoicesService.selectAllIncidentProblems();
+            incidentProblems = incidentChoicesService.selectAllIncidentProblems();
             return incidentProblems;
         }
     }
@@ -241,7 +250,7 @@ public class SetItisCodes {
         if (incidentEffects != null)
             return incidentEffects;
         else {
-            incidentEffects = IncidentChoicesService.selectAllIncidentEffects();
+            incidentEffects = incidentChoicesService.selectAllIncidentEffects();
             return incidentEffects;
         }
     }
@@ -250,7 +259,7 @@ public class SetItisCodes {
         if (incidentActions != null)
             return incidentActions;
         else {
-            incidentActions = IncidentChoicesService.selectAllIncidentActions();
+            incidentActions = incidentChoicesService.selectAllIncidentActions();
             return incidentActions;
         }
     }

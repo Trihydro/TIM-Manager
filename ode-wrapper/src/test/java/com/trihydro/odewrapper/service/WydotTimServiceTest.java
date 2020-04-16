@@ -24,6 +24,7 @@ import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimRsuService;
+import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 
@@ -32,53 +33,46 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ActiveTimService.class, TimRsuService.class, RsuService.class, RestTemplateProvider.class })
+@RunWith(StrictStubs.class)
 public class WydotTimServiceTest {
 
     @Mock
     BasicConfiguration mockBasicConfiguration;
-
     @Mock
     EmailHelper mockEmailHelper;
-
     @Mock
     TimTypeService mockTimTypeService;
-
     @Mock
     SdwService mockSdwService;
-
     @Mock
     Utility mockUtility;
-
     @Mock
     OdeService mockOdeService;
-
     @Mock
     RestTemplate restTemplate;
+    @Mock
+    ActiveTimService mockActiveTimService;
+    @Mock
+    TimRsuService mockTimRsuService;
+    @Mock
+    RestTemplateProvider mockRestTemplateProvider;
+    @Mock
+    RsuService mockRsuService;
+    @Mock
+    TimService mockTimService;
 
     @InjectMocks
     WydotTimService uut;
 
     @Before
     public void setup() {
-        PowerMockito.mockStatic(ActiveTimService.class);
-        PowerMockito.mockStatic(TimRsuService.class);
-        PowerMockito.mockStatic(RsuService.class);
-        PowerMockito.mockStatic(RestTemplateProvider.class);
-
-        when(RestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
-
         String[] addresses = new String[1];
         addresses[0] = "unit@test.com";
-        Mockito.when(mockBasicConfiguration.getAlertAddresses()).thenReturn(addresses);
+        when(mockBasicConfiguration.getAlertAddresses()).thenReturn(addresses);
     }
 
     private List<ActiveTim> getActiveTims(boolean isSat) {
@@ -113,23 +107,21 @@ public class WydotTimServiceTest {
         timRsu.setRsuId(-10l);
         timRsu.setRsuIndex(-1);
         timRsus.add(timRsu);
-        when(TimRsuService.getTimRsusByTimId(-10l)).thenReturn(new ArrayList<>());
-        when(TimRsuService.getTimRsusByTimId(-20l)).thenReturn(timRsus);
+        when(mockTimRsuService.getTimRsusByTimId(-10l)).thenReturn(new ArrayList<>());
+        when(mockTimRsuService.getTimRsusByTimId(-20l)).thenReturn(timRsus);
         ArrayList<WydotRsu> allRsus = new ArrayList<>();
         WydotRsu wydotRsu = new WydotRsu();
         wydotRsu.setRsuId(-10);
         wydotRsu.setRsuIndex(-1);
         allRsus.add(wydotRsu);
-        Mockito.when(RsuService.selectAll()).thenReturn(allRsus);
+        when(mockRsuService.selectAll()).thenReturn(allRsus);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic(ActiveTimService.class);
-        ActiveTimService.deleteActiveTim(-1l);
-        PowerMockito.verifyStatic(ActiveTimService.class);
-        ActiveTimService.deleteActiveTim(-2l);
+        verify(mockActiveTimService).deleteActiveTim(-1l);
+        verify(mockActiveTimService).deleteActiveTim(-2l);
     }
 
     @Test
@@ -141,7 +133,7 @@ public class WydotTimServiceTest {
         sdxDelResults.put(-2032126074, true);
         String subject = "SDX Delete Fail";
         String body = "The following recordIds failed to delete from the SDX: -1032012897";
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
+        when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
@@ -150,12 +142,10 @@ public class WydotTimServiceTest {
         verify(mockEmailHelper).SendEmail(mockBasicConfiguration.getAlertAddresses(), null, subject, body,
                 mockBasicConfiguration.getMailPort(), mockBasicConfiguration.getMailHost(),
                 mockBasicConfiguration.getFromEmail());
-        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-2l);
-        ActiveTimService.deleteActiveTimsById(delIds);
-        PowerMockito.verifyStatic(TimRsuService.class, never());
-        TimRsuService.getTimRsusByTimId(isA(Long.class));
+        verify(mockActiveTimService).deleteActiveTimsById(delIds);
+        verify(mockTimRsuService, never()).getTimRsusByTimId(isA(Long.class));
     }
 
     @Test
@@ -164,18 +154,15 @@ public class WydotTimServiceTest {
         List<ActiveTim> activeTims = getActiveTims(true);
         HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
         sdxDelResults.put(-1032012897, null);
-        Mockito.when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
+        when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
 
         // Act
         uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        PowerMockito.verifyStatic(ActiveTimService.class);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-1l);
         delIds.add(-2l);
-        ActiveTimService.deleteActiveTimsById(delIds);
-        PowerMockito.verifyStatic(TimRsuService.class, never());
-        TimRsuService.getTimRsusByTimId(isA(Long.class));
+        verify(mockActiveTimService).deleteActiveTimsById(delIds);
     }
 }

@@ -1,0 +1,71 @@
+{
+  "event-element-details": {
+    "event-element-detail": {
+      "event-times": {
+        "update-time": {
+          "date": 20200412,
+          "offset": "-0600",
+          "time": 140821
+        }
+      },
+      "event-descriptions": {
+        "event-description": {
+          "phrase": {
+            "pavement-conditions": "dry pavement"
+          }
+        }
+      },
+      "event-locations": {
+        "event-location": {
+          "location-on-link": {
+            "link-ownership": "WYDOT",
+            "secondary-location": {
+              "geo-location": {
+                "latitude": 43175668,
+                "longitude": -111001784
+              },
+              "linear-reference": 119.2,
+              "point-name": "Alpine Jct"
+            },
+            "link-designator": "US89",
+            "primary-location": {
+              "geo-location": {
+                "latitude": 42739996,
+                "longitude": -110933278
+              },
+              "linear-reference": 86.24,
+              "point-name": "Afton"
+            },
+            "link-direction": "both directions"
+          }
+        }
+      }
+    }
+  },
+  "message-header": {
+    "message-number": 166166271,
+    "organization-sending": {
+      "organization-id": "WYDOT"
+    },
+    "message-type-version": 2,
+    "message-time-stamp": {
+      "date": 20200414,
+      "offset": "-0600",
+      "time": 101720
+    }
+  },
+  "event-reference": {
+    "update-time": {
+      "date": 20200412,
+      "offset": "-0600",
+      "time": 140821
+    },
+    "event-id": "AFTNUS89NB",
+    "event-update": 418
+  },
+  "event-headline": {
+    "headline": {
+      "system-information": "travel information"
+    }
+  }
+}

@@ -12,6 +12,7 @@ public class WydotTimRw extends WydotTim {
     private String schedEnd;
     private String highway;
     private String surface;
+    private Integer projectKey;
     private List<Buffer> buffers;
     private Integer[] advisory;
 
@@ -82,5 +83,13 @@ public class WydotTimRw extends WydotTim {
 
     public void setBuffers(List<Buffer> buffers) {
         this.buffers = buffers;
+    }
+
+    public Integer getProjectKey() {
+        return projectKey;
+    }
+
+    public void setProjectKey(Integer projectKey) {
+        this.projectKey = projectKey;
     }
 }

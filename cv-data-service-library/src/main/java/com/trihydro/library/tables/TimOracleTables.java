@@ -200,6 +200,7 @@ public class TimOracleTables extends OracleTables {
             activeTimHoldingTable.add("END_LONGITUDE");
             activeTimHoldingTable.add("RSU_INDEX");
             activeTimHoldingTable.add("DATE_CREATED");
+            activeTimHoldingTable.add("PROJECT_KEY");
             return activeTimHoldingTable;
         }
     }

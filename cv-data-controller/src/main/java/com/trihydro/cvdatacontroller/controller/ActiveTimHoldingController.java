@@ -94,6 +94,8 @@ public class ActiveTimHoldingController extends BaseController {
                 } else if (col.equals("DATE_CREATED")) {
                     sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
                             LocalDateTime.parse(activeTimHolding.getDateCreated(), DateTimeFormatter.ISO_DATE_TIME)));
+                } else if (col.equals("PROJECT_KEY")) {
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
                 }
 
                 fieldNum++;

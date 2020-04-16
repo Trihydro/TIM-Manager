@@ -18,14 +18,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ RestTemplateProvider.class })
+@RunWith(StrictStubs.class)
 public class TmddServiceTest extends BaseServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -46,10 +44,10 @@ public class TmddServiceTest extends BaseServiceTest {
 
         // Using live GsonFactory to test "root node removal" behavior
         uut = new TmddService();
-        uut.InjectDependencies(mockConfig, new GsonFactory());
+        uut.InjectDependencies(mockConfig, new GsonFactory(), mockRestTemplateProvider);
 
         // Configure standard mock behavior
-        when(RestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
+        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
         doReturn(mockResponse).when(mockRestTemplate).exchange(eq("endpoint/tmdd/all"), eq(HttpMethod.GET), any(),
                 eq(String.class));
     }

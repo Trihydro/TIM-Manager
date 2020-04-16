@@ -22,11 +22,14 @@ import org.springframework.stereotype.Component;
 public class TmddService {
     private TmddProps config;
     private GsonFactory gsonFactory;
+    private RestTemplateProvider restTemplateProvider;
 
     @Autowired
-    public void InjectDependencies(TmddProps _config, GsonFactory _gsonFactory) {
+    public void InjectDependencies(TmddProps _config, GsonFactory _gsonFactory,
+            RestTemplateProvider _restTemplateProvider) {
         this.config = _config;
         this.gsonFactory = _gsonFactory;
+        this.restTemplateProvider = _restTemplateProvider;
     }
 
     public List<FullEventUpdate> getTmddEvents() throws Exception {
@@ -38,7 +41,7 @@ public class TmddService {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         // Get response
-        ResponseEntity<String> response = RestTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity,
+        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity,
                 String.class);
         String body = response.getBody();
 

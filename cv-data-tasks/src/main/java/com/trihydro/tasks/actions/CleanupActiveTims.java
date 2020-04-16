@@ -21,11 +21,15 @@ import org.springframework.stereotype.Component;
 public class CleanupActiveTims implements Runnable {
     private DataTasksConfiguration configuration;
     private Utility utility;
+    private ActiveTimService activeTimService;
+    private RestTemplateProvider restTemplateProvider;
 
     @Autowired
-    public void InjectDependencies(DataTasksConfiguration configuration, Utility _utility) {
+    public void InjectDependencies(DataTasksConfiguration configuration, Utility _utility,
+            ActiveTimService _activeTimService, RestTemplateProvider _restTemplateProvider) {
         this.configuration = configuration;
         utility = _utility;
+        activeTimService = _activeTimService;
     }
 
     public void run() {
@@ -36,14 +40,14 @@ public class CleanupActiveTims implements Runnable {
             List<ActiveTim> tmp = null;
 
             // select active tims missing ITIS codes
-            tmp = ActiveTimService.getActiveTimsMissingItisCodes();
+            tmp = activeTimService.getActiveTimsMissingItisCodes();
             if (tmp.size() > 0) {
                 utility.logWithDate("Found " + tmp.size() + " Active TIMs missing ITIS Codes", this.getClass());
                 activeTims.addAll(tmp);
             }
 
             // add active tims that weren't sent to the SDX or any RSUs
-            tmp = ActiveTimService.getActiveTimsNotSent();
+            tmp = activeTimService.getActiveTimsNotSent();
             if (tmp.size() > 0) {
                 utility.logWithDate("Found " + tmp.size() + " Active TIMs that weren't distributed", this.getClass());
                 activeTims.addAll(tmp);
@@ -69,7 +73,7 @@ public class CleanupActiveTims implements Runnable {
                 utility.logWithDate(
                         "CleanupActiveTims - Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }",
                         this.getClass());
-                RestTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
+                restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {

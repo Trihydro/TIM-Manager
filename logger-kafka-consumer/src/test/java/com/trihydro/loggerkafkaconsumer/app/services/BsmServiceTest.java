@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
@@ -46,7 +46,7 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSize;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class BsmServiceTest extends TestBase<BsmService> {
 
     @Spy

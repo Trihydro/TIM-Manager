@@ -24,7 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -32,13 +31,14 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 @Component
 public class OdeService {
 
-    public static Gson gson = new Gson();
-    public static RestTemplate restTemplate = new RestTemplate();
+    private Gson gson = new Gson();
+    private RestTemplateProvider restTemplateProvider;
     private Utility utility;
 
     @Autowired
-    public void InjectDependencies(Utility _utility) {
+    public void InjectDependencies(Utility _utility, RestTemplateProvider _restTemplateProvider) {
         utility = _utility;
+        restTemplateProvider = _restTemplateProvider;
     }
 
     public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, String odeUrl, Integer index) {
@@ -64,7 +64,7 @@ public class OdeService {
         // send TIM if not a test
         try {
             utility.logWithDate("Sending new TIM to RSU");
-            restTemplate.postForObject(odeUrl + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(odeUrl + "/tim", timToSendJson, String.class);
             TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
             System.out.println("Send new TIM to RSU exception: " + targetException.getMessage());
@@ -73,7 +73,7 @@ public class OdeService {
         }
     }
 
-    public static Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
+    public Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
 
         List<Integer> setIndexList = new ArrayList<Integer>();
 
@@ -90,7 +90,7 @@ public class OdeService {
         return null;
     }
 
-    public static TimQuery submitTimQuery(WydotRsu rsu, int counter, String odeUrl) {
+    public TimQuery submitTimQuery(WydotRsu rsu, int counter, String odeUrl) {
 
         // stop if this fails twice
         if (counter == 2)
@@ -106,7 +106,8 @@ public class OdeService {
         String responseStr = null;
 
         try {
-            responseStr = restTemplate.postForObject(odeUrl + "/tim/query", entity, String.class);
+            responseStr = restTemplateProvider.GetRestTemplate().postForObject(odeUrl + "/tim/query", entity,
+                    String.class);
         } catch (RestClientException e) {
             return submitTimQuery(rsu, counter + 1, odeUrl);
         }
@@ -132,7 +133,7 @@ public class OdeService {
         return timQuery;
     }
 
-    public static SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
+    public SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
         SNMP snmp = new SNMP();
         snmp.setChannel(178);
         snmp.setRsuid("83");// RSU wants hex 83, and the ODE is expecting a hex value to parse. This parses

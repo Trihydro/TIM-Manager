@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.ContentEnum;
@@ -39,8 +40,10 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
     @Autowired
     public WydotTimParkingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService);
+            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
+            RestTemplateProvider _restTemplateProvider) {
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
+                _restTemplateProvider);
     }
 
     @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")

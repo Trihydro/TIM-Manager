@@ -11,9 +11,9 @@ import com.trihydro.library.model.ItisCode;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(StrictStubs.class)
 public class ItisCodeServiceTest extends TestBase<ItisCodeService> {
 
     @Test

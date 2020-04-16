@@ -3,8 +3,9 @@ package com.trihydro.rsudatacontroller.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,11 +21,13 @@ import com.trihydro.rsudatacontroller.process.ProcessFactory;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
+@RunWith(StrictStubs.class)
 public class RsuServiceTest {
     @Mock
     ProcessFactory mockProcessFactory;
@@ -39,13 +42,14 @@ public class RsuServiceTest {
     @Mock
     Utility mockUtility;
 
+    @Mock
+    InputStream mockInputStream;
+
     @InjectMocks
     RsuService uut;
 
     @Before
     public void initMocks() {
-        MockitoAnnotations.initMocks(this);
-
         when(mockConfig.getSnmpRetries()).thenReturn(0);
         when(mockConfig.getSnmpTimeoutSeconds()).thenReturn(10);
         when(mockConfig.getSnmpUserName()).thenReturn("username");
@@ -61,7 +65,7 @@ public class RsuServiceTest {
         // Arrange
         InputStream output = getInputStream("iso.0.15628.4.1.4.1.7.2 = Hex-STRING: 07 E4 03 14 11 3B",
                 "iso.0.15628.4.1.4.1.7.3 = Hex-STRING: 07 E4 03 14 13 1E");
-        when(mockProcess.getInputStream()).thenReturn(output);
+        doReturn(output).when(mockProcess).getInputStream();
 
         // Act
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
@@ -82,7 +86,7 @@ public class RsuServiceTest {
     public void getAllDeliveryStartTimes_single() throws Exception {
         // Arrange
         InputStream output = getInputStream("iso.0.15628.4.1.4.1.7.2 = Hex-STRING: 07 E4 03 14 11 3B ");
-        when(mockProcess.getInputStream()).thenReturn(output);
+        doReturn(output).when(mockProcess).getInputStream();
 
         // Act
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
@@ -101,7 +105,7 @@ public class RsuServiceTest {
     public void getAllDeliveryStartTimes_none() throws Exception {
         // Arrange
         InputStream output = getInputStream("");
-        when(mockProcess.getInputStream()).thenReturn(output);
+        doReturn(output).when(mockProcess).getInputStream();
 
         // Act
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
@@ -118,7 +122,7 @@ public class RsuServiceTest {
     public void getAllDeliveryStartTimes_snmpTimeout() throws Exception {
         // Arrange
         InputStream output = getInputStream("snmpwalk: Timeout");
-        when(mockProcess.getInputStream()).thenReturn(output);
+        doReturn(output).when(mockProcess).getInputStream();
 
         // Act
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
@@ -141,9 +145,10 @@ public class RsuServiceTest {
     @Test(expected = IOException.class)
     public void getAllDeliveryStartTimes_throwsIOException() throws Exception {
         // Arrange
-        InputStream mockInputStream = mock(InputStream.class);
-        when(mockInputStream.read()).thenThrow(new IOException("error occurred reading input stream"));
-        when(mockProcess.getInputStream()).thenReturn(mockInputStream);
+        // InputStream mockInputStream = mock(InputStream.class);
+        doThrow(new IOException("error occurred reading input stream")).when(mockInputStream).read(any(), anyInt(),
+                anyInt());
+        doReturn(mockInputStream).when(mockProcess).getInputStream();
 
         // Act
         uut.getAllDeliveryStartTimes("0.0.0.0");

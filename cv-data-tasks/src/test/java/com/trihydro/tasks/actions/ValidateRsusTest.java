@@ -2,7 +2,7 @@ package com.trihydro.tasks.actions;
 
 import static com.trihydro.tasks.TestHelper.importJsonArray;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,14 +31,16 @@ import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestClientException;
 
+@RunWith(StrictStubs.class)
 public class ValidateRsusTest {
     @Mock
     private DataTasksConfiguration mockConfig;
@@ -74,8 +76,6 @@ public class ValidateRsusTest {
 
     @Before
     public void setup() throws InterruptedException {
-        MockitoAnnotations.initMocks(this);
-
         // Configure mock threadpool behavior
         when(mockExecutorFactory.getFixedThreadPool(any(int.class))).thenReturn(mockExecutorService);
         when(mockExecutorService.awaitTermination(1, TimeUnit.SECONDS)).thenReturn(true);

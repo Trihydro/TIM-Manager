@@ -1,7 +1,7 @@
 package com.trihydro.rsudatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,14 +12,15 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.service.RsuService;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@RunWith(StrictStubs.class)
 public class RsuTimControllerTest {
     @Mock
     RsuService mockRsuService;
@@ -29,11 +30,6 @@ public class RsuTimControllerTest {
 
     @InjectMocks
     RsuTimController uut;
-
-    @Before
-    public void initMocks() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void getAllDeliveryStartTimes_success() throws Exception {

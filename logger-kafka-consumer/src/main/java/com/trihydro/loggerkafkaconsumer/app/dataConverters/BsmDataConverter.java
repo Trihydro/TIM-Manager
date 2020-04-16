@@ -13,7 +13,7 @@ import us.dot.its.jpo.ode.model.OdeData;
 @Component
 public class BsmDataConverter {
 
-    public static Gson gson = new Gson();
+    public Gson gson = new Gson();
     private JsonToJavaConverter jsonToJava;
 
     @Autowired

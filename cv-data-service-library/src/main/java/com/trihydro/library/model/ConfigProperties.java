@@ -1,6 +1,6 @@
 package com.trihydro.library.model;
 
-public class ConfigProperties implements SdwProps, RsuDataServiceProps {
+public class ConfigProperties implements SdwProps, RsuDataServiceProps, TmddProps {
 
     private String odeUrl;
     private String dbDriver;
@@ -27,6 +27,10 @@ public class ConfigProperties implements SdwProps, RsuDataServiceProps {
     private String depositTopic;
     private String depositGroup;
     private String rsuDataServiceUrl;
+
+    private String tmddUrl;
+    private String tmddUser;
+    private String tmddPassword;
 
     public String getOdeUrl() {
         return odeUrl;
@@ -198,5 +202,29 @@ public class ConfigProperties implements SdwProps, RsuDataServiceProps {
 
     public void setRsuDataServiceUrl(String rsuDataServiceUrl) {
         this.rsuDataServiceUrl = rsuDataServiceUrl;
+    }
+
+    public String getTmddUrl() {
+        return tmddUrl;
+    }
+
+    public void setTmddUrl(String tmddUrl) {
+        this.tmddUrl = tmddUrl;
+    }
+
+    public String getTmddUser() {
+        return tmddUser;
+    }
+
+    public void setTmddUser(String tmddUser) {
+        this.tmddUser = tmddUser;
+    }
+
+    public String getTmddPassword() {
+        return tmddPassword;
+    }
+
+    public void setTmddPassword(String tmddPassword) {
+        this.tmddPassword = tmddPassword;
     }
 }

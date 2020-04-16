@@ -38,6 +38,7 @@ import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 
 import org.apache.commons.lang3.StringUtils;
@@ -90,10 +91,10 @@ public class WydotTimService {
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public WydotTravelerInputData createTim(WydotTim wydotTim, String direction, String timTypeStr,
-            String startDateTime, String endDateTime) {
+            String startDateTime, String endDateTime, ContentEnum content) {
 
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration);
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration, content);
 
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0]

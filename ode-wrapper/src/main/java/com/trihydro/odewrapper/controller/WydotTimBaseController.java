@@ -17,6 +17,7 @@ import com.trihydro.library.service.CvDataServiceLibrary;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
@@ -436,16 +437,16 @@ public abstract class WydotTimBaseController {
         return false;
     }
 
-    public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
-            Integer pk) {
+    public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk,
+            ContentEnum content) {
 
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
             // i
-            createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk);
+            createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk, content);
             // d
-            createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk);
+            createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk, content);
         } else {
-            createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk);
+            createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk, content);
         }
     }
 
@@ -472,10 +473,10 @@ public abstract class WydotTimBaseController {
 
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, String direction, TimType timType, String startDateTime,
-            String endDateTime, Integer pk) {
+            String endDateTime, Integer pk, ContentEnum content) {
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
-                startDateTime, endDateTime);
+                startDateTime, endDateTime, content);
         String regionNamePrev = direction + "_" + wydotTim.getRoute();
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {

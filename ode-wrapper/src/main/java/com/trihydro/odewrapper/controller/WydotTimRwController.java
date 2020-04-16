@@ -13,6 +13,7 @@ import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
@@ -275,10 +276,18 @@ public class WydotTimRwController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 for (WydotTimRw tim : timsToSend) {
-                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
+                    // check for speed limit, itis code 268
+                    if (tim.getAdvisory().length == 3 && tim.getAdvisory()[0] == 268) {
+                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
+                                ContentEnum.speedLimit);
+                    } else {
+                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
+                                ContentEnum.advisory);
+                    }
                 }
             }
         }).start();
+
     }
 
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")

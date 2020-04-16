@@ -11,6 +11,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimParkingList;
@@ -131,10 +132,11 @@ public class WydotTimParkingController extends WydotTimBaseController {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimParking wydotTim : wydotTims) {
                     if (wydotTim.getDirection().equals("b")) {
-                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, null);
-                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, null);
+                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, null, ContentEnum.advisory);
+                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, null, ContentEnum.advisory);
                     } else {
-                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null, null);
+                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null, null,
+                                ContentEnum.advisory);
                     }
                 }
             }

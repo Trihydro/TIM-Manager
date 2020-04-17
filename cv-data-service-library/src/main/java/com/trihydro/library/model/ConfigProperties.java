@@ -13,7 +13,6 @@ public class ConfigProperties implements SdwProps, RsuDataServiceProps, TmddProp
     private String mongoPassword;
     private String hostname;
     private String mongoHost;
-    private String tracUrl;
 
     private String sdwRestUrl;
     private String sdwApiKey;
@@ -186,14 +185,6 @@ public class ConfigProperties implements SdwProps, RsuDataServiceProps, TmddProp
 
     public void setMongoHost(String mongoHost) {
         this.mongoHost = mongoHost;
-    }
-
-    public void setTracUrl(String url) {
-        this.tracUrl = url;
-    }
-
-    public String getGetTracUrl() {
-        return this.tracUrl;
     }
 
     public String getRsuDataServiceUrl() {

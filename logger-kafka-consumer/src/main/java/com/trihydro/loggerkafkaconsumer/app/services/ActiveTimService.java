@@ -57,7 +57,15 @@ public class ActiveTimService extends BaseService {
                                 LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
                     else
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
-                else if (col.equals("TIM_TYPE_ID"))
+                else if (col.equals("EXPIRATION_DATE")) {
+                    if (activeTim.getExpirationDateTime() != null) {
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
+                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTim.getExpirationDateTime(),
+                                        DateTimeFormatter.ISO_DATE_TIME)));
+                    } else {
+                        preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
+                    }
+                } else if (col.equals("TIM_TYPE_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimTypeId());
                 else if (col.equals("ROUTE"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getRoute());
@@ -196,24 +204,25 @@ public class ActiveTimService extends BaseService {
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
                 activeTim.setStartDateTime(rs.getString("TIM_START"));
+                activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));
-                
-                Coordinate startPoint = null;
-				Coordinate endPoint = null;
-				double startLat = rs.getDouble("START_LATITUDE");
-				double startLon = rs.getDouble("START_LONGITUDE");
-				if (!rs.wasNull()) {
-					startPoint = new Coordinate(startLat, startLon);
-				}
-				activeTim.setStartPoint(startPoint);
 
-				double endLat = rs.getDouble("END_LATITUDE");
-				double endLon = rs.getDouble("END_LONGITUDE");
-				if (!rs.wasNull()) {
-					endPoint = new Coordinate(endLat, endLon);
-				}
-				activeTim.setEndPoint(endPoint);
+                Coordinate startPoint = null;
+                Coordinate endPoint = null;
+                double startLat = rs.getDouble("START_LATITUDE");
+                double startLon = rs.getDouble("START_LONGITUDE");
+                if (!rs.wasNull()) {
+                    startPoint = new Coordinate(startLat, startLon);
+                }
+                activeTim.setStartPoint(startPoint);
+
+                double endLat = rs.getDouble("END_LATITUDE");
+                double endLon = rs.getDouble("END_LONGITUDE");
+                if (!rs.wasNull()) {
+                    endPoint = new Coordinate(endLat, endLon);
+                }
+                activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -265,24 +274,25 @@ public class ActiveTimService extends BaseService {
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
                 activeTim.setStartDateTime(rs.getString("TIM_START"));
+                activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));
 
                 Coordinate startPoint = null;
-				Coordinate endPoint = null;
-				double startLat = rs.getDouble("START_LATITUDE");
-				double startLon = rs.getDouble("START_LONGITUDE");
-				if (!rs.wasNull()) {
-					startPoint = new Coordinate(startLat, startLon);
-				}
-				activeTim.setStartPoint(startPoint);
+                Coordinate endPoint = null;
+                double startLat = rs.getDouble("START_LATITUDE");
+                double startLon = rs.getDouble("START_LONGITUDE");
+                if (!rs.wasNull()) {
+                    startPoint = new Coordinate(startLat, startLon);
+                }
+                activeTim.setStartPoint(startPoint);
 
-				double endLat = rs.getDouble("END_LATITUDE");
-				double endLon = rs.getDouble("END_LONGITUDE");
-				if (!rs.wasNull()) {
-					endPoint = new Coordinate(endLat, endLon);
-				}
-				activeTim.setEndPoint(endPoint);
+                double endLat = rs.getDouble("END_LATITUDE");
+                double endLon = rs.getDouble("END_LONGITUDE");
+                if (!rs.wasNull()) {
+                    endPoint = new Coordinate(endLat, endLon);
+                }
+                activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -64,15 +64,12 @@ public class OdeService {
     }
 
     public Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
-
-        List<Integer> setIndexList = new ArrayList<Integer>();
-
-        for (Integer index : indicies) {
-            setIndexList.add(index);
+        if (indicies == null) {
+            return null;
         }
 
         for (int i = 2; i < 100; i++) {
-            if (!setIndexList.contains(i)) {
+            if (!indicies.contains(i)) {
                 return i;
             }
         }

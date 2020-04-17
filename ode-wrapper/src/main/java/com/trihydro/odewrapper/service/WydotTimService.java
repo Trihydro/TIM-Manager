@@ -234,16 +234,24 @@ public class WydotTimService {
                         .getActiveTimHoldingForRsu(rsu.getRsuTarget());
 
                 TimQuery timQuery = odeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
-                // append existing holding indices
-                existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
-                Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
 
-                // query failed, don't send TIM
+                // if query failed, don't send TIM,
                 // log the error and continue
-                if (nextRsuIndex == null) {
+                if (timQuery == null) {
                     WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
                     utility.logWithDate("Returning without sending TIM to RSU. submitTimQuery failed for RSU "
                             + gson.toJson(wydotRsu));
+                    continue;
+                }
+
+                existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
+                Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+
+                // if unable to find next available index,
+                // log error and continue
+                if (nextRsuIndex == null) {
+                    WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
+                    utility.logWithDate("Unable to find an available index for RSU " + gson.toJson(wydotRsu));
                     continue;
                 }
 

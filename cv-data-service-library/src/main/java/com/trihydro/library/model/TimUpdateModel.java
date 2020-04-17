@@ -9,7 +9,6 @@ public class TimUpdateModel extends ActiveTim {
     private String urlB;
     private Timestamp startDate_Timestamp;
     private Timestamp endDate_Timestamp;
-    private Timestamp expirationDate_Timestamp;
     private String packetId;
 
     // Coordinates
@@ -45,14 +44,6 @@ public class TimUpdateModel extends ActiveTim {
 
     public Coordinate getStartPoint() {
         return this.startPoint;
-    }
-
-    public Timestamp getExpirationDate_Timestamp() {
-        return expirationDate_Timestamp;
-    }
-
-    public void setExpirationDate_Timestamp(Timestamp expirationDate_Timestamp) {
-        this.expirationDate_Timestamp = expirationDate_Timestamp;
     }
 
     public void setStartPoint(Coordinate startPoint) {

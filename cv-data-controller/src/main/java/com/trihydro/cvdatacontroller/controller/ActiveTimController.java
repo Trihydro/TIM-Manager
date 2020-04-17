@@ -114,7 +114,6 @@ public class ActiveTimController extends BaseController {
 
 				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START"));
 				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END"));
-				activeTim.setExpirationDate_Timestamp(rs.getTimestamp("EXPIRATION_DATE"));
 
 				// Tim properties
 				activeTim.setMsgCnt(rs.getInt("MSG_CNT"));

@@ -264,6 +264,15 @@ public class TimRefreshController {
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
                 Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
 
+                // query failed, don't send TIM
+                // log the error and continue
+                if (nextRsuIndex == null) {
+                    WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
+                    utility.logWithDate("Returning without sending TIM to RSU. submitTimQuery failed for RSU "
+                            + gson.toJson(wydotRsu));
+                    continue;
+                }
+
                 // create new active_tim_holding record, to account for any index changes
                 WydotTim wydotTim = new WydotTim();
                 wydotTim.setClientId(aTim.getClientId());

@@ -237,6 +237,16 @@ public class WydotTimService {
                 // append existing holding indices
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
                 Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
+
+                // query failed, don't send TIM
+                // log the error and continue
+                if (nextRsuIndex == null) {
+                    WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
+                    utility.logWithDate("Returning without sending TIM to RSU. submitTimQuery failed for RSU "
+                            + gson.toJson(wydotRsu));
+                    continue;
+                }
+
                 activeTimHolding.setRsuIndex(nextRsuIndex);
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
@@ -411,7 +421,8 @@ public class WydotTimService {
 
         try {
             utility.logWithDate("Sending new TIM to SDW. sat_record_id: " + recordId);
-            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
         } catch (RuntimeException targetException) {
             System.out.println("Failed to send new TIM to SDW");
             targetException.printStackTrace();
@@ -473,7 +484,8 @@ public class WydotTimService {
         // send TIM
         try {
             utility.logWithDate("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
-            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
         } catch (RuntimeException targetException) {
             utility.logWithDate("exception updating tim on SDW");
             targetException.printStackTrace();
@@ -506,8 +518,9 @@ public class WydotTimService {
 
         try {
             utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
-            restTemplateProvider.GetRestTemplate().exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
-                    entity, String.class);
+            restTemplateProvider.GetRestTemplate().exchange(
+                    configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity,
+                    String.class);
         } catch (HttpClientErrorException e) {
             System.out.println(e.getMessage());
         } catch (RuntimeException targetException) {

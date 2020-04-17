@@ -95,6 +95,8 @@ public class ActiveTimService extends BaseService {
                     if (activeTim.getEndPoint() != null)
                         end_lon = activeTim.getEndPoint().getLongitude();
                     sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lon);
+                } else if (col.equals("PROJECT_KEY")) {
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getProjectKey());
                 }
 
                 fieldNum++;
@@ -124,7 +126,7 @@ public class ActiveTimService extends BaseService {
 
         boolean activeTimIdResult = false;
         String updateTableSQL = "UPDATE ACTIVE_TIM SET TIM_ID = ?, START_LATITUDE = ?, START_LONGITUDE = ?, END_LATITUDE = ?,";
-        updateTableSQL += "END_LONGITUDE = ?, TIM_START = ?, TIM_END = ?, PK = ? WHERE ACTIVE_TIM_ID = ?";
+        updateTableSQL += "END_LONGITUDE = ?, TIM_START = ?, TIM_END = ?, PK = ?, PROJECT_KEY = ? WHERE ACTIVE_TIM_ID = ?";
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -158,7 +160,8 @@ public class ActiveTimService extends BaseService {
                         .valueOf(LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 
             sqlNullHandler.setIntegerOrNull(preparedStatement, 8, activeTim.getPk());
-            sqlNullHandler.setLongOrNull(preparedStatement, 9, activeTim.getActiveTimId());
+            sqlNullHandler.setIntegerOrNull(preparedStatement, 9, activeTim.getProjectKey());
+            sqlNullHandler.setLongOrNull(preparedStatement, 10, activeTim.getActiveTimId());
             activeTimIdResult = updateOrDelete(preparedStatement);
             System.out.println("------ Updated active_tim with id: " + activeTim.getActiveTimId() + " --------------");
         } catch (SQLException e) {

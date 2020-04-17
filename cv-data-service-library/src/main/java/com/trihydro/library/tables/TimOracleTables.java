@@ -181,6 +181,7 @@ public class TimOracleTables extends OracleTables {
             activeTimTable.add("END_LATITUDE");
             activeTimTable.add("END_LONGITUDE");
             activeTimTable.add("EXPIRATION_DATE");
+            activeTimTable.add("PROJECT_KEY");
             return activeTimTable;
         }
     }
@@ -201,6 +202,7 @@ public class TimOracleTables extends OracleTables {
             activeTimHoldingTable.add("END_LONGITUDE");
             activeTimHoldingTable.add("RSU_INDEX");
             activeTimHoldingTable.add("DATE_CREATED");
+            activeTimHoldingTable.add("PROJECT_KEY");
             return activeTimHoldingTable;
         }
     }

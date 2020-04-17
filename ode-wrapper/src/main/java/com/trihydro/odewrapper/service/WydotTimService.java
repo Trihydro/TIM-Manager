@@ -40,6 +40,7 @@ import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
+import com.trihydro.odewrapper.model.WydotTimRw;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +158,12 @@ public class WydotTimService {
         // save new active_tim_holding record
         ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId);
         activeTimHolding.setDirection(direction);// we are overriding the direction from the tim here
+
+        // Set projectKey, if this is a RW TIM
+        if (wydotTim instanceof WydotTimRw) {
+            activeTimHolding.setProjectKey(((WydotTimRw) wydotTim).getProjectKey());
+        }
+
         activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
         String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
@@ -217,6 +224,11 @@ public class WydotTimService {
             // create new active_tim_holding record
             ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null);
             activeTimHolding.setDirection(direction);
+
+            // Set projectKey, if this is a RW TIM
+            if (wydotTim instanceof WydotTimRw) {
+                activeTimHolding.setProjectKey(((WydotTimRw) wydotTim).getProjectKey());
+            }
 
             // if active tims exist, update tim
             if (activeTim != null) {
@@ -412,7 +424,8 @@ public class WydotTimService {
 
         try {
             utility.logWithDate("Sending new TIM to SDW. sat_record_id: " + recordId);
-            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
         } catch (RuntimeException targetException) {
             System.out.println("Failed to send new TIM to SDW");
             targetException.printStackTrace();
@@ -474,7 +487,8 @@ public class WydotTimService {
         // send TIM
         try {
             utility.logWithDate("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
-            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(configuration.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
         } catch (RuntimeException targetException) {
             utility.logWithDate("exception updating tim on SDW");
             targetException.printStackTrace();
@@ -507,8 +521,9 @@ public class WydotTimService {
 
         try {
             utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
-            restTemplateProvider.GetRestTemplate().exchange(configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE,
-                    entity, String.class);
+            restTemplateProvider.GetRestTemplate().exchange(
+                    configuration.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity,
+                    String.class);
         } catch (HttpClientErrorException e) {
             System.out.println(e.getMessage());
         } catch (RuntimeException targetException) {

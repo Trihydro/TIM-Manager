@@ -222,6 +222,11 @@ public abstract class WydotTimBaseController {
             }
         }
 
+        // ensure projectKey was supplied
+        if (tim.getProjectKey() == null) {
+            resultMessages.add("Project Key must be supplied");
+        }
+
         // set itis codes
         List<String> itisCodes = setItisCodes.setItisCodesRw(tim);
         if (itisCodes.size() == 0)

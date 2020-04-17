@@ -41,6 +41,11 @@ public class ActiveTimHoldingService extends BaseService {
                         .setStartPoint(new Coordinate(rs.getDouble("START_LATITUDE"), rs.getDouble("START_LONGITUDE")));
                 activeTimHolding
                         .setEndPoint(new Coordinate(rs.getDouble("END_LATITUDE"), rs.getDouble("END_LONGITUDE")));
+
+                int projectKey = rs.getInt("PROJECT_KEY");
+                if (!rs.wasNull()) {
+                    activeTimHolding.setProjectKey(projectKey);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -90,6 +95,11 @@ public class ActiveTimHoldingService extends BaseService {
                         .setStartPoint(new Coordinate(rs.getDouble("START_LATITUDE"), rs.getDouble("START_LONGITUDE")));
                 activeTimHolding
                         .setEndPoint(new Coordinate(rs.getDouble("END_LATITUDE"), rs.getDouble("END_LONGITUDE")));
+
+                int projectKey = rs.getInt("PROJECT_KEY");
+                if (!rs.wasNull()) {
+                    activeTimHolding.setProjectKey(projectKey);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -118,7 +128,7 @@ public class ActiveTimHoldingService extends BaseService {
             return false;
         }
 
-        String updateTableSQL = "DELETE ACTIVE_TIM_HOLDING WHERE ACTIVE_TIM_HOLDING_ID = ?";
+        String updateTableSQL = "DELETE FROM ACTIVE_TIM_HOLDING WHERE ACTIVE_TIM_HOLDING_ID = ?";
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 

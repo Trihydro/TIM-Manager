@@ -12,6 +12,17 @@ public class ActiveTimHolding {
     private Coordinate startPoint;
     private Coordinate endPoint;
     private String dateCreated;
+    private Integer projectKey;
+
+    public ActiveTimHolding(WydotTim tim, String rsuTarget, String satRecordId) {
+        this.clientId = tim.getClientId();
+        this.direction = tim.getDirection();
+        this.rsuTarget = rsuTarget;
+        this.satRecordId = satRecordId;
+        this.startPoint = tim.getStartPoint();
+        this.endPoint = tim.getEndPoint();
+        this.dateCreated = Instant.now().toString();
+    }
 
     public String getDirection() {
         return this.direction;
@@ -89,13 +100,11 @@ public class ActiveTimHolding {
         this.dateCreated = Instant.now().toString();
     }
 
-    public ActiveTimHolding(WydotTim tim, String rsuTarget, String satRecordId) {
-        this.clientId = tim.getClientId();
-        this.direction = tim.getDirection();
-        this.rsuTarget = rsuTarget;
-        this.satRecordId = satRecordId;
-        this.startPoint = tim.getStartPoint();
-        this.endPoint = tim.getEndPoint();
-        this.dateCreated = Instant.now().toString();
+    public Integer getProjectKey() {
+        return projectKey;
+    }
+
+    public void setProjectKey(Integer projectKey) {
+        this.projectKey = projectKey;
     }
 }

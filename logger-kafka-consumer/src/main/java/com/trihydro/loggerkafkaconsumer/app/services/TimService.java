@@ -270,10 +270,13 @@ public class TimService extends BaseService {
             activeTim.setEndDateTime(zdt.toString());
         }
 
-        // set activeTim start/end points from holding table
         if (ath != null) {
+            // set activeTim start/end points from holding table
             activeTim.setStartPoint(ath.getStartPoint());
             activeTim.setEndPoint(ath.getEndPoint());
+
+            // set projectKey
+            activeTim.setProjectKey(ath.getProjectKey());
         }
 
         // if true, TIM came from WYDOT

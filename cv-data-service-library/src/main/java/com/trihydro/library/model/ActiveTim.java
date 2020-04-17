@@ -20,6 +20,7 @@ public class ActiveTim {
     private List<Integer> itisCodes;
     private Coordinate startPoint;
     private Coordinate endPoint;
+    private Integer projectKey;
 
     public Coordinate getEndPoint() {
         return endPoint;
@@ -141,11 +142,19 @@ public class ActiveTim {
         this.rsuIndex = rsuIndex;
     }
 
-    public List<Integer> getItisCodes(){
+    public List<Integer> getItisCodes() {
         return itisCodes;
     }
 
-    public void setItisCodes(List<Integer> itisCodes){
+    public void setItisCodes(List<Integer> itisCodes) {
         this.itisCodes = itisCodes;
+    }
+
+    public Integer getProjectKey() {
+        return projectKey;
+    }
+
+    public void setProjectKey(Integer projectKey) {
+        this.projectKey = projectKey;
     }
 }

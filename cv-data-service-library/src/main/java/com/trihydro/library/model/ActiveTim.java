@@ -11,6 +11,7 @@ public class ActiveTim {
     private String direction;
     private String startDateTime;
     private String endDateTime;
+    private String expirationDateTime;
     private String route;
     private String clientId;
     private String satRecordId;
@@ -24,6 +25,14 @@ public class ActiveTim {
 
     public Coordinate getEndPoint() {
         return endPoint;
+    }
+
+    public String getExpirationDateTime() {
+        return expirationDateTime;
+    }
+
+    public void setExpirationDateTime(String expirationDateTime) {
+        this.expirationDateTime = expirationDateTime;
     }
 
     public void setEndPoint(Coordinate endPoint) {

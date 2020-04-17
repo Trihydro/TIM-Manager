@@ -11,6 +11,7 @@ import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.ContentEnum;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class CreateBaseTimUtil {
         milepostService = _milepostService;
     }
 
-    public WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, BasicConfiguration config) {
+    public WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, BasicConfiguration config,
+            ContentEnum content) {
 
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
@@ -58,7 +60,8 @@ public class CreateBaseTimUtil {
         dataFrame.setDurationTime(32000);
 
         dataFrame.setPriority(5);
-        dataFrame.setContent("Advisory");
+
+        dataFrame.setContent(content.getStringValue());// "Advisory");
         dataFrame.setFrameType(us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType.advisory);
         dataFrame.setUrl("null");
 

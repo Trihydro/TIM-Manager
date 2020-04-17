@@ -91,6 +91,7 @@ public class ActiveTimController extends BaseController {
 				activeTim.setDirection(rs.getString("DIRECTION"));
 				activeTim.setStartDateTime(rs.getString("TIM_START"));
 				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
 				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
 				activeTim.setClientId(rs.getString("CLIENT_ID"));
 				activeTim.setRoute(rs.getString("ROUTE"));
@@ -761,6 +762,7 @@ public class ActiveTimController extends BaseController {
 					activeTim.setDirection(rs.getString("DIRECTION"));
 					activeTim.setStartDateTime(rs.getString("TIM_START"));
 					activeTim.setEndDateTime(rs.getString("TIM_END"));
+					activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
 					activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
 					activeTim.setRoute(rs.getString("ROUTE"));
 					activeTim.setClientId(rs.getString("CLIENT_ID"));
@@ -849,6 +851,7 @@ public class ActiveTimController extends BaseController {
 				activeTim.setDirection(rs.getString("DIRECTION"));
 				activeTim.setStartDateTime(rs.getString("TIM_START"));
 				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
 				activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
 				activeTim.setRoute(rs.getString("ROUTE"));
 				activeTim.setClientId(rs.getString("CLIENT_ID"));
@@ -970,7 +973,15 @@ public class ActiveTimController extends BaseController {
 								LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
 					else
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
-				else if (col.equals("TIM_TYPE_ID"))
+				else if (col.equals("EXPIRATION_DATE")) {
+					if (activeTim.getExpirationDateTime() != null) {
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
+								java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTim.getExpirationDateTime(),
+										DateTimeFormatter.ISO_DATE_TIME)));
+					} else {
+						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
+					}
+				} else if (col.equals("TIM_TYPE_ID"))
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimTypeId());
 				else if (col.equals("ROUTE"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getRoute());
@@ -1038,6 +1049,7 @@ public class ActiveTimController extends BaseController {
 			activeTim.setDirection(rs.getString("DIRECTION"));
 			activeTim.setEndDateTime(rs.getString("TIM_END"));
 			activeTim.setStartDateTime(rs.getString("TIM_START"));
+			activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
 			activeTim.setRoute(rs.getString("ROUTE"));
 			activeTim.setPk(rs.getInt("PK"));
 			activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));

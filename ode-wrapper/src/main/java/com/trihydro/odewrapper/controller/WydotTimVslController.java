@@ -13,6 +13,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
@@ -86,7 +87,7 @@ public class WydotTimVslController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null);
+                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.speedLimit);
                 }
             }
         }).start();

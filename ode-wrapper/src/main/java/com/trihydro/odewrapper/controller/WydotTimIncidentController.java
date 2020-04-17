@@ -12,6 +12,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
@@ -134,13 +135,15 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
                     // check if this is a point TIM
                     if (wydotTim.getDirection().toLowerCase().equals("b")) {
-                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk(),
+                                ContentEnum.advisory);
 
-                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk());
+                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk(),
+                                ContentEnum.advisory);
                     } else {
                         // single direction TIM
                         createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
-                                wydotTim.getPk());
+                                wydotTim.getPk(), ContentEnum.advisory);
                     }
                 }
             }

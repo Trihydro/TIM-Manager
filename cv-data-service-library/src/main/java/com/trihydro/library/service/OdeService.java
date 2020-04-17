@@ -47,16 +47,6 @@ public class OdeService {
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
-
-        WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
-
-        // query failed, don't send TIM
-        if (index == null) {
-            utility.logWithDate(
-                    "Returning without sending TIM to RSU. submitTimQuery failed for RSU " + gson.toJson(wydotRsu));
-            return;
-        }
-
         timToSend.getRequest().getRsus()[0].setRsuIndex(index);
 
         String timToSendJson = gson.toJson(timToSend);
@@ -74,15 +64,12 @@ public class OdeService {
     }
 
     public Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {
-
-        List<Integer> setIndexList = new ArrayList<Integer>();
-
-        for (Integer index : indicies) {
-            setIndexList.add(index);
+        if (indicies == null) {
+            return null;
         }
 
         for (int i = 2; i < 100; i++) {
-            if (!setIndexList.contains(i)) {
+            if (!indicies.contains(i)) {
                 return i;
             }
         }

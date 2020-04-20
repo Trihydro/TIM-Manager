@@ -2,27 +2,69 @@ package com.trihydro.timrefresh.config;
 
 import java.math.BigDecimal;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CVRestServiceProps;
-import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.library.model.SdwProps;
+import com.trihydro.library.service.ActiveTimHoldingService;
+import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.DataFrameService;
+import com.trihydro.library.service.MilepostService;
+import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.PathNodeXYService;
+import com.trihydro.library.service.RegionService;
+import com.trihydro.library.service.RestTemplateProvider;
+import com.trihydro.library.service.RsuService;
+import com.trihydro.library.service.SdwService;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 
 @Component
 @ConfigurationProperties("config")
-@ComponentScan({ "com.trihydro.timrefresh", "com.trihydro.library.service", "com.trihydro.library.helpers" })
-public class TimRefreshConfiguration extends ConfigProperties implements CVRestServiceProps {
+@Import({ ActiveTimHoldingService.class, ActiveTimService.class, DataFrameService.class, MilepostService.class,
+        OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
+        Utility.class, RestTemplateProvider.class })
+public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth;
     private String cvRestService;
     private String[] rsuRoutes;
+    private String odeUrl;
+    private String sdwRestUrl;
+    private String sdwApiKey;
 
     public TimeToLive getSdwTtl() {
         return sdwTtl;
+    }
+
+    @Override
+    public String getSdwApiKey() {
+        return sdwApiKey;
+    }
+
+    public void setSdwApiKey(String sdwApiKey) {
+        this.sdwApiKey = sdwApiKey;
+    }
+
+    @Override
+    public String getSdwRestUrl() {
+        return sdwRestUrl;
+    }
+
+    public void setSdwRestUrl(String sdwRestUrl) {
+        this.sdwRestUrl = sdwRestUrl;
+    }
+
+    public String getOdeUrl() {
+        return odeUrl;
+    }
+
+    public void setOdeUrl(String odeUrl) {
+        this.odeUrl = odeUrl;
     }
 
     public String[] getRsuRoutes() {

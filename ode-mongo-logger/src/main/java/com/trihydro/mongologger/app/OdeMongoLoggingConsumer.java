@@ -21,13 +21,13 @@ public class OdeMongoLoggingConsumer {
 
 	PreparedStatement preparedStatement = null;
 	Statement statement = null;
-	private BasicConfiguration configProperties;
+	private MongoLoggerConfiguration mongoLoggerConfig;
 	private MongoLogger mongoLogger;
 
 	@Autowired
-	public OdeMongoLoggingConsumer(BasicConfiguration configProperties, MongoLogger _mongoLogger)
+	public OdeMongoLoggingConsumer(MongoLoggerConfiguration _mongoLoggerConfig, MongoLogger _mongoLogger)
 			throws IOException, SQLException {
-		this.configProperties = configProperties;
+		this.mongoLoggerConfig = _mongoLoggerConfig;
 		mongoLogger = _mongoLogger;
 
 		System.out.println("starting..............");
@@ -38,19 +38,19 @@ public class OdeMongoLoggingConsumer {
 		// An Async task always executes in new thread
 		new Thread(new Runnable() {
 			public void run() {
-				String endpoint = configProperties.getHostname() + ":9092";
+				String endpoint = mongoLoggerConfig.getHostname() + ":9092";
 
 				// Properties for the kafka topic
 				Properties props = new Properties();
 				props.put("bootstrap.servers", endpoint);
-				props.put("group.id", configProperties.getDepositGroup());
+				props.put("group.id", mongoLoggerConfig.getDepositGroup());
 				props.put("auto.commit.interval.ms", "1000");
 				props.put("session.timeout.ms", "30000");
 				props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 				props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
 				KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
-				String topic = configProperties.getDepositTopic();
+				String topic = mongoLoggerConfig.getDepositTopic();
 
 				stringConsumer.subscribe(Arrays.asList(topic));
 				System.out.println("Subscribed to topic " + topic);

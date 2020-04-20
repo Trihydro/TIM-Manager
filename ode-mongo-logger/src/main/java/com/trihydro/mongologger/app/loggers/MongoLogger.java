@@ -10,7 +10,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.trihydro.library.model.ConfigProperties;
+import com.trihydro.mongologger.app.MongoLoggerConfiguration;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class MongoLogger {
         private MongoCredential credential;
 
         @Autowired
-        public void InjectDependencies(ConfigProperties config) {
+        public void InjectDependencies(MongoLoggerConfiguration config) {
                 username = config.getMongoUsername(); // the user name
                 databaseName = config.getMongoDatabase(); // the name of the database in which the user is defined
                 password = config.getMongoPassword(); // the password as a character array

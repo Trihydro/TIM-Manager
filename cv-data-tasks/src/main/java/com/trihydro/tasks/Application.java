@@ -17,7 +17,7 @@ import com.trihydro.library.service.SdwService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
 import com.trihydro.tasks.actions.RemoveExpiredActiveTims;
 import com.trihydro.tasks.actions.ValidateRsus;
-import com.trihydro.tasks.actions.ValidateSDX;
+import com.trihydro.tasks.actions.ValidateSdx;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +33,12 @@ public class Application {
 
         private RemoveExpiredActiveTims removeExpiredActiveTims;
         private CleanupActiveTims cleanupActiveTims;
-        private ValidateSDX sdxValidator;
+        private ValidateSdx sdxValidator;
         private ValidateRsus rsuValidator;
 
         @Autowired
         public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
-                        CleanupActiveTims _cleanupActiveTims, ValidateSDX _sdxValidator, ValidateRsus _rsuValidator) {
+                        CleanupActiveTims _cleanupActiveTims, ValidateSdx _sdxValidator, ValidateRsus _rsuValidator) {
                 config = _config;
                 removeExpiredActiveTims = _removeExpiredActiveTims;
                 cleanupActiveTims = _cleanupActiveTims;

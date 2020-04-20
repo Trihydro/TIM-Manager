@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidateSDX implements Runnable {
+public class ValidateSdx implements Runnable {
     private DataTasksConfiguration config;
     private SdwService sdwService;
     private ActiveTimService activeTimService;

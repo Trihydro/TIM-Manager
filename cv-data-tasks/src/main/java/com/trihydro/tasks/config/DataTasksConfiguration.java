@@ -3,13 +3,14 @@ package com.trihydro.tasks.config;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
+import com.trihydro.library.model.TmddProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps {
+public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps {
 
     private String cvRestService;
     private String cvRestServiceDev; // Temporary
@@ -18,6 +19,9 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private String wrapperUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
+    private String tmddUrl;
+    private String tmddUser;
+    private String tmddPassword;
     private String[] alertAddresses;
     private String fromEmail;
     private String mailHost;
@@ -187,4 +191,29 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
             this.rsuValidationPeriodMinutes = rsuValidationPeriodMinutes;
         }
     }
+
+    public String getTmddUrl() {
+        return tmddUrl;
+    }
+
+    public void setTmddUrl(String tmddUrl) {
+        this.tmddUrl = tmddUrl;
+    }
+
+    public String getTmddUser() {
+        return tmddUser;
+    }
+
+    public void setTmddUser(String tmddUser) {
+        this.tmddUser = tmddUser;
+    }
+
+    public String getTmddPassword() {
+        return tmddPassword;
+    }
+
+    public void setTmddPassword(String tmddPassword) {
+        this.tmddPassword = tmddPassword;
+    }
+
 }

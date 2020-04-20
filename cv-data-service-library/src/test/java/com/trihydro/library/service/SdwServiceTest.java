@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trihydro.library.helpers.TestConfig;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
-import com.trihydro.library.model.ConfigProperties;
 import com.trihydro.library.model.SDXDecodeRequest;
 import com.trihydro.library.model.SDXDecodeResponse;
 import com.trihydro.library.model.SemiDialogID;
@@ -51,7 +51,7 @@ import org.springframework.web.client.RestClientException;
 public class SdwServiceTest extends BaseServiceTest {
 
     @Mock
-    ConfigProperties mockConfig;
+    TestConfig mockConfig;
 
     @Mock
     HttpURLConnection mockUrlConn;

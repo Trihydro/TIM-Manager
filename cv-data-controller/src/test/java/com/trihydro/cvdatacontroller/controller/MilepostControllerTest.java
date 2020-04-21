@@ -39,7 +39,11 @@ public class MilepostControllerTest {
     private Coordinate startPoint;
     private Coordinate endPoint;
     private WydotTim wydotTim;
-
+    private String direction = "B";
+    private String commonName = "commonName";
+    private double fromMilepost = 0d;
+    private double toMilepost = 10d;
+    
     @Mock
     MilepostService mockMilepostService;
     @Mock
@@ -82,32 +86,51 @@ public class MilepostControllerTest {
     }
 
     @Test
-    public void getMileposts_SUCCESS() throws SQLException {
+    public void getMilepostsCommonName_SUCCESS() throws SQLException {
         // Arrange
+        String commonName = "I 80";
 
         // Act
-        ResponseEntity<List<Milepost>> data = uut.getMileposts();
+        ResponseEntity<List<Milepost>> data = uut.getMilepostsCommonName(commonName, false);
 
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement)
-                .executeQuery("select * from MILEPOST_VW_NEW where MOD(milepost, 1) = 0 order by milepost asc");
+                .executeQuery(String.format("select * from MILEPOST_VW_NEW where COMMON_NAME = '%s'", commonName));
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(1, data.getBody().size());
     }
 
     @Test
-    public void getMileposts_FAIL() throws SQLException {
+    public void getMilepostsCommonName_modSUCCESS() throws SQLException {
         // Arrange
+        String commonName = "I 80";
+
+        // Act
+        ResponseEntity<List<Milepost>> data = uut.getMilepostsCommonName(commonName, true);
+
+        // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
+        verify(mockStatement).executeQuery(String
+                .format("select * from MILEPOST_VW_NEW where COMMON_NAME = '%s' and MOD(milepost, 1) = 0", commonName));
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, data.getBody().size());
+    }
+
+    @Test
+    public void getMilepostsCommonName_FAIL() throws SQLException {
+        // Arrange
+        String commonName = "I 80";
         when(mockRs.getString(isA(String.class))).thenThrow(new SQLException());
         // Act
-        ResponseEntity<List<Milepost>> data = uut.getMileposts();
+        ResponseEntity<List<Milepost>> data = uut.getMilepostsCommonName(commonName, false);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement)
-                .executeQuery("select * from MILEPOST_VW_NEW where MOD(milepost, 1) = 0 order by milepost asc");
+                .executeQuery(String.format("select * from MILEPOST_VW_NEW where COMMON_NAME = '%s'", commonName));
         verify(mockStatement).close();
         verify(mockConnection).close();
         assertEquals(0, data.getBody().size());
@@ -211,6 +234,156 @@ public class MilepostControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
         assertEquals(1, data.getBody().size());
+    }
+
+    @Test
+    public void getMilepostRangeNoDirection_asc_SUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW_NEW where milepost between ";
+        statementStr += fromMilepost;
+        statementStr += " and " + toMilepost;
+        statementStr += " and common_name = '";
+        statementStr += commonName;
+        statementStr += "' order by milepost asc";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRangeNoDirection(commonName, fromMilepost,
+                toMilepost);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getString("COMMON_NAME");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        // verify(mockRs).getDouble("BEARING");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostRangeNoDirection_desc_SUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW_NEW where milepost between ";
+        statementStr += fromMilepost;
+        statementStr += " and " + toMilepost;
+        statementStr += " and common_name = '";
+        statementStr += commonName;
+        statementStr += "' order by milepost desc";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRangeNoDirection(commonName, toMilepost,
+                fromMilepost);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockRs).getString("COMMON_NAME");
+        verify(mockRs).getDouble("MILEPOST");
+        verify(mockRs).getDouble("LATITUDE");
+        verify(mockRs).getDouble("LONGITUDE");
+        // verify(mockRs).getDouble("BEARING");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostRangeNoDirection_FAIL() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW_NEW where milepost between ";
+        statementStr += fromMilepost;
+        statementStr += " and " + toMilepost;
+        statementStr += " and common_name = '";
+        statementStr += commonName;
+        statementStr += "' order by milepost desc";
+        when(mockRs.getString(isA(String.class))).thenThrow(new SQLException());
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRangeNoDirection(commonName, toMilepost,
+                fromMilepost);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+        assertEquals(0, milePosts.getBody().size());
+    }
+    @Test
+    public void getMilepostRange_Direction_asc_SUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW_NEW where direction = '";
+        statementStr += direction;
+        statementStr += "' and milepost between ";
+        statementStr += fromMilepost;
+        statementStr += " and " + toMilepost;
+        statementStr += " and common_name = '";
+        statementStr += commonName;
+        statementStr += "' order by milepost asc";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRange(direction, commonName, fromMilepost,
+                toMilepost);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostRange_Direction_desc_SUCCESS() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW_NEW where direction = '";
+        statementStr += direction;
+        statementStr += "' and milepost between ";
+        statementStr += fromMilepost;
+        statementStr += " and " + toMilepost;
+        statementStr += " and common_name = '";
+        statementStr += commonName;
+        statementStr += "' order by milepost desc";
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRange(direction, commonName, toMilepost,
+                fromMilepost);
+
+        // Assert
+        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(1, milePosts.getBody().size());
+    }
+
+    @Test
+    public void getMilepostRange_Direction_FAIL() throws SQLException {
+        // Arrange
+        String statementStr = "select * from MILEPOST_VW_NEW where direction = '";
+        statementStr += direction;
+        statementStr += "' and milepost between ";
+        statementStr += fromMilepost;
+        statementStr += " and " + toMilepost;
+        statementStr += " and common_name = '";
+        statementStr += commonName;
+        statementStr += "' order by milepost desc";
+        when(mockRs.getString("COMMON_NAME")).thenThrow(new SQLException());
+
+        // Act
+        ResponseEntity<List<Milepost>> milePosts = uut.getMilepostRange(direction, commonName, toMilepost,
+                fromMilepost);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
+        verify(mockStatement).executeQuery(statementStr);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        assertEquals(0, milePosts.getBody().size());
     }
 
 }

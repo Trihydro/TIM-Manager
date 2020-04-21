@@ -24,8 +24,13 @@ public class ActiveTimHoldingService extends BaseService {
             connection = GetConnectionPool();
             statement = connection.createStatement();
             String query = "select * from active_tim_holding";
-            query += " where rsu_target = '" + ipv4Address + "' and client_id = '" + clientId + "' and direction = '"
-                    + direction + "'";
+            query += " where rsu_target = '" + ipv4Address;
+            if (clientId != null) {
+                query += "' and client_id = '" + clientId + "'";
+            } else {
+                query += "' and client_id is null";
+            }
+            query += " and direction = '" + direction + "'";
 
             rs = statement.executeQuery(query);
 
@@ -78,8 +83,13 @@ public class ActiveTimHoldingService extends BaseService {
             connection = GetConnectionPool();
             statement = connection.createStatement();
             String query = "select * from active_tim_holding";
-            query += " where sat_record_id = '" + satRecordId + "' and client_id = '" + clientId + "' and direction = '"
-                    + direction + "'";
+            query += " where sat_record_id = '" + satRecordId;
+            if (clientId != null) {
+                query += "' and client_id = '" + clientId + "'";
+            } else {
+                query += "' and client_id is null";
+            }
+            query += " and direction = '" + direction + "'";
 
             rs = statement.executeQuery(query);
 

@@ -39,7 +39,7 @@ public class MilepostControllerTest {
     private Coordinate startPoint;
     private Coordinate endPoint;
     private WydotTim wydotTim;
-    private String direction = "direction";
+    private String direction = "B";
     private String commonName = "commonName";
     private double fromMilepost = 0d;
     private double toMilepost = 10d;

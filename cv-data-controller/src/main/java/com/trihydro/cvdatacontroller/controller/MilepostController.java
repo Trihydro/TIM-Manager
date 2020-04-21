@@ -264,7 +264,7 @@ public class MilepostController extends BaseController {
 				return "B";
 
 			default:
-				return direction;
+				return direction.toUpperCase();
 		}
 	}
 

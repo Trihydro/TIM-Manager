@@ -27,6 +27,7 @@ import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 
 @RunWith(StrictStubs.class)
 public class ActiveTimServiceTest extends BaseServiceTest {
@@ -330,5 +331,53 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         assertEquals(1, ats.size());
         ActiveTim tim = ats.get(0);
         assertEquals(tum, tim);
+    }
+
+    @Test
+    public void getActiveTimsForSDX_success() {
+        // Arrange
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx", ActiveTim[].class))
+                .thenReturn(mockResponseEntityActiveTims);
+
+        // Act
+        List<ActiveTim> result = uut.getActiveTimsForSDX();
+
+        // Assert
+        assertEquals(aTims.length, result.size());
+        assertEquals(aTim, result.get(0));
+    }
+
+    @Test(expected = RestClientException.class)
+    public void getActiveTimsForSDX_throwsError() {
+        // Arrange
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx", ActiveTim[].class))
+                .thenThrow(new RestClientException("timeout"));
+
+        // Act
+        uut.getActiveTimsForSDX();
+    }
+
+    @Test
+    public void getActiveTimsWithItisCodes_success() {
+        // Arrange
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis", ActiveTim[].class))
+                .thenReturn(mockResponseEntityActiveTims);
+
+        // Act
+        List<ActiveTim> result = uut.getActiveTimsWithItisCodes();
+
+        // Assert
+        assertEquals(aTims.length, result.size());
+        assertEquals(aTim, result.get(0));
+    }
+
+    @Test(expected = RestClientException.class)
+    public void getActiveTimsWithItisCodes_throwsError() {
+        // Arrange
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis", ActiveTim[].class))
+                .thenThrow(new RestClientException("timeout"));
+
+        // Act
+        uut.getActiveTimsWithItisCodes();
     }
 }

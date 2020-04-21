@@ -725,6 +725,15 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/all-sdx", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetAllActiveSDXTims() {
+		return getActiveTimsWithItisCodes(true);
+	}
+
+	@RequestMapping(value = "/all-with-itis", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetAllActiveTimsWithItis() {
+		return getActiveTimsWithItisCodes(false);
+	}
+
+	private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly) {
 		List<ActiveTim> results = new ArrayList<ActiveTim>();
 		ActiveTim activeTim = null;
 		Connection connection = null;
@@ -739,7 +748,11 @@ public class ActiveTimController extends BaseController {
 			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
-			query += " where sat_record_id is not null";
+
+			if (sdxOnly) {
+				query += " where sat_record_id is not null";
+			}
+
 			query += " order by active_tim.active_tim_id";
 
 			rs = statement.executeQuery(query);
@@ -1079,5 +1092,4 @@ public class ActiveTimController extends BaseController {
 
 		return activeTims;
 	}
-
 }

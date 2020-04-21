@@ -302,6 +302,11 @@ public class MilepostController extends BaseController {
 		return ResponseEntity.ok(data);
 	}
 
+	/**
+	 * Needed for TIM Creator
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = "/mileposts-test", method = RequestMethod.GET, headers = "Accept=application/json")
 	public List<Milepost> getMilepostsTest() {
 
@@ -347,6 +352,15 @@ public class MilepostController extends BaseController {
 		return mileposts;
 	}
 
+	/**
+	 * Needed for TIM Creator
+	 * 
+	 * @param direction
+	 * @param route
+	 * @param start
+	 * @param end
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{start}/{end}/{route}")
 	public List<Milepost> getMilepostTestRange(@PathVariable String direction, @PathVariable String route,
 			@PathVariable Double start, @PathVariable Double end) {

@@ -301,4 +301,104 @@ public class MilepostController extends BaseController {
 				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude(), wydotTim.getDirection());
 		return ResponseEntity.ok(data);
 	}
+
+	@RequestMapping(value = "/mileposts-test", method = RequestMethod.GET, headers = "Accept=application/json")
+	public List<Milepost> getMilepostsTest() {
+
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+			rs = statement.executeQuery("select * from MILEPOST_TEST order by milepost asc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				// milepost.setMilepostId(rs.getInt("milepost_id"));
+				milepost.setCommonName(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setDirection(rs.getString("direction"));
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return mileposts;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/get-milepost-test-range/{direction}/{start}/{end}/{route}")
+	public List<Milepost> getMilepostTestRange(@PathVariable String direction, @PathVariable String route,
+			@PathVariable Double start, @PathVariable Double end) {
+		List<Milepost> mileposts = new ArrayList<Milepost>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			// build SQL query
+			String statementStr = "select * from MILEPOST_TEST where direction = '" + direction
+					+ "' and milepost between " + Math.min(start, end) + " and " + Math.max(start, end)
+					+ " and route like '%" + route + "%'";
+
+			if (start < end)
+				rs = statement.executeQuery(statementStr + "order by milepost asc");
+			else
+				rs = statement.executeQuery(statementStr + "order by milepost desc");
+
+			// convert result to milepost objects
+			while (rs.next()) {
+				Milepost milepost = new Milepost();
+				milepost.setCommonName(rs.getString("route"));
+				milepost.setMilepost(rs.getDouble("milepost"));
+				milepost.setDirection(rs.getString("direction"));
+				milepost.setLatitude(rs.getDouble("latitude"));
+				milepost.setLongitude(rs.getDouble("longitude"));
+				milepost.setBearing(rs.getDouble("bearing"));
+				mileposts.add(milepost);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return mileposts;
+	}
+
 }

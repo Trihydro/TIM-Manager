@@ -725,15 +725,15 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/all-sdx", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetAllActiveSDXTims() {
-		return getActiveTimsWithItisCodes(true);
+		return getActiveTimsWithItisCodes(true, false);
 	}
 
 	@RequestMapping(value = "/all-with-itis", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetAllActiveTimsWithItis() {
-		return getActiveTimsWithItisCodes(false);
+		return getActiveTimsWithItisCodes(false, true);
 	}
 
-	private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly) {
+	private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly, boolean excludeVsl) {
 		List<ActiveTim> results = new ArrayList<ActiveTim>();
 		ActiveTim activeTim = null;
 		Connection connection = null;
@@ -744,13 +744,22 @@ public class ActiveTimController extends BaseController {
 			connection = GetConnectionPool();
 			statement = connection.createStatement();
 
-			String query = "select active_tim.*, itis_code.itis_code from active_tim";
+			String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
+			query += " left join tim_type on active_tim.tim_type_id = tim_type.tim_type_id";
 			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
 
 			if (sdxOnly) {
 				query += " where sat_record_id is not null";
+			}
+
+			if (excludeVsl) {
+				if (query.contains("where")) {
+					query += " and tim_type.type != 'VSL'";
+				} else {
+					query += " where tim_type.type != 'VSL'";
+				}
 			}
 
 			query += " order by active_tim.active_tim_id";
@@ -776,7 +785,6 @@ public class ActiveTimController extends BaseController {
 					activeTim.setStartDateTime(rs.getString("TIM_START"));
 					activeTim.setEndDateTime(rs.getString("TIM_END"));
 					activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
-					activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
 					activeTim.setRoute(rs.getString("ROUTE"));
 					activeTim.setClientId(rs.getString("CLIENT_ID"));
 					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
@@ -797,6 +805,12 @@ public class ActiveTimController extends BaseController {
 						endPoint = new Coordinate(endLat, endLon);
 					}
 					activeTim.setEndPoint(endPoint);
+
+					long timTypeId = rs.getLong("TIM_TYPE_ID");
+					if (!rs.wasNull()) {
+						activeTim.setTimTypeId(timTypeId);
+						activeTim.setTimType(rs.getString("TYPE"));
+					}
 				}
 
 				// Add the ITIS code to the ActiveTim's ITIS codes

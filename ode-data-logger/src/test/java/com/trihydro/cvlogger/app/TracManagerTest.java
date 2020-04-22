@@ -110,7 +110,7 @@ public class TracManagerTest {
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(new Integer(200), argument.getValue().getRestResponseCode());
+                assertEquals(Integer.valueOf(200), argument.getValue().getRestResponseCode());
                 assertEquals(true, argument.getValue().isMessageSent());
                 assertEquals(false, argument.getValue().isEmailSent());
         }
@@ -166,7 +166,7 @@ public class TracManagerTest {
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(new Integer(-1), argument.getValue().getRestResponseCode());
+                assertEquals(Integer.valueOf(-1), argument.getValue().getRestResponseCode());
                 assertEquals(false, argument.getValue().isMessageSent());
                 assertEquals(true, argument.getValue().isEmailSent());
 
@@ -202,7 +202,7 @@ public class TracManagerTest {
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(new Integer(500), argument.getValue().getRestResponseCode());
+                assertEquals(Integer.valueOf(500), argument.getValue().getRestResponseCode());
                 assertEquals(false, argument.getValue().isMessageSent());
                 assertEquals(true, argument.getValue().isEmailSent());
 
@@ -240,7 +240,7 @@ public class TracManagerTest {
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
                 assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(new Integer(500), argument.getValue().getRestResponseCode());
+                assertEquals(Integer.valueOf(500), argument.getValue().getRestResponseCode());
                 assertEquals(false, argument.getValue().isMessageSent());
                 assertEquals(false, argument.getValue().isEmailSent());
 

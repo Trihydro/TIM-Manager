@@ -37,6 +37,14 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
         return odeUrl;
     }
 
+    /**
+     * Returns the defaultLaneWidth / 2
+     * @return
+     */
+    public Double getPathDistanceLimit() {
+        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
+
     public String getFromEmail() {
         return fromEmail;
     }

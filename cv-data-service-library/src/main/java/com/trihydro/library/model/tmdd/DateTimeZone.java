@@ -39,17 +39,17 @@ public class DateTimeZone {
     }
 
     public String asDateTimeString() {
-        if (date.length() != 8 || time.length() != 6) {
+        if (date == null || date.length() != 8 || time == null || time.length() != 6) {
             return null;
         }
 
         int oHour;
         int oMin;
 
-        if (offset.length() == 5) {
+        if (offset != null && offset.length() == 5) {
             oHour = Integer.parseInt(offset.substring(0, 3));
             oMin = Integer.parseInt(offset.substring(3, 5));
-        } else if (offset.length() == 4) {
+        } else if (offset != null && offset.length() == 4) {
             oHour = Integer.parseInt(offset.substring(0, 2));
             oMin = Integer.parseInt(offset.substring(2, 4));
         } else {

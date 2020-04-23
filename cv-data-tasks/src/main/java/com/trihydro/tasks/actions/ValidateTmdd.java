@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
@@ -13,6 +14,8 @@ import com.trihydro.library.model.tmdd.LinkLocation;
 import com.trihydro.library.model.tmdd.PointOnLink;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TmddService;
+import com.trihydro.tasks.config.DataTasksConfiguration;
+import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
 import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimValidationResult;
@@ -26,18 +29,25 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ValidateTmdd implements Runnable {
+    private DataTasksConfiguration config;
     private TmddService tmddService;
     private ActiveTimService activeTimService;
-    private Utility utility;
     private IdNormalizer idNormalizer;
+    private EmailFormatter emailFormatter;
+    private EmailHelper mailHelper;
+    private Utility utility;
 
     @Autowired
-    public void InjectDependencies(TmddService tmddService, ActiveTimService activeTimService, Utility utility,
-            IdNormalizer idNormalizer) {
+    public void InjectDependencies(DataTasksConfiguration config, TmddService tmddService,
+            ActiveTimService activeTimService, IdNormalizer idNormalizer, EmailFormatter emailFormatter,
+            EmailHelper mailHelper, Utility utility) {
+        this.config = config;
         this.tmddService = tmddService;
         this.activeTimService = activeTimService;
-        this.utility = utility;
         this.idNormalizer = idNormalizer;
+        this.emailFormatter = emailFormatter;
+        this.mailHelper = mailHelper;
+        this.utility = utility;
     }
 
     public void run() {
@@ -154,6 +164,17 @@ public class ValidateTmdd implements Runnable {
                 result.setErrors(inconsistencies);
 
                 validationResults.add(result);
+            }
+        }
+
+        if (unableToVerify.size() > 0 || validationResults.size() > 0) {
+            String email = emailFormatter.generateTmddSummaryEmail(unableToVerify, validationResults);
+
+            try {
+                mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Results", email,
+                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }

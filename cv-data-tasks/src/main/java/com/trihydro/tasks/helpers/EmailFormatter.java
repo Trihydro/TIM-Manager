@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.RsuIndexInfo;
 import com.trihydro.tasks.models.ActiveTimMapping;
+import com.trihydro.tasks.models.ActiveTimValidationResult;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
@@ -132,6 +133,12 @@ public class EmailFormatter {
         body = body.replaceAll("\\s*\n\\s*", "");
 
         return body;
+    }
+
+    public String generateTmddSummaryEmail(List<ActiveTim> unableToVerify,
+            List<ActiveTimValidationResult> validationResults) {
+        // TODO: implement
+        return "";
     }
 
     private String getRsuResult(RsuValidationResult result) {

@@ -1,5 +1,6 @@
 package com.trihydro.tasks.helpers;
 
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
 
 import org.springframework.stereotype.Component;
@@ -43,8 +44,25 @@ public class IdNormalizer {
         return result;
     }
 
-    public String fromClientId() {
-        // TODO
-        return null;
+    public String fromActiveTim(ActiveTim activeTim) {
+        String result = null;
+
+        switch (activeTim.getTimType()) {
+            case "RC":
+                result = activeTim.getClientId();
+                break;
+            case "IN":
+                result = activeTim.getClientId().replace("IN", "I");
+                break;
+            case "RW":
+                if (activeTim.getProjectKey() != null) {
+                    result = "C" + activeTim.getProjectKey();
+                }
+                break;
+            default:
+                break;
+        }
+
+        return result;
     }
 }

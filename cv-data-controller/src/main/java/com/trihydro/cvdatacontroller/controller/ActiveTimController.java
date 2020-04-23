@@ -790,8 +790,11 @@ public class ActiveTimController extends BaseController {
 					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
 					activeTim.setPk(rs.getInt("PK"));
 					activeTim.setItisCodes(new ArrayList<Integer>());
+
 					Coordinate startPoint = null;
 					Coordinate endPoint = null;
+
+					// Set startPoint
 					double startLat = rs.getDouble("START_LATITUDE");
 					double startLon = rs.getDouble("START_LONGITUDE");
 					if (!rs.wasNull()) {
@@ -799,6 +802,7 @@ public class ActiveTimController extends BaseController {
 					}
 					activeTim.setStartPoint(startPoint);
 
+					// Set endPoint
 					double endLat = rs.getDouble("END_LATITUDE");
 					double endLon = rs.getDouble("END_LONGITUDE");
 					if (!rs.wasNull()) {
@@ -806,10 +810,17 @@ public class ActiveTimController extends BaseController {
 					}
 					activeTim.setEndPoint(endPoint);
 
+					// Set timType
 					long timTypeId = rs.getLong("TIM_TYPE_ID");
 					if (!rs.wasNull()) {
 						activeTim.setTimTypeId(timTypeId);
 						activeTim.setTimType(rs.getString("TYPE"));
+					}
+
+					// Set projectKey
+					int projectKey = rs.getInt("PROJECT_KEY");
+					if (!rs.wasNull()) {
+						activeTim.setProjectKey(projectKey);
 					}
 				}
 

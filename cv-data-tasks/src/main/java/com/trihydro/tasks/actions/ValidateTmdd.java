@@ -10,6 +10,7 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TmddItisCode;
+import com.trihydro.library.model.tmdd.EventDescription;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
 import com.trihydro.library.model.tmdd.LinkLocation;
 import com.trihydro.library.model.tmdd.PointOnLink;
@@ -154,18 +155,18 @@ public class ValidateTmdd implements Runnable {
                 }
             }
 
-            LinkLocation location = getLocation(feu);
-            if (location != null) {
+            LinkLocation feuLocation = getLocation(feu);
+            if (feuLocation != null) {
                 // Check Start Point
-                if (!pointsInRange(location.getPrimaryLocation(), tim.getStartPoint())) {
+                if (!pointsInRange(feuLocation.getPrimaryLocation(), tim.getStartPoint())) {
                     inconsistencies.add(new ActiveTimError("Start Point", formatCoordinate(tim.getStartPoint()),
-                            formatPointOnLink(location.getPrimaryLocation())));
+                            formatPointOnLink(feuLocation.getPrimaryLocation())));
                 }
 
                 // Check End Point
-                if (!pointsInRange(location.getSecondaryLocation(), tim.getEndPoint())) {
+                if (!pointsInRange(feuLocation.getSecondaryLocation(), tim.getEndPoint())) {
                     inconsistencies.add(new ActiveTimError("End Point", formatCoordinate(tim.getEndPoint()),
-                            formatPointOnLink(location.getSecondaryLocation())));
+                            formatPointOnLink(feuLocation.getSecondaryLocation())));
                 }
             } else {
                 // FEU doesn't have a start or end point...
@@ -173,7 +174,13 @@ public class ValidateTmdd implements Runnable {
                 inconsistencies.add(new ActiveTimError("End Point", formatCoordinate(tim.getEndPoint()), null));
             }
 
-            // TODO: verify ITIS codes
+            // Check ITIS Codes
+            List<EventDescription> feuEds = getEventDescriptions(feu);
+            List<Integer> feuItisCodes = getNumericItisCodes(feuEds);
+            if (!sameItisCodes(feuItisCodes, tim.getItisCodes())) {
+                inconsistencies.add(new ActiveTimError("ITIS Codes", formatItisCodes(tim.getItisCodes()),
+                        formatItisCodes(feuItisCodes)));
+            }
 
             if (inconsistencies.size() > 0) {
                 ActiveTimValidationResult result = new ActiveTimValidationResult();
@@ -243,6 +250,65 @@ public class ValidateTmdd implements Runnable {
         return location;
     }
 
+    private List<EventDescription> getEventDescriptions(FullEventUpdate feu) {
+        List<EventDescription> eventDescriptions = null;
+
+        if (feu != null && feu.getEventElementDetails() != null && feu.getEventElementDetails().size() > 0
+                && feu.getEventElementDetails().get(0) != null) {
+            eventDescriptions = feu.getEventElementDetails().get(0).getEventDescriptions();
+        }
+
+        return eventDescriptions;
+    }
+
+    private List<Integer> getNumericItisCodes(List<EventDescription> eventDescriptions) {
+        if (eventDescriptions == null) {
+            return null;
+        }
+
+        List<Integer> itisCodes = new ArrayList<Integer>();
+
+        for (EventDescription description : eventDescriptions) {
+            if (description == null || description.getPhrase() == null) {
+                continue;
+            }
+
+            Integer itisCode = tmddItisCodes.get(description.getPhrase().normalized());
+
+            if (itisCode != null) {
+                itisCodes.add(itisCode);
+            }
+        }
+
+        return itisCodes;
+    }
+
+    private boolean sameItisCodes(List<Integer> o1, List<Integer> o2) {
+        boolean result = true;
+
+        if (o1 == null || o2 == null || o1.size() != o2.size()) {
+            result = false;
+        } else {
+            for (int i = 0; i < o1.size(); i++) {
+                boolean inBoth = false;
+
+                for (int j = 0; j < o2.size(); j++) {
+                    if (o1.get(i) != null && o1.get(i).equals(o2.get(j))) {
+                        inBoth = true;
+                        break;
+                    }
+                }
+
+                if (!inBoth) {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
     private boolean pointsInRange(PointOnLink tmddPoint, Coordinate timPoint) {
         if (tmddPoint == null || tmddPoint.getGeoLocation() == null || timPoint == null) {
             return false;
@@ -283,5 +349,23 @@ public class ValidateTmdd implements Runnable {
 
     private String formatPoint(double lat, double lon) {
         return String.format("{ lat: %.6f, lon: %.6f }", lat, lon);
+    }
+
+    private String formatItisCodes(List<Integer> itisCodes) {
+        // { }
+        // { 1 }
+        // { 1, 2 }
+        String result = "{ ";
+
+        if (itisCodes != null) {
+            for (Integer itisCode : itisCodes) {
+                result += String.format("%d, ", itisCode);
+            }
+        }
+
+        result = result.replaceAll(", $", " ");
+        result += "}";
+
+        return result;
     }
 }

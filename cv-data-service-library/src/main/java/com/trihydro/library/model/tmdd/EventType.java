@@ -27,6 +27,6 @@ public class EventType {
 
     public String normalized() {
         // "type:valuetext"
-        return (type + ":" + value).toLowerCase().replaceAll("\s", "");
+        return (type + ":" + value).toLowerCase().replaceAll("[\s-]", "");
     }
 }

@@ -28,4 +28,9 @@ public class TmddItisCode {
     public void setItisCode(Integer itisCode) {
         this.itisCode = itisCode;
     }
+
+    public String normalized() {
+        // "type:valuetext"
+        return (elementType + ":" + elementValue).toLowerCase().replaceAll("\s", "");
+    }
 }

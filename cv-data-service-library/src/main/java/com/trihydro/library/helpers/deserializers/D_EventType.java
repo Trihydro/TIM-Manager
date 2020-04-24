@@ -33,10 +33,10 @@ public class D_EventType implements JsonDeserializer<EventType> {
                 throw new JsonParseException("Failed parsing JSON source: too many members");
             }
 
-            String name = members.iterator().next();
-            String type = obj.get(name).getAsString();
+            String type = members.iterator().next();
+            String value = obj.get(type).getAsString();
 
-            result = new EventType(name, type);
+            result = new EventType(type, value);
         }
 
         return result;

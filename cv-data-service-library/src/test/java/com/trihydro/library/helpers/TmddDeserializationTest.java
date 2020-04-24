@@ -69,8 +69,8 @@ public class TmddDeserializationTest {
 
         // Event Headline
         EventHeadline headline = feu.getEventHeadline();
-        assertEquals("system-information", headline.getHeadline().getName());
-        assertEquals("travel information", headline.getHeadline().getType());
+        assertEquals("system-information", headline.getHeadline().getType());
+        assertEquals("travel information", headline.getHeadline().getValue());
 
         // Event Element Details...
         assertEquals(1, feu.getEventElementDetails().size());
@@ -84,8 +84,8 @@ public class TmddDeserializationTest {
         // ...event-descriptions
         assertEquals(1, details.getEventDescriptions().size());
         EventDescription description = details.getEventDescriptions().get(0);
-        assertEquals("pavement-conditions", description.getPhrase().getName());
-        assertEquals("dry pavement", description.getPhrase().getType());
+        assertEquals("pavement-conditions", description.getPhrase().getType());
+        assertEquals("dry pavement", description.getPhrase().getValue());
 
         // ...event-locations
         assertEquals(1, details.getEventLocations().size());

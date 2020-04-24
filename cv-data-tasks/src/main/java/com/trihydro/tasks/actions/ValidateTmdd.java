@@ -9,10 +9,12 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.TmddItisCode;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
 import com.trihydro.library.model.tmdd.LinkLocation;
 import com.trihydro.library.model.tmdd.PointOnLink;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.library.service.TmddService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
@@ -32,18 +34,22 @@ public class ValidateTmdd implements Runnable {
     private DataTasksConfiguration config;
     private TmddService tmddService;
     private ActiveTimService activeTimService;
+    private ItisCodeService itisCodeService;
     private IdNormalizer idNormalizer;
     private EmailFormatter emailFormatter;
     private EmailHelper mailHelper;
     private Utility utility;
 
+    private Map<String, Integer> tmddItisCodes;
+
     @Autowired
     public void InjectDependencies(DataTasksConfiguration config, TmddService tmddService,
-            ActiveTimService activeTimService, IdNormalizer idNormalizer, EmailFormatter emailFormatter,
-            EmailHelper mailHelper, Utility utility) {
+            ActiveTimService activeTimService, ItisCodeService itisCodeService, IdNormalizer idNormalizer,
+            EmailFormatter emailFormatter, EmailHelper mailHelper, Utility utility) {
         this.config = config;
         this.tmddService = tmddService;
         this.activeTimService = activeTimService;
+        this.itisCodeService = itisCodeService;
         this.idNormalizer = idNormalizer;
         this.emailFormatter = emailFormatter;
         this.mailHelper = mailHelper;
@@ -82,6 +88,17 @@ public class ValidateTmdd implements Runnable {
             utility.logWithDate("Error fetching Active Tims:", this.getClass());
             ex.printStackTrace();
             return;
+        }
+
+        // If the TMDD ITIS Code cache isn't setup, initialize it.
+        if (tmddItisCodes == null) {
+            try {
+                initializeTmddItisCodes();
+            } catch (Exception ex) {
+                utility.logWithDate("Unable to initialize TMDD ITIS Code cache:", this.getClass());
+                ex.printStackTrace();
+                return;
+            }
         }
 
         // Initialize FEU map with initial capacity of 1024
@@ -176,6 +193,17 @@ public class ValidateTmdd implements Runnable {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+        }
+    }
+
+    private void initializeTmddItisCodes() {
+        List<TmddItisCode> itisCodes = itisCodeService.selectAllTmddItisCodes();
+
+        // Initial capacity for 150 ITIS Codes (currently 145) before resizing
+        tmddItisCodes = new HashMap<>(200);
+
+        for (TmddItisCode code : itisCodes) {
+            tmddItisCodes.put(code.normalized(), code.getItisCode());
         }
     }
 

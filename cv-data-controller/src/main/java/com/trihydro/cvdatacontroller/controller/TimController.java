@@ -246,7 +246,7 @@ public class TimController extends BaseController {
                 e.printStackTrace();
             }
         }
-        return new Long(0);
+        return Long.valueOf(0);
     }
 
 }

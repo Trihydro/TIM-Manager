@@ -80,7 +80,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 Long timId = uut.AddTim(tim);
 
                 // Assert
-                assertEquals(new Long(-1), timId);
+                assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, j2735.getMsgCnt());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, j2735.getPacketID());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, j2735.getUrlB());
@@ -109,7 +109,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 // Assert
                 // j2735 fields are skipped, we start at index 5 after those
                 // See timOracleTables.getTimTable() for ordering
-                assertEquals(new Long(-1), timId);
+                assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5,
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
@@ -148,7 +148,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 // Assert
                 // See timOracleTables.getTimTable() for ordering
-                assertEquals(new Long(-1), timId);
+                assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6,
                                 receivedMessageDetails.getLocationData().getElevation());// RMD_LD_ELEVATION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7,

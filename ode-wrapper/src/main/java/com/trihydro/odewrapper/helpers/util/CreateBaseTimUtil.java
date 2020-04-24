@@ -85,9 +85,6 @@ public class CreateBaseTimUtil {
         List<Milepost> mileposts = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
         // reduce the mileposts by removing straight away posts
         mileposts = applyMilepostReductionAlorithm(mileposts, config.getPathDistanceLimit());
-        if (mileposts.size() > 60) {
-            mileposts = reduceMilepostsBelowMaxCount(mileposts);
-        }
         timToSend.setMileposts(mileposts);
 
         OdePosition3D anchorPosition = new OdePosition3D();
@@ -227,32 +224,6 @@ public class CreateBaseTimUtil {
         }
 
         return reducedPath;
-    }
-
-    private List<Milepost> reduceMilepostsBelowMaxCount(List<Milepost> sizeRestrictedMilepostList) {
-        int mod = 2;
-
-        List<Milepost> tempList = new ArrayList<Milepost>();
-
-        tempList = sizeRestrictedMilepostList;
-
-        while (tempList.size() > 60) {
-
-            tempList = new ArrayList<Milepost>();
-            tempList.add(sizeRestrictedMilepostList.get(0));
-            tempList.add(sizeRestrictedMilepostList.get(1));
-
-            for (int i = 2; i < sizeRestrictedMilepostList.size() - 1; i++) {
-
-                if (Math.round(sizeRestrictedMilepostList.get(i).getMilepost() * 10 % mod) == 0) {
-                    tempList.add(sizeRestrictedMilepostList.get(i));
-                }
-            }
-
-            tempList.add(sizeRestrictedMilepostList.get(sizeRestrictedMilepostList.size() - 1));
-            mod += 2;
-        }
-        return tempList;
     }
 
     private double calculateBearing(double startLat, double startLon, double destLat, double destLon) {

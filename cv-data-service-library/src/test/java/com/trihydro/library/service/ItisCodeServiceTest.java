@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.model.TmddItisCode;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +25,9 @@ public class ItisCodeServiceTest extends BaseServiceTest {
 
     @Mock
     private ResponseEntity<ItisCode[]> mockResponseEntityItisCodeArray;
+
+    @Mock
+    private ResponseEntity<TmddItisCode[]> mockResponseEntityTmddItisCodeArray;
 
     private String baseUrl = "baseUrl";
 
@@ -58,5 +62,27 @@ public class ItisCodeServiceTest extends BaseServiceTest {
         verify(mockRestTemplate).getForEntity(url, ItisCode[].class);
         assertEquals(1, data.size());
         assertEquals(ic, data.get(0));
+    }
+
+    @Test
+    public void selectAllTmddItisCodes() {
+        // Arrange
+        String url = String.format("%s/tmdd-itiscodes", baseUrl);
+        TmddItisCode result = new TmddItisCode();
+        result.setElementType("type");
+        result.setElementValue("value");
+        result.setItisCode(5);
+        doReturn(new TmddItisCode[] { result }).when(mockResponseEntityTmddItisCodeArray).getBody();
+        when(mockRestTemplate.getForEntity(url, TmddItisCode[].class)).thenReturn(mockResponseEntityTmddItisCodeArray);
+
+        // Act
+        List<TmddItisCode> data = uut.selectAllTmddItisCodes();
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, TmddItisCode[].class);
+        assertEquals(1, data.size());
+        assertEquals("type", data.get(0).getElementType());
+        assertEquals("value", data.get(0).getElementValue());
+        assertEquals(5, (int) data.get(0).getItisCode());
     }
 }

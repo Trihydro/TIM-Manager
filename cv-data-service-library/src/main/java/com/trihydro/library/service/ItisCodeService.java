@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.model.TmddItisCode;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -18,4 +19,10 @@ public class ItisCodeService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
+	public List<TmddItisCode> selectAllTmddItisCodes() {
+		String url = String.format("%s/tmdd-itiscodes", config.getCvRestService());
+		ResponseEntity<TmddItisCode[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
+				TmddItisCode[].class);
+		return Arrays.asList(response.getBody());
+	}
 }

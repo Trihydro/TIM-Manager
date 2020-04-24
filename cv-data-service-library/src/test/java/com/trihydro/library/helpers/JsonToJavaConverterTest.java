@@ -347,9 +347,9 @@ public class JsonToJavaConverterTest {
         OdeBsmPayload odeBsmPayloadTest = jsonToJava.convertBsmPayloadJsonToJava(value);
 
         assertNotNull(odeBsmPayloadTest);
-        assertEquals(new Integer(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
+        assertEquals(Integer.valueOf(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
         assertEquals("738B0000", odeBsmPayloadTest.getBsm().getCoreData().getId());
-        assertEquals(new Integer(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
+        assertEquals(Integer.valueOf(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
         assertEquals("40.4740003", odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLatitude().toString());
         assertEquals("-104.9691846", odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLongitude().toString());
         assertEquals(new BigDecimal(1489), odeBsmPayloadTest.getBsm().getCoreData().getPosition().getElevation());
@@ -405,7 +405,7 @@ public class JsonToJavaConverterTest {
                 1);
         assertEquals("unknownFuel", suve.getClassDetails().getFuelType().toString());
         assertEquals("none", suve.getClassDetails().getHpmsType().toString());
-        assertEquals(new Integer(0), suve.getClassDetails().getKeyType());
+        assertEquals(Integer.valueOf(0), suve.getClassDetails().getKeyType());
         assertEquals("basicVehicle", suve.getClassDetails().getRole().toString());
     }
 

@@ -49,7 +49,7 @@ public class HttpLoggingControllerTest extends TestBase<HttpLoggingController> {
 
         // Assert
         assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(new Long(-1), data.getBody());
+        assertEquals(Long.valueOf(-1), data.getBody());
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 1, httpLoggingModel.getRequestTime());// REQUEST_TIME
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, httpLoggingModel.getRequest());// REST_REQUEST
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 3, httpLoggingModel.getResponseTime());// RESPONSE_TIME
@@ -71,7 +71,7 @@ public class HttpLoggingControllerTest extends TestBase<HttpLoggingController> {
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertEquals(new Long(0), data.getBody());
+        assertEquals(Long.valueOf(0), data.getBody());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

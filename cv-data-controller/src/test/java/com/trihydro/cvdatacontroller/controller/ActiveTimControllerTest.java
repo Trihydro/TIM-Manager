@@ -65,7 +65,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         assertEquals(HttpStatus.OK, tums.getStatusCode());
         assertEquals(1, tums.getBody().size());
-        assertEquals(new Long(999), tums.getBody().get(0).getActiveTimId());
+        assertEquals(Long.valueOf(999), tums.getBody().get(0).getActiveTimId());
     }
 
     @Test
@@ -465,7 +465,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void DeleteActiveTimsById_SUCCESS() throws SQLException {
         // Arrange
         List<Long> activeTimIds = new ArrayList<>();
-        activeTimIds.add(new Long(-1));
+        activeTimIds.add(Long.valueOf(-1));
 
         // Act
         ResponseEntity<Boolean> data = uut.DeleteActiveTimsById(activeTimIds);
@@ -483,7 +483,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void DeleteActiveTimsById_FAIL() throws SQLException {
         // Arrange
         List<Long> activeTimIds = new ArrayList<>();
-        activeTimIds.add(new Long(-1));
+        activeTimIds.add(Long.valueOf(-1));
         doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1l);
 
         // Act

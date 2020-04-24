@@ -125,9 +125,9 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Assert
         verify(mockRestTemplate).getForEntity(url, Integer[].class);
         assertEquals(3, activeTim.getItisCodes().size());
-        assertEquals(new Integer(0), activeTim.getItisCodes().get(0));
-        assertEquals(new Integer(1), activeTim.getItisCodes().get(1));
-        assertEquals(new Integer(2), activeTim.getItisCodes().get(2));
+        assertEquals(Integer.valueOf(0), activeTim.getItisCodes().get(0));
+        assertEquals(Integer.valueOf(1), activeTim.getItisCodes().get(1));
+        assertEquals(Integer.valueOf(2), activeTim.getItisCodes().get(2));
     }
 
     @Test
@@ -177,9 +177,9 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Assert
         verify(mockRestTemplate).getForEntity(url, Integer[].class);
         assertEquals(3, data.size());
-        assertEquals(new Integer(0), data.get(0));
-        assertEquals(new Integer(1), data.get(1));
-        assertEquals(new Integer(2), data.get(2));
+        assertEquals(Integer.valueOf(0), data.get(0));
+        assertEquals(Integer.valueOf(1), data.get(1));
+        assertEquals(Integer.valueOf(2), data.get(2));
     }
 
     @Test

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.RsuIndexInfo;
+import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.ActiveTimValidationResult;
 import com.trihydro.tasks.models.CActiveTim;
@@ -154,7 +155,7 @@ public class EmailFormatter {
         // Populate Inconsistencies section
         String inconsistencies = "";
         for (ActiveTimValidationResult result : validationResults) {
-            // TODO: pick up here on Monday
+            inconsistencies += getTmddResult(result);
         }
         body = body.replaceAll("\\{content\\}", inconsistencies);
 
@@ -213,6 +214,19 @@ public class EmailFormatter {
             subSection += getRow(collision.getIndex().toString(), activeTimIds);
         }
         section = section.replaceAll("\\{rowsCollisions\\}", subSection);
+
+        return section;
+    }
+
+    private String getTmddResult(ActiveTimValidationResult result) {
+        String header = result.getActiveTim().getActiveTimId() + " (" + result.getActiveTim().getClientId() + ")";
+        String section = formatTmddResults.replaceAll("\\{header\\}", header);
+
+        String rows = "";
+        for (ActiveTimError error : result.getErrors()) {
+            rows += getRow(error.getName(), error.getTimValue(), error.getTmddValue());
+        }
+        section = section.replaceAll("\\{rows\\}", rows);
 
         return section;
     }

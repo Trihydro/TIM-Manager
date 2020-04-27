@@ -1,6 +1,7 @@
 package com.trihydro.tasks.helpers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -13,7 +14,9 @@ import java.util.regex.Pattern;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.RsuIndexInfo;
+import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimMapping;
+import com.trihydro.tasks.models.ActiveTimValidationResult;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
@@ -230,8 +233,57 @@ public class EmailFormatterTest {
                         ".*<h3>Unexpected Errors Processing RSUs</h3><ul><li>10.145.0.0: InterruptedException</li></ul>.*"));
     }
 
+    @Test
+    public void generateTmddSummaryEmail_success() throws IOException {
+        // Arrange
+        EmailFormatter uut = new EmailFormatter();
+
+        List<ActiveTim> unableToVerify = new ArrayList<>();
+        unableToVerify.add(new ActiveTim() {
+            {
+                setActiveTimId(1234l);
+                setClientId("AA1234");
+            }
+        });
+        List<ActiveTimValidationResult> validationResults = new ArrayList<>();
+
+        // Act
+        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.matches(".*<p>1234 \\(AA1234\\)</p>.*"));
+    }
+
+    @Test
+    public void generateTmddSummaryEmail_inconsistencies() throws IOException {
+        // Arrange
+        EmailFormatter uut = new EmailFormatter();
+
+        List<ActiveTim> unableToVerify = new ArrayList<>();
+        List<ActiveTimValidationResult> validationResults = new ArrayList<>();
+
+        ActiveTim tim = new ActiveTim();
+        tim.setActiveTimId(1234l);
+        tim.setClientId("AA1234");
+        ActiveTimError error = new ActiveTimError("fieldName", "timValue", "tmddValue");
+
+        ActiveTimValidationResult valResult = new ActiveTimValidationResult();
+        valResult.setActiveTim(tim);
+        valResult.getErrors().add(error);
+        validationResults.add(valResult);
+
+        // Act
+        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
+        assertTrue(result.contains("<td>fieldName</td><td>timValue</td><td>tmddValue</td>"));
+    }
+
     // RSU Validation Email helper method
-    public String getRowsForListItem(String listItemHeader, String emailBody) {
+    private String getRowsForListItem(String listItemHeader, String emailBody) {
         String row = "";
 
         Pattern p = Pattern.compile("<li>" + listItemHeader + ".*?<tbody>(.*?)<\\/tbody>.*?<\\/li>");

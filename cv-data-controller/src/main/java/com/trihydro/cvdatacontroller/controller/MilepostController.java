@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.trihydro.cvdatacontroller.services.MilepostService;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -299,6 +300,27 @@ public class MilepostController extends BaseController {
 		Collection<com.trihydro.cvdatacontroller.model.Milepost> data = milepostService.getPathWithBuffer(
 				wydotTim.getRoute(), wydotTim.getStartPoint().getLatitude(), wydotTim.getStartPoint().getLongitude(),
 				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude(), wydotTim.getDirection());
+		return ResponseEntity.ok(data);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/get-milepost-single-point")
+	public ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> getMilepostsByPointWithBuffer(
+			@RequestBody MilepostBuffer milepostBuffer) {
+		// check startPoint
+		if (milepostBuffer.getPoint() == null || milepostBuffer.getPoint().getLatitude() == null
+				|| milepostBuffer.getPoint().getLongitude() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
+		// check direction, route
+		if (milepostBuffer.getDirection() == null || milepostBuffer.getCommonName() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
+		Collection<com.trihydro.cvdatacontroller.model.Milepost> data = milepostService.getPathWithSpecifiedBuffer(
+				milepostBuffer.getCommonName(), milepostBuffer.getPoint().getLatitude(),
+				milepostBuffer.getPoint().getLongitude(), milepostBuffer.getDirection(),
+				milepostBuffer.getBufferMiles());
 		return ResponseEntity.ok(data);
 	}
 

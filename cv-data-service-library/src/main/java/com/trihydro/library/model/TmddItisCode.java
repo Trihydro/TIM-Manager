@@ -31,6 +31,6 @@ public class TmddItisCode {
 
     public String normalized() {
         // "type:valuetext"
-        return (elementType + ":" + elementValue).toLowerCase().replaceAll("[\s-]", "");
+        return (elementType + ":" + elementValue).toLowerCase().replaceAll("[\\s-]", "");
     }
 }

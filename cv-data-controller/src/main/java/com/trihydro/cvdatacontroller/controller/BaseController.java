@@ -29,8 +29,7 @@ public class BaseController {
     private HikariDataSource hds = null;
     private HikariConfig config;
     protected DataControllerConfigProperties dbConfig;
-    // private JavaMailSenderImplProvider mailProvider;
-    private Utility utility;
+    protected Utility utility;
     private EmailHelper emailHelper;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -39,10 +38,8 @@ public class BaseController {
     protected DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(DataControllerConfigProperties props, //JavaMailSenderImplProvider _mailProvider,
-            Utility _utility, EmailHelper _emailHelper) {
+    public void InjectDependencies(DataControllerConfigProperties props, Utility _utility, EmailHelper _emailHelper) {
         dbConfig = props;
-        // mailProvider = _mailProvider;
         utility = _utility;
         emailHelper = _emailHelper;
     }

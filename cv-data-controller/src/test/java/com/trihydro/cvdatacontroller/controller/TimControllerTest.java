@@ -69,6 +69,8 @@ public class TimControllerTest extends TestBase<TimController> {
                 doReturn(secResultCodeTypes).when(mockResponseEntitySecurityResultCodeTypeList).getBody();
                 when(mockSecurityResultCodeTypeController.GetSecurityResultCodeTypes())
                                 .thenReturn(mockResponseEntitySecurityResultCodeTypeList);
+
+                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
         @Test
@@ -212,7 +214,6 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockRs).close();
         }
 
-
         @Test
         public void deleteOldTim() throws SQLException {
                 // Arrange
@@ -222,19 +223,19 @@ public class TimControllerTest extends TestBase<TimController> {
                 Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
                 String strDate = sdf.format(dte.getTime());
                 doReturn(strDate).when(uut).getOneMonthPrior();
-        
+
                 // Act
                 var data = uut.deleteOldTim();
-        
+
                 // Assert
                 String deleteSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
                 deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ?)";
-        
+
                 assertEquals(HttpStatus.OK, data.getStatusCode());
                 assertTrue("Fail return on success", data.getBody());
                 verify(mockConnection).prepareStatement(deleteSQL);
                 verify(mockConnection).prepareStatement("DELETE FROM tim WHERE ode_received_at < ?");
-        
+
                 verify(mockPreparedStatement, times(2)).setString(1, strDate);
                 verify(mockPreparedStatement, times(2)).close();
                 verify(mockConnection, times(2)).close();

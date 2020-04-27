@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
@@ -37,15 +36,13 @@ public class TimController extends BaseController {
     private TimOracleTables timOracleTables;
     private SQLNullHandler sqlNullHandler;
     private SecurityResultCodeTypeController securityResultCodeTypeController;
-    private Utility utility;
 
     @Autowired
     public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler,
-            SecurityResultCodeTypeController _securityResultCodeTypeController, Utility _utility) {
+            SecurityResultCodeTypeController _securityResultCodeTypeController) {
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
         securityResultCodeTypeController = _securityResultCodeTypeController;
-        this.utility = _utility;
     }
 
     @RequestMapping(value = "/get-tim/{timId}", method = RequestMethod.GET)

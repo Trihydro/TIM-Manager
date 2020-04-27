@@ -26,15 +26,17 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private String fromEmail;
     private String mailHost;
     private int mailPort;
+    private boolean runTmddValidation;
     private boolean runRsuValidation;
     private int rsuValThreadPoolSize = 1;
     private int rsuValTimeoutSeconds = 300; // 76 RSUs, 20s timeout each... Could still finish processing with up to 20%
                                             // of RSUs down in a pool w/ single thread
 
-    private int removeExpiredPeriodMinutes = 240;
-    private int cleanupPeriodMinutes = 240;
-    private int sdxValidationPeriodMinutes = 240;
-    private int rsuValidationPeriodMinutes = 240;
+    private int removeExpiredPeriodMinutes = 1440;
+    private int cleanupPeriodMinutes = 1440;
+    private int sdxValidationPeriodMinutes = 1440;
+    private int rsuValidationPeriodMinutes = 1440;
+    private int tmddValidationPeriodMinutes = 1440;
 
     public String getCvRestService() {
         return cvRestService;
@@ -122,6 +124,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setMailPort(int mailPort) {
         this.mailPort = mailPort;
+    }
+
+    public boolean getRunTmddValidation() {
+        return runTmddValidation;
+    }
+
+    public void setRunTmddValidation(boolean runTmddValidation) {
+        this.runTmddValidation = runTmddValidation;
     }
 
     public boolean getRunRsuValidation() {
@@ -214,6 +224,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setTmddPassword(String tmddPassword) {
         this.tmddPassword = tmddPassword;
+    }
+
+    public int getTmddValidationPeriodMinutes() {
+        return tmddValidationPeriodMinutes;
+    }
+
+    public void setTmddValidationPeriodMinutes(int tmddValidationPeriodMinutes) {
+        this.tmddValidationPeriodMinutes = tmddValidationPeriodMinutes;
     }
 
 }

@@ -109,10 +109,16 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         // if 'D' direction, get bufferMiles after
         query += "with mp,";
         if (increasing) {
-            query += " case when mp.Milepost -1 < extremeMp.Milepost then extremeMp.Milepost else mp.Milepost -1 end as startMpNum";
+            query += " case when mp.Milepost -";
+            query += bufferInMiles;
+            query += " < extremeMp.Milepost then extremeMp.Milepost else mp.Milepost -";
         } else {
-            query += " case when mp.Milepost +1 > extremeMp.Milepost then extremeMp.Milepost else mp.Milepost +1 end as startMpNum";
+            query += " case when mp.Milepost +";
+            query += bufferInMiles;
+            query += " > extremeMp.Milepost then extremeMp.Milepost else mp.Milepost +";
         }
+        query += bufferInMiles;
+        query += " end as startMpNum";
         query += " match(bufferStart:Milepost{CommonName:mp.CommonName, Milepost:startMpNum})";
         query += " where bufferStart.Direction in " + dirQuery;
 

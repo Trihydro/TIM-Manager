@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
@@ -36,13 +37,15 @@ public class TimController extends BaseController {
     private TimOracleTables timOracleTables;
     private SQLNullHandler sqlNullHandler;
     private SecurityResultCodeTypeController securityResultCodeTypeController;
+    private Utility utility;
 
     @Autowired
     public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler,
-            SecurityResultCodeTypeController _securityResultCodeTypeController) {
+            SecurityResultCodeTypeController _securityResultCodeTypeController, Utility _utility) {
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
         securityResultCodeTypeController = _securityResultCodeTypeController;
+        this.utility = _utility;
     }
 
     @RequestMapping(value = "/get-tim/{timId}", method = RequestMethod.GET)
@@ -89,15 +92,6 @@ public class TimController extends BaseController {
 
         return ResponseEntity.ok(tim);
     }
-
-    // TODO: this may be used in the tim creator...should call out to the
-    // activeTimController instead
-    // @RequestMapping(value = "/active-tims", method = RequestMethod.GET, headers =
-    // "Accept=application/json")
-    // public List<ActiveTim> SelectAllActiveTims() throws Exception {
-    // List<ActiveTim> activeTims = ActiveTimService.getAllActiveTims();
-    // return activeTims;
-    // }
 
     @RequestMapping(value = "/add-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public Long AddTim(@RequestBody TimInsertModel tim) {
@@ -249,4 +243,81 @@ public class TimController extends BaseController {
         return Long.valueOf(0);
     }
 
+    @RequestMapping(value = "/delete-old-tim", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    public ResponseEntity<Boolean> deleteOldTim() {
+        // delete all tim_rsu, tim over 30 days old
+        boolean deleteResult = true;
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String strDate = getOneMonthPrior();
+
+        try {
+            deleteResult = deleteOldTimRsus(strDate);
+
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old tim_rsus");
+                return ResponseEntity.ok(false);
+            }
+
+            String deleteSQL = "DELETE FROM tim WHERE ode_received_at < ?";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return ResponseEntity.ok(deleteResult);
+    }
+
+    private boolean deleteOldTimRsus(String strDate) {
+        boolean deleteResult = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ?)";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete tim_rsus");
+        }
+        return deleteResult;
+    }
 }

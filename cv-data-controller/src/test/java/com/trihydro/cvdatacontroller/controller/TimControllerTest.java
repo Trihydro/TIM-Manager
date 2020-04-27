@@ -1,15 +1,23 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
@@ -61,7 +69,6 @@ public class TimControllerTest extends TestBase<TimController> {
                 doReturn(secResultCodeTypes).when(mockResponseEntitySecurityResultCodeTypeList).getBody();
                 when(mockSecurityResultCodeTypeController.GetSecurityResultCodeTypes())
                                 .thenReturn(mockResponseEntitySecurityResultCodeTypeList);
-                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
         @Test
@@ -203,6 +210,34 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockStatement).close();
                 verify(mockConnection).close();
                 verify(mockRs).close();
+        }
+
+
+        @Test
+        public void deleteOldTim() throws SQLException {
+                // Arrange
+                DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+                TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+                sdf.setTimeZone(toTimeZone);
+                Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
+                String strDate = sdf.format(dte.getTime());
+                doReturn(strDate).when(uut).getOneMonthPrior();
+        
+                // Act
+                var data = uut.deleteOldTim();
+        
+                // Assert
+                String deleteSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
+                deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ?)";
+        
+                assertEquals(HttpStatus.OK, data.getStatusCode());
+                assertTrue("Fail return on success", data.getBody());
+                verify(mockConnection).prepareStatement(deleteSQL);
+                verify(mockConnection).prepareStatement("DELETE FROM tim WHERE ode_received_at < ?");
+        
+                verify(mockPreparedStatement, times(2)).setString(1, strDate);
+                verify(mockPreparedStatement, times(2)).close();
+                verify(mockConnection, times(2)).close();
         }
 
         private ReceivedMessageDetails getRxMsg() {

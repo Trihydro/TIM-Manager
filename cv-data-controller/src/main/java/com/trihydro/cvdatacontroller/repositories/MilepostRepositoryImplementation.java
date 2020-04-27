@@ -100,22 +100,22 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
 
         query += " match(mp:Milepost{CommonName: $commonName})";
         query += " where mp.Direction in " + dirQuery;
-        query += " with extremeMp, mp, distance(point({longitude:$lon,latitude:$lat}), point({longitude:startMp.Longitude,latitude:startMp.Latitude})) as d1 ";
+        query += " with extremeMp, mp, distance(point({longitude:$lon,latitude:$lat}), point({longitude:mp.Longitude,latitude:mp.Latitude})) as d1 ";
         query += " with extremeMp, mp, d1 ORDER BY d1 ASC LIMIT 1";// here we have the closest point, now go back
                                                                    // bufferInMiles
 
         // get the buffered start
         // if 'I' direction, get bufferedMiles before
         // if 'D' direction, get bufferMiles after
-        query += "with mp,";
+        query += " with mp,";
         if (increasing) {
-            query += " case when mp.Milepost -";
+            query += " case when mp.Milepost - ";
             query += bufferInMiles;
-            query += " < extremeMp.Milepost then extremeMp.Milepost else mp.Milepost -";
+            query += " < extremeMp.Milepost then extremeMp.Milepost else mp.Milepost - ";
         } else {
-            query += " case when mp.Milepost +";
+            query += " case when mp.Milepost + ";
             query += bufferInMiles;
-            query += " > extremeMp.Milepost then extremeMp.Milepost else mp.Milepost +";
+            query += " > extremeMp.Milepost then extremeMp.Milepost else mp.Milepost + ";
         }
         query += bufferInMiles;
         query += " end as startMpNum";

@@ -9,10 +9,12 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotRsu;
@@ -69,13 +71,14 @@ public class TimRefreshController {
     private RegionService regionService;
     private RsuService rsuService;
     private WydotTimService wydotTimService;
+    private MilepostReduction milepostReduction;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, DataFrameService _dataFrameService,
             PathNodeXYService _pathNodeXYService, RegionService _regionService, RsuService _rsuService,
-            WydotTimService _WydotTimService) {
+            WydotTimService _WydotTimService, MilepostReduction _milepostReduction) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -88,6 +91,7 @@ public class TimRefreshController {
         regionService = _regionService;
         rsuService = _rsuService;
         wydotTimService = _WydotTimService;
+        milepostReduction = _milepostReduction;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -113,7 +117,21 @@ public class TimRefreshController {
             wydotTim.setDirection(aTim.getDirection());
             wydotTim.setStartPoint(aTim.getStartPoint());
             wydotTim.setEndPoint(aTim.getEndPoint());
-            List<Milepost> mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+
+            List<Milepost> mps = new ArrayList<>();
+            if (wydotTim.getEndPoint() != null) {
+                mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+            } else {
+                // point incident
+                MilepostBuffer mpb = new MilepostBuffer();
+                mpb.setBufferMiles(configuration.getPointIncidentBufferMiles());
+                mpb.setCommonName(wydotTim.getRoute());
+                mpb.setDirection(wydotTim.getDirection());
+                mpb.setPoint(wydotTim.getStartPoint());
+                mps = milepostService.getMilepostsByPointWithBuffer(mpb);
+            }
+            // reduce the mileposts by removing straight away posts
+            mps = milepostReduction.applyMilepostReductionAlorithm(mps, configuration.getPathDistanceLimit());
 
             if (mps.size() == 0) {
                 System.out.println("Unable to send TIM to SDW, no mileposts found to determine service area");

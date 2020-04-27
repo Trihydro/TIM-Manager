@@ -3,12 +3,6 @@ package com.trihydro.cvdatacontroller.controller;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.TimeZone;
 
 import com.trihydro.library.helpers.Utility;
 
@@ -35,7 +29,7 @@ public class BsmController extends BaseController {
     }
 
     @RequestMapping(value = "/delete-old", method = RequestMethod.DELETE, headers = "Accept=application/json")
-    public ResponseEntity<Boolean> DeleteOldBsm() {
+    public ResponseEntity<Boolean> deleteOldBsm() {
         // delete all bsm_part2_spve, bsm_part2_suve, bsm_part2_vse, bsm_core_data
         // over 30 days old
         boolean deleteResult = true;
@@ -78,15 +72,6 @@ public class BsmController extends BaseController {
         }
 
         return ResponseEntity.ok(deleteResult);
-    }
-
-    public String getOneMonthPrior() {
-        DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
-        sdf.setTimeZone(toTimeZone);
-        Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
-        String strDate = sdf.format(dte.getTime());
-        return strDate;
     }
 
     private Boolean deleteOldBsmPart2Suve(String strDate) {

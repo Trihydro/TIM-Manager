@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BsmService extends CvDataServiceLibrary {
-    public boolean deleteOldBsm() {
-        String url = String.format("%s/bsm/delete-old", config.getCvRestService());
+public class DriverAlertService extends CvDataServiceLibrary{
+    public boolean deleteOldDriverAlerts() {
+        String url = String.format("%s/driver-alert/delete-old", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -18,5 +18,4 @@ public class BsmService extends CvDataServiceLibrary {
 				entity, Boolean.class);
 		return response.getBody();
     }
-
 }

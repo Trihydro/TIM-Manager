@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -145,4 +147,14 @@ public class BaseController {
         }
         return convertedDate;
     }
+
+    public String getOneMonthPrior() {
+        DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+        sdf.setTimeZone(toTimeZone);
+        Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
+        String strDate = sdf.format(dte.getTime());
+        return strDate;
+    }
+
 }

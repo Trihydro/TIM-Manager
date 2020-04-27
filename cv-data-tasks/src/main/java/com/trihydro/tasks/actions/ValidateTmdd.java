@@ -314,8 +314,8 @@ public class ValidateTmdd implements Runnable {
             return false;
         }
 
-        double tmddLat = tmddPoint.getGeoLocation().getLatitude() / 1000000;
-        double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000;
+        double tmddLat = tmddPoint.getGeoLocation().getLatitude() / 1000000.0;
+        double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000.0;
 
         GlobalCoordinates tmdd = new GlobalCoordinates(tmddLat, tmddLon);
         GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude(), timPoint.getLongitude());
@@ -333,8 +333,8 @@ public class ValidateTmdd implements Runnable {
             return null;
         }
 
-        double lat = point.getGeoLocation().getLatitude() / 1000000;
-        double lon = point.getGeoLocation().getLongitude() / 1000000;
+        double lat = point.getGeoLocation().getLatitude() / 1000000.0;
+        double lon = point.getGeoLocation().getLongitude() / 1000000.0;
 
         return formatPoint(lat, lon);
     }

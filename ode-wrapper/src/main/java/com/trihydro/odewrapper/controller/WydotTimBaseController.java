@@ -131,7 +131,8 @@ public abstract class WydotTimBaseController {
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
             resultMessages.add("Invalid startPoint");
         }
-        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+        // endPoint may be null here, so check if not null that it is valid
+        if (tim.getEndPoint() != null && !tim.getEndPoint().isValid()) {
             resultMessages.add("Invalid endPoint");
         }
 

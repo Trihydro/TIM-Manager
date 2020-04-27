@@ -33,16 +33,27 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     private String tmddUser;
     private String tmddPassword;
 
+    private Double pointIncidentBufferMiles;
+
     public String getOdeUrl() {
         return odeUrl;
     }
 
     /**
      * Returns the defaultLaneWidth / 2
+     * 
      * @return
      */
     public Double getPathDistanceLimit() {
         return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
+
+    public Double getPointIncidentBufferMiles() {
+        return pointIncidentBufferMiles;
+    }
+
+    public void setPointIncidentBufferMiles(Double pointIncidentBufferMiles) {
+        this.pointIncidentBufferMiles = pointIncidentBufferMiles;
     }
 
     public String getFromEmail() {

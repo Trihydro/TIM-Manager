@@ -2,6 +2,7 @@ package com.trihydro.odewrapper.model;
 
 import java.util.List;
 
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.WydotTim;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -27,6 +28,9 @@ public class WydotTimIncident extends WydotTim {
     private transient String route;
     @ApiModelProperty(hidden = true)
     private transient List<String> itisCodes;
+
+    @ApiModelProperty(required = false)
+	private transient Coordinate endPoint;
 
     public String getSchedStart() {
         return this.schedStart;

@@ -282,6 +282,33 @@ public class EmailFormatterTest {
         assertTrue(result.contains("<td>fieldName</td><td>timValue</td><td>tmddValue</td>"));
     }
 
+    @Test
+    public void generateTmddSummaryEmail_inconsistenciesWithNull() throws IOException {
+        // Arrange
+        EmailFormatter uut = new EmailFormatter();
+
+        List<ActiveTim> unableToVerify = new ArrayList<>();
+        List<ActiveTimValidationResult> validationResults = new ArrayList<>();
+
+        ActiveTim tim = new ActiveTim();
+        tim.setActiveTimId(1234l);
+        tim.setClientId("AA1234");
+        ActiveTimError error = new ActiveTimError("fieldName", null, "tmddValue");
+
+        ActiveTimValidationResult valResult = new ActiveTimValidationResult();
+        valResult.setActiveTim(tim);
+        valResult.getErrors().add(error);
+        validationResults.add(valResult);
+
+        // Act
+        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
+        assertTrue(result.contains("<td>fieldName</td><td>null</td><td>tmddValue</td>"));
+    }
+
     // RSU Validation Email helper method
     private String getRowsForListItem(String listItemHeader, String emailBody) {
         String row = "";

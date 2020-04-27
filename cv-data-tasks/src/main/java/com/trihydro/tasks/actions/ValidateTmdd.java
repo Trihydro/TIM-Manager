@@ -198,6 +198,7 @@ public class ValidateTmdd implements Runnable {
                 mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Results", email,
                         config.getMailPort(), config.getMailHost(), config.getFromEmail());
             } catch (Exception ex) {
+                utility.logWithDate("Error sending summary email:", this.getClass());
                 ex.printStackTrace();
             }
         }

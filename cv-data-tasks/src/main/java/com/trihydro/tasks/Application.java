@@ -16,6 +16,7 @@ import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
 import com.trihydro.tasks.actions.RemoveExpiredActiveTims;
+import com.trihydro.tasks.actions.RetentionPolicyEnforcement;
 import com.trihydro.tasks.actions.ValidateRsus;
 import com.trihydro.tasks.actions.ValidateSDX;
 import com.trihydro.tasks.config.DataTasksConfiguration;
@@ -33,17 +34,20 @@ public class Application {
 
         private RemoveExpiredActiveTims removeExpiredActiveTims;
         private CleanupActiveTims cleanupActiveTims;
+        private RetentionPolicyEnforcement retentionEnforcement;
         private ValidateSDX sdxValidator;
         private ValidateRsus rsuValidator;
 
         @Autowired
         public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
-                        CleanupActiveTims _cleanupActiveTims, ValidateSDX _sdxValidator, ValidateRsus _rsuValidator) {
+                        CleanupActiveTims _cleanupActiveTims, ValidateSDX _sdxValidator, ValidateRsus _rsuValidator,
+                        RetentionPolicyEnforcement _retentionEnforcement) {
                 config = _config;
                 removeExpiredActiveTims = _removeExpiredActiveTims;
                 cleanupActiveTims = _cleanupActiveTims;
                 sdxValidator = _sdxValidator;
                 rsuValidator = _rsuValidator;
+                retentionEnforcement = _retentionEnforcement;
         }
 
         public static void main(String[] args) {
@@ -74,5 +78,9 @@ public class Application {
                         scheduledExecutorService.scheduleAtFixedRate(rsuValidator, 15,
                                         config.getRsuValidationPeriodMinutes(), TimeUnit.MINUTES);
                 }
+
+                // Retention Policy Enforcement
+                scheduledExecutorService.scheduleAtFixedRate(retentionEnforcement, 20,
+                                config.getRetentionEnforcementPeriodMinutes(), TimeUnit.MINUTES);
         }
 }

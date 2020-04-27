@@ -1,34 +1,54 @@
-package com.trihydro.odewrapper.helpers.util;
+package com.trihydro.library.helpers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Milepost;
-import com.trihydro.library.service.MilepostService;
-import com.trihydro.odewrapper.config.BasicConfiguration;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
-@RunWith(StrictStubs.class)
-public class CreateBaseTimUtilTest {
-    @Mock
-    BasicConfiguration mockBasicConfiguration;
-    @Mock
-    Utility mockUtility;
-    @Mock
-    MilepostService mockMilepostService;
+public class MilepostReductionTest {
 
-    @InjectMocks
-    CreateBaseTimUtil uut;
+    private MilepostReduction uut = new MilepostReduction();
+
+    @Test
+    public void applyMilepostReductionAlorithm_SUCCESS() {
+        // Arrange
+        List<Milepost> mps = getMileposts();
+
+        // Act
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
+
+        // Assert
+        assertTrue(mps.size() > reduced.size());
+    }
+
+    @Test
+    public void applyMilepostReductionAlorithm_NULL() {
+        // Arrange
+
+        // Act
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(null, Double.valueOf(327 / 2));
+
+        // Assert
+        assertNull(reduced);
+    }
+
+    @Test
+    public void applyMilepostReductionAlorithm_empty() {
+        // Arrange
+        List<Milepost> mps = new ArrayList<>();
+
+        // Act
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
+
+        // Assert
+        assertEquals(0, reduced.size());
+    }
 
     private List<Milepost> getMileposts() {
         List<Milepost> mps = new ArrayList<>();
@@ -629,38 +649,4 @@ public class CreateBaseTimUtilTest {
         return mps;
     }
 
-    @Test
-    public void applyMilepostReductionAlorithm_SUCCESS() {
-        // Arrange
-        List<Milepost> mps = getMileposts();
-
-        // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
-
-        // Assert
-        assertTrue(mps.size() > reduced.size());
-    }
-
-    @Test
-    public void applyMilepostReductionAlorithm_NULL() {
-        // Arrange
-
-        // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(null, Double.valueOf(327 / 2));
-
-        // Assert
-        assertNull(reduced);
-    }
-
-    @Test
-    public void applyMilepostReductionAlorithm_empty() {
-        // Arrange
-        List<Milepost> mps = new ArrayList<>();
-
-        // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
-
-        // Assert
-        assertEquals(0, reduced.size());
-    }
 }

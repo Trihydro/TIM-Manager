@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Coordinate;
@@ -68,6 +69,8 @@ public class TimRefreshControllerTest {
     RsuService mockRsuService;
     @Mock
     WydotTimService mockWydotTimService;
+    @Mock
+    MilepostReduction mockMilepostReduction;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
@@ -108,6 +111,7 @@ public class TimRefreshControllerTest {
         mps.add(startMp);
         mps.add(endMp);
         doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
     }
 
     @Test

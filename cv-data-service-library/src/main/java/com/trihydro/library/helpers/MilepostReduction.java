@@ -38,9 +38,7 @@ public class MilepostReduction {
         int on = 1;
         int nn = 2;
         int maxn = mileposts.size() - 1;
-
-        Milepost nodeCopy = new Milepost(mileposts.get(cn));
-        reducedPath.add(nodeCopy);
+        reducedPath.add(mileposts.get(cn));
 
         // step through the full path
         // save the nodes that constitute the minimum path length
@@ -61,16 +59,14 @@ public class MilepostReduction {
 
             } else {
                 cn = nn - 1;
-                nodeCopy = new Milepost(mileposts.get(cn));
-                reducedPath.add(nodeCopy);
+                reducedPath.add(mileposts.get(cn));
                 on = cn + 1;
                 nn = cn + 2;
             }
 
             if (nn > maxn) {
                 cn = nn - 1;
-                nodeCopy = new Milepost(mileposts.get(cn));
-                reducedPath.add(nodeCopy);
+                reducedPath.add(mileposts.get(cn));
                 break; // quit stepping down path we have reached the end
             }
 

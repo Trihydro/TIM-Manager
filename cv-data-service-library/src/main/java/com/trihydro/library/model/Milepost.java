@@ -1,7 +1,7 @@
 package com.trihydro.library.model;
 
 public class Milepost {
-    private final double RE = 6371000.0; // Earth radius for distance calculations
+    private static final double RE = 6371000.0; // Earth radius for distance calculations
 
     private String commonName;
     private Double milepost;

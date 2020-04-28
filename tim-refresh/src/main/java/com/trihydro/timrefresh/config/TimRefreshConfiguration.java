@@ -2,6 +2,7 @@ package com.trihydro.timrefresh.config;
 
 import java.math.BigDecimal;
 
+import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.SdwProps;
@@ -26,19 +27,37 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 @ConfigurationProperties("config")
 @Import({ ActiveTimHoldingService.class, ActiveTimService.class, DataFrameService.class, MilepostService.class,
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
-        Utility.class, RestTemplateProvider.class })
+        Utility.class, RestTemplateProvider.class, MilepostReduction.class })
 public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
 
     private TimeToLive sdwTtl;
-    private BigDecimal defaultLaneWidth;
+    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(327);
     private String cvRestService;
     private String[] rsuRoutes;
     private String odeUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
+    private Double pointIncidentBufferMiles;
+
+    /**
+     * Returns the defaultLaneWidth / 2
+     * 
+     * @return
+     */
+    public Double getPathDistanceLimit() {
+        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
 
     public TimeToLive getSdwTtl() {
         return sdwTtl;
+    }
+
+    public Double getPointIncidentBufferMiles() {
+        return pointIncidentBufferMiles;
+    }
+
+    public void setPointIncidentBufferMiles(Double pointIncidentBufferMiles) {
+        this.pointIncidentBufferMiles = pointIncidentBufferMiles;
     }
 
     @Override

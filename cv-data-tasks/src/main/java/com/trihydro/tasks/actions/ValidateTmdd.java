@@ -43,6 +43,8 @@ public class ValidateTmdd implements Runnable {
 
     private Map<String, Integer> tmddItisCodes;
 
+    private List<String> errors;
+
     @Autowired
     public void InjectDependencies(DataTasksConfiguration config, TmddService tmddService,
             ActiveTimService activeTimService, ItisCodeService itisCodeService, IdNormalizer idNormalizer,
@@ -59,14 +61,30 @@ public class ValidateTmdd implements Runnable {
 
     public void run() {
         utility.logWithDate("Running...", this.getClass());
+        errors = new ArrayList<>();
 
         try {
             validateTmdd();
         } catch (Exception ex) {
             utility.logWithDate("Error while validating Oracle with TMDD:", this.getClass());
             ex.printStackTrace();
+            errors.add(ex.getMessage());
+
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
+        }
+
+        if (errors.size() > 0) {
+            try {
+                String email = "Error(s) occurred durring Oracle-TMDD message validation:<br>"
+                        + String.join("<br><br>", errors);
+
+                mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Error(s)", email,
+                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+            } catch (Exception ex) {
+                utility.logWithDate("Failed to send error summary email:", this.getClass());
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -78,6 +96,8 @@ public class ValidateTmdd implements Runnable {
         } catch (Exception ex) {
             utility.logWithDate("Error fetching FEUs from TMDD:", this.getClass());
             ex.printStackTrace();
+            errors.add("Error fetching FEUs from TMDD: " + ex.getMessage());
+
             return;
         }
 
@@ -88,6 +108,8 @@ public class ValidateTmdd implements Runnable {
         } catch (Exception ex) {
             utility.logWithDate("Error fetching Active Tims:", this.getClass());
             ex.printStackTrace();
+            errors.add("Error fetching Active Tims: " + ex.getMessage());
+
             return;
         }
 
@@ -98,6 +120,8 @@ public class ValidateTmdd implements Runnable {
             } catch (Exception ex) {
                 utility.logWithDate("Unable to initialize TMDD ITIS Code cache:", this.getClass());
                 ex.printStackTrace();
+                errors.add("Unable to initialize TMDD ITIS Code cache: " + ex.getMessage());
+
                 return;
             }
         }
@@ -198,6 +222,7 @@ public class ValidateTmdd implements Runnable {
             } catch (Exception ex) {
                 utility.logWithDate("Error sending summary email:", this.getClass());
                 ex.printStackTrace();
+                errors.add("Error sending summary email: " + ex.getMessage());
             }
         }
     }

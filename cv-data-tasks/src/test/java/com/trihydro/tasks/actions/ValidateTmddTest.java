@@ -192,7 +192,7 @@ public class ValidateTmddTest {
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
         assertEquals("Error fetching Active Tims:", logMessageCaptor.getValue());
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -206,7 +206,7 @@ public class ValidateTmddTest {
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
         assertEquals("Error fetching FEUs from TMDD:", logMessageCaptor.getValue());
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -220,7 +220,7 @@ public class ValidateTmddTest {
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
         assertEquals("Unable to initialize TMDD ITIS Code cache:", logMessageCaptor.getValue());
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -245,7 +245,8 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        assertEquals("Error sending summary email:", logMessageCaptor.getValue());
+        verify(mockUtility, times(3)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
+        assertEquals("Error sending summary email:", logMessageCaptor.getAllValues().get(1));
+        assertEquals("Failed to send error summary email:", logMessageCaptor.getAllValues().get(2));
     }
 }

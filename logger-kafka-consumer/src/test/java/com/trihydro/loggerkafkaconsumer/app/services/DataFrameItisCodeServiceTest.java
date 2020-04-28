@@ -43,7 +43,7 @@ public class DataFrameItisCodeServiceTest
         Long data = uut.insertDataFrameItisCode(dataFrameId, itis);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, Long.parseLong(itis));// ITIS_CODE_ID
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 2, dataFrameId);// DATA_FRAME_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, null);// TEXT
@@ -60,7 +60,7 @@ public class DataFrameItisCodeServiceTest
         Long data = uut.insertDataFrameItisCode(dataFrameId, itis);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

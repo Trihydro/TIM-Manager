@@ -37,7 +37,7 @@ public class PathNodeXYServiceTest extends TestBase<PathNodeXYService> {
         Long data = uut.insertPathNodeXY(-1l, -1l);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// NODE_XY_ID
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 2, -1l);// PATH_ID
         verify(mockPreparedStatement).close();
@@ -52,7 +52,7 @@ public class PathNodeXYServiceTest extends TestBase<PathNodeXYService> {
         Long data = uut.insertPathNodeXY(-1l, -1l);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

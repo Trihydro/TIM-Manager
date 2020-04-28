@@ -69,7 +69,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         Long data = uut.addDriverAlertToOracleDB(odeData);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1,
                 odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLatitude());// LATITUDE
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2,
@@ -115,7 +115,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         Long data = uut.addDriverAlertToOracleDB(getOdeData());
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

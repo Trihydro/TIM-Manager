@@ -87,7 +87,7 @@ public class ValidateTmddTest {
 
         // Assert
         verify(mockTmddService).getTmddEvents();
-        verify(mockActiveTimService).getActiveTimsWithItisCodes();
+        verify(mockActiveTimService).getActiveTimsWithItisCodes(true);
 
         // Assert (no email sent)
         verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
@@ -104,7 +104,7 @@ public class ValidateTmddTest {
         TmddItisCode[] itisCodes = importJsonArray("/tmdd_itis_codes.json", TmddItisCode[].class);
 
         when(mockTmddService.getTmddEvents()).thenReturn(Arrays.asList(feus));
-        when(mockActiveTimService.getActiveTimsWithItisCodes()).thenReturn(Arrays.asList(activeTims));
+        when(mockActiveTimService.getActiveTimsWithItisCodes(true)).thenReturn(Arrays.asList(activeTims));
         when(mockItisCodeService.selectAllTmddItisCodes()).thenReturn(Arrays.asList(itisCodes));
 
         // Act
@@ -113,7 +113,7 @@ public class ValidateTmddTest {
         // Assert
         // Service methods called
         verify(mockTmddService).getTmddEvents();
-        verify(mockActiveTimService).getActiveTimsWithItisCodes();
+        verify(mockActiveTimService).getActiveTimsWithItisCodes(true);
         verify(mockItisCodeService).selectAllTmddItisCodes();
 
         // No email sent
@@ -130,7 +130,7 @@ public class ValidateTmddTest {
         TmddItisCode[] itisCodes = importJsonArray("/tmdd_itis_codes.json", TmddItisCode[].class);
 
         when(mockTmddService.getTmddEvents()).thenReturn(Arrays.asList(feus));
-        when(mockActiveTimService.getActiveTimsWithItisCodes()).thenReturn(Arrays.asList(activeTims));
+        when(mockActiveTimService.getActiveTimsWithItisCodes(true)).thenReturn(Arrays.asList(activeTims));
         when(mockItisCodeService.selectAllTmddItisCodes()).thenReturn(Arrays.asList(itisCodes));
 
         // Act
@@ -139,7 +139,7 @@ public class ValidateTmddTest {
         // Assert
         // Service methods called
         verify(mockTmddService).getTmddEvents();
-        verify(mockActiveTimService).getActiveTimsWithItisCodes();
+        verify(mockActiveTimService).getActiveTimsWithItisCodes(true);
         verify(mockItisCodeService).selectAllTmddItisCodes();
 
         // Validation summary email generated
@@ -184,7 +184,7 @@ public class ValidateTmddTest {
     @Test
     public void validateTmdd_run_activeTimServiceError() throws MailException, MessagingException {
         // Arrange
-        when(mockActiveTimService.getActiveTimsWithItisCodes()).thenThrow(new RestClientException("timeout"));
+        when(mockActiveTimService.getActiveTimsWithItisCodes(true)).thenThrow(new RestClientException("timeout"));
 
         // Act
         uut.run();
@@ -234,7 +234,7 @@ public class ValidateTmddTest {
         TmddItisCode[] itisCodes = importJsonArray("/tmdd_itis_codes.json", TmddItisCode[].class);
 
         when(mockTmddService.getTmddEvents()).thenReturn(Arrays.asList(feus));
-        when(mockActiveTimService.getActiveTimsWithItisCodes()).thenReturn(Arrays.asList(activeTims));
+        when(mockActiveTimService.getActiveTimsWithItisCodes(true)).thenReturn(Arrays.asList(activeTims));
         when(mockItisCodeService.selectAllTmddItisCodes()).thenReturn(Arrays.asList(itisCodes));
 
         // Throw exception when sending email

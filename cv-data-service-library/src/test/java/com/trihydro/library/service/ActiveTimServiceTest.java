@@ -360,11 +360,11 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     @Test
     public void getActiveTimsWithItisCodes_success() {
         // Arrange
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis", ActiveTim[].class))
-                .thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=true",
+                ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
-        List<ActiveTim> result = uut.getActiveTimsWithItisCodes();
+        List<ActiveTim> result = uut.getActiveTimsWithItisCodes(true);
 
         // Assert
         assertEquals(aTims.length, result.size());
@@ -374,10 +374,10 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     @Test(expected = RestClientException.class)
     public void getActiveTimsWithItisCodes_throwsError() {
         // Arrange
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis", ActiveTim[].class))
-                .thenThrow(new RestClientException("timeout"));
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=true",
+                ActiveTim[].class)).thenThrow(new RestClientException("timeout"));
 
         // Act
-        uut.getActiveTimsWithItisCodes();
+        uut.getActiveTimsWithItisCodes(true);
     }
 }

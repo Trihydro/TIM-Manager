@@ -84,7 +84,7 @@ public class ValidateTmdd implements Runnable {
         // Get ActiveTims (for both RSUs and SDX)
         List<ActiveTim> activeTims = null;
         try {
-            activeTims = activeTimService.getActiveTimsWithItisCodes();
+            activeTims = activeTimService.getActiveTimsWithItisCodes(true);
         } catch (Exception ex) {
             utility.logWithDate("Error fetching Active Tims:", this.getClass());
             ex.printStackTrace();

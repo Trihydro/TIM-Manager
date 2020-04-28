@@ -132,8 +132,6 @@ public class ValidateTmdd implements Runnable {
             }
 
             List<ActiveTimError> inconsistencies = new ArrayList<>();
-            // ActiveTimValidationResult inconsistencies = new ActiveTimValidationResult();
-            // inconsistencies.setActiveTim(tim);
 
             // Check Start Time
             String feuStartTime = getStartTime(feu);

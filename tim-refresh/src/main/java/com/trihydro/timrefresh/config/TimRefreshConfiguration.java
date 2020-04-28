@@ -31,7 +31,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
 
     private TimeToLive sdwTtl;
-    private BigDecimal defaultLaneWidth;
+    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(327);
     private String cvRestService;
     private String[] rsuRoutes;
     private String odeUrl;

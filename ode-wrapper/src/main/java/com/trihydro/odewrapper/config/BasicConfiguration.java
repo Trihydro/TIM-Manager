@@ -17,7 +17,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps {
 
     private TimeToLive sdwTtl;
-    private BigDecimal defaultLaneWidth;
+    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(327);
     private String cvRestService;
     private String[] rsuRoutes;
     private Integer httpLoggingMaxSize;

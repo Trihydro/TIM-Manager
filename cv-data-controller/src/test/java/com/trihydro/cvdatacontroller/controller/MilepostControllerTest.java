@@ -22,6 +22,7 @@ import java.util.List;
 import com.trihydro.cvdatacontroller.services.MilepostService;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 
 import org.junit.Before;
@@ -43,7 +44,7 @@ public class MilepostControllerTest {
     private String commonName = "commonName";
     private double fromMilepost = 0d;
     private double toMilepost = 10d;
-    
+
     @Mock
     MilepostService mockMilepostService;
     @Mock
@@ -237,6 +238,28 @@ public class MilepostControllerTest {
     }
 
     @Test
+    public void getMilepostsByPointWithBuffer_SUCCESS() {
+        // Arrange
+        Collection<com.trihydro.cvdatacontroller.model.Milepost> resp = new ArrayList<>();
+        resp.add(new com.trihydro.cvdatacontroller.model.Milepost());
+        doReturn(resp).when(mockMilepostService).getPathWithSpecifiedBuffer(anyString(), anyDouble(), anyDouble(),
+                anyString(), anyDouble());
+        MilepostBuffer mpb = new MilepostBuffer();
+        mpb.setCommonName("route");
+        mpb.setDirection("direction");
+        mpb.setPoint(new Coordinate(-3, -4));
+        mpb.setBufferMiles(1d);
+
+        // Act
+        ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> data = uut
+                .getMilepostsByPointWithBuffer(mpb);
+
+        // Assert
+        assertEquals(HttpStatus.OK, data.getStatusCode());
+        assertEquals(1, data.getBody().size());
+    }
+
+    @Test
     public void getMilepostRangeNoDirection_asc_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from MILEPOST_VW_NEW where milepost between ";
@@ -313,6 +336,7 @@ public class MilepostControllerTest {
         verify(mockRs).close();
         assertEquals(0, milePosts.getBody().size());
     }
+
     @Test
     public void getMilepostRange_Direction_asc_SUCCESS() throws SQLException {
         // Arrange

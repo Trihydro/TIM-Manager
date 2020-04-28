@@ -27,4 +27,10 @@ public class MilepostService {
             Double endLong, String direction) {
         return milepostRepository.getPathWithBuffer(commonName, startLat, startLong, endLat, endLong, direction);
     }
+
+    @Transactional(readOnly = true)
+    public Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, Double lat, Double lon, String direction,
+            Double bufferInMiles) {
+        return milepostRepository.getPathWithSpecifiedBuffer(commonName, lat, lon, direction, bufferInMiles);
+    }
 }

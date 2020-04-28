@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 
 import org.junit.Before;
@@ -60,5 +61,30 @@ public class MilepostServiceTest extends BaseServiceTest {
         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Milepost[].class);
         assertEquals(1, data.size());
         assertEquals(milepost, data.get(0));
+    }
+
+    @Test
+    public void getMilepostsByPointWithBuffer() {
+         // Arrange
+         MilepostBuffer mpb = new MilepostBuffer();
+         Milepost[] mileposts = new Milepost[1];
+         Milepost milepost = new Milepost();
+         milepost.setBearing(22d);
+         milepost.setDirection("B");
+         milepost.setCommonName("route");
+         mileposts[0] = milepost;
+         doReturn(mileposts).when(mockResponseEntityMilepostArray).getBody();
+         HttpEntity<MilepostBuffer> entity = getEntity(mpb, MilepostBuffer.class);
+         String url = String.format("%s/get-milepost-single-point", baseUrl);
+         when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, Milepost[].class))
+                 .thenReturn(mockResponseEntityMilepostArray);
+ 
+         // Act
+         List<Milepost> data = uut.getMilepostsByPointWithBuffer(mpb);
+ 
+         // Assert
+         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Milepost[].class);
+         assertEquals(1, data.size());
+         assertEquals(milepost, data.get(0));
     }
 }

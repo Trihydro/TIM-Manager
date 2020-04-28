@@ -22,4 +22,19 @@ public interface MilepostRepository {
      */
     Collection<Milepost> getPathWithBuffer(String commonName, Double startLat, Double startLong, Double endLat,
             Double endLong, String direction);
+
+    /**
+     * Finds a path along commonName route with the given point. Creates a buffer
+     * with a mileage of bufferInMiles around that point dependent upon direction
+     * field. Accounts for edge cases of path terminus
+     * 
+     * @param commonName
+     * @param lat
+     * @param lon
+     * @param direction
+     * @param bufferInMiles
+     * @return
+     */
+    Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, Double lat, Double lon, String direction,
+            Double bufferInMiles);
 }

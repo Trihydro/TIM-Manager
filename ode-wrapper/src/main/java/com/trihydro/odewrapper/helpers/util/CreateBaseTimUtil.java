@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.MilepostService;
@@ -82,7 +83,18 @@ public class CreateBaseTimUtil {
 
         // assume the given start/stop points are correct and send them on to calculate
         // mileposts
-        List<Milepost> mileposts = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+        List<Milepost> mileposts = new ArrayList<>();
+        if (wydotTim.getEndPoint() != null) {
+            mileposts = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+        } else {
+            // point incident
+            MilepostBuffer mpb = new MilepostBuffer();
+            mpb.setBufferMiles(config.getPointIncidentBufferMiles());
+            mpb.setCommonName(wydotTim.getRoute());
+            mpb.setDirection(wydotTim.getDirection());
+            mpb.setPoint(wydotTim.getStartPoint());
+            mileposts = milepostService.getMilepostsByPointWithBuffer(mpb);
+        }
         timToSend.setMileposts(mileposts);
 
         List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();

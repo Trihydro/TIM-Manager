@@ -33,8 +33,18 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     private String tmddUser;
     private String tmddPassword;
 
+    private Double pointIncidentBufferMiles;
+
     public String getOdeUrl() {
         return odeUrl;
+    }
+
+    public Double getPointIncidentBufferMiles() {
+        return pointIncidentBufferMiles;
+    }
+
+    public void setPointIncidentBufferMiles(Double pointIncidentBufferMiles) {
+        this.pointIncidentBufferMiles = pointIncidentBufferMiles;
     }
 
     public String getFromEmail() {

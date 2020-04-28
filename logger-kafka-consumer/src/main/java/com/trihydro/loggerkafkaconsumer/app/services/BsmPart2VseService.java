@@ -249,6 +249,6 @@ public class BsmPart2VseService extends BaseService {
 			}
 		}
 
-		return new Long(0);
+		return Long.valueOf(0);
 	}
 }

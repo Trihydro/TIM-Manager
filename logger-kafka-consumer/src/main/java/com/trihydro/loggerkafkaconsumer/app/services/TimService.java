@@ -493,7 +493,7 @@ public class TimService extends BaseService {
                 e.printStackTrace();
             }
         }
-        return new Long(0);
+        return Long.valueOf(0);
     }
 
     public void addRegion(DataFrame dataFrame, Long dataFrameId) {

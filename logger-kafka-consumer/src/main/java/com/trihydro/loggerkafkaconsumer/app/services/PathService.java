@@ -57,6 +57,6 @@ public class PathService extends BaseService {
             }
         }
         // if we got here, its an error
-        return new Long(0);
+        return Long.valueOf(0);
     }
 }

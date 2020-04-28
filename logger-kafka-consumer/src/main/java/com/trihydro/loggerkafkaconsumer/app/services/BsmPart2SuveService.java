@@ -414,6 +414,6 @@ public class BsmPart2SuveService extends BaseService {
 			}
 		}
 
-		return new Long(0);
+		return Long.valueOf(0);
 	}
 }

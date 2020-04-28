@@ -333,7 +333,7 @@ public class TimRefreshController {
         String regionName = getSATRegionName(aTim, recordId);
 
         // Update region.name in database
-        regionService.updateRegionName(new Long(aTim.getRegionId()), regionName);
+        regionService.updateRegionName(Long.valueOf(aTim.getRegionId()), regionName);
         // Update active_tim.
         activeTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);

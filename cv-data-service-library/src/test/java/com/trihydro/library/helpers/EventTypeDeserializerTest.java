@@ -20,7 +20,7 @@ public class EventTypeDeserializerTest {
 
         EventType result = gson.fromJson(event_type, EventType.class);
 
-        assertEquals("pavement-conditions", result.getName());
-        assertEquals("dry pavement", result.getType());
+        assertEquals("pavement-conditions", result.getType());
+        assertEquals("dry pavement", result.getValue());
     }
 }

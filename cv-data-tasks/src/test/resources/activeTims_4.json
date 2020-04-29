@@ -1,0 +1,36 @@
+[
+  {
+    "activeTimId": 1,
+    "clientId": "AFTNUS89NB",
+    "startDateTime": "2020-04-27 09:43:00",
+    "endDateTime": null,
+    "timType": "RC",
+    "projectKey": null,
+    "startPoint": {
+      "latitude": 42.739997,
+      "longitude": -110.933279
+    },
+    "endPoint": {
+      "latitude": 43.175667,
+      "longitude": -111.001783
+    },
+    "itisCodes": [6011]
+  },
+  {
+    "activeTimId": 10,
+    "clientId": "18100",
+    "startDateTime": "2020-04-27 09:43:00",
+    "endDateTime": "2020-04-27 09:49:00",
+    "timType": "RW",
+    "projectKey": 18103,
+    "startPoint": {
+      "latitude": 41.247902,
+      "longitude": -111.046725
+    },
+    "endPoint": {
+      "latitude": 41.719024,
+      "longitude": -107.769582
+    },
+    "itisCodes": [1537, 5934, 1025]
+  }
+]

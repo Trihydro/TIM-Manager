@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.model.TmddItisCode;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @CrossOrigin
 @RestController
 @ApiIgnore
-public class ItisCodeController extends BaseController{
-	
-	@RequestMapping(value="/itiscodes",method = RequestMethod.GET,headers="Accept=application/json")
-  	public ResponseEntity<List<ItisCode>> selectAllItisCodes() throws SQLException { 
+public class ItisCodeController extends BaseController {
+	@RequestMapping(value = "/itiscodes", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<List<ItisCode>> selectAllItisCodes() {
 		List<ItisCode> itisCodes = new ArrayList<ItisCode>();
 		Connection connection = null;
 		Statement statement = null;
@@ -59,6 +59,50 @@ public class ItisCodeController extends BaseController{
 				ex.printStackTrace();
 			}
 		}
-  	}
+	}
 
+	@RequestMapping(value = "/tmdd-itiscodes", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<List<TmddItisCode>> selectAllTmddItisCodes() {
+		List<TmddItisCode> results = new ArrayList<TmddItisCode>();
+
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = GetConnectionPool();
+			statement = connection.createStatement();
+
+			rs = statement.executeQuery("select * from wrr.tmdd_itis_codes");
+
+			while (rs.next()) {
+				TmddItisCode result = new TmddItisCode();
+
+				result.setElementType(rs.getString("TMDD_ELEMENT_TYPE"));
+				result.setElementValue(rs.getString("TMDD_ELEMENT_VALUE"));
+				result.setItisCode(rs.getInt("ITIS_CODE"));
+
+				results.add(result);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(results);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(results);
+	}
 }

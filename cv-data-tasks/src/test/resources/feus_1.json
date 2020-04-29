@@ -1,0 +1,163 @@
+[
+  {
+    "event-element-details": {
+      "event-element-detail": {
+        "event-times": {
+          "update-time": {
+            "date": 20200426,
+            "offset": "-0600",
+            "time": 135200
+          }
+        },
+        "event-descriptions": {
+          "event-description": {
+            "phrase": {
+              "pavement-conditions": "dry pavement"
+            }
+          }
+        },
+        "event-locations": {
+          "event-location": {
+            "location-on-link": {
+              "link-ownership": "WYDOT",
+              "secondary-location": {
+                "geo-location": {
+                  "latitude": 43175668,
+                  "longitude": -111001784
+                },
+                "linear-reference": 119.2,
+                "point-name": "Alpine Jct"
+              },
+              "link-designator": "US89",
+              "primary-location": {
+                "geo-location": {
+                  "latitude": 42739996,
+                  "longitude": -110933278
+                },
+                "linear-reference": 86.24,
+                "point-name": "Afton"
+              },
+              "link-direction": "both directions"
+            }
+          }
+        }
+      }
+    },
+    "message-header": {
+      "message-number": 167703959,
+      "organization-sending": {
+        "organization-id": "WYDOT"
+      },
+      "message-type-version": 2,
+      "message-time-stamp": {
+        "date": 20200427,
+        "offset": "-0600",
+        "time": "094328"
+      }
+    },
+    "event-reference": {
+      "update-time": {
+        "date": 20200426,
+        "offset": "-0600",
+        "time": 135200
+      },
+      "event-id": "AFTNUS89NB",
+      "event-update": 441
+    },
+    "event-headline": {
+      "headline": {
+        "system-information": "travel information"
+      }
+    }
+  },
+  {
+    "event-element-details": {
+      "event-element-detail": {
+        "event-times": {
+          "update-time": {
+            "date": 20200316,
+            "offset": "-0600",
+            "time": 145006
+          }
+        },
+        "event-descriptions": {
+          "event-description": [
+            {
+              "phrase": {
+                "roadwork": "road construction"
+              }
+            },
+            {
+              "phrase": {
+                "pavement-conditions": "paved"
+              }
+            },
+            {
+              "phrase": {
+                "delay-status-cancellation": "delays"
+              }
+            },
+            {
+              "additional-text": {
+                "description": "Expect delays"
+              }
+            }
+          ]
+        },
+        "event-locations": {
+          "event-location": {
+            "location-on-link": {
+              "link-ownership": "WYDOT",
+              "secondary-location": {
+                "geo-location": {
+                  "latitude": 41719026,
+                  "longitude": -107769584
+                },
+                "linear-reference": 185
+              },
+              "link-designator": "I80",
+              "primary-location": {
+                "geo-location": {
+                  "latitude": 41247900,
+                  "longitude": -111046723
+                },
+                "linear-reference": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "message-header": {
+      "message-number": 167704377,
+      "organization-sending": {
+        "organization-id": "WYDOT"
+      },
+      "message-type-version": 2,
+      "message-time-stamp": {
+        "date": 20200427,
+        "offset": "-0600",
+        "time": "094328"
+      },
+      "message-expiry-time": {
+        "date": 20200427,
+        "offset": "-0600",
+        "time": "094928"
+      }
+    },
+    "event-reference": {
+      "update-time": {
+        "date": 20200316,
+        "offset": "-0600",
+        "time": 145006
+      },
+      "event-id": "C18103ML80B",
+      "event-update": 3
+    },
+    "event-headline": {
+      "headline": {
+        "roadwork": "road construction"
+      }
+    }
+  }
+]

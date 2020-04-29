@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.RsuIndexInfo;
+import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimMapping;
+import com.trihydro.tasks.models.ActiveTimValidationResult;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
@@ -25,12 +27,16 @@ public class EmailFormatter {
     private String formatSection;
     private String formatRsuMain;
     private String formatRsuResults;
+    private String formatTmddMain;
+    private String formatTmddResults;
 
     public EmailFormatter() throws IOException {
         formatSdxMain = readFile("/email-templates/sdx-main.html");
         formatSection = readFile("/email-templates/section.html");
         formatRsuMain = readFile("/email-templates/rsu-main.html");
         formatRsuResults = readFile("/email-templates/rsu-results.html");
+        formatTmddMain = readFile("/email-templates/tmdd-main.html");
+        formatTmddResults = readFile("/email-templates/tmdd-results.html");
     }
 
     private String readFile(String path) throws IOException {
@@ -134,6 +140,31 @@ public class EmailFormatter {
         return body;
     }
 
+    public String generateTmddSummaryEmail(List<ActiveTim> unableToVerify,
+            List<ActiveTimValidationResult> validationResults) {
+        String body = formatTmddMain;
+
+        // List Active TIMs that couldn't be verified
+        String notVerified = "";
+        for (ActiveTim tim : unableToVerify) {
+            notVerified += tim.getActiveTimId() + " (" + tim.getClientId() + "), ";
+        }
+        notVerified = notVerified.replaceAll(", $", "");
+        body = body.replaceAll("\\{notVerified\\}", notVerified);
+
+        // Populate Inconsistencies section
+        String inconsistencies = "";
+        for (ActiveTimValidationResult result : validationResults) {
+            inconsistencies += getTmddResult(result);
+        }
+        body = body.replaceAll("\\{content\\}", inconsistencies);
+
+        // Remove unnecessary whitespace
+        body = body.replaceAll("\\s*\n\\s*", "");
+
+        return body;
+    }
+
     private String getRsuResult(RsuValidationResult result) {
         String section = formatRsuResults.replaceAll("\\{ipv4Address\\}", result.getRsu());
         String subSection = "";
@@ -183,6 +214,19 @@ public class EmailFormatter {
             subSection += getRow(collision.getIndex().toString(), activeTimIds);
         }
         section = section.replaceAll("\\{rowsCollisions\\}", subSection);
+
+        return section;
+    }
+
+    private String getTmddResult(ActiveTimValidationResult result) {
+        String header = result.getActiveTim().getActiveTimId() + " (" + result.getActiveTim().getClientId() + ")";
+        String section = formatTmddResults.replaceAll("\\{header\\}", header);
+
+        String rows = "";
+        for (ActiveTimError error : result.getErrors()) {
+            rows += getRow(error.getName(), error.getTimValue(), error.getTmddValue());
+        }
+        section = section.replaceAll("\\{rows\\}", rows);
 
         return section;
     }

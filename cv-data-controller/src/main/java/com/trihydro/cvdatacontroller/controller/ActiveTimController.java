@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import springfox.documentation.annotations.ApiIgnore;
@@ -725,6 +726,21 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/all-sdx", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetAllActiveSDXTims() {
+		return getActiveTimsWithItisCodes(true, false);
+	}
+
+	@RequestMapping(value = "/all-with-itis", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetAllActiveTimsWithItis(
+			@RequestParam(required = false) Boolean excludeVslAndParking) {
+		// Configure default value
+		if (excludeVslAndParking == null) {
+			excludeVslAndParking = false;
+		}
+
+		return getActiveTimsWithItisCodes(false, excludeVslAndParking);
+	}
+
+	private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly, boolean excludeVslAndParking) {
 		List<ActiveTim> results = new ArrayList<ActiveTim>();
 		ActiveTim activeTim = null;
 		Connection connection = null;
@@ -735,11 +751,24 @@ public class ActiveTimController extends BaseController {
 			connection = GetConnectionPool();
 			statement = connection.createStatement();
 
-			String query = "select active_tim.*, itis_code.itis_code from active_tim";
+			String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
+			query += " left join tim_type on active_tim.tim_type_id = tim_type.tim_type_id";
 			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
-			query += " where sat_record_id is not null";
+
+			if (sdxOnly) {
+				query += " where sat_record_id is not null";
+			}
+
+			if (excludeVslAndParking) {
+				if (query.contains("where")) {
+					query += " and tim_type.type not in ('P', 'VSL')";
+				} else {
+					query += " where tim_type.type not in ('P', 'VSL')";
+				}
+			}
+
 			query += " order by active_tim.active_tim_id";
 
 			rs = statement.executeQuery(query);
@@ -763,14 +792,16 @@ public class ActiveTimController extends BaseController {
 					activeTim.setStartDateTime(rs.getString("TIM_START"));
 					activeTim.setEndDateTime(rs.getString("TIM_END"));
 					activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
-					activeTim.setTimTypeId(rs.getLong("TIM_TYPE_ID"));
 					activeTim.setRoute(rs.getString("ROUTE"));
 					activeTim.setClientId(rs.getString("CLIENT_ID"));
 					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
 					activeTim.setPk(rs.getInt("PK"));
 					activeTim.setItisCodes(new ArrayList<Integer>());
+
 					Coordinate startPoint = null;
 					Coordinate endPoint = null;
+
+					// Set startPoint
 					double startLat = rs.getDouble("START_LATITUDE");
 					double startLon = rs.getDouble("START_LONGITUDE");
 					if (!rs.wasNull()) {
@@ -778,12 +809,26 @@ public class ActiveTimController extends BaseController {
 					}
 					activeTim.setStartPoint(startPoint);
 
+					// Set endPoint
 					double endLat = rs.getDouble("END_LATITUDE");
 					double endLon = rs.getDouble("END_LONGITUDE");
 					if (!rs.wasNull()) {
 						endPoint = new Coordinate(endLat, endLon);
 					}
 					activeTim.setEndPoint(endPoint);
+
+					// Set timType
+					long timTypeId = rs.getLong("TIM_TYPE_ID");
+					if (!rs.wasNull()) {
+						activeTim.setTimTypeId(timTypeId);
+						activeTim.setTimType(rs.getString("TYPE"));
+					}
+
+					// Set projectKey
+					int projectKey = rs.getInt("PROJECT_KEY");
+					if (!rs.wasNull()) {
+						activeTim.setProjectKey(projectKey);
+					}
 				}
 
 				// Add the ITIS code to the ActiveTim's ITIS codes
@@ -1079,5 +1124,4 @@ public class ActiveTimController extends BaseController {
 
 		return activeTims;
 	}
-
 }

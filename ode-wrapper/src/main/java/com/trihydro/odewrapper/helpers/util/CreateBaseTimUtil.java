@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
@@ -30,11 +31,13 @@ public class CreateBaseTimUtil {
 
     private Utility utility;
     private MilepostService milepostService;
+    MilepostReduction milepostReduction;
 
     @Autowired
-    public void InjectDependencies(Utility _utility, MilepostService _milepostService) {
+    public void InjectDependencies(Utility _utility, MilepostService _milepostService, MilepostReduction _milepostReduction) {
         utility = _utility;
         milepostService = _milepostService;
+        milepostReduction=_milepostReduction;
     }
 
     public WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, BasicConfiguration config,
@@ -95,42 +98,14 @@ public class CreateBaseTimUtil {
             mpb.setPoint(wydotTim.getStartPoint());
             mileposts = milepostService.getMilepostsByPointWithBuffer(mpb);
         }
+        // reduce the mileposts by removing straight away posts
+        mileposts = milepostReduction.applyMilepostReductionAlorithm(mileposts, config.getPathDistanceLimit());
         timToSend.setMileposts(mileposts);
-
-        List<Milepost> sizeRestrictedMilepostList = timToSend.getMileposts();
-
-        int mod = 2;
-
-        List<Milepost> tempList = new ArrayList<Milepost>();
-
-        tempList = sizeRestrictedMilepostList;
-
-        while (tempList.size() > 60) {
-
-            tempList = new ArrayList<Milepost>();
-            tempList.add(sizeRestrictedMilepostList.get(0));
-            tempList.add(sizeRestrictedMilepostList.get(1));
-
-            for (int i = 2; i < sizeRestrictedMilepostList.size() - 1; i++) {
-
-                if (Math.round(sizeRestrictedMilepostList.get(i).getMilepost() * 10 % mod) == 0) {
-                    tempList.add(sizeRestrictedMilepostList.get(i));
-                }
-            }
-
-            tempList.add(sizeRestrictedMilepostList.get(sizeRestrictedMilepostList.size() - 1));
-            // sizeRestrictedMilepostList = tempList;
-            mod += 2;
-        }
-
-        timToSend.setMileposts(tempList);
 
         OdePosition3D anchorPosition = new OdePosition3D();
         if (timToSend.getMileposts().size() > 0) {
             anchorPosition.setLatitude(new BigDecimal(timToSend.getMileposts().get(0).getLatitude()));
             anchorPosition.setLongitude(new BigDecimal(timToSend.getMileposts().get(0).getLongitude()));
-            // anchorPosition.setElevation(new
-            // BigDecimal(timToSend.getMileposts().get(0).getElevation() * 0.3048));
         } else {
             anchorPosition.setLatitude(new BigDecimal(0));
             anchorPosition.setLongitude(new BigDecimal(0));

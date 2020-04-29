@@ -36,7 +36,7 @@ import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.mail.MailException;
 
 @RunWith(StrictStubs.class)
-public class ValidateSDXTest {
+public class ValidateSdxTest {
     // Mocked dependencies
     @Mock
     private EmailHelper mockEmailHelper;
@@ -61,7 +61,7 @@ public class ValidateSDXTest {
 
     // Unit under test
     @InjectMocks
-    ValidateSDX uut;
+    ValidateSdx uut;
 
     @Test
     public void validateSDX_run_noRecords() throws MailException, MessagingException {

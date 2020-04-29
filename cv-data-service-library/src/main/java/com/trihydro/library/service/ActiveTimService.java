@@ -154,4 +154,11 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				.getForEntity(config.getCvRestService() + "/active-tim/all-sdx", ActiveTim[].class);
 		return Arrays.asList(response.getBody());
 	}
+
+	public List<ActiveTim> getActiveTimsWithItisCodes(boolean excludeVslAndParking) {
+		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate().getForEntity(
+				config.getCvRestService() + "/active-tim/all-with-itis?excludeVslAndParking=" + excludeVslAndParking,
+				ActiveTim[].class);
+		return Arrays.asList(response.getBody());
+	}
 }

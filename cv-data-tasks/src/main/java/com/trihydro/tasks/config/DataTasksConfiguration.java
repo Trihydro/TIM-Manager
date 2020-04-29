@@ -3,13 +3,14 @@ package com.trihydro.tasks.config;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
+import com.trihydro.library.model.TmddProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps {
+public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps {
 
     private String cvRestService;
     private String cvRestServiceDev; // Temporary
@@ -18,20 +19,26 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private String wrapperUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
+    private String tmddUrl;
+    private String tmddUser;
+    private String tmddPassword;
     private String[] alertAddresses;
     private String fromEmail;
     private String mailHost;
     private int mailPort;
+    private boolean runTmddValidation;
     private boolean runRsuValidation;
     private int rsuValThreadPoolSize = 1;
     private int rsuValTimeoutSeconds = 300; // 76 RSUs, 20s timeout each... Could still finish processing with up to 20%
                                             // of RSUs down in a pool w/ single thread
 
-    private int removeExpiredPeriodMinutes = 240;
-    private int cleanupPeriodMinutes = 240;
-    private int sdxValidationPeriodMinutes = 240;
-    private int rsuValidationPeriodMinutes = 240;
+    private int removeExpiredPeriodMinutes = 1440;
+    private int cleanupPeriodMinutes = 1440;
+    private int sdxValidationPeriodMinutes = 1440;
+    private int rsuValidationPeriodMinutes = 1440;
+    private int tmddValidationPeriodMinutes = 1440;
     private int retentionEnforcementPeriodMinutes = 1440;// run once a day by default
+
 
     public String getCvRestService() {
         return cvRestService;
@@ -129,6 +136,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.mailPort = mailPort;
     }
 
+    public boolean getRunTmddValidation() {
+        return runTmddValidation;
+    }
+
+    public void setRunTmddValidation(boolean runTmddValidation) {
+        this.runTmddValidation = runTmddValidation;
+    }
+
     public boolean getRunRsuValidation() {
         return runRsuValidation;
     }
@@ -196,4 +211,37 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
             this.rsuValidationPeriodMinutes = rsuValidationPeriodMinutes;
         }
     }
+
+    public String getTmddUrl() {
+        return tmddUrl;
+    }
+
+    public void setTmddUrl(String tmddUrl) {
+        this.tmddUrl = tmddUrl;
+    }
+
+    public String getTmddUser() {
+        return tmddUser;
+    }
+
+    public void setTmddUser(String tmddUser) {
+        this.tmddUser = tmddUser;
+    }
+
+    public String getTmddPassword() {
+        return tmddPassword;
+    }
+
+    public void setTmddPassword(String tmddPassword) {
+        this.tmddPassword = tmddPassword;
+    }
+
+    public int getTmddValidationPeriodMinutes() {
+        return tmddValidationPeriodMinutes;
+    }
+
+    public void setTmddValidationPeriodMinutes(int tmddValidationPeriodMinutes) {
+        this.tmddValidationPeriodMinutes = tmddValidationPeriodMinutes;
+    }
+
 }

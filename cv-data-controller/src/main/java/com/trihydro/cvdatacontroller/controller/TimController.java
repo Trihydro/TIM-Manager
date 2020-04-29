@@ -242,7 +242,7 @@ public class TimController extends BaseController {
 
     @RequestMapping(value = "/delete-old-tim", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<Boolean> deleteOldTim() {
-        // delete all tim_rsu, tim over 30 days old
+        // delete all tim and related over 30 days old
         boolean deleteResult = true;
 
         Connection connection = null;

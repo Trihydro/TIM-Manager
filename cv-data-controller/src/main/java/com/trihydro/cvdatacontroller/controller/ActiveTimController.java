@@ -740,7 +740,7 @@ public class ActiveTimController extends BaseController {
 		return getActiveTimsWithItisCodes(false, excludeVslAndParking);
 	}
 
-	private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly, boolean excludeVsl) {
+	private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly, boolean excludeVslAndParking) {
 		List<ActiveTim> results = new ArrayList<ActiveTim>();
 		ActiveTim activeTim = null;
 		Connection connection = null;
@@ -761,7 +761,7 @@ public class ActiveTimController extends BaseController {
 				query += " where sat_record_id is not null";
 			}
 
-			if (excludeVsl) {
+			if (excludeVslAndParking) {
 				if (query.contains("where")) {
 					query += " and tim_type.type not in ('P', 'VSL')";
 				} else {

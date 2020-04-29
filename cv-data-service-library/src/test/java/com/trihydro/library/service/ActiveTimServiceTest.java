@@ -3,6 +3,8 @@ package com.trihydro.library.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -358,7 +360,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void getActiveTimsWithItisCodes_success() {
+    public void getActiveTimsWithItisCodesWithExclusions_success() {
         // Arrange
         when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=true",
                 ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
@@ -371,11 +373,25 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         assertEquals(aTim, result.get(0));
     }
 
+    @Test
+    public void getActiveTimsWithItisCodes_success() {
+        // Arrange
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=false",
+                ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+
+        // Act
+        List<ActiveTim> result = uut.getActiveTimsWithItisCodes(false);
+
+        // Assert
+        assertEquals(aTims.length, result.size());
+        assertEquals(aTim, result.get(0));
+    }
+
     @Test(expected = RestClientException.class)
     public void getActiveTimsWithItisCodes_throwsError() {
         // Arrange
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=true",
-                ActiveTim[].class)).thenThrow(new RestClientException("timeout"));
+        when(mockRestTemplate.getForEntity(anyString(), eq(ActiveTim[].class)))
+                .thenThrow(new RestClientException("timeout"));
 
         // Act
         uut.getActiveTimsWithItisCodes(true);

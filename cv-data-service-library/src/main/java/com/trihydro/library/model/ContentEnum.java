@@ -1,4 +1,4 @@
-package com.trihydro.odewrapper.helpers;
+package com.trihydro.library.model;
 
 import java.util.HashMap;
 import java.util.Map;

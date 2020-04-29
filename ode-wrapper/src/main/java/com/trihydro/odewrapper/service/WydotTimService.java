@@ -20,6 +20,7 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
@@ -38,7 +39,6 @@ import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
-import com.trihydro.odewrapper.helpers.ContentEnum;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.WydotTimRw;
 

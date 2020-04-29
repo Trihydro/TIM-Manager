@@ -228,17 +228,54 @@ public class TimControllerTest extends TestBase<TimController> {
                 var data = uut.deleteOldTim();
 
                 // Assert
-                String deleteSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
-                deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ?)";
-
                 assertEquals(HttpStatus.OK, data.getStatusCode());
                 assertTrue("Fail return on success", data.getBody());
-                verify(mockConnection).prepareStatement(deleteSQL);
-                verify(mockConnection).prepareStatement("DELETE FROM tim WHERE ode_received_at < ?");
 
-                verify(mockPreparedStatement, times(2)).setString(1, strDate);
-                verify(mockPreparedStatement, times(2)).close();
-                verify(mockConnection, times(2)).close();
+                verify(uut).getOneMonthPrior();
+
+                String deleteTimRsuSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
+
+                String deleteDfItis = "DELETE FROM DATA_FRAME_ITIS_CODE where data_frame_id in";
+                deleteDfItis += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deleteNodeXy = "DELETE FROM node_xy WHERE node_xy_id IN";
+                deleteNodeXy += "(SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deleteNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deletePathNodeXy = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deletePathNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deletePath = "DELETE FROM path WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deletePath += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deleteRegion = "DELETE FROM region where data_frame_id in";
+                deleteRegion += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deleteDataFrame = "DELETE FROM data_frame WHERE tim_id IN";
+
+                String deleteTim = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
+                String deleteSQL = " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
+
+                deleteTimRsuSQL += deleteSQL;
+                deleteDfItis += deleteSQL + ")";
+                deleteNodeXy += deleteSQL + ")))";
+                deletePathNodeXy += deleteSQL + "))";
+                deletePath += deleteSQL + "))";
+                deleteRegion += deleteSQL + ")";
+                deleteDataFrame += deleteSQL;
+
+                verify(mockConnection).prepareStatement(deleteTimRsuSQL);
+                verify(mockConnection).prepareStatement(deleteDfItis);
+                verify(mockConnection).prepareStatement(deleteNodeXy);
+                verify(mockConnection).prepareStatement(deletePathNodeXy);
+                verify(mockConnection).prepareStatement(deletePath);
+                verify(mockConnection).prepareStatement(deleteRegion);
+                verify(mockConnection).prepareStatement(deleteDataFrame);
+                verify(mockConnection).prepareStatement(deleteTim);
+
+                verify(mockPreparedStatement, times(8)).setString(1, strDate);
+                verify(mockPreparedStatement, times(8)).close();
+                verify(mockConnection, times(8)).close();
         }
 
         private ReceivedMessageDetails getRxMsg() {

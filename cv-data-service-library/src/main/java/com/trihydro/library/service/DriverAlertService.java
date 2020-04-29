@@ -9,7 +9,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DriverAlertService extends CvDataServiceLibrary{
-    public boolean deleteOldDriverAlerts() {
+	/**
+	 * Remove all old driver_alert records
+	 * @return
+	 */
+	public boolean deleteOldDriverAlerts() {
         String url = String.format("%s/driver-alert/delete-old", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

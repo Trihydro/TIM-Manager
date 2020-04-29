@@ -18,13 +18,19 @@ public class TimService extends CvDataServiceLibrary {
 		return response.getBody();
 	}
 
+	/**
+	 * Remove all old tim, tim_rsu, data_frame, data_frame_itis_code, region, path,
+	 * path_node_xy, node_xy records
+	 * 
+	 * @return
+	 */
 	public boolean deleteOldTim() {
-        String url = String.format("%s/delete-old-tim", config.getCvRestService());
+		String url = String.format("%s/delete-old-tim", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE,
 				entity, Boolean.class);
 		return response.getBody();
-    }
+	}
 }

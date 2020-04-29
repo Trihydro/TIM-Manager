@@ -9,14 +9,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BsmService extends CvDataServiceLibrary {
-    public boolean deleteOldBsm() {
-        String url = String.format("%s/bsm/delete-old", config.getCvRestService());
+	/**
+	 * Remove all old bsm_part2_spve, bsm_part2_suve, bsm_part2_vse, bsm_core_data
+	 * records
+	 * 
+	 * @return
+	 */
+	public boolean deleteOldBsm() {
+		String url = String.format("%s/bsm/delete-old", config.getCvRestService());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE,
 				entity, Boolean.class);
 		return response.getBody();
-    }
+	}
 
 }

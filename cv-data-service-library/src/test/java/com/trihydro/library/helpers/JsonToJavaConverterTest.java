@@ -185,10 +185,10 @@ public class JsonToJavaConverterTest {
         @Test
         public void TestConvertTimPayloadJsonToJava_SpeedLimit() throws IOException, URISyntaxException {
                 // Arrange
-
-                // Act
                 String value = new String(Files
                                 .readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_SpeedLimit.json").toURI())));
+
+                // Act
                 OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
 
                 // Assert
@@ -382,7 +382,8 @@ public class JsonToJavaConverterTest {
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLongitude().toString());
                 assertEquals(BigDecimal.valueOf(1489),
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getElevation());
-                assertEquals(BigDecimal.valueOf(0), odeBsmPayloadTest.getBsm().getCoreData().getAccelSet().getAccelYaw());
+                assertEquals(BigDecimal.valueOf(0),
+                                odeBsmPayloadTest.getBsm().getCoreData().getAccelSet().getAccelYaw());
                 assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMajor().toString());
                 assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMinor().toString());
                 assertEquals(J2735TransmissionState.NEUTRAL,

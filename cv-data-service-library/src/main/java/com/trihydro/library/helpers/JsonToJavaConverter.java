@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.trihydro.library.model.ContentEnum;
 
 import org.springframework.stereotype.Component;
 
@@ -326,7 +327,19 @@ public class JsonToJavaConverter {
             JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
             JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
 
-            JsonNode sequenceArrNode = travelerDataFrame.get("content").get("advisory").get("SEQUENCE");
+            JsonNode sequenceArrNode = null;
+            JsonNode contentNode = travelerDataFrame.get("content");
+            if (contentNode.has(ContentEnum.advisory.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.advisory.getStringValue()).get("SEQUENCE");
+            } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.speedLimit.getStringValue()).get("SEQUENCE");
+            } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.exitService.getStringValue()).get("SEQUENCE");
+            } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.genericSign.getStringValue()).get("SEQUENCE");
+            } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
+            }
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
@@ -347,7 +360,7 @@ public class JsonToJavaConverter {
             // if ITIS codes are in an array
             List<String> itemsList = new ArrayList<String>();
             String item = null;
-            if (sequenceArrNode.isArray()) {
+            if (sequenceArrNode != null && sequenceArrNode.isArray()) {
                 for (final JsonNode objNode : sequenceArrNode) {
                     if (objNode.get("item").get("itis") != null)
                         item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
@@ -359,7 +372,7 @@ public class JsonToJavaConverter {
             }
 
             // ADD NON ARRAY ELEMENT
-            if (!sequenceArrNode.isArray()) {
+            if (sequenceArrNode != null && !sequenceArrNode.isArray()) {
                 if (sequenceArrNode.get("item").get("itis") != null)
                     item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
                 else if (sequenceArrNode.get("item").get("text") != null)

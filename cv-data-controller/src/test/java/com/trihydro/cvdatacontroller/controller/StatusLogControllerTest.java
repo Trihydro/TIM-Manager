@@ -24,11 +24,7 @@ public class StatusLogControllerTest extends TestBase<StatusLogController> {
     @Test
     public void DeleteOldStatusLogs() throws SQLException {
         // Arrange
-        DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
-        sdf.setTimeZone(toTimeZone);
-        Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
-        String strDate = sdf.format(dte.getTime());
+        String strDate = uut.getOneMonthPrior();
         doReturn(strDate).when(uut).getOneMonthPrior();
 
         // Act

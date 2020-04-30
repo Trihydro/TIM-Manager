@@ -86,15 +86,6 @@ public class Application {
                                         config.getRsuValidationPeriodMinutes(), TimeUnit.MINUTES);
                 }
 
-                // RSU Validator
-                // Since we're validating Active Tims from both environments in the same task,
-                // we only want this running in 1 environment, or else we'll receive duplicate
-                // emails
-                if (config.getRunRsuValidation()) {
-                        scheduledExecutorService.scheduleAtFixedRate(rsuValidator, 15,
-                                        config.getRsuValidationPeriodMinutes(), TimeUnit.MINUTES);
-                }
-
                 // TMDD Validator
                 // Since dev has many Active TIMs that aren't present on the TMDD,
                 // we should only be running the TMDD validation in prod.

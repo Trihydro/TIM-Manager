@@ -10,14 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
@@ -227,7 +221,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 assertEquals(HttpStatus.OK, data.getStatusCode());
                 assertTrue("Fail return on success", data.getBody());
 
-                verify(uut).getOneMonthPrior();
+                verify(uut, times(2)).getOneMonthPrior();
 
                 String deleteTimRsuSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
 
@@ -235,7 +229,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 deleteDfItis += " (select data_frame_id from data_frame WHERE tim_id IN";
 
                 String deleteNodeXy = "DELETE FROM node_xy WHERE node_xy_id IN";
-                deleteNodeXy += "(SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deleteNodeXy += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
                 deleteNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
 
                 String deletePathNodeXy = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";

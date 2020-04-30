@@ -12,10 +12,15 @@ import com.trihydro.library.helpers.GsonFactory;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.BsmService;
+import com.trihydro.library.service.DriverAlertService;
+import com.trihydro.library.service.HmiLogService;
 import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.SdwService;
+import com.trihydro.library.service.StatusLogService;
+import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TmddService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
 import com.trihydro.tasks.actions.RemoveExpiredActiveTims;
@@ -33,7 +38,8 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
                 ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class, TmddService.class,
-                GsonFactory.class })
+                GsonFactory.class, BsmService.class, DriverAlertService.class, HmiLogService.class,
+                StatusLogService.class, TimService.class })
 public class Application {
         protected static DataTasksConfiguration config;
 

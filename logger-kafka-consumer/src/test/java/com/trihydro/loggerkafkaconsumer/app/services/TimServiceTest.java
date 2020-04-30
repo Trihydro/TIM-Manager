@@ -511,7 +511,7 @@ public class TimServiceTest extends TestBase<TimService> {
 
         // Assert
         assertNotNull(data);
-        assertEquals(new Long(-1), data.getTimTypeId());
+        assertEquals(Long.valueOf(-1), data.getTimTypeId());
     }
 
     @Test

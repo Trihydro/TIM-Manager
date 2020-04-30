@@ -37,9 +37,19 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private int sdxValidationPeriodMinutes = 1440;
     private int rsuValidationPeriodMinutes = 1440;
     private int tmddValidationPeriodMinutes = 1440;
+    private int retentionEnforcementPeriodMinutes = 1440;// run once a day by default
+
 
     public String getCvRestService() {
         return cvRestService;
+    }
+
+    public int getRetentionEnforcementPeriodMinutes() {
+        return retentionEnforcementPeriodMinutes;
+    }
+
+    public void setRetentionEnforcementPeriodMinutes(int retentionEnforcementPeriodMinutes) {
+        this.retentionEnforcementPeriodMinutes = retentionEnforcementPeriodMinutes;
     }
 
     public void setCvRestService(String cvRestService) {

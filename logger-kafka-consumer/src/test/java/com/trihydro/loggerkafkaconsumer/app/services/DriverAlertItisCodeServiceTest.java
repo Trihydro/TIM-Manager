@@ -30,7 +30,7 @@ public class DriverAlertItisCodeServiceTest extends TestBase<DriverAlertItisCode
     @Before
     public void setupSubTest() {
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
-        driverAlertId = new Long(-1);
+        driverAlertId = Long.valueOf(-1);
         itisCodeId = -2;
     }
 
@@ -42,7 +42,7 @@ public class DriverAlertItisCodeServiceTest extends TestBase<DriverAlertItisCode
         Long data = uut.insertDriverAlertItisCode(driverAlertId, itisCodeId);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, itisCodeId);// ITIS_CODE_ID
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 2, driverAlertId);// DRIVER_ALERT_ID
         verify(mockPreparedStatement).close();
@@ -58,7 +58,7 @@ public class DriverAlertItisCodeServiceTest extends TestBase<DriverAlertItisCode
         Long data = uut.insertDriverAlertItisCode(driverAlertId, itisCodeId);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

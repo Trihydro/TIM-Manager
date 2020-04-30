@@ -42,7 +42,7 @@ public class NodeXYServiceTest extends TestBase<NodeXYService> {
         Long data = uut.AddNodeXY(nodeXY);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1, nodeXY.getDelta());// DELTA
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 2, nodeXY.getNodeLat());// NODE_LAT
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, nodeXY.getNodeLong());// NODE_LONG
@@ -65,7 +65,7 @@ public class NodeXYServiceTest extends TestBase<NodeXYService> {
         Long data = uut.AddNodeXY(nodeXY);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

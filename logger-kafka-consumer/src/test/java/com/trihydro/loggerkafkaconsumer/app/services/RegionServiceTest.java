@@ -48,7 +48,7 @@ public class RegionServiceTest extends TestBase<RegionService> {
         Long data = uut.AddRegion(dataFrameId, pathId, region);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, dataFrameId);// DATA_FRAME_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, region.getName());// NAME
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, region.getLaneWidth());// LANE_WIDTH
@@ -86,7 +86,7 @@ public class RegionServiceTest extends TestBase<RegionService> {
         Long data = uut.AddRegion(dataFrameId, pathId, region);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

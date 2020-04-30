@@ -52,7 +52,7 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         Long data = uut.AddDataFrame(dFrame, -1l);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// TIM_ID
         verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 2, dFrame.getSspTimRights());// SSP_TIM_RIGHTS
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, null);// FRAME_TYPE
@@ -79,7 +79,7 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         Long data = uut.AddDataFrame(dFrame, -1l);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

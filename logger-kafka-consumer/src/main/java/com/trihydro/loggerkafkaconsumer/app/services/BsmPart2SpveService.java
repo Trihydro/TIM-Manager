@@ -199,6 +199,6 @@ public class BsmPart2SpveService extends BaseService {
             }
         }
 
-        return new Long(0);
+        return Long.valueOf(0);
     }
 }

@@ -55,7 +55,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         Long data = uut.insertActiveTim(activeTim);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTim.getDirection());// DIRECTION
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 5, java.sql.Timestamp// TIM_START
@@ -91,7 +91,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         Long data = uut.insertActiveTim(activeTim);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -160,8 +160,8 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
         // Assert
         assertNotNull("Null ActiveTim returned", data);
-        assertEquals(new Long(99), data.getActiveTimId());
-        assertEquals(new Long(-99), data.getTimId());
+        assertEquals(Long.valueOf(99), data.getActiveTimId());
+        assertEquals(Long.valueOf(-99), data.getTimId());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -202,8 +202,8 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
         // Assert
         assertNotNull("Null ActiveTim returned", data);
-        assertEquals(new Long(99), data.getActiveTimId());
-        assertEquals(new Long(-99), data.getTimId());
+        assertEquals(Long.valueOf(99), data.getActiveTimId());
+        assertEquals(Long.valueOf(-99), data.getTimId());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();

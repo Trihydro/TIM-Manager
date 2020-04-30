@@ -169,7 +169,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         Long data = uut.addBSMCoreData(metadata, bsm);
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockPreparedStatement).setString(1, bsm.getCoreData().getId());// ID
         verify(mockPreparedStatement).setString(2, null);// MSGCNT
         verify(mockPreparedStatement).setString(3, null);// SECMARK
@@ -225,7 +225,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         Long data = uut.addBSMCoreData(metadata, bsm);
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
     }
 
     private OdeData getOdeData(String partIIName) {

@@ -65,6 +65,6 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6, mockTMS.getRestResponseMessage());
         verify(mockSqlNullHandler).setIntegerFromBool(mockPreparedStatement, 7, mockTMS.isMessageSent());
         verify(mockSqlNullHandler).setIntegerFromBool(mockPreparedStatement, 8, mockTMS.isEmailSent());
-        assertEquals(new Long(-1), key.getBody());
+        assertEquals(Long.valueOf(-1), key.getBody());
     }
 }

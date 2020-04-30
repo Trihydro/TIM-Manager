@@ -47,7 +47,7 @@ public class TimRsuService extends BaseService {
             return timRsuId;
         } catch (SQLException e) {
             e.printStackTrace();
-            return new Long(0);
+            return Long.valueOf(0);
         } finally {
             try {
                 // close prepared statement

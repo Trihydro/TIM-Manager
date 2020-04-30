@@ -59,7 +59,7 @@ public class BsmService extends BaseService {
             if (bsm != null) {
                 Long bsmCoreDataId = addBSMCoreData(metadata, bsm);
                 List<J2735BsmPart2Content> partII = payload.getBsm().getPartII();
-                if (bsmCoreDataId != null && !bsmCoreDataId.equals(new Long(0)) && partII != null) {
+                if (bsmCoreDataId != null && !bsmCoreDataId.equals(Long.valueOf(0)) && partII != null) {
                     for (int i = 0; i < partII.size(); i++) {
                         if (partII.get(i).getId().name() == "VehicleSafetyExtensions") {
                             J2735VehicleSafetyExtensions vse = jsonToJava
@@ -288,6 +288,6 @@ public class BsmService extends BaseService {
             }
         }
 
-        return new Long(0);
+        return Long.valueOf(0);
     }
 }

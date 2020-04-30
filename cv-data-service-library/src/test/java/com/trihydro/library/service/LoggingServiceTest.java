@@ -58,6 +58,6 @@ public class LoggingServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
-        assertEquals(new Long(1), data);
+        assertEquals(Long.valueOf(1), data);
     }
 }

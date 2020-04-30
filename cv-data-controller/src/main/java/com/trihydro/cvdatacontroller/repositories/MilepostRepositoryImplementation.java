@@ -46,9 +46,9 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         query += " with startMp, d1 ORDER BY d1 ASC LIMIT 1";
         query += " optional match(startAdjust:Milepost)-->(startMp)";
         if (direction.toUpperCase() == "I") {
-            query += " where  startAdjust.Milepost < startMp.Milepost";
+            query += " where startAdjust.Milepost < startMp.Milepost";
         } else {
-            query += " where  startAdjust.Milepost > startMp.Milepost";
+            query += " where startAdjust.Milepost > startMp.Milepost";
         }
         query += " with coalesce(startAdjust, startMp) as newStart";// coalesce gets first non-null in list
         query += " match(endMp:Milepost{CommonName: $commonName})";

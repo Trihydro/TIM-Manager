@@ -92,7 +92,7 @@ public class Milepost {
         double bso = this.bearingTo(offNode); // bearing start to offset node
         double dso = this.angularDistanceTo(offNode); // angular distance start to offset node
 
-        double dXt = Math.asin(Math.sin(dso) * Math.sin(bso - bse)) * this.RE;
+        double dXt = Math.asin(Math.sin(dso) * Math.sin(bso - bse)) * Milepost.RE;
 
         return dXt;
 

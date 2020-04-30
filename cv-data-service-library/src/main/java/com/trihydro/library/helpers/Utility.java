@@ -101,7 +101,7 @@ public class Utility {
 		try {
 			String value = rs.getString(key);
 			if (value != null) {
-				return new Short(value);
+				return Short.valueOf(value);
 			}
 		} catch (SQLException ex) {
 			System.out.println("Error attempting to get short value '" + key + "' from ResultSet");

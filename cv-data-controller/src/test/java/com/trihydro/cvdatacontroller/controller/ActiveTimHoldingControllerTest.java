@@ -93,7 +93,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
 
                 // Assert
                 assertEquals(HttpStatus.OK, data.getStatusCode());
-                assertEquals(new Long(-99), data.getBody());
+                assertEquals(Long.valueOf(-99), data.getBody());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTimHolding.getClientId());// CLIENT_ID
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
@@ -136,7 +136,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
 
                 // Assert
                 assertEquals(HttpStatus.OK, data.getStatusCode());
-                assertEquals(new Long(-99), data.getBody());
+                assertEquals(Long.valueOf(-99), data.getBody());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTimHolding.getClientId());// CLIENT_ID
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET

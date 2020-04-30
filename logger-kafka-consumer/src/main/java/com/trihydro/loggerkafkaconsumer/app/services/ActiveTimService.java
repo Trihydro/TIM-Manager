@@ -119,7 +119,7 @@ public class ActiveTimService extends BaseService {
             }
         }
 
-        return new Long(0);
+        return Long.valueOf(0);
     }
 
     public boolean updateActiveTim(ActiveTim activeTim) {

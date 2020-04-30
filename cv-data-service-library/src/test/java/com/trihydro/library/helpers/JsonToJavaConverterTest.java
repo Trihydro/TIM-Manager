@@ -124,8 +124,8 @@ public class JsonToJavaConverterTest {
                 tim.setTimeStamp("2017-10-11T21:32");
 
                 OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude((new BigDecimal(263056840)).multiply(new BigDecimal(".0000001")));
-                anchorPosition.setLongitude((new BigDecimal(-801481510)).multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLatitude((BigDecimal.valueOf(263056840)).multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLongitude((BigDecimal.valueOf(-801481510)).multiply(new BigDecimal(".0000001")));
                 // anchorPosition.setElevation(new BigDecimal(20));
 
                 region.setAnchorPosition(anchorPosition);
@@ -215,15 +215,15 @@ public class JsonToJavaConverterTest {
                 tim.setTimeStamp("2017-10-11T21:32");
 
                 OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude((new BigDecimal(263056840)).multiply(new BigDecimal(".0000001")));
-                anchorPosition.setLongitude((new BigDecimal(-801481510)).multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLatitude((BigDecimal.valueOf(263056840)).multiply(new BigDecimal(".0000001")));
+                anchorPosition.setLongitude((BigDecimal.valueOf(-801481510)).multiply(new BigDecimal(".0000001")));
                 // anchorPosition.setElevation(new BigDecimal(20));
 
                 region.setAnchorPosition(anchorPosition);
 
                 geometry.setDirection("1010101010101010");
                 geometry.setExtent(1);// this is an enum
-                geometry.setLaneWidth(new BigDecimal(33));
+                geometry.setLaneWidth(BigDecimal.valueOf(33));
 
                 Circle circle = new Circle();
                 circle.setRadius(15);
@@ -373,16 +373,16 @@ public class JsonToJavaConverterTest {
                 OdeBsmPayload odeBsmPayloadTest = jsonToJava.convertBsmPayloadJsonToJava(value);
 
                 assertNotNull(odeBsmPayloadTest);
-                assertEquals(new Integer(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
+                assertEquals(Integer.valueOf(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
                 assertEquals("738B0000", odeBsmPayloadTest.getBsm().getCoreData().getId());
-                assertEquals(new Integer(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
+                assertEquals(Integer.valueOf(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
                 assertEquals("40.4740003",
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLatitude().toString());
                 assertEquals("-104.9691846",
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLongitude().toString());
-                assertEquals(new BigDecimal(1489),
+                assertEquals(BigDecimal.valueOf(1489),
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getElevation());
-                assertEquals(new BigDecimal(0), odeBsmPayloadTest.getBsm().getCoreData().getAccelSet().getAccelYaw());
+                assertEquals(BigDecimal.valueOf(0), odeBsmPayloadTest.getBsm().getCoreData().getAccelSet().getAccelYaw());
                 assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMajor().toString());
                 assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMinor().toString());
                 assertEquals(J2735TransmissionState.NEUTRAL,
@@ -442,7 +442,7 @@ public class JsonToJavaConverterTest {
                                 .convertJ2735SupplementalVehicleExtensionsJsonToJava(value, 1);
                 assertEquals("unknownFuel", suve.getClassDetails().getFuelType().toString());
                 assertEquals("none", suve.getClassDetails().getHpmsType().toString());
-                assertEquals(new Integer(0), suve.getClassDetails().getKeyType());
+                assertEquals(Integer.valueOf(0), suve.getClassDetails().getKeyType());
                 assertEquals("basicVehicle", suve.getClassDetails().getRole().toString());
         }
 

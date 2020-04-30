@@ -1,9 +1,11 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +63,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 doReturn(secResultCodeTypes).when(mockResponseEntitySecurityResultCodeTypeList).getBody();
                 when(mockSecurityResultCodeTypeController.GetSecurityResultCodeTypes())
                                 .thenReturn(mockResponseEntitySecurityResultCodeTypeList);
+
                 uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
@@ -80,7 +83,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 Long timId = uut.AddTim(tim);
 
                 // Assert
-                assertEquals(new Long(-1), timId);
+                assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, j2735.getMsgCnt());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, j2735.getPacketID());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, j2735.getUrlB());
@@ -109,7 +112,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 // Assert
                 // j2735 fields are skipped, we start at index 5 after those
                 // See timOracleTables.getTimTable() for ordering
-                assertEquals(new Long(-1), timId);
+                assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5,
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
@@ -148,7 +151,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 // Assert
                 // See timOracleTables.getTimTable() for ordering
-                assertEquals(new Long(-1), timId);
+                assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6,
                                 receivedMessageDetails.getLocationData().getElevation());// RMD_LD_ELEVATION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7,
@@ -203,6 +206,66 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockStatement).close();
                 verify(mockConnection).close();
                 verify(mockRs).close();
+        }
+
+        @Test
+        public void deleteOldTim() throws SQLException {
+                // Arrange
+                String strDate = uut.getOneMonthPrior();
+                doReturn(strDate).when(uut).getOneMonthPrior();
+
+                // Act
+                var data = uut.deleteOldTim();
+
+                // Assert
+                assertEquals(HttpStatus.OK, data.getStatusCode());
+                assertTrue("Fail return on success", data.getBody());
+
+                verify(uut, times(2)).getOneMonthPrior();
+
+                String deleteTimRsuSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
+
+                String deleteDfItis = "DELETE FROM DATA_FRAME_ITIS_CODE where data_frame_id in";
+                deleteDfItis += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deleteNodeXy = "DELETE FROM node_xy WHERE node_xy_id IN";
+                deleteNodeXy += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deleteNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deletePathNodeXy = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deletePathNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deletePath = "DELETE FROM path WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deletePath += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deleteRegion = "DELETE FROM region where data_frame_id in";
+                deleteRegion += " (select data_frame_id from data_frame WHERE tim_id IN";
+
+                String deleteDataFrame = "DELETE FROM data_frame WHERE tim_id IN";
+
+                String deleteTim = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
+                String deleteSQL = " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
+
+                deleteTimRsuSQL += deleteSQL;
+                deleteDfItis += deleteSQL + ")";
+                deleteNodeXy += deleteSQL + ")))";
+                deletePathNodeXy += deleteSQL + "))";
+                deletePath += deleteSQL + "))";
+                deleteRegion += deleteSQL + ")";
+                deleteDataFrame += deleteSQL;
+
+                verify(mockConnection).prepareStatement(deleteTimRsuSQL);
+                verify(mockConnection).prepareStatement(deleteDfItis);
+                verify(mockConnection).prepareStatement(deleteNodeXy);
+                verify(mockConnection).prepareStatement(deletePathNodeXy);
+                verify(mockConnection).prepareStatement(deletePath);
+                verify(mockConnection).prepareStatement(deleteRegion);
+                verify(mockConnection).prepareStatement(deleteDataFrame);
+                verify(mockConnection).prepareStatement(deleteTim);
+
+                verify(mockPreparedStatement, times(8)).setString(1, strDate);
+                verify(mockPreparedStatement, times(8)).close();
+                verify(mockConnection, times(8)).close();
         }
 
         private ReceivedMessageDetails getRxMsg() {

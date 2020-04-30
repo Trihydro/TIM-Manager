@@ -62,7 +62,7 @@ public class TimRsuController extends BaseController {
             return ResponseEntity.ok(timRsuId);
         } catch (SQLException e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Long(0));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Long.valueOf(0));
         } finally {
             try {
                 // close prepared statement

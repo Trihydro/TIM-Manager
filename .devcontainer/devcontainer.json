@@ -4,7 +4,8 @@
   "name": "WyoCV",
   "dockerFile": "Dockerfile",
   "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "java.home": "/docker-java-home"
   },
 
   // Ports forwarded from container

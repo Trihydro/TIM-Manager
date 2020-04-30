@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -27,8 +29,7 @@ public class BaseController {
     private HikariDataSource hds = null;
     private HikariConfig config;
     protected DataControllerConfigProperties dbConfig;
-    // private JavaMailSenderImplProvider mailProvider;
-    private Utility utility;
+    protected Utility utility;
     private EmailHelper emailHelper;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -37,10 +38,8 @@ public class BaseController {
     protected DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(DataControllerConfigProperties props, //JavaMailSenderImplProvider _mailProvider,
-            Utility _utility, EmailHelper _emailHelper) {
+    public void InjectDependencies(DataControllerConfigProperties props, Utility _utility, EmailHelper _emailHelper) {
         dbConfig = props;
-        // mailProvider = _mailProvider;
         utility = _utility;
         emailHelper = _emailHelper;
     }
@@ -145,4 +144,14 @@ public class BaseController {
         }
         return convertedDate;
     }
+
+    public String getOneMonthPrior() {
+        DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+        sdf.setTimeZone(toTimeZone);
+        Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
+        String strDate = sdf.format(dte.getTime());
+        return strDate;
+    }
+
 }

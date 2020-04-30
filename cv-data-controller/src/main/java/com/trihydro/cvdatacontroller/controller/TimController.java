@@ -90,15 +90,6 @@ public class TimController extends BaseController {
         return ResponseEntity.ok(tim);
     }
 
-    // TODO: this may be used in the tim creator...should call out to the
-    // activeTimController instead
-    // @RequestMapping(value = "/active-tims", method = RequestMethod.GET, headers =
-    // "Accept=application/json")
-    // public List<ActiveTim> SelectAllActiveTims() throws Exception {
-    // List<ActiveTim> activeTims = ActiveTimService.getAllActiveTims();
-    // return activeTims;
-    // }
-
     @RequestMapping(value = "/add-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public Long AddTim(@RequestBody TimInsertModel tim) {
         PreparedStatement preparedStatement = null;
@@ -246,7 +237,314 @@ public class TimController extends BaseController {
                 e.printStackTrace();
             }
         }
-        return new Long(0);
+        return Long.valueOf(0);
     }
 
+    @RequestMapping(value = "/delete-old-tim", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    public ResponseEntity<Boolean> deleteOldTim() {
+        // delete all tim and related over 30 days old
+        boolean deleteResult = true;
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String strDate = getOneMonthPrior();
+
+        try {
+            deleteResult = deleteOldTimRsus(strDate);
+            deleteResult &= deleteOldDataFrames(strDate);
+
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old tim_rsus");
+                return ResponseEntity.ok(false);
+            }
+
+            String deleteSQL = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return ResponseEntity.ok(deleteResult);
+    }
+
+    private boolean deleteOldDataFrames(String strDate) {
+        boolean deleteResult = deleteOldDataFrameItisCodes(strDate);
+        deleteResult &= deleteOldRegions(strDate);
+        if (!deleteResult) {
+            return false;
+        }
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM data_frame WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete data_frame");
+        }
+        return deleteResult;
+    }
+
+    private boolean deleteOldDataFrameItisCodes(String strDate) {
+        boolean deleteResult = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM DATA_FRAME_ITIS_CODE where data_frame_id in";
+            deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete DATA_FRAME_ITIS_CODE");
+        }
+        return deleteResult;
+    }
+
+    private boolean deleteOldRegions(String strDate) {
+        boolean deleteResult = deleteOldPaths(strDate);
+        if (!deleteResult) {
+            return false;
+        }
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM region where data_frame_id in";
+            deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete region");
+        }
+        return deleteResult;
+    }
+
+    private boolean deleteOldPaths(String strDate) {
+        boolean deleteResult = deleteOldPathNodeXY(strDate);
+        if (!deleteResult) {
+            return false;
+        }
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM path WHERE path_id in (SELECT path_id from region where data_frame_id in";
+            deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete path");
+        }
+        return deleteResult;
+    }
+
+    private boolean deleteOldPathNodeXY(String strDate) {
+        boolean deleteResult = deleteOldNodeXY(strDate);
+        if (!deleteResult) {
+            return false;
+        }
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+            deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete path_node_xy");
+        }
+        return deleteResult;
+    }
+
+    private boolean deleteOldNodeXY(String strDate) {
+        boolean deleteResult = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM node_xy WHERE node_xy_id IN";
+            deleteSQL += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+            deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))))";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete node_xy");
+        }
+        return deleteResult;
+    }
+
+    private boolean deleteOldTimRsus(String strDate) {
+        boolean deleteResult = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            String deleteSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
+            deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
+            connection = GetConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setString(1, strDate);
+
+            // execute delete SQL stetement
+            deleteResult = updateOrDelete(preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!deleteResult) {
+            utility.logWithDate("Failed to delete tim_rsus");
+        }
+        return deleteResult;
+    }
 }

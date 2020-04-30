@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,11 +31,12 @@ public class TestBase<T> {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setup() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+    public void setup() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]
                 .getTypeName();
         Class<?> clazz = Class.forName(className);
-        uut = spy((T) clazz.newInstance());
+        uut = spy((T) clazz.getDeclaredConstructor().newInstance());
         lenient().when(mockConnection.createStatement()).thenReturn(mockStatement);
         lenient().when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
         lenient().when(mockConnection.prepareStatement(isA(String.class), isA(String[].class)))

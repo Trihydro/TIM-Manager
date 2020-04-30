@@ -37,7 +37,7 @@ public class PathServiceTest extends TestBase<PathService> {
         Long data = uut.InsertPath();
 
         // Assert
-        assertEquals(new Long(-1), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, 0);// SCALE
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
@@ -51,7 +51,7 @@ public class PathServiceTest extends TestBase<PathService> {
         Long data = uut.InsertPath();
 
         // Assert
-        assertEquals(new Long(0), data);
+        assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

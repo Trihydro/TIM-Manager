@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("security-result-code-type")
 public class SecurityResultCodeTypeController extends BaseController {
-	@RequestMapping(value = "/get-all", method = RequestMethod.POST, headers = "Accept=application/json")
+	@RequestMapping(value = "/get-all", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<SecurityResultCodeType>> GetSecurityResultCodeTypes() {
 
 		SecurityResultCodeType securityResultCodeType = null;

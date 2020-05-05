@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
@@ -43,13 +42,11 @@ public class ActiveTimController extends BaseController {
 
 	private TimOracleTables timOracleTables;
 	private SQLNullHandler sqlNullHandler;
-	private Utility utility;
 
 	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler, Utility _utility) {
+	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
 		timOracleTables = _timOracleTables;
 		sqlNullHandler = _sqlNullHandler;
-		utility = _utility;
 	}
 
 	// select all ITIS codes
@@ -62,7 +59,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
@@ -190,12 +187,12 @@ public class ActiveTimController extends BaseController {
 		boolean success = false;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
 					connection);
 
 			// execute update statement
-			success = updateOrDelete(preparedStatement);
+			success = dbInteractions.updateOrDelete(preparedStatement);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -222,7 +219,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			statement = connection.createStatement();
 
@@ -286,7 +283,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			statement = connection.createStatement();
 
@@ -327,7 +324,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			statement = connection.createStatement();
 
@@ -370,7 +367,7 @@ public class ActiveTimController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			String selectStatement = "select tim_rsu.rsu_index from active_tim";
@@ -417,7 +414,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 			String query = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
 					+ timTypeId;
@@ -458,7 +455,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 			String selectStatement = "select itis_code from active_tim ";
 			selectStatement += "inner join tim on tim.tim_id = active_tim.tim_id ";
@@ -505,12 +502,12 @@ public class ActiveTimController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			preparedStatement = connection.prepareStatement(deleteSQL);
 			preparedStatement.setLong(1, activeTimId);
 
 			// execute delete SQL stetement
-			deleteActiveTimResult = updateOrDelete(preparedStatement);
+			deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
 
 			System.out.println("Active Tim (active_tim_id " + activeTimId + ") is deleted!");
 
@@ -549,14 +546,14 @@ public class ActiveTimController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			preparedStatement = connection.prepareStatement(deleteSQL);
 			for (int i = 0; i < activeTimIds.size(); i++) {
 				preparedStatement.setLong(i + 1, activeTimIds.get(i));
 			}
 
 			// execute delete SQL stetement
-			deleteActiveTimResult = updateOrDelete(preparedStatement);
+			deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
 
 			System.out.println("Active Tims (active_tim_ids "
 					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") deleted!");
@@ -590,7 +587,7 @@ public class ActiveTimController extends BaseController {
 		WydotTim wydotTim = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			String query = "select * from active_tim where ";
 			if (timTypeId != null) {
 				query += "TIM_TYPE_ID = ? and (";
@@ -660,7 +657,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 			rs = statement.executeQuery("select * from active_tim where TIM_TYPE_ID = " + timTypeId);
 			activeTims = getActiveTimFromRS(rs, false);
@@ -694,7 +691,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			statement = connection.createStatement();
 
@@ -748,7 +745,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
@@ -875,7 +872,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			String query = "select active_tim.*, rsu_vw.ipv4_address, tim_rsu.rsu_index from active_tim";
@@ -952,7 +949,7 @@ public class ActiveTimController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 			String query = "select * from active_tim";
 			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
@@ -999,7 +996,7 @@ public class ActiveTimController extends BaseController {
 					timOracleTables.getActiveTimTable());
 
 			// get connection
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
 			int fieldNum = 1;
@@ -1061,7 +1058,7 @@ public class ActiveTimController extends BaseController {
 				fieldNum++;
 			}
 
-			activeTimId = executeAndLog(preparedStatement, "active tim");
+			activeTimId = dbInteractions.executeAndLog(preparedStatement, "active tim");
 			return ResponseEntity.ok(activeTimId);
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -10,6 +10,7 @@ import java.sql.SQLException;
 
 import com.trihydro.library.helpers.Utility;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -20,6 +21,11 @@ import org.springframework.http.HttpStatus;
 public class BsmControllerTest extends TestBase<BsmController> {
     @Mock
     private Utility mockUtility;
+
+    @Before
+    public void setupSubTest() {
+        uut.InjectDependencies(mockUtility);
+    }
 
     @Test
     public void DeleteOldBsm() throws SQLException {

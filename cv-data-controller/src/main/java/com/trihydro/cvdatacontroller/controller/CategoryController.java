@@ -34,7 +34,7 @@ public class CategoryController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build SQL statement

@@ -35,7 +35,7 @@ public class IncidentChoiceController extends BaseController {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
 
             // select all from incident_action_lut table
@@ -81,7 +81,7 @@ public class IncidentChoiceController extends BaseController {
 
         try {
             // select all from incident_effect_lut table
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             rs = statement.executeQuery("select * from incident_effect_lut");
 
@@ -124,7 +124,7 @@ public class IncidentChoiceController extends BaseController {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
 
             // select all from incident_problem_lut table

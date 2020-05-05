@@ -30,7 +30,7 @@ public class ItisCodeController extends BaseController {
 		Statement statement = null;
 		ResultSet rs = null;
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			// select all Itis Codes from ItisCode table
 			statement = connection.createStatement();
 			rs = statement.executeQuery("select * from itis_code");
@@ -70,7 +70,7 @@ public class ItisCodeController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			rs = statement.executeQuery("select * from wrr.tmdd_itis_codes");

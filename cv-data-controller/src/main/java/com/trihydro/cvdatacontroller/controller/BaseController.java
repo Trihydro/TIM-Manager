@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.trihydro.cvdatacontroller.model.DataControllerConfigProperties;
+import com.trihydro.cvdatacontroller.services.DbInteractions;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.zaxxer.hikari.HikariConfig;
@@ -32,18 +33,23 @@ public class BaseController {
     protected Utility utility;
     private EmailHelper emailHelper;
 
+    protected DbInteractions dbInteractions;
+
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
     protected DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectDependencies(DataControllerConfigProperties props, Utility _utility, EmailHelper _emailHelper) {
+    public void InjectBaseDependencies(DataControllerConfigProperties props, DbInteractions _dbInteractions,
+            Utility _utility, EmailHelper _emailHelper) {
         dbConfig = props;
+        dbInteractions = _dbInteractions;
         utility = _utility;
         emailHelper = _emailHelper;
     }
 
+    @Deprecated
     public Connection GetConnectionPool() throws SQLException {
 
         // create pool if not already done
@@ -87,6 +93,7 @@ public class BaseController {
         }
     }
 
+    @Deprecated
     public boolean updateOrDelete(PreparedStatement preparedStatement) {
 
         boolean result = false;
@@ -102,6 +109,7 @@ public class BaseController {
         return result;
     }
 
+    @Deprecated
     public Long executeAndLog(PreparedStatement preparedStatement, String type) {
         Long id = null;
         try {
@@ -126,6 +134,7 @@ public class BaseController {
         return id;
     }
 
+    @Deprecated
     public Date convertDate(String incomingDate) {
 
         Date convertedDate = null;
@@ -153,5 +162,4 @@ public class BaseController {
         String strDate = sdf.format(dte.getTime());
         return strDate;
     }
-
 }

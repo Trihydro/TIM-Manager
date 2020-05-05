@@ -25,7 +25,6 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.Attributes;
 
 @RunWith(StrictStubs.class)
 public class NodeXYControllerTest extends TestBase<NodeXYController> {
-
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
@@ -36,9 +35,7 @@ public class NodeXYControllerTest extends TestBase<NodeXYController> {
         lenient().doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(),
                 any(), any());
         lenient().doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        lenient().doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("",
-                new String[] { "region_id" });
-        lenient().doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
+
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
 

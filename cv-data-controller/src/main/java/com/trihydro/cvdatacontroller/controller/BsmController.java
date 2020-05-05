@@ -49,12 +49,12 @@ public class BsmController extends BaseController {
             }
 
             String deleteSQL = "DELETE FROM bsm_core_data WHERE ode_received_at < ?";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -82,12 +82,12 @@ public class BsmController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM bsm_part2_suve WHERE bsm_core_data_id IN";
             deleteSQL += " (SELECT bsm_core_data_id FROM bsm_core_data WHERE ode_received_at < ?)";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -118,12 +118,12 @@ public class BsmController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM bsm_part2_spve WHERE bsm_core_data_id IN";
             deleteSQL += " (SELECT bsm_core_data_id FROM bsm_core_data WHERE ode_received_at < ?)";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -152,12 +152,12 @@ public class BsmController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM bsm_part2_vse WHERE bsm_core_data_id IN";
             deleteSQL += " (SELECT bsm_core_data_id FROM bsm_core_data WHERE ode_received_at < ?)";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

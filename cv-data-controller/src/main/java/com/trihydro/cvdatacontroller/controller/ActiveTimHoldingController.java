@@ -52,7 +52,7 @@ public class ActiveTimHoldingController extends BaseController {
                     timOracleTables.getActiveTimHoldingTable());
 
             // get connection
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
 
             preparedStatement = connection.prepareStatement(insertQueryStatement,
                     new String[] { "active_tim_holding_id" });
@@ -101,7 +101,7 @@ public class ActiveTimHoldingController extends BaseController {
                 fieldNum++;
             }
 
-            activeTimHoldingId = executeAndLog(preparedStatement, "active tim holding");
+            activeTimHoldingId = dbInteractions.executeAndLog(preparedStatement, "active tim holding");
 
             if (activeTimHoldingId == null) {
                 // this already exists, fetch it and return the id
@@ -167,7 +167,7 @@ public class ActiveTimHoldingController extends BaseController {
         List<ActiveTimHolding> holdings = new ArrayList<>();
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             String query = "select * from active_tim_holding ";
             query += " where rsu_target = '" + ipv4Address + "'";

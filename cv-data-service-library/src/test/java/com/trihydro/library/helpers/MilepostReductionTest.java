@@ -1,8 +1,10 @@
 package com.trihydro.library.helpers;
 
-import static org.junit.Assert.assertEquals;
+// import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+// import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,18 @@ public class MilepostReductionTest {
     public void applyMilepostReductionAlorithm_SUCCESS() {
         // Arrange
         List<Milepost> mps = getMileposts();
+
+        // Act
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
+
+        // Assert
+        assertTrue(mps.size() > reduced.size());
+    }
+
+    @Test
+    public void applyMilepostReductionAlorithm_SUCCESS_Vsl() {
+        // Arrange
+        List<Milepost> mps = getMpVsl();
 
         // Act
         List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
@@ -649,4 +663,449 @@ public class MilepostReductionTest {
         return mps;
     }
 
+    private List<Milepost> getMpVsl() {
+        List<Milepost> mps = new ArrayList<>();
+
+        Milepost mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(353.1);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10961403);
+        mp.setLongitude(-104.97337039);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(353.0);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10938468);
+        mp.setLongitude(-104.97526035);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.9);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10915577);
+        mp.setLongitude(-104.97715041);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.8);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10892524);
+        mp.setLongitude(-104.9790401);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.7);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10869609);
+        mp.setLongitude(-104.98093008);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.6);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10846731);
+        mp.setLongitude(-104.98282012);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.5);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10823754);
+        mp.setLongitude(-104.98470996);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.4);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10800988);
+        mp.setLongitude(-104.98660025);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.3);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10777955);
+        mp.setLongitude(-104.98848995);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.2);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10753733);
+        mp.setLongitude(-104.990377);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.1);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10720193);
+        mp.setLongitude(-104.99223849);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(352.0);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10673543);
+        mp.setLongitude(-104.99404997);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.9);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.1062341);
+        mp.setLongitude(-104.99584573);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.8);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10572808);
+        mp.setLongitude(-104.99763919);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.7);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10522379);
+        mp.setLongitude(-104.99943348);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.6);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10471756);
+        mp.setLongitude(-105.00122681);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.5);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10421259);
+        mp.setLongitude(-105.00302074);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.4);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10370475);
+        mp.setLongitude(-105.00481325);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.3);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10320274);
+        mp.setLongitude(-105.0066086);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.2);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10269448);
+        mp.setLongitude(-105.00840086);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.1);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10219597);
+        mp.setLongitude(-105.01019786);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(351.0);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10178354);
+        mp.setLongitude(-105.01203167);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.9);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10150753);
+        mp.setLongitude(-105.01390976);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.8);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10136087);
+        mp.setLongitude(-105.01581304);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.7);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10135169);
+        mp.setLongitude(-105.01772623);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.6);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.1014764);
+        mp.setLongitude(-105.01963244);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.5);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10173509);
+        mp.setLongitude(-105.02151484);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.4);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10204607);
+        mp.setLongitude(-105.0233841);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.3);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10235774);
+        mp.setLongitude(-105.02525317);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.2);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10266788);
+        mp.setLongitude(-105.02712268);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.1);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10297865);
+        mp.setLongitude(-105.02899203);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(350.0);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10328426);
+        mp.setLongitude(-105.03086285);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.9);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10353963);
+        mp.setLongitude(-105.0327461);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.8);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10365357);
+        mp.setLongitude(-105.0346535);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.7);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10365505);
+        mp.setLongitude(-105.03656687);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.6);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10361368);
+        mp.setLongitude(-105.03848001);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.5);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10356939);
+        mp.setLongitude(-105.04039303);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.4);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10351296);
+        mp.setLongitude(-105.04230549);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.3);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10338509);
+        mp.setLongitude(-105.04421091);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.2);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10312949);
+        mp.setLongitude(-105.04609453);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.1);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10284712);
+        mp.setLongitude(-105.04797173);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(349.0);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10256347);
+        mp.setLongitude(-105.04984858);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.9);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10227993);
+        mp.setLongitude(-105.05172546);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.8);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10199146);
+        mp.setLongitude(-105.05360102);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.7);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10170522);
+        mp.setLongitude(-105.05547717);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.6);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10141793);
+        mp.setLongitude(-105.05735302);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.5);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10113159);
+        mp.setLongitude(-105.05922912);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.4);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10084654);
+        mp.setLongitude(-105.06110556);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.3);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10056914);
+        mp.setLongitude(-105.06298263);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.2);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10033262);
+        mp.setLongitude(-105.06486835);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.1);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.1002209);
+        mp.setLongitude(-105.06677366);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(348.0);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10021764);
+        mp.setLongitude(-105.06868528);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(347.9);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10023417);
+        mp.setLongitude(-105.0705969);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(347.8);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10025026);
+        mp.setLongitude(-105.07250851);
+        mps.add(mp);
+
+        mp = new Milepost();
+        mp.setDirection("D");
+        mp.setMilepost(347.7);
+        mp.setCommonName("I 80");
+        mp.setLatitude(41.10027094);
+        mp.setLongitude(-105.07442006);
+        mps.add(mp);
+
+        return mps;
+    }
 }

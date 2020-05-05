@@ -31,7 +31,7 @@ public class SecurityResultCodeTypeController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 			rs = statement.executeQuery("select * from SECURITY_RESULT_CODE_TYPE");
 

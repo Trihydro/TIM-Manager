@@ -56,7 +56,7 @@ public class TimController extends BaseController {
 
         try {
             // build SQL statement
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             rs = statement.executeQuery("select * from tim where tim_id = " + timId);
 
@@ -99,7 +99,7 @@ public class TimController extends BaseController {
 
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim",
                     timOracleTables.getTimTable());
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
             int fieldNum = 1;
             OdeTravelerInformationMessage j2735 = tim.getJ2735TravelerInformationMessage();
@@ -221,7 +221,7 @@ public class TimController extends BaseController {
                 fieldNum++;
             }
             // execute insert statement
-            Long timId = executeAndLog(preparedStatement, "timID");
+            Long timId = dbInteractions.executeAndLog(preparedStatement, "timID");
             return timId;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -259,12 +259,12 @@ public class TimController extends BaseController {
             }
 
             String deleteSQL = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -296,12 +296,12 @@ public class TimController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -332,12 +332,12 @@ public class TimController extends BaseController {
             String deleteSQL = "DELETE FROM DATA_FRAME_ITIS_CODE where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -371,12 +371,12 @@ public class TimController extends BaseController {
             String deleteSQL = "DELETE FROM region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -410,12 +410,12 @@ public class TimController extends BaseController {
             String deleteSQL = "DELETE FROM path WHERE path_id in (SELECT path_id from region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -449,12 +449,12 @@ public class TimController extends BaseController {
             String deleteSQL = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -486,12 +486,12 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))))";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -521,12 +521,12 @@ public class TimController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

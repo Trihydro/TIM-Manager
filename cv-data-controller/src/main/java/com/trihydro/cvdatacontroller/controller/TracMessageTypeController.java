@@ -29,7 +29,7 @@ public class TracMessageTypeController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			// build SQL statement
 			statement = connection.createStatement();
 			rs = statement.executeQuery("select * from TRAC_MESSAGE_TYPE");

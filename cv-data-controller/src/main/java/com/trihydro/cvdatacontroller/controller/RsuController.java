@@ -33,7 +33,7 @@ public class RsuController extends BaseController {
 		Statement statement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// select all RSUs from RSU table
@@ -81,7 +81,7 @@ public class RsuController extends BaseController {
 		Statement statement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// select all RSUs that are labeled as 'Existing' in the WYDOT view
@@ -125,7 +125,7 @@ public class RsuController extends BaseController {
 		Statement statement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// select all RSUs that are labeled as 'Existing' in the WYDOT view
@@ -172,7 +172,7 @@ public class RsuController extends BaseController {
 		Statement statement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// select all RSUs from RSU table

@@ -28,7 +28,7 @@ public class TimTypeController extends BaseController {
         Statement statement = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
 
             // build SQL statement

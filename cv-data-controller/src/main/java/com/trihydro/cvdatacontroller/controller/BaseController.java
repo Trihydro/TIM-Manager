@@ -134,7 +134,6 @@ public class BaseController {
         return id;
     }
 
-    @Deprecated
     public Date convertDate(String incomingDate) {
 
         Date convertedDate = null;

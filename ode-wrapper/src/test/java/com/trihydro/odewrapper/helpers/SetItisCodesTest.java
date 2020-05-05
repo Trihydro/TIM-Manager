@@ -77,6 +77,21 @@ public class SetItisCodesTest {
     }
 
     @Test
+    public void setItisCodesRc_nonExistent() {
+        // Arrange
+        WydotTimRc tim = new WydotTimRc();
+        Integer[] itisCodes = new Integer[2];
+        itisCodes[0] = 0;
+        itisCodes[1] = 13;
+        tim.setAdvisory(itisCodes);
+        // Act
+        var result = uut.setItisCodesRc(tim);
+
+        // Assert
+        assertEquals(0, result.size());
+    }
+
+    @Test
     public void setItisCodesRc_translated() {
         // Arrange
         WydotTimRc tim = new WydotTimRc();

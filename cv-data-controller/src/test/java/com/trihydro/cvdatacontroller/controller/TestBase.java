@@ -12,9 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.trihydro.cvdatacontroller.model.DataControllerConfigProperties;
 import com.trihydro.cvdatacontroller.services.DbInteractions;
-import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 
 import org.junit.Before;
@@ -33,13 +31,9 @@ public class TestBase<T extends BaseController> {
 
         // BaseController dependencies
         @Mock
-        protected DataControllerConfigProperties mockConfig;
-        @Mock
         protected DbInteractions mockDbInteractions;
         @Mock
         protected Utility mockUtility;
-        @Mock
-        protected EmailHelper mockEmailHelper;
 
         protected T uut;
 
@@ -63,6 +57,6 @@ public class TestBase<T extends BaseController> {
                 lenient().when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
                 lenient().when(mockRs.next()).thenReturn(true).thenReturn(false);
 
-                uut.InjectBaseDependencies(mockConfig, mockDbInteractions, mockUtility, mockEmailHelper);
+                uut.InjectBaseDependencies(mockDbInteractions, mockUtility);
         }
 }

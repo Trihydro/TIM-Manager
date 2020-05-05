@@ -1,4 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -13,19 +14,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
 
-import com.trihydro.library.helpers.Utility;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 
 @RunWith(StrictStubs.class)
 public class DriverAlertControllerTest extends TestBase<DriverAlertController> {
-    @Mock
-    private Utility mockUtility;
-
     @Test
     public void DeleteOldDriverAlert() throws SQLException {
         // Arrange

@@ -4,9 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.library.helpers.Utility;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,12 +18,6 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("driver-alert")
 @ApiIgnore
 public class DriverAlertController extends BaseController {
-    private Utility utility;
-
-    @Autowired
-    public void InjectDependencies(Utility _utility) {
-        utility = _utility;
-    }
 
     @RequestMapping(value = "/delete-old", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<Boolean> DeleteOldDriverAlert() {

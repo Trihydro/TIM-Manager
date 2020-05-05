@@ -3,6 +3,7 @@ package com.trihydro.odewrapper.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.model.CustomItisEnum;
 import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.WydotTim;
@@ -65,6 +66,11 @@ public class SetItisCodes {
 
         for (Integer item : wydotTim.getAdvisory()) {
 
+            var alphaItis = getCustomAlphabetic(item);
+            if(alphaItis!=null){
+                items.add(alphaItis);
+                continue;
+            }
             // map "closed" itis code
             if (item == 769) {
                 code = getItisCodes().stream().filter(x -> x.getItisCode().equals(770)).findFirst().orElse(null);
@@ -77,6 +83,15 @@ public class SetItisCodes {
         }
 
         return items;
+    }
+
+    public String getCustomAlphabetic(Integer itisCode) {
+        String text = null;
+        var en = CustomItisEnum.valueOf(itisCode);
+        if (en != null) {
+            text = en.getStringValue();
+        }
+        return text;
     }
 
     public List<String> setItisCodesVsl(WydotTimVsl wydotTim) {

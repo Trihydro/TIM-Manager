@@ -598,8 +598,10 @@ public class TimService extends BaseService {
             return activeTim;
         if (splitName.length > 3) {
             TimType timType = getTimType((splitName[3]));
-            activeTim.setTimType(timType.getType());
-            activeTim.setTimTypeId(timType.getTimTypeId());
+            if (timType != null) {
+                activeTim.setTimType(timType.getType());
+                activeTim.setTimTypeId(timType.getTimTypeId());
+            }
         } else
             return activeTim;
 

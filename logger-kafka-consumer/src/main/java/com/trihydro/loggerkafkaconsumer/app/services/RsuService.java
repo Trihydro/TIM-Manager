@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RsuService extends BaseService {
 
-    public ArrayList<WydotRsu> getRsus() {
+	public ArrayList<WydotRsu> getRsus() {
 
 		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
 		Connection connection = null;
@@ -21,7 +21,7 @@ public class RsuService extends BaseService {
 		Statement statement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// select all RSUs from RSU table

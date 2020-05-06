@@ -28,7 +28,7 @@ public class TimRsuService extends BaseService {
         Connection connection = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("TIM_RSU",
                     timOracleTables.getTimRsuTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "TIM_RSU_ID" });
@@ -43,7 +43,7 @@ public class TimRsuService extends BaseService {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuIndex);
                 fieldNum++;
             }
-            Long timRsuId = executeAndLog(preparedStatement, "tim rsu");
+            Long timRsuId = dbInteractions.executeAndLog(preparedStatement, "tim rsu");
             return timRsuId;
         } catch (SQLException e) {
             e.printStackTrace();

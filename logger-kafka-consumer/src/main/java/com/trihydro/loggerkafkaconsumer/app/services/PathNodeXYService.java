@@ -28,7 +28,7 @@ public class PathNodeXYService extends BaseService {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path_node_xy",
                     timOracleTables.getPathNodeXYTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_node_xy_id" });
@@ -42,7 +42,7 @@ public class PathNodeXYService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long pathNodeXYId = executeAndLog(preparedStatement, "pathnodexyid");
+            Long pathNodeXYId = dbInteractions.executeAndLog(preparedStatement, "pathnodexyid");
             return pathNodeXYId;
 
         } catch (SQLException e) {

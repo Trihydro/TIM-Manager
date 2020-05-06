@@ -50,7 +50,7 @@ public class DriverAlertService extends BaseService {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = driverAlertOracleTables.buildInsertQueryStatement("driver_alert",
                     driverAlertOracleTables.getDriverAlertTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "driver_alert_id" });
@@ -153,7 +153,7 @@ public class DriverAlertService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long driverAlertId = executeAndLog(preparedStatement, "driverAlertId");
+            Long driverAlertId = dbInteractions.executeAndLog(preparedStatement, "driverAlertId");
 
             // add driver_alert_itis_codes
             if (driverAlertId != null && alert.split(",").length > 1) {

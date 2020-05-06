@@ -268,6 +268,7 @@ public class TimServiceTest extends TestBase<TimService> {
         // verify only these were called on the uut
         verify(uut).InjectDependencies(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any());
+        verify(uut).InjectBaseDependencies(any(), any(), any(), any());
         verify(uut).addTimToOracleDB(odeData);
         verify(uut).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verifyNoMoreInteractions(uut);

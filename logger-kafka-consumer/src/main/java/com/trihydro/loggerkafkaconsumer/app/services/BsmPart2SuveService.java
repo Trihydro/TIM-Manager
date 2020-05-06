@@ -15,24 +15,24 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 @Component
 public class BsmPart2SuveService extends BaseService {
 
-    private BsmOracleTables bsmOracleTables;
+	private BsmOracleTables bsmOracleTables;
 
-    @Autowired
-    public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
-        bsmOracleTables = _bsmOracleTables;
-    }
+	@Autowired
+	public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
+		bsmOracleTables = _bsmOracleTables;
+	}
 
-    public Long insertBSMPart2SUVE(J2735BsmPart2Content part2Content, J2735SupplementalVehicleExtensions suve,
+	public Long insertBSMPart2SUVE(J2735BsmPart2Content part2Content, J2735SupplementalVehicleExtensions suve,
 			Long bsmCoreDataId) {
 
 		String bsmSuveInsertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_part2_suve",
-        bsmOracleTables.getBsmPart2SuveTable());
+				bsmOracleTables.getBsmPart2SuveTable());
 		PreparedStatement bsmSuvePreparedStatement = null;
 		Connection connection = null;
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			bsmSuvePreparedStatement = connection.prepareStatement(bsmSuveInsertQueryStatement,
 					new String[] { "bsm_part2_suve_id" });
 
@@ -397,7 +397,7 @@ public class BsmPart2SuveService extends BaseService {
 			fieldNum++;
 
 			// execute insert statement
-			Long bsmPart2SuveId = executeAndLog(bsmSuvePreparedStatement, "bsmPart2SuveId");
+			Long bsmPart2SuveId = dbInteractions.executeAndLog(bsmSuvePreparedStatement, "bsmPart2SuveId");
 			return bsmPart2SuveId;
 		} catch (SQLException e) {
 			e.printStackTrace();

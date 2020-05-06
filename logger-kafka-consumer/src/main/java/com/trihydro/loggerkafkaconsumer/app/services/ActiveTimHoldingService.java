@@ -21,7 +21,7 @@ public class ActiveTimHoldingService extends BaseService {
         ResultSet rs = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             String query = "select * from active_tim_holding";
             query += " where rsu_target = '" + ipv4Address;
@@ -80,7 +80,7 @@ public class ActiveTimHoldingService extends BaseService {
         ResultSet rs = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             String query = "select * from active_tim_holding";
             query += " where sat_record_id = '" + satRecordId;
@@ -143,10 +143,10 @@ public class ActiveTimHoldingService extends BaseService {
         PreparedStatement preparedStatement = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(updateTableSQL);
             preparedStatement.setLong(1, activeTimHoldingId);
-            return updateOrDelete(preparedStatement);
+            return dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

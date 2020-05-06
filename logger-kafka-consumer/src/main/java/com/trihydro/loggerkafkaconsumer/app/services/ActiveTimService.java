@@ -38,7 +38,7 @@ public class ActiveTimService extends BaseService {
                     timOracleTables.getActiveTimTable());
 
             // get connection
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
 
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
             int fieldNum = 1;
@@ -102,7 +102,7 @@ public class ActiveTimService extends BaseService {
                 fieldNum++;
             }
 
-            Long activeTimId = executeAndLog(preparedStatement, "active tim");
+            Long activeTimId = dbInteractions.executeAndLog(preparedStatement, "active tim");
             return activeTimId;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -143,7 +143,7 @@ public class ActiveTimService extends BaseService {
             end_lon = activeTim.getEndPoint().getLongitude();
         }
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(updateTableSQL);
             sqlNullHandler.setLongOrNull(preparedStatement, 1, activeTim.getTimId());
             sqlNullHandler.setDoubleOrNull(preparedStatement, 2, start_lat);
@@ -162,7 +162,7 @@ public class ActiveTimService extends BaseService {
             sqlNullHandler.setIntegerOrNull(preparedStatement, 8, activeTim.getPk());
             sqlNullHandler.setIntegerOrNull(preparedStatement, 9, activeTim.getProjectKey());
             sqlNullHandler.setLongOrNull(preparedStatement, 10, activeTim.getActiveTimId());
-            activeTimIdResult = updateOrDelete(preparedStatement);
+            activeTimIdResult = dbInteractions.updateOrDelete(preparedStatement);
             System.out.println("------ Updated active_tim with id: " + activeTim.getActiveTimId() + " --------------");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -190,7 +190,7 @@ public class ActiveTimService extends BaseService {
         ResultSet rs = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             String query = "select * from active_tim";
             query += " where sat_record_id = '" + satRecordId + "' and active_tim.direction = '" + direction + "'";
@@ -256,7 +256,7 @@ public class ActiveTimService extends BaseService {
         ResultSet rs = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             String query = "select * from active_tim";
             query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";

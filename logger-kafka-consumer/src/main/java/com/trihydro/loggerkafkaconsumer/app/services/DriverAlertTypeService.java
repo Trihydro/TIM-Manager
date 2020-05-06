@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DriverAlertTypeService extends BaseService {
 
-    public List<DriverAlertType> getDriverAlertTypes() {
+	public List<DriverAlertType> getDriverAlertTypes() {
 
 		List<DriverAlertType> driverAlertTypes = new ArrayList<DriverAlertType>();
 		Connection connection = null;
@@ -23,7 +23,7 @@ public class DriverAlertTypeService extends BaseService {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build SQL statement

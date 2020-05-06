@@ -29,7 +29,7 @@ public class TestBase<T extends BaseController> {
         @Mock
         protected ResultSet mockRs;
 
-        // BaseController dependencies
+        // Mock BaseController dependencies
         @Mock
         protected DbInteractions mockDbInteractions;
         @Mock

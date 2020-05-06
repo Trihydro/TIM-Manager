@@ -21,14 +21,14 @@ public class PathService extends BaseService {
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
     }
-    
+
     public Long InsertPath() {
 
         PreparedStatement preparedStatement = null;
         Connection connection = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path",
                     timOracleTables.getPathTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_id" });
@@ -40,7 +40,7 @@ public class PathService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long pathId = executeAndLog(preparedStatement, "pathId");
+            Long pathId = dbInteractions.executeAndLog(preparedStatement, "pathId");
             return pathId;
         } catch (SQLException e) {
             e.printStackTrace();

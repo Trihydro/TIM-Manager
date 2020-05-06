@@ -12,10 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.loggerkafkaconsumer.app.helpers.DbInteractions;
-import com.trihydro.loggerkafkaconsumer.config.LoggerConfiguration;
 
 import org.junit.Before;
 import org.mockito.Mock;
@@ -34,12 +31,6 @@ public class TestBase<T extends BaseService> {
     // Mock BaseService dependencies
     @Mock
     protected DbInteractions mockDbInteractions;
-    @Mock
-    protected LoggerConfiguration mockConfiguration;
-    @Mock
-    protected Utility mockUtility;
-    @Mock
-    protected EmailHelper mockEmailHelper;
 
     protected T uut;
 
@@ -62,6 +53,6 @@ public class TestBase<T extends BaseService> {
         lenient().when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
         lenient().when(mockRs.next()).thenReturn(true).thenReturn(false);
 
-        uut.InjectBaseDependencies(mockDbInteractions, mockConfiguration, mockUtility, mockEmailHelper);
+        uut.InjectBaseDependencies(mockDbInteractions);
     }
 }

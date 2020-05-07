@@ -6,15 +6,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,15 +23,13 @@ import com.trihydro.library.model.WydotTim;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @RunWith(StrictStubs.class)
-public class MilepostControllerTest {
+public class MilepostControllerTest extends TestBase<MilepostController> {
     private Coordinate startPoint;
     private Coordinate endPoint;
     private WydotTim wydotTim;
@@ -47,32 +40,10 @@ public class MilepostControllerTest {
 
     @Mock
     MilepostService mockMilepostService;
-    @Mock
-    protected Connection mockConnection;
-    @Mock
-    protected Statement mockStatement;
-    @Mock
-    protected PreparedStatement mockPreparedStatement;
-    @Mock
-    protected ResultSet mockRs;
-
-    @Spy
-    @InjectMocks
-    MilepostController uut;
 
     @Before
-    public void setup() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        lenient().when(mockConnection.createStatement()).thenReturn(mockStatement);
-        lenient().when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
-        lenient().when(mockConnection.prepareStatement(isA(String.class), isA(String[].class)))
-                .thenReturn(mockPreparedStatement);
-        lenient().doReturn(mockConnection).when((BaseController) uut).GetConnectionPool();
-        lenient().doReturn(-1l).when((BaseController) uut).executeAndLog(isA(PreparedStatement.class),
-                isA(String.class));
-        lenient().doReturn(true).when((BaseController) uut).updateOrDelete(mockPreparedStatement);
-        lenient().when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
-        lenient().when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
-        lenient().when(mockRs.next()).thenReturn(true).thenReturn(false);
+    public void setupSubTest() {
+        uut.InjectDependencies(mockMilepostService);
     }
 
     private void setupWydotTim() {

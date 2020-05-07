@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimTypeService extends BaseService {
 
-    public List<TimType> getTimTypes() {
+	public List<TimType> getTimTypes() {
 		List<TimType> timTypes = new ArrayList<TimType>();
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement statement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build SQL statement

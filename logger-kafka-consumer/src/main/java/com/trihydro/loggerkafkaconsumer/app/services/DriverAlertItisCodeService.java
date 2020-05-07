@@ -31,7 +31,7 @@ public class DriverAlertItisCodeService extends BaseService {
 
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("driver_alert_itis_code",
                     timOracleTables.getDriverAlertItisCodeTable());
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             if (connection != null) {
                 preparedStatement = connection.prepareStatement(insertQueryStatement,
                         new String[] { "driver_alert_itis_code_id" });
@@ -45,7 +45,7 @@ public class DriverAlertItisCodeService extends BaseService {
                     fieldNum++;
                 }
 
-                Long driverAlertItisCodeId = executeAndLog(preparedStatement, "driverAlertItisCode");
+                Long driverAlertItisCodeId = dbInteractions.executeAndLog(preparedStatement, "driverAlertItisCode");
                 return driverAlertItisCodeId;
             }
 

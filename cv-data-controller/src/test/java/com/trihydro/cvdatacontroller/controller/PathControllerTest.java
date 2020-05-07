@@ -31,7 +31,6 @@ public class PathControllerTest extends TestBase<PathController> {
     @Before
     public void setupSubTest() {
         doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        doReturn(-1l).when(uut).executeAndLog(mockPreparedStatement, "pathId");
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
 
@@ -52,7 +51,7 @@ public class PathControllerTest extends TestBase<PathController> {
     @Test
     public void InsertPath_FAIL() throws SQLException {
         // Arrange
-        doThrow(new SQLException()).when(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1,0);
+        doThrow(new SQLException()).when(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, 0);
 
         // Act
         ResponseEntity<Long> data = uut.InsertPath();

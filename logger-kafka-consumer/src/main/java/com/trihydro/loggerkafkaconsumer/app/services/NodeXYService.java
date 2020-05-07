@@ -31,7 +31,7 @@ public class NodeXYService extends BaseService {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("node_xy",
                     timOracleTables.getNodeXYTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "node_xy_id" });
@@ -62,7 +62,7 @@ public class NodeXYService extends BaseService {
                         preparedStatement.setString(fieldNum, null);
                 fieldNum++;
             }
-            Long nodeXYId = executeAndLog(preparedStatement, "nodexy");
+            Long nodeXYId = dbInteractions.executeAndLog(preparedStatement, "nodexy");
             return nodeXYId;
         } catch (SQLException e) {
             e.printStackTrace();

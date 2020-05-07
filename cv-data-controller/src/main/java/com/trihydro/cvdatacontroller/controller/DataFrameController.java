@@ -53,7 +53,7 @@ public class DataFrameController extends BaseController {
 		List<String> itisCodes = new ArrayList<>();
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			statement = connection.createStatement();
 
@@ -97,7 +97,7 @@ public class DataFrameController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("data_frame",
 					timOracleTables.getDataFrameTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "data_frame_id" });
@@ -146,7 +146,7 @@ public class DataFrameController extends BaseController {
 				fieldNum++;
 			}
 
-			Long dataFrameId = executeAndLog(preparedStatement, "dataframe");
+			Long dataFrameId = dbInteractions.executeAndLog(preparedStatement, "dataframe");
 			return ResponseEntity.ok(dataFrameId);
 		} catch (SQLException e) {
 			e.printStackTrace();

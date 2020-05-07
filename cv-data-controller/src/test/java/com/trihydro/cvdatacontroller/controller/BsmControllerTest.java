@@ -8,18 +8,13 @@ import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
 
-import com.trihydro.library.helpers.Utility;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 
 @RunWith(StrictStubs.class)
 public class BsmControllerTest extends TestBase<BsmController> {
-    @Mock
-    private Utility mockUtility;
 
     @Test
     public void DeleteOldBsm() throws SQLException {

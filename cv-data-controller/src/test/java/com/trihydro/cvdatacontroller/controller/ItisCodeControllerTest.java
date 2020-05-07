@@ -1,4 +1,4 @@
-package com.trihydro.cvdatacontroller;
+package com.trihydro.cvdatacontroller.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -6,8 +6,6 @@ import static org.mockito.Mockito.when;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.controller.ItisCodeController;
-import com.trihydro.cvdatacontroller.controller.TestBase;
 import com.trihydro.library.model.TmddItisCode;
 
 import org.junit.Test;

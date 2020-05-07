@@ -39,7 +39,7 @@ public class PathController extends BaseController {
         Connection connection = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path",
                     timOracleTables.getPathTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_id" });
@@ -51,7 +51,7 @@ public class PathController extends BaseController {
                 fieldNum++;
             }
             // execute insert statement
-            Long pathId = executeAndLog(preparedStatement, "pathId");
+            Long pathId = dbInteractions.executeAndLog(preparedStatement, "pathId");
             return ResponseEntity.ok(pathId);
         } catch (SQLException e) {
             e.printStackTrace();

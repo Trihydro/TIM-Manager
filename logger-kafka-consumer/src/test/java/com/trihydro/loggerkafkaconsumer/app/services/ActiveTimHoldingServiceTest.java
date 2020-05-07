@@ -101,12 +101,12 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         // Arrange
 
         // Act
-        Boolean data = uut.deleteActiveTimHolding(-1l);
+        Boolean data = uut.deleteActiveTimHolding(1l);
 
         // Assert
         assertTrue(data);
-        verify(mockConnection).prepareStatement("DELETE ACTIVE_TIM_HOLDING WHERE ACTIVE_TIM_HOLDING_ID = ?");
-        verify(mockPreparedStatement).setLong(1, -1l);
+        verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM_HOLDING WHERE ACTIVE_TIM_HOLDING_ID = ?");
+        verify(mockPreparedStatement).setLong(1, 1l);
         verify(mockConnection).close();
         verify(mockPreparedStatement).close();
     }
@@ -116,7 +116,7 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         // Arrange
         doThrow(new SQLException()).when(mockConnection).prepareStatement(anyString());
         // Act
-        Boolean data = uut.deleteActiveTimHolding(-1l);
+        Boolean data = uut.deleteActiveTimHolding(1l);
 
         // Assert
         assertFalse(data);

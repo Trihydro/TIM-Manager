@@ -80,7 +80,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 activeTimHolding.setDirection("direction");
                 activeTimHolding.setStartPoint(new Coordinate(1, 2));
                 activeTimHolding.setEndPoint(new Coordinate(5, 6));
-                doReturn(null).when(uut).executeAndLog(mockPreparedStatement, "active tim holding");
+                doReturn(null).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim holding");
                 doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
 
                 String query = "select active_tim_holding_id from active_tim_holding";
@@ -123,7 +123,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 activeTimHolding.setDirection("direction");
                 activeTimHolding.setStartPoint(new Coordinate(1, 2));
                 activeTimHolding.setEndPoint(new Coordinate(5, 6));
-                doReturn(null).when(uut).executeAndLog(mockPreparedStatement, "active tim holding");
+                doReturn(null).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim holding");
                 doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
 
                 String query = "select active_tim_holding_id from active_tim_holding";

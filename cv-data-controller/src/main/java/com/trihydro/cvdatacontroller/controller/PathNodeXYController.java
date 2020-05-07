@@ -46,7 +46,7 @@ public class PathNodeXYController extends BaseController {
 		List<NodeXY> nodeXYs = new ArrayList<>();
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			statement = connection.createStatement();
 
@@ -97,7 +97,7 @@ public class PathNodeXYController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path_node_xy",
 					timOracleTables.getPathNodeXYTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_node_xy_id" });
@@ -111,7 +111,7 @@ public class PathNodeXYController extends BaseController {
 				fieldNum++;
 			}
 			// execute insert statement
-			Long pathNodeXYId = executeAndLog(preparedStatement, "pathnodexyid");
+			Long pathNodeXYId = dbInteractions.executeAndLog(preparedStatement, "pathnodexyid");
 			return ResponseEntity.ok(pathNodeXYId);
 
 		} catch (SQLException e) {

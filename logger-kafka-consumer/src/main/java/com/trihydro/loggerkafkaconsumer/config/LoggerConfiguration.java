@@ -1,9 +1,11 @@
 package com.trihydro.loggerkafkaconsumer.config;
 
+import com.trihydro.library.model.DbInteractionsProps;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class LoggerConfiguration {
+public class LoggerConfiguration implements DbInteractionsProps {
 
     private String depositGroup;
     private String depositTopic;

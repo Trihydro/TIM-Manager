@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.trihydro.loggerkafkaconsumer.app.helpers.DbInteractions;
+import com.trihydro.library.helpers.DbInteractions;
 
 import org.junit.Before;
 import org.mockito.Mock;

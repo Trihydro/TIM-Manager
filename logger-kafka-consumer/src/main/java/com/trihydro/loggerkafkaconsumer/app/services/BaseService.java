@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.model.SecurityResultCodeType;
-import com.trihydro.loggerkafkaconsumer.app.helpers.DbInteractions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

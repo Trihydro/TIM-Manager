@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.trihydro.cvdatacontroller.services.DbInteractions;
+import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.Utility;
 
 import org.springframework.beans.factory.annotation.Autowired;

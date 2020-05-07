@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.trihydro.cvdatacontroller.services.DbInteractions;
+import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.Utility;
 
 import org.junit.Before;

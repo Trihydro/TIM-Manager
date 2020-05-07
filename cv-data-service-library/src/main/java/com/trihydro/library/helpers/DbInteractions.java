@@ -1,4 +1,4 @@
-package com.trihydro.cvdatacontroller.services;
+package com.trihydro.library.helpers;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,9 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.TimeZone;
 
-import com.trihydro.cvdatacontroller.model.DataControllerConfigProperties;
-import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.DbInteractionsProps;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -21,12 +19,12 @@ public class DbInteractions {
     private HikariDataSource hds;
     private HikariConfig config;
 
-    protected DataControllerConfigProperties dbConfig;
+    protected DbInteractionsProps dbConfig;
     protected Utility utility;
     private EmailHelper emailHelper;
 
     @Autowired
-    public void InjectDependencies(DataControllerConfigProperties props, Utility _utility, EmailHelper _emailHelper) {
+    public void InjectDependencies(DbInteractionsProps props, Utility _utility, EmailHelper _emailHelper) {
         dbConfig = props;
         utility = _utility;
         emailHelper = _emailHelper;
@@ -45,9 +43,10 @@ public class DbInteractions {
             config.setPassword(dbConfig.getDbPassword());
             config.setJdbcUrl(dbConfig.getDbUrl());
             config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(dbConfig.getPoolSize());// splitting pool size between here and the kafka consumer
-            config.setMaxLifetime(600000);// setting a maxLifetime of 10 minutes (defaults to 30), to help avoid
-                                          // connection issues
+            config.setMaximumPoolSize(dbConfig.getPoolSize());
+            // Pool Size formula: connections = ((core_count*2) + effective_spindle_count)
+            // https://stackoverflow.com/questions/28987540/why-does-hikaricp-recommend-fixed-size-pool-for-better-performance
+            config.setMaxLifetime(600000);// setting to 10 minutes (defaults to 30), to help avoid connection issues
 
             hds = new HikariDataSource(config);
         }

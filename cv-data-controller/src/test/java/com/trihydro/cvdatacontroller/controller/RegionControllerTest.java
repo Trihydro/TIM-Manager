@@ -42,8 +42,6 @@ public class RegionControllerTest extends TestBase<RegionController> {
         doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
         doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("", new String[] { "region_id" });
-        doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
 
@@ -64,7 +62,7 @@ public class RegionControllerTest extends TestBase<RegionController> {
     @Test
     public void updateRegionName_FAIL() throws SQLException {
         // Arrange
-        doThrow(new SQLException()).when(uut).GetConnectionPool();
+        doThrow(new SQLException()).when(mockDbInteractions).getConnectionPool();
 
         // Act
         ResponseEntity<Boolean> data = uut.UpdateRegionName(-1l, "name");

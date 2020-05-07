@@ -40,8 +40,7 @@ public class HttpLoggingController extends BaseController {
         PreparedStatement preparedStatement = null;
 
         try {
-
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = loggingTables.buildInsertQueryStatement("http_logging",
                     loggingTables.getHttpLoggingTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "http_logging_id" });
@@ -59,7 +58,7 @@ public class HttpLoggingController extends BaseController {
                 fieldNum++;
             }
 
-            Long httpLoggingId = executeAndLog(preparedStatement, "http_logging");
+            Long httpLoggingId = dbInteractions.executeAndLog(preparedStatement, "http_logging");
             return ResponseEntity.ok(httpLoggingId);
         } catch (SQLException e) {
             e.printStackTrace();

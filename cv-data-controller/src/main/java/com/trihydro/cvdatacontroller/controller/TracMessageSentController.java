@@ -44,7 +44,7 @@ public class TracMessageSentController extends BaseController {
 		Statement statement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build SQL statement
@@ -80,7 +80,7 @@ public class TracMessageSentController extends BaseController {
 		PreparedStatement preparedStatement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			String insertQueryStatement = tracMessageOracleTables.buildInsertQueryStatement("TRAC_MESSAGE_SENT",
 					tracMessageOracleTables.getTracMessageSentTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement,
@@ -109,7 +109,7 @@ public class TracMessageSentController extends BaseController {
 				fieldNum++;
 			}
 			// execute insert statement
-			Long tracMessageSentId = executeAndLog(preparedStatement, "tracMessageSentId");
+			Long tracMessageSentId = dbInteractions.executeAndLog(preparedStatement, "tracMessageSentId");
 			return ResponseEntity.ok(tracMessageSentId);
 		} catch (SQLException e) {
 			e.printStackTrace();

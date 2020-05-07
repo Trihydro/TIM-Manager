@@ -46,7 +46,7 @@ public class MilepostController extends BaseController {
 		List<String> routes = new ArrayList<>();
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 
 			// build SQL query
 			String statementStr = "select distinct common_name from MILEPOST_VW_NEW";
@@ -95,7 +95,7 @@ public class MilepostController extends BaseController {
 		try {
 
 			// build statement SQL query
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build statement SQL query
@@ -148,7 +148,7 @@ public class MilepostController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build SQL query
@@ -206,7 +206,7 @@ public class MilepostController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build SQL query
@@ -338,7 +338,7 @@ public class MilepostController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 			rs = statement.executeQuery("select * from MILEPOST_TEST order by milepost asc");
 
@@ -393,7 +393,7 @@ public class MilepostController extends BaseController {
 
 		try {
 
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
 			// build SQL query

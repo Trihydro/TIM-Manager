@@ -36,7 +36,7 @@ public class DataFrameService extends BaseService {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("data_frame",
                     timOracleTables.getDataFrameTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "data_frame_id" });
@@ -85,7 +85,7 @@ public class DataFrameService extends BaseService {
                 fieldNum++;
             }
 
-            Long dataFrameId = executeAndLog(preparedStatement, "dataframe");
+            Long dataFrameId = dbInteractions.executeAndLog(preparedStatement, "dataframe");
             return dataFrameId;
         } catch (SQLException e) {
             e.printStackTrace();

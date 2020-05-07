@@ -18,21 +18,21 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 public class RegionService extends BaseService {
 
     private TimOracleTables timOracleTables;
-	private SQLNullHandler sqlNullHandler;
+    private SQLNullHandler sqlNullHandler;
 
-	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-		timOracleTables = _timOracleTables;
-		sqlNullHandler = _sqlNullHandler;
+    @Autowired
+    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
+        timOracleTables = _timOracleTables;
+        sqlNullHandler = _sqlNullHandler;
     }
-    
+
     public Long AddRegion(Long dataFrameId, Long pathId, Region region) {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("region",
                     timOracleTables.getRegionTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "region_id" });
@@ -109,7 +109,7 @@ public class RegionService extends BaseService {
             }
 
             // execute insert statement
-            Long regionId = executeAndLog(preparedStatement, "regionID");
+            Long regionId = dbInteractions.executeAndLog(preparedStatement, "regionID");
             return regionId;
         } catch (SQLException e) {
             e.printStackTrace();

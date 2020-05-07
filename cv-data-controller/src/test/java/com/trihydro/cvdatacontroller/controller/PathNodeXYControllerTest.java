@@ -3,8 +3,8 @@ package com.trihydro.cvdatacontroller.controller;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,8 +35,7 @@ public class PathNodeXYControllerTest extends TestBase<PathNodeXYController> {
 
     @Before
     public void setupSubTest() {
-        lenient().doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        lenient().doReturn(-1l).when(uut).executeAndLog(mockPreparedStatement, "pathId");
+        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
 

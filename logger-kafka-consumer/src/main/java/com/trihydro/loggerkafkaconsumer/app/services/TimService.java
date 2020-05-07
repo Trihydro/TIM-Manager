@@ -319,7 +319,7 @@ public class TimService extends BaseService {
         Long id = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection
                     .prepareStatement("select tim_id from tim where packet_id = ? and time_stamp = ?");
             preparedStatement.setString(1, packetId);
@@ -356,7 +356,7 @@ public class TimService extends BaseService {
 
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim",
                     timOracleTables.getTimTable());
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
             int fieldNum = 1;
 
@@ -477,7 +477,7 @@ public class TimService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long timId = executeAndLog(preparedStatement, "timID");
+            Long timId = dbInteractions.executeAndLog(preparedStatement, "timID");
             return timId;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -545,11 +545,11 @@ public class TimService extends BaseService {
         Connection connection = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
             preparedStatement.setString(1, satRecordId);
             preparedStatement.setLong(2, timId);
-            return updateOrDelete(preparedStatement);
+            return dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception ex) {
             return false;
         } finally {

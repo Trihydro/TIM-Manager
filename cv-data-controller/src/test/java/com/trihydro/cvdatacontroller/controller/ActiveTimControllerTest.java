@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
@@ -43,12 +42,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     private TimOracleTables mockTimOracleTables = new TimOracleTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
-    @Mock
-    private Utility mockUtility;
 
     @Before
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockUtility);
+        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
         doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
     }
@@ -89,7 +86,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void UpdateActiveTim_SatRecordId_FAIL() {
         // Arrange
-        doReturn(false).when(uut).updateOrDelete(mockPreparedStatement);
+        doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
 
         // Act
         ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
@@ -101,7 +98,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void UpdateActiveTim_SatRecordId_SUCCESS() {
         // Arrange
-        doReturn(true).when(uut).updateOrDelete(mockPreparedStatement);
+        doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
 
         // Act
         ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
@@ -113,7 +110,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void UpdateActiveTim_SatRecordId_EXCEPTION() throws SQLException {
         // Arrange
-        doThrow(new SQLException()).when(uut).GetConnectionPool();
+        doThrow(new SQLException()).when(mockDbInteractions).getConnectionPool();
 
         // Act
         ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");

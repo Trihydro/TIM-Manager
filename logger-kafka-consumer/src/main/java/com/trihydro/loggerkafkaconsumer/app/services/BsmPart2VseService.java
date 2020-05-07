@@ -31,7 +31,7 @@ public class BsmPart2VseService extends BaseService {
 		Connection connection = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			bsmVsePreparedStatement = connection.prepareStatement(bsmVseInsertQueryStatement,
 					new String[] { "bsm_part2_vse_id" });
 
@@ -232,7 +232,7 @@ public class BsmPart2VseService extends BaseService {
 			}
 
 			// execute insert statement
-			Long bsmPart2VseId = executeAndLog(bsmVsePreparedStatement, "bsmPart2VseId");
+			Long bsmPart2VseId = dbInteractions.executeAndLog(bsmVsePreparedStatement, "bsmPart2VseId");
 			return bsmPart2VseId;
 		} catch (SQLException e) {
 			e.printStackTrace();

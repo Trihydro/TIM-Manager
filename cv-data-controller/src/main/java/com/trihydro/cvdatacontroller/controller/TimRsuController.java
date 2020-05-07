@@ -43,7 +43,7 @@ public class TimRsuController extends BaseController {
         Connection connection = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("TIM_RSU",
                     timOracleTables.getTimRsuTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "TIM_RSU_ID" });
@@ -58,7 +58,7 @@ public class TimRsuController extends BaseController {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuIndex);
                 fieldNum++;
             }
-            Long timRsuId = executeAndLog(preparedStatement, "tim rsu");
+            Long timRsuId = dbInteractions.executeAndLog(preparedStatement, "tim rsu");
             return ResponseEntity.ok(timRsuId);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -87,7 +87,7 @@ public class TimRsuController extends BaseController {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             // build SQL statement
             rs = statement.executeQuery("select * from TIM_RSU where tim_id = " + timId);
@@ -130,7 +130,7 @@ public class TimRsuController extends BaseController {
         TimRsu timRsu = new TimRsu();
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             // build SQL statement
             rs = statement.executeQuery("select * from TIM_RSU where rsu_id = " + rsuId + " and tim_id = " + timId);

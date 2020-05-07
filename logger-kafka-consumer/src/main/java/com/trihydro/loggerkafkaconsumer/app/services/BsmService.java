@@ -96,7 +96,7 @@ public class BsmService extends BaseService {
         Connection connection = null;
 
         try {
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             bsmPreparedStatement = connection.prepareStatement(bsmCoreInsertQueryStatement,
                     new String[] { "bsm_core_data_id" });
 
@@ -271,7 +271,7 @@ public class BsmService extends BaseService {
             }
 
             // execute insert statement
-            Long bsmCoreDataId = executeAndLog(bsmPreparedStatement, "bsmCoreDataId");
+            Long bsmCoreDataId = dbInteractions.executeAndLog(bsmPreparedStatement, "bsmCoreDataId");
             return bsmCoreDataId;
         } catch (SQLException e) {
             e.printStackTrace();

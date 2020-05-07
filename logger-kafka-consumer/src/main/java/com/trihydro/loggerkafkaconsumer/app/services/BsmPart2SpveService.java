@@ -16,7 +16,7 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
 public class BsmPart2SpveService extends BaseService {
 
     private BsmOracleTables bsmOracleTables;
-    //TODO: refactor code to use sqlNullHandler
+    // TODO: refactor code to use sqlNullHandler
 
     @Autowired
     public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
@@ -31,7 +31,7 @@ public class BsmPart2SpveService extends BaseService {
 
         try {
 
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_part2_spve",
                     bsmOracleTables.getBsmPart2SpveTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "bsm_part2_spve_id" });
@@ -181,7 +181,7 @@ public class BsmPart2SpveService extends BaseService {
             fieldNum++;
 
             // execute insert statement
-            Long bsmPart2SpveId = executeAndLog(preparedStatement, "bsmPart2SpveId");
+            Long bsmPart2SpveId = dbInteractions.executeAndLog(preparedStatement, "bsmPart2SpveId");
             return bsmPart2SpveId;
 
         } catch (SQLException e) {

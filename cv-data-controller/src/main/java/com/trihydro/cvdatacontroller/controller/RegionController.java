@@ -49,11 +49,11 @@ public class RegionController extends BaseController {
 		cols.add(new ImmutablePair<String, Object>("NAME", name));
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			preparedStatement = timOracleTables.buildUpdateStatement(regionId, "REGION", "REGION_ID", cols, connection);
 
 			// execute update statement
-			Boolean success = updateOrDelete(preparedStatement);
+			Boolean success = dbInteractions.updateOrDelete(preparedStatement);
 			return ResponseEntity.ok(success);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -80,7 +80,7 @@ public class RegionController extends BaseController {
 		PreparedStatement preparedStatement = null;
 
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("region",
 					timOracleTables.getRegionTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "region_id" });
@@ -157,7 +157,7 @@ public class RegionController extends BaseController {
 			}
 
 			// execute insert statement
-			Long regionId = executeAndLog(preparedStatement, "regionID");
+			Long regionId = dbInteractions.executeAndLog(preparedStatement, "regionID");
 			return ResponseEntity.ok(regionId);
 		} catch (SQLException e) {
 			e.printStackTrace();

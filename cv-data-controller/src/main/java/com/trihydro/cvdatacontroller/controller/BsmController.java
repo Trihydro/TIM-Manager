@@ -4,9 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.library.helpers.Utility;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,12 +18,6 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("bsm")
 @ApiIgnore
 public class BsmController extends BaseController {
-    private Utility utility;
-
-    @Autowired
-    public void InjectDependencies(Utility _utility) {
-        utility = _utility;
-    }
 
     @RequestMapping(value = "/delete-old", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<Boolean> deleteOldBsm() {
@@ -49,12 +40,12 @@ public class BsmController extends BaseController {
             }
 
             String deleteSQL = "DELETE FROM bsm_core_data WHERE ode_received_at < ?";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -82,12 +73,12 @@ public class BsmController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM bsm_part2_suve WHERE bsm_core_data_id IN";
             deleteSQL += " (SELECT bsm_core_data_id FROM bsm_core_data WHERE ode_received_at < ?)";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -118,12 +109,12 @@ public class BsmController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM bsm_part2_spve WHERE bsm_core_data_id IN";
             deleteSQL += " (SELECT bsm_core_data_id FROM bsm_core_data WHERE ode_received_at < ?)";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -152,12 +143,12 @@ public class BsmController extends BaseController {
         try {
             String deleteSQL = "DELETE FROM bsm_part2_vse WHERE bsm_core_data_id IN";
             deleteSQL += " (SELECT bsm_core_data_id FROM bsm_core_data WHERE ode_received_at < ?)";
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

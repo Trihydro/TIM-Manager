@@ -32,7 +32,7 @@ public class DataFrameItisCodeService extends BaseService {
 
             String insertQueryStatement = timOracleTables.buildInsertQueryStatement("data_frame_itis_code",
                     timOracleTables.getDataFrameItisCodeTable());
-            connection = GetConnectionPool();
+            connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement,
                     new String[] { "data_frame_itis_code_id" });
             int fieldNum = 1;
@@ -53,7 +53,7 @@ public class DataFrameItisCodeService extends BaseService {
                 fieldNum++;
             }
 
-            Long dataFrameItisCodeId = executeAndLog(preparedStatement, "dataFrameItisCode");
+            Long dataFrameItisCodeId = dbInteractions.executeAndLog(preparedStatement, "dataFrameItisCode");
             return dataFrameItisCodeId;
         } catch (SQLException e) {
             e.printStackTrace();

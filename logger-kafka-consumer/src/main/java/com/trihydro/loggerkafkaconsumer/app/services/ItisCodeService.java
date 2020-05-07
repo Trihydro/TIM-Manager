@@ -20,7 +20,7 @@ public class ItisCodeService extends BaseService {
 		Statement statement = null;
 		ResultSet rs = null;
 		try {
-			connection = GetConnectionPool();
+			connection = dbInteractions.getConnectionPool();
 			// select all Itis Codes from ItisCode table
 			statement = connection.createStatement();
 			rs = statement.executeQuery("select * from itis_code");

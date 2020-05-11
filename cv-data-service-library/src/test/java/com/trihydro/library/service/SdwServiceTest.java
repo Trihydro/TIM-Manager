@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -204,7 +205,7 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockDecodeResponse.getBody()).thenReturn(response);
 
         // Act
-        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("000000000000000000");
+        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("AAAAAAAAAAAAAAAAA001F");
 
         // Assert
         assertEquals(3, result.size());
@@ -235,8 +236,8 @@ public class SdwServiceTest extends BaseServiceTest {
         assertTrue(result.contains(5907));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void getItisCodesFromAdvisoryMessage_IllegalArgumentException() {
+    @Test
+    public void getItisCodesFromAdvisoryMessage_nullAdvisoryMessage() {
         // Arrange (if for some reason we get past the guard clause, ensure the REST
         // request doesn't happen)
         String url = "http://localhost:12230/api/decode";
@@ -245,7 +246,28 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockDecodeResponse.getBody()).thenReturn(null);
 
         // Act
-        sdwService.getItisCodesFromAdvisoryMessage("");
+        var exception = assertThrows(IllegalArgumentException.class, () -> {
+            sdwService.getItisCodesFromAdvisoryMessage(null);
+        });
+
+        assertEquals("advisoryMessage cannot be null", exception.getMessage());
+    }
+
+    @Test
+    public void getItisCodesFromAdvisoryMessage_NoMessageFrame() {
+        // Arrange (if for some reason we get past the guard clause, ensure the REST
+        // request doesn't happen)
+        String url = "http://localhost:12230/api/decode";
+        when(mockRestTemplate.exchange(eq(url), eq(HttpMethod.POST), isA(HttpEntity.class),
+                eq(SDXDecodeResponse.class))).thenReturn(mockDecodeResponse);
+        when(mockDecodeResponse.getBody()).thenReturn(null);
+
+        // Act
+        var exception = assertThrows(IllegalArgumentException.class, () -> {
+            sdwService.getItisCodesFromAdvisoryMessage("00000000");
+        });
+
+        assertEquals("Cannot determine start of MessageFrame", exception.getMessage());
     }
 
     @Test
@@ -265,7 +287,7 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockDecodeResponse.getBody()).thenReturn(response);
 
         // Act
-        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("000000000000000000");
+        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("00000000000000001F");
 
         // Assert
         assertEquals(2, result.size());
@@ -290,7 +312,7 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockDecodeResponse.getBody()).thenReturn(response);
 
         // Act
-        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("000000000000000000");
+        List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("00000000000000001F");
 
         // Assert
         assertNull(result);

@@ -108,8 +108,13 @@ public class SdwService {
     }
 
     public List<Integer> getItisCodesFromAdvisoryMessage(String advisoryMessage) throws IllegalArgumentException {
-        if (advisoryMessage == null || advisoryMessage.length() < 18) {
-            throw new IllegalArgumentException("messageFrame must be provided and at least 18 characters");
+        if (advisoryMessage == null) {
+            throw new IllegalArgumentException("advisoryMessage cannot be null");
+        }
+
+        int idx = advisoryMessage.indexOf("001F");
+        if (idx < 0) {
+            throw new IllegalArgumentException("Cannot determine start of MessageFrame");
         }
 
         List<Integer> results = new ArrayList<Integer>();
@@ -126,7 +131,7 @@ public class SdwService {
         SDXDecodeRequest request = new SDXDecodeRequest();
         request.setEncodeType("hex");
         request.setMessageType("MessageFrame");
-        request.setEncodedMsg(advisoryMessage.substring(18));
+        request.setEncodedMsg(advisoryMessage.substring(idx));
 
         // Execute request
         try {

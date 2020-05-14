@@ -21,6 +21,51 @@ steps:
 
 - task: Maven@3
   inputs:
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.1.0.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-core -Dversion="1.1.0" -Dpackaging=jar'
+
+- task: Maven@3
+  inputs:
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.1.0.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-common -Dversion="1.1.0" -Dpackaging=jar'
+
+- task: Maven@3
+  inputs:
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-svcs -Dversion="1.1.0" -Dpackaging=jar'
+
+- task: Maven@3
+  inputs:
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ojdbc8.jar -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion="12.2.0.1.0" -Dpackaging=jar'
+
+- task: Maven@3
+  inputs:
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ucp.jar -DgroupId=com.oracle -DartifactId=ucp -Dversion="12.2.0.1.0" -Dpackaging=jar'    
+
+- task: Maven@3
+  inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'

@@ -315,7 +315,7 @@ public class MilepostController extends BaseController {
 	 * @param wydotTim
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/get-feature-collection")
+	@RequestMapping(method = RequestMethod.POST, value = "/get-feature-collection", produces = "application/json")
 	public ResponseEntity<String> getMilepostsFeatureCollectionByStartEndPoint(@RequestBody WydotTim wydotTim) {
 
 		// check startPoint

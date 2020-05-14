@@ -29,7 +29,7 @@ public class MilepostReduction {
      * @return
      */
     public List<Milepost> applyMilepostReductionAlorithm(List<Milepost> mileposts, Double distance) {
-        if (mileposts == null || mileposts.size() == 0) {
+        if (mileposts == null || mileposts.size() <= 3) {//min 3 to iterate over
             return mileposts;
         }
 

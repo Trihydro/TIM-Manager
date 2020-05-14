@@ -8,7 +8,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.mapbox.services.commons.geojson.Feature;
+import com.mapbox.services.commons.geojson.FeatureCollection;
+import com.mapbox.services.commons.geojson.LineString;
+import com.mapbox.services.commons.models.Position;
 import com.trihydro.cvdatacontroller.services.MilepostService;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
@@ -301,6 +306,48 @@ public class MilepostController extends BaseController {
 				wydotTim.getRoute(), wydotTim.getStartPoint().getLatitude(), wydotTim.getStartPoint().getLongitude(),
 				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude(), wydotTim.getDirection());
 		return ResponseEntity.ok(data);
+	}
+
+	/**
+	 * Rewrite of getMilepostsByStartEndPoint used in testing to cut time on geojson
+	 * creation to test continuity
+	 * 
+	 * @param wydotTim
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/get-feature-collection", produces = "application/json")
+	public ResponseEntity<String> getMilepostsFeatureCollectionByStartEndPoint(@RequestBody WydotTim wydotTim) {
+
+		// check startPoint
+		if (wydotTim.getStartPoint() == null || wydotTim.getStartPoint().getLatitude() == null
+				|| wydotTim.getStartPoint().getLongitude() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
+		// check endpoint
+		if (wydotTim.getEndPoint() == null || wydotTim.getEndPoint().getLatitude() == null
+				|| wydotTim.getEndPoint().getLongitude() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
+		// check direction, route
+		if (wydotTim.getDirection() == null || wydotTim.getRoute() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+
+		Collection<com.trihydro.cvdatacontroller.model.Milepost> data = milepostService.getPathWithBuffer(
+				wydotTim.getRoute(), wydotTim.getStartPoint().getLatitude(), wydotTim.getStartPoint().getLongitude(),
+				wydotTim.getEndPoint().getLatitude(), wydotTim.getEndPoint().getLongitude(), wydotTim.getDirection());
+
+		List<Feature> features = new ArrayList<>();
+		var coordinates = data.stream().map(x -> Position.fromCoordinates(x.getLongitude(), x.getLatitude()))
+				.collect(Collectors.toList());
+		LineString ls = LineString.fromCoordinates(coordinates);
+		var feature = Feature.fromGeometry(ls);
+		features.add(feature);
+		FeatureCollection fc = FeatureCollection.fromFeatures(features);
+
+		return ResponseEntity.ok(fc.toJson());
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/get-milepost-single-point")

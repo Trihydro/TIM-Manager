@@ -280,7 +280,8 @@ public class WydotTimRwController extends WydotTimBaseController {
             public void run() {
                 for (WydotTimRw tim : timsToSend) {
                     // check for speed limit, itis code 268
-                    if (tim.getAdvisory().length == 3 && tim.getAdvisory()[0] == 268) {
+                    if (tim.getItisCodes() != null && tim.getItisCodes().size() == 3
+                            && tim.getItisCodes().get(0) == "268") {
                         processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
                                 ContentEnum.speedLimit);
                     } else {

@@ -12,6 +12,15 @@ pool:
 steps:
 - task: Maven@3
   inputs:
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    goals: 'mvn install:install-file -Dfile="resources/jpo-ode-plugins-1.1.0.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.1.0" -Dpackaging=jar'
+
+- task: Maven@3
+  inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'

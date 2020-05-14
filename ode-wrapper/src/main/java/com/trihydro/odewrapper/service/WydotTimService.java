@@ -251,9 +251,8 @@ public class WydotTimService {
                 // if query failed, don't send TIM,
                 // log the error and continue
                 if (timQuery == null) {
-                    WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
                     utility.logWithDate("Returning without sending TIM to RSU. submitTimQuery failed for RSU "
-                            + gson.toJson(wydotRsu));
+                            + gson.toJson(rsu));
                     continue;
                 }
 

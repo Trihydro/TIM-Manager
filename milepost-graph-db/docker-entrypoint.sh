@@ -353,7 +353,9 @@ declare -A ENTERPRISE
 
 COMMUNITY=(
      [dbms.tx_log.rotation.retention_policy]="100M size"
-     [dbms.memory.pagecache.size]="512M"
+     [dbms.memory.pagecache.size]="2G"
+     [dbms.memory.heap.initial_size]="2G"
+     [dbms.memory.heap.max_size]="2G"
      [dbms.connectors.default_listen_address]="0.0.0.0"
      [dbms.connector.https.listen_address]="0.0.0.0:7473"
      [dbms.connector.http.listen_address]="0.0.0.0:7474"

@@ -87,8 +87,9 @@ public class CreateBaseTimUtil {
         // assume the given start/stop points are correct and send them on to calculate
         // mileposts
         List<Milepost> mileposts = new ArrayList<>();
+        List<Milepost> milepostsAll = new ArrayList<>();
         if (wydotTim.getEndPoint() != null) {
-            mileposts = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+            milepostsAll = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
         } else {
             // point incident
             MilepostBuffer mpb = new MilepostBuffer();
@@ -96,10 +97,10 @@ public class CreateBaseTimUtil {
             mpb.setCommonName(wydotTim.getRoute());
             mpb.setDirection(wydotTim.getDirection());
             mpb.setPoint(wydotTim.getStartPoint());
-            mileposts = milepostService.getMilepostsByPointWithBuffer(mpb);
+            milepostsAll = milepostService.getMilepostsByPointWithBuffer(mpb);
         }
         // reduce the mileposts by removing straight away posts
-        mileposts = milepostReduction.applyMilepostReductionAlorithm(mileposts, config.getPathDistanceLimit());
+        mileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll, config.getPathDistanceLimit());
         timToSend.setMileposts(mileposts);
 
         OdePosition3D anchorPosition = new OdePosition3D();
@@ -129,13 +130,13 @@ public class CreateBaseTimUtil {
 
         int timDirection = 0;
         // path list - change later
-        if (timToSend.getMileposts() != null && timToSend.getMileposts().size() > 0) {
-            double startLat = timToSend.getMileposts().get(0).getLatitude();
-            double startLon = timToSend.getMileposts().get(0).getLongitude();
-            for (int j = 1; j < timToSend.getMileposts().size(); j++) {
+        if (milepostsAll != null && milepostsAll.size() > 0) {
+            double startLat = milepostsAll.get(0).getLatitude();
+            double startLon = milepostsAll.get(0).getLongitude();
+            for (int j = 1; j < milepostsAll.size(); j++) {
                 OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-                double lat = timToSend.getMileposts().get(j).getLatitude();
-                double lon = timToSend.getMileposts().get(j).getLongitude();
+                double lat = milepostsAll.get(j).getLatitude();
+                double lon = milepostsAll.get(j).getLongitude();
                 node.setNodeLat(new BigDecimal(lat));
                 node.setNodeLong(new BigDecimal(lon));
                 node.setDelta("node-LatLon");

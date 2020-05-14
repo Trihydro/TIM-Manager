@@ -67,7 +67,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<List<? extends WydotTim>> entity = new HttpEntity<List<? extends WydotTim>>(wydotTims, headers);
-		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT,
+		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST,
 				entity, ActiveTim[].class);
 		return Arrays.asList(response.getBody());
 	}

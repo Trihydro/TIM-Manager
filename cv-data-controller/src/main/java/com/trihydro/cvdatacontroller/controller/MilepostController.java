@@ -15,7 +15,6 @@ import com.mapbox.services.commons.geojson.FeatureCollection;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.models.Position;
 import com.trihydro.cvdatacontroller.services.MilepostService;
-// import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;

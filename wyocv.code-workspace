@@ -5,7 +5,6 @@
 		}
 	],
 	"settings": {
-		"java.configuration.updateBuildConfiguration": "automatic",
-		"workbench.editor.scrollToSwitchTabs": true
+		"java.configuration.updateBuildConfiguration": "automatic"
 	}
 }

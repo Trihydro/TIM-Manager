@@ -114,6 +114,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.grumlimited</groupId>
+            <artifactId>geocalc</artifactId>
+            <version>0.5.8</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -140,6 +145,10 @@
         <repository>
             <id>spring-releases</id>
             <url>https://repo.spring.io/libs-release</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
     <pluginRepositories>

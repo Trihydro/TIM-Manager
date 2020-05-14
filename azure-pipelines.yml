@@ -17,7 +17,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.1.0" -Dpackaging=jar'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-plugins -Dversion="1.1.0" -Dpackaging=jar'
 
 - task: Maven@3
   inputs:

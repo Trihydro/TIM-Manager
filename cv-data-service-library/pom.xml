@@ -108,28 +108,13 @@
           <release>11</release>
         </configuration>
       </plugin>
-      <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>1.7</version>
-          <executions>
-              <execution>
-                  <id>getMainBaseDir</id>
-                  <phase>validate</phase>
-                  <goals>
-                      <goal>run</goal>
-                  </goals>
-                  <configuration>
-                      <exportAntProperties>true</exportAntProperties>
-                      <target>
-                          <!--Adjust the location below to your directory structure -->
-                          <property name="main.basedir" location="./.." />
-                          <echo message="main.basedir=${main.basedir}"/>
-                      </target>
-                  </configuration>
-              </execution>
-          </executions>
-      </plugin>
     </plugins>
   </build>
+
+  <repositories>
+        <repository>
+            <id>my-local-repo</id>
+            <url>file://${project.parent.basedir}/resources</url>
+        </repository>
+  </repositories>
 </project>

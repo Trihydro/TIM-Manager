@@ -74,8 +74,11 @@ public class ActiveTimService extends CvDataServiceLibrary {
 
 	// get Active TIMs by client ID direction
 	public List<ActiveTim> getActiveTimsByClientIdDirection(String clientId, Long timTypeId, String direction) {
-		String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", config.getCvRestService(), clientId,
-				timTypeId, direction);
+		String url = String.format("%s/active-tim/client-id-direction/%s/%d", config.getCvRestService(), clientId,
+				timTypeId);
+		if (direction != null) {
+			url += "/" + direction;
+		}
 		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
 				ActiveTim[].class);
 		return Arrays.asList(response.getBody());

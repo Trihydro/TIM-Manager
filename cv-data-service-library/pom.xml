@@ -124,7 +124,7 @@
                       <target>
                           <!--Adjust the location below to your directory structure -->
                           <property name="main.basedir" location="./.." />
-                          <!-- <echo message="main.basedir=${main.basedir}"/> -->
+                          <echo message="main.basedir=${main.basedir}"/>
                       </target>
                   </configuration>
               </execution>

@@ -91,11 +91,15 @@ public class RsuService extends CvDataServiceLibrary {
 				if (numericRoute % 2 == 0) {
 					rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < endPoint.getLongitude())
 							.collect(Collectors.toList());
-					entryRsu = rsusLower.stream().min(compLong).get();
+					if (rsusLower.size() > 0) {
+						entryRsu = rsusLower.stream().min(compLong).get();
+					}
 				} else {
 					rsusLower = mainRsus.stream().filter(x -> x.getLatitude() < endPoint.getLatitude())
 							.collect(Collectors.toList());
-					entryRsu = rsusLower.stream().min(compLat).get();
+					if (rsusLower.size() > 0) {
+						entryRsu = rsusLower.stream().min(compLat).get();
+					}
 				}
 			} else {
 				// else find milepost closest to lowerMilepost
@@ -107,15 +111,17 @@ public class RsuService extends CvDataServiceLibrary {
 				}
 			}
 
-			GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
-			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
-			GeodeticCalculator geoCalc = new GeodeticCalculator();
-			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
-			double miles = 0.000621371 * curve.getEllipsoidalDistance();
+			if (entryRsu != null) {
+				GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
+				GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+				GeodeticCalculator geoCalc = new GeodeticCalculator();
+				GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+				double miles = 0.000621371 * curve.getEllipsoidalDistance();
 
-			if (miles > 20) {
-				// don't send to RSU if its further that X amount of miles away
-				entryRsu = null;
+				if (miles > 20) {
+					// don't send to RSU if its further that X amount of miles away
+					entryRsu = null;
+				}
 			}
 
 		} else { // d
@@ -135,11 +141,15 @@ public class RsuService extends CvDataServiceLibrary {
 				if (numericRoute % 2 == 0) {
 					rsusHigher = mainRsus.stream().filter(x -> x.getLongitude() > startPoint.getLongitude())
 							.collect(Collectors.toList());
-					entryRsu = rsusHigher.stream().max(compLong).get();
+					if (rsusHigher.size() > 0) {
+						entryRsu = rsusHigher.stream().max(compLong).get();
+					}
 				} else {
 					rsusHigher = mainRsus.stream().filter(x -> x.getLatitude() > startPoint.getLatitude())
 							.collect(Collectors.toList());
-					entryRsu = rsusHigher.stream().max(compLat).get();
+					if (rsusHigher.size() > 0) {
+						entryRsu = rsusHigher.stream().max(compLat).get();
+					}
 				}
 
 				if (rsusHigher.size() == 0) {
@@ -153,17 +163,18 @@ public class RsuService extends CvDataServiceLibrary {
 					entryRsu = rsusHigher.stream().min(compLat).get();
 				}
 			}
+			if (entryRsu != null) {
+				GlobalCoordinates start = new GlobalCoordinates(endPoint.getLatitude(), endPoint.getLongitude());
+				GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+				GeodeticCalculator geoCalc = new GeodeticCalculator();
+				GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+				double miles = 0.000621371 * curve.getEllipsoidalDistance();// returns in meters, so convert to miles
 
-			GlobalCoordinates start = new GlobalCoordinates(endPoint.getLatitude(), endPoint.getLongitude());
-			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
-			GeodeticCalculator geoCalc = new GeodeticCalculator();
-			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
-			double miles = 0.000621371 * curve.getEllipsoidalDistance();// returns in meters, so convert to miles
-
-			if (miles > 20) {
-				// don't send to RSU if its further than 20 miles away
-				utility.logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
-				entryRsu = null;
+				if (miles > 20) {
+					// don't send to RSU if its further than 20 miles away
+					utility.logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
+					entryRsu = null;
+				}
 			}
 		}
 

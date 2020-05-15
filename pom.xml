@@ -88,10 +88,34 @@
         </plugins>
     </build>
 
+    <plugins>
+        <plugin>
+            <groupId>org.commonjava.maven.plugins</groupId>
+            <artifactId>directory-maven-plugin</artifactId>
+            <version>0.1</version>
+            <executions>
+                <execution>
+                    <id>directories</id>
+                    <goals>
+                        <goal>directory-of</goal>
+                    </goals>
+                    <phase>initialize</phase>
+                    <configuration>
+                        <property>myproject.basedir</property>
+                        <project>
+                            <groupId>com.wyocv</groupId>
+                            <artifactId>wyo-cv</artifactId>
+                        </project>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+
     <repositories>
-    <repository>
-      <id>my-local-repo</id>
-      <url>file://${basedir}/resources</url>
-    </repository>
+        <repository>
+            <id>my-local-repo</id>
+            <url>file://${myproject.basedir}/resources</url>
+        </repository>
   </repositories>
 </project>

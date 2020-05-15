@@ -10,13 +10,10 @@ import com.trihydro.library.model.TmddProps;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
-
 @Component
 @ConfigurationProperties("config")
 public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps {
 
-    private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(327);
     private String cvRestService;
     private String[] rsuRoutes;
@@ -144,10 +141,6 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
         this.tmddPassword = tmddPassword;
     }
 
-    public TimeToLive getSdwTtl() {
-        return sdwTtl;
-    }
-
     public Integer getHttpLoggingMaxSize() {
         return httpLoggingMaxSize;
     }
@@ -178,9 +171,5 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
 
     public void setDefaultLaneWidth(BigDecimal defaultLaneWidth) {
         this.defaultLaneWidth = defaultLaneWidth;
-    }
-
-    public void setSdwTtl(String sdwTtl) {
-        this.sdwTtl = TimeToLive.valueOf(sdwTtl);
     }
 }

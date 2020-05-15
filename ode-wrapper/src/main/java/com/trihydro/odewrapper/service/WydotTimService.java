@@ -650,7 +650,9 @@ public class WydotTimService {
      */
     private TimeToLive getTimeToLive(int duration) {
         if (duration == 32000) {
-            return null;
+            // ODE defaults to thirtyminutes, if TTL is null. To get around this,
+            // we'll just pass the largest TTL value: oneyear.
+            return TimeToLive.oneyear;
         } else if (duration <= 1) {
             return TimeToLive.oneminute;
         } else if (duration <= 30) {

@@ -190,7 +190,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         setupWydotTims();
         HttpEntity<List<WydotTim>> entity = new HttpEntity<List<WydotTim>>(wydotTims, getDefaultHeaders());
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim/get-by-wydot-tim/" + timTypeId, HttpMethod.PUT, entity,
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim/get-by-wydot-tim/" + timTypeId, HttpMethod.POST, entity,
                 ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act

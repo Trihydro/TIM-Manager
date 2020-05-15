@@ -5,6 +5,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.grum.geocalc.Coordinate;
+import com.grum.geocalc.EarthCalc;
+import com.grum.geocalc.Point;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ContentEnum;
@@ -34,10 +37,11 @@ public class CreateBaseTimUtil {
     MilepostReduction milepostReduction;
 
     @Autowired
-    public void InjectDependencies(Utility _utility, MilepostService _milepostService, MilepostReduction _milepostReduction) {
+    public void InjectDependencies(Utility _utility, MilepostService _milepostService,
+            MilepostReduction _milepostReduction) {
         utility = _utility;
         milepostService = _milepostService;
-        milepostReduction=_milepostReduction;
+        milepostReduction = _milepostReduction;
     }
 
     public WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, BasicConfiguration config,
@@ -87,8 +91,9 @@ public class CreateBaseTimUtil {
         // assume the given start/stop points are correct and send them on to calculate
         // mileposts
         List<Milepost> mileposts = new ArrayList<>();
+        List<Milepost> milepostsAll = new ArrayList<>();
         if (wydotTim.getEndPoint() != null) {
-            mileposts = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+            milepostsAll = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
         } else {
             // point incident
             MilepostBuffer mpb = new MilepostBuffer();
@@ -96,10 +101,10 @@ public class CreateBaseTimUtil {
             mpb.setCommonName(wydotTim.getRoute());
             mpb.setDirection(wydotTim.getDirection());
             mpb.setPoint(wydotTim.getStartPoint());
-            mileposts = milepostService.getMilepostsByPointWithBuffer(mpb);
+            milepostsAll = milepostService.getMilepostsByPointWithBuffer(mpb);
         }
         // reduce the mileposts by removing straight away posts
-        mileposts = milepostReduction.applyMilepostReductionAlorithm(mileposts, config.getPathDistanceLimit());
+        mileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll, config.getPathDistanceLimit());
         timToSend.setMileposts(mileposts);
 
         OdePosition3D anchorPosition = new OdePosition3D();
@@ -129,19 +134,22 @@ public class CreateBaseTimUtil {
 
         int timDirection = 0;
         // path list - change later
-        if (timToSend.getMileposts() != null && timToSend.getMileposts().size() > 0) {
-            double startLat = timToSend.getMileposts().get(0).getLatitude();
-            double startLon = timToSend.getMileposts().get(0).getLongitude();
-            for (int j = 1; j < timToSend.getMileposts().size(); j++) {
+        if (milepostsAll != null && milepostsAll.size() > 0) {
+            double startLat = milepostsAll.get(0).getLatitude();
+            double startLon = milepostsAll.get(0).getLongitude();
+            for (int j = 1; j < milepostsAll.size(); j++) {
                 OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-                double lat = timToSend.getMileposts().get(j).getLatitude();
-                double lon = timToSend.getMileposts().get(j).getLongitude();
+                double lat = milepostsAll.get(j).getLatitude();
+                double lon = milepostsAll.get(j).getLongitude();
                 node.setNodeLat(new BigDecimal(lat));
                 node.setNodeLong(new BigDecimal(lon));
                 node.setDelta("node-LatLon");
                 nodes.add(node);
 
-                timDirection |= utility.getDirection(calculateBearing(startLat, startLon, lat, lon));
+                Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
+                Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
+
+                timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
                 // reset for next round
                 startLat = lat;
                 startLon = lon;
@@ -169,25 +177,6 @@ public class CreateBaseTimUtil {
         timToSend.setRequest(new ServiceRequest());
 
         return timToSend;
-    }
-
-    private double calculateBearing(double startLat, double startLon, double destLat, double destLon) {
-        // these calculations must be done in radians, and we are given degrees
-        double lonDiff_rad = Math.toRadians(destLon - startLon);
-        double startLat_rad = Math.toRadians(startLat);
-        double destLon_rad = Math.toRadians(destLon);
-        double destLat_rad = Math.toRadians(destLat);
-
-        double y = Math.sin(lonDiff_rad) * Math.cos(destLon_rad);
-        double x = Math.cos(startLat_rad) * Math.sin(destLat_rad)
-                - Math.sin(startLat_rad) * Math.cos(destLat_rad) * Math.cos(lonDiff_rad);
-
-        // gives -180 to 180
-        double brng = Math.toDegrees(Math.atan2(y, x));
-
-        // normalize to compass degrees
-        double norm_brng = (brng + 360) % 360;
-        return norm_brng;
     }
 
     protected String getDelta(Double distance) {

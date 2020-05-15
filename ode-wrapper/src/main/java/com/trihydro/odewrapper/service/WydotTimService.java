@@ -251,8 +251,8 @@ public class WydotTimService {
                 // if query failed, don't send TIM,
                 // log the error and continue
                 if (timQuery == null) {
-                    utility.logWithDate("Returning without sending TIM to RSU. submitTimQuery failed for RSU "
-                            + gson.toJson(rsu));
+                    utility.logWithDate(
+                            "Returning without sending TIM to RSU. submitTimQuery failed for RSU " + gson.toJson(rsu));
                     continue;
                 }
 

@@ -114,10 +114,12 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
-        wydotTimService.deleteWydotTimsByType(timIncidentList.getTimIncidentList(), type);
+        if (timsToSend.size() > 0) {
+            wydotTimService.deleteWydotTimsByType(timsToSend, type);
 
-        // make tims and send them
-        makeTimsAsync(timsToSend);
+            // make tims and send them
+            makeTimsAsync(timsToSend);
+        }
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);

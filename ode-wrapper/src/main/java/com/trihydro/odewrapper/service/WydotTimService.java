@@ -280,6 +280,9 @@ public class WydotTimService {
 
     public void deleteTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
 
+        if (activeTims == null || activeTims.isEmpty()) {
+            return;
+        }
         WydotRsu rsu = null;
 
         // split activeTims into sat and rsu for processing

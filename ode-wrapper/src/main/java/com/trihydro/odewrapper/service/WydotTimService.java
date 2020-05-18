@@ -53,6 +53,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -429,7 +430,8 @@ public class WydotTimService {
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(configuration.getSdwTtl());
+        sdw.setTtl(getTimeToLive(timToSend.getTim().getDataframes()[0].getDurationTime()));
+
         // set new record id
         sdw.setRecordId(recordId);
 
@@ -492,7 +494,8 @@ public class WydotTimService {
         sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
 
         // set time to live
-        sdw.setTtl(configuration.getSdwTtl());
+        sdw.setTtl(getTimeToLive(timToSend.getTim().getDataframes()[0].getDurationTime()));
+
         // set new record id
         sdw.setRecordId(recordId);
 
@@ -638,5 +641,32 @@ public class WydotTimService {
         }
 
         return codes;
+    }
+
+    /**
+     * Get's appropriate SDX TTL based on duration
+     * 
+     * @param duration DataFrame duration (minutes), up to 32000 per J2735
+     */
+    private TimeToLive getTimeToLive(int duration) {
+        if (duration == 32000) {
+            // ODE defaults to thirtyminutes, if TTL is null. To get around this,
+            // we'll just pass the largest TTL value: oneyear.
+            return TimeToLive.oneyear;
+        } else if (duration <= 1) {
+            return TimeToLive.oneminute;
+        } else if (duration <= 30) {
+            return TimeToLive.thirtyminutes;
+        } else if (duration <= 60 * 24) {
+            return TimeToLive.oneday;
+        } else if (duration <= 60 * 24 * 7) {
+            return TimeToLive.oneweek;
+        } else if (duration <= 60 * 24 * 31) {
+            return TimeToLive.onemonth;
+        } else {
+            // duration isn't indefinite, but it also doesn't fit in one of the smaller
+            // TTL buckets. Return the largest, finite TTL value.
+            return TimeToLive.oneyear;
+        }
     }
 }

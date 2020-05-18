@@ -110,20 +110,6 @@ public class RsuService extends CvDataServiceLibrary {
 					entryRsu = rsusLower.stream().max(compLat).get();
 				}
 			}
-
-			if (entryRsu != null) {
-				GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
-				GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
-				GeodeticCalculator geoCalc = new GeodeticCalculator();
-				GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
-				double miles = 0.000621371 * curve.getEllipsoidalDistance();
-
-				if (miles > 20) {
-					// don't send to RSU if its further that X amount of miles away
-					entryRsu = null;
-				}
-			}
-
 		} else { // d
 
 			List<WydotRsu> rsusHigher = new ArrayList<>();
@@ -163,18 +149,19 @@ public class RsuService extends CvDataServiceLibrary {
 					entryRsu = rsusHigher.stream().min(compLat).get();
 				}
 			}
-			if (entryRsu != null) {
-				GlobalCoordinates start = new GlobalCoordinates(endPoint.getLatitude(), endPoint.getLongitude());
-				GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
-				GeodeticCalculator geoCalc = new GeodeticCalculator();
-				GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
-				double miles = 0.000621371 * curve.getEllipsoidalDistance();// returns in meters, so convert to miles
+		}
 
-				if (miles > 20) {
-					// don't send to RSU if its further than 20 miles away
-					utility.logWithDate("Entry RSU is > 20 miles from the affected area, removing it from the list");
-					entryRsu = null;
-				}
+		// Check distance to entry RSU
+		if (entryRsu != null) {
+			GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
+			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+			GeodeticCalculator geoCalc = new GeodeticCalculator();
+			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
+			double miles = 0.000621371 * curve.getEllipsoidalDistance();
+
+			if (miles > 20) {
+				// don't send to RSU if its further that X amount of miles away
+				entryRsu = null;
 			}
 		}
 

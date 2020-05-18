@@ -405,9 +405,9 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(indices);
 	}
 
-	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}/{direction}", method = RequestMethod.GET)
+	@RequestMapping(value = {"/client-id-direction/{clientId}/{timTypeId}", "/client-id-direction/{clientId}/{timTypeId}/{direction}"}, method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
-			@PathVariable Long timTypeId, @PathVariable String direction) {
+			@PathVariable Long timTypeId, @PathVariable(required = false) String direction) {
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;

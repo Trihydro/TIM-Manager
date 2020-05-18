@@ -75,7 +75,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ucp.jar'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ucp.jar -DgroupId=com.oracle -DartifactId=ucp -Dversion="12.2.0.1.0" -Dpackaging=jar'
 
 - task: Maven@3
   inputs:

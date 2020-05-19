@@ -130,21 +130,14 @@ public class CreateBaseTimUtil {
 
         region.setAnchorPosition(anchorPosition);
 
-        ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-
         int timDirection = 0;
         // path list - change later
         if (milepostsAll != null && milepostsAll.size() > 0) {
             double startLat = milepostsAll.get(0).getLatitude();
             double startLon = milepostsAll.get(0).getLongitude();
             for (int j = 1; j < milepostsAll.size(); j++) {
-                OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
                 double lat = milepostsAll.get(j).getLatitude();
                 double lon = milepostsAll.get(j).getLongitude();
-                node.setNodeLat(new BigDecimal(lat));
-                node.setNodeLong(new BigDecimal(lon));
-                node.setDelta("node-LatLon");
-                nodes.add(node);
 
                 Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
                 Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
@@ -163,8 +156,20 @@ public class CreateBaseTimUtil {
         region.setDirection(dirTest); // heading slice
 
         // set path nodes
-        path.setNodes(nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]));
-        region.setPath(path);
+        if (mileposts != null && mileposts.size() > 0) {
+            ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+            for (int i = 1; i < mileposts.size(); i++) {
+                OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
+                double lat = mileposts.get(i).getLatitude();
+                double lon = mileposts.get(i).getLongitude();
+                node.setNodeLat(new BigDecimal(lat));
+                node.setNodeLong(new BigDecimal(lon));
+                node.setDelta("node-LatLon");
+                nodes.add(node);
+            }
+            path.setNodes(nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]));
+            region.setPath(path);
+        }
 
         regions.add(region);
         dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));

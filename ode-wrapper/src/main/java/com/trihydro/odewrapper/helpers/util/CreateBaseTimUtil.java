@@ -160,8 +160,8 @@ public class CreateBaseTimUtil {
             ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
             for (int i = 1; i < mileposts.size(); i++) {
                 OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-                double lat = milepostsAll.get(i).getLatitude();
-                double lon = milepostsAll.get(i).getLongitude();
+                double lat = mileposts.get(i).getLatitude();
+                double lon = mileposts.get(i).getLongitude();
                 node.setNodeLat(new BigDecimal(lat));
                 node.setNodeLong(new BigDecimal(lon));
                 node.setDelta("node-LatLon");

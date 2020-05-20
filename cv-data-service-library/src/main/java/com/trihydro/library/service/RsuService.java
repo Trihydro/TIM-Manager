@@ -169,15 +169,25 @@ public class RsuService extends CvDataServiceLibrary {
 		}
 
 		if (numericRoute % 2 == 0) {
-			// rsus = mainRsus.stream().filter(
-			// x -> x.getLongitude() >= startPoint.getLongitude() && x.getLongitude() <=
-			// endPoint.getLongitude())
-			// .collect(Collectors.toList());
-			rsus = mainRsus.stream().filter(x -> x.getLongitude().compareTo(startPoint.getLongitude()) >= 0
-					&& x.getLongitude().compareTo(endPoint.getLongitude()) <= 0).collect(Collectors.toList());
+			if (direction.toLowerCase().equals("i")) {
+				rsus = mainRsus.stream()
+						.filter(x -> x.getLongitude().compareTo(startPoint.getLongitude()) >= 0
+								&& x.getLongitude().compareTo(endPoint.getLongitude()) <= 0)
+						.collect(Collectors.toList());
+			} else {
+				rsus = mainRsus.stream()
+						.filter(x -> x.getLongitude().compareTo(startPoint.getLongitude()) <= 0
+								&& x.getLongitude().compareTo(endPoint.getLongitude()) >= 0)
+						.collect(Collectors.toList());
+			}
 		} else {
-			rsus = mainRsus.stream().filter(x -> x.getLatitude().compareTo(startPoint.getLatitude()) >= 0
-					&& x.getLatitude().compareTo(endPoint.getLatitude()) <= 0).collect(Collectors.toList());
+			if (direction.toLowerCase().equals("i")) {
+				rsus = mainRsus.stream().filter(x -> x.getLatitude().compareTo(startPoint.getLatitude()) >= 0
+						&& x.getLatitude().compareTo(endPoint.getLatitude()) <= 0).collect(Collectors.toList());
+			} else {
+				rsus = mainRsus.stream().filter(x -> x.getLatitude().compareTo(startPoint.getLatitude()) <= 0
+						&& x.getLatitude().compareTo(endPoint.getLatitude()) >= 0).collect(Collectors.toList());
+			}
 		}
 
 		if (entryRsu != null)

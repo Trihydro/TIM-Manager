@@ -17,7 +17,16 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.1.0.jar'
+    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar'
+
+- task: Maven@3
+  inputs:
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.1.0.jar'
 
 - task: Maven@3
   inputs:

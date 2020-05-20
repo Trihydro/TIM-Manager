@@ -90,7 +90,7 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
          * bufferStart, mp call algo.shortestPath.stream(bufferStart,mp) yield nodeId
          * match(other:Milepost) where id(other) = nodeId return other
          */
-        boolean increasing = direction.toUpperCase() == "I";
+        boolean increasing = direction.equalsIgnoreCase("I");
         String dirQuery = "[";
         if (!direction.equalsIgnoreCase("B")) {
             dirQuery += "'" + direction.toUpperCase() + "', ";

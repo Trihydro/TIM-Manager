@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -141,10 +142,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getString("CLIENT_ID");
@@ -198,10 +199,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getString("CLIENT_ID");
@@ -248,10 +249,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getString("SAT_RECORD_ID");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("TYPE");
         verify(mockRs).getString("CLIENT_ID");
         verify(mockRs).getString("ROUTE");
@@ -349,10 +350,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockStatement).close();
@@ -522,10 +523,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockPreparedStatement).close();
@@ -575,10 +576,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockRs).getLong("TIM_TYPE_ID");
@@ -621,10 +622,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getString("SAT_RECORD_ID");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("CLIENT_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -716,10 +717,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockRs).getString("TIM_END");
         verify(mockRs).getString("TIM_START");
-        verify(mockRs).getDouble("START_LATITUDE");
-        verify(mockRs).getDouble("START_LONGITUDE");
-        verify(mockRs).getDouble("END_LATITUDE");
-        verify(mockRs).getDouble("END_LONGITUDE");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getInt("PK");
         verify(mockStatement).close();
@@ -757,8 +758,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void InsertActiveTim_SUCCESS() throws SQLException {
         // Arrange
         ActiveTim activeTim = new ActiveTim();
-        activeTim.setStartPoint(new Coordinate(-1, -2));
-        activeTim.setEndPoint(new Coordinate(-3, -4));
+        activeTim.setStartPoint(new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2)));
+        activeTim.setEndPoint(new Coordinate(BigDecimal.valueOf(-3), BigDecimal.valueOf(-4)));
         String startTime = Instant.now().toString();
         String endTime = Instant.now().plusSeconds(60).toString();
         activeTim.setStartDateTime(startTime);
@@ -780,10 +781,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7, activeTim.getClientId());// CLIENT_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 8, activeTim.getSatRecordId());// SAT_RECORD_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 9, activeTim.getPk());// PK
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 10, activeTim.getStartPoint().getLatitude());// START_LATITUDE
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 11, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 12, activeTim.getEndPoint().getLatitude());// END_LATITUDE
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 13, activeTim.getEndPoint().getLongitude());// END_LONGITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 10, activeTim.getStartPoint().getLatitude());// START_LATITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 11, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 12, activeTim.getEndPoint().getLatitude());// END_LATITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 13, activeTim.getEndPoint().getLongitude());// END_LONGITUDE
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
 

@@ -33,8 +33,8 @@ public class RsuControllerTest extends TestBase<RsuController> {
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getInt("RSU_ID");
         verify(mockRs).getString("IPV4_ADDRESS");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getBigDecimal("LATITUDE");
+        verify(mockRs).getBigDecimal("LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getDouble("MILEPOST");
         verify(mockStatement).close();
@@ -70,8 +70,8 @@ public class RsuControllerTest extends TestBase<RsuController> {
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getString("IPV4_ADDRESS");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getBigDecimal("LATITUDE");
+        verify(mockRs).getBigDecimal("LONGITUDE");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -109,8 +109,8 @@ public class RsuControllerTest extends TestBase<RsuController> {
         assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getString("IPV4_ADDRESS");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getBigDecimal("LATITUDE");
+        verify(mockRs).getBigDecimal("LONGITUDE");
         verify(mockRs).getInt("RSU_INDEX");
         verify(mockRs).getString("UPDATE_USERNAME");
         verify(mockRs).getString("UPDATE_PASSWORD");
@@ -152,8 +152,8 @@ public class RsuControllerTest extends TestBase<RsuController> {
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getInt("RSU_ID");
         verify(mockRs).getString("IPV4_ADDRESS");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getBigDecimal("LATITUDE");
+        verify(mockRs).getBigDecimal("LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getDouble("MILEPOST");
         verify(mockStatement).close();

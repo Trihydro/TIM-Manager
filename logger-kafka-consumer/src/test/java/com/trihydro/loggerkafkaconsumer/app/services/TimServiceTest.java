@@ -109,8 +109,8 @@ public class TimServiceTest extends TestBase<TimService> {
         rsu = new WydotRsu();
         rsu.setRsuId(-1);
         rsu.setRsuIndex(99);
-        rsu.setLatitude(-1d);
-        rsu.setLongitude(-2d);
+        rsu.setLatitude(BigDecimal.valueOf(-1));
+        rsu.setLongitude(BigDecimal.valueOf(-2));
         rsu.setMilepost(99d);
         rsu.setRsuTarget("rsuTarget");
         rsus.add(rsu);
@@ -549,8 +549,8 @@ public class TimServiceTest extends TestBase<TimService> {
         ath.setActiveTimHoldingId(-1l);
         ath.setClientId("clientId");
         ath.setDirection("direction");
-        ath.setStartPoint(new Coordinate(-1, -2));
-        ath.setEndPoint(new Coordinate(-3, -4));
+        ath.setStartPoint(new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2)));
+        ath.setEndPoint(new Coordinate(BigDecimal.valueOf(-3), BigDecimal.valueOf(-4)));
         return ath;
     }
 

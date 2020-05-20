@@ -32,8 +32,8 @@ public class RsuService extends BaseService {
 				WydotRsu rsu = new WydotRsu();
 				rsu.setRsuId(rs.getInt("RSU_ID"));
 				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
-				rsu.setLatitude(rs.getDouble("LATITUDE"));
-				rsu.setLongitude(rs.getDouble("LONGITUDE"));
+				rsu.setLatitude(rs.getBigDecimal("LATITUDE"));
+				rsu.setLongitude(rs.getBigDecimal("LONGITUDE"));
 				rsu.setRoute(rs.getString("ROUTE"));
 				rsu.setMilepost(rs.getDouble("MILEPOST"));
 				rsus.add(rsu);

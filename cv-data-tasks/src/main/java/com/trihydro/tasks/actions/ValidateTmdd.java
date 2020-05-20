@@ -342,7 +342,7 @@ public class ValidateTmdd implements Runnable {
         double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000.0;
 
         GlobalCoordinates tmdd = new GlobalCoordinates(tmddLat, tmddLon);
-        GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude(), timPoint.getLongitude());
+        GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude().doubleValue(), timPoint.getLongitude().doubleValue());
 
         GeodeticCalculator geoCalc = new GeodeticCalculator();
         GeodeticCurve curve = geoCalc.calculateGeodeticCurve(Ellipsoid.WGS84, tmdd, tim);
@@ -368,7 +368,7 @@ public class ValidateTmdd implements Runnable {
             return null;
         }
 
-        return formatPoint(point.getLatitude(), point.getLongitude());
+        return formatPoint(point.getLatitude().doubleValue(), point.getLongitude().doubleValue());
     }
 
     private String formatPoint(double lat, double lon) {

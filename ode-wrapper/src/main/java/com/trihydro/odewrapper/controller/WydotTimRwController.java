@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -179,8 +180,8 @@ public class WydotTimRwController extends WydotTimBaseController {
         double bufferBefore = 0.000;
 
         Ellipsoid reference = Ellipsoid.WGS84;
-        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getStartPoint().getLatitude(),
-                wydotTim.getStartPoint().getLongitude());
+        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getStartPoint().getLatitude().doubleValue(),
+                wydotTim.getStartPoint().getLongitude().doubleValue());
         GlobalCoordinates nextCoordinates = null;
         double bearing = getIBearingForRoute(wydotTim.getRoute());
         GeodeticCalculator calculator = new GeodeticCalculator();
@@ -203,8 +204,10 @@ public class WydotTimRwController extends WydotTimBaseController {
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
             }
-            wydotTimBuffer.setStartPoint(new Coordinate(nextCoordinates.getLatitude(), nextCoordinates.getLongitude()));
-            wydotTimBuffer.setEndPoint(new Coordinate(startCoordinates.getLatitude(), startCoordinates.getLongitude()));
+            wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),
+                    BigDecimal.valueOf(nextCoordinates.getLongitude())));
+            wydotTimBuffer.setEndPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
+                    BigDecimal.valueOf(startCoordinates.getLongitude())));
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
             wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 
@@ -230,8 +233,8 @@ public class WydotTimRwController extends WydotTimBaseController {
         double bufferBefore = 0;
 
         Ellipsoid reference = Ellipsoid.WGS84;
-        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getEndPoint().getLatitude(),
-                wydotTim.getEndPoint().getLongitude());
+        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getEndPoint().getLatitude().doubleValue(),
+                wydotTim.getEndPoint().getLongitude().doubleValue());
         GlobalCoordinates nextCoordinates = null;
         double bearing = getDBearingForRoute(wydotTim.getRoute());
         GeodeticCalculator calculator = new GeodeticCalculator();
@@ -253,9 +256,10 @@ public class WydotTimRwController extends WydotTimBaseController {
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
             }
-            wydotTimBuffer
-                    .setStartPoint(new Coordinate(startCoordinates.getLatitude(), startCoordinates.getLongitude()));
-            wydotTimBuffer.setEndPoint(new Coordinate(nextCoordinates.getLatitude(), nextCoordinates.getLongitude()));
+            wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
+                    BigDecimal.valueOf(startCoordinates.getLongitude())));
+            wydotTimBuffer.setEndPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),
+                    BigDecimal.valueOf(nextCoordinates.getLongitude())));
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
             wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 

@@ -52,8 +52,8 @@ public class RsuService extends CvDataServiceLibrary {
 
 	public List<WydotRsu> getRsusByLatLong(String direction, Coordinate startPoint, Coordinate endPoint, String route) {
 		List<WydotRsu> rsus = new ArrayList<>();
-		Comparator<WydotRsu> compLat = (l1, l2) -> Double.compare(l1.getLatitude(), l2.getLatitude());
-		Comparator<WydotRsu> compLong = (l1, l2) -> Double.compare(l1.getLongitude(), l2.getLongitude());
+		Comparator<WydotRsu> compLat = (l1, l2) -> l1.getLatitude().compareTo(l2.getLatitude());
+		Comparator<WydotRsu> compLong = (l1, l2) -> l1.getLongitude().compareTo(l2.getLongitude());
 		WydotRsu entryRsu = null;
 		Integer numericRoute = Integer.parseInt(route.replaceAll("\\D+", ""));
 		// WydotRsu rsuHigher;
@@ -78,10 +78,10 @@ public class RsuService extends CvDataServiceLibrary {
 			// I 80 and parts of I 25
 			List<WydotRsu> rsusLower = new ArrayList<>();
 			if (numericRoute % 2 == 0) {
-				rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < startPoint.getLongitude())
+				rsusLower = mainRsus.stream().filter(x -> x.getLongitude().compareTo(startPoint.getLongitude()) < 0)
 						.collect(Collectors.toList());
 			} else {
-				rsusLower = mainRsus.stream().filter(x -> x.getLatitude() < startPoint.getLatitude())
+				rsusLower = mainRsus.stream().filter(x -> x.getLatitude().compareTo(startPoint.getLatitude()) < 0)
 						.collect(Collectors.toList());
 			}
 
@@ -89,13 +89,13 @@ public class RsuService extends CvDataServiceLibrary {
 				// if no rsus found farther west/south than startPoint
 				// find milepost furthest west/south than longitude of TIM location
 				if (numericRoute % 2 == 0) {
-					rsusLower = mainRsus.stream().filter(x -> x.getLongitude() < endPoint.getLongitude())
+					rsusLower = mainRsus.stream().filter(x -> x.getLongitude().compareTo(endPoint.getLongitude()) < 0)
 							.collect(Collectors.toList());
 					if (rsusLower.size() > 0) {
 						entryRsu = rsusLower.stream().min(compLong).get();
 					}
 				} else {
-					rsusLower = mainRsus.stream().filter(x -> x.getLatitude() < endPoint.getLatitude())
+					rsusLower = mainRsus.stream().filter(x -> x.getLatitude().compareTo(endPoint.getLatitude()) < 0)
 							.collect(Collectors.toList());
 					if (rsusLower.size() > 0) {
 						entryRsu = rsusLower.stream().min(compLat).get();
@@ -115,23 +115,24 @@ public class RsuService extends CvDataServiceLibrary {
 			List<WydotRsu> rsusHigher = new ArrayList<>();
 			// get rsus at mileposts greater than your milepost
 			if (numericRoute % 2 == 0) {
-				rsusHigher = mainRsus.stream().filter(x -> x.getLongitude() > endPoint.getLongitude())
+				rsusHigher = mainRsus.stream().filter(x -> x.getLongitude().compareTo(endPoint.getLongitude()) > 0)
 						.collect(Collectors.toList());
 			} else {
-				rsusHigher = mainRsus.stream().filter(x -> x.getLatitude() > endPoint.getLatitude())
+				rsusHigher = mainRsus.stream().filter(x -> x.getLatitude().compareTo(endPoint.getLatitude()) > 0)
 						.collect(Collectors.toList());
 			}
 
 			if (rsusHigher.size() == 0) {
 
 				if (numericRoute % 2 == 0) {
-					rsusHigher = mainRsus.stream().filter(x -> x.getLongitude() > startPoint.getLongitude())
+					rsusHigher = mainRsus.stream()
+							.filter(x -> x.getLongitude().compareTo(startPoint.getLongitude()) > 0)
 							.collect(Collectors.toList());
 					if (rsusHigher.size() > 0) {
 						entryRsu = rsusHigher.stream().max(compLong).get();
 					}
 				} else {
-					rsusHigher = mainRsus.stream().filter(x -> x.getLatitude() > startPoint.getLatitude())
+					rsusHigher = mainRsus.stream().filter(x -> x.getLatitude().compareTo(startPoint.getLatitude()) > 0)
 							.collect(Collectors.toList());
 					if (rsusHigher.size() > 0) {
 						entryRsu = rsusHigher.stream().max(compLat).get();
@@ -153,8 +154,10 @@ public class RsuService extends CvDataServiceLibrary {
 
 		// Check distance to entry RSU
 		if (entryRsu != null) {
-			GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude(), startPoint.getLongitude());
-			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude(), entryRsu.getLongitude());
+			GlobalCoordinates start = new GlobalCoordinates(startPoint.getLatitude().doubleValue(),
+					startPoint.getLongitude().doubleValue());
+			GlobalCoordinates end = new GlobalCoordinates(entryRsu.getLatitude().doubleValue(),
+					entryRsu.getLongitude().doubleValue());
 			GeodeticCalculator geoCalc = new GeodeticCalculator();
 			GeodeticCurve curve = geoCalc.calculateGeodeticCurve(reference, start, end);
 			double miles = 0.000621371 * curve.getEllipsoidalDistance();
@@ -166,13 +169,15 @@ public class RsuService extends CvDataServiceLibrary {
 		}
 
 		if (numericRoute % 2 == 0) {
-			rsus = mainRsus.stream().filter(
-					x -> x.getLongitude() >= startPoint.getLongitude() && x.getLongitude() <= endPoint.getLongitude())
-					.collect(Collectors.toList());
+			// rsus = mainRsus.stream().filter(
+			// x -> x.getLongitude() >= startPoint.getLongitude() && x.getLongitude() <=
+			// endPoint.getLongitude())
+			// .collect(Collectors.toList());
+			rsus = mainRsus.stream().filter(x -> x.getLongitude().compareTo(startPoint.getLongitude()) >= 0
+					&& x.getLongitude().compareTo(endPoint.getLongitude()) <= 0).collect(Collectors.toList());
 		} else {
-			rsus = mainRsus.stream().filter(
-					x -> x.getLatitude() >= startPoint.getLatitude() && x.getLatitude() <= endPoint.getLatitude())
-					.collect(Collectors.toList());
+			rsus = mainRsus.stream().filter(x -> x.getLatitude().compareTo(startPoint.getLatitude()) >= 0
+					&& x.getLatitude().compareTo(endPoint.getLatitude()) <= 0).collect(Collectors.toList());
 		}
 
 		if (entryRsu != null)

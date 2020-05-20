@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -211,8 +212,8 @@ public class TimRefreshControllerTest {
         TimUpdateModel tum = new TimUpdateModel();
         tum.setRoute("I 80");
         tum.setDirection("i");
-        tum.setStartPoint(new Coordinate(-1, -2));
-        tum.setEndPoint(new Coordinate(-3, -4));
+        tum.setStartPoint(new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2)));
+        tum.setEndPoint(new Coordinate(BigDecimal.valueOf(-3), BigDecimal.valueOf(-4)));
         tum.setClosedPath(false);
         return tum;
     }

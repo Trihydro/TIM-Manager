@@ -1,6 +1,7 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +22,7 @@ import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,12 +47,12 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
     @Before
     public void setupSubTest() {
         uut.InjectDependencies(mockMilepostService);
+        
+        startPoint = new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2));
+        endPoint = new Coordinate(BigDecimal.valueOf(-3), BigDecimal.valueOf(-4));
     }
 
     private void setupWydotTim() {
-        startPoint = new Coordinate(-1, -2);
-        endPoint = new Coordinate(-3, -4);
-
         wydotTim = new WydotTim();
         wydotTim.setDirection("direction");
         wydotTim.setRoute("route");
@@ -196,8 +199,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         setupWydotTim();
         Collection<com.trihydro.cvdatacontroller.model.Milepost> resp = new ArrayList<>();
         resp.add(new com.trihydro.cvdatacontroller.model.Milepost());
-        doReturn(resp).when(mockMilepostService).getPathWithBuffer(anyString(), anyDouble(), anyDouble(), anyDouble(),
-                anyDouble(), anyString());
+        doReturn(resp).when(mockMilepostService).getPathWithBuffer(anyString(), any(), any(), any(),
+                any(), anyString());
 
         // Act
         ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> data = uut
@@ -213,12 +216,12 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         // Arrange
         Collection<com.trihydro.cvdatacontroller.model.Milepost> resp = new ArrayList<>();
         resp.add(new com.trihydro.cvdatacontroller.model.Milepost());
-        doReturn(resp).when(mockMilepostService).getPathWithSpecifiedBuffer(anyString(), anyDouble(), anyDouble(),
+        doReturn(resp).when(mockMilepostService).getPathWithSpecifiedBuffer(anyString(), any(), any(),
                 anyString(), anyDouble());
         MilepostBuffer mpb = new MilepostBuffer();
         mpb.setCommonName("route");
         mpb.setDirection("direction");
-        mpb.setPoint(new Coordinate(-3, -4));
+        mpb.setPoint(endPoint);
         mpb.setBufferMiles(1d);
 
         // Act

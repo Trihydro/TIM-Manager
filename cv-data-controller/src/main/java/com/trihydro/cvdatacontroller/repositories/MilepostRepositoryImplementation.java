@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.repositories;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +33,8 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
     }
 
     @Override
-    public Collection<Milepost> getPathWithBuffer(String commonName, Double startLat, Double startLong, Double endLat,
-            Double endLong, String direction) {
+    public Collection<Milepost> getPathWithBuffer(String commonName, BigDecimal startLat, BigDecimal startLong, BigDecimal endLat,
+    BigDecimal endLong, String direction) {
         String dirQuery = "[";
         if (direction.toUpperCase() != "B") {
             dirQuery += "'" + direction.toUpperCase() + "', ";
@@ -45,10 +46,11 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         query += " with startMp, distance(point({longitude:$startLong,latitude:$startLat}), point({longitude:startMp.Longitude,latitude:startMp.Latitude})) as d1 ";
         query += " with startMp, d1 ORDER BY d1 ASC LIMIT 1";
         query += " optional match(startAdjust:Milepost)-->(startMp)";
+        query+= " where startAdjust.Direction in "+dirQuery;
         if (direction.toUpperCase() == "I") {
-            query += " where startAdjust.Milepost < startMp.Milepost";
+            query += " and startAdjust.Milepost < startMp.Milepost";
         } else {
-            query += " where startAdjust.Milepost > startMp.Milepost";
+            query += " and startAdjust.Milepost > startMp.Milepost";
         }
         query += " with coalesce(startAdjust, startMp) as newStart";// coalesce gets first non-null in list
         query += " match(endMp:Milepost{CommonName: $commonName})";
@@ -71,7 +73,7 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
     }
 
     @Override
-    public Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, Double lat, Double lon, String direction,
+    public Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, BigDecimal lat, BigDecimal lon, String direction,
             Double bufferInMiles) {
         /**
          * This function creates a statement such as the following

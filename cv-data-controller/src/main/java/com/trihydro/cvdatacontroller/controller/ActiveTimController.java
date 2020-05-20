@@ -148,7 +148,7 @@ public class ActiveTimController extends BaseController {
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
 				String dfContent = rs.getString("DF_CONTENT");
-				if (dfContent == null || dfContent == "") {
+				if (dfContent == null || dfContent.isEmpty()) {
 					dfContent = "advisory";
 				}
 				activeTim.setDfContent(dfContent);

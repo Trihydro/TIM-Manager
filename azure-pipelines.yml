@@ -18,7 +18,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar'
+    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar -DgeneratePom=true'
 
 - task: Maven@3
   inputs:
@@ -28,7 +28,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.1.0.jar'
+    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.1.0.jar -DgeneratePom=true'
 
 - task: Maven@3
   inputs:
@@ -38,7 +38,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.1.0.jar'
+    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.1.0.jar -DgeneratePom=true'
 
 - task: Maven@3
   inputs:
@@ -48,7 +48,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar'
+    goals: 'org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar -DgeneratePom=true'
 
 - task: Maven@3
   inputs:
@@ -58,7 +58,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ojdbc8.jar -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion="12.2.0.1.0" -Dpackaging=jar'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ojdbc8.jar -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion="12.2.0.1.0" -Dpackaging=jar -DgeneratePom=true'
 
 - task: Maven@3
   inputs:
@@ -68,7 +68,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ucp.jar -DgroupId=com.oracle -DartifactId=ucp -Dversion="12.2.0.1.0" -Dpackaging=jar'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ucp.jar -DgroupId=com.oracle -DartifactId=ucp -Dversion="12.2.0.1.0" -Dpackaging=jar -DgeneratePom=true'
 
 - task: Maven@3
   inputs:

@@ -1,6 +1,7 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 
 import com.trihydro.library.model.WydotRsu;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
@@ -29,8 +31,8 @@ public class RsuServiceTest extends TestBase<RsuService> {
                 "select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid order by milepost asc");
         verify(mockRs).getInt("RSU_ID");
         verify(mockRs).getString("IPV4_ADDRESS");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getBigDecimal("LATITUDE");
+        verify(mockRs).getBigDecimal("LONGITUDE");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getDouble("MILEPOST");
         verify(mockStatement).close();

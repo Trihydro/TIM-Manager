@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.controller;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -96,15 +97,15 @@ public class ActiveTimController extends BaseController {
 
 				Coordinate startPoint = null;
 				Coordinate endPoint = null;
-				double startLat = rs.getDouble("START_LATITUDE");
-				double startLon = rs.getDouble("START_LONGITUDE");
+				BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+				BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 				if (!rs.wasNull()) {
 					startPoint = new Coordinate(startLat, startLon);
 				}
 				activeTim.setStartPoint(startPoint);
 
-				double endLat = rs.getDouble("END_LATITUDE");
-				double endLon = rs.getDouble("END_LONGITUDE");
+				BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+				BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 				if (!rs.wasNull()) {
 					endPoint = new Coordinate(endLat, endLon);
 				}
@@ -147,7 +148,7 @@ public class ActiveTimController extends BaseController {
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
 				String dfContent = rs.getString("DF_CONTENT");
-				if (dfContent == null || dfContent == "") {
+				if (dfContent == null || dfContent.isEmpty()) {
 					dfContent = "advisory";
 				}
 				activeTim.setDfContent(dfContent);
@@ -405,7 +406,8 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(indices);
 	}
 
-	@RequestMapping(value = {"/client-id-direction/{clientId}/{timTypeId}", "/client-id-direction/{clientId}/{timTypeId}/{direction}"}, method = RequestMethod.GET)
+	@RequestMapping(value = { "/client-id-direction/{clientId}/{timTypeId}",
+			"/client-id-direction/{clientId}/{timTypeId}/{direction}" }, method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
 			@PathVariable Long timTypeId, @PathVariable(required = false) String direction) {
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -799,16 +801,16 @@ public class ActiveTimController extends BaseController {
 					Coordinate endPoint = null;
 
 					// Set startPoint
-					double startLat = rs.getDouble("START_LATITUDE");
-					double startLon = rs.getDouble("START_LONGITUDE");
+					BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+					BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 					if (!rs.wasNull()) {
 						startPoint = new Coordinate(startLat, startLon);
 					}
 					activeTim.setStartPoint(startPoint);
 
 					// Set endPoint
-					double endLat = rs.getDouble("END_LATITUDE");
-					double endLon = rs.getDouble("END_LONGITUDE");
+					BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+					BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 					if (!rs.wasNull()) {
 						endPoint = new Coordinate(endLat, endLon);
 					}
@@ -903,15 +905,15 @@ public class ActiveTimController extends BaseController {
 				activeTim.setRsuIndex(rs.getInt("RSU_INDEX"));
 				Coordinate startPoint = null;
 				Coordinate endPoint = null;
-				double startLat = rs.getDouble("START_LATITUDE");
-				double startLon = rs.getDouble("START_LONGITUDE");
+				BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+				BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 				if (!rs.wasNull()) {
 					startPoint = new Coordinate(startLat, startLon);
 				}
 				activeTim.setStartPoint(startPoint);
 
-				double endLat = rs.getDouble("END_LATITUDE");
-				double endLon = rs.getDouble("END_LONGITUDE");
+				BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+				BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 				if (!rs.wasNull()) {
 					endPoint = new Coordinate(endLat, endLon);
 				}
@@ -1034,25 +1036,25 @@ public class ActiveTimController extends BaseController {
 				else if (col.equals("PK"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
 				else if (col.equals("START_LATITUDE")) {
-					Double start_lat = null;
+					BigDecimal start_lat = null;
 					if (activeTim.getStartPoint() != null)
 						start_lat = activeTim.getStartPoint().getLatitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lat);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, start_lat);
 				} else if (col.equals("START_LONGITUDE")) {
-					Double start_lon = null;
+					BigDecimal start_lon = null;
 					if (activeTim.getStartPoint() != null)
 						start_lon = activeTim.getStartPoint().getLongitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lon);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, start_lon);
 				} else if (col.equals("END_LATITUDE")) {
-					Double end_lat = null;
+					BigDecimal end_lat = null;
 					if (activeTim.getEndPoint() != null)
 						end_lat = activeTim.getEndPoint().getLatitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lat);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lat);
 				} else if (col.equals("END_LONGITUDE")) {
-					Double end_lon = null;
+					BigDecimal end_lon = null;
 					if (activeTim.getEndPoint() != null)
 						end_lon = activeTim.getEndPoint().getLongitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lon);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lon);
 				}
 
 				fieldNum++;
@@ -1102,15 +1104,15 @@ public class ActiveTimController extends BaseController {
 
 			Coordinate startPoint = null;
 			Coordinate endPoint = null;
-			double startLat = rs.getDouble("START_LATITUDE");
-			double startLon = rs.getDouble("START_LONGITUDE");
+			BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+			BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 			if (!rs.wasNull()) {
 				startPoint = new Coordinate(startLat, startLon);
 			}
 			activeTim.setStartPoint(startPoint);
 
-			double endLat = rs.getDouble("END_LATITUDE");
-			double endLon = rs.getDouble("END_LONGITUDE");
+			BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+			BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 			if (!rs.wasNull()) {
 				endPoint = new Coordinate(endLat, endLon);
 			}

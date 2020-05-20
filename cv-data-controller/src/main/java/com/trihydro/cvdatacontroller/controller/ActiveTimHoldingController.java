@@ -71,22 +71,22 @@ public class ActiveTimHoldingController extends BaseController {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getSatRecordId());
                 } else if (col.equals("START_LATITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getStartPoint().getLatitude());
                     }
                 } else if (col.equals("START_LONGITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getStartPoint().getLongitude());
                     }
                 } else if (col.equals("END_LATITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getEndPoint().getLatitude());
                     }
                 } else if (col.equals("END_LONGITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getEndPoint().getLongitude());
                     }
                 } else if (col.equals("RSU_INDEX")) {
@@ -182,9 +182,9 @@ public class ActiveTimHoldingController extends BaseController {
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
                 activeTimHolding
-                        .setStartPoint(new Coordinate(rs.getDouble("START_LATITUDE"), rs.getDouble("START_LONGITUDE")));
+                        .setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
                 activeTimHolding
-                        .setEndPoint(new Coordinate(rs.getDouble("END_LATITUDE"), rs.getDouble("END_LONGITUDE")));
+                        .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
                 activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
                 int rsu_index = rs.getInt("RSU_INDEX");
                 if (!rs.wasNull()) {

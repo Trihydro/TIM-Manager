@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.repositories;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,28 +33,29 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
     }
 
     @Override
-    public Collection<Milepost> getPathWithBuffer(String commonName, Double startLat, Double startLong, Double endLat,
-            Double endLong, String direction) {
+    public Collection<Milepost> getPathWithBuffer(String commonName, BigDecimal startLat, BigDecimal startLong,
+            BigDecimal endLat, BigDecimal endLong, String direction) {
         String dirQuery = "[";
-        if (direction.toUpperCase() != "B") {
+        if (!direction.equalsIgnoreCase("B")) {
             dirQuery += "'" + direction.toUpperCase() + "', ";
         }
         dirQuery += "'B']";
 
         String query = "match(startMp:Milepost{CommonName: $commonName})";
         query += " where startMp.Direction in " + dirQuery;
-        query += " with startMp, distance(point({longitude:$startLong,latitude:$startLat}), point({longitude:startMp.Longitude,latitude:startMp.Latitude})) as d1 ";
+        query += " with startMp, distance(point({longitude:apoc.number.parseFloat($startLong),latitude:apoc.number.parseFloat($startLat)}), point({longitude:startMp.Longitude,latitude:startMp.Latitude})) as d1 ";
         query += " with startMp, d1 ORDER BY d1 ASC LIMIT 1";
         query += " optional match(startAdjust:Milepost)-->(startMp)";
-        if (direction.toUpperCase() == "I") {
-            query += " where startAdjust.Milepost < startMp.Milepost";
+        query += " where startAdjust.Direction in " + dirQuery;
+        if (direction.equalsIgnoreCase("I")) {
+            query += " and startAdjust.Milepost < startMp.Milepost";
         } else {
-            query += " where startAdjust.Milepost > startMp.Milepost";
+            query += " and startAdjust.Milepost > startMp.Milepost";
         }
         query += " with coalesce(startAdjust, startMp) as newStart";// coalesce gets first non-null in list
         query += " match(endMp:Milepost{CommonName: $commonName})";
         query += " where endMp.Direction in " + dirQuery;
-        query += " with newStart, endMp, distance(point({longitude:$endLong,latitude:$endLat}), point({longitude:endMp.Longitude,latitude:endMp.Latitude})) as d2 ";
+        query += " with newStart, endMp, distance(point({longitude:apoc.number.parseFloat($endLong),latitude:apoc.number.parseFloat($endLat)}), point({longitude:endMp.Longitude,latitude:endMp.Latitude})) as d2 ";
         query += " with newStart, endMp, d2 ORDER BY d2 ASC LIMIT 1";
         query += " with newStart, endMp ";
         query += " call algo.shortestPath.stream(newStart,endMp) yield nodeId";
@@ -62,17 +64,17 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
 
         Map<String, Object> map = new HashMap<>();
         map.put("commonName", commonName);
-        map.put("startLat", startLat);
-        map.put("startLong", startLong);
-        map.put("endLat", endLat);
-        map.put("endLong", endLong);
+        map.put("startLat", startLat.toPlainString());
+        map.put("startLong", startLong.toPlainString());
+        map.put("endLat", endLat.toPlainString());
+        map.put("endLong", endLong.toPlainString());
         Iterable<Milepost> mp = session.query(Milepost.class, query, map);
         return StreamSupport.stream(mp.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
-    public Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, Double lat, Double lon, String direction,
-            Double bufferInMiles) {
+    public Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, BigDecimal lat, BigDecimal lon,
+            String direction, Double bufferInMiles) {
         /**
          * This function creates a statement such as the following
          * 
@@ -88,9 +90,9 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
          * bufferStart, mp call algo.shortestPath.stream(bufferStart,mp) yield nodeId
          * match(other:Milepost) where id(other) = nodeId return other
          */
-        boolean increasing = direction.toUpperCase() == "I";
+        boolean increasing = direction.equalsIgnoreCase("I");
         String dirQuery = "[";
-        if (direction.toUpperCase() != "B") {
+        if (!direction.equalsIgnoreCase("B")) {
             dirQuery += "'" + direction.toUpperCase() + "', ";
         }
         dirQuery += "'B']";
@@ -105,7 +107,7 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
 
         query += " match(mp:Milepost{CommonName: $commonName})";
         query += " where mp.Direction in " + dirQuery;
-        query += " with extremeMp, mp, distance(point({longitude:$lon,latitude:$lat}), point({longitude:mp.Longitude,latitude:mp.Latitude})) as d1 ";
+        query += " with extremeMp, mp, distance(point({longitude:apoc.number.parseFloat($lon),latitude:apoc.number.parseFloat($lat)}), point({longitude:mp.Longitude,latitude:mp.Latitude})) as d1 ";
         query += " with extremeMp, mp, d1 ORDER BY d1 ASC LIMIT 1";// here we have the closest point, now go back
                                                                    // bufferInMiles
 
@@ -139,8 +141,8 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
 
         Map<String, Object> map = new HashMap<>();
         map.put("commonName", commonName);
-        map.put("lat", lat);
-        map.put("lon", lon);
+        map.put("lat", lat.toPlainString());
+        map.put("lon", lon.toPlainString());
         map.put("bufferMiles", bufferInMiles);
         Iterable<Milepost> mp = session.query(Milepost.class, query, map);
         return StreamSupport.stream(mp.spliterator(), false).collect(Collectors.toList());

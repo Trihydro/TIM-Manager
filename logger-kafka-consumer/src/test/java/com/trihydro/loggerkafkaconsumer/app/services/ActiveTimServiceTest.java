@@ -5,12 +5,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,8 +25,10 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimOracleTables;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -35,17 +42,22 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
+    private Coordinate startPoint;
+    private Coordinate endPoint;
+
     @Before
     public void setupSubTest() {
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        startPoint = new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2));
+        endPoint = new Coordinate(BigDecimal.valueOf(-3), BigDecimal.valueOf(-4));
     }
 
     @Test
     public void insertActiveTim_SUCCESS() throws SQLException {
         // Arrange
         ActiveTim activeTim = new ActiveTim();
-        activeTim.setStartPoint(new Coordinate(-1, -2));
-        activeTim.setEndPoint(new Coordinate(-3, -4));
+        activeTim.setStartPoint(startPoint);
+        activeTim.setEndPoint(endPoint);
         activeTim.setStartDateTime("2020-02-03T16:00:00.000Z");
         activeTim.setEndDateTime("2020-02-03T16:00:00.000Z");
         doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
@@ -67,10 +79,10 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7, activeTim.getClientId());// CLIENT_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 8, activeTim.getSatRecordId());// SAT_RECORD_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 9, activeTim.getPk());// PK
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 10, activeTim.getStartPoint().getLatitude());// START_LATITUDE
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 11, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 12, activeTim.getEndPoint().getLatitude());// END_LATITUDE
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 13, activeTim.getEndPoint().getLongitude());// END_LONGITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 10, activeTim.getStartPoint().getLatitude());// START_LATITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 11, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 12, activeTim.getEndPoint().getLatitude());// END_LATITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 13, activeTim.getEndPoint().getLongitude());// END_LONGITUDE
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 15, null); // PROJECT_KEY
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
@@ -98,10 +110,8 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         // Arrange
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
         ActiveTim activeTim = new ActiveTim();
-        Coordinate start = new Coordinate(-1, -2);
-        Coordinate end = new Coordinate(-3, -4);
-        activeTim.setStartPoint(start);
-        activeTim.setEndPoint(end);
+        activeTim.setStartPoint(startPoint);
+        activeTim.setEndPoint(endPoint);
         activeTim.setActiveTimId(-1l);
         activeTim.setStartDateTime("2020-02-03T16:00:00.000Z");
         activeTim.setEndDateTime("2020-02-03T16:00:00.000Z");
@@ -112,10 +122,10 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         // Assert
         assertTrue("Failed to update activeTim", data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 2, activeTim.getStartPoint().getLatitude());
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 3, activeTim.getStartPoint().getLongitude());
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 4, activeTim.getEndPoint().getLatitude());
-        verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 5, activeTim.getEndPoint().getLongitude());
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 2, activeTim.getStartPoint().getLatitude());
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, activeTim.getStartPoint().getLongitude());
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, activeTim.getEndPoint().getLatitude());
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 5, activeTim.getEndPoint().getLongitude());
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 6, java.sql.Timestamp
                 .valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 7, java.sql.Timestamp

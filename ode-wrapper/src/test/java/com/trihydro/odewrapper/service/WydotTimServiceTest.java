@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,11 +86,11 @@ public class WydotTimServiceTest {
             aTim.setSatRecordId("C27CBB9F");
             aTim2.setSatRecordId("86E03786");
         } else {
-            aTim.setStartPoint(new Coordinate(1, 2));
-            aTim.setEndPoint(new Coordinate(3, 4));
+            aTim.setStartPoint(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2)));
+            aTim.setEndPoint(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(4)));
             aTim.setTimId(-10l);
-            aTim2.setStartPoint(new Coordinate(5, 6));
-            aTim2.setEndPoint(new Coordinate(7, 8));
+            aTim2.setStartPoint(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(6)));
+            aTim2.setEndPoint(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(8)));
             aTim2.setTimId(-20l);
         }
         activeTims.add(aTim);

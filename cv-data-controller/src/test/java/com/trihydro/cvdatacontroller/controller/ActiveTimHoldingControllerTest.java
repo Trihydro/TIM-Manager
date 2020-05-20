@@ -1,12 +1,13 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,20 +34,26 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         @Mock
         private SQLNullHandler mockSqlNullHandler;
 
+        private Coordinate startCoord;
+        private Coordinate endCoord;
+
         @Before
         public void setupSubTest() throws SQLException {
                 uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
                 doReturn("insert query statement").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
                 doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("insert query statement",
                                 new String[] { "active_tim_holding_id" });
+
+                startCoord = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+                endCoord = new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(6));
         }
 
         @Test
         public void InsertActiveTimHolding_SUCCESS() throws SQLException {
                 // Arrange
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
-                activeTimHolding.setStartPoint(new Coordinate(1, 2));
-                activeTimHolding.setEndPoint(new Coordinate(5, 6));
+                activeTimHolding.setStartPoint(startCoord);
+                activeTimHolding.setEndPoint(endCoord);
 
                 // Act
                 ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
@@ -57,13 +64,13 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, activeTimHolding.getSatRecordId());// SAT_RECORD_ID
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 6,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 6,
                                 activeTimHolding.getStartPoint().getLatitude());// START_LATITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 7,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 7,
                                 activeTimHolding.getStartPoint().getLongitude());// START_LONGITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 8,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 8,
                                 activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
                 verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
@@ -78,8 +85,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 activeTimHolding.setSatRecordId("satRecordId");
                 activeTimHolding.setClientId("clientId");
                 activeTimHolding.setDirection("direction");
-                activeTimHolding.setStartPoint(new Coordinate(1, 2));
-                activeTimHolding.setEndPoint(new Coordinate(5, 6));
+                activeTimHolding.setStartPoint(startCoord);
+                activeTimHolding.setEndPoint(endCoord);
                 doReturn(null).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim holding");
                 doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
 
@@ -98,13 +105,13 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, activeTimHolding.getSatRecordId());// SAT_RECORD_ID
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 6,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 6,
                                 activeTimHolding.getStartPoint().getLatitude());// START_LATITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 7,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 7,
                                 activeTimHolding.getStartPoint().getLongitude());// START_LONGITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 8,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 8,
                                 activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
                 verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
@@ -121,8 +128,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 activeTimHolding.setRsuTargetId("10.10.10.1");
                 activeTimHolding.setClientId("clientId");
                 activeTimHolding.setDirection("direction");
-                activeTimHolding.setStartPoint(new Coordinate(1, 2));
-                activeTimHolding.setEndPoint(new Coordinate(5, 6));
+                activeTimHolding.setStartPoint(startCoord);
+                activeTimHolding.setEndPoint(endCoord);
                 doReturn(null).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim holding");
                 doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
 
@@ -141,13 +148,13 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, activeTimHolding.getSatRecordId());// SAT_RECORD_ID
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 6,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 6,
                                 activeTimHolding.getStartPoint().getLatitude());// START_LATITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 7,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 7,
                                 activeTimHolding.getStartPoint().getLongitude());// START_LONGITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 8,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 8,
                                 activeTimHolding.getEndPoint().getLatitude());// END_LATITUDE
-                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
+                verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
                 verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
@@ -161,8 +168,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         public void InsertActiveTimHolding_FAIL() throws SQLException {
                 // Arrange
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
-                activeTimHolding.setStartPoint(new Coordinate(1, 2));
-                activeTimHolding.setEndPoint(new Coordinate(5, 6));
+                activeTimHolding.setStartPoint(startCoord);
+                activeTimHolding.setEndPoint(endCoord);
                 doThrow(new SQLException()).when(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2,
                                 activeTimHolding.getClientId());
 
@@ -192,10 +199,10 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockRs).getString("DIRECTION");
                 verify(mockRs).getString("RSU_TARGET");
                 verify(mockRs).getString("SAT_RECORD_ID");
-                verify(mockRs).getDouble("START_LATITUDE");
-                verify(mockRs).getDouble("START_LONGITUDE");
-                verify(mockRs).getDouble("END_LATITUDE");
-                verify(mockRs).getDouble("END_LONGITUDE");
+                verify(mockRs).getBigDecimal("START_LATITUDE");
+                verify(mockRs).getBigDecimal("START_LONGITUDE");
+                verify(mockRs).getBigDecimal("END_LATITUDE");
+                verify(mockRs).getBigDecimal("END_LONGITUDE");
                 verify(mockRs).getString("DATE_CREATED");
                 verify(mockRs).getInt("RSU_INDEX");
                 verify(mockStatement).close();

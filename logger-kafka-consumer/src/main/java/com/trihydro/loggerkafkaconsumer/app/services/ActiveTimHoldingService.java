@@ -43,9 +43,9 @@ public class ActiveTimHoldingService extends BaseService {
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
                 activeTimHolding
-                        .setStartPoint(new Coordinate(rs.getDouble("START_LATITUDE"), rs.getDouble("START_LONGITUDE")));
+                        .setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
                 activeTimHolding
-                        .setEndPoint(new Coordinate(rs.getDouble("END_LATITUDE"), rs.getDouble("END_LONGITUDE")));
+                        .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
 
                 int projectKey = rs.getInt("PROJECT_KEY");
                 if (!rs.wasNull()) {
@@ -102,9 +102,9 @@ public class ActiveTimHoldingService extends BaseService {
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
                 activeTimHolding
-                        .setStartPoint(new Coordinate(rs.getDouble("START_LATITUDE"), rs.getDouble("START_LONGITUDE")));
+                        .setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
                 activeTimHolding
-                        .setEndPoint(new Coordinate(rs.getDouble("END_LATITUDE"), rs.getDouble("END_LONGITUDE")));
+                        .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
 
                 int projectKey = rs.getInt("PROJECT_KEY");
                 if (!rs.wasNull()) {

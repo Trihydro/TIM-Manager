@@ -1,11 +1,14 @@
 package com.trihydro.library.model;
+
+import java.math.BigDecimal;
+
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 
 public class WydotRsu extends RSU
 {
 	private static final long serialVersionUID = 3381208236984831107L;
-	private Double latitude;
-	private Double longitude;
+	private BigDecimal latitude;
+	private BigDecimal longitude;
 	private Integer rsuId;
 	private String route;
 	private Double milepost;
@@ -20,22 +23,22 @@ public class WydotRsu extends RSU
 		this.rsuId = rsuId;
 	}
 
-	public Double getLatitude() 
+	public BigDecimal getLatitude() 
 	{
 		return this.latitude;
 	}
 
-	public void setLatitude(Double latitude) 
+	public void setLatitude(BigDecimal latitude) 
 	{
 		this.latitude = latitude;
 	}
 
-	public Double getLongitude() 
+	public BigDecimal getLongitude() 
 	{
 		return this.longitude;
 	}
 
-	public void setLongitude(Double longitude) 
+	public void setLongitude(BigDecimal longitude) 
 	{
 		this.longitude = longitude;
 	}

@@ -422,21 +422,21 @@ public class TimRefreshController {
         region.setAnchorPosition(getAnchorPosition(aTim, mps));
         region.setLaneWidth(aTim.getLaneWidth());
         String regionDirection = aTim.getRegionDirection();
-        if (regionDirection == null || regionDirection == "") {
+        if (regionDirection == null || regionDirection.isEmpty()) {
             regionDirection = getHeadingSliceFromMileposts(mps);
         }
         region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
 
         // set directionality, default to 3
         String directionality = aTim.getDirectionality();
-        if (directionality == null || directionality == "") {
+        if (directionality == null || directionality.isEmpty()) {
             directionality = "3";
         }
         region.setDirectionality(directionality);
         region.setClosedPath(aTim.getClosedPath());
 
         String regionDescrip = aTim.getRegionDescription();// J2736 - one of path, geometry, oldRegion
-        if (regionDescrip == null || regionDescrip == "") {
+        if (regionDescrip == null || regionDescrip.isEmpty()) {
             regionDescrip = "path";// if null, set it to path...we only support path anyway, and only have tables
                                    // supporting path
         }
@@ -467,7 +467,7 @@ public class TimRefreshController {
         regionName += middle;// SAT_xxx or RSU_xxx
 
         String timType = aTim.getTimTypeName();
-        if (timType == null || timType == "") {
+        if (timType == null || timType.isEmpty()) {
             timType = "RC";// defaulting to Road Condition
         }
         // the rest depend on each other to be there for indexing

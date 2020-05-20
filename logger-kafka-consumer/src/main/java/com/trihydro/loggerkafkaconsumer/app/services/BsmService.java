@@ -61,17 +61,17 @@ public class BsmService extends BaseService {
                 List<J2735BsmPart2Content> partII = payload.getBsm().getPartII();
                 if (bsmCoreDataId != null && !bsmCoreDataId.equals(Long.valueOf(0)) && partII != null) {
                     for (int i = 0; i < partII.size(); i++) {
-                        if (partII.get(i).getId().name() == "VehicleSafetyExtensions") {
+                        if (partII.get(i).getId().name().equalsIgnoreCase("VehicleSafetyExtensions")) {
                             J2735VehicleSafetyExtensions vse = jsonToJava
                                     .convertJ2735VehicleSafetyExtensionsJsonToJava(value, i);
                             if (vse != null)
                                 bsmPart2VseService.insertBSMPart2VSE(partII.get(i), vse, bsmCoreDataId);
-                        } else if (partII.get(i).getId().name() == "SpecialVehicleExtensions") {
+                        } else if (partII.get(i).getId().name().equalsIgnoreCase("SpecialVehicleExtensions")) {
                             J2735SpecialVehicleExtensions spve = jsonToJava
                                     .convertJ2735SpecialVehicleExtensionsJsonToJava(value, i);
                             if (spve != null)
                                 bsmPart2SpveService.insertBSMPart2SPVE(partII.get(i), spve, bsmCoreDataId);
-                        } else if (partII.get(i).getId().name() == "SupplementalVehicleExtensions") {
+                        } else if (partII.get(i).getId().name().equalsIgnoreCase("SupplementalVehicleExtensions")) {
                             J2735SupplementalVehicleExtensions suve = jsonToJava
                                     .convertJ2735SupplementalVehicleExtensionsJsonToJava(value, i);
                             if (suve != null)

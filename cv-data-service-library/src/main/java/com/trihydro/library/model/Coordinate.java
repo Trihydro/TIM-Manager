@@ -1,5 +1,7 @@
 package com.trihydro.library.model;
 
+import java.math.BigDecimal;
+
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -8,31 +10,31 @@ import io.swagger.annotations.ApiModelProperty;
 public class Coordinate {
 
     @ApiModelProperty(required = true)
-    private Double latitude;
+    private BigDecimal latitude;
     @ApiModelProperty(required = true)
-    private Double longitude;
+    private BigDecimal longitude;
 
     public Coordinate() {
     }
 
-    public Coordinate(double lat, double lon) {
+    public Coordinate(BigDecimal lat, BigDecimal lon) {
         this.latitude = lat;
         this.longitude = lon;
     }
 
-    public Double getLatitude() {
+    public BigDecimal getLatitude() {
         return latitude;
     }
 
-    public Double getLongitude() {
+    public BigDecimal getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Double longitude) {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
     }
 
-    public void setLatitude(Double latitude) {
+    public void setLatitude(BigDecimal latitude) {
         this.latitude = latitude;
     }
 

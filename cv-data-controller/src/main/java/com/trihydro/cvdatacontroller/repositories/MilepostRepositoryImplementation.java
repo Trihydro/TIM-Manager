@@ -44,23 +44,41 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         String query = "match(startMp:Milepost{CommonName: $commonName})";
         query += " where startMp.Direction in " + dirQuery;
         query += " with startMp, distance(point({longitude:apoc.number.parseFloat($startLong),latitude:apoc.number.parseFloat($startLat)}), point({longitude:startMp.Longitude,latitude:startMp.Latitude})) as d1 ";
+
         query += " with startMp, d1 ORDER BY d1 ASC LIMIT 1";
-        query += " optional match(startAdjust:Milepost)-->(startMp)";
-        query += " where startAdjust.Direction in " + dirQuery;
-        if (direction.equalsIgnoreCase("I")) {
-            query += " and startAdjust.Milepost < startMp.Milepost";
-        } else {
-            query += " and startAdjust.Milepost > startMp.Milepost";
-        }
-        query += " with coalesce(startAdjust, startMp) as newStart";// coalesce gets first non-null in list
+
         query += " match(endMp:Milepost{CommonName: $commonName})";
         query += " where endMp.Direction in " + dirQuery;
-        query += " with newStart, endMp, distance(point({longitude:apoc.number.parseFloat($endLong),latitude:apoc.number.parseFloat($endLat)}), point({longitude:endMp.Longitude,latitude:endMp.Latitude})) as d2 ";
-        query += " with newStart, endMp, d2 ORDER BY d2 ASC LIMIT 1";
-        query += " with newStart, endMp ";
-        query += " call algo.shortestPath.stream(newStart,endMp) yield nodeId";
-        query += " match(other:Milepost) ";
-        query += " where id(other) = nodeId return other;";
+
+        query += " with startMp, endMp, distance(point({longitude:apoc.number.parseFloat($endLong),latitude:apoc.number.parseFloat($endLat)}), point({longitude:endMp.Longitude,latitude:endMp.Latitude})) as d2 ";
+
+        query += " with startMp, endMp, d2 ORDER BY d2 ASC LIMIT 1";
+        query += " call apoc.when(startMp.Milepost < endMp.Milepost, ";
+
+        if (direction.equalsIgnoreCase("I")) {
+            query += " 'optional match(tmp:Milepost)-->(startMp) where tmp.Milepost < startMp.Milepost return coalesce(tmp, startMp) as adjust',";
+            query += " 'optional match(tmp:Milepost)-->(endMp) where tmp.Milepost < endMp.Milepost return coalesce(tmp, endMp) as adjust',";
+        } else { // 'D' direction
+            query += " 'optional match(tmp:Milepost)-->(endMp) where tmp.Milepost > endMp.Milepost return coalesce(tmp, endMp) as adjust',";
+            query += " 'optional match(tmp:Milepost)-->(startMp) where tmp.Milepost > startMp.Milepost return coalesce(tmp, startMp) as adjust',";
+        }
+        query += " {startMp:startMp, endMp:endMp}) yield value";
+
+        query += " with startMp, endMp, value.adjust as adjust";
+        query += " call apoc.when(startMp.Milepost < endMp.Milepost,";
+        if (direction.equalsIgnoreCase("I")) {
+            query += " 'call algo.shortestPath.stream(adjust,endMp) yield nodeId match(other:Milepost) where id(other) = nodeId return other',";
+            query += " 'call algo.shortestPath.stream(startMp,adjust) yield nodeId match(other:Milepost) where id(other) = nodeId return other',";
+        } else {
+            query += " 'call algo.shortestPath.stream(startMp,adjust) yield nodeId match(other:Milepost) where id(other) = nodeId return other',";
+            query += " 'call algo.shortestPath.stream(adjust,endMp) yield nodeId match(other:Milepost) where id(other) = nodeId return other',";
+        }
+        query += " {adjust:adjust, startMp:startMp, endMp:endMp}) yield value";
+        query += " return value.other order by value.other.Milepost";
+
+        if (direction.equalsIgnoreCase("D")) {
+            query += " desc";
+        }
 
         Map<String, Object> map = new HashMap<>();
         map.put("commonName", commonName);

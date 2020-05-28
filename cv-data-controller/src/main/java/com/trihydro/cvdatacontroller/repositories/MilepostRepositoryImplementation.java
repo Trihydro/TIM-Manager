@@ -41,18 +41,22 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         }
         dirQuery += "'B']";
 
+        // Find nearest point to given start point
         String query = "match(startMp:Milepost{CommonName: $commonName})";
         query += " where startMp.Direction in " + dirQuery;
         query += " with startMp, distance(point({longitude:apoc.number.parseFloat($startLong),latitude:apoc.number.parseFloat($startLat)}), point({longitude:startMp.Longitude,latitude:startMp.Latitude})) as d1 ";
 
         query += " with startMp, d1 ORDER BY d1 ASC LIMIT 1";
 
+        // Find nearest point to given end point
         query += " match(endMp:Milepost{CommonName: $commonName})";
         query += " where endMp.Direction in " + dirQuery;
 
         query += " with startMp, endMp, distance(point({longitude:apoc.number.parseFloat($endLong),latitude:apoc.number.parseFloat($endLat)}), point({longitude:endMp.Longitude,latitude:endMp.Latitude})) as d2 ";
 
         query += " with startMp, endMp, d2 ORDER BY d2 ASC LIMIT 1";
+
+        // Depending on direction, find appropriate adjust point
         query += " call apoc.when(startMp.Milepost < endMp.Milepost, ";
 
         if (direction.equalsIgnoreCase("I")) {
@@ -65,6 +69,8 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         query += " {startMp:startMp, endMp:endMp}) yield value";
 
         query += " with startMp, endMp, value.adjust as adjust";
+        
+        // Calculate shortest path between appropriate start/end and adjust
         query += " call apoc.when(startMp.Milepost < endMp.Milepost,";
         if (direction.equalsIgnoreCase("I")) {
             query += " 'call algo.shortestPath.stream(adjust,endMp) yield nodeId match(other:Milepost) where id(other) = nodeId return other',";
@@ -74,8 +80,9 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
             query += " 'call algo.shortestPath.stream(adjust,endMp) yield nodeId match(other:Milepost) where id(other) = nodeId return other',";
         }
         query += " {adjust:adjust, startMp:startMp, endMp:endMp}) yield value";
-        query += " return value.other order by value.other.Milepost";
 
+        // Return nodes ordered by milepost (descending if D)
+        query += " return value.other order by value.other.Milepost";
         if (direction.equalsIgnoreCase("D")) {
             query += " desc";
         }

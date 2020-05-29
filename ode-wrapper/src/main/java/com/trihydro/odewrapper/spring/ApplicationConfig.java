@@ -21,10 +21,8 @@ import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@EnableWebMvc
 @Configuration
 @Import({ ActiveTimService.class, ActiveTimHoldingService.class, OdeService.class, SdwService.class,
         TimTypeService.class, MilepostService.class, TimRsuService.class, WydotTimService.class, RsuService.class,

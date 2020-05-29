@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.trihydro.library.model.ContentEnum;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -484,15 +486,29 @@ public abstract class WydotTimBaseController {
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
                 startDateTime, endDateTime, content);
+
+        if (timToSend == null) {
+            return;
+        }
+
         String regionNamePrev = direction + "_" + wydotTim.getRoute();
+
+        var endPoint = new Coordinate();
+        if (wydotTim.getEndPoint() != null) {
+            endPoint = wydotTim.getEndPoint();
+        } else {
+            var endMp = timToSend.getMileposts().get(timToSend.getMileposts().size() - 1);
+            endPoint = new Coordinate(BigDecimal.valueOf(endMp.getLatitude()),
+                    BigDecimal.valueOf(endMp.getLongitude()));
+        }
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs
-            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endDateTime);
+            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endDateTime, endPoint);
         }
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, direction, timType, pk);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endPoint);
     }
 }

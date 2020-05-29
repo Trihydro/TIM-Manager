@@ -21,6 +21,7 @@ import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.ContentEnum;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
@@ -108,6 +109,10 @@ public class WydotTimService {
         // build base TIM
         WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration, content);
 
+        if (timToSend == null) {
+            return null;
+        }
+
         // add itis codes to tim
         timToSend.getTim().getDataframes()[0]
                 .setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
@@ -142,7 +147,7 @@ public class WydotTimService {
     }
 
     public void sendTimToSDW(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev,
-            String direction, TimType timType, Integer pk) {
+            String direction, TimType timType, Integer pk, Coordinate endPoint) {
 
         List<ActiveTim> activeSatTims = null;
 
@@ -157,7 +162,7 @@ public class WydotTimService {
                 : sdwService.getNewRecordId();
 
         // save new active_tim_holding record
-        ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId);
+        ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId, endPoint);
         activeTimHolding.setDirection(direction);// we are overriding the direction from the tim here
 
         // Set projectKey, if this is a RW TIM
@@ -187,11 +192,10 @@ public class WydotTimService {
     }
 
     public void sendTimToRsus(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev,
-            String direction, TimType timType, Integer pk, String endDateTime) {
-
+            String direction, TimType timType, Integer pk, String endDateTime, Coordinate endPoint) {
         // FIND ALL RSUS TO SEND TO
         // TODO: should this query a graph db instead to follow with milepost?
-        List<WydotRsu> rsus = rsuService.getRsusByLatLong(direction, wydotTim.getStartPoint(), wydotTim.getEndPoint(),
+        List<WydotRsu> rsus = rsuService.getRsusByLatLong(direction, wydotTim.getStartPoint(), endPoint,
                 wydotTim.getRoute());
 
         // if no RSUs found
@@ -223,7 +227,7 @@ public class WydotTimService {
             ActiveTim activeTim = activeTimService.getActiveRsuTim(artqm);
 
             // create new active_tim_holding record
-            ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null);
+            ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null, endPoint);
             activeTimHolding.setDirection(direction);
 
             // Set projectKey, if this is a RW TIM

@@ -306,7 +306,8 @@ public class TimRefreshController {
                 wydotTim.setDirection(aTim.getDirection());
                 wydotTim.setStartPoint(aTim.getStartPoint());
                 wydotTim.setEndPoint(aTim.getEndPoint());
-                ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, dbRsus.get(i).getRsuTarget(), null);
+                ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, dbRsus.get(i).getRsuTarget(), null,
+                        aTim.getEndPoint());
                 activeTimHolding.setRsuIndex(nextRsuIndex);
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 

@@ -14,13 +14,13 @@ public class ActiveTimHolding {
     private String dateCreated;
     private Integer projectKey;
 
-    public ActiveTimHolding(WydotTim tim, String rsuTarget, String satRecordId) {
+    public ActiveTimHolding(WydotTim tim, String rsuTarget, String satRecordId, Coordinate endPt) {
         this.clientId = tim.getClientId();
         this.direction = tim.getDirection();
         this.rsuTarget = rsuTarget;
         this.satRecordId = satRecordId;
         this.startPoint = tim.getStartPoint();
-        this.endPoint = tim.getEndPoint();
+        this.endPoint = endPt;
         this.dateCreated = Instant.now().toString();
     }
 

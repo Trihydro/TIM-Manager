@@ -69,7 +69,7 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         query += " {startMp:startMp, endMp:endMp}) yield value";
 
         query += " with startMp, endMp, value.adjust as adjust";
-        
+
         // Calculate shortest path between appropriate start/end and adjust
         query += " call apoc.when(startMp.Milepost < endMp.Milepost,";
         if (direction.equalsIgnoreCase("I")) {
@@ -157,7 +157,10 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         query += " with bufferStart, mp";
         query += " call algo.shortestPath.stream(bufferStart,mp) yield nodeId";
         query += " match(other:Milepost)";
-        query += " where id(other) = nodeId return other;";
+        query += " where id(other) = nodeId return other order by other.Milepost";
+        if (!increasing) {
+            query += " desc";
+        }
 
         // Note that we do not worry about the 'B' case here, as it should be called
         // with 'I' or 'D'

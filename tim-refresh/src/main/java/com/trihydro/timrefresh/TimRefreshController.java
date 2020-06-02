@@ -201,8 +201,8 @@ public class TimRefreshController {
         NodeXY[] nodes = new NodeXY[mps.size()];
         for (int i = 0; i < mps.size(); i++) {
             NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-            node.setNodeLat(new BigDecimal(mps.get(i).getLatitude()));
-            node.setNodeLong(new BigDecimal(mps.get(i).getLongitude()));
+            node.setNodeLat(mps.get(i).getLatitude());
+            node.setNodeLong(mps.get(i).getLongitude());
             node.setDelta("node-LatLon");
             nodes[i] = node;
         }
@@ -405,12 +405,12 @@ public class TimRefreshController {
             anchorPosition.setLongitude(aTim.getAnchorLong());
         } else {
             if (mps.size() > 0) {
-                anchorPosition.setLatitude(new BigDecimal(mps.get(0).getLatitude()));
-                anchorPosition.setLongitude(new BigDecimal(mps.get(0).getLongitude()));
+                anchorPosition.setLatitude(mps.get(0).getLatitude());
+                anchorPosition.setLongitude(mps.get(0).getLongitude());
             } else {
-                anchorPosition.setLatitude(new BigDecimal(0));
-                anchorPosition.setLongitude(new BigDecimal(0));
-                anchorPosition.setElevation(new BigDecimal(0));
+                anchorPosition.setLatitude(BigDecimal.valueOf(0));
+                anchorPosition.setLongitude(BigDecimal.valueOf(0));
+                anchorPosition.setElevation(BigDecimal.valueOf(0));
             }
         }
         return anchorPosition;

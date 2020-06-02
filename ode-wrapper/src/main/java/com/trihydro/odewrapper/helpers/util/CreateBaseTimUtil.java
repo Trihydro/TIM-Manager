@@ -119,12 +119,12 @@ public class CreateBaseTimUtil {
 
         OdePosition3D anchorPosition = new OdePosition3D();
         if (timToSend.getMileposts().size() > 0) {
-            anchorPosition.setLatitude(new BigDecimal(timToSend.getMileposts().get(0).getLatitude()));
-            anchorPosition.setLongitude(new BigDecimal(timToSend.getMileposts().get(0).getLongitude()));
+            anchorPosition.setLatitude(timToSend.getMileposts().get(0).getLatitude());
+            anchorPosition.setLongitude(timToSend.getMileposts().get(0).getLongitude());
         } else {
-            anchorPosition.setLatitude(new BigDecimal(0));
-            anchorPosition.setLongitude(new BigDecimal(0));
-            anchorPosition.setElevation(new BigDecimal(0));
+            anchorPosition.setLatitude(BigDecimal.valueOf(0));
+            anchorPosition.setLongitude(BigDecimal.valueOf(0));
+            anchorPosition.setElevation(BigDecimal.valueOf(0));
         }
 
         MsgId msgId = new MsgId();
@@ -143,11 +143,11 @@ public class CreateBaseTimUtil {
         int timDirection = 0;
         // path list - change later
         if (milepostsAll != null && milepostsAll.size() > 0) {
-            double startLat = milepostsAll.get(0).getLatitude();
-            double startLon = milepostsAll.get(0).getLongitude();
+            double startLat = milepostsAll.get(0).getLatitude().doubleValue();
+            double startLon = milepostsAll.get(0).getLongitude().doubleValue();
             for (int j = 1; j < milepostsAll.size(); j++) {
-                double lat = milepostsAll.get(j).getLatitude();
-                double lon = milepostsAll.get(j).getLongitude();
+                double lat = milepostsAll.get(j).getLatitude().doubleValue();
+                double lon = milepostsAll.get(j).getLongitude().doubleValue();
 
                 Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
                 Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
@@ -168,14 +168,16 @@ public class CreateBaseTimUtil {
         // set path nodes
         if (mileposts != null && mileposts.size() > 0) {
             ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+            var startMp = mileposts.get(0);
             for (int i = 1; i < mileposts.size(); i++) {
                 OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-                double lat = mileposts.get(i).getLatitude();
-                double lon = mileposts.get(i).getLongitude();
-                node.setNodeLat(new BigDecimal(lat));
-                node.setNodeLong(new BigDecimal(lon));
-                node.setDelta("node-LatLon");
+                BigDecimal lat = mileposts.get(i).getLatitude().subtract(startMp.getLatitude());
+                BigDecimal lon = mileposts.get(i).getLongitude().subtract(startMp.getLongitude());
+                node.setNodeLat(lat);
+                node.setNodeLong(lon);
+                node.setDelta("node-LL");
                 nodes.add(node);
+                startMp = mileposts.get(i);
             }
             path.setNodes(nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]));
             region.setPath(path);

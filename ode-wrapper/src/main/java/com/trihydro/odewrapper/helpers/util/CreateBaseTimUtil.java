@@ -110,8 +110,8 @@ public class CreateBaseTimUtil {
         // path
         region.setDescription("path");
         OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
-        path.setScale(0);
-        path.setType("xy");
+        path.setScale(1);
+        path.setType("ll");
 
         // reduce the mileposts by removing straight away posts
         mileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll, config.getPathDistanceLimit());

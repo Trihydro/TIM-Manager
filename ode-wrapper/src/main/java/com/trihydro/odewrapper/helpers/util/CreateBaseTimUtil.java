@@ -170,6 +170,8 @@ public class CreateBaseTimUtil {
             ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
             var startMp = mileposts.get(0);
             for (int i = 1; i < mileposts.size(); i++) {
+                // note that even though we are setting node-LL type here, the ODE only has a
+                // NodeXY object, as the structure is the same.
                 OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
                 BigDecimal lat = mileposts.get(i).getLatitude().subtract(startMp.getLatitude());
                 BigDecimal lon = mileposts.get(i).getLongitude().subtract(startMp.getLongitude());

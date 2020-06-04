@@ -405,13 +405,22 @@ public class JsonToJavaConverter {
             if (pathNode == null)
                 return null;
             JsonNode xyNode = pathNode.get("offset").get("xy");
+            Boolean isXy = true;
+
+            // switching to using ll offset produces "ll" instead of "xy"
+            if (xyNode == null) {
+                xyNode = pathNode.get("offset").get("ll");
+                isXy = false;
+            }
+
             if (xyNode == null)
                 return null;
+
             JsonNode nodesNode = xyNode.get("nodes");
             if (nodesNode == null)
                 return null;
 
-            JsonNode nodeXYArrNode = nodesNode.get("NodeXY");
+            JsonNode nodeXYArrNode = isXy ? nodesNode.get("NodeXY") : nodesNode.get("NodeLL");
             OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
             List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
             OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
@@ -419,13 +428,15 @@ public class JsonToJavaConverter {
             if (nodeXYArrNode.isArray()) {
                 for (final JsonNode objNode : nodeXYArrNode) {
                     nodeXY = new OdeTravelerInformationMessage.NodeXY();
-                    JsonNode nodeLatLon = objNode.get("delta").get("node-LatLon");
+                    var deltaObj = objNode.get("delta");
+                    var firstObj = deltaObj.fields().next();
+                    JsonNode nodeLatLon = firstObj.getValue();// objNode.get("delta").get("node-LatLon");
                     if (nodeLatLon != null) {
                         BigDecimal lat = mapper.treeToValue(nodeLatLon.get("lat"), BigDecimal.class);
                         BigDecimal lon = mapper.treeToValue(nodeLatLon.get("lon"), BigDecimal.class);
                         nodeXY.setNodeLat(lat.multiply(new BigDecimal(".0000001")));
                         nodeXY.setNodeLong(lon.multiply(new BigDecimal(".0000001")));
-                        nodeXY.setDelta("node-LatLon");
+                        nodeXY.setDelta(firstObj.getKey());
                         nodeXYs.add(nodeXY);
                     }
                 }

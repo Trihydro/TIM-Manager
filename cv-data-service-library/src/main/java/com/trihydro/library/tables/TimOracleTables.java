@@ -13,7 +13,9 @@ public class TimOracleTables extends OracleTables {
     private List<String> pathTable;
     private List<String> regionTable;
     private List<String> nodeXYTable;
+    private List<String> nodeLLTable;
     private List<String> pathNodeXYTable;
+    private List<String> pathNodeLLTable;
     private List<String> timTypeTable;
     private List<String> activeTimTable;
     private List<String> activeTimHoldingTable;
@@ -135,6 +137,17 @@ public class TimOracleTables extends OracleTables {
         }
     }
 
+    public List<String> getPathNodeLLTable() {
+        if (pathNodeLLTable != null)
+            return pathNodeLLTable;
+        else {
+            pathNodeLLTable = new ArrayList<String>();
+            pathNodeLLTable.add("NODE_LL_ID");
+            pathNodeLLTable.add("PATH_ID");
+            return pathNodeLLTable;
+        }
+    }
+
     public List<String> getNodeXYTable() {
         if (nodeXYTable != null)
             return nodeXYTable;
@@ -148,6 +161,22 @@ public class TimOracleTables extends OracleTables {
             nodeXYTable.add("ATTRIBUTES_DWIDTH");
             nodeXYTable.add("ATTRIBUTES_DELEVATION");
             return nodeXYTable;
+        }
+    }
+
+    public List<String> getNodeLLTable() {
+        if (nodeLLTable != null)
+            return nodeLLTable;
+        else {
+            nodeLLTable = new ArrayList<String>();
+            nodeLLTable.add("DELTA");
+            nodeLLTable.add("NODE_LAT");
+            nodeLLTable.add("NODE_LONG");
+            nodeLLTable.add("X");
+            nodeLLTable.add("Y");
+            nodeLLTable.add("ATTRIBUTES_DWIDTH");
+            nodeLLTable.add("ATTRIBUTES_DELEVATION");
+            return nodeLLTable;
         }
     }
 

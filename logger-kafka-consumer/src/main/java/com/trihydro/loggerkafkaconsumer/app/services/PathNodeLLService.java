@@ -42,8 +42,8 @@ public class PathNodeLLService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long pathNodeXYId = dbInteractions.executeAndLog(preparedStatement, "pathnodellid");
-            return pathNodeXYId;
+            Long pathNodeLLId = dbInteractions.executeAndLog(preparedStatement, "pathnodellid");
+            return pathNodeLLId;
 
         } catch (SQLException e) {
             e.printStackTrace();

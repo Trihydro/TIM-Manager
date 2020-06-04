@@ -62,8 +62,8 @@ public class NodeLLService extends BaseService {
                         preparedStatement.setString(fieldNum, null);
                 fieldNum++;
             }
-            Long nodeXYId = dbInteractions.executeAndLog(preparedStatement, "nodell");
-            return nodeXYId;
+            Long nodeLLId = dbInteractions.executeAndLog(preparedStatement, "nodell");
+            return nodeLLId;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

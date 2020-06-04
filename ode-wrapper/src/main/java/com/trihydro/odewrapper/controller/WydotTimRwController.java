@@ -88,14 +88,14 @@ public class WydotTimRwController extends WydotTimBaseController {
                 wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
 
             // if bi-directional
-            if (wydotTim.getDirection().equals("b")) {
+            if (wydotTim.getDirection().equalsIgnoreCase("b")) {
                 // make i TIMs
                 makeIncreasingTims(wydotTim);
                 // make d TIMs
                 makeDecreasingTims(wydotTim);
             }
             // else make one direction TIMs
-            else if (wydotTim.getDirection().equals("i"))
+            else if (wydotTim.getDirection().equalsIgnoreCase("i"))
                 makeIncreasingTims(wydotTim);
             else
                 makeDecreasingTims(wydotTim);

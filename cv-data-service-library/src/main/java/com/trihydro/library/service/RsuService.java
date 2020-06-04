@@ -68,7 +68,7 @@ public class RsuService extends CvDataServiceLibrary {
 		}
 
 		Ellipsoid reference = Ellipsoid.WGS84;
-		if (direction.toLowerCase().equals("i")) {
+		if (direction.equalsIgnoreCase("i")) {
 
 			// get rsus at mileposts less than your milepost
 			// Note that in the future this logic may need to be refactored.
@@ -169,7 +169,7 @@ public class RsuService extends CvDataServiceLibrary {
 		}
 
 		if (numericRoute % 2 == 0) {
-			if (direction.toLowerCase().equals("i")) {
+			if (direction.equalsIgnoreCase("i")) {
 				rsus = mainRsus.stream()
 						.filter(x -> x.getLongitude().compareTo(startPoint.getLongitude()) >= 0
 								&& x.getLongitude().compareTo(endPoint.getLongitude()) <= 0)
@@ -181,7 +181,7 @@ public class RsuService extends CvDataServiceLibrary {
 						.collect(Collectors.toList());
 			}
 		} else {
-			if (direction.toLowerCase().equals("i")) {
+			if (direction.equalsIgnoreCase("i")) {
 				rsus = mainRsus.stream().filter(x -> x.getLatitude().compareTo(startPoint.getLatitude()) >= 0
 						&& x.getLatitude().compareTo(endPoint.getLatitude()) <= 0).collect(Collectors.toList());
 			} else {

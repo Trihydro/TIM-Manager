@@ -67,7 +67,7 @@ public class SetItisCodes {
         for (Integer item : wydotTim.getAdvisory()) {
 
             var alphaItis = getCustomAlphabetic(item);
-            if(alphaItis!=null){
+            if (alphaItis != null) {
                 items.add(alphaItis);
                 continue;
             }
@@ -132,8 +132,10 @@ public class SetItisCodes {
         if (code != null)
             items.add(wydotTim.getAvailability().toString());
 
+        // for parking TIM, content=exitService, and includes additional itis codes
+        // depending on if rest area or exit number
         if (wydotTim.getExit() != null) {
-            items.add("11794");
+            items.add("11794");// Exit Number
             int exitItisCodeNumber;
             if (wydotTim.getExit().toLowerCase().equals("turnout")
                     || wydotTim.getExit().toLowerCase().equals("parking")) {
@@ -149,7 +151,7 @@ public class SetItisCodes {
                 }
             }
         } else {
-            items.add("7986");
+            items.add("7986");// Rest Area
             System.out.println("rest area");
         }
 

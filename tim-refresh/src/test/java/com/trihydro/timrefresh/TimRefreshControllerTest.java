@@ -98,16 +98,16 @@ public class TimRefreshControllerTest {
         startMp.setCommonName("route1");
         startMp.setMilepost(250d);
         startMp.setDirection("i");
-        startMp.setLatitude(105d);
-        startMp.setLongitude(45d);
+        startMp.setLatitude(BigDecimal.valueOf(105));
+        startMp.setLongitude(BigDecimal.valueOf(45d));
         // startMp.setBearing(22d);
 
         Milepost endMp = new Milepost();
         endMp.setCommonName("route1");
         endMp.setMilepost(255d);
         endMp.setDirection("i");
-        endMp.setLatitude(105d);
-        endMp.setLongitude(45d);
+        endMp.setLatitude(BigDecimal.valueOf(105d));
+        endMp.setLongitude(BigDecimal.valueOf(45d));
         // endMp.setBearing(59d);
         mps.add(startMp);
         mps.add(endMp);

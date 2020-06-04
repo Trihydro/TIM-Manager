@@ -1,6 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,6 +44,8 @@ public abstract class WydotTimBaseController {
     protected RestTemplateProvider restTemplateProvider;
 
     private List<String> routes = new ArrayList<>();
+    protected static Gson gson = new Gson();
+    private List<TimType> timTypes;
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
@@ -56,9 +57,6 @@ public abstract class WydotTimBaseController {
         activeTimService = _activeTimService;
         restTemplateProvider = _restTemplateProvider;
     }
-
-    protected static Gson gson = new Gson();
-    private List<TimType> timTypes;
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {
 
@@ -77,8 +75,8 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getMileMarker() != null && tim.getMileMarker() < 0) {
@@ -123,8 +121,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getIncidentId() == null) {
@@ -170,8 +168,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -268,8 +266,8 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -317,8 +315,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -373,8 +371,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -498,13 +496,13 @@ public abstract class WydotTimBaseController {
             endPoint = wydotTim.getEndPoint();
         } else {
             var endMp = timToSend.getMileposts().get(timToSend.getMileposts().size() - 1);
-            endPoint = new Coordinate(BigDecimal.valueOf(endMp.getLatitude()),
-                    BigDecimal.valueOf(endMp.getLongitude()));
+            endPoint = new Coordinate(endMp.getLatitude(), endMp.getLongitude());
         }
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs
-            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endDateTime, endPoint);
+            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endDateTime,
+                    endPoint);
         }
         // send TIM to SDW
         // remove rsus from TIM

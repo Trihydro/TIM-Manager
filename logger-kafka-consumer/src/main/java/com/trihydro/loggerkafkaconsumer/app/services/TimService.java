@@ -59,6 +59,8 @@ public class TimService extends BaseService {
     private NodeXYService nodeXYService;
     private Utility utility;
     private ActiveTimHoldingService activeTimHoldingService;
+    private PathNodeLLService pathNodeLLService;
+    private NodeLLService nodeLLService;
 
     @Autowired
     public void InjectDependencies(ActiveTimService _ats, TimOracleTables _timOracleTables,
@@ -66,7 +68,8 @@ public class TimService extends BaseService {
             DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
             ItisCodeService _itisCodesService, TimRsuService _timRsuService,
             DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
-            NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService) {
+            NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService,
+            PathNodeLLService _pathNodeLLService, NodeLLService _nodeLLService) {
         activeTimService = _ats;
         timOracleTables = _timOracleTables;
         sqlNullHandler = _sqlNullHandler;
@@ -82,6 +85,8 @@ public class TimService extends BaseService {
         nodeXYService = _nodeXYService;
         utility = _utility;
         activeTimHoldingService = _athService;
+        pathNodeLLService = _pathNodeLLService;
+        nodeLLService = _nodeLLService;
     }
 
     public void addTimToOracleDB(OdeData odeData) {
@@ -508,9 +513,16 @@ public class TimService extends BaseService {
             regionService.AddRegion(dataFrameId, pathId, region);
 
             Long nodeXYId;
+            Long nodeLLId;
             for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
-                nodeXYId = nodeXYService.AddNodeXY(nodeXY);
-                pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                if (nodeXY.getDelta().toLowerCase().contains("xy")) {
+                    nodeXYId = nodeXYService.AddNodeXY(nodeXY);
+                    pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                } else {
+                    // node-LL
+                    nodeLLId = nodeLLService.AddNodeLL(nodeXY);
+                    pathNodeLLService.insertPathNodeLL(nodeLLId, pathId);
+                }
             }
         } else if (geometry != null) {
             regionService.AddRegion(dataFrameId, null, region);

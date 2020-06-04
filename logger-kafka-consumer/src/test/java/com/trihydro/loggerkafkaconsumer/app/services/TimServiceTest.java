@@ -94,6 +94,10 @@ public class TimServiceTest extends TestBase<TimService> {
     private Utility mockUtility;
     @Mock
     private ActiveTimHoldingService mockActiveTimHoldingService;
+    @Mock
+    private NodeLLService mockNodeLLService;
+    @Mock
+    private PathNodeLLService mockPathNodeLLService;
 
     private WydotRsu rsu;
     private Long pathId = -99l;
@@ -103,7 +107,7 @@ public class TimServiceTest extends TestBase<TimService> {
         uut.InjectDependencies(mockActiveTimService, mockTimOracleTables, mockSqlNullHandler, mockPathService,
                 mockRegionService, mockDataFrameService, mockRsuService, mockTts, mockItisCodesService,
                 mockTimRsuService, mockDataFrameItisCodeService, mockPathNodeXYService, mockNodeXYService, mockUtility,
-                mockActiveTimHoldingService);
+                mockActiveTimHoldingService, mockPathNodeLLService, mockNodeLLService);
 
         ArrayList<WydotRsu> rsus = new ArrayList<>();
         rsu = new WydotRsu();
@@ -267,7 +271,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verifyNoInteractions(mockDataFrameItisCodeService);
         // verify only these were called on the uut
         verify(uut).InjectDependencies(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any());
         verify(uut).InjectBaseDependencies(any());
         verify(uut).addTimToOracleDB(odeData);
         verify(uut).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
@@ -304,7 +308,7 @@ public class TimServiceTest extends TestBase<TimService> {
     }
 
     @Test
-    public void addRegion_pathSUCCESS() {
+    public void addRegion_pathXYSUCCESS() {
         // Arrange
         DataFrame dataFrame = getDataFrames()[0];
         Path path = dataFrame.getRegions()[0].getPath();
@@ -321,6 +325,32 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(mockRegionService).AddRegion(dataFrameId, pathId, dataFrame.getRegions()[0]);
         verify(mockNodeXYService).AddNodeXY(path.getNodes()[0]);
         verify(mockPathNodeXYService).insertPathNodeXY(nodeXYId, pathId);
+        verifyNoMoreInteractions(mockRegionService);
+    }
+
+    @Test
+    public void addRegion_pathLLSUCCESS() {
+        // Arrange
+        DataFrame dataFrame = getDataFrames()[0];
+        Path path = dataFrame.getRegions()[0].getPath();
+
+        // set node-LL
+        for (int i = 0; i < path.getNodes().length; i++) {
+            path.getNodes()[i].setDelta("node-LL");
+        }
+        Long dataFrameId = -1l;
+        Long nodeLLId = -2l;
+        doReturn(pathId).when(mockPathService).InsertPath();
+        doReturn(nodeLLId).when(mockNodeLLService).AddNodeLL(isA(OdeTravelerInformationMessage.NodeXY.class));
+
+        // Act
+        uut.addRegion(dataFrame, dataFrameId);
+
+        // Assert
+        verify(mockPathService).InsertPath();
+        verify(mockRegionService).AddRegion(dataFrameId, pathId, dataFrame.getRegions()[0]);
+        verify(mockNodeLLService).AddNodeLL(path.getNodes()[0]);
+        verify(mockPathNodeLLService).insertPathNodeLL(nodeLLId, pathId);
         verifyNoMoreInteractions(mockRegionService);
     }
 
@@ -673,6 +703,7 @@ public class TimServiceTest extends TestBase<TimService> {
     private NodeXY[] getNodes() {
         NodeXY[] nodes = new NodeXY[1];
         NodeXY nxy = new NodeXY();
+        nxy.setDelta("xy");
         nxy.setNodeLat(new BigDecimal(-1));
         nxy.setNodeLong(new BigDecimal(-2));
         nodes[0] = nxy;

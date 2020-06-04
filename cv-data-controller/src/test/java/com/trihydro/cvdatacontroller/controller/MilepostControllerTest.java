@@ -251,8 +251,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getString("COMMON_NAME");
         verify(mockRs).getDouble("MILEPOST");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getBigDecimal("LATITUDE");
+        verify(mockRs).getBigDecimal("LONGITUDE");
         // verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -278,8 +278,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getString("COMMON_NAME");
         verify(mockRs).getDouble("MILEPOST");
-        verify(mockRs).getDouble("LATITUDE");
-        verify(mockRs).getDouble("LONGITUDE");
+        verify(mockRs).getBigDecimal("LATITUDE");
+        verify(mockRs).getBigDecimal("LONGITUDE");
         // verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();

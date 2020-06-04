@@ -136,7 +136,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                     wydotTim.setRoute(wydotTim.getHighway());
 
                     // check if this is a point TIM
-                    if (wydotTim.getDirection().toLowerCase().equals("b")) {
+                    if (wydotTim.getDirection().equalsIgnoreCase("b")) {
                         createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk(),
                                 ContentEnum.advisory);
 

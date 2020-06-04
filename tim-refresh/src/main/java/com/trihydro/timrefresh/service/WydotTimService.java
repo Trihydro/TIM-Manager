@@ -1,6 +1,5 @@
 package com.trihydro.timrefresh.service;
 
-import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 
@@ -98,8 +97,8 @@ public class WydotTimService {
 
     public OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {
 
-        Comparator<Milepost> compLat = (l1, l2) -> Double.compare(l1.getLatitude(), l2.getLatitude());
-        Comparator<Milepost> compLong = (l1, l2) -> Double.compare(l1.getLongitude(), l2.getLongitude());
+        Comparator<Milepost> compLat = (l1, l2) -> l1.getLatitude().compareTo(l2.getLatitude());
+        Comparator<Milepost> compLong = (l1, l2) -> l1.getLongitude().compareTo(l2.getLongitude());
         OdeGeoRegion serviceRegion = new OdeGeoRegion();
 
         if (mileposts.size() > 0) {
@@ -113,12 +112,12 @@ public class WydotTimService {
             Milepost minLong = mileposts.stream().min(compLong).get();
 
             OdePosition3D nwCorner = new OdePosition3D();
-            nwCorner.setLatitude(new BigDecimal(maxLat.getLatitude()));
-            nwCorner.setLongitude(new BigDecimal(minLong.getLongitude()));
+            nwCorner.setLatitude(maxLat.getLatitude());
+            nwCorner.setLongitude(minLong.getLongitude());
 
             OdePosition3D seCorner = new OdePosition3D();
-            seCorner.setLatitude(new BigDecimal(minLat.getLatitude()));
-            seCorner.setLongitude(new BigDecimal(maxLong.getLongitude()));
+            seCorner.setLatitude(minLat.getLatitude());
+            seCorner.setLongitude(maxLong.getLongitude());
 
             serviceRegion.setNwCorner(nwCorner);
             serviceRegion.setSeCorner(seCorner);

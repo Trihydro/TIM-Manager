@@ -134,7 +134,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimParking wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equals("b")) {
+                    if (wydotTim.getDirection().equalsIgnoreCase("b")) {
                         createSendTims(wydotTim, "i", getTimType(type), startTime, null, null, ContentEnum.advisory);
                         createSendTims(wydotTim, "d", getTimType(type), startTime, null, null, ContentEnum.advisory);
                     } else {

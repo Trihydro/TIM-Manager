@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.DbInteractions;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 public class BaseService {
 
     protected DbInteractions dbInteractions;
+    protected Utility utility;
 
     private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -28,8 +30,9 @@ public class BaseService {
     public DateFormat mstFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     @Autowired
-    public void InjectBaseDependencies(DbInteractions _dbInteractions) {
+    public void InjectBaseDependencies(DbInteractions _dbInteractions, Utility _utility) {
         dbInteractions = _dbInteractions;
+        utility = _utility;
     }
 
     public Date convertDate(String incomingDate) {

@@ -42,10 +42,10 @@ public class ActiveTimHoldingService extends BaseService {
                 activeTimHolding.setDirection(rs.getString("DIRECTION"));
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-                activeTimHolding
-                        .setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
-                activeTimHolding
-                        .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                activeTimHolding.setStartPoint(
+                        new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(
+                        new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
 
                 int projectKey = rs.getInt("PROJECT_KEY");
                 if (!rs.wasNull()) {
@@ -101,10 +101,10 @@ public class ActiveTimHoldingService extends BaseService {
                 activeTimHolding.setDirection(rs.getString("DIRECTION"));
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-                activeTimHolding
-                        .setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
-                activeTimHolding
-                        .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                activeTimHolding.setStartPoint(
+                        new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(
+                        new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
 
                 int projectKey = rs.getInt("PROJECT_KEY");
                 if (!rs.wasNull()) {
@@ -146,7 +146,13 @@ public class ActiveTimHoldingService extends BaseService {
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(updateTableSQL);
             preparedStatement.setLong(1, activeTimHoldingId);
-            return dbInteractions.updateOrDelete(preparedStatement);
+            var success = dbInteractions.updateOrDelete(preparedStatement);
+            if (success) {
+                utility.logWithDate("Deleted ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+            } else {
+                utility.logWithDate("Failed to delete ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+            }
+            return success;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

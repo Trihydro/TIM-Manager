@@ -329,7 +329,7 @@ public class ActiveTimController extends BaseController {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE from active_tim";
+			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE, TIM_END, TIM_START, EXPIRATION_DATE, PK, ACTIVE_TIM.TIM_TYPE_ID from active_tim";
 			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
 			selectStatement += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 

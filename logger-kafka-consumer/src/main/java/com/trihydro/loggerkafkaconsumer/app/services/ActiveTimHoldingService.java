@@ -6,21 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ActiveTimHoldingService extends BaseService {
-    Utility utility;
-
-    @Autowired
-    public ActiveTimHoldingService(Utility _utility) {
-        utility = _utility;
-    }
 
     public ActiveTimHolding getRsuActiveTimHolding(String clientId, String direction, String ipv4Address) {
         ActiveTimHolding activeTimHolding = null;

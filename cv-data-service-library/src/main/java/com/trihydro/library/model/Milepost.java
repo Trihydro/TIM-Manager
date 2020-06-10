@@ -1,6 +1,7 @@
 package com.trihydro.library.model;
 
 import java.math.BigDecimal;
+
 import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
@@ -101,7 +102,6 @@ public class Milepost {
         double dXt = Math.asin(Math.sin(dso) * Math.sin(bso - bse)) * Milepost.RE;
 
         return dXt;
-
     }
 
     /**
@@ -117,8 +117,10 @@ public class Milepost {
         Point forePoint = Point.at(Coordinate.fromDegrees(nextNode.getLatitude().doubleValue()),
                 Coordinate.fromDegrees(nextNode.getLongitude().doubleValue()));
 
-        return EarthCalc.bearing(standPoint, forePoint);
+        double bearing = Math.toRadians(EarthCalc.bearing(standPoint, forePoint));
 
+        // convert bearing into a compass bearing (0 - 360 in radians)
+        return Math.IEEEremainder(bearing + (2.0 * Math.PI), 2.0 * Math.PI);
     }
 
     /**
@@ -132,16 +134,18 @@ public class Milepost {
      */
     public double angularDistanceTo(Milepost nextNode) {
 
-        double lat1 = this.getLatitude().doubleValue();
-        double lat2 = nextNode.getLatitude().doubleValue();
+        double lat1 = Math.toRadians(this.getLatitude().doubleValue());
+        double lat2 = Math.toRadians(nextNode.getLatitude().doubleValue());
         double dlat = lat2 - lat1;
-        double dlon = nextNode.getLongitude().doubleValue() - this.getLongitude().doubleValue();
+
+        double lon1 = Math.toRadians(this.getLongitude().doubleValue());
+        double lon2 = Math.toRadians(nextNode.getLongitude().doubleValue());
+        double dlon = lon2 - lon1;
 
         double a = (Math.sin(dlat / 2.0) * Math.sin(dlat / 2.0))
                 + (Math.cos(lat1) * Math.cos(lat2) * Math.sin(dlon / 2.0) * Math.sin(dlon / 2.0));
         double c = 2.0 * (Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a)));
 
         return c;
-
     }
 }

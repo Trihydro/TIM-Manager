@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("config")
 public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps {
-
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(327);
     private String cvRestService;
     private String[] rsuRoutes;
@@ -37,12 +36,12 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     }
 
     /**
-     * Returns the defaultLaneWidth / 2
+     * Returns the defaultLaneWidth * 0.4
      * 
      * @return
      */
     public Double getPathDistanceLimit() {
-        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+        return defaultLaneWidth.multiply(new BigDecimal("0.4")).doubleValue();
     }
 
     public Double getPointIncidentBufferMiles() {

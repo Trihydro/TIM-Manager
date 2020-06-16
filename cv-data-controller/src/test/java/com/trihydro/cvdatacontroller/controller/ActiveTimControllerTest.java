@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -491,6 +492,37 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         assertFalse("Success return on error", data.getBody());
         verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (?)");
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void GetActiveTimsByIds_SUCCESS() throws SQLException {
+        // Arrange
+        String query = "select * from active_tim where active_tim_id in (?, ?)";
+
+        // Act
+        var response = uut.GetActiveTimsByIds(Arrays.asList(-1l, -2l));
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(mockConnection).prepareStatement(query);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void GetActiveTimsByIds_FAIL() throws SQLException {
+        // Arrange
+        String query = "select * from active_tim where active_tim_id in (?, ?)";
+        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1l);
+
+        // Act
+        var response = uut.GetActiveTimsByIds(Arrays.asList(-1l, -2l));
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        verify(mockConnection).prepareStatement(query);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

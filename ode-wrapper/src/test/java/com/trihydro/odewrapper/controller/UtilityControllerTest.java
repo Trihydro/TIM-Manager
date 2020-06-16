@@ -1,8 +1,13 @@
 package com.trihydro.odewrapper.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,10 +20,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.controller.UtilityController.RsuClearSuccess;
+import com.trihydro.odewrapper.model.TimDeleteSummary;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.junit.Before;
@@ -42,6 +49,8 @@ public class UtilityControllerTest {
     TimTypeService mockTimTypeService;
     @Mock
     OdeService mockOdeService;
+    @Mock
+    ActiveTimService mockActiveTimService;
 
     @InjectMocks
     private UtilityController uut;
@@ -187,5 +196,22 @@ public class UtilityControllerTest {
         assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
         assertEquals(true, returnMessages.get(0).success);
         verify(mockWydotTimService, times(4)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
+    }
+
+    @Test
+    public void deleteTims_Success() {
+        // Arrange
+        var summary = new TimDeleteSummary();
+        doReturn(summary).when(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
+        var aTimIds = new ArrayList<Long>();
+
+        // Act
+        var result = uut.deleteTims(aTimIds);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertThat(result.getBody(), instanceOf(TimDeleteSummary.class));
+        assertNotNull((TimDeleteSummary)result.getBody());
+        verify(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
     }
 }

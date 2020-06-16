@@ -579,6 +579,52 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(deleteActiveTimResult);
 	}
 
+	@RequestMapping(value = "/get-by-ids", method = RequestMethod.POST)
+	public ResponseEntity<List<ActiveTim>> GetActiveTimsByIds(@RequestBody List<Long> ids) {
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			String query = "select * from active_tim where active_tim_id in (";
+
+			for (int i = 0; i < ids.size(); i++) {
+				query += "?, ";
+			}
+			query = query.substring(0, query.length() - 2);// subtract ', '
+			query += ")";
+			ps = connection.prepareStatement(query);
+
+			int index = 1;
+			for (int i = 0; i < ids.size(); i++) {
+				// set active_tim_id
+				ps.setLong(index, ids.get(i));
+				index++;
+			}
+			rs = ps.executeQuery();
+			activeTims = getActiveTimFromRS(rs, false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement and result set (rs closed by prepared statement)
+				if (ps != null) {
+					ps.close();
+				}
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
 	@RequestMapping(value = "/get-by-wydot-tim/{timTypeId}", method = RequestMethod.POST)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByWydotTim(@RequestBody List<? extends WydotTim> wydotTims,
 			@PathVariable Long timTypeId) {

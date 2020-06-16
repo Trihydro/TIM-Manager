@@ -15,6 +15,7 @@ import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
+import com.trihydro.odewrapper.model.TimDeleteSummary;
 import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,8 @@ public class UtilityController extends WydotTimBaseController {
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             OdeService _odeService, RestTemplateProvider _restTemplateProvider) {
-        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService, _restTemplateProvider);
+        super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
+                _restTemplateProvider);
         this.odeService = _odeService;
     }
 
@@ -140,6 +142,13 @@ public class UtilityController extends WydotTimBaseController {
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    @RequestMapping(value = "/delete-tims", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    public ResponseEntity<TimDeleteSummary> deleteTims(@RequestBody List<Long> aTimIds) {
+        var aTims = activeTimService.getActiveTimsById(aTimIds);
+        var summary = wydotTimService.deleteTimsFromRsusAndSdx(aTims);
+        return ResponseEntity.status(HttpStatus.OK).body(summary);
     }
 
     @RequestMapping(value = "/clear-rsu", method = RequestMethod.DELETE, headers = "Accept=application/json")

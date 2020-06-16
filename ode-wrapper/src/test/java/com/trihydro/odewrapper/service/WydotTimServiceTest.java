@@ -1,7 +1,10 @@
 package com.trihydro.odewrapper.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,13 +119,15 @@ public class WydotTimServiceTest {
         wydotRsu.setRsuIndex(-1);
         allRsus.add(wydotRsu);
         when(mockRsuService.selectAll()).thenReturn(allRsus);
+        doReturn(true).when(mockActiveTimService).deleteActiveTim(any());
 
         // Act
-        uut.deleteTimsFromRsusAndSdx(activeTims);
+        var result = uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
         verify(mockActiveTimService).deleteActiveTim(-1l);
         verify(mockActiveTimService).deleteActiveTim(-2l);
+        assertEquals(result.getSuccessfulRsuDeletions().size(), 2);
     }
 
     @Test
@@ -135,9 +140,10 @@ public class WydotTimServiceTest {
         String subject = "SDX Delete Fail";
         String body = "The following recordIds failed to delete from the SDX: -1032012897";
         when(mockSdwService.deleteSdxDataBySatRecordId(anyList())).thenReturn(sdxDelResults);
+        doReturn(true).when(mockActiveTimService).deleteActiveTimsById(any());
 
         // Act
-        uut.deleteTimsFromRsusAndSdx(activeTims);
+        var result = uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
         verify(mockEmailHelper).SendEmail(mockBasicConfiguration.getAlertAddresses(), null, subject, body,
@@ -147,6 +153,8 @@ public class WydotTimServiceTest {
         delIds.add(-2l);
         verify(mockActiveTimService).deleteActiveTimsById(delIds);
         verify(mockTimRsuService, never()).getTimRsusByTimId(isA(Long.class));
+        assertEquals(1, result.getSuccessfulSatelliteDeletions().size());
+        assertEquals(body, result.getSatelliteErrorSummary());
     }
 
     @Test

@@ -62,6 +62,16 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
+	public List<ActiveTim> getActiveTimsById(List<Long> aTimIds) {
+		String url = String.format("%s/active-tim/get-by-ids", config.getCvRestService());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<List<Long>> entity = new HttpEntity<List<Long>>(aTimIds, headers);
+		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST,
+				entity, ActiveTim[].class);
+		return Arrays.asList(response.getBody());
+	}
+
 	public List<ActiveTim> getActiveTimsByWydotTim(List<? extends WydotTim> wydotTims, Long timTypeId) {
 		String url = String.format("%s/active-tim/get-by-wydot-tim/%d", config.getCvRestService(), timTypeId);
 		HttpHeaders headers = new HttpHeaders();

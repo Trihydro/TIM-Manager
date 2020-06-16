@@ -582,6 +582,9 @@ public class ActiveTimController extends BaseController {
 	@RequestMapping(value = "/get-by-ids", method = RequestMethod.POST)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByIds(@RequestBody List<Long> ids) {
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		if (ids == null || ids.size() == 0) {
+			return ResponseEntity.ok(activeTims);
+		}
 		Connection connection = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;

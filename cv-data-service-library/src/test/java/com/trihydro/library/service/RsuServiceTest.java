@@ -1,6 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,8 +10,9 @@ import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
@@ -31,17 +31,21 @@ public class RsuServiceTest extends BaseServiceTest {
 
     private String baseUrl = "baseUrl";
 
-    @Before
+    @BeforeEach
     public void setupSubtest() {
+        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
+    }
+
+    private void setWydotRsuReturn(){
         WydotRsu[] wydotRsuData = new WydotRsu[1];
         wydotRsuData[0] = new WydotRsu();
         when(mockResponseEntityWydotRsuArray.getBody()).thenReturn(wydotRsuData);
-        doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
     }
 
     @Test
     public void selectAll() {
         // Arrange
+        setWydotRsuReturn();
         String url = String.format("%s/rsus", baseUrl);
         when(mockRestTemplate.getForEntity(url, WydotRsu[].class)).thenReturn(mockResponseEntityWydotRsuArray);
 
@@ -50,12 +54,13 @@ public class RsuServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, WydotRsu[].class);
-        assertEquals(1, data.size());
+        Assertions.assertEquals(1, data.size());
     }
 
     @Test
     public void selectRsusByRoute() {
         // Arrange
+        setWydotRsuReturn();
         String route = "i80";
         String url = String.format("%s/rsus-by-route/%s", baseUrl, route);
         when(mockRestTemplate.getForEntity(url, WydotRsu[].class)).thenReturn(mockResponseEntityWydotRsuArray);
@@ -65,7 +70,7 @@ public class RsuServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, WydotRsu[].class);
-        assertEquals(1, data.size());
+        Assertions.assertEquals(1, data.size());
     }
 
     @Test
@@ -84,6 +89,6 @@ public class RsuServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, WydotRsuTim[].class);
-        assertEquals(1, data.size());
+        Assertions.assertEquals(1, data.size());
     }
 }

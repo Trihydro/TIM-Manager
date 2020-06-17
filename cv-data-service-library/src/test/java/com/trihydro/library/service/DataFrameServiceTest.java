@@ -1,14 +1,14 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.trihydro.library.model.CVRestServiceProps;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpEntity;
@@ -28,7 +28,7 @@ public class DataFrameServiceTest extends BaseServiceTest {
     @InjectMocks
     private DataFrameService uut;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         responseArray[0] = "test";
         doReturn(responseArray).when(mockResponseEntityStringArray).getBody();
@@ -49,7 +49,7 @@ public class DataFrameServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, String[].class);
-        assertEquals(1, data.length);
-        assertEquals(responseArray[0], data[0]);
+        Assertions.assertEquals(1, data.length);
+        Assertions.assertEquals(responseArray[0], data[0]);
     }
 }

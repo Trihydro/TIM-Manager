@@ -1,6 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,16 +9,14 @@ import java.util.List;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TracMessageSent;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class TracMessageSentServiceTest extends BaseServiceTest {
 
     @Mock
@@ -50,8 +47,8 @@ public class TracMessageSentServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, String[].class);
-        assertEquals(1, data.size());
-        assertEquals("test", data.get(0));
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals("test", data.get(0));
     }
 
     @Test
@@ -69,6 +66,6 @@ public class TracMessageSentServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Long.class);
-        assertEquals(Long.valueOf(1), data);
+        Assertions.assertEquals(Long.valueOf(1), data);
     }
 }

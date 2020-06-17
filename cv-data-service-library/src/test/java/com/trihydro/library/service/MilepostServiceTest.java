@@ -1,6 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,8 +11,9 @@ import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpEntity;
@@ -33,7 +33,7 @@ public class MilepostServiceTest extends BaseServiceTest {
 
     private String baseUrl = "baseUrl";
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         doReturn(baseUrl).when(mockConfig).getCvRestService();
     }
@@ -59,8 +59,8 @@ public class MilepostServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Milepost[].class);
-        assertEquals(1, data.size());
-        assertEquals(milepost, data.get(0));
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(milepost, data.get(0));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class MilepostServiceTest extends BaseServiceTest {
  
          // Assert
          verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, Milepost[].class);
-         assertEquals(1, data.size());
-         assertEquals(milepost, data.get(0));
+         Assertions.assertEquals(1, data.size());
+         Assertions.assertEquals(milepost, data.get(0));
     }
 }

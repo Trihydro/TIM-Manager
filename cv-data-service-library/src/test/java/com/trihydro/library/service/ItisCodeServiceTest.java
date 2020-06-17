@@ -1,6 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,15 +10,12 @@ import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TmddItisCode;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.ResponseEntity;
-
-@RunWith(StrictStubs.class)
 
 public class ItisCodeServiceTest extends BaseServiceTest {
 
@@ -37,7 +33,7 @@ public class ItisCodeServiceTest extends BaseServiceTest {
     @InjectMocks
     private ItisCodeService uut;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         doReturn(baseUrl).when(mockConfig).getCvRestService();
     }
@@ -60,8 +56,8 @@ public class ItisCodeServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, ItisCode[].class);
-        assertEquals(1, data.size());
-        assertEquals(ic, data.get(0));
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(ic, data.get(0));
     }
 
     @Test
@@ -80,9 +76,9 @@ public class ItisCodeServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, TmddItisCode[].class);
-        assertEquals(1, data.size());
-        assertEquals("type", data.get(0).getElementType());
-        assertEquals("value", data.get(0).getElementValue());
-        assertEquals(5, (int) data.get(0).getItisCode());
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals("type", data.get(0).getElementType());
+        Assertions.assertEquals("value", data.get(0).getElementValue());
+        Assertions.assertEquals(5, (int) data.get(0).getItisCode());
     }
 }

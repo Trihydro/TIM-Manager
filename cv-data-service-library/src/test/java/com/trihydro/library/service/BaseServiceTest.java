@@ -1,6 +1,6 @@
 package com.trihydro.library.service;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ public class BaseServiceTest {
 
     @BeforeEach
     public void setup() throws SQLException {
-        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
+        lenient().when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
     }
 
     protected HttpHeaders getDefaultHeaders() {

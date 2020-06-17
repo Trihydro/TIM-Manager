@@ -1,22 +1,18 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import com.trihydro.library.model.CVRestServiceProps;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-
-@RunWith(StrictStubs.class)
 
 public class RegionServiceTest extends BaseServiceTest {
 
@@ -31,7 +27,7 @@ public class RegionServiceTest extends BaseServiceTest {
 
     private String baseUrl = "baseUrl";
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         doReturn(true).when(mockResponseEntityBoolean).getBody();
         doReturn(baseUrl).when(mockConfig).getCvRestService();
@@ -51,6 +47,6 @@ public class RegionServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
-        assertEquals(true, data);
+        Assertions.assertEquals(true, data);
     }
 }

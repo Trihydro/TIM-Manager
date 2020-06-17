@@ -10,10 +10,6 @@
 
   <artifactId>ode-data-logger</artifactId>
 
-  <properties>
-    <junit.version>4.12</junit.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.kafka</groupId>
@@ -30,10 +26,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-    <!-- <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-    </dependency> -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-mail</artifactId>

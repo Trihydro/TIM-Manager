@@ -95,8 +95,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public List<ActiveTim> getExpiredActiveTims() {
-		ResponseEntity<TimUpdateModel[]> response = restTemplateProvider.GetRestTemplate()
-				.getForEntity(config.getCvRestService() + "/active-tim/expired", TimUpdateModel[].class);
+		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate()
+				.getForEntity(config.getCvRestService() + "/active-tim/expired", ActiveTim[].class);
 		return Arrays.asList(response.getBody());
 	}
 

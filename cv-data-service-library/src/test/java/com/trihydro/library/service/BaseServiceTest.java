@@ -9,25 +9,25 @@ import java.sql.SQLException;
 
 import com.google.gson.Gson;
 
-import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 @Ignore
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class BaseServiceTest {
     @Mock
     protected RestTemplate mockRestTemplate;
     @Mock
     protected RestTemplateProvider mockRestTemplateProvider;
 
-    @Before
+    @BeforeEach
     public void setup() throws SQLException {
         when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
     }

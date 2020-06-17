@@ -528,6 +528,17 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     }
 
     @Test
+    public void GetActiveTimsByIds_BadRequest() throws SQLException {
+        // Arrange
+
+        // Act
+        var response = uut.GetActiveTimsByIds(null);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
     public void GetActiveTimsByWydotTim_SUCCESS() throws SQLException {
         // Arrange
         List<WydotTim> wydotTims = new ArrayList<>();

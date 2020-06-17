@@ -1,8 +1,5 @@
 package com.trihydro.library.helpers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -14,7 +11,8 @@ import com.trihydro.library.helpers.deserializers.ProductDeserializer;
 import com.trihydro.library.models.Product;
 import com.trihydro.library.models.Store;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ListDeserializerTest {
     // This class uses the Store and Product classes as a proof of concept.
@@ -57,8 +55,8 @@ public class ListDeserializerTest {
         Store result = uut.fromJson(json, Store.class);
 
         // Assert
-        assertEquals(1, result.getProducts().size());
-        assertEquals("1234", result.getProducts().get(0).getSerialNumber());
+        Assertions.assertEquals(1, result.getProducts().size());
+        Assertions.assertEquals("1234", result.getProducts().get(0).getSerialNumber());
     }
 
     @Test
@@ -71,9 +69,9 @@ public class ListDeserializerTest {
         Store result = uut.fromJson(json, Store.class);
 
         // Assert
-        assertEquals(2, result.getProducts().size());
-        assertEquals("1234", result.getProducts().get(0).getSerialNumber());
-        assertEquals("5678", result.getProducts().get(1).getSerialNumber());
+        Assertions.assertEquals(2, result.getProducts().size());
+        Assertions.assertEquals("1234", result.getProducts().get(0).getSerialNumber());
+        Assertions.assertEquals("5678", result.getProducts().get(1).getSerialNumber());
     }
 
     @Test
@@ -86,8 +84,8 @@ public class ListDeserializerTest {
         Store result = uut.fromJson(json, Store.class);
 
         // Assert
-        assertEquals(1, result.getProducts().size());
-        assertEquals("1234", result.getProducts().get(0).getSerialNumber());
+        Assertions.assertEquals(1, result.getProducts().size());
+        Assertions.assertEquals("1234", result.getProducts().get(0).getSerialNumber());
     }
 
     @Test
@@ -100,16 +98,18 @@ public class ListDeserializerTest {
         Store result = uut.fromJson(json, Store.class);
 
         // Assert
-        assertNull(result);
+        Assertions.assertNull(result);
     }
 
-    @Test(expected = JsonParseException.class)
+    @Test
     public void invalid_json_type() {
         // Arrange
         Gson uut = getGson();
         String json = "{ \"products\": \"a string\" }";
 
         // Act
-        uut.fromJson(json, Store.class);
+        Assertions.assertThrows(JsonParseException.class, () -> {
+            uut.fromJson(json, Store.class);
+        });
     }
 }

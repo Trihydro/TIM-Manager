@@ -583,7 +583,7 @@ public class ActiveTimController extends BaseController {
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByIds(@RequestBody List<Long> ids) {
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		if (ids == null || ids.size() == 0) {
-			return ResponseEntity.ok(activeTims);
+			return ResponseEntity.badRequest().body(activeTims);
 		}
 		Connection connection = null;
 		PreparedStatement ps = null;

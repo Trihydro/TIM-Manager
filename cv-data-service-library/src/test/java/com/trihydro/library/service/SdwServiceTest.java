@@ -6,25 +6,17 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.SDXDecodeRequest;
@@ -38,39 +30,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClientException;
 
-@PrepareForTest({ SdwService.class })
-@RunWith(PowerMockRunner.class)
+@RunWith(StrictStubs.class)
 public class SdwServiceTest extends BaseServiceTest {
 
     @Mock
     SdwProps mockConfig;
-
-    @Mock
-    HttpURLConnection mockUrlConn;
-
-    @Mock
-    InputStreamReader mockISReader;
-
-    @Mock
-    BufferedReader mockBufferedReader;
-
-    @Mock
-    ObjectMapper mockObjMapper;
-
-    @Mock
-    OutputStream mockOutputStream;
-
-    @Mock
-    Stream<String> mockStringStream;
 
     @Mock
     Utility mockUtility;
@@ -81,13 +55,22 @@ public class SdwServiceTest extends BaseServiceTest {
     @Mock
     ResponseEntity<SDXDecodeResponse> mockDecodeResponse;
 
+    @Mock
+    private ResponseEntity<AdvisorySituationDataDeposit> mockRespAdvisorySituationDataDeposit;
+
+    @Mock
+    private ResponseEntity<HashMap<Integer, Boolean>> mockRespHashMap;
+
     @InjectMocks
     SdwService sdwService;
 
+    private String baseUrl = "http://localhost:12230";
+    private String apiKey = "apiKey";
+
     @Before
     public void setupSubTest() throws SQLException {
-        when(mockConfig.getSdwRestUrl()).thenReturn("http://localhost:12230");
-        when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
+        when(mockConfig.getSdwRestUrl()).thenReturn(baseUrl);
+        when(mockConfig.getSdwApiKey()).thenReturn(apiKey);
     }
 
     @Test
@@ -104,32 +87,24 @@ public class SdwServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void getSdwDataByRecordId_handleException() throws IOException {
-        when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
-        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
-                .thenThrow(new IOException());
-        AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId("record");
-        Assert.isNull(asdd, "AdvisorySituationDeposit should be null");
-    }
-
-    @Test
     public void getSdwDataByRecordId_success() throws IOException, Exception {
-        when(mockBufferedReader.readLine()).thenReturn("testValue");
-        when(mockConfig.getSdwApiKey()).thenReturn("apiKey");
-        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
-                .thenReturn(mockUrlConn);
-        AdvisorySituationDataDeposit asdd_orig = new AdvisorySituationDataDeposit();
-        when(mockObjMapper.readValue("testValue", AdvisorySituationDataDeposit.class)).thenReturn(asdd_orig);
+        // Arrange
+        String recordId = "record";
+        String url = String.format("%s/api/GetDataByRecordId?recordId=%s", baseUrl, recordId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("apikey", apiKey);
+        HttpEntity<String> entity = getEntity(null, String.class, headers);
+        when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, AdvisorySituationDataDeposit.class))
+                .thenReturn(mockRespAdvisorySituationDataDeposit);
+        when(mockRespAdvisorySituationDataDeposit.getBody()).thenReturn(new AdvisorySituationDataDeposit());
 
-        PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(mockISReader);
-        PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(mockBufferedReader);
-        PowerMockito.whenNew(ObjectMapper.class).withNoArguments().thenReturn(mockObjMapper);
+        // Act
+        var data = sdwService.getSdwDataByRecordId(recordId);
 
-        AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId("record");
-        verify(mockBufferedReader).readLine();
-        verify(mockUtility).getSdxUrlConnection("GET",
-                new URL("http://localhost:12230/api/GetDataByRecordId?recordId=record"), "apiKey");
-        assertEquals(asdd_orig, asdd);
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, AdvisorySituationDataDeposit.class);
+        assertNotNull(data);
     }
 
     @Test
@@ -159,33 +134,29 @@ public class SdwServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void deleteSdxDataBySatRecordId_handleException() throws IOException {
-        List<String> satNames = new ArrayList<String>();
-        satNames.add("A9184436");
-        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
-                .thenThrow(new IOException());
-        HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
-        assertNull(results);
-    }
-
-    @Test
     public void deleteSdxDataBySatRecordId_success() throws IOException, Exception {
+        // Arrange
         List<String> satNames = new ArrayList<String>();
         satNames.add("A9184436");
         HashMap<Integer, Boolean> hMap = new HashMap<Integer, Boolean>();
         hMap.put(-1, true);
 
-        when(mockStringStream.collect(any())).thenReturn("{\"-1101625306\":null}");
-        when(mockBufferedReader.lines()).thenReturn(mockStringStream);
-        PowerMockito.whenNew(InputStreamReader.class).withAnyArguments().thenReturn(mockISReader);
-        PowerMockito.whenNew(BufferedReader.class).withAnyArguments().thenReturn(mockBufferedReader);
-        when(mockUrlConn.getOutputStream()).thenReturn(mockOutputStream);
-        when(mockUrlConn.getResponseCode()).thenReturn(200);
-        when(mockUtility.getSdxUrlConnection(isA(String.class), isA(URL.class), isA(String.class)))
-                .thenReturn(mockUrlConn);
+        String url = String.format("%s/api/delete-multiple-by-recordid", baseUrl);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("apikey", apiKey);
+        HttpEntity<List<String>> entity = new HttpEntity<List<String>>(satNames, headers);
+        ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
+        };
+        when(mockRestTemplate.exchange(url, HttpMethod.DELETE, entity, responseType)).thenReturn(mockRespHashMap);
+        when(mockRespHashMap.getBody()).thenReturn(hMap);
+
+        // Act
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
+
+        // Assert
         assertNotNull(results);
-        assertThat(results, IsMapContaining.hasKey(-1101625306));
+        assertThat(results, IsMapContaining.hasKey(-1));
     }
 
     @Test
@@ -241,9 +212,6 @@ public class SdwServiceTest extends BaseServiceTest {
         // Arrange (if for some reason we get past the guard clause, ensure the REST
         // request doesn't happen)
         String url = "http://localhost:12230/api/decode";
-        when(mockRestTemplate.exchange(eq(url), eq(HttpMethod.POST), isA(HttpEntity.class),
-                eq(SDXDecodeResponse.class))).thenReturn(mockDecodeResponse);
-        when(mockDecodeResponse.getBody()).thenReturn(null);
 
         // Act
         var exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -258,9 +226,6 @@ public class SdwServiceTest extends BaseServiceTest {
         // Arrange (if for some reason we get past the guard clause, ensure the REST
         // request doesn't happen)
         String url = "http://localhost:12230/api/decode";
-        when(mockRestTemplate.exchange(eq(url), eq(HttpMethod.POST), isA(HttpEntity.class),
-                eq(SDXDecodeResponse.class))).thenReturn(mockDecodeResponse);
-        when(mockDecodeResponse.getBody()).thenReturn(null);
 
         // Act
         var exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -309,7 +274,6 @@ public class SdwServiceTest extends BaseServiceTest {
         String url = "http://localhost:12230/api/decode";
         when(mockRestTemplate.exchange(eq(url), eq(HttpMethod.POST), isA(HttpEntity.class),
                 eq(SDXDecodeResponse.class))).thenThrow(new RestClientException("something went wrong..."));
-        when(mockDecodeResponse.getBody()).thenReturn(response);
 
         // Act
         List<Integer> result = sdwService.getItisCodesFromAdvisoryMessage("00000000000000001F");

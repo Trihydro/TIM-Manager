@@ -44,6 +44,12 @@ public class BaseServiceTest {
         return entity;
     }
 
+    @SuppressWarnings("unchecked")
+    protected <T> HttpEntity<T> getEntity(Object body, Class<T> clazz, HttpHeaders customHeaders) {
+        HttpEntity<T> entity = new HttpEntity<T>((T) body, customHeaders);
+        return entity;
+    }
+
     protected <T> T importJsonObject(String fileName, Class<T> clazz) {
         InputStream is = BaseServiceTest.class.getResourceAsStream(fileName);
         InputStreamReader isr = new InputStreamReader(is);

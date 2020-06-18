@@ -600,11 +600,9 @@ public class ActiveTimController extends BaseController {
 			query += ")";
 			ps = connection.prepareStatement(query);
 
-			int index = 1;
 			for (int i = 0; i < ids.size(); i++) {
 				// set active_tim_id
-				ps.setLong(index, ids.get(i));
-				index++;
+				ps.setLong(i+1, ids.get(i));
 			}
 			rs = ps.executeQuery();
 			activeTims = getActiveTimFromRS(rs, false);

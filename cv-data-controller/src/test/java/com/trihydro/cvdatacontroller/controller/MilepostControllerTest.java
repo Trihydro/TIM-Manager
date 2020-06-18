@@ -1,6 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,15 +21,13 @@ import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class MilepostControllerTest extends TestBase<MilepostController> {
     private Coordinate startPoint;
     private Coordinate endPoint;
@@ -43,7 +40,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
     @Mock
     MilepostService mockMilepostService;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockMilepostService);
         
@@ -68,12 +65,12 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         ResponseEntity<List<Milepost>> data = uut.getMilepostsCommonName(commonName, false);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement)
                 .executeQuery(String.format("select * from MILEPOST_VW_NEW where COMMON_NAME = '%s'", commonName));
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(1, data.getBody().size());
     }
 
     @Test
@@ -85,12 +82,12 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         ResponseEntity<List<Milepost>> data = uut.getMilepostsCommonName(commonName, true);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(String
                 .format("select * from MILEPOST_VW_NEW where COMMON_NAME = '%s' and MOD(milepost, 1) = 0", commonName));
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(1, data.getBody().size());
     }
 
     @Test
@@ -102,12 +99,12 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         ResponseEntity<List<Milepost>> data = uut.getMilepostsCommonName(commonName, false);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement)
                 .executeQuery(String.format("select * from MILEPOST_VW_NEW where COMMON_NAME = '%s'", commonName));
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(0, data.getBody().size());
     }
 
     @Test
@@ -119,8 +116,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         ResponseEntity<List<String>> data = uut.getRoutes();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
     }
 
     @Test
@@ -132,8 +129,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         ResponseEntity<List<String>> data = uut.getRoutes();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(0, data.getBody().size());
     }
 
     @Test
@@ -147,7 +144,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 .getMilepostsByStartEndPoint(wydotTim);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
     }
 
     @Test
@@ -161,7 +158,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 .getMilepostsByStartEndPoint(wydotTim);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
     }
 
     @Test
@@ -175,7 +172,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 .getMilepostsByStartEndPoint(wydotTim);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
     }
 
     @Test
@@ -189,7 +186,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 .getMilepostsByStartEndPoint(wydotTim);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
     }
 
     @Test
@@ -206,8 +203,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 .getMilepostsByStartEndPoint(wydotTim);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
     }
 
     @Test
@@ -228,8 +225,8 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 .getMilepostsByPointWithBuffer(mpb);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
     }
 
     @Test
@@ -247,7 +244,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 toMilepost);
 
         // Assert
-        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getString("COMMON_NAME");
         verify(mockRs).getDouble("MILEPOST");
@@ -256,7 +253,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         // verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, milePosts.getBody().size());
+        Assertions.assertEquals(1, milePosts.getBody().size());
     }
 
     @Test
@@ -274,7 +271,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 fromMilepost);
 
         // Assert
-        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getString("COMMON_NAME");
         verify(mockRs).getDouble("MILEPOST");
@@ -283,7 +280,7 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
         // verify(mockRs).getDouble("BEARING");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, milePosts.getBody().size());
+        Assertions.assertEquals(1, milePosts.getBody().size());
     }
 
     @Test
@@ -302,12 +299,12 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 fromMilepost);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
-        assertEquals(0, milePosts.getBody().size());
+        Assertions.assertEquals(0, milePosts.getBody().size());
     }
 
     @Test
@@ -327,11 +324,11 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 toMilepost);
 
         // Assert
-        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, milePosts.getBody().size());
+        Assertions.assertEquals(1, milePosts.getBody().size());
     }
 
     @Test
@@ -351,11 +348,11 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 fromMilepost);
 
         // Assert
-        assertEquals(HttpStatus.OK, milePosts.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, milePosts.getBody().size());
+        Assertions.assertEquals(1, milePosts.getBody().size());
     }
 
     @Test
@@ -376,11 +373,11 @@ public class MilepostControllerTest extends TestBase<MilepostController> {
                 fromMilepost);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, milePosts.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(0, milePosts.getBody().size());
+        Assertions.assertEquals(0, milePosts.getBody().size());
     }
 
 }

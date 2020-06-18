@@ -1,7 +1,5 @@
 package com.trihydro.rsudatacontroller.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -19,15 +17,16 @@ import com.trihydro.rsudatacontroller.config.BasicConfiguration;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.process.ProcessFactory;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class RsuServiceTest {
     @Mock
     ProcessFactory mockProcessFactory;
@@ -48,7 +47,7 @@ public class RsuServiceTest {
     @InjectMocks
     RsuService uut;
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         when(mockConfig.getSnmpRetries()).thenReturn(0);
         when(mockConfig.getSnmpTimeoutSeconds()).thenReturn(10);
@@ -56,13 +55,16 @@ public class RsuServiceTest {
         when(mockConfig.getSnmpAuthPassphrase()).thenReturn("passphrase");
         when(mockConfig.getSnmpAuthProtocol()).thenReturn("protocol");
         when(mockConfig.getSnmpSecurityLevel()).thenReturn("level");
+    }
 
+    private void setupProcess() {
         when(mockProcessFactory.buildAndStartProcess(factoryArgs.capture())).thenReturn(mockProcess);
     }
 
     @Test
     public void getAllDeliveryStartTimes_success() throws Exception {
         // Arrange
+        setupProcess();
         InputStream output = getInputStream("iso.0.15628.4.1.4.1.7.2 = Hex-STRING: 07 E4 03 14 11 3B",
                 "iso.0.15628.4.1.4.1.7.3 = Hex-STRING: 07 E4 03 14 13 1E");
         doReturn(output).when(mockProcess).getInputStream();
@@ -71,13 +73,13 @@ public class RsuServiceTest {
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
 
         // Assert
-        assertEquals(2, results.size());
-        assertEquals(2, (int) results.get(0).getIndex());
-        assertEquals("2020-03-20 17:59:00", results.get(0).getDeliveryStartTime());
-        assertEquals(3, (int) results.get(1).getIndex());
-        assertEquals("2020-03-20 19:30:00", results.get(1).getDeliveryStartTime());
+        Assertions.assertEquals(2, results.size());
+        Assertions.assertEquals(2, (int) results.get(0).getIndex());
+        Assertions.assertEquals("2020-03-20 17:59:00", results.get(0).getDeliveryStartTime());
+        Assertions.assertEquals(3, (int) results.get(1).getIndex());
+        Assertions.assertEquals("2020-03-20 19:30:00", results.get(1).getDeliveryStartTime());
 
-        assertEquals(
+        Assertions.assertEquals(
                 "snmpwalk -v 3 -r 0 -t 10 -u username -l level -a protocol -A passphrase 0.0.0.0 1.0.15628.4.1.4.1.7",
                 String.join(" ", factoryArgs.getAllValues()));
     }
@@ -85,6 +87,7 @@ public class RsuServiceTest {
     @Test
     public void getAllDeliveryStartTimes_single() throws Exception {
         // Arrange
+        setupProcess();
         InputStream output = getInputStream("iso.0.15628.4.1.4.1.7.2 = Hex-STRING: 07 E4 03 14 11 3B ");
         doReturn(output).when(mockProcess).getInputStream();
 
@@ -92,11 +95,11 @@ public class RsuServiceTest {
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
 
         // Assert
-        assertEquals(1, results.size());
-        assertEquals(2, (int) results.get(0).getIndex());
-        assertEquals("2020-03-20 17:59:00", results.get(0).getDeliveryStartTime());
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals(2, (int) results.get(0).getIndex());
+        Assertions.assertEquals("2020-03-20 17:59:00", results.get(0).getDeliveryStartTime());
 
-        assertEquals(
+        Assertions.assertEquals(
                 "snmpwalk -v 3 -r 0 -t 10 -u username -l level -a protocol -A passphrase 0.0.0.0 1.0.15628.4.1.4.1.7",
                 String.join(" ", factoryArgs.getAllValues()));
     }
@@ -104,6 +107,7 @@ public class RsuServiceTest {
     @Test
     public void getAllDeliveryStartTimes_none() throws Exception {
         // Arrange
+        setupProcess();
         InputStream output = getInputStream("");
         doReturn(output).when(mockProcess).getInputStream();
 
@@ -111,9 +115,9 @@ public class RsuServiceTest {
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
 
         // Assert
-        assertEquals(0, results.size());
+        Assertions.assertEquals(0, results.size());
 
-        assertEquals(
+        Assertions.assertEquals(
                 "snmpwalk -v 3 -r 0 -t 10 -u username -l level -a protocol -A passphrase 0.0.0.0 1.0.15628.4.1.4.1.7",
                 String.join(" ", factoryArgs.getAllValues()));
     }
@@ -121,6 +125,7 @@ public class RsuServiceTest {
     @Test
     public void getAllDeliveryStartTimes_snmpTimeout() throws Exception {
         // Arrange
+        setupProcess();
         InputStream output = getInputStream("snmpwalk: Timeout");
         doReturn(output).when(mockProcess).getInputStream();
 
@@ -128,30 +133,30 @@ public class RsuServiceTest {
         List<RsuTim> results = uut.getAllDeliveryStartTimes("0.0.0.0");
 
         // Assert
-        assertNull(results);
+        Assertions.assertNull(results);
         verify(mockUtility).logWithDate(any());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void getAllDeliveryStartTimes_throwsRuntimeException() throws Exception {
         // Arrange
         doThrow(new RuntimeException("unable to find snmpwalk command")).when(mockProcessFactory)
                 .buildAndStartProcess(any());
 
         // Act
-        uut.getAllDeliveryStartTimes("0.0.0.0");
+        Assertions.assertThrows(RuntimeException.class, () -> uut.getAllDeliveryStartTimes("0.0.0.0"));
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void getAllDeliveryStartTimes_throwsIOException() throws Exception {
         // Arrange
-        // InputStream mockInputStream = mock(InputStream.class);
+        setupProcess();
         doThrow(new IOException("error occurred reading input stream")).when(mockInputStream).read(any(), anyInt(),
                 anyInt());
         doReturn(mockInputStream).when(mockProcess).getInputStream();
 
         // Act
-        uut.getAllDeliveryStartTimes("0.0.0.0");
+        Assertions.assertThrows(IOException.class, () -> uut.getAllDeliveryStartTimes("0.0.0.0"));
     }
 
     private InputStream getInputStream(String... lines) {

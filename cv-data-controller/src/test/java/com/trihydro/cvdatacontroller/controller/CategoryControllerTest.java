@@ -1,6 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -9,13 +8,11 @@ import java.util.List;
 
 import com.trihydro.library.model.Category;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class CategoryControllerTest extends TestBase<CategoryController> {
 
     @Test
@@ -26,8 +23,8 @@ public class CategoryControllerTest extends TestBase<CategoryController> {
         ResponseEntity<List<Category>> data = uut.SelectAllCategories();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
         verify(mockRs).getInt("category_id");
         verify(mockRs).getString("category");
         verify(mockRs).close();
@@ -44,8 +41,8 @@ public class CategoryControllerTest extends TestBase<CategoryController> {
         ResponseEntity<List<Category>> data = uut.SelectAllCategories();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(0, data.getBody().size());
         verify(mockRs).close();
         verify(mockStatement).close();
         verify(mockConnection).close();

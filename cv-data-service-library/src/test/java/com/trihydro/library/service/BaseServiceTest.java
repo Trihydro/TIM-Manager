@@ -1,6 +1,6 @@
 package com.trihydro.library.service;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,27 +9,27 @@ import java.sql.SQLException;
 
 import com.google.gson.Gson;
 
-import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 @Ignore
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class BaseServiceTest {
     @Mock
     protected RestTemplate mockRestTemplate;
     @Mock
     protected RestTemplateProvider mockRestTemplateProvider;
 
-    @Before
+    @BeforeEach
     public void setup() throws SQLException {
-        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
+        lenient().when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
     }
 
     protected HttpHeaders getDefaultHeaders() {
@@ -41,6 +41,12 @@ public class BaseServiceTest {
     @SuppressWarnings("unchecked")
     protected <T> HttpEntity<T> getEntity(Object body, Class<T> clazz) {
         HttpEntity<T> entity = new HttpEntity<T>((T) body, getDefaultHeaders());
+        return entity;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> HttpEntity<T> getEntity(Object body, Class<T> clazz, HttpHeaders customHeaders) {
+        HttpEntity<T> entity = new HttpEntity<T>((T) body, customHeaders);
         return entity;
     }
 

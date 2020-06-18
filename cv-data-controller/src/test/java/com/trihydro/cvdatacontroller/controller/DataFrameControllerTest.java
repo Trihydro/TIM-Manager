@@ -1,17 +1,14 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class DataFrameControllerTest extends TestBase<DataFrameController> {
 
     @Test
@@ -25,13 +22,13 @@ public class DataFrameControllerTest extends TestBase<DataFrameController> {
         ResponseEntity<String[]> data = uut.GetItisCodesForDataFrameId(-1);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getString("ITIS_CODE");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
-        assertEquals(1, data.getBody().length);
+        Assertions.assertEquals(1, data.getBody().length);
     }
 
     // TODO: test AddDataFrame

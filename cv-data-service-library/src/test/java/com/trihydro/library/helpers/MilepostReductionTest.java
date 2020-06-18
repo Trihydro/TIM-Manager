@@ -1,18 +1,13 @@
 package com.trihydro.library.helpers;
 
-// import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-// import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.model.Milepost;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class MilepostReductionTest {
 
@@ -27,7 +22,7 @@ public class MilepostReductionTest {
         List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
 
         // Assert
-        assertTrue(mps.size() > reduced.size());
+        Assertions.assertTrue(mps.size() > reduced.size());
     }
 
     @Test
@@ -39,7 +34,7 @@ public class MilepostReductionTest {
         List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
 
         // Assert
-        assertTrue(mps.size() > reduced.size());
+        Assertions.assertTrue(mps.size() > reduced.size());
     }
 
     @Test
@@ -50,7 +45,7 @@ public class MilepostReductionTest {
         List<Milepost> reduced = uut.applyMilepostReductionAlorithm(null, Double.valueOf(327 / 2));
 
         // Assert
-        assertNull(reduced);
+        Assertions.assertNull(reduced);
     }
 
     @Test
@@ -62,7 +57,7 @@ public class MilepostReductionTest {
         List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
 
         // Assert
-        assertEquals(0, reduced.size());
+        Assertions.assertEquals(0, reduced.size());
     }
 
     private List<Milepost> getMileposts() {

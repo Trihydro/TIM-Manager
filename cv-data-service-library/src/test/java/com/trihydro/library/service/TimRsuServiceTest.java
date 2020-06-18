@@ -1,7 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,8 +9,9 @@ import java.util.List;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimRsu;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpEntity;
@@ -32,7 +31,7 @@ public class TimRsuServiceTest extends BaseServiceTest {
     @InjectMocks
     private TimRsuService uut;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         doReturn(baseUrl).when(mockCVRestServiceProps).getCvRestService();
     }
@@ -55,7 +54,7 @@ public class TimRsuServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, TimRsu[].class);
-        assertEquals(1, data.size());
+        Assertions.assertEquals(1, data.size());
     }
 
     @Test
@@ -72,7 +71,7 @@ public class TimRsuServiceTest extends BaseServiceTest {
         TimRsu data = uut.getTimRsu(timId, rsuId);
 
         // Assert
-        assertNotNull(data);
+        Assertions.assertNotNull(data);
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, TimRsu.class);
     }
 }

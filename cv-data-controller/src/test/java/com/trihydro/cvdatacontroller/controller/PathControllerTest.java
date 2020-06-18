@@ -1,6 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -11,16 +10,14 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class PathControllerTest extends TestBase<PathController> {
 
     @Mock
@@ -28,7 +25,7 @@ public class PathControllerTest extends TestBase<PathController> {
     @Spy
     private TimOracleTables mockTimOracleTables;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
@@ -42,7 +39,7 @@ public class PathControllerTest extends TestBase<PathController> {
         ResponseEntity<Long> data = uut.InsertPath();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
 
@@ -57,7 +54,7 @@ public class PathControllerTest extends TestBase<PathController> {
         ResponseEntity<Long> data = uut.InsertPath();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

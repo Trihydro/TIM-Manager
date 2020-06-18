@@ -1,8 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -20,18 +17,16 @@ import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 
-@RunWith(StrictStubs.class)
 public class ActiveTimServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<TimUpdateModel[]> mockResponseEntity;
@@ -58,30 +53,44 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     @InjectMocks
     private ActiveTimService uut;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() throws SQLException {
+        doReturn(baseUrl).when(mockConfig).getCvRestService();
+    }
+
+    private void setupBooleanReturn() {
         doReturn(true).when(mockResponseEntityBoolean).getBody();
+    }
+
+    private void setupIntegerArrayReturn() {
         Integer[] intArray = new Integer[3];
         intArray[0] = 0;
         intArray[1] = 1;
         intArray[2] = 2;
         when(mockResponseEntityIntegerArray.getBody()).thenReturn(intArray);
+    }
 
+    private void setupActiveTimArrayReturn() {
         aTims = new ActiveTim[1];
         aTim = new ActiveTim();
         aTim.setActiveTimId(-1l);
         aTims[0] = aTim;
         doReturn(aTims).when(mockResponseEntityActiveTims).getBody();
-        doReturn(aTim).when(mockResponseEntityActiveTim).getBody();
+    }
 
+    private void setupActiveTimReturn() {
+        aTim = new ActiveTim();
+        aTim.setActiveTimId(-1l);
+        doReturn(aTim).when(mockResponseEntityActiveTim).getBody();
+    }
+
+    private void setupTUMReturn(){
         tumArr = new TimUpdateModel[1];
         TimUpdateModel tum = new TimUpdateModel();
         tum.setActiveTimId(-1l);
         tum.setClientId("testClient");
         tumArr[0] = tum;
         when(mockResponseEntityTimUpdateModelArray.getBody()).thenReturn(tumArr);
-
-        doReturn(baseUrl).when(mockConfig).getCvRestService();
     }
 
     private void setupWydotTims() {
@@ -99,6 +108,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     @Test
     public void updateActiveTim_SatRecordId() {
         // Arrange
+        setupBooleanReturn();
         Long activeTimId = -1l;
         String satRecordId = "asdf";
         HttpEntity<String> entity = getEntity(null, String.class);
@@ -111,12 +121,13 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
-        assertTrue("Update failed when should have succeeded", data);
+        Assertions.assertTrue(data, "Update failed when should have succeeded");
     }
 
     @Test
     public void addItisCodesToActiveTim() {
         // Arrange
+        setupIntegerArrayReturn();
         ActiveTim activeTim = new ActiveTim();
         activeTim.setActiveTimId(-1l);
         String url = String.format("%s/active-tim/itis-codes/%d", baseUrl, activeTim.getActiveTimId());
@@ -127,15 +138,16 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, Integer[].class);
-        assertEquals(3, activeTim.getItisCodes().size());
-        assertEquals(Integer.valueOf(0), activeTim.getItisCodes().get(0));
-        assertEquals(Integer.valueOf(1), activeTim.getItisCodes().get(1));
-        assertEquals(Integer.valueOf(2), activeTim.getItisCodes().get(2));
+        Assertions.assertEquals(3, activeTim.getItisCodes().size());
+        Assertions.assertEquals(Integer.valueOf(0), activeTim.getItisCodes().get(0));
+        Assertions.assertEquals(Integer.valueOf(1), activeTim.getItisCodes().get(1));
+        Assertions.assertEquals(Integer.valueOf(2), activeTim.getItisCodes().get(2));
     }
 
     @Test
     public void deleteActiveTim() {
         // Arrange
+        setupBooleanReturn();
         Long activeTimId = -1l;
         String url = String.format("%s/active-tim/delete-id/%d", baseUrl, activeTimId);
         HttpEntity<String> entity = getEntity(null, String.class);
@@ -147,12 +159,13 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.DELETE, entity, Boolean.class);
-        assertTrue("Reported failure when success", data);
+        Assertions.assertTrue(data, "Reported failure when success");
     }
 
     @Test
     public void deleteActiveTimsById() throws SQLException {
         // Arrange
+        setupBooleanReturn();
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1l);
         activeTimIds.add(-2l);
@@ -164,12 +177,13 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         boolean success = uut.deleteActiveTimsById(activeTimIds);
 
         // Assert
-        assertTrue(success);
+        Assertions.assertTrue(success);
     }
 
     @Test
     public void getActiveTimIndicesByRsu() {
         // Arrange
+        setupIntegerArrayReturn();
         String rsuTarget = "10.10.10.10";
         String url = String.format("%s/active-tim/indices-rsu/%s", baseUrl, rsuTarget);
         when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(mockResponseEntityIntegerArray);
@@ -179,16 +193,17 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, Integer[].class);
-        assertEquals(3, data.size());
-        assertEquals(Integer.valueOf(0), data.get(0));
-        assertEquals(Integer.valueOf(1), data.get(1));
-        assertEquals(Integer.valueOf(2), data.get(2));
+        Assertions.assertEquals(3, data.size());
+        Assertions.assertEquals(Integer.valueOf(0), data.get(0));
+        Assertions.assertEquals(Integer.valueOf(1), data.get(1));
+        Assertions.assertEquals(Integer.valueOf(2), data.get(2));
     }
 
     @Test
     public void getActiveTimsByWydotTim() throws SQLException {
         // Arrange
         setupWydotTims();
+        setupActiveTimArrayReturn();
         HttpEntity<List<WydotTim>> entity = new HttpEntity<List<WydotTim>>(wydotTims, getDefaultHeaders());
         when(mockRestTemplate.exchange(baseUrl + "/active-tim/get-by-wydot-tim/" + timTypeId, HttpMethod.POST, entity,
                 ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
@@ -197,14 +212,15 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         List<ActiveTim> data = uut.getActiveTimsByWydotTim(wydotTims, timTypeId);
 
         // Assert
-        assertNotNull(data);
-        assertEquals(1, data.size());
-        assertEquals(aTim, data.get(0));
+        Assertions.assertNotNull(data);
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(aTim, data.get(0));
     }
 
     @Test
     public void getActiveTimsByClientIdDirection() {
         // Arrange
+        setupActiveTimArrayReturn();
         String clientId = "clientId";
         String direction = "westward";
         String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", baseUrl, clientId, timTypeId,
@@ -216,28 +232,30 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
-        assertEquals(Arrays.asList(aTims), data);
+        Assertions.assertEquals(Arrays.asList(aTims), data);
     }
 
     @Test
     public void getExpiredActiveTims() {
         // Arrange
+        setupActiveTimArrayReturn();
         String url = String.format("%s/active-tim/expired", baseUrl);
-        when(mockRestTemplate.getForEntity(url, TimUpdateModel[].class))
-                .thenReturn(mockResponseEntityTimUpdateModelArray);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class))
+                .thenReturn(mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> data = uut.getExpiredActiveTims();
 
         // Assert
-        verify(mockRestTemplate).getForEntity(url, TimUpdateModel[].class);
-        assertEquals(1, data.size());
-        assertEquals(Arrays.asList(tumArr), data);
+        verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(Arrays.asList(aTims), data);
     }
 
     @Test
     public void getActivesTimByType() {
         // Arrange
+        setupActiveTimArrayReturn();
         String url = String.format("%s/active-tim/tim-type-id/%d", baseUrl, timTypeId);
         when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
@@ -246,12 +264,13 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
-        assertEquals(Arrays.asList(aTims), data);
+        Assertions.assertEquals(Arrays.asList(aTims), data);
     }
 
     @Test
     public void getActiveRsuTim() {
         // Arrange
+        setupActiveTimReturn();
         String clientId = "clientId";
         String direction = "westward";
         String ipv4Address = "10.10.10.10";
@@ -266,12 +285,13 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.POST, entity, ActiveTim.class);
-        assertEquals(aTim, data);
+        Assertions.assertEquals(aTim, data);
     }
 
     @Test
     public void getExpiringActiveTims() {
         // Arrange
+        setupTUMReturn();
         String url = String.format("%s/active-tim/expiring", baseUrl);
         when(mockRestTemplate.getForEntity(url, TimUpdateModel[].class))
                 .thenReturn(mockResponseEntityTimUpdateModelArray);
@@ -281,8 +301,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, TimUpdateModel[].class);
-        assertEquals(1, data.size());
-        assertEquals(Arrays.asList(tumArr), data);
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(Arrays.asList(tumArr), data);
     }
 
     @Test
@@ -305,9 +325,9 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         List<ActiveTim> ats = uut.getActiveTimsMissingItisCodes();
 
         // Assert
-        assertEquals(1, ats.size());
+        Assertions.assertEquals(1, ats.size());
         ActiveTim tim = ats.get(0);
-        assertEquals(tum, tim);
+        Assertions.assertEquals(tum, tim);
     }
 
     @Test
@@ -330,14 +350,15 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         List<ActiveTim> ats = uut.getActiveTimsNotSent();
 
         // Assert
-        assertEquals(1, ats.size());
+        Assertions.assertEquals(1, ats.size());
         ActiveTim tim = ats.get(0);
-        assertEquals(tum, tim);
+        Assertions.assertEquals(tum, tim);
     }
 
     @Test
     public void getActiveTimsForSDX_success() {
         // Arrange
+        setupActiveTimArrayReturn();
         when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx", ActiveTim[].class))
                 .thenReturn(mockResponseEntityActiveTims);
 
@@ -345,23 +366,26 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         List<ActiveTim> result = uut.getActiveTimsForSDX();
 
         // Assert
-        assertEquals(aTims.length, result.size());
-        assertEquals(aTim, result.get(0));
+        Assertions.assertEquals(aTims.length, result.size());
+        Assertions.assertEquals(aTim, result.get(0));
     }
 
-    @Test(expected = RestClientException.class)
+    @Test
     public void getActiveTimsForSDX_throwsError() {
         // Arrange
         when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx", ActiveTim[].class))
                 .thenThrow(new RestClientException("timeout"));
 
         // Act
-        uut.getActiveTimsForSDX();
+        Assertions.assertThrows(RestClientException.class, () -> {
+            uut.getActiveTimsForSDX();
+        });
     }
 
     @Test
     public void getActiveTimsWithItisCodesWithExclusions_success() {
         // Arrange
+        setupActiveTimArrayReturn();
         when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=true",
                 ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
@@ -369,13 +393,14 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         List<ActiveTim> result = uut.getActiveTimsWithItisCodes(true);
 
         // Assert
-        assertEquals(aTims.length, result.size());
-        assertEquals(aTim, result.get(0));
+        Assertions.assertEquals(aTims.length, result.size());
+        Assertions.assertEquals(aTim, result.get(0));
     }
 
     @Test
     public void getActiveTimsWithItisCodes_success() {
         // Arrange
+        setupActiveTimArrayReturn();
         when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=false",
                 ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
@@ -383,17 +408,19 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         List<ActiveTim> result = uut.getActiveTimsWithItisCodes(false);
 
         // Assert
-        assertEquals(aTims.length, result.size());
-        assertEquals(aTim, result.get(0));
+        Assertions.assertEquals(aTims.length, result.size());
+        Assertions.assertEquals(aTim, result.get(0));
     }
 
-    @Test(expected = RestClientException.class)
+    @Test
     public void getActiveTimsWithItisCodes_throwsError() {
         // Arrange
         when(mockRestTemplate.getForEntity(anyString(), eq(ActiveTim[].class)))
                 .thenThrow(new RestClientException("timeout"));
 
         // Act
-        uut.getActiveTimsWithItisCodes(true);
+        Assertions.assertThrows(RestClientException.class, () -> {
+            uut.getActiveTimsWithItisCodes(true);
+        });
     }
 }

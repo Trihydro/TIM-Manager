@@ -1,7 +1,6 @@
 package com.trihydro.tasks.actions;
 
 import static com.trihydro.tasks.TestHelper.importJsonArray;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -26,16 +25,17 @@ import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailException;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class ValidateSdxTest {
     // Mocked dependencies
     @Mock
@@ -131,9 +131,9 @@ public class ValidateSdxTest {
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(0), eq(0), eq(2), toResendCaptor.capture(),
                 deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
 
-        assertEquals(2, toResendCaptor.getValue().size());
-        assertEquals(0, deleteFromSdxCaptor.getValue().size());
-        assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(2, toResendCaptor.getValue().size());
+        Assertions.assertEquals(0, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invOracleRecordsCaptor.getValue().size());
     }
 
     @Test
@@ -166,9 +166,9 @@ public class ValidateSdxTest {
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
                 deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
 
-        assertEquals(0, toResendCaptor.getValue().size());
-        assertEquals(2, deleteFromSdxCaptor.getValue().size());
-        assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(0, toResendCaptor.getValue().size());
+        Assertions.assertEquals(2, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invOracleRecordsCaptor.getValue().size());
     }
 
     @Test
@@ -213,8 +213,8 @@ public class ValidateSdxTest {
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),
                 deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
 
-        assertEquals(2, toResendCaptor.getValue().size());
-        assertEquals(1, deleteFromSdxCaptor.getValue().size());
-        assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(2, toResendCaptor.getValue().size());
+        Assertions.assertEquals(1, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invOracleRecordsCaptor.getValue().size());
     }
 }

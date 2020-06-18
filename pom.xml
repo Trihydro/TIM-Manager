@@ -15,6 +15,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <junit.jupiter.version>5.6.2</junit.jupiter.version>
+    </properties>
+
     <modules>
         <module>cv-data-service-library</module>
         <module>cv-data-controller</module>
@@ -74,6 +78,13 @@
             <artifactId>HikariCP</artifactId>
             <version>3.3.1</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>    
 
     <build>
@@ -84,6 +95,14 @@
                 <configuration>
                     <release>11</release>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.2</version>
             </plugin>
         </plugins>
     </build>

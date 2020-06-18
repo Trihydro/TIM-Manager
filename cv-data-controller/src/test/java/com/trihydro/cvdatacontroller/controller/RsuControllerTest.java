@@ -1,6 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -11,13 +10,11 @@ import java.util.List;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class RsuControllerTest extends TestBase<RsuController> {
 
     @Test
@@ -29,7 +26,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<List<WydotRsu>> data = uut.SelectAllRsus();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getInt("RSU_ID");
         verify(mockRs).getString("IPV4_ADDRESS");
@@ -51,7 +48,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<List<WydotRsu>> data = uut.SelectAllRsus();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -67,7 +64,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<List<WydotRsu>> data = uut.SelectActiveRsus();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getString("IPV4_ADDRESS");
         verify(mockRs).getBigDecimal("LATITUDE");
@@ -87,7 +84,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<List<WydotRsu>> data = uut.SelectActiveRsus();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -106,7 +103,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<List<WydotRsuTim>> data = uut.GetFullRsusTimIsOn(timId);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getString("IPV4_ADDRESS");
         verify(mockRs).getBigDecimal("LATITUDE");
@@ -131,7 +128,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<List<WydotRsuTim>> data = uut.GetFullRsusTimIsOn(timId);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -148,7 +145,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<ArrayList<WydotRsu>> data = uut.SelectRsusByRoute(route);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getInt("RSU_ID");
         verify(mockRs).getString("IPV4_ADDRESS");
@@ -172,7 +169,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         ResponseEntity<ArrayList<WydotRsu>> data = uut.SelectRsusByRoute(route);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();

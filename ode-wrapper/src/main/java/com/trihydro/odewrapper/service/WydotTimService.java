@@ -40,6 +40,7 @@ import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
+import com.trihydro.odewrapper.model.TimDeleteSummary;
 import com.trihydro.odewrapper.model.WydotTimRw;
 
 import org.apache.commons.lang3.StringUtils;
@@ -282,10 +283,11 @@ public class WydotTimService {
         }
     }
 
-    public void deleteTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
+    public TimDeleteSummary deleteTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
 
+        var returnValue = new TimDeleteSummary();
         if (activeTims == null || activeTims.isEmpty()) {
-            return;
+            return returnValue;
         }
         WydotRsu rsu = null;
 
@@ -309,7 +311,9 @@ public class WydotTimService {
                 }
             }
             // delete active tim
-            activeTimService.deleteActiveTim(activeTim.getActiveTimId());
+            if(activeTimService.deleteActiveTim(activeTim.getActiveTimId())){
+                returnValue.addSuccessfulRsuDeletions(activeTim.getActiveTimId());
+            }
         }
 
         if (satTims != null && satTims.size() > 0) {
@@ -337,6 +341,7 @@ public class WydotTimService {
                         .map(x -> x.getKey().toString()).collect(Collectors.joining(","));
                 if (StringUtils.isNotBlank(failedResultsText)) {
                     String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
+                    returnValue.setSatelliteErrorSummary(body);
                     try {
                         emailHelper.SendEmail(configuration.getAlertAddresses(), null, "SDX Delete Fail", body,
                                 configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
@@ -347,8 +352,11 @@ public class WydotTimService {
                 }
             }
 
-            activeTimService.deleteActiveTimsById(activeSatTimIds);
+            if (activeTimService.deleteActiveTimsById(activeSatTimIds)) {
+                returnValue.setSuccessfulSatelliteDeletions(activeSatTimIds);
+            }
         }
+        return returnValue;
     }
 
     public boolean clearTimsById(String timTypeStr, String clientId, String direction) {

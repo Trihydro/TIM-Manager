@@ -34,21 +34,17 @@ import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 import com.trihydro.timrefresh.service.WydotTimService;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class TimRefreshControllerTest {
     private long timID = 1l;
-
-    @Rule
-    public TestName name = new TestName();
 
     @Mock
     TimRefreshConfiguration mockConfiguration;
@@ -76,14 +72,15 @@ public class TimRefreshControllerTest {
     @InjectMocks
     private TimRefreshController controllerUnderTest;
 
-    @Before
-    public void setup() {
-        setupMilePost();
-        setupDataFrameService();
+    @BeforeEach
+    public void setup(TestInfo testInfo) {
+        System.out.println("Executing " + testInfo.getTestMethod().get().getName());
+    }
+
+    private void setupRoutes(){
         String[] routes = new String[1];
         routes[0] = "I 80";
         doReturn(routes).when(mockConfiguration).getRsuRoutes();
-        System.out.println("Executing " + name.getMethodName());
     }
 
     private void setupDataFrameService() {
@@ -100,7 +97,6 @@ public class TimRefreshControllerTest {
         startMp.setDirection("i");
         startMp.setLatitude(BigDecimal.valueOf(105));
         startMp.setLongitude(BigDecimal.valueOf(45d));
-        // startMp.setBearing(22d);
 
         Milepost endMp = new Milepost();
         endMp.setCommonName("route1");
@@ -108,7 +104,6 @@ public class TimRefreshControllerTest {
         endMp.setDirection("i");
         endMp.setLatitude(BigDecimal.valueOf(105d));
         endMp.setLongitude(BigDecimal.valueOf(45d));
-        // endMp.setBearing(59d);
         mps.add(startMp);
         mps.add(endMp);
         doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
@@ -133,6 +128,9 @@ public class TimRefreshControllerTest {
     @Test
     public void TestPerformTaskUsingCron_Rsu_NotFound() {
         // setup return
+        setupRoutes();
+        setupMilePost();
+        setupDataFrameService();
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
         ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
         ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
@@ -155,6 +153,9 @@ public class TimRefreshControllerTest {
     @Test
     public void TestPerformTaskUsingCron_Rsu() {
         // setup return
+        setupRoutes();
+        setupMilePost();
+        setupDataFrameService();
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
         ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
 
@@ -185,6 +186,9 @@ public class TimRefreshControllerTest {
     @Test
     public void TestPerformTaskUsingCron_Sdw() {
         // setup return
+        setupRoutes();
+        setupMilePost();
+        setupDataFrameService();
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
 
         TimUpdateModel tum = getSdwTim();

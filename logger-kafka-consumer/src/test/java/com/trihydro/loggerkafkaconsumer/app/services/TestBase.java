@@ -15,9 +15,12 @@ import java.sql.Statement;
 import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.Utility;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class TestBase<T extends BaseService> {
     // Mock Internals
     @Mock
@@ -38,7 +41,7 @@ public class TestBase<T extends BaseService> {
     protected T uut;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setup() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException,
             IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]

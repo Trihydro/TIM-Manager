@@ -1,6 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -8,8 +7,9 @@ import java.math.BigDecimal;
 
 import com.trihydro.library.model.CVRestServiceProps;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpEntity;
@@ -31,7 +31,7 @@ public class PathNodeXYServiceTest extends BaseServiceTest {
 
     private String baseUrl = "baseUrl";
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         doReturn(baseUrl).when(mockConfig).getCvRestService();
     }
@@ -56,6 +56,6 @@ public class PathNodeXYServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, NodeXY[].class);
-        assertEquals(nodeXY, data[0]);
+        Assertions.assertEquals(nodeXY, data[0]);
     }
 }

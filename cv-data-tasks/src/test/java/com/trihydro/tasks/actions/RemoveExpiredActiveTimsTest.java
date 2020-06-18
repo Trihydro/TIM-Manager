@@ -13,18 +13,18 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class RemoveExpiredActiveTimsTest {
 
     @Mock
@@ -41,7 +41,7 @@ public class RemoveExpiredActiveTimsTest {
     @InjectMocks
     public RemoveExpiredActiveTims uut;
 
-    @Before
+    @BeforeEach
     public void setup() {
         when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 

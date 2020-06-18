@@ -1,10 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -18,6 +13,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -28,25 +24,26 @@ import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Spy
     private TimOracleTables mockTimOracleTables = new TimOracleTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+    }
+
+    private void setupPreparedStatement() {
         doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
     }
@@ -61,9 +58,9 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();
 
         // Assert
-        assertEquals(HttpStatus.OK, tums.getStatusCode());
-        assertEquals(1, tums.getBody().size());
-        assertEquals(Long.valueOf(999), tums.getBody().get(0).getActiveTimId());
+        Assertions.assertEquals(HttpStatus.OK, tums.getStatusCode());
+        Assertions.assertEquals(1, tums.getBody().size());
+        Assertions.assertEquals(Long.valueOf(999), tums.getBody().get(0).getActiveTimId());
     }
 
     @Test
@@ -76,8 +73,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, tums.getStatusCode());
-        assertEquals(0, tums.getBody().size());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, tums.getStatusCode());
+        Assertions.assertEquals(0, tums.getBody().size());
         verify(mockRs).close();
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -87,25 +84,27 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void UpdateActiveTim_SatRecordId_FAIL() {
         // Arrange
+        setupPreparedStatement();
         doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
 
         // Act
         ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
 
         // Assert
-        assertFalse("UpdateActiveTim_SatRecordId succeeded when it should have failed", success.getBody());
+        Assertions.assertFalse(success.getBody(), "UpdateActiveTim_SatRecordId succeeded when it should have failed");
     }
 
     @Test
     public void UpdateActiveTim_SatRecordId_SUCCESS() {
         // Arrange
+        setupPreparedStatement();
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
 
         // Act
         ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
 
         // Assert
-        assertTrue("UpdateActiveTim_SatRecordId failed when it should have succeeded", success.getBody());
+        Assertions.assertTrue(success.getBody(), "UpdateActiveTim_SatRecordId failed when it should have succeeded");
     }
 
     @Test
@@ -117,7 +116,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
 
         // Assert
-        assertFalse("UpdateActiveTim_SatRecordId was successful during an error", success.getBody());
+        Assertions.assertFalse(success.getBody(), "UpdateActiveTim_SatRecordId was successful during an error");
     }
 
     @Test
@@ -139,7 +138,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsMissingItisCodes();
 
         // Assert
-        assertEquals(HttpStatus.OK, aTims.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getBigDecimal("START_LATITUDE");
@@ -153,7 +152,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, aTims.getBody().size());
+        Assertions.assertEquals(1, aTims.getBody().size());
     }
 
     @Test
@@ -176,12 +175,12 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsMissingItisCodes();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
-        assertEquals(0, aTims.getBody().size());
+        Assertions.assertEquals(0, aTims.getBody().size());
     }
 
     @Test
@@ -196,7 +195,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsNotSent();
 
         // Assert
-        assertEquals(HttpStatus.OK, aTims.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getBigDecimal("START_LATITUDE");
@@ -210,7 +209,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, aTims.getBody().size());
+        Assertions.assertEquals(1, aTims.getBody().size());
     }
 
     @Test
@@ -226,11 +225,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> aTims = uut.GetActiveTimsNotSent();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(0, aTims.getBody().size());
+        Assertions.assertEquals(0, aTims.getBody().size());
     }
 
     @Test
@@ -244,7 +243,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
 
         // Assert
-        assertEquals(HttpStatus.OK, aTims.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -259,7 +258,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("DIRECTION");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, aTims.getBody().size());
+        Assertions.assertEquals(1, aTims.getBody().size());
     }
 
     @Test
@@ -274,11 +273,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
         verify(mockStatement).executeQuery(statementStr);
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(0, aTims.getBody().size());
+        Assertions.assertEquals(0, aTims.getBody().size());
     }
 
     @Test
@@ -296,7 +295,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<Integer>> data = uut.GetActiveTimIndicesByRsu(rsuTarget);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getInt("RSU_INDEX");
         verify(mockStatement).close();
@@ -320,7 +319,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<Integer>> data = uut.GetActiveTimIndicesByRsu(rsuTarget);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -341,7 +340,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByClientIdDirection(clientId, timTypeId, direction);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -376,7 +375,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByClientIdDirection(clientId, timTypeId, direction);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -398,7 +397,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<Integer>> data = uut.GetItisCodesForActiveTim(activeTimId);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getInt("ITIS_CODE");
         verify(mockStatement).close();
@@ -418,7 +417,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<Integer>> data = uut.GetItisCodesForActiveTim(activeTimId);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -433,8 +432,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Boolean> data = uut.DeleteActiveTim(activeTimId);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertTrue("Fail return on success", data.getBody());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertTrue(data.getBody(), "Fail return on success");
         verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID = ?");
         verify(mockPreparedStatement).setLong(1, activeTimId);
         verify(mockPreparedStatement).close();
@@ -451,8 +450,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Boolean> data = uut.DeleteActiveTim(activeTimId);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertFalse("Success returned on error", data.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertFalse(data.getBody(), "Success returned on error");
         verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID = ?");
         verify(mockPreparedStatement).setLong(1, activeTimId);
         verify(mockPreparedStatement).close();
@@ -469,8 +468,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Boolean> data = uut.DeleteActiveTimsById(activeTimIds);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertTrue("Fail return on success", data.getBody());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertTrue(data.getBody(), "Fail return on success");
         verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (?)");
         verify(mockPreparedStatement).setLong(1, -1l);
         verify(mockPreparedStatement).close();
@@ -488,11 +487,53 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Boolean> data = uut.DeleteActiveTimsById(activeTimIds);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertFalse("Success return on error", data.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertFalse(data.getBody(), "Success return on error");
         verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (?)");
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
+    }
+
+    @Test
+    public void GetActiveTimsByIds_SUCCESS() throws SQLException {
+        // Arrange
+        String query = "select * from active_tim where active_tim_id in (?, ?)";
+
+        // Act
+        var response = uut.GetActiveTimsByIds(Arrays.asList(-1l, -2l));
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(mockConnection).prepareStatement(query);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void GetActiveTimsByIds_FAIL() throws SQLException {
+        // Arrange
+        String query = "select * from active_tim where active_tim_id in (?, ?)";
+        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1l);
+
+        // Act
+        var response = uut.GetActiveTimsByIds(Arrays.asList(-1l, -2l));
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        verify(mockConnection).prepareStatement(query);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void GetActiveTimsByIds_BadRequest() throws SQLException {
+        // Arrange
+
+        // Act
+        var response = uut.GetActiveTimsByIds(null);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -510,8 +551,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByWydotTim(wydotTims, timTypeId);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
         verify(mockConnection).prepareStatement(query);
         verify(mockPreparedStatement).setLong(1, timTypeId);
         verify(mockPreparedStatement).setString(2, wydotTim.getClientId() + "%");
@@ -549,8 +590,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByWydotTim(wydotTims, timTypeId);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(0, data.getBody().size());
         verify(mockConnection).prepareStatement(query);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
@@ -566,8 +607,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByType(timTypeId);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
         verify(mockStatement).executeQuery(query);
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -599,8 +640,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByType(timTypeId);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(0, data.getBody().size());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -616,8 +657,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetAllActiveTims();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
         verify(mockStatement).executeQuery(query);
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -642,8 +683,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetAllActiveTims();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(0, data.getBody().size());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -656,7 +697,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveRsuTims();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getString("DIRECTION");
@@ -682,8 +723,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveRsuTims();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertNull(data.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertNull(data.getBody());
         verify(mockStatement).executeQuery(any());
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -707,8 +748,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(artqm);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertNotNull("ActiveTim should not be null", data.getBody());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertNotNull(data.getBody(), "ActiveTim should not be null");
         verify(mockStatement).executeQuery(query);
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -747,8 +788,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<ActiveTim> data = uut.GetActiveRsuTim(artqm);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertNull("ActiveTim should be null", data.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertNull(data.getBody(), "ActiveTim should be null");
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -769,7 +810,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Long> data = uut.InsertActiveTim(activeTim);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTim.getDirection());// DIRECTION
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 3, java.sql.Timestamp
@@ -809,7 +850,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Long> data = uut.InsertActiveTim(activeTim);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
 

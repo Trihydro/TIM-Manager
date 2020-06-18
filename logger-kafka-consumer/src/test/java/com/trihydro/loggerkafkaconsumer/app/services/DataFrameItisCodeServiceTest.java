@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -9,14 +8,12 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
-@RunWith(StrictStubs.class)
 public class DataFrameItisCodeServiceTest
         extends TestBase<com.trihydro.loggerkafkaconsumer.app.services.DataFrameItisCodeService> {
 
@@ -28,7 +25,7 @@ public class DataFrameItisCodeServiceTest
     private Long dataFrameId;
     private String itis;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
         dataFrameId = -1l;
@@ -43,7 +40,7 @@ public class DataFrameItisCodeServiceTest
         Long data = uut.insertDataFrameItisCode(dataFrameId, itis);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, Long.parseLong(itis));// ITIS_CODE_ID
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 2, dataFrameId);// DATA_FRAME_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, null);// TEXT
@@ -60,7 +57,7 @@ public class DataFrameItisCodeServiceTest
         Long data = uut.insertDataFrameItisCode(dataFrameId, itis);
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        Assertions.assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

@@ -1,7 +1,6 @@
 package com.trihydro.tasks.actions;
 
 import static com.trihydro.tasks.TestHelper.importJsonArray;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -29,18 +28,19 @@ import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.ExecutorFactory;
 import com.trihydro.tasks.models.RsuValidationResult;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestClientException;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class ValidateRsusTest {
     @Mock
     private DataTasksConfiguration mockConfig;
@@ -74,15 +74,20 @@ public class ValidateRsusTest {
     @InjectMocks
     private ValidateRsus uut;
 
-    @Before
-    public void setup() throws InterruptedException {
+    @BeforeEach
+    public void setup() {
+        when(mockConfig.getCvRestServiceDev()).thenReturn("devUrl");
+    }
+
+    private void setupProdRestService() {
+        when(mockConfig.getCvRestServiceProd()).thenReturn("prodUrl");
+    }
+
+    private void setupThreadpool() throws InterruptedException {
         // Configure mock threadpool behavior
         when(mockExecutorFactory.getFixedThreadPool(any(int.class))).thenReturn(mockExecutorService);
         when(mockExecutorService.awaitTermination(1, TimeUnit.SECONDS)).thenReturn(true);
         when(mockConfig.getRsuValThreadPoolSize()).thenReturn(1);
-
-        when(mockConfig.getCvRestServiceDev()).thenReturn("devUrl");
-        when(mockConfig.getCvRestServiceProd()).thenReturn("prodUrl");
     }
 
     private void configureServiceReturns() {
@@ -123,6 +128,7 @@ public class ValidateRsusTest {
     public void validateRsus_noErrors()
             throws InterruptedException, ExecutionException, MailException, MessagingException {
         // Arrange
+        setupThreadpool();
         configureServiceReturns(); // Service responds with with 4 Active Tims (across 2 RSUs)
         // 2 validation tasks generated, as a result. Simulate their responses.
         when(firstTask.get()).thenReturn(new RsuValidationResult("0.0.0.0"));
@@ -144,6 +150,8 @@ public class ValidateRsusTest {
         // Arrange
         // - first RSU to be unresponsive
         // - second RSU to contain errors
+        setupThreadpool();
+        setupProdRestService();
         RsuValidationResult firstRsu = new RsuValidationResult("0.0.0.0");
         RsuValidationResult secondRsu = new RsuValidationResult("0.0.0.1");
         firstRsu.setRsuUnresponsive(true);
@@ -165,9 +173,9 @@ public class ValidateRsusTest {
                 unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
-        assertEquals(1, unresponsiveRsus.getValue().size());
-        assertEquals(1, rsusWithErrors.getValue().size());
-        assertEquals(0, unexpectedErrors.getValue().size());
+        Assertions.assertEquals(1, unresponsiveRsus.getValue().size());
+        Assertions.assertEquals(1, rsusWithErrors.getValue().size());
+        Assertions.assertEquals(0, unexpectedErrors.getValue().size());
     }
 
     @Test
@@ -176,6 +184,8 @@ public class ValidateRsusTest {
         // Arrange
         // - first RSU to validate successfully
         // - second RSU to have been cancelled during validation (thread pool timeout)
+        setupThreadpool();
+        setupProdRestService();
         configureServiceReturns(); // Service responds with with 4 Active Tims (across 2 RSUs)
         // 2 validation tasks generated, as a result. Simulate their responses.
         when(firstTask.get()).thenReturn(new RsuValidationResult("0.0.0.0"));
@@ -192,9 +202,10 @@ public class ValidateRsusTest {
                 unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
-        assertEquals(0, unresponsiveRsus.getValue().size());
-        assertEquals(0, rsusWithErrors.getValue().size());
-        assertEquals(1, unexpectedErrors.getValue().size());
-        assertEquals("0.0.0.1: java.util.concurrent.CancellationException - null", unexpectedErrors.getValue().get(0));
+        Assertions.assertEquals(0, unresponsiveRsus.getValue().size());
+        Assertions.assertEquals(0, rsusWithErrors.getValue().size());
+        Assertions.assertEquals(1, unexpectedErrors.getValue().size());
+        Assertions.assertEquals("0.0.0.1: java.util.concurrent.CancellationException - null",
+                unexpectedErrors.getValue().get(0));
     }
 }

@@ -1,12 +1,10 @@
 package com.trihydro.tasks.helpers;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.trihydro.library.model.tmdd.EventReference;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class IdNormalizerTest {
     @Test
@@ -26,7 +24,7 @@ public class IdNormalizerTest {
             String result = uut.fromFeu(feu);
 
             // Assert
-            assertEquals(expected[i], result);
+            Assertions.assertEquals(expected[i], result);
         }
     }
 
@@ -45,7 +43,7 @@ public class IdNormalizerTest {
 
         // Assert
         // Id should be unchanged
-        assertEquals(rcId, result);
+        Assertions.assertEquals(rcId, result);
     }
 
     @Test
@@ -63,7 +61,7 @@ public class IdNormalizerTest {
 
         // Assert
         // Id should be unchanged
-        assertEquals(inId, result);
+        Assertions.assertEquals(inId, result);
     }
 
     @Test
@@ -76,6 +74,6 @@ public class IdNormalizerTest {
         String result = uut.fromFeu(feu);
 
         // Assert
-        assertNull(result);
+        Assertions.assertNull(result);
     }
 }

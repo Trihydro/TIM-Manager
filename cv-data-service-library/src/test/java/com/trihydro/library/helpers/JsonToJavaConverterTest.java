@@ -1,10 +1,5 @@
 package com.trihydro.library.helpers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
@@ -14,11 +9,9 @@ import java.nio.file.Paths;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmMetadata.BsmSource;
@@ -44,12 +37,11 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.DistanceUnits.DistanceUnitsEnu
 /**
  * Unit tests for JSON to Java Object Converters.
  */
-@RunWith(StrictStubs.class)
 public class JsonToJavaConverterTest {
 
         private JsonToJavaConverter jsonToJava;
 
-        @Before
+        @BeforeEach
         public void setup() {
                 jsonToJava = new JsonToJavaConverter();
         }
@@ -94,15 +86,15 @@ public class JsonToJavaConverterTest {
 
                 OdeLogMetadata odeTimMetadataTest = jsonToJava.convertTimMetadataJsonToJava(value);
 
-                assertNotNull(odeTimMetadataTest);
-                assertEquals(odeTimMetadata, odeTimMetadataTest);
-                assertEquals(odeTimMetadata.getSecurityResultCode(), odeTimMetadataTest.getSecurityResultCode());
+                Assertions.assertNotNull(odeTimMetadataTest);
+                Assertions.assertEquals(odeTimMetadata, odeTimMetadataTest);
+                Assertions.assertEquals(odeTimMetadata.getSecurityResultCode(), odeTimMetadataTest.getSecurityResultCode());
         }
 
         @Test
         public void TestConvertTimMetadataNullException() throws IOException {
                 OdeLogMetadata odeTimMetadataTest = jsonToJava.convertTimMetadataJsonToJava("");
-                assertNull(odeTimMetadataTest);
+                Assertions.assertNull(odeTimMetadataTest);
         }
 
         @Test
@@ -158,28 +150,28 @@ public class JsonToJavaConverterTest {
                 OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
                 System.out.println("PACKETID: " + odeTimPayload.getTim().getPacketID());
                 for (int i = 0; i < 2; i++) {
-                        assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
+                        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
                                         .getNodeLat(),
                                         odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getNodeLat());
-                        assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
+                        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
                                         .getNodeLong(),
                                         odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getNodeLong());
-                        assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
+                        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
                                         .getDelta(),
                                         odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getDelta());
                 }
 
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
-                assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
+                Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
                 // assertEquals(odeTimPayload.getTim().getTimeStamp(),
                 // odeTimPayloadTest.getTim().getTimeStamp());
 
-                assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
-                assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
+                Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
+                Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
         }
 
         @Test
@@ -192,8 +184,8 @@ public class JsonToJavaConverterTest {
                 OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
 
                 // Assert
-                assertNotNull(odeTimPayloadTest);
-                assertTrue(odeTimPayloadTest.getTim().getDataframes()[0].getItems().length > 0);
+                Assertions.assertNotNull(odeTimPayloadTest);
+                Assertions.assertTrue(odeTimPayloadTest.getTim().getDataframes()[0].getItems().length > 0);
         }
 
         @Test
@@ -249,51 +241,51 @@ public class JsonToJavaConverterTest {
 
                 // test geometry properties
                 // direction
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getDirection(),
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getDirection(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry()
                                                 .getDirection());
                 // extent
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getExtent(),
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getExtent(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry()
                                                 .getExtent());
                 // laneWidth
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getLaneWidth(),
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getLaneWidth(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry()
                                                 .getLaneWidth());
                 // circle/radius
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                 .getRadius(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                                 .getRadius());
                 // circle/units
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                 .getUnits(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                                 .getUnits());
                 // circle/position/latitude
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                 .getCenter().getLatitude(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                                 .getCenter().getLatitude());
                 // circle/position/longitude
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                 .getCenter().getLongitude(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                                 .getCenter().getLongitude());
                 // circle/position/elevation
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                 .getCenter().getElevation(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle()
                                                 .getCenter().getElevation());
 
-                assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
+                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
-                assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
+                Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
                 // assertEquals(odeTimPayload.getTim().getTimeStamp(),
                 // odeTimPayloadTest.getTim().getTimeStamp());
 
-                assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
-                assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
+                Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
+                Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
         }
 
         @Test
@@ -309,17 +301,17 @@ public class JsonToJavaConverterTest {
                 // String(Files.readAllBytes(Paths.get("broadcastTim_OdeOutput.json")));
                 OdeTravelerInformationMessage timTest = jsonToJava.convertBroadcastTimPayloadJsonToJava(value);
 
-                assertEquals(1, timTest.getMsgCnt());
-                assertEquals("2018-03-15T21:18:46.719-07:00", timTest.getTimeStamp());
-                assertEquals("17e610000000000000", timTest.getPacketID());
-                assertEquals("null", timTest.getUrlB());
-                assertEquals("null", timTest.getUrlB());
+                Assertions.assertEquals(1, timTest.getMsgCnt());
+                Assertions.assertEquals("2018-03-15T21:18:46.719-07:00", timTest.getTimeStamp());
+                Assertions.assertEquals("17e610000000000000", timTest.getPacketID());
+                Assertions.assertEquals("null", timTest.getUrlB());
+                Assertions.assertEquals("null", timTest.getUrlB());
         }
 
         @Test
         public void TestConvertTimPayloadNullException() throws IOException {
                 OdeTimPayload odeTimPayload = jsonToJava.convertTimPayloadJsonToJava("");
-                assertNull(odeTimPayload);
+                Assertions.assertNull(odeTimPayload);
         }
 
         @Test
@@ -352,16 +344,16 @@ public class JsonToJavaConverterTest {
 
                 OdeBsmMetadata odeBsmMetadataTest = jsonToJava.convertBsmMetadataJsonToJava(value);
 
-                assertNotNull(odeBsmMetadataTest);
-                assertEquals(odeBsmMetadata, odeBsmMetadataTest);
-                assertEquals(odeBsmMetadata.getSecurityResultCode(), odeBsmMetadataTest.getSecurityResultCode());
-                assertEquals(odeBsmMetadata.getBsmSource(), odeBsmMetadataTest.getBsmSource());
+                Assertions.assertNotNull(odeBsmMetadataTest);
+                Assertions.assertEquals(odeBsmMetadata, odeBsmMetadataTest);
+                Assertions.assertEquals(odeBsmMetadata.getSecurityResultCode(), odeBsmMetadataTest.getSecurityResultCode());
+                Assertions.assertEquals(odeBsmMetadata.getBsmSource(), odeBsmMetadataTest.getBsmSource());
         }
 
         @Test
         public void TestConvertBsmMetadataNullException() throws IOException {
                 OdeBsmMetadata odeBsmMetadataTest = jsonToJava.convertBsmMetadataJsonToJava("");
-                assertNull(odeBsmMetadataTest);
+                Assertions.assertNull(odeBsmMetadataTest);
         }
 
         @Test
@@ -372,46 +364,40 @@ public class JsonToJavaConverterTest {
 
                 OdeBsmPayload odeBsmPayloadTest = jsonToJava.convertBsmPayloadJsonToJava(value);
 
-                assertNotNull(odeBsmPayloadTest);
-                assertEquals(Integer.valueOf(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
-                assertEquals("738B0000", odeBsmPayloadTest.getBsm().getCoreData().getId());
-                assertEquals(Integer.valueOf(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
-                assertEquals("40.4740003",
+                Assertions.assertNotNull(odeBsmPayloadTest);
+                Assertions.assertEquals(Integer.valueOf(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
+                Assertions.assertEquals("738B0000", odeBsmPayloadTest.getBsm().getCoreData().getId());
+                Assertions.assertEquals(Integer.valueOf(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
+                Assertions.assertEquals("40.4740003",
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLatitude().toString());
-                assertEquals("-104.9691846",
+                Assertions.assertEquals("-104.9691846",
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLongitude().toString());
-                assertEquals(BigDecimal.valueOf(1489),
+                Assertions.assertEquals(BigDecimal.valueOf(1489),
                                 odeBsmPayloadTest.getBsm().getCoreData().getPosition().getElevation());
-                assertEquals(BigDecimal.valueOf(0),
+                Assertions.assertEquals(BigDecimal.valueOf(0),
                                 odeBsmPayloadTest.getBsm().getCoreData().getAccelSet().getAccelYaw());
-                assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMajor().toString());
-                assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMinor().toString());
-                assertEquals(J2735TransmissionState.NEUTRAL,
+                Assertions.assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMajor().toString());
+                Assertions.assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMinor().toString());
+                Assertions.assertEquals(J2735TransmissionState.NEUTRAL,
                                 odeBsmPayloadTest.getBsm().getCoreData().getTransmission());
-                assertEquals("0.1", odeBsmPayloadTest.getBsm().getCoreData().getSpeed().toString());
-                assertEquals("19.9125", odeBsmPayloadTest.getBsm().getCoreData().getHeading().toString());
-                assertEquals(false,
+                Assertions.assertEquals("0.1", odeBsmPayloadTest.getBsm().getCoreData().getSpeed().toString());
+                Assertions.assertEquals("19.9125", odeBsmPayloadTest.getBsm().getCoreData().getHeading().toString());
+                Assertions.assertEquals(false,
                                 odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("leftFront"));
-                assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes()
+                Assertions.assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes()
                                 .get("rightFront"));
-                assertEquals(true, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes()
+                Assertions.assertEquals(true, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes()
                                 .get("unavailable"));
-                assertEquals(false,
+                Assertions.assertEquals(false,
                                 odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("leftRear"));
-                assertEquals(false,
+                Assertions.assertEquals(false,
                                 odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("rightRear"));
-                assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getTraction());
-                assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAbs());
-                assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getScs());
-                assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getBrakeBoost());
-                assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAuxBrakes());
-                assertEquals(2, odeBsmPayloadTest.getBsm().getPartII().size());
-        }
-
-        @Test
-        @Ignore
-        public void TestConvertJ2735SpecialVehicleExtensionsJsonToJava() throws IOException {
-
+                Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getTraction());
+                Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAbs());
+                Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getScs());
+                Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getBrakeBoost());
+                Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAuxBrakes());
+                Assertions.assertEquals(2, odeBsmPayloadTest.getBsm().getPartII().size());
         }
 
         @Test
@@ -420,18 +406,18 @@ public class JsonToJavaConverterTest {
                                 Files.readAllBytes(Paths.get("src/test/resources/bsmLogDuringEvent_OdeOutput.json")));
 
                 J2735VehicleSafetyExtensions vse = jsonToJava.convertJ2735VehicleSafetyExtensionsJsonToJava(value, 0);
-                assertEquals("-9.2", vse.getPathHistory().getCrumbData().get(0).getElevationOffset().toString());
-                assertEquals("0.0000322", vse.getPathHistory().getCrumbData().get(0).getLatOffset().toString());
-                assertEquals("0.0001445", vse.getPathHistory().getCrumbData().get(0).getLonOffset().toString());
-                assertEquals("33.38", vse.getPathHistory().getCrumbData().get(0).getTimeOffset().toString());
+                Assertions.assertEquals("-9.2", vse.getPathHistory().getCrumbData().get(0).getElevationOffset().toString());
+                Assertions.assertEquals("0.0000322", vse.getPathHistory().getCrumbData().get(0).getLatOffset().toString());
+                Assertions.assertEquals("0.0001445", vse.getPathHistory().getCrumbData().get(0).getLonOffset().toString());
+                Assertions.assertEquals("33.38", vse.getPathHistory().getCrumbData().get(0).getTimeOffset().toString());
 
-                assertEquals("1", vse.getPathHistory().getCrumbData().get(1).getElevationOffset().toString());
-                assertEquals("-0.0000097", vse.getPathHistory().getCrumbData().get(1).getLatOffset().toString());
-                assertEquals("0.0000609", vse.getPathHistory().getCrumbData().get(1).getLonOffset().toString());
-                assertEquals("225.6", vse.getPathHistory().getCrumbData().get(1).getTimeOffset().toString());
+                Assertions.assertEquals("1", vse.getPathHistory().getCrumbData().get(1).getElevationOffset().toString());
+                Assertions.assertEquals("-0.0000097", vse.getPathHistory().getCrumbData().get(1).getLatOffset().toString());
+                Assertions.assertEquals("0.0000609", vse.getPathHistory().getCrumbData().get(1).getLonOffset().toString());
+                Assertions.assertEquals("225.6", vse.getPathHistory().getCrumbData().get(1).getTimeOffset().toString());
 
-                assertEquals("50", vse.getPathPrediction().getConfidence().toString());
-                assertEquals("0", vse.getPathPrediction().getRadiusOfCurve().toString());
+                Assertions.assertEquals("50", vse.getPathPrediction().getConfidence().toString());
+                Assertions.assertEquals("0", vse.getPathPrediction().getRadiusOfCurve().toString());
         }
 
         @Test
@@ -441,10 +427,10 @@ public class JsonToJavaConverterTest {
 
                 J2735SupplementalVehicleExtensions suve = jsonToJava
                                 .convertJ2735SupplementalVehicleExtensionsJsonToJava(value, 1);
-                assertEquals("unknownFuel", suve.getClassDetails().getFuelType().toString());
-                assertEquals("none", suve.getClassDetails().getHpmsType().toString());
-                assertEquals(Integer.valueOf(0), suve.getClassDetails().getKeyType());
-                assertEquals("basicVehicle", suve.getClassDetails().getRole().toString());
+                Assertions.assertEquals("unknownFuel", suve.getClassDetails().getFuelType().toString());
+                Assertions.assertEquals("none", suve.getClassDetails().getHpmsType().toString());
+                Assertions.assertEquals(Integer.valueOf(0), suve.getClassDetails().getKeyType());
+                Assertions.assertEquals("basicVehicle", suve.getClassDetails().getRole().toString());
         }
 
         @Test
@@ -453,7 +439,7 @@ public class JsonToJavaConverterTest {
                                 Files.readAllBytes(Paths.get("src/test/resources/bsmLogDuringEvent_OdeOutput.json")));
                 String testNode = "{\"classDetails\":{\"fuelType\":\"unknownFuel\",\"hpmsType\":\"none\",\"keyType\":0,\"regional\":[],\"role\":\"basicVehicle\"},\"weatherProbe\":{},\"regional\":[]}";
                 JsonNode part2Node = jsonToJava.getPart2Node(value, 1);
-                assertEquals(testNode, part2Node.toString());
+                Assertions.assertEquals(testNode, part2Node.toString());
         }
 
         @Test
@@ -496,9 +482,9 @@ public class JsonToJavaConverterTest {
                                 Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput.json")));
                 OdeLogMetadata odeDriverAlertMetadataTest = jsonToJava.convertDriverAlertMetadataJsonToJava(value);
 
-                assertNotNull(odeDriverAlertMetadataTest);
-                assertEquals(odeDriverAlertMetadata, odeDriverAlertMetadata);
-                assertEquals(odeDriverAlertMetadata.getSecurityResultCode(),
+                Assertions.assertNotNull(odeDriverAlertMetadataTest);
+                Assertions.assertEquals(odeDriverAlertMetadata, odeDriverAlertMetadata);
+                Assertions.assertEquals(odeDriverAlertMetadata.getSecurityResultCode(),
                                 odeDriverAlertMetadata.getSecurityResultCode());
         }
 
@@ -509,8 +495,8 @@ public class JsonToJavaConverterTest {
                                 Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput.json")));
                 OdeDriverAlertPayload odeDriverAlertPayloadTest = jsonToJava.convertDriverAlertPayloadJsonToJava(value);
 
-                assertNotNull(odeDriverAlertPayloadTest);
-                assertEquals("ICW", odeDriverAlertPayloadTest.getAlert());
+                Assertions.assertNotNull(odeDriverAlertPayloadTest);
+                Assertions.assertEquals("ICW", odeDriverAlertPayloadTest.getAlert());
         }
 
 }

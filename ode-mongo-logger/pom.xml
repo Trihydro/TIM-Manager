@@ -12,17 +12,7 @@
   <name>ode-mongo-logger</name>
   <packaging>jar</packaging>
 
-  <properties>
-    <junit.version>4.12</junit.version>
-  </properties>
-
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
     <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
     <dependency>
       <groupId>org.apache.kafka</groupId>

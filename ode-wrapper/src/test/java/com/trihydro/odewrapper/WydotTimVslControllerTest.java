@@ -1,7 +1,5 @@
 package com.trihydro.odewrapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -24,19 +22,18 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
 
-@RunWith(StrictStubs.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 public class WydotTimVslControllerTest {
 
 	@Mock
@@ -58,7 +55,7 @@ public class WydotTimVslControllerTest {
 
 	private Gson gson = new Gson();
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<ItisCode> itisCodes = new ArrayList<>();
 		ItisCode ic = new ItisCode();
@@ -87,12 +84,12 @@ public class WydotTimVslControllerTest {
 		ResponseEntity<String> data = uut.createUpdateVslTim(timVslList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("b", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
@@ -106,12 +103,12 @@ public class WydotTimVslControllerTest {
 		ResponseEntity<String> data = uut.createUpdateVslTim(timVslList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
 	}
 
 	@Test
@@ -128,8 +125,8 @@ public class WydotTimVslControllerTest {
 		Collection<ActiveTim> data = uut.getVslTims();
 
 		// Assert
-		assertEquals(1, data.size());
-		assertEquals(at, data.iterator().next());
+		Assertions.assertEquals(1, data.size());
+		Assertions.assertEquals(at, data.iterator().next());
 	}
 
 }

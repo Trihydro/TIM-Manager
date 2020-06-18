@@ -1,8 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.dataConverters;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -10,11 +7,12 @@ import java.nio.file.Paths;
 
 import com.trihydro.library.helpers.JsonToJavaConverter;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
@@ -29,7 +27,7 @@ import us.dot.its.jpo.ode.model.SerialId;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class TimDataConverterTest {
 
     @Spy
@@ -127,24 +125,24 @@ public class TimDataConverterTest {
         OdeTimPayload odeTimPayloadTest = (OdeTimPayload) odeDataTest.getPayload();
 
         // Assert
-        assertNotNull(odeTimMetadataTest);
-        assertEquals(odeTimMetadata, odeTimMetadataTest);
+        Assertions.assertNotNull(odeTimMetadataTest);
+        Assertions.assertEquals(odeTimMetadata, odeTimMetadataTest);
 
         for (int i = 0; i < 2; i++) {
-            assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat(),
+            Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat(),
                     odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat());
-            assertEquals(
+            Assertions.assertEquals(
                     odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLong(),
                     odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
                             .getNodeLong());
-            assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta(),
+            Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta(),
                     odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta());
         }
 
-        assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
+        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
-        assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
-        assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
-        assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
+        Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
+        Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
+        Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
     }
 }

@@ -1,7 +1,6 @@
 package com.trihydro.tasks.actions;
 
 import static com.trihydro.tasks.TestHelper.importJsonArray;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -30,19 +29,20 @@ import com.trihydro.tasks.helpers.IdNormalizer;
 import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimValidationResult;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.web.client.RestClientException;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class ValidateTmddTest {
     @Mock
     private TmddService mockTmddService;
@@ -150,32 +150,32 @@ public class ValidateTmddTest {
         List<ActiveTimValidationResult> validationResults = validationResultsCaptor.getValue();
 
         // Check validation results
-        assertEquals(0, unableToVerify.size());
-        assertEquals(1, validationResults.size());
-        assertEquals(1l, (long) validationResults.get(0).getActiveTim().getActiveTimId());
-        assertEquals(5, validationResults.get(0).getErrors().size());
+        Assertions.assertEquals(0, unableToVerify.size());
+        Assertions.assertEquals(1, validationResults.size());
+        Assertions.assertEquals(1l, (long) validationResults.get(0).getActiveTim().getActiveTimId());
+        Assertions.assertEquals(5, validationResults.get(0).getErrors().size());
 
         // Check errors individually
         List<ActiveTimError> errors = validationResults.get(0).getErrors();
-        assertEquals("Start Time", errors.get(0).getName());
-        assertEquals("2020-04-27 10:00:00", errors.get(0).getTimValue());
-        assertEquals("2020-04-27 09:43:00", errors.get(0).getTmddValue());
+        Assertions.assertEquals("Start Time", errors.get(0).getName());
+        Assertions.assertEquals("2020-04-27 10:00:00", errors.get(0).getTimValue());
+        Assertions.assertEquals("2020-04-27 09:43:00", errors.get(0).getTmddValue());
 
-        assertEquals("End Time", errors.get(1).getName());
-        assertEquals("2020-04-27 11:00:00", errors.get(1).getTimValue());
-        assertEquals(null, errors.get(1).getTmddValue());
+        Assertions.assertEquals("End Time", errors.get(1).getName());
+        Assertions.assertEquals("2020-04-27 11:00:00", errors.get(1).getTimValue());
+        Assertions.assertEquals(null, errors.get(1).getTmddValue());
 
-        assertEquals("Start Point", errors.get(2).getName());
-        assertEquals("{ lat: 42.750000, lon: -110.940000 }", errors.get(2).getTimValue());
-        assertEquals("{ lat: 42.739996, lon: -110.933278 }", errors.get(2).getTmddValue());
+        Assertions.assertEquals("Start Point", errors.get(2).getName());
+        Assertions.assertEquals("{ lat: 42.750000, lon: -110.940000 }", errors.get(2).getTimValue());
+        Assertions.assertEquals("{ lat: 42.739996, lon: -110.933278 }", errors.get(2).getTmddValue());
 
-        assertEquals("End Point", errors.get(3).getName());
-        assertEquals("{ lat: 43.180000, lon: -111.010000 }", errors.get(3).getTimValue());
-        assertEquals("{ lat: 43.175668, lon: -111.001784 }", errors.get(3).getTmddValue());
+        Assertions.assertEquals("End Point", errors.get(3).getName());
+        Assertions.assertEquals("{ lat: 43.180000, lon: -111.010000 }", errors.get(3).getTimValue());
+        Assertions.assertEquals("{ lat: 43.175668, lon: -111.001784 }", errors.get(3).getTmddValue());
 
-        assertEquals("ITIS Codes", errors.get(4).getName());
-        assertEquals("{ 5906 }", errors.get(4).getTimValue());
-        assertEquals("{ 6011 }", errors.get(4).getTmddValue());
+        Assertions.assertEquals("ITIS Codes", errors.get(4).getName());
+        Assertions.assertEquals("{ 5906 }", errors.get(4).getTimValue());
+        Assertions.assertEquals("{ 6011 }", errors.get(4).getTmddValue());
 
         // Email was sent
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
@@ -191,7 +191,7 @@ public class ValidateTmddTest {
 
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        assertEquals("Error fetching Active Tims:", logMessageCaptor.getValue());
+        Assertions.assertEquals("Error fetching Active Tims:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
     }
 
@@ -205,7 +205,7 @@ public class ValidateTmddTest {
 
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        assertEquals("Error fetching FEUs from TMDD:", logMessageCaptor.getValue());
+        Assertions.assertEquals("Error fetching FEUs from TMDD:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
     }
 
@@ -219,7 +219,7 @@ public class ValidateTmddTest {
 
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        assertEquals("Unable to initialize TMDD ITIS Code cache:", logMessageCaptor.getValue());
+        Assertions.assertEquals("Unable to initialize TMDD ITIS Code cache:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
     }
 
@@ -246,7 +246,7 @@ public class ValidateTmddTest {
 
         // Assert
         verify(mockUtility, times(3)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        assertEquals("Error sending summary email:", logMessageCaptor.getAllValues().get(1));
-        assertEquals("Failed to send error summary email:", logMessageCaptor.getAllValues().get(2));
+        Assertions.assertEquals("Error sending summary email:", logMessageCaptor.getAllValues().get(1));
+        Assertions.assertEquals("Failed to send error summary email:", logMessageCaptor.getAllValues().get(2));
     }
 }

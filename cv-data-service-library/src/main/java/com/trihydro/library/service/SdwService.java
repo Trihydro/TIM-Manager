@@ -1,12 +1,5 @@
 package com.trihydro.library.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,10 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
@@ -27,11 +17,12 @@ import com.trihydro.library.model.SDXQuery;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.SemiDialogID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -56,27 +47,14 @@ public class SdwService {
             return null;
         }
 
-        try {
-            URL url = getBaseUrl("api/GetDataByRecordId?recordId=" + recordId);
-            HttpURLConnection conn = utility.getSdxUrlConnection("GET", url, configProperties.getSdwApiKey());
-
-            InputStreamReader isr = new InputStreamReader(conn.getInputStream());
-            BufferedReader br = new BufferedReader(isr);
-            String objString = br.readLine();
-
-            if (StringUtils.isEmpty(objString) || StringUtils.isBlank(objString)) {
-                return null;
-            }
-
-            // hydrate AdvisorySituationDataDeposit
-            ObjectMapper mapper = new ObjectMapper();
-            AdvisorySituationDataDeposit asdd = mapper.readValue(objString, AdvisorySituationDataDeposit.class);
-            return asdd;
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        String url = getBaseUrlString("api/GetDataByRecordId?recordId=" + recordId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("apikey", configProperties.getSdwApiKey());
+        HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+        ResponseEntity<AdvisorySituationDataDeposit> response = restTemplateProvider.GetRestTemplate().exchange(url,
+                HttpMethod.GET, entity, AdvisorySituationDataDeposit.class);
+        return response.getBody();
 
     }
 
@@ -198,50 +176,28 @@ public class SdwService {
             return results;
         }
 
-        try {
-            URL url = getBaseUrl("api/delete-multiple-by-recordid");
-            List<Integer> satRecordInts = satRecordIds.stream().map(x -> Integer.parseUnsignedInt(x, 16))
-                    .collect(Collectors.toList());
-            String body = gson.toJson(satRecordInts);
-            HttpURLConnection conn = utility.getSdxUrlConnection("DELETE", url, configProperties.getSdwApiKey());
-            conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setDoOutput(true);
+        String url = getBaseUrlString("api/delete-multiple-by-recordid");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("apikey", configProperties.getSdwApiKey());
+        HttpEntity<List<String>> entity = new HttpEntity<List<String>>(satRecordIds, headers);
+        ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
+        };
+        ResponseEntity<HashMap<Integer, Boolean>> response = restTemplateProvider.GetRestTemplate().exchange(url,
+                HttpMethod.DELETE, entity, responseType);
 
-            try (OutputStream os = conn.getOutputStream()) {
-                byte[] input = body.getBytes("utf-8");
-                os.write(input, 0, input.length);
-                os.close();
-            }
-
-            if (conn.getResponseCode() != 200) {
-                utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
-            }
-
-            InputStreamReader isr = new InputStreamReader(conn.getInputStream());
-            BufferedReader br = new BufferedReader(isr);
-            String objString = br.lines().collect(Collectors.joining());
-            ObjectMapper mapper = new ObjectMapper();
-            TypeReference<HashMap<Integer, Boolean>> typeRef = new TypeReference<HashMap<Integer, Boolean>>() {
-            };
-            results = mapper.readValue(objString, typeRef);
-            utility.logWithDate("Results from deleting SDX data by recordId: " + results.toString());
-            return results;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return results;
+        if (response.getStatusCode() != HttpStatus.OK) {
+            utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
         }
+        return response.getBody();
     }
 
-    private URL getBaseUrl(String end) {
-        try {
-            String baseUrl = configProperties.getSdwRestUrl();
-            if (!baseUrl.endsWith("/")) {
-                baseUrl += "/";
-            }
-            baseUrl += end;
-            return new URL(baseUrl);
-        } catch (MalformedURLException ex) {
-            return null;
+    private String getBaseUrlString(String end) {
+        String baseUrl = configProperties.getSdwRestUrl();
+        if (!baseUrl.endsWith("/")) {
+            baseUrl += "/";
         }
+        baseUrl += end;
+        return baseUrl;
     }
 }

@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -9,11 +8,9 @@ import java.util.List;
 
 import com.trihydro.library.model.DriverAlertType;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-@RunWith(StrictStubs.class)
 public class DriverAlertTypeServiceTest extends TestBase<DriverAlertTypeService> {
 
     @Test
@@ -24,7 +21,7 @@ public class DriverAlertTypeServiceTest extends TestBase<DriverAlertTypeService>
         List<DriverAlertType> data = uut.getDriverAlertTypes();
 
         // Assert
-        assertEquals(1, data.size());
+        Assertions.assertEquals(1, data.size());
         verify(mockStatement).executeQuery("select * from DRIVER_ALERT_TYPE");
         verify(mockRs).getInt("DRIVER_ALERT_TYPE_ID");
         verify(mockRs).getString("SHORT_NAME");
@@ -42,7 +39,7 @@ public class DriverAlertTypeServiceTest extends TestBase<DriverAlertTypeService>
         List<DriverAlertType> data = uut.getDriverAlertTypes();
 
         // Assert
-        assertEquals(0, data.size());
+        Assertions.assertEquals(0, data.size());
         verify(mockStatement).executeQuery("select * from DRIVER_ALERT_TYPE");
         verify(mockStatement).close();
         verify(mockRs).close();

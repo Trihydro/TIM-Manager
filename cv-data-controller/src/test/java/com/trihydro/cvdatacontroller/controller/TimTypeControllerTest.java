@@ -1,6 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -9,13 +8,11 @@ import java.util.List;
 
 import com.trihydro.library.model.TimType;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class TimTypeControllerTest extends TestBase<TimTypeController> {
     @Test
     public void SelectAll_SUCCESS() throws SQLException {
@@ -26,7 +23,7 @@ public class TimTypeControllerTest extends TestBase<TimTypeController> {
         ResponseEntity<List<TimType>> data = uut.SelectAll();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockRs).getLong("TIM_TYPE_ID");
         verify(mockRs).getString("TYPE");
@@ -46,7 +43,7 @@ public class TimTypeControllerTest extends TestBase<TimTypeController> {
         ResponseEntity<List<TimType>> data = uut.SelectAll();
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockStatement).executeQuery(selectStatement);
         verify(mockStatement).close();
         verify(mockConnection).close();

@@ -1,7 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -19,12 +17,11 @@ import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -37,7 +34,6 @@ import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.RxSource;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
-@RunWith(StrictStubs.class)
 public class TimControllerTest extends TestBase<TimController> {
 
         @Mock
@@ -51,25 +47,30 @@ public class TimControllerTest extends TestBase<TimController> {
 
         private String mstFormatedDate = "03-Feb-20 04.00.00.000 PM";
 
-        @Before
+        @BeforeEach
         public void setupSubTest() {
+                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
+        }
+
+        private void setupInsertQueryStatement(){
+                doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        }
+
+        private void setupSecurityResultTypes(){
                 List<SecurityResultCodeType> secResultCodeTypes = new ArrayList<>();
                 SecurityResultCodeType srct = new SecurityResultCodeType();
                 srct.setSecurityResultCodeType(SecurityResultCode.success.toString());
                 srct.setSecurityResultCodeTypeId(-1);
                 secResultCodeTypes.add(srct);
-
-                doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
                 doReturn(secResultCodeTypes).when(mockResponseEntitySecurityResultCodeTypeList).getBody();
                 when(mockSecurityResultCodeTypeController.GetSecurityResultCodeTypes())
                                 .thenReturn(mockResponseEntitySecurityResultCodeTypeList);
-
-                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
         @Test
         public void AddTim_J2735_SUCCESS() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
                 TimInsertModel tim = new TimInsertModel();
                 tim.setJ2735TravelerInformationMessage(new OdeTravelerInformationMessage());
                 tim.setRecordType(RecordType.driverAlert);
@@ -83,7 +84,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 Long timId = uut.AddTim(tim);
 
                 // Assert
-                assertEquals(Long.valueOf(-1), timId);
+                Assertions.assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, j2735.getMsgCnt());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, j2735.getPacketID());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, j2735.getUrlB());
@@ -95,6 +96,7 @@ public class TimControllerTest extends TestBase<TimController> {
         @Test
         public void AddTim_timMetadata_SUCCESS() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
                 TimInsertModel tim = new TimInsertModel();
                 OdeMsgMetadata omm = GetOmm();
                 omm.setRecordGeneratedBy(GeneratedBy.TMC);
@@ -112,7 +114,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 // Assert
                 // j2735 fields are skipped, we start at index 5 after those
                 // See timOracleTables.getTimTable() for ordering
-                assertEquals(Long.valueOf(-1), timId);
+                Assertions.assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5,
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
@@ -137,6 +139,8 @@ public class TimControllerTest extends TestBase<TimController> {
         @Test
         public void AddTim_receivedMessageDetails_SUCCESS() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
+                setupSecurityResultTypes();
                 TimInsertModel tim = new TimInsertModel();
                 tim.setReceivedMessageDetails(getRxMsg());
                 tim.setRecordType(RecordType.driverAlert);
@@ -151,7 +155,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 // Assert
                 // See timOracleTables.getTimTable() for ordering
-                assertEquals(Long.valueOf(-1), timId);
+                Assertions.assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6,
                                 receivedMessageDetails.getLocationData().getElevation());// RMD_LD_ELEVATION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7,
@@ -179,7 +183,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 ResponseEntity<WydotOdeTravelerInformationMessage> data = uut.GetTim(timId);
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
                 verify(mockStatement).executeQuery(selectStatement);
                 verify(mockRs).getString("PACKET_ID");
                 verify(mockRs).getInt("MSG_CNT");
@@ -201,7 +205,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 ResponseEntity<WydotOdeTravelerInformationMessage> data = uut.GetTim(timId);
 
                 // Assert
-                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+                Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
                 verify(mockStatement).executeQuery(selectStatement);
                 verify(mockStatement).close();
                 verify(mockConnection).close();
@@ -218,8 +222,8 @@ public class TimControllerTest extends TestBase<TimController> {
                 var data = uut.deleteOldTim();
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
-                assertTrue("Fail return on success", data.getBody());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertTrue(data.getBody(),"Fail return on success");
 
                 verify(uut, times(2)).getOneMonthPrior();
 

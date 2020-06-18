@@ -1,6 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
@@ -8,13 +7,11 @@ import java.util.List;
 
 import com.trihydro.library.model.SecurityResultCodeType;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class SecurityResultCodeTypeControllerTest extends TestBase<SecurityResultCodeTypeController> {
     @Test
     public void GetSecurityResultCodeTypes_Success() throws SQLException {
@@ -24,12 +21,12 @@ public class SecurityResultCodeTypeControllerTest extends TestBase<SecurityResul
         ResponseEntity<List<SecurityResultCodeType>> data = uut.GetSecurityResultCodeTypes();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockStatement).executeQuery("select * from SECURITY_RESULT_CODE_TYPE");
         verify(mockRs).getInt("SECURITY_RESULT_CODE_TYPE_ID");
         verify(mockRs).getString("SECURITY_RESULT_CODE_TYPE");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(1, data.getBody().size());
     }
 }

@@ -1,19 +1,15 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-@RunWith(StrictStubs.class)
 public class BsmControllerTest extends TestBase<BsmController> {
 
     @Test
@@ -29,8 +25,8 @@ public class BsmControllerTest extends TestBase<BsmController> {
         String deleteSQL = "DELETE FROM %s WHERE bsm_core_data_id IN";
         deleteSQL += " (SELECT bsm_core_data_id FROM bsm_core_data WHERE ode_received_at < ?)";
 
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertTrue("Fail return on success", data.getBody());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertTrue(data.getBody(), "Fail return on success");
         // suve
         verify(mockConnection).prepareStatement(String.format(deleteSQL, "bsm_part2_suve"));
         verify(mockConnection).prepareStatement(String.format(deleteSQL, "bsm_part2_spve"));

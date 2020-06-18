@@ -1,18 +1,14 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-@RunWith(StrictStubs.class)
 public class HmiLogControllerTest extends TestBase<HmiLogController> {
     @Test
     public void DeleteOldHmiLogs() throws SQLException {
@@ -24,8 +20,8 @@ public class HmiLogControllerTest extends TestBase<HmiLogController> {
         var data = uut.DeleteOldHmiLogs();
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertTrue("Fail return on success", data.getBody());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertTrue(data.getBody(), "Fail return on success");
         verify(mockConnection).prepareStatement("DELETE FROM hmi_log WHERE received_at < ?");
 
         verify(mockPreparedStatement).close();

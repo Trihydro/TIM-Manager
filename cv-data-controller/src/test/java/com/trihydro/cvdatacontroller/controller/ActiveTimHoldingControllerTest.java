@@ -1,7 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -18,16 +16,14 @@ import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingController> {
         @Spy
         private TimOracleTables mockTimOracleTables = new TimOracleTables();
@@ -37,20 +33,27 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         private Coordinate startCoord;
         private Coordinate endCoord;
 
-        @Before
-        public void setupSubTest() throws SQLException {
+        @BeforeEach
+        public void setupSubTest() {
                 uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
-                doReturn("insert query statement").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-                doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("insert query statement",
-                                new String[] { "active_tim_holding_id" });
-
                 startCoord = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
                 endCoord = new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(6));
+        }
+
+        private void setupInsertQueryStatement() {
+                doReturn("insert query statement").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        }
+
+        private void setupPreparedStatement() throws SQLException {
+                doReturn(mockPreparedStatement).when(mockConnection).prepareStatement("insert query statement",
+                                new String[] { "active_tim_holding_id" });
         }
 
         @Test
         public void InsertActiveTimHolding_SUCCESS() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
+                setupPreparedStatement();
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
                 activeTimHolding.setStartPoint(startCoord);
                 activeTimHolding.setEndPoint(endCoord);
@@ -59,7 +62,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTimHolding.getClientId());// CLIENT_ID
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
@@ -81,6 +84,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         @Test
         public void InsertActiveTimHolding_ExistingSDX() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
+                setupPreparedStatement();
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
                 activeTimHolding.setSatRecordId("satRecordId");
                 activeTimHolding.setClientId("clientId");
@@ -99,8 +104,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
-                assertEquals(Long.valueOf(-99), data.getBody());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertEquals(Long.valueOf(-99), data.getBody());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTimHolding.getClientId());// CLIENT_ID
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
@@ -124,6 +129,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         @Test
         public void InsertActiveTimHolding_ExistingRSU() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
+                setupPreparedStatement();
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
                 activeTimHolding.setRsuTargetId("10.10.10.1");
                 activeTimHolding.setClientId("clientId");
@@ -142,8 +149,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
-                assertEquals(Long.valueOf(-99), data.getBody());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertEquals(Long.valueOf(-99), data.getBody());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTimHolding.getClientId());// CLIENT_ID
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, activeTimHolding.getDirection());// DIRECTION
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, activeTimHolding.getRsuTarget());// RSU_TARGET
@@ -167,6 +174,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         @Test
         public void InsertActiveTimHolding_FAIL() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
+                setupPreparedStatement();
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
                 activeTimHolding.setStartPoint(startCoord);
                 activeTimHolding.setEndPoint(endCoord);
@@ -177,7 +186,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
 
                 // Assert
-                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+                Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
                 verify(mockPreparedStatement).close();
                 verify(mockConnection).close();
 
@@ -191,9 +200,9 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 ResponseEntity<List<ActiveTimHolding>> data = uut.getActiveTimHoldingForRsu("ipv4Address");
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
-                assertNotNull(data.getBody());
-                assertEquals(1, data.getBody().size());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertNotNull(data.getBody());
+                Assertions.assertEquals(1, data.getBody().size());
                 verify(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
                 verify(mockRs).getString("CLIENT_ID");
                 verify(mockRs).getString("DIRECTION");
@@ -219,9 +228,9 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 ResponseEntity<List<ActiveTimHolding>> data = uut.getActiveTimHoldingForRsu("ipv4Address");
 
                 // Assert
-                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-                assertNotNull(data.getBody());
-                assertEquals(0, data.getBody().size());
+                Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+                Assertions.assertNotNull(data.getBody());
+                Assertions.assertEquals(0, data.getBody().size());
                 verify(mockStatement).close();
                 verify(mockConnection).close();
                 verify(mockRs).close();

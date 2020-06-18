@@ -1,10 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -14,11 +9,9 @@ import java.sql.SQLException;
 
 import com.trihydro.library.model.ActiveTimHolding;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-@RunWith(StrictStubs.class)
 public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingService> {
     @Test
     public void getActiveTimHolding_SUCCESS() throws SQLException {
@@ -32,8 +25,8 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         ActiveTimHolding data = uut.getRsuActiveTimHolding("clientId", "direction", "ipv4Address");
 
         // Assert
-        assertNotNull("Null ActiveTimHolding returned", data);
-        assertEquals(athId, data.getActiveTimHoldingId());
+        Assertions.assertNotNull(data, "Null ActiveTimHolding returned");
+        Assertions.assertEquals(athId, data.getActiveTimHoldingId());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -51,7 +44,8 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         ActiveTimHolding data = uut.getRsuActiveTimHolding("clientId", "direction", "ipv4Address");
 
         // Assert
-        assertNull(data.getActiveTimHoldingId(), "getActiveTimHolding returned object when should have returned empty");
+        Assertions.assertNull(data.getActiveTimHoldingId(),
+                "getActiveTimHolding returned object when should have returned empty");
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -70,8 +64,8 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         ActiveTimHolding data = uut.getSdxActiveTimHolding("clientId", "direction", "satRecordId");
 
         // Assert
-        assertNotNull("Null ActiveTimHolding returned", data);
-        assertEquals(athId, data.getActiveTimHoldingId());
+        Assertions.assertNotNull(data, "Null ActiveTimHolding returned");
+        Assertions.assertEquals(athId, data.getActiveTimHoldingId());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -89,7 +83,8 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         ActiveTimHolding data = uut.getSdxActiveTimHolding("clientId", "direction", "satRecordId");
 
         // Assert
-        assertNull(data.getActiveTimHoldingId(), "getActiveTimHolding returned object when should have returned empty");
+        Assertions.assertNull(data.getActiveTimHoldingId(),
+                "getActiveTimHolding returned object when should have returned empty");
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -104,7 +99,7 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         Boolean data = uut.deleteActiveTimHolding(1l);
 
         // Assert
-        assertTrue(data);
+        Assertions.assertTrue(data);
         verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM_HOLDING WHERE ACTIVE_TIM_HOLDING_ID = ?");
         verify(mockPreparedStatement).setLong(1, 1l);
         verify(mockConnection).close();
@@ -119,7 +114,7 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         Boolean data = uut.deleteActiveTimHolding(1l);
 
         // Assert
-        assertFalse(data);
+        Assertions.assertFalse(data);
         verify(mockConnection).close();
     }
 }

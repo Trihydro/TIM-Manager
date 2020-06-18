@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -18,12 +17,11 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.tables.BsmOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
@@ -46,7 +44,6 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSize;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 
-@RunWith(StrictStubs.class)
 public class BsmServiceTest extends TestBase<BsmService> {
 
     @Spy
@@ -70,15 +67,23 @@ public class BsmServiceTest extends TestBase<BsmService> {
     @Mock
     private Utility mockUtility;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockJsonToJava, mockBsmOracleTables, mockSqlNullHandler, mockBsmPart2SpveService,
                 mockBsmPart2VseService, mockBsmPart2SuveService, mockUtility);
+    }
 
+    private void setupSafetyExtensions() {
         doReturn(mockJ2735VehicleSafetyExtensions).when(mockJsonToJava)
                 .convertJ2735VehicleSafetyExtensionsJsonToJava(isA(String.class), isA(Integer.class));
+    }
+
+    private void setupSpecialExtensions() {
         doReturn(mockJ2735SpecialVehicleExtensions).when(mockJsonToJava)
                 .convertJ2735SpecialVehicleExtensionsJsonToJava(isA(String.class), isA(Integer.class));
+    }
+
+    private void setupSupplementalExtensions() {
         doReturn(mockJ2735SupplementalVehicleExtensions).when(mockJsonToJava)
                 .convertJ2735SupplementalVehicleExtensionsJsonToJava(isA(String.class), isA(Integer.class));
     }
@@ -86,6 +91,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
     @Test
     public void addBSMToOracleDB_VehicleSafetyExtensions_SUCCESS() {
         // Arrange
+        setupSafetyExtensions();
         Long bsmCoreDataId = -1l;
         doReturn(bsmCoreDataId).when(uut).addBSMCoreData(isA(OdeBsmMetadata.class), isA(J2735Bsm.class));
         OdeData odeData = getOdeData("VehicleSafetyExtensions");
@@ -105,6 +111,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
     @Test
     public void addBSMToOracleDB_SpecialVehicleExtensions_SUCCESS() {
         // Arrange
+        setupSpecialExtensions();
         Long bsmCoreDataId = -1l;
         doReturn(bsmCoreDataId).when(uut).addBSMCoreData(isA(OdeBsmMetadata.class), isA(J2735Bsm.class));
         OdeData odeData = getOdeData("SpecialVehicleExtensions");
@@ -124,6 +131,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
     @Test
     public void addBSMToOracleDB_SupplementalVehicleExtensions_SUCCESS() {
         // Arrange
+        setupSupplementalExtensions();
         Long bsmCoreDataId = -1l;
         doReturn(bsmCoreDataId).when(uut).addBSMCoreData(isA(OdeBsmMetadata.class), isA(J2735Bsm.class));
         OdeData odeData = getOdeData("SupplementalVehicleExtensions");
@@ -169,7 +177,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         Long data = uut.addBSMCoreData(metadata, bsm);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockPreparedStatement).setString(1, bsm.getCoreData().getId());// ID
         verify(mockPreparedStatement).setString(2, null);// MSGCNT
         verify(mockPreparedStatement).setString(3, null);// SECMARK
@@ -225,7 +233,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         Long data = uut.addBSMCoreData(metadata, bsm);
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        Assertions.assertEquals(Long.valueOf(0), data);
     }
 
     private OdeData getOdeData(String partIIName) {

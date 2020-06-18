@@ -1,10 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -21,14 +16,12 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
-@RunWith(StrictStubs.class)
 public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
     @Spy
@@ -39,7 +32,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
     private Coordinate startPoint;
     private Coordinate endPoint;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
         startPoint = new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2));
@@ -61,7 +54,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         Long data = uut.insertActiveTim(activeTim);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTim.getDirection());// DIRECTION
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 3, java.sql.Timestamp// TIM_START
@@ -73,10 +66,14 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7, activeTim.getClientId());// CLIENT_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 8, activeTim.getSatRecordId());// SAT_RECORD_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 9, activeTim.getPk());// PK
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 10, activeTim.getStartPoint().getLatitude());// START_LATITUDE
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 11, activeTim.getStartPoint().getLongitude());// START_LONGITUDE
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 12, activeTim.getEndPoint().getLatitude());// END_LATITUDE
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 13, activeTim.getEndPoint().getLongitude());// END_LONGITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 10,
+                activeTim.getStartPoint().getLatitude());// START_LATITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 11,
+                activeTim.getStartPoint().getLongitude());// START_LONGITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 12,
+                activeTim.getEndPoint().getLatitude());// END_LATITUDE
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 13,
+                activeTim.getEndPoint().getLongitude());// END_LONGITUDE
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 15, null); // PROJECT_KEY
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
@@ -94,7 +91,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         Long data = uut.insertActiveTim(activeTim);
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        Assertions.assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -114,12 +111,15 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         boolean data = uut.updateActiveTim(activeTim);
 
         // Assert
-        assertTrue("Failed to update activeTim", data);
+        Assertions.assertTrue(data, "Failed to update activeTim");
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 2, activeTim.getStartPoint().getLatitude());
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, activeTim.getStartPoint().getLongitude());
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 2,
+                activeTim.getStartPoint().getLatitude());
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3,
+                activeTim.getStartPoint().getLongitude());
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, activeTim.getEndPoint().getLatitude());
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 5, activeTim.getEndPoint().getLongitude());
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 5,
+                activeTim.getEndPoint().getLongitude());
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 6, java.sql.Timestamp
                 .valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 7, java.sql.Timestamp
@@ -144,7 +144,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         boolean data = uut.updateActiveTim(activeTim);
 
         // Assert
-        assertFalse("Success reported on failed update activeTim", data);
+        Assertions.assertFalse(data, "Success reported on failed update activeTim");
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -161,9 +161,9 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         ActiveTim data = uut.getActiveSatTim("satRecordId", "direction");
 
         // Assert
-        assertNotNull("Null ActiveTim returned", data);
-        assertEquals(Long.valueOf(99), data.getActiveTimId());
-        assertEquals(Long.valueOf(-99), data.getTimId());
+        Assertions.assertNotNull(data, "Null ActiveTim returned");
+        Assertions.assertEquals(Long.valueOf(99), data.getActiveTimId());
+        Assertions.assertEquals(Long.valueOf(-99), data.getTimId());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -179,8 +179,8 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         ActiveTim data = uut.getActiveSatTim("satRecordId", "direction");
 
         // Assert
-        assertNull("ActiveTimID returned when expected null", data.getActiveTimId());
-        assertNull("TimID returned when expected null", data.getTimId());
+        Assertions.assertNull(data.getActiveTimId(), "ActiveTimID returned when expected null");
+        Assertions.assertNull(data.getTimId(), "TimID returned when expected null");
         verify(mockStatement).close();
         verify(mockRs).close();
         verify(mockConnection).close();
@@ -203,9 +203,9 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         ActiveTim data = uut.getActiveRsuTim("clientId", "direction", "ipv4Address");
 
         // Assert
-        assertNotNull("Null ActiveTim returned", data);
-        assertEquals(Long.valueOf(99), data.getActiveTimId());
-        assertEquals(Long.valueOf(-99), data.getTimId());
+        Assertions.assertNotNull(data, "Null ActiveTim returned");
+        Assertions.assertEquals(Long.valueOf(99), data.getActiveTimId());
+        Assertions.assertEquals(Long.valueOf(-99), data.getTimId());
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -221,8 +221,8 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         ActiveTim data = uut.getActiveRsuTim("clientId", "direction", "ipv4Address");
 
         // Assert
-        assertNull("ActiveTimID returned when expected null", data.getActiveTimId());
-        assertNull("TimID returned when expected null", data.getTimId());
+        Assertions.assertNull(data.getActiveTimId(), "ActiveTimID returned when expected null");
+        Assertions.assertNull(data.getTimId(), "TimID returned when expected null");
         verify(mockStatement).close();
         verify(mockRs).close();
         verify(mockConnection).close();

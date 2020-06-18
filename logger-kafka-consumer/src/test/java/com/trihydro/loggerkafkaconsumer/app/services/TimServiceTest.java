@@ -1,10 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -34,12 +29,11 @@ import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeDataType;
@@ -61,7 +55,6 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 
-@RunWith(StrictStubs.class)
 public class TimServiceTest extends TestBase<TimService> {
 
     @Mock
@@ -102,7 +95,7 @@ public class TimServiceTest extends TestBase<TimService> {
     private WydotRsu rsu;
     private Long pathId = -99l;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockActiveTimService, mockTimOracleTables, mockSqlNullHandler, mockPathService,
                 mockRegionService, mockDataFrameService, mockRsuService, mockTts, mockItisCodesService,
@@ -440,7 +433,7 @@ public class TimServiceTest extends TestBase<TimService> {
         boolean data = uut.updateTimSatRecordId(timId, satRecordId);
 
         // Assert
-        assertFalse("updateTimSatRecordId returned true when failure", data);
+        Assertions.assertFalse(data, "updateTimSatRecordId returned true when failure");
         verify(mockConnection).prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
         verify(mockConnection).close();
     }
@@ -454,7 +447,7 @@ public class TimServiceTest extends TestBase<TimService> {
         boolean data = uut.updateTimSatRecordId(timId, satRecordId);
 
         // Assert
-        assertTrue("updateTimSatRecordId returned false when successful", data);
+        Assertions.assertTrue(data, "updateTimSatRecordId returned false when successful");
         verify(mockConnection).prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
         verify(mockPreparedStatement).setString(1, satRecordId);
         verify(mockPreparedStatement).setLong(2, timId);
@@ -470,7 +463,7 @@ public class TimServiceTest extends TestBase<TimService> {
         ActiveTim data = uut.setActiveTimByRegionName(null);
 
         // Assert
-        assertNull(data);
+        Assertions.assertNull(data);
     }
 
     @Test
@@ -486,13 +479,13 @@ public class TimServiceTest extends TestBase<TimService> {
         ActiveTim data = uut.setActiveTimByRegionName(regionName);
 
         // Assert
-        assertNotNull(data);
-        assertNotNull(data.getDirection());
-        assertNotNull(data.getRoute());
-        assertNotNull(data.getRsuTarget());
-        assertNotNull(data.getTimType());
-        assertNotNull(data.getTimTypeId());
-        assertNotNull(data.getClientId());
+        Assertions.assertNotNull(data);
+        Assertions.assertNotNull(data.getDirection());
+        Assertions.assertNotNull(data.getRoute());
+        Assertions.assertNotNull(data.getRsuTarget());
+        Assertions.assertNotNull(data.getTimType());
+        Assertions.assertNotNull(data.getTimTypeId());
+        Assertions.assertNotNull(data.getClientId());
     }
 
     @Test
@@ -508,13 +501,13 @@ public class TimServiceTest extends TestBase<TimService> {
         ActiveTim data = uut.setActiveTimByRegionName(regionName);
 
         // Assert
-        assertNotNull(data);
-        assertNotNull(data.getDirection());
-        assertNotNull(data.getRoute());
-        assertNotNull(data.getSatRecordId());
-        assertNotNull(data.getTimType());
-        assertNotNull(data.getTimTypeId());
-        assertNotNull(data.getClientId());
+        Assertions.assertNotNull(data);
+        Assertions.assertNotNull(data.getDirection());
+        Assertions.assertNotNull(data.getRoute());
+        Assertions.assertNotNull(data.getSatRecordId());
+        Assertions.assertNotNull(data.getTimType());
+        Assertions.assertNotNull(data.getTimTypeId());
+        Assertions.assertNotNull(data.getClientId());
     }
 
     @Test
@@ -525,7 +518,7 @@ public class TimServiceTest extends TestBase<TimService> {
         TimType data = uut.getTimType("timTypeName");
 
         // Assert
-        assertNull(data);
+        Assertions.assertNull(data);
     }
 
     @Test
@@ -541,8 +534,8 @@ public class TimServiceTest extends TestBase<TimService> {
         TimType data = uut.getTimType("timTypeName");
 
         // Assert
-        assertNotNull(data);
-        assertEquals(Long.valueOf(-1), data.getTimTypeId());
+        Assertions.assertNotNull(data);
+        Assertions.assertEquals(Long.valueOf(-1), data.getTimTypeId());
     }
 
     @Test
@@ -554,7 +547,7 @@ public class TimServiceTest extends TestBase<TimService> {
         String data = uut.getItisCodeId("1234");
 
         // Assert
-        assertNull(data);
+        Assertions.assertNull(data);
     }
 
     @Test
@@ -571,7 +564,7 @@ public class TimServiceTest extends TestBase<TimService> {
         String data = uut.getItisCodeId("1234");
 
         // Assert
-        assertEquals("-1", data);
+        Assertions.assertEquals("-1", data);
     }
 
     private ActiveTimHolding getActiveTimHolding() {

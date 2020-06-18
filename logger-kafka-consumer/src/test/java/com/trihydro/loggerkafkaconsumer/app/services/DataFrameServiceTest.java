@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -15,16 +14,14 @@ import java.util.TimeZone;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
-@RunWith(StrictStubs.class)
 public class DataFrameServiceTest extends TestBase<DataFrameService> {
 
     @Spy
@@ -32,7 +29,7 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
     }
@@ -52,7 +49,7 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         Long data = uut.AddDataFrame(dFrame, -1l);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// TIM_ID
         verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 2, dFrame.getSspTimRights());// SSP_TIM_RIGHTS
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, null);// FRAME_TYPE
@@ -79,7 +76,7 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         Long data = uut.AddDataFrame(dFrame, -1l);
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        Assertions.assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

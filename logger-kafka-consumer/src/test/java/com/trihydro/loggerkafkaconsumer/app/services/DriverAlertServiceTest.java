@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -13,12 +12,11 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.tables.DriverAlertOracleTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
@@ -30,7 +28,6 @@ import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.SerialId;
 
-@RunWith(StrictStubs.class)
 public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
 
     @Spy
@@ -46,7 +43,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
 
     private DriverAlertType dat;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         uut.InjectDependencies(mockDriverAlertOracleTables, mockSqlNullHandler, mockItisCodeService,
                 mockDriverAlertTypeService, mockDriverAlertItisCodeService);
@@ -69,7 +66,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         Long data = uut.addDriverAlertToOracleDB(odeData);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1,
                 odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLatitude());// LATITUDE
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2,
@@ -115,7 +112,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         Long data = uut.addDriverAlertToOracleDB(getOdeData());
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        Assertions.assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

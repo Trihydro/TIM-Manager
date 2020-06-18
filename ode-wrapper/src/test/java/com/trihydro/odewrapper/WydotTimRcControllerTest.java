@@ -1,7 +1,5 @@
 package com.trihydro.odewrapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -21,19 +19,18 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.service.WydotTimService;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
 
-@RunWith(StrictStubs.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 public class WydotTimRcControllerTest {
 
 	@Mock
@@ -53,7 +50,7 @@ public class WydotTimRcControllerTest {
 
 	private Gson gson = new Gson();
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<ItisCode> itisCodes = new ArrayList<>();
 		ItisCode ic = new ItisCode();
@@ -81,13 +78,13 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("b", resultArr[0].direction);
-		assertEquals("I80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
+		Assertions.assertEquals("I80", resultArr[0].route);
 	}
 
 	@Test
@@ -102,12 +99,12 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("b", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("route not supported", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
@@ -121,13 +118,13 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("b", resultArr[0].direction);
-		assertEquals("I80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
+		Assertions.assertEquals("I80", resultArr[0].route);
 	}
 
 	@Test
@@ -141,13 +138,13 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
-		assertEquals("I80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
+		Assertions.assertEquals("I80", resultArr[0].route);
 	}
 
 	@Test
@@ -161,13 +158,13 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
-		assertEquals("I80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
+		Assertions.assertEquals("I80", resultArr[0].route);
 	}
 
 	@Test
@@ -181,13 +178,13 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
-		assertEquals("I80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
+		Assertions.assertEquals("I80", resultArr[0].route);
 	}
 
 	@Test
@@ -201,12 +198,12 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("d", resultArr[0].direction);
-		assertEquals("I80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("d", resultArr[0].direction);
+		Assertions.assertEquals("I80", resultArr[0].route);
 	}
 }

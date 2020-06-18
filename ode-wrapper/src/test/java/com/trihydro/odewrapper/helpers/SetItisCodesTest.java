@@ -1,7 +1,5 @@
 package com.trihydro.odewrapper.helpers;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
@@ -13,14 +11,15 @@ import com.trihydro.library.service.IncidentChoicesService;
 import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.odewrapper.model.WydotTimRc;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class SetItisCodesTest {
 
     @Mock
@@ -31,7 +30,7 @@ public class SetItisCodesTest {
     @InjectMocks
     SetItisCodes uut;
 
-    @Before
+    @BeforeEach
     public void setup() {
         List<ItisCode> itisCodes = new ArrayList<>();
         ItisCode code = new ItisCode();
@@ -73,7 +72,7 @@ public class SetItisCodesTest {
         var result = uut.setItisCodesRc(tim);
 
         // Assert
-        assertEquals(2, result.size());
+        Assertions.assertEquals(2, result.size());
     }
 
     @Test
@@ -88,7 +87,7 @@ public class SetItisCodesTest {
         var result = uut.setItisCodesRc(tim);
 
         // Assert
-        assertEquals(0, result.size());
+        Assertions.assertEquals(0, result.size());
     }
 
     @Test
@@ -103,8 +102,8 @@ public class SetItisCodesTest {
         var result = uut.setItisCodesRc(tim);
 
         // Assert
-        assertEquals(2, result.size());
-        assertTrue(result.contains("770"));
+        Assertions.assertEquals(2, result.size());
+        Assertions.assertTrue(result.contains("770"));
     }
 
     @Test
@@ -119,7 +118,7 @@ public class SetItisCodesTest {
         var result = uut.setItisCodesRc(tim);
 
         // Assert
-        assertEquals(2, result.size());
-        assertTrue(result.contains("Extreme blow over risk"));
+        Assertions.assertEquals(2, result.size());
+        Assertions.assertTrue(result.contains("Extreme blow over risk"));
     }
 }

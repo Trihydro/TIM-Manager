@@ -1,6 +1,5 @@
 package com.trihydro.odewrapper.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.isA;
@@ -32,16 +31,16 @@ import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class WydotTimServiceTest {
 
     @Mock
@@ -72,8 +71,7 @@ public class WydotTimServiceTest {
     @InjectMocks
     WydotTimService uut;
 
-    @Before
-    public void setup() {
+    public void setupAlertAddresses() {
         String[] addresses = new String[1];
         addresses[0] = "unit@test.com";
         when(mockBasicConfiguration.getAlertAddresses()).thenReturn(addresses);
@@ -127,12 +125,13 @@ public class WydotTimServiceTest {
         // Assert
         verify(mockActiveTimService).deleteActiveTim(-1l);
         verify(mockActiveTimService).deleteActiveTim(-2l);
-        assertEquals(result.getSuccessfulRsuDeletions().size(), 2);
+        Assertions.assertEquals(result.getSuccessfulRsuDeletions().size(), 2);
     }
 
     @Test
     public void deleteTimsFromRsusAndSdx_Sdx() throws MailException, MessagingException {
         // Arrange
+        setupAlertAddresses();
         List<ActiveTim> activeTims = getActiveTims(true);
         HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
         sdxDelResults.put(-1032012897, false);
@@ -153,8 +152,8 @@ public class WydotTimServiceTest {
         delIds.add(-2l);
         verify(mockActiveTimService).deleteActiveTimsById(delIds);
         verify(mockTimRsuService, never()).getTimRsusByTimId(isA(Long.class));
-        assertEquals(1, result.getSuccessfulSatelliteDeletions().size());
-        assertEquals(body, result.getSatelliteErrorSummary());
+        Assertions.assertEquals(1, result.getSuccessfulSatelliteDeletions().size());
+        Assertions.assertEquals(body, result.getSatelliteErrorSummary());
     }
 
     @Test

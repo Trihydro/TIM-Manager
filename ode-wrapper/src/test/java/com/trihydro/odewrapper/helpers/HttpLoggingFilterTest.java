@@ -21,14 +21,14 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.BufferedRequestWrapper;
 import com.trihydro.odewrapper.model.BufferedResponseWrapper;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class HttpLoggingFilterTest {
     @Mock
     HttpServletRequest mockHttpServletRequest;
@@ -58,11 +58,12 @@ public class HttpLoggingFilterTest {
     @InjectMocks
     HttpLoggingFilter uut;
 
-    @Before
+    @BeforeEach
     public void setup() throws ServletException, IOException {
         Enumeration<String> paramNames = Collections.emptyEnumeration();
         doReturn(paramNames).when(mockHttpServletRequest).getParameterNames();
-        doReturn(mockBufferedResponseWrapper).when(mockBufferedResponseWrapperFactory).getBufferedResponseWrapper(any());
+        doReturn(mockBufferedResponseWrapper).when(mockBufferedResponseWrapperFactory)
+                .getBufferedResponseWrapper(any());
         doReturn(mockBufferedRequestWrapper).when(mockBufferedRequestWrapperFactory).getBufferedRequestWrapper(any());
 
         uut.init(mockFilterConfig);

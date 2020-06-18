@@ -1,10 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -28,16 +24,18 @@ import com.trihydro.odewrapper.controller.UtilityController.RsuClearSuccess;
 import com.trihydro.odewrapper.model.TimDeleteSummary;
 import com.trihydro.odewrapper.service.WydotTimService;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class UtilityControllerTest {
     @Mock
     BasicConfiguration mockConfiguration;
@@ -60,13 +58,8 @@ public class UtilityControllerTest {
     private String rsuTarget2 = "1.2.3.4";
     protected Gson gson = new Gson();
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
-        List<Integer> indices = new ArrayList<>();
-        indices.add(1);
-        indices.add(2);
-        when(mockTimQuery.getIndicies_set()).thenReturn(indices);
-
         wydotRsus = new ArrayList<>();
         WydotRsu wydotRsu = new WydotRsu();
         wydotRsu.setRsuTarget(rsuTarget);
@@ -74,6 +67,13 @@ public class UtilityControllerTest {
         wydotRsu = new WydotRsu();
         wydotRsu.setRsuTarget(rsuTarget2);
         wydotRsus.add(wydotRsu);
+    }
+
+    private void setupIndicesSet(){
+        List<Integer> indices = new ArrayList<>();
+        indices.add(1);
+        indices.add(2);
+        when(mockTimQuery.getIndicies_set()).thenReturn(indices);
     }
 
     @Test
@@ -84,8 +84,8 @@ public class UtilityControllerTest {
         ResponseEntity<String> result = uut.clearRsu(null);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertEquals("No addresses supplied", result.getBody());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        Assertions.assertEquals("No addresses supplied", result.getBody());
     }
 
     @Test
@@ -96,8 +96,8 @@ public class UtilityControllerTest {
         ResponseEntity<String> result = uut.clearRsu(addresses);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertEquals("No addresses supplied", result.getBody());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        Assertions.assertEquals("No addresses supplied", result.getBody());
     }
 
     @Test
@@ -112,14 +112,14 @@ public class UtilityControllerTest {
         ResponseEntity<String> result = uut.clearRsu(addresses);
 
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         Type typeOfT = new TypeToken<List<RsuClearSuccess>>() {
         }.getType();
         List<RsuClearSuccess> returnMessages = gson.fromJson(result.getBody(), typeOfT);
-        assertFalse(returnMessages.isEmpty());
-        assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
-        assertEquals(false, returnMessages.get(0).success);
-        assertEquals("RSU not found for provided address", returnMessages.get(0).errMessage);
+        Assertions.assertFalse(returnMessages.isEmpty());
+        Assertions.assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
+        Assertions.assertEquals(false, returnMessages.get(0).success);
+        Assertions.assertEquals("RSU not found for provided address", returnMessages.get(0).errMessage);
     }
 
     @Test
@@ -136,19 +136,20 @@ public class UtilityControllerTest {
         ResponseEntity<String> result = uut.clearRsu(addresses);
 
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         Type typeOfT = new TypeToken<List<RsuClearSuccess>>() {
         }.getType();
         List<RsuClearSuccess> returnMessages = gson.fromJson(result.getBody(), typeOfT);
-        assertFalse(returnMessages.isEmpty());
-        assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
-        assertEquals(false, returnMessages.get(0).success);
-        assertEquals("Querying RSU indexes failed", returnMessages.get(0).errMessage);
+        Assertions.assertFalse(returnMessages.isEmpty());
+        Assertions.assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
+        Assertions.assertEquals(false, returnMessages.get(0).success);
+        Assertions.assertEquals("Querying RSU indexes failed", returnMessages.get(0).errMessage);
     }
 
     @Test
     public void clearRsu_Success() {
         // Arrange
+        setupIndicesSet();
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
 
@@ -161,19 +162,20 @@ public class UtilityControllerTest {
         ResponseEntity<String> result = uut.clearRsu(addresses);
 
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         Type typeOfT = new TypeToken<List<RsuClearSuccess>>() {
         }.getType();
         List<RsuClearSuccess> returnMessages = gson.fromJson(result.getBody(), typeOfT);
-        assertFalse(returnMessages.isEmpty());
-        assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
-        assertEquals(true, returnMessages.get(0).success);
+        Assertions.assertFalse(returnMessages.isEmpty());
+        Assertions.assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
+        Assertions.assertEquals(true, returnMessages.get(0).success);
         verify(mockWydotTimService, times(2)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
     }
 
     @Test
     public void clearRsu_MultipleSuccess() {
         // Arrange
+        setupIndicesSet();
         String[] addresses = new String[2];
         addresses[0] = rsuTarget;
         addresses[1] = rsuTarget2;
@@ -187,14 +189,14 @@ public class UtilityControllerTest {
         ResponseEntity<String> result = uut.clearRsu(addresses);
 
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         Type typeOfT = new TypeToken<List<RsuClearSuccess>>() {
         }.getType();
         List<RsuClearSuccess> returnMessages = gson.fromJson(result.getBody(), typeOfT);
-        assertFalse(returnMessages.isEmpty());
-        assertEquals(2, returnMessages.size());
-        assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
-        assertEquals(true, returnMessages.get(0).success);
+        Assertions.assertFalse(returnMessages.isEmpty());
+        Assertions.assertEquals(2, returnMessages.size());
+        Assertions.assertEquals(rsuTarget, returnMessages.get(0).rsuTarget);
+        Assertions.assertEquals(true, returnMessages.get(0).success);
         verify(mockWydotTimService, times(4)).deleteTimFromRsu(isA(WydotRsu.class), isA(Integer.class));
     }
 
@@ -209,9 +211,9 @@ public class UtilityControllerTest {
         var result = uut.deleteTims(aTimIds);
 
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertThat(result.getBody(), instanceOf(TimDeleteSummary.class));
-        assertNotNull((TimDeleteSummary)result.getBody());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+        MatcherAssert.assertThat(result.getBody(), instanceOf(TimDeleteSummary.class));
+        Assertions.assertNotNull((TimDeleteSummary)result.getBody());
         verify(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
     }
 }

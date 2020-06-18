@@ -1,7 +1,5 @@
 package com.trihydro.library.service;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,7 +47,6 @@ public class SdwService {
             return null;
         }
 
-        // try {
         String url = getBaseUrlString("api/GetDataByRecordId?recordId=" + recordId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -58,28 +55,6 @@ public class SdwService {
         ResponseEntity<AdvisorySituationDataDeposit> response = restTemplateProvider.GetRestTemplate().exchange(url,
                 HttpMethod.GET, entity, AdvisorySituationDataDeposit.class);
         return response.getBody();
-        // URL url = getBaseUrl("api/GetDataByRecordId?recordId=" + recordId);
-        // HttpURLConnection conn = utility.getSdxUrlConnection("GET", url,
-        // configProperties.getSdwApiKey());
-
-        // InputStreamReader isr = new InputStreamReader(conn.getInputStream());
-        // BufferedReader br = new BufferedReader(isr);
-        // String objString = br.readLine();
-
-        // if (StringUtils.isEmpty(objString) || StringUtils.isBlank(objString)) {
-        // return null;
-        // }
-
-        // // hydrate AdvisorySituationDataDeposit
-        // ObjectMapper mapper = new ObjectMapper();
-        // AdvisorySituationDataDeposit asdd = mapper.readValue(objString,
-        // AdvisorySituationDataDeposit.class);
-        // return asdd;
-
-        // } catch (IOException ex) {
-        // ex.printStackTrace();
-        // return null;
-        // }
 
     }
 
@@ -215,43 +190,6 @@ public class SdwService {
             utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
         }
         return response.getBody();
-
-        // try {
-        // URL url = getBaseUrl("api/delete-multiple-by-recordid");
-        // List<Integer> satRecordInts = satRecordIds.stream().map(x ->
-        // Integer.parseUnsignedInt(x, 16))
-        // .collect(Collectors.toList());
-        // String body = gson.toJson(satRecordInts);
-        // HttpURLConnection conn = utility.getSdxUrlConnection("DELETE", url,
-        // configProperties.getSdwApiKey());
-        // conn.setRequestProperty("Content-Type", "application/json; utf-8");
-        // conn.setDoOutput(true);
-
-        // try (OutputStream os = conn.getOutputStream()) {
-        // byte[] input = body.getBytes("utf-8");
-        // os.write(input, 0, input.length);
-        // os.close();
-        // }
-
-        // if (conn.getResponseCode() != 200) {
-        // utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
-        // }
-
-        // InputStreamReader isr = new InputStreamReader(conn.getInputStream());
-        // BufferedReader br = new BufferedReader(isr);
-        // String objString = br.lines().collect(Collectors.joining());
-        // ObjectMapper mapper = new ObjectMapper();
-        // TypeReference<HashMap<Integer, Boolean>> typeRef = new
-        // TypeReference<HashMap<Integer, Boolean>>() {
-        // };
-        // results = mapper.readValue(objString, typeRef);
-        // utility.logWithDate("Results from deleting SDX data by recordId: " +
-        // results.toString());
-        // return results;
-        // } catch (IOException ex) {
-        // ex.printStackTrace();
-        // return results;
-        // }
     }
 
     private String getBaseUrlString(String end) {
@@ -261,18 +199,5 @@ public class SdwService {
         }
         baseUrl += end;
         return baseUrl;
-    }
-
-    private URL getBaseUrl(String end) {
-        try {
-            String baseUrl = configProperties.getSdwRestUrl();
-            if (!baseUrl.endsWith("/")) {
-                baseUrl += "/";
-            }
-            baseUrl += end;
-            return new URL(baseUrl);
-        } catch (MalformedURLException ex) {
-            return null;
-        }
     }
 }

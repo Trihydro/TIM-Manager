@@ -1,9 +1,5 @@
 package com.trihydro.tasks.helpers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +20,8 @@ import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.RsuValidationResult;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class EmailFormatterTest {
     @Test
@@ -40,14 +37,18 @@ public class EmailFormatterTest {
         String emailBody = uut.generateSdxSummaryEmail(1, 2, 3, toResend, deleteFromSdx, invOracleRecords);
 
         // Assert
-        assertTrue("Number of stale records on SDX (different ITIS codes than ActiveTim): 2", emailBody.matches(
-                ".*Number of stale records on SDX \\(different ITIS codes than ActiveTim\\):</td>\\s*<td>2.*"));
-        assertTrue("Number of messages on SDX without corresponding Oracle record: 1",
-                emailBody.matches(".*Number of messages on SDX without corresponding Oracle record:</td>\\s*<td>1.*"));
-        assertTrue("Number of Oracle records without corresponding message in SDX: 3",
-                emailBody.matches(".*Number of Oracle records without corresponding message in SDX:</td>\\s*<td>3.*"));
-        assertTrue("Number of invalid records in Oracle: 0",
-                emailBody.matches(".*Number of invalid records in Oracle:</td>\\s*<td>0.*"));
+        Assertions.assertTrue(
+                emailBody.matches(
+                        ".*Number of stale records on SDX \\(different ITIS codes than ActiveTim\\):</td>\\s*<td>2.*"),
+                "Number of stale records on SDX (different ITIS codes than ActiveTim): 2");
+        Assertions.assertTrue(
+                emailBody.matches(".*Number of messages on SDX without corresponding Oracle record:</td>\\s*<td>1.*"),
+                "Number of messages on SDX without corresponding Oracle record: 1");
+        Assertions.assertTrue(
+                emailBody.matches(".*Number of Oracle records without corresponding message in SDX:</td>\\s*<td>3.*"),
+                "Number of Oracle records without corresponding message in SDX: 3");
+        Assertions.assertTrue(emailBody.matches(".*Number of invalid records in Oracle:</td>\\s*<td>0.*"),
+                "Number of invalid records in Oracle: 0");
     }
 
     @Test
@@ -69,10 +70,10 @@ public class EmailFormatterTest {
         String emailBody = uut.generateSdxSummaryEmail(0, 0, 0, toResend, deleteFromSdx, invOracleRecords);
 
         // Assert
-        assertTrue("Contains section: Invalid Oracle records",
-                emailBody.matches(".*<h3>Invalid Oracle records</h3>.*"));
-        assertTrue("<tr><td>100</td><td>invHex</td></tr>",
-                emailBody.matches(".*<tr><td>100</td><td>invHex</td></tr>.*"));
+        Assertions.assertTrue(emailBody.matches(".*<h3>Invalid Oracle records</h3>.*"),
+                "Contains section: Invalid Oracle records");
+        Assertions.assertTrue(emailBody.matches(".*<tr><td>100</td><td>invHex</td></tr>.*"),
+                "<tr><td>100</td><td>invHex</td></tr>");
     }
 
     @Test
@@ -94,10 +95,10 @@ public class EmailFormatterTest {
         String emailBody = uut.generateSdxSummaryEmail(0, 1, 0, toResend, deleteFromSdx, invOracleRecords);
 
         // Assert
-        assertTrue("Contains section: ActiveTims to resend to SDX",
-                emailBody.matches(".*<h3>ActiveTims to resend to SDX</h3>.*"));
-        assertTrue("<tr><td>200</td><td>AA1234</td></tr>",
-                emailBody.matches(".*<tr><td>200</td><td>AA1234</td></tr>.*"));
+        Assertions.assertTrue(emailBody.matches(".*<h3>ActiveTims to resend to SDX</h3>.*"),
+                "Contains section: ActiveTims to resend to SDX");
+        Assertions.assertTrue(emailBody.matches(".*<tr><td>200</td><td>AA1234</td></tr>.*"),
+                "<tr><td>200</td><td>AA1234</td></tr>");
     }
 
     @Test
@@ -117,9 +118,9 @@ public class EmailFormatterTest {
         String emailBody = uut.generateSdxSummaryEmail(1, 0, 0, toResend, deleteFromSdx, invOracleRecords);
 
         // Assert
-        assertTrue("Contains section: Orphaned records to delete from SDX",
-                emailBody.matches(".*<h3>Orphaned records to delete from SDX</h3>.*"));
-        assertTrue("<tr><td>-200</td></tr>", emailBody.matches(".*<tr><td>-200</td></tr>.*"));
+        Assertions.assertTrue(emailBody.matches(".*<h3>Orphaned records to delete from SDX</h3>.*"),
+                "Contains section: Orphaned records to delete from SDX");
+        Assertions.assertTrue(emailBody.matches(".*<tr><td>-200</td></tr>.*"), "<tr><td>-200</td></tr>");
     }
 
     @Test
@@ -137,8 +138,8 @@ public class EmailFormatterTest {
         String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
 
         // Assert
-        assertTrue("Unable to verify the following RSUs 10.145.0.0",
-                emailBody.matches(".*<div class=\"indent\"><p>10.145.0.0</p></div>.*"));
+        Assertions.assertTrue(emailBody.matches(".*<div class=\"indent\"><p>10.145.0.0</p></div>.*"),
+                "Unable to verify the following RSUs 10.145.0.0");
     }
 
     @Test
@@ -198,19 +199,20 @@ public class EmailFormatterTest {
         String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
 
         // Assert
-        assertTrue("<h3>RSUs with Errors</h3><h4>10.145.0.0</h4>",
-                emailBody.matches(".*<h3>RSUs with Errors</h3><h4>10.145.0.0</h4>.*"));
-        assertTrue("... Populated indexes without record ... 3 ...",
-                emailBody.matches(".*Populated indexes without record.*3.*"));
+        Assertions.assertTrue(emailBody.matches(".*<h3>RSUs with Errors</h3><h4>10.145.0.0</h4>.*"),
+                "<h3>RSUs with Errors</h3><h4>10.145.0.0</h4>");
+        Assertions.assertTrue(emailBody.matches(".*Populated indexes without record.*3.*"),
+                "... Populated indexes without record ... 3 ...");
 
         String tbody = getRowsForListItem("Active TIMs missing from RSU", emailBody);
-        assertEquals("<tr><td>DEV</td><td>1</td><td>1</td></tr>", tbody);
+        Assertions.assertEquals("<tr><td>DEV</td><td>1</td><td>1</td></tr>", tbody);
 
         tbody = getRowsForListItem("Stale TIMs on RSU", emailBody);
-        assertEquals("<tr><td>DEV</td><td>4</td><td>3</td><td>2020-01-01</td><td>2020-02-02</td></tr>", tbody);
+        Assertions.assertEquals("<tr><td>DEV</td><td>4</td><td>3</td><td>2020-01-01</td><td>2020-02-02</td></tr>",
+                tbody);
 
         tbody = getRowsForListItem("Active TIM index collisions", emailBody);
-        assertEquals("<tr><td>2</td><td>2 (DEV), 3 (PROD)</td></tr>", tbody);
+        Assertions.assertEquals("<tr><td>2</td><td>2 (DEV), 3 (PROD)</td></tr>", tbody);
     }
 
     @Test
@@ -228,9 +230,11 @@ public class EmailFormatterTest {
         String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
 
         // Assert
-        assertTrue("... <h3>Unexpected Errors Processing RSUs</h3> ... <li>10.145.0.0: InterruptedException</li> ...",
+        Assertions.assertTrue(
+
                 emailBody.matches(
-                        ".*<h3>Unexpected Errors Processing RSUs</h3><ul><li>10.145.0.0: InterruptedException</li></ul>.*"));
+                        ".*<h3>Unexpected Errors Processing RSUs</h3><ul><li>10.145.0.0: InterruptedException</li></ul>.*"),
+                "... <h3>Unexpected Errors Processing RSUs</h3> ... <li>10.145.0.0: InterruptedException</li> ...");
     }
 
     @Test
@@ -251,8 +255,8 @@ public class EmailFormatterTest {
         String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result.matches(".*<p>1234 \\(AA1234\\)</p>.*"));
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.matches(".*<p>1234 \\(AA1234\\)</p>.*"));
     }
 
     @Test
@@ -277,9 +281,9 @@ public class EmailFormatterTest {
         String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
-        assertTrue(result.contains("<td>fieldName</td><td>timValue</td><td>tmddValue</td>"));
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
+        Assertions.assertTrue(result.contains("<td>fieldName</td><td>timValue</td><td>tmddValue</td>"));
     }
 
     @Test
@@ -304,9 +308,9 @@ public class EmailFormatterTest {
         String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
-        assertTrue(result.contains("<td>fieldName</td><td>null</td><td>tmddValue</td>"));
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
+        Assertions.assertTrue(result.contains("<td>fieldName</td><td>null</td><td>tmddValue</td>"));
     }
 
     // RSU Validation Email helper method

@@ -97,6 +97,8 @@ public class CreateBaseTimUtil {
         dataFrame.setContent(content.getStringValue());// "Advisory");
         dataFrame.setFrameType(us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType.advisory);
         dataFrame.setUrl("null");
+        // add itis codes to tim
+        dataFrame.setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
 
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
@@ -114,38 +116,29 @@ public class CreateBaseTimUtil {
         path.setType("ll");
 
         // reduce the mileposts by removing straight away posts
+        Milepost anchorMp = milepostsAll.remove(0);
         mileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll, config.getPathDistanceLimit());
         timToSend.setMileposts(mileposts);
 
         OdePosition3D anchorPosition = new OdePosition3D();
-        if (timToSend.getMileposts().size() > 0) {
-            anchorPosition.setLatitude(timToSend.getMileposts().get(0).getLatitude());
-            anchorPosition.setLongitude(timToSend.getMileposts().get(0).getLongitude());
-        } else {
-            anchorPosition.setLatitude(BigDecimal.valueOf(0));
-            anchorPosition.setLongitude(BigDecimal.valueOf(0));
-            anchorPosition.setElevation(BigDecimal.valueOf(0));
-        }
+        anchorPosition.setLatitude(anchorMp.getLatitude());
+        anchorPosition.setLongitude(anchorMp.getLongitude());
+        region.setAnchorPosition(anchorPosition);
 
         MsgId msgId = new MsgId();
         RoadSignID roadSignID = new RoadSignID();
-        OdePosition3D position = new OdePosition3D();
-        position.setLatitude(anchorPosition.getLatitude());
-        position.setLongitude(anchorPosition.getLongitude());
-        roadSignID.setPosition(position);
+        roadSignID.setPosition(anchorPosition);
         roadSignID.setMutcdCode(MutcdCodeEnum.warning);
         roadSignID.setViewAngle("1111111111111111");
         msgId.setRoadSignID(roadSignID);
         dataFrame.setMsgId(msgId);
 
-        region.setAnchorPosition(anchorPosition);
-
         int timDirection = 0;
         // path list - change later
         if (milepostsAll != null && milepostsAll.size() > 0) {
-            double startLat = milepostsAll.get(0).getLatitude().doubleValue();
-            double startLon = milepostsAll.get(0).getLongitude().doubleValue();
-            for (int j = 1; j < milepostsAll.size(); j++) {
+            double startLat = anchorMp.getLatitude().doubleValue();//milepostsAll.get(0).getLatitude().doubleValue();
+            double startLon = anchorMp.getLongitude().doubleValue();//milepostsAll.get(0).getLongitude().doubleValue();
+            for (int j = 0; j < milepostsAll.size(); j++) {
                 double lat = milepostsAll.get(j).getLatitude().doubleValue();
                 double lon = milepostsAll.get(j).getLongitude().doubleValue();
 
@@ -168,8 +161,8 @@ public class CreateBaseTimUtil {
         // set path nodes
         if (mileposts != null && mileposts.size() > 0) {
             ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-            var startMp = mileposts.get(0);
-            for (int i = 1; i < mileposts.size(); i++) {
+            var startMp = anchorMp;
+            for (int i = 0; i < mileposts.size(); i++) {
                 // note that even though we are setting node-LL type here, the ODE only has a
                 // NodeXY object, as the structure is the same.
                 OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();

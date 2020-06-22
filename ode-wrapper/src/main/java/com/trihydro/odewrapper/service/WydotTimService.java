@@ -113,10 +113,6 @@ public class WydotTimService {
             return null;
         }
 
-        // add itis codes to tim
-        timToSend.getTim().getDataframes()[0]
-                .setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
-
         // overwrite start date/time if one is provided (start date/time has been set to
         // the current time in base tim creation)
         if (startDateTime != null) {

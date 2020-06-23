@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
@@ -176,11 +177,14 @@ public class SdwService {
             return results;
         }
 
+        List<Integer> satRecordInts = satRecordIds.stream().map(x -> Integer.parseUnsignedInt(x, 16))
+                .collect(Collectors.toList());
+
         String url = getBaseUrlString("api/delete-multiple-by-recordid");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("apikey", configProperties.getSdwApiKey());
-        HttpEntity<List<String>> entity = new HttpEntity<List<String>>(satRecordIds, headers);
+        HttpEntity<List<Integer>> entity = new HttpEntity<List<Integer>>(satRecordInts, headers);
         ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
         };
         ResponseEntity<HashMap<Integer, Boolean>> response = restTemplateProvider.GetRestTemplate().exchange(url,

@@ -134,6 +134,8 @@ public class SdwServiceTest extends BaseServiceTest {
         setupConfig();
         List<String> satNames = new ArrayList<String>();
         satNames.add("A9184436");
+        List<Integer> satIds = new ArrayList<Integer>();
+        satIds.add(-1458027466);
         HashMap<Integer, Boolean> hMap = new HashMap<Integer, Boolean>();
         hMap.put(-1, true);
 
@@ -141,7 +143,7 @@ public class SdwServiceTest extends BaseServiceTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("apikey", apiKey);
-        HttpEntity<List<String>> entity = new HttpEntity<List<String>>(satNames, headers);
+        HttpEntity<List<Integer>> entity = new HttpEntity<List<Integer>>(satIds, headers);
         ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
         };
         when(mockRestTemplate.exchange(url, HttpMethod.DELETE, entity, responseType)).thenReturn(mockRespHashMap);

@@ -159,15 +159,21 @@ public class DriverAlertService extends BaseService {
             if (driverAlertId != null && alert.split(",").length > 1) {
                 for (String code : alert.split(",")) {
                     if (code.chars().allMatch(Character::isDigit)) {
-                        for (ItisCode itisCode : itisCodes) {
-                            try {
-                                if (itisCode.getItisCode() == Integer.parseInt(code)) {
-                                    driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
-                                            itisCode.getItisCodeId());
-                                }
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
+                        var foundItisCode = itisCodes.stream().filter(x -> x.getItisCode() == Integer.parseInt(code))
+                                .findFirst();
+                        if (!foundItisCode.isEmpty()) {
+                            driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
+                                    foundItisCode.get().getItisCodeId());
+                        }
+                    } else {
+                        // look up by text
+                        var itisCode = itisCodes.stream().filter(x -> x.getDescription() != null
+                                && !x.getDescription().equals("") && x.getDescription().equals(code)).findFirst();
+                        // these text values end with 'START_ITIS_CODE'/'END_ITIS_CODE', so check for
+                        // nulls
+                        if (!itisCode.isEmpty()) {
+                            driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
+                                    itisCode.get().getItisCodeId());
                         }
                     }
                 }

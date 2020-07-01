@@ -98,6 +98,11 @@
               }
             },
             {
+              "phrase": {
+                "closures": "shoulder closed"
+              }
+            },
+            {
               "additional-text": {
                 "description": "Expect delays"
               }

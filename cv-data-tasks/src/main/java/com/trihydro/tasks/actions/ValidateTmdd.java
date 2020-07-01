@@ -199,7 +199,7 @@ public class ValidateTmdd implements Runnable {
             // Check ITIS Codes
             List<EventDescription> feuEds = getEventDescriptions(feu);
             List<Integer> feuItisCodes = getNumericItisCodes(feuEds);
-            if (!sameItisCodes(feuItisCodes, tim.getItisCodes())) {
+            if (!correctItisCodes(tim.getItisCodes(), feuItisCodes)) {
                 inconsistencies.add(new ActiveTimError("ITIS Codes", formatItisCodes(tim.getItisCodes()),
                         formatItisCodes(feuItisCodes)));
             }
@@ -307,26 +307,30 @@ public class ValidateTmdd implements Runnable {
         return itisCodes;
     }
 
-    private boolean sameItisCodes(List<Integer> o1, List<Integer> o2) {
-        boolean result = true;
+    // Check that all the ITIS Codes present in an Active TIM are present in the
+    // corresponding FEU. Note that FEUs may have more ITIS codes than an Active
+    // TIM, as the ITIS Codes reported in TIMs are a subset of those reported by the
+    // TMDD
+    private boolean correctItisCodes(List<Integer> activeTimItisCodes, List<Integer> feuItisCodes) {
+        if (activeTimItisCodes == null || feuItisCodes == null) {
+            return false;
+        }
 
-        if (o1 == null || o2 == null || o1.size() != o2.size()) {
-            result = false;
-        } else {
-            for (int i = 0; i < o1.size(); i++) {
-                boolean inBoth = false;
+        var result = true;
 
-                for (int j = 0; j < o2.size(); j++) {
-                    if (o1.get(i) != null && o1.get(i).equals(o2.get(j))) {
-                        inBoth = true;
-                        break;
-                    }
-                }
-
-                if (!inBoth) {
-                    result = false;
+        // Iterate over activeTimItisCodes and ensure each is present in feuItisCodes
+        for (var i = 0; i < activeTimItisCodes.size(); i++) {
+            var inBoth = false;
+            for (var j = 0; j < feuItisCodes.size(); j++) {
+                if (activeTimItisCodes.get(i) != null && activeTimItisCodes.get(i).equals(feuItisCodes.get(j))) {
+                    inBoth = true;
                     break;
                 }
+            }
+
+            if (!inBoth) {
+                result = false;
+                break;
             }
         }
 
@@ -342,7 +346,8 @@ public class ValidateTmdd implements Runnable {
         double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000.0;
 
         GlobalCoordinates tmdd = new GlobalCoordinates(tmddLat, tmddLon);
-        GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude().doubleValue(), timPoint.getLongitude().doubleValue());
+        GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude().doubleValue(),
+                timPoint.getLongitude().doubleValue());
 
         GeodeticCalculator geoCalc = new GeodeticCalculator();
         GeodeticCurve curve = geoCalc.calculateGeodeticCurve(Ellipsoid.WGS84, tmdd, tim);

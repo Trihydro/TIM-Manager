@@ -99,22 +99,35 @@ public class LoggerKafkaConsumer {
                                 switch (tdw.getTopic()) {
                                     case "topic.OdeTimJson":
                                         odeData = timDataConverter.processTimJson(tdw.getData());
-                                        if (odeData.getMetadata()
-                                                .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
-                                            timService.addActiveTimToOracleDB(odeData);
+                                        if (odeData != null) {
+                                            if (odeData.getMetadata()
+                                                    .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
+                                                timService.addActiveTimToOracleDB(odeData);
+                                            } else {
+                                                timService.addTimToOracleDB(odeData);
+                                            }
                                         } else {
-                                            timService.addTimToOracleDB(odeData);
+                                            utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
                                         }
                                         break;
 
                                     case "topic.OdeBsmJson":
                                         odeData = bsmDataConverter.processBsmJson(tdw.getData());
-                                        bsmService.addBSMToOracleDB(odeData, tdw.getData());
+                                        if (odeData != null) {
+                                            bsmService.addBSMToOracleDB(odeData, tdw.getData());
+                                        } else {
+                                            utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
+                                        }
                                         break;
 
                                     case "topic.OdeDriverAlertJson":
                                         odeData = daConverter.processDriverAlertJson(tdw.getData());
-                                        driverAlertService.addDriverAlertToOracleDB(odeData);
+                                        if (odeData != null) {
+                                            driverAlertService.addDriverAlertToOracleDB(odeData);
+                                        } else {
+                                            utility.logWithDate(
+                                                    "Failed to parse topic.OdeDriverAlertJson, insert fails");
+                                        }
                                         break;
                                 }
                             } else {

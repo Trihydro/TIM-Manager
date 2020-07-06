@@ -593,9 +593,7 @@ public class JsonToJavaConverter {
             tim.setDataframes(dataFrames);
             odeTimPayload = new OdeTimPayload();
             odeTimPayload.setTim(tim);
-        } catch (
-
-        IOException e) {
+        } catch (IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
             System.out.println(e.getMessage());
@@ -634,9 +632,12 @@ public class JsonToJavaConverter {
     }
 
     public OdeDriverAlertPayload convertDriverAlertPayloadJsonToJava(String value) {
-
         OdeDriverAlertPayload odeDriverAlertPayload = null;
-        JsonNode alertNode = JsonUtils.getJsonNode(value, "payload").get("alert");
+        var payloadNode = JsonUtils.getJsonNode(value, "payload");
+        if (payloadNode == null) {
+            return null;
+        }
+        JsonNode alertNode = payloadNode.get("alert");
 
         try {
             String alert = mapper.treeToValue(alertNode, String.class);

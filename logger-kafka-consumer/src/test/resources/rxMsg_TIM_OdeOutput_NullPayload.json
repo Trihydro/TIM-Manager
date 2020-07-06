@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "recordGeneratedBy": "OBU",
+    "receivedMessageDetails": {
+      "locationData": {
+        "elevation": 1515,
+        "heading": "0.0000",
+        "latitude": 40.4739533,
+        "speed": 0.14,
+        "longitude": -104.9689995
+      },
+      "rxSource": "SAT"
+    },
+    "schemaVersion": 3,
+    "securityResultCode": "unknown",
+    "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
+    "serialId": {
+      "recordId": 2,
+      "serialNumber": 0,
+      "streamId": "f212c298-4021-412a-b7c6-1fdb64a6a227",
+      "bundleSize": 1,
+      "bundleId": 4
+    },
+    "sanitized": false,
+    "recordGeneratedAt": "2017-09-05T20:23:39.194Z[UTC]",
+    "recordType": "rxMsg",
+    "logFileName": "rxMsg_TIM.bin",
+    "odeReceivedAt": "2017-11-09T13:33:34.039Z[UTC]"
+  }
+}

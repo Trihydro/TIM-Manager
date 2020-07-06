@@ -602,7 +602,7 @@ public class ActiveTimController extends BaseController {
 
 			for (int i = 0; i < ids.size(); i++) {
 				// set active_tim_id
-				ps.setLong(i+1, ids.get(i));
+				ps.setLong(i + 1, ids.get(i));
 			}
 			rs = ps.executeQuery();
 			activeTims = getActiveTimFromRS(rs, false);
@@ -877,8 +877,11 @@ public class ActiveTimController extends BaseController {
 					}
 				}
 
-				// Add the ITIS code to the ActiveTim's ITIS codes
-				activeTim.getItisCodes().add(rs.getInt("ITIS_CODE"));
+				// Add the ITIS code to the ActiveTim's ITIS codes, if not null
+				var itisCode = rs.getInt("ITIS_CODE");
+				if (!rs.wasNull()) {
+					activeTim.getItisCodes().add(itisCode);
+				}
 			}
 
 			if (activeTim != null) {

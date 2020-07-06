@@ -51,42 +51,44 @@ public enum CustomItisEnum {
                 return "Closed due to law enforcement request";
             case 904:
                 return "Closed due to local authority request";
-            case 905:
-                return "Winter conditions and crashes";
-            case 912:
-                return "rolling closure";
-
-            case 2567:
-                return "Local access only";
-            case 2571:
-                return "No through traffic";
+            case 7040:
+                return "Extreme blow over risk";
             case 2688:
                 return "Advise no light trailers";
             case 2689:
                 return "Closed to light, high profile vehicles";
-            case 2690:
-                return "Closed to light, high-profile vehicles due to active blowovers in the area";
-            case 2691:
-                return "Closed to light, high-profile vehicles due to gusting winds";
-            case 2692:
-                return "Closed to light, high-profile vehicles due to gusting winds and slick conditions";
 
-            case 3200:
-                return "Fire";
-            case 3968:
-                return "Local celebration";
-            case 4880:
-                return "Hail";
-            case 5914:
-                return "Slush";
-            case 6018:
-                return "Winter conditions";
-            case 6272:
-                return "Chains or all wheel drive with snow tires required";
-            case 7040:
-                return "Extreme blow over risk";
-            case 7296:
-                return "Watch for falling rock";
+            // codes from TMDD but not supported via documentation
+            // case 905:
+            // return "Winter conditions and crashes";
+            // case 912:
+            // return "rolling closure";
+            // case 2567:
+            // return "Local access only";
+            // case 2571:
+            // return "No through traffic";
+            // case 2690:
+            // return "Closed to light, high-profile vehicles due to active blowovers in the
+            // area";
+            // case 2691:
+            // return "Closed to light, high-profile vehicles due to gusting winds";
+            // case 2692:
+            // return "Closed to light, high-profile vehicles due to gusting winds and slick
+            // conditions";
+            // case 3200:
+            // return "Fire";
+            // case 3968:
+            // return "Local celebration";
+            // case 4880:
+            // return "Hail";
+            // case 5914:
+            // return "Slush";
+            // case 6018:
+            // return "Winter conditions";
+            // case 6272:
+            // return "Chains or all wheel drive with snow tires required";
+            // case 7296:
+            // return "Watch for falling rock";
 
             default:
                 return null;// default to returning null

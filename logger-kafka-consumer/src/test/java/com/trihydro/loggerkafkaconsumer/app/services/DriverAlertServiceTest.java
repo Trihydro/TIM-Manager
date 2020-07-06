@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.DriverAlertType;
+import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.tables.DriverAlertOracleTables;
 
 import org.junit.jupiter.api.Assertions;
@@ -50,7 +51,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
 
         List<DriverAlertType> dats = new ArrayList<DriverAlertType>();
         dat = new DriverAlertType();
-        dat.setShortName("alert");
+        dat.setShortName("TIM");
         dat.setDriverAlertTypeId(-1);
         dats.add(dat);
         doReturn(dats).when(mockDriverAlertTypeService).getDriverAlertTypes();
@@ -61,6 +62,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         // Arrange
         OdeData odeData = getOdeData();
         OdeLogMetadata odeDriverAlertMetadata = (OdeLogMetadata) odeData.getMetadata();
+        doReturn(getItisCodes()).when(mockItisCodeService).selectAllItisCodes();
 
         // Act
         Long data = uut.addDriverAlertToOracleDB(odeData);
@@ -99,6 +101,25 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 18,
                 odeDriverAlertMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
         verify(mockPreparedStatement).setString(19, "0"); // SANITIZED
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+
+    @Test
+    public void addDriverAlertToOracleDB_SUCCESS_Custom() throws SQLException {
+        // Arrange
+        OdeData odeData = getOdeData();
+        String alert = "770,Closed due to law enforcement request";
+        ((OdeDriverAlertPayload) odeData.getPayload()).setAlert(alert);
+        doReturn(getItisCodes()).when(mockItisCodeService).selectAllItisCodes();
+
+        // Act
+        Long data = uut.addDriverAlertToOracleDB(odeData);
+    
+        // Assert
+        verify(mockDriverAlertItisCodeService).insertDriverAlertItisCode(-1l, -1);
+        verify(mockDriverAlertItisCodeService).insertDriverAlertItisCode(-1l, -2);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -157,7 +178,21 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
     }
 
     private OdeDriverAlertPayload getMsgPayload() {
-        OdeDriverAlertPayload payload = new OdeDriverAlertPayload("alert");
+        OdeDriverAlertPayload payload = new OdeDriverAlertPayload("770,END_ITIS_CODE");
         return payload;
+    }
+
+    private List<ItisCode> getItisCodes(){
+        var itisCodes = new ArrayList<ItisCode>();
+        var itisCode = new ItisCode();
+        itisCode.setItisCode(770);
+        itisCode.setItisCodeId(-1);
+        itisCodes.add(itisCode);
+        
+        itisCode = new ItisCode();
+        itisCode.setDescription("Closed due to law enforcement request");
+        itisCode.setItisCodeId(-2);
+        itisCodes.add(itisCode);
+        return itisCodes;
     }
 }

@@ -313,6 +313,10 @@ public class ValidateTmdd implements Runnable {
     // TMDD
     private boolean correctItisCodes(List<Integer> activeTimItisCodes, List<Integer> feuItisCodes) {
         if (activeTimItisCodes == null || feuItisCodes == null) {
+            if (activeTimItisCodes == null && feuItisCodes == null) {
+                return true;
+            }
+
             return false;
         }
 

@@ -36,7 +36,6 @@ public class BsmDataConverterTest {
     @Test
     public void processBsmJson() throws IOException {
         // Arrange
-        // create test objects
         SerialId serialId;
 
         OdeBsmMetadata odeBsmMetadata = new OdeBsmMetadata();
@@ -94,4 +93,29 @@ public class BsmDataConverterTest {
         Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAuxBrakes());
         Assertions.assertEquals(2, odeBsmPayloadTest.getBsm().getPartII().size());
     }
+
+    @Test
+    public void processBsmJson_FAIL_Metadata() throws IOException {
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/bsmLogDuringEvent_OdeOutput_NullMetadata.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processBsmJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
+    }
+
+    @Test
+    public void processBsmJson_FAIL_Payload() throws IOException {
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/bsmLogDuringEvent_OdeOutput_NullPayload.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processBsmJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
+    }
+
 }

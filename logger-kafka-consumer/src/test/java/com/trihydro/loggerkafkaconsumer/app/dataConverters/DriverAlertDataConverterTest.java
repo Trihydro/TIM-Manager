@@ -83,4 +83,30 @@ public class DriverAlertDataConverterTest {
         Assertions.assertNotNull(odeDriverAlertPayloadTest);
         Assertions.assertEquals("ICW", odeDriverAlertPayloadTest.getAlert());
     }
+
+    @Test
+    public void processDriverAlertJson_FAIL_Metadata() throws IOException {
+
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput_NullMetadata.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processDriverAlertJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
+    }
+
+    @Test
+    public void processDriverAlertJson_FAIL_Payload() throws IOException {
+
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput_NullPayload.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processDriverAlertJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
+    }
 }

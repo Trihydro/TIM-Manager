@@ -28,7 +28,11 @@ public class TimDataConverter {
 
     public OdeData processTimJson(String value) {
 
-        JsonNode recordGeneratedBy = JsonUtils.getJsonNode(value, "metadata").get("recordGeneratedBy");
+        var metadata = JsonUtils.getJsonNode(value, "metadata");
+        if (metadata == null) {
+            return null;
+        }
+        JsonNode recordGeneratedBy = metadata.get("recordGeneratedBy");
 
         ObjectMapper mapper = new ObjectMapper();
 

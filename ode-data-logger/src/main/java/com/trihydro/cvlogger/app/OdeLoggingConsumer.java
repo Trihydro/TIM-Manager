@@ -56,7 +56,6 @@ public class OdeLoggingConsumer {
 		properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
-		// create adminClient to check if topic exists
 		var admin = Admin.create(properties);
 		var listTopics = admin.listTopics();
 		try {

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import com.google.gson.Gson;
 import com.trihydro.cvlogger.app.services.TracManager;
@@ -15,7 +16,7 @@ import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 
-import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -46,6 +47,7 @@ public class OdeLoggingConsumer {
 	}
 
 	public void setupTopic() {
+
 		String endpoint = configProperties.getKafkaHostServer() + ":9092";
 		Properties properties = new Properties();
 		properties.put("bootstrap.servers", endpoint);
@@ -53,13 +55,28 @@ public class OdeLoggingConsumer {
 		properties.put("auto.commit.interval.ms", "1000");
 		properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		AdminClient adminClient = AdminClient.create(properties);
-		NewTopic newTopic = new NewTopic(configProperties.getProducerTopic(), 1, (short) 1);
-		List<NewTopic> newTopics = new ArrayList<NewTopic>();
-		newTopics.add(newTopic);
 
-		adminClient.createTopics(newTopics);
-		adminClient.close();
+		var admin = Admin.create(properties);
+		var listTopics = admin.listTopics();
+		try {
+			var names = listTopics.names().get();
+			if (names != null && !names.contains(configProperties.getProducerTopic())) {
+				// topic doesn't exist, create it
+				NewTopic newTopic = new NewTopic(configProperties.getProducerTopic(), 1, (short) 1);
+				List<NewTopic> newTopics = new ArrayList<NewTopic>();
+				newTopics.add(newTopic);
+				admin.createTopics(newTopics);
+				
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+			return;
+		} finally {
+			admin.close();
+		}
 	}
 
 	public void startKafkaConsumerAsync() {

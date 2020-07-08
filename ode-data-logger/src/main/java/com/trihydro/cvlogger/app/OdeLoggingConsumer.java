@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.google.gson.Gson;
@@ -18,7 +17,6 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 
 import org.apache.kafka.clients.admin.Admin;
-import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -59,11 +57,18 @@ public class OdeLoggingConsumer {
 		properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
 		// create adminClient to check if topic exists
-		var client = AdminClient.create(properties);
-		var listTopics = client.listTopics();
-		Set<String> names = null;
+		var admin = Admin.create(properties);
+		var listTopics = admin.listTopics();
 		try {
-			names = listTopics.names().get();
+			var names = listTopics.names().get();
+			if (names != null && !names.contains(configProperties.getProducerTopic())) {
+				// topic doesn't exist, create it
+				NewTopic newTopic = new NewTopic(configProperties.getProducerTopic(), 1, (short) 1);
+				List<NewTopic> newTopics = new ArrayList<NewTopic>();
+				newTopics.add(newTopic);
+				admin.createTopics(newTopics);
+				admin.close();
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return;
@@ -71,16 +76,6 @@ public class OdeLoggingConsumer {
 			e.printStackTrace();
 			return;
 		} finally {
-			client.close();
-		}
-
-		if (names != null && !names.contains(configProperties.getProducerTopic())) {
-			// topic doesn't exist, create it
-			var admin = Admin.create(properties);
-			NewTopic newTopic = new NewTopic(configProperties.getProducerTopic(), 1, (short) 1);
-			List<NewTopic> newTopics = new ArrayList<NewTopic>();
-			newTopics.add(newTopic);
-			admin.createTopics(newTopics);
 			admin.close();
 		}
 	}

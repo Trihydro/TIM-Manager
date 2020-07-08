@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import com.google.gson.Gson;
 import com.trihydro.cvlogger.app.services.TracManager;
@@ -15,6 +17,7 @@ import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -46,6 +49,7 @@ public class OdeLoggingConsumer {
 	}
 
 	public void setupTopic() {
+
 		String endpoint = configProperties.getKafkaHostServer() + ":9092";
 		Properties properties = new Properties();
 		properties.put("bootstrap.servers", endpoint);
@@ -53,13 +57,32 @@ public class OdeLoggingConsumer {
 		properties.put("auto.commit.interval.ms", "1000");
 		properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		AdminClient adminClient = AdminClient.create(properties);
-		NewTopic newTopic = new NewTopic(configProperties.getProducerTopic(), 1, (short) 1);
-		List<NewTopic> newTopics = new ArrayList<NewTopic>();
-		newTopics.add(newTopic);
 
-		adminClient.createTopics(newTopics);
-		adminClient.close();
+		// create adminClient to check if topic exists
+		var client = AdminClient.create(properties);
+		var listTopics = client.listTopics();
+		Set<String> names = null;
+		try {
+			names = listTopics.names().get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+			return;
+		} finally {
+			client.close();
+		}
+
+		if (names != null && !names.contains(configProperties.getProducerTopic())) {
+			// topic doesn't exist, create it
+			var admin = Admin.create(properties);
+			NewTopic newTopic = new NewTopic(configProperties.getProducerTopic(), 1, (short) 1);
+			List<NewTopic> newTopics = new ArrayList<NewTopic>();
+			newTopics.add(newTopic);
+			admin.createTopics(newTopics);
+			admin.close();
+		}
 	}
 
 	public void startKafkaConsumerAsync() {

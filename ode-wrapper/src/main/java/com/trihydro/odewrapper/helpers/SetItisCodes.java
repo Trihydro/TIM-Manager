@@ -136,15 +136,12 @@ public class SetItisCodes {
         // depending on if rest area or exit number
         if (wydotTim.getExit() != null) {
             items.add("11794");// Exit Number
-            int exitItisCodeNumber;
             if (wydotTim.getExit().toLowerCase().equals("turnout")
                     || wydotTim.getExit().toLowerCase().equals("parking")) {
-                exitItisCodeNumber = convertNumberToItisCode((int) Math.round(wydotTim.getMileMarker()));
-                items.add(String.valueOf(exitItisCodeNumber));
+                items.add(String.valueOf(((int) Math.round(wydotTim.getMileMarker()))));
             } else {
                 List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
-                exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
-                items.add(String.valueOf(exitItisCodeNumber));
+                items.add(String.valueOf(Integer.parseInt(list.get(0))));
                 if (list.size() > 1) {
                     items.add(list.get(1));
                     System.out.println("list: " + list.get(1));

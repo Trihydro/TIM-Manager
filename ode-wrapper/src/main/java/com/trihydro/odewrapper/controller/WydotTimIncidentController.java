@@ -135,19 +135,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 for (WydotTimIncident wydotTim : wydotTims) {
                     // set route
                     wydotTim.setRoute(wydotTim.getHighway());
-
-                    // check if this is a point TIM
-                    if (wydotTim.getDirection().equalsIgnoreCase("b")) {
-                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk(),
-                                ContentEnum.advisory, TravelerInfoType.advisory);
-
-                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk(),
-                                ContentEnum.advisory, TravelerInfoType.advisory);
-                    } else {
-                        // single direction TIM
-                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
-                                wydotTim.getPk(), ContentEnum.advisory, TravelerInfoType.advisory);
-                    }
+                    processRequest(wydotTim, getTimType(type), startTime, null, wydotTim.getPk(), ContentEnum.advisory,
+                            TravelerInfoType.advisory);
                 }
             }
         }).start();

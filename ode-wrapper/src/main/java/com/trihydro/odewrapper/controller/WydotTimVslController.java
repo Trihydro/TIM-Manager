@@ -89,7 +89,7 @@ public class WydotTimVslController extends WydotTimBaseController {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
                     processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.speedLimit,
-                            TravelerInfoType.roadSignage);// also needs to have mutcdCode=regulatory...
+                            TravelerInfoType.roadSignage);
                 }
             }
         }).start();

@@ -198,11 +198,6 @@ public class SetItisCodes {
         return items;
     }
 
-    private int convertNumberToItisCode(int number) {
-        int itisCode = number + 12544;
-        return itisCode;
-    }
-
     public List<String> setItisCodesIncident(WydotTimIncident wydotTim) {
         List<String> items = new ArrayList<String>();
 

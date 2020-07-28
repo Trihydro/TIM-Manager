@@ -288,9 +288,14 @@ public class WydotTimRwController extends WydotTimBaseController {
                             && tim.getItisCodes().get(0).equals("268")) {
                         processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
                                 ContentEnum.speedLimit);
-                    } else {
+                    } else if (tim.getItisCodes() != null && tim.getItisCodes().get(0).equals("7186")) {
+                        // prepare to stop
                         processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.advisory);
+                                ContentEnum.workZone);
+                    } else {
+                        // the rest are content=workZone
+                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
+                                ContentEnum.workZone);
                     }
                 }
             }

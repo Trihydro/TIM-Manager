@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -87,7 +88,8 @@ public class WydotTimVslController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.speedLimit);
+                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.speedLimit,
+                            TravelerInfoType.roadSignage);
                 }
             }
         }).start();

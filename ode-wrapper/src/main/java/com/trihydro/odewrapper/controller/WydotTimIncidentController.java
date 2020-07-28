@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -134,19 +135,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
                 for (WydotTimIncident wydotTim : wydotTims) {
                     // set route
                     wydotTim.setRoute(wydotTim.getHighway());
-
-                    // check if this is a point TIM
-                    if (wydotTim.getDirection().equalsIgnoreCase("b")) {
-                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk(),
-                                ContentEnum.advisory);
-
-                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk(),
-                                ContentEnum.advisory);
-                    } else {
-                        // single direction TIM
-                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
-                                wydotTim.getPk(), ContentEnum.advisory);
-                    }
+                    processRequest(wydotTim, getTimType(type), startTime, null, wydotTim.getPk(), ContentEnum.advisory,
+                            TravelerInfoType.advisory);
                 }
             }
         }).start();

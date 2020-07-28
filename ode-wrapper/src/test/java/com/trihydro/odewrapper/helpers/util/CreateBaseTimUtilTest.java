@@ -24,6 +24,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
+
 @ExtendWith(MockitoExtension.class)
 public class CreateBaseTimUtilTest {
     @Mock
@@ -93,9 +95,10 @@ public class CreateBaseTimUtilTest {
         wydotTim.setEndPoint(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2)));
         String direction = "I";
         var content = ContentEnum.advisory;
+        var frameType = TravelerInfoType.advisory;
 
         // Act
-        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content);
+        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content, frameType);
 
         // Assert
         Assertions.assertNull(data);
@@ -116,11 +119,12 @@ public class CreateBaseTimUtilTest {
 
         String direction = "I";
         var content = ContentEnum.advisory;
+        var frameType = TravelerInfoType.advisory;
 
         doReturn(allMileposts).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
 
         // Act
-        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content);
+        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content, frameType);
 
         // Assert
         // validate dataFrame
@@ -167,11 +171,12 @@ public class CreateBaseTimUtilTest {
 
         String direction = "I";
         var content = ContentEnum.advisory;
+        var frameType = TravelerInfoType.advisory;
 
         doReturn(allMileposts).when(mockMilepostService).getMilepostsByPointWithBuffer(any());
 
         // Act
-        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content);
+        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content, frameType);
 
         // Assert
         // validate dataFrame

@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -283,14 +284,19 @@ public class WydotTimRwController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 for (WydotTimRw tim : timsToSend) {
-                    // check for speed limit, itis code 268
+                    // check for reduce speed, itis code 7443
                     if (tim.getItisCodes() != null && tim.getItisCodes().size() == 3
-                            && tim.getItisCodes().get(0).equals("268")) {
+                            && tim.getItisCodes().get(0).equals("7443")) {
                         processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.speedLimit);
+                                ContentEnum.speedLimit, TravelerInfoType.advisory);
+                    } else if (tim.getItisCodes() != null && tim.getItisCodes().get(0).equals("7186")) {
+                        // prepare to stop
+                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
+                                ContentEnum.advisory, TravelerInfoType.advisory);
                     } else {
+                        // the rest are content=workZone
                         processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.advisory);
+                                ContentEnum.workZone, TravelerInfoType.advisory);
                     }
                 }
             }

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -134,13 +135,8 @@ public class WydotTimParkingController extends WydotTimBaseController {
             public void run() {
                 String startTime = java.time.Clock.systemUTC().instant().toString();
                 for (WydotTimParking wydotTim : wydotTims) {
-                    if (wydotTim.getDirection().equalsIgnoreCase("b")) {
-                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, null, ContentEnum.exitService);
-                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, null, ContentEnum.exitService);
-                    } else {
-                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null, null,
-                                ContentEnum.exitService);
-                    }
+                    processRequest(wydotTim, getTimType(type), startTime, null, null, ContentEnum.exitService,
+                            TravelerInfoType.advisory);
                 }
             }
         }).start();

@@ -146,7 +146,7 @@ public class CreateBaseTimUtilTest {
         var path = region.getPath();
         Assertions.assertNotNull(path);
         Assertions.assertEquals("ll", path.getType());
-        Assertions.assertEquals(1, path.getScale());
+        Assertions.assertEquals(0, path.getScale());
 
         // validate nodes
         Assertions.assertEquals(3, path.getNodes().length);
@@ -198,7 +198,7 @@ public class CreateBaseTimUtilTest {
         var path = region.getPath();
         Assertions.assertNotNull(path);
         Assertions.assertEquals("ll", path.getType());
-        Assertions.assertEquals(1, path.getScale());
+        Assertions.assertEquals(0, path.getScale());
 
         // validate nodes
         Assertions.assertEquals(3, path.getNodes().length);

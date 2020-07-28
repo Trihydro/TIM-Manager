@@ -633,7 +633,7 @@ public class WydotTimService {
             codes[1] = Integer.parseInt(number) + 12544;
 
             // mintues ITIS code
-            codes[2] = 8720;
+            codes[2] = 8728;
         } else if (action.equals("prepareStop")) {
             // content=advisory
             codes = new Integer[1];

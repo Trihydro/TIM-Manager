@@ -27,6 +27,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 @Component
@@ -45,7 +46,7 @@ public class CreateBaseTimUtil {
     }
 
     public WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, BasicConfiguration config,
-            ContentEnum content) {
+            ContentEnum content, TravelerInfoType frameType) {
 
         // assume the given start/stop points are correct and send them on to calculate
         // mileposts
@@ -94,8 +95,8 @@ public class CreateBaseTimUtil {
 
         dataFrame.setPriority(5);
 
-        dataFrame.setContent(content.getStringValue());// "Advisory");
-        dataFrame.setFrameType(us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType.advisory);
+        dataFrame.setContent(content.getStringValue());
+        dataFrame.setFrameType(frameType);
         dataFrame.setUrl("null");
         // add itis codes to tim
         dataFrame.setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
@@ -128,7 +129,13 @@ public class CreateBaseTimUtil {
         MsgId msgId = new MsgId();
         RoadSignID roadSignID = new RoadSignID();
         roadSignID.setPosition(anchorPosition);
-        roadSignID.setMutcdCode(MutcdCodeEnum.warning);
+        // if we are coming in with content=speedLimit and frameType=roadSignage,
+        // we need to set the mutcdCode to regulatory to display the regulatory signage
+        if (content == ContentEnum.speedLimit && frameType == TravelerInfoType.roadSignage) {
+            roadSignID.setMutcdCode(MutcdCodeEnum.regulatory);
+        } else {
+            roadSignID.setMutcdCode(MutcdCodeEnum.warning);
+        }
         roadSignID.setViewAngle("1111111111111111");
         msgId.setRoadSignID(roadSignID);
         dataFrame.setMsgId(msgId);
@@ -136,8 +143,8 @@ public class CreateBaseTimUtil {
         int timDirection = 0;
         // path list - change later
         if (milepostsAll != null && milepostsAll.size() > 0) {
-            double startLat = anchorMp.getLatitude().doubleValue();//milepostsAll.get(0).getLatitude().doubleValue();
-            double startLon = anchorMp.getLongitude().doubleValue();//milepostsAll.get(0).getLongitude().doubleValue();
+            double startLat = anchorMp.getLatitude().doubleValue();
+            double startLon = anchorMp.getLongitude().doubleValue();
             for (int j = 0; j < milepostsAll.size(); j++) {
                 double lat = milepostsAll.get(j).getLatitude().doubleValue();
                 double lon = milepostsAll.get(j).getLongitude().doubleValue();

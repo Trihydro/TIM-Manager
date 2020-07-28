@@ -58,6 +58,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @Component
 public class WydotTimService {
@@ -104,10 +105,10 @@ public class WydotTimService {
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public WydotTravelerInputData createTim(WydotTim wydotTim, String direction, String timTypeStr,
-            String startDateTime, String endDateTime, ContentEnum content) {
+            String startDateTime, String endDateTime, ContentEnum content, TravelerInfoType frameType) {
 
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration, content);
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration, content, frameType);
 
         if (timToSend == null) {
             return null;
@@ -307,7 +308,7 @@ public class WydotTimService {
                 }
             }
             // delete active tim
-            if(activeTimService.deleteActiveTim(activeTim.getActiveTimId())){
+            if (activeTimService.deleteActiveTim(activeTim.getActiveTimId())) {
                 returnValue.addSuccessfulRsuDeletions(activeTim.getActiveTimId());
             }
         }
@@ -634,9 +635,11 @@ public class WydotTimService {
             // mintues ITIS code
             codes[2] = 8720;
         } else if (action.equals("prepareStop")) {
+            // content=advisory
             codes = new Integer[1];
             codes[0] = 7186;
         } else if (action.contains("reduceSpeed_")) { // Construction zone speed limit XX from delay on Con Admin
+            // content=speedLimit
             codes = new Integer[3];
             // Reduced speed ITIS code
             codes[0] = 7443;

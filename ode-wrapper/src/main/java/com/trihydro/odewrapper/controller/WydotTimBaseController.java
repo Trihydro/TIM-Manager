@@ -32,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
+
 @Component
 public abstract class WydotTimBaseController {
 
@@ -445,15 +447,16 @@ public abstract class WydotTimBaseController {
     }
 
     public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk,
-            ContentEnum content) {
+            ContentEnum content, TravelerInfoType frameType) {
 
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
             // i
-            createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk, content);
+            createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk, content, frameType);
             // d
-            createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk, content);
+            createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk, content, frameType);
         } else {
-            createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk, content);
+            createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk, content,
+                    frameType);
         }
     }
 
@@ -480,10 +483,10 @@ public abstract class WydotTimBaseController {
 
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, String direction, TimType timType, String startDateTime,
-            String endDateTime, Integer pk, ContentEnum content) {
+            String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType) {
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
-                startDateTime, endDateTime, content);
+                startDateTime, endDateTime, content, frameType);
 
         if (timToSend == null) {
             return;

@@ -135,17 +135,17 @@ public class SetItisCodes {
         // for parking TIM, content=exitService, and includes additional itis codes
         // depending on if rest area or exit number
         if (wydotTim.getExit() != null) {
+            // if exit, the exit number should be a text value.
+            // This has some strange implications as seen here
+            // https://github.com/usdot-jpo-ode/jpo-ode/blob/540b79f1697f4d6464e8c4b8491666ec9cf08d8d/jpo-ode-plugins/src/main/java/us/dot/its/jpo/ode/plugin/j2735/builders/TravelerMessageFromHumanToAsnConverter.java#L337
+            // the ODE translates a text value only if we start with a single quote to
+            // denote this. No ending quote is used
             items.add("11794");// Exit Number
             if (wydotTim.getExit().toLowerCase().equals("turnout")
                     || wydotTim.getExit().toLowerCase().equals("parking")) {
-                items.add(String.valueOf(((int) Math.round(wydotTim.getMileMarker()))));
+                items.add("'" + String.valueOf(((int) Math.round(wydotTim.getMileMarker()))));
             } else {
-                List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
-                items.add(String.valueOf(Integer.parseInt(list.get(0))));
-                if (list.size() > 1) {
-                    items.add(list.get(1));
-                    System.out.println("list: " + list.get(1));
-                }
+                items.add("'" + wydotTim.getExit());
             }
         } else {
             items.add("7986");// Rest Area

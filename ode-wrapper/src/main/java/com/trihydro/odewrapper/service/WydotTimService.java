@@ -123,6 +123,11 @@ public class WydotTimService {
         // set the duration if there is an enddate
         if (endDateTime != null) {
             int durationTime = utility.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+            // J2735 has duration time of 0-32000
+            // the ODE fails if we have greater than 32000
+            if(durationTime > 32000){
+                durationTime = 32000;
+            }
             timToSend.getTim().getDataframes()[0].setDurationTime(durationTime);
         }
 

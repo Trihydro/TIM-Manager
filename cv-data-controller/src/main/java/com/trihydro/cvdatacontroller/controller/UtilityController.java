@@ -81,7 +81,7 @@ public class UtilityController extends BaseController {
 
     @RequestMapping(value = { "/drop-bsm-partitions" }, method = RequestMethod.POST)
     public ResponseEntity<Boolean> dropBsmPartitions(@RequestBody List<String> partitionNames) {
-        if (partitionNames == null) {
+        if (partitionNames == null || partitionNames.size() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 

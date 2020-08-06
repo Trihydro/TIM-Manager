@@ -47,7 +47,7 @@ public class UtilityController extends BaseController {
                 var partitionName = rs.getString("PARTITION_NAME");
                 var stringHighValue = rs.getString("HIGH_VALUE");
 
-                stringHighValue = stringHighValue.replaceFirst("TIMESTAMP'\s", "").replace("'", "");
+                stringHighValue = stringHighValue.replaceFirst("TIMESTAMP'\\s", "").replace("'", "");
 
                 try {
                     var highValue = partHighValue.parse(stringHighValue);

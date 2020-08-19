@@ -1,6 +1,9 @@
 package com.trihydro.tasks.actions;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -32,8 +35,10 @@ public class CleanupBsms implements Runnable {
         try {
             var partitions = utilityService.getBsmCoreDataPartitions();
             var toRemove = new ArrayList<BsmCoreDataPartition>();
-            var cutoff = new Date(
-                    Instant.now().toEpochMilli() - (configuration.getBsmRetentionPeriodDays() * 86400000));
+
+            var cutoffLocalDate = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
+                    .minusDays(configuration.getBsmRetentionPeriodDays());
+            var cutoff = new Date(cutoffLocalDate.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli());
 
             for (var part : partitions) {
                 if (part.getHighValue().compareTo(cutoff) < 0) {

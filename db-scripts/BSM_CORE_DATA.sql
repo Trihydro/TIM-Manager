@@ -59,6 +59,12 @@
      NO INMEMORY ;
 
 --------------------------------------------------------
+-- DDL for Index RECORD_GENERATED_AT
+--------------------------------------------------------
+
+	CREATE INDEX "CVCOMMS"."RECORD_GENERATED_AT" ON "CVCOMMS"."BSM_CORE_DATA" ("RECORD_GENERATED_AT");
+
+--------------------------------------------------------
 --  DDL for Index BSM_U
 --------------------------------------------------------
 
@@ -94,7 +100,6 @@ ALTER TRIGGER "CVCOMMS"."TRG_BSM_CORE_DATA_ID" ENABLE;
 --  Constraints for Table BSM_CORE_DATA
 --------------------------------------------------------
 
-  ALTER TABLE "CVCOMMS"."BSM_CORE_DATA" ADD CONSTRAINT "UNIQUE_CONSTRAINT" UNIQUE ("MSGCNT", "SECMARK", "POSITION_LAT", "POSITION_LONG", "LOG_FILE_NAME", "POSITION_ELEV", "RECORD_GENERATED_AT") DISABLE;
   ALTER TABLE "CVCOMMS"."BSM_CORE_DATA" ADD CONSTRAINT "BSM_U" UNIQUE ("MSGCNT", "SECMARK", "POSITION_LAT", "POSITION_LONG", "POSITION_ELEV", "RECORD_GENERATED_AT", "LOG_FILE_NAME", "BSM_SOURCE");
 
 --------------------------------------------------------

@@ -79,7 +79,7 @@ public class UtilityController extends BaseController {
         return ResponseEntity.ok(results);
     }
 
-    @RequestMapping(value = { "/drop-bsm-partitions" }, method = RequestMethod.POST)
+    @RequestMapping(value = { "/drop-bsm-partitions" }, method = RequestMethod.DELETE)
     public ResponseEntity<Boolean> dropBsmPartitions(@RequestBody List<String> partitionNames) {
         if (partitionNames == null || partitionNames.size() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);

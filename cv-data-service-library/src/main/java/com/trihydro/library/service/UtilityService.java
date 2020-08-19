@@ -25,7 +25,7 @@ public class UtilityService extends CvDataServiceLibrary {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List<String>> entity = new HttpEntity<List<String>>(partitionNames, headers);
-        ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity,
+        ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity,
                 Boolean.class);
 
         return response.getBody();

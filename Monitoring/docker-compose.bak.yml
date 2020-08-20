@@ -1,0 +1,101 @@
+version: '3.1'
+
+networks:
+  front-tier:
+  back-tier:
+
+services:
+  cadvisor:
+    image: google/cadvisor:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 9094:8080
+    restart: always
+    networks:
+      - back-tier
+    deploy:
+      mode: global
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9091:9090
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+    restart: always
+    networks:
+      - back-tier
+    depends_on:
+      - cadvisor
+    links:
+      - cadvisor:cadvisor
+      - alertmanager:alertmanager
+      - node-exporter:node-exporter
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == ${HOSTNAME}
+
+  alertmanager:
+    image: prom/alertmanager
+    restart: always
+    ports:
+      - 9093:9093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    restart: always
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+    networks:
+      - back-tier
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == ${HOSTNAME}
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=Tr1hydro!
+    depends_on:
+      - prometheus
+    ports:
+      - 9095:3000
+    volumes:
+      - grafana_data:/var/lib/grafana/
+    networks:
+      - back-tier
+    links:
+      - prometheus:prometheus
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - 9100:9100
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+        # - '--collector.processes'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+
+  glances:
+    build: ./glances
+    restart: always
+    ports:
+      - 9096:9096
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+
+volumes:
+  grafana_data: {} 

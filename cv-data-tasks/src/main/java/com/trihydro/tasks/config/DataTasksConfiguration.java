@@ -26,6 +26,7 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private String fromEmail;
     private String mailHost;
     private int mailPort;
+    private int bsmRetentionPeriodDays;
     private boolean runTmddValidation;
     private boolean runRsuValidation;
     private int rsuValThreadPoolSize = 1;
@@ -38,7 +39,7 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private int rsuValidationPeriodMinutes = 1440;
     private int tmddValidationPeriodMinutes = 1440;
     private int retentionEnforcementPeriodMinutes = 1440;// run once a day by default
-
+    private int bsmCleanupPeriodMinutes = 1440;
 
     public String getCvRestService() {
         return cvRestService;
@@ -134,6 +135,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setMailPort(int mailPort) {
         this.mailPort = mailPort;
+    }
+
+    public int getBsmRetentionPeriodDays() {
+        return bsmRetentionPeriodDays;
+    }
+
+    public void setBsmRetentionPeriodDays(int bsmRetentionPeriodDays) {
+        this.bsmRetentionPeriodDays = bsmRetentionPeriodDays;
     }
 
     public boolean getRunTmddValidation() {
@@ -244,4 +253,11 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.tmddValidationPeriodMinutes = tmddValidationPeriodMinutes;
     }
 
+    public int getBsmCleanupPeriodMinutes() {
+        return bsmCleanupPeriodMinutes;
+    }
+
+    public void setBsmCleanupPeriodMinutes(int bsmCleanupPeriodMinutes) {
+        this.bsmCleanupPeriodMinutes = bsmCleanupPeriodMinutes;
+    }
 }

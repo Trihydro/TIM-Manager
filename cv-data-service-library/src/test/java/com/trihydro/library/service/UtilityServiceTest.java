@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
@@ -73,7 +72,7 @@ public class UtilityServiceTest extends BaseServiceTest {
     @Test
     public void dropBsmPartitions_success() {
         // Arrange
-        when(mockRestTemplate.exchange(isA(String.class), eq(HttpMethod.POST), any(), eq(Boolean.class)))
+        when(mockRestTemplate.exchange(isA(String.class), eq(HttpMethod.DELETE), any(), eq(Boolean.class)))
                 .thenReturn(mockBoolResponse);
 
         doReturn(true).when(mockBoolResponse).getBody();
@@ -83,13 +82,13 @@ public class UtilityServiceTest extends BaseServiceTest {
 
         // Assert
         assertTrue(result);
-        verify(mockRestTemplate).exchange(isA(String.class), eq(HttpMethod.POST), any(), eq(Boolean.class));
+        verify(mockRestTemplate).exchange(isA(String.class), eq(HttpMethod.DELETE), any(), eq(Boolean.class));
     }
 
     @Test
     public void dropBsmPartitions_restClientException() {
         // Arrange
-        when(mockRestTemplate.exchange(isA(String.class), eq(HttpMethod.POST), any(), eq(Boolean.class)))
+        when(mockRestTemplate.exchange(isA(String.class), eq(HttpMethod.DELETE), any(), eq(Boolean.class)))
                 .thenThrow(new RestClientException(""));
 
         // Act, Assert

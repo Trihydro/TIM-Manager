@@ -7,7 +7,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -51,8 +54,12 @@ public class CleanupBsmsTest {
     public void cleanupBsms_success() {
         // Arrange
         // 1 partition, sys_1, which is 25 hours old (1 hour outside retention period)
-        when(mockUtilityService.getBsmCoreDataPartitions()).thenReturn(Arrays.asList(new BsmCoreDataPartition[] {
-                new BsmCoreDataPartition("sys_1", new Date(Instant.now().toEpochMilli() - 1000 * 60 * 60 * 25)) }));
+        when(mockUtilityService.getBsmCoreDataPartitions())
+                .thenReturn(
+                        Arrays.asList(new BsmCoreDataPartition[] { new BsmCoreDataPartition("sys_1",
+                                new Date(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
+                                        .toInstant(OffsetDateTime.now().getOffset()).toEpochMilli()
+                                        - 1000 * 60 * 60 * 25)) }));
 
         // Act
         uut.run();

@@ -1,0 +1,40 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: '10.145.9.29:25'
+  smtp_from: 'cv_monitor@wyo.gov'
+  smtp_auth_username: ''
+  smtp_auth_password: ''
+
+# The directory from which notification templates are read.
+templates: 
+- '/etc/alertmanager/template/*.tmpl'
+
+# The root route on which each incoming alert enters.
+route:
+
+  # If an alert has successfully been sent, wait 'repeat_interval' to
+  # resend them.
+  repeat_interval: 24h
+
+  # A default receiver
+  receiver: team-X-mails
+  group_by: [severity]
+
+# Inhibition rules allow to mute a set of alerts given that another alert is
+# firing.
+# We use this to mute any warning-level notifications if the same alert is 
+# already critical.
+inhibit_rules:
+- source_match:
+    severity: 'critical'
+  target_match:
+    severity: 'warning'
+  # Apply inhibition if the alertname is the same.
+  equal: ['alertname', 'cluster', 'service']
+
+
+receivers:
+- name: 'team-X-mails'
+  email_configs:
+  - to: 'bpayne@trihydro.com, ttrouchon@trihydro.com'
+    require_tls: false

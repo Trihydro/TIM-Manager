@@ -14,7 +14,6 @@ alerting:
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
     - 'cAdvisor_alert_dev.rules'
-    # - 'alert.rules'
   # - "first_rules.yml"
   # - "second_rules.yml"
 
@@ -41,8 +40,3 @@ scrape_configs:
   - job_name: 'docker'
     static_configs:
       - targets: ['10.145.9.205:9417']
-
-  # - job_name: 'glances'
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets: ['10.145.9.205:9096']

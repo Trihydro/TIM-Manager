@@ -30,9 +30,9 @@ scrape_configs:
     static_configs:
       - targets: ['10.145.9.205:9091']
 
-  # - job_name: 'cadvisor'
-  #   static_configs:
-  #     - targets: ['10.145.9.205:9094']
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['10.145.9.205:9094']
 
   - job_name: 'node'
     static_configs:

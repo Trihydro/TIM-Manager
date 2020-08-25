@@ -2,6 +2,7 @@ package com.trihydro.mongologger.app.loggers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -54,15 +55,24 @@ public class MongoLogger {
                 }
 
                 if (docs.size() > 0) {
-                        MongoClient mongoClient = MongoClients.create(MongoClientSettings.builder()
-                                        .applyToClusterSettings(builder -> builder
-                                                        .hosts(Arrays.asList(new ServerAddress(serverAddress, 27017))))
-                                        .credential(credential).build());
+                        MongoClient mongoClient = null;
+                        try {
+                                mongoClient = MongoClients.create(MongoClientSettings.builder()
+                                                .applyToClusterSettings(builder -> builder.hosts(
+                                                                Arrays.asList(new ServerAddress(serverAddress, 27017))))
+                                                .credential(credential).build());
 
-                        MongoDatabase database = mongoClient.getDatabase(databaseName);
-                        MongoCollection<Document> collection = database.getCollection(collectionName);
-                        collection.insertMany(docs);
-                        mongoClient.close();
+                                MongoDatabase database = mongoClient.getDatabase(databaseName);
+                                MongoCollection<Document> collection = database.getCollection(collectionName);
+                                collection.insertMany(docs);
+                        } catch (Exception ex) {
+                                Date date = new Date();
+                                System.out.println(date + " " + ex.getMessage());
+                        } finally {
+                                if (mongoClient != null) {
+                                        mongoClient.close();
+                                }
+                        }
                 }
         }
 }

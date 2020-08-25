@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 
 import com.trihydro.mongologger.app.loggers.MongoLogger;
@@ -74,6 +75,9 @@ public class OdeMongoLoggingConsumer {
 							}
 						}
 					}
+				} catch (Exception ex) {
+					Date date = new Date();
+					System.out.println(date + " " + ex.getMessage());
 				} finally {
 					stringConsumer.close();
 				}

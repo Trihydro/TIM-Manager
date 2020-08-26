@@ -30,6 +30,9 @@ services:
       # SERVER_SSL_KEY_ALIAS: ${WRAPPER_SERVER_SSL_KEY_ALIAS}
     ports:
       - "7777:7777"
+    logging:
+      options:
+        max-size: 50m
 
   cv-data-tasks:
     build: cv-data-tasks
@@ -60,6 +63,9 @@ services:
       CONFIG_RSU_VALIDATION_PERIOD_MINUTES: ${TASKS_CONFIG_RSU_VALIDATION_PERIOD_MINUTES}
       CONFIG_TMDD_VALIDATION_PERIOD_MINUTES: ${TASKS_CONFIG_TMDD_VALIDATION_PERIOD_MINUTES}
       CONFIG_RETENTION_ENFORCEMENT_PERIOD_MINUTES: ${TASKS_CONFIG_RETENTION_ENFORCEMENT_PERIOD_MINUTES}
+    logging:
+      options:
+        max-size: 50m
 
   tim-refresh:
     build: tim-refresh
@@ -75,6 +81,9 @@ services:
       CONFIG_POINT_INCIDENT_BUFFER_MILES: ${REFRESH_CONFIG_POINT_INCIDENT_BUFFER_MILES}
       CRON_EXPRESSION: ${REFRESH_CRON_EXPRESSION}
       CONFIG_ENV: ${REFRESH_CONFIG_ENV}
+    logging:
+      options:
+        max-size: 50m
 
   cv-data-controller:
     build: cv-data-controller
@@ -91,6 +100,9 @@ services:
       CONFIG_ODE_URL: ${CONTROLLER_CONFIG_ODE_URL}
       CONFIG_ENV: ${CONTROLLER_CONFIG_ENV}
       SPRING_DATA_NEO4J_URI: ${CONTROLLER_SPRING_DATA_NEO4J_URI}
+    logging:
+      options:
+        max-size: 50m
 
   rsu-data-controller:
     build: rsu-data-controller
@@ -105,12 +117,18 @@ services:
       CONFIG_SNMP_AUTH_PASSPHRASE: ${RSUCONTROLLER_CONFIG_SNMP_AUTH_PASSPHRASE}
       CONFIG_SNMP_AUTH_PROTOCOL: ${RSUCONTROLLER_CONFIG_SNMP_AUTH_PROTOCOL}
       CONFIG_SNMP_SECURITY_LEVEL: ${RSUCONTROLLER_CONFIG_SNMP_SECURITY_LEVEL}
+    logging:
+      options:
+        max-size: 50m
 
   angular:
     build: timBuilder
     restart: always
     ports:
       - "4200:4200"
+    logging:
+      options:
+        max-size: 50m
 
   bsm_logger_mongo:
     build: ode-mongo-logger
@@ -413,3 +431,6 @@ services:
 
     environment:
       NEO4J_AUTH: none
+    logging:
+      options:
+        max-size: 50m

@@ -56,6 +56,7 @@ public class TestBase<T extends BaseController> {
                 lenient().doReturn(-1l).when(mockDbInteractions).executeAndLog(isA(PreparedStatement.class),
                                 isA(String.class));
                 lenient().doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+                lenient().doReturn(true).when(mockDbInteractions).deleteWithPossibleZero(mockPreparedStatement);
                 lenient().when(mockStatement.executeQuery(isA(String.class))).thenReturn(mockRs);
                 lenient().when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
                 lenient().when(mockRs.next()).thenReturn(true).thenReturn(false);

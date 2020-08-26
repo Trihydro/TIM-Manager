@@ -87,6 +87,18 @@ public class DbInteractions {
         return result;
     }
 
+    public boolean deleteWithPossibleZero(PreparedStatement preparedStatement) {
+        boolean result = false;
+        try {
+            preparedStatement.executeUpdate();
+            result = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public Long executeAndLog(PreparedStatement preparedStatement, String type) {
         Long id = null;
         try {

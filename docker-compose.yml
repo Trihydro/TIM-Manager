@@ -391,6 +391,9 @@ services:
         max-size: 50m
     ports:
       - "8081:8081"
+    logging:
+      options:
+        max-size: 50m
 
   logger-kafka-consumer:
     build: logger-kafka-consumer

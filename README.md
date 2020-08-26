@@ -11,6 +11,7 @@
 ## About
 
 The WyoCV Applications are a suite of tools for interacting with the Wyoming DOT ODE, with an emphasis on Traveler Information Messages (TIMs). The tool suite include modules for both sides of interaction, from the ode-wrapper used to simplify interactions with pushing TIMs, to the ode-data-logger used to subscribe to ODE Kafka topics and deposit data into an Oracle database. Each module within the project contains its own README file to help understand specific functionality.
+> __Note:__ Most of the modules are hosted here, however the SMDM applicaton is hosted in BitBucket as it is owned by WYDOT and USDOT. This application is imported and ran by our docker-compose.yml file, but is not maintained here.
 
 ## Getting Started
 

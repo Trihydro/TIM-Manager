@@ -37,13 +37,13 @@ public class OdeLoggingConsumer {
 
 	@Autowired
 	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TracManager _tracManager, Utility _utility)
-			throws IOException {
+			throws IOException, Exception {
 		this.configProperties = configProperties;
 		tracManager = _tracManager;
 		utility = _utility;
 		System.out.println("starting..............");
 		setupTopic();
-		startKafkaConsumerAsync();
+		startKafkaConsumer();
 	}
 
 	public void setupTopic() {
@@ -66,7 +66,7 @@ public class OdeLoggingConsumer {
 				List<NewTopic> newTopics = new ArrayList<NewTopic>();
 				newTopics.add(newTopic);
 				admin.createTopics(newTopics);
-				
+
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -79,60 +79,66 @@ public class OdeLoggingConsumer {
 		}
 	}
 
-	public void startKafkaConsumerAsync() {
-		// An Async task always executes in new thread
-		new Thread(new Runnable() {
-			public void run() {
-				String endpoint = configProperties.getKafkaHostServer() + ":9092";
+	public void startKafkaConsumer() throws Exception {
+		String endpoint = configProperties.getKafkaHostServer() + ":9092";
 
-				// Properties for the kafka topic
-				Properties consumerProps = new Properties();
-				consumerProps.put("bootstrap.servers", endpoint);
-				consumerProps.put("group.id", configProperties.getDepositGroup());
-				consumerProps.put("auto.commit.interval.ms", "1000");
-				consumerProps.put("session.timeout.ms", "30000");
-				consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(consumerProps);
-				String consumerTopic = configProperties.getDepositTopic();
-				stringConsumer.subscribe(Arrays.asList(consumerTopic));
-				System.out.println("Subscribed to topic " + consumerTopic);
+		// Properties for the kafka topic
+		Properties consumerProps = new Properties();
+		consumerProps.put("bootstrap.servers", endpoint);
+		consumerProps.put("group.id", configProperties.getDepositGroup());
+		consumerProps.put("auto.commit.interval.ms", "1000");
+		consumerProps.put("session.timeout.ms", "30000");
+		consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(consumerProps);
+		String consumerTopic = configProperties.getDepositTopic();
+		stringConsumer.subscribe(Arrays.asList(consumerTopic));
+		System.out.println("Subscribed to topic " + consumerTopic);
 
-				Properties producerProps = new Properties();
-				producerProps.put("bootstrap.servers", endpoint);
-				producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-				producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-				KafkaProducer<String, String> stringProducer = new KafkaProducer<String, String>(producerProps);
-				String producerTopic = configProperties.getProducerTopic();
+		Properties producerProps = new Properties();
+		producerProps.put("bootstrap.servers", endpoint);
+		producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		KafkaProducer<String, String> stringProducer = new KafkaProducer<String, String>(producerProps);
+		String producerTopic = configProperties.getProducerTopic();
 
-				Gson gson = new Gson();
+		Gson gson = new Gson();
 
-				try {
-					while (true) {
-						Duration polTime = Duration.ofMillis(100);
-						ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
-						for (ConsumerRecord<String, String> record : records) {
-							if (consumerTopic.equals("topic.OdeDNMsgJson")) {
-								utility.logWithDate("Found DNMsgJson, submitting to Trac");
-								tracManager.submitDNMsgToTrac(record.value(), configProperties);
-							} else {
-								String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
-										record.topic(), producerTopic);
-								utility.logWithDate(logTxt);
-								TopicDataWrapper tdw = new TopicDataWrapper();
-								tdw.setTopic(record.topic());
-								tdw.setData(record.value());
-								ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(
-										producerTopic, gson.toJson(tdw));
-								stringProducer.send(producerRecord);
-							}
-						}
+		try {
+			while (true) {
+				Duration polTime = Duration.ofMillis(100);
+				ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
+				for (ConsumerRecord<String, String> record : records) {
+					if (consumerTopic.equals("topic.OdeDNMsgJson")) {
+						utility.logWithDate("Found DNMsgJson, submitting to Trac");
+						tracManager.submitDNMsgToTrac(record.value(), configProperties);
+					} else {
+						String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
+								record.topic(), producerTopic);
+						utility.logWithDate(logTxt);
+						TopicDataWrapper tdw = new TopicDataWrapper();
+						tdw.setTopic(record.topic());
+						tdw.setData(record.value());
+						ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(
+								producerTopic, gson.toJson(tdw));
+						stringProducer.send(producerRecord);
 					}
-				} finally {
-					stringConsumer.close();
-					stringProducer.close();
 				}
 			}
-		}).start();
+		} catch (Exception ex) {
+			utility.logWithDate(ex.getMessage());
+			throw (ex);
+		} finally {
+			try {
+				stringConsumer.close();
+			} catch (Exception consumerEx) {
+				consumerEx.printStackTrace();
+			}
+			try {
+				stringProducer.close();
+			} catch (Exception producerEx) {
+				producerEx.printStackTrace();
+			}
+		}
 	}
 }

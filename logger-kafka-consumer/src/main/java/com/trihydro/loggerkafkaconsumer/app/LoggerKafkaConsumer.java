@@ -42,7 +42,7 @@ public class LoggerKafkaConsumer {
     public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService,
             DriverAlertService _driverAlertService, TimDataConverter _timDataConverter,
             BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter, Utility _utility)
-            throws IOException {
+            throws IOException, Exception {
         loggerConfig = _loggerConfig;
         bsmService = _bsmService;
         timService = _timService;
@@ -56,93 +56,94 @@ public class LoggerKafkaConsumer {
 
         mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        startKafkaConsumerAsync();
+        startKafkaConsumer();
     }
 
-    public void startKafkaConsumerAsync() {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                String endpoint = loggerConfig.getKafkaHostServer() + ":9092";
+    public void startKafkaConsumer() throws Exception {
 
-                // Properties for the kafka topic
-                Properties props = new Properties();
-                props.put("bootstrap.servers", endpoint);
-                props.put("group.id", loggerConfig.getDepositGroup());
-                props.put("auto.commit.interval.ms", "1000");
-                props.put("session.timeout.ms", "30000");
-                props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-                props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-                KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
+        String endpoint = loggerConfig.getKafkaHostServer() + ":9092";
 
-                String topic = loggerConfig.getDepositTopic();
+        // Properties for the kafka topic
+        Properties props = new Properties();
+        props.put("bootstrap.servers", endpoint);
+        props.put("group.id", loggerConfig.getDepositGroup());
+        props.put("auto.commit.interval.ms", "1000");
+        props.put("session.timeout.ms", "30000");
+        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
 
-                stringConsumer.subscribe(Arrays.asList(topic));
-                System.out.println("Subscribed to topic " + topic);
+        String topic = loggerConfig.getDepositTopic();
 
-                Gson gson = new Gson();
+        stringConsumer.subscribe(Arrays.asList(topic));
+        System.out.println("Subscribed to topic " + topic);
 
-                try {
-                    OdeData odeData = new OdeData();
-                    while (true) {
-                        ConsumerRecords<String, String> records = stringConsumer.poll(100);
-                        for (ConsumerRecord<String, String> record : records) {
-                            TopicDataWrapper tdw = null;
-                            try {
-                                tdw = gson.fromJson(record.value(), TopicDataWrapper.class);
-                            } catch (Exception e) {
-                                // Could be ioException, JsonParseException, JsonMappingException
-                                e.printStackTrace();
-                            }
-                            if (tdw != null && tdw.getData() != null) {
-                                utility.logWithDate(String.format("Found data for topic: %s", tdw.getTopic()));
-                                switch (tdw.getTopic()) {
-                                    case "topic.OdeTimJson":
-                                        odeData = timDataConverter.processTimJson(tdw.getData());
-                                        if (odeData != null) {
-                                            if (odeData.getMetadata()
-                                                    .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
-                                                timService.addActiveTimToOracleDB(odeData);
-                                            } else {
-                                                timService.addTimToOracleDB(odeData);
-                                            }
-                                        } else {
-                                            utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
-                                        }
-                                        break;
+        Gson gson = new Gson();
 
-                                    case "topic.OdeBsmJson":
-                                        odeData = bsmDataConverter.processBsmJson(tdw.getData());
-                                        if (odeData != null) {
-                                            bsmService.addBSMToOracleDB(odeData, tdw.getData());
-                                        } else {
-                                            utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
-                                        }
-                                        break;
-
-                                    case "topic.OdeDriverAlertJson":
-                                        odeData = daConverter.processDriverAlertJson(tdw.getData());
-                                        if (odeData != null) {
-                                            driverAlertService.addDriverAlertToOracleDB(odeData);
-                                        } else {
-                                            utility.logWithDate(
-                                                    "Failed to parse topic.OdeDriverAlertJson, insert fails");
-                                        }
-                                        break;
+        try {
+            OdeData odeData = new OdeData();
+            while (true) {
+                ConsumerRecords<String, String> records = stringConsumer.poll(100);
+                for (ConsumerRecord<String, String> record : records) {
+                    TopicDataWrapper tdw = null;
+                    try {
+                        tdw = gson.fromJson(record.value(), TopicDataWrapper.class);
+                    } catch (Exception e) {
+                        // Could be ioException, JsonParseException, JsonMappingException
+                        e.printStackTrace();
+                    }
+                    if (tdw != null && tdw.getData() != null) {
+                        utility.logWithDate(String.format("Found data for topic: %s", tdw.getTopic()));
+                        switch (tdw.getTopic()) {
+                            case "topic.OdeTimJson":
+                                odeData = timDataConverter.processTimJson(tdw.getData());
+                                if (odeData != null) {
+                                    if (odeData.getMetadata()
+                                            .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
+                                        timService.addActiveTimToOracleDB(odeData);
+                                    } else {
+                                        timService.addTimToOracleDB(odeData);
+                                    }
+                                } else {
+                                    utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
                                 }
-                            } else {
-                                utility.logWithDate(
-                                        "Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
-                                if (tdw != null) {
-                                    utility.logWithDate(gson.toJson(tdw));
+                                break;
+
+                            case "topic.OdeBsmJson":
+                                odeData = bsmDataConverter.processBsmJson(tdw.getData());
+                                if (odeData != null) {
+                                    bsmService.addBSMToOracleDB(odeData, tdw.getData());
+                                } else {
+                                    utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
                                 }
-                            }
+                                break;
+
+                            case "topic.OdeDriverAlertJson":
+                                odeData = daConverter.processDriverAlertJson(tdw.getData());
+                                if (odeData != null) {
+                                    driverAlertService.addDriverAlertToOracleDB(odeData);
+                                } else {
+                                    utility.logWithDate("Failed to parse topic.OdeDriverAlertJson, insert fails");
+                                }
+                                break;
+                        }
+                    } else {
+                        utility.logWithDate("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
+                        if (tdw != null) {
+                            utility.logWithDate(gson.toJson(tdw));
                         }
                     }
-                } finally {
-                    stringConsumer.close();
                 }
             }
-        }).start();
+        } catch (Exception ex) {
+            utility.logWithDate(ex.getMessage());
+            throw (ex);
+        } finally {
+            try {
+                stringConsumer.close();
+            } catch (Exception consumerEx) {
+                consumerEx.printStackTrace();
+            }
+        }
     }
 }

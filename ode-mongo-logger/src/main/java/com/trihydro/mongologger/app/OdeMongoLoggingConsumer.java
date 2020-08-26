@@ -80,7 +80,11 @@ public class OdeMongoLoggingConsumer {
 					System.out.println(date + " " + ex.getMessage());
 					throw (ex);
 				} finally {
-					stringConsumer.close();
+					try {
+						stringConsumer.close();
+					} catch (Exception consumerEx) {
+						consumerEx.printStackTrace();
+					}
 				}
 			}
 		}).start();

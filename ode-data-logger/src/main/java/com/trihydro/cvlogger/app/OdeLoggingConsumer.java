@@ -66,7 +66,7 @@ public class OdeLoggingConsumer {
 				List<NewTopic> newTopics = new ArrayList<NewTopic>();
 				newTopics.add(newTopic);
 				admin.createTopics(newTopics);
-				
+
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -128,9 +128,20 @@ public class OdeLoggingConsumer {
 							}
 						}
 					}
+				} catch (Exception ex) {
+					utility.logWithDate(ex.getMessage());
+					throw (ex);
 				} finally {
-					stringConsumer.close();
-					stringProducer.close();
+					try {
+						stringConsumer.close();
+					} catch (Exception consumerEx) {
+						consumerEx.printStackTrace();
+					}
+					try {
+						stringProducer.close();
+					} catch (Exception producerEx) {
+						producerEx.printStackTrace();
+					}
 				}
 			}
 		}).start();

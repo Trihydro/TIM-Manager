@@ -139,8 +139,15 @@ public class LoggerKafkaConsumer {
                             }
                         }
                     }
+                } catch (Exception ex) {
+                    utility.logWithDate(ex.getMessage());
+                    throw (ex);
                 } finally {
-                    stringConsumer.close();
+                    try {
+                        stringConsumer.close();
+                    } catch (Exception consumerEx) {
+                        consumerEx.printStackTrace();
+                    }
                 }
             }
         }).start();

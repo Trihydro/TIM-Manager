@@ -264,7 +264,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -301,7 +301,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -337,7 +337,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -376,7 +376,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -415,7 +415,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -454,7 +454,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -491,7 +491,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -526,7 +526,7 @@ public class TimController extends BaseController {
             preparedStatement.setString(1, strDate);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

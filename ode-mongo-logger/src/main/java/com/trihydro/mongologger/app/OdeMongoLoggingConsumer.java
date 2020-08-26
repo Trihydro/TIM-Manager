@@ -78,6 +78,7 @@ public class OdeMongoLoggingConsumer {
 				} catch (Exception ex) {
 					Date date = new Date();
 					System.out.println(date + " " + ex.getMessage());
+					throw (ex);
 				} finally {
 					stringConsumer.close();
 				}

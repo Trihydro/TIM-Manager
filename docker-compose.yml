@@ -32,8 +32,8 @@ services:
       - "7777:7777"
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   cv-data-tasks:
     build: cv-data-tasks
@@ -66,8 +66,8 @@ services:
       CONFIG_RETENTION_ENFORCEMENT_PERIOD_MINUTES: ${TASKS_CONFIG_RETENTION_ENFORCEMENT_PERIOD_MINUTES}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   tim-refresh:
     build: tim-refresh
@@ -85,8 +85,8 @@ services:
       CONFIG_ENV: ${REFRESH_CONFIG_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   cv-data-controller:
     build: cv-data-controller
@@ -105,8 +105,8 @@ services:
       SPRING_DATA_NEO4J_URI: ${CONTROLLER_SPRING_DATA_NEO4J_URI}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   rsu-data-controller:
     build: rsu-data-controller
@@ -123,8 +123,8 @@ services:
       CONFIG_SNMP_SECURITY_LEVEL: ${RSUCONTROLLER_CONFIG_SNMP_SECURITY_LEVEL}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   angular:
     build: timBuilder
@@ -133,8 +133,8 @@ services:
       - "4200:4200"
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   bsm_logger_mongo:
     build: ode-mongo-logger
@@ -154,8 +154,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   bsm_logger_mongo_2:
     build: ode-mongo-logger
@@ -175,8 +175,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   bsm_logger:
     build: ode-data-logger
@@ -195,8 +195,8 @@ services:
       ENV: ${LOGGER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   bsm_logger_2:
     build: ode-data-logger
@@ -215,8 +215,8 @@ services:
       ENV: ${LOGGER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   tim_logger_mongo:
     build: ode-mongo-logger
@@ -236,8 +236,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   tim_logger_mongo_2:
     build: ode-mongo-logger
@@ -257,8 +257,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   tim_logger:
     build: ode-data-logger
@@ -277,8 +277,8 @@ services:
       ENV: ${LOGGER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   tim_logger_2:
     build: ode-data-logger
@@ -297,8 +297,8 @@ services:
       ENV: ${LOGGER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   da_logger_mongo:
     build: ode-mongo-logger
@@ -318,8 +318,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   da_logger_mongo_2:
     build: ode-mongo-logger
@@ -339,8 +339,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   da_logger:
     build: ode-data-logger
@@ -359,8 +359,8 @@ services:
       ENV: ${LOGGER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   da_logger_2:
     build: ode-data-logger
@@ -379,8 +379,8 @@ services:
       ENV: ${LOGGER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   dn_trac_sender:
     build: ode-data-logger
@@ -399,16 +399,16 @@ services:
       ENV: ${LOGGER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   smdm:
     build: smdm
     restart: always
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
     ports:
       - "8081:8081"
 
@@ -431,8 +431,8 @@ services:
       ENV: ${DBCONSUMER_ENV}
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"
 
   milepost-graph-db:
     build: milepost-graph-db
@@ -454,5 +454,5 @@ services:
       NEO4J_AUTH: none
     logging:
       options:
-        max-size: 20m
-        max-file: 3
+        max-size: "20m"
+        max-file: "3"

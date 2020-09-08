@@ -69,6 +69,8 @@ public class LoggerKafkaConsumer {
         props.put("group.id", loggerConfig.getDepositGroup());
         props.put("auto.commit.interval.ms", "1000");
         props.put("session.timeout.ms", "30000");
+        props.put("max.poll.interval.ms", loggerConfig.getMaxPollIntervalMs());
+        props.put("max.poll.records", loggerConfig.getMaxPollRecords());
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);

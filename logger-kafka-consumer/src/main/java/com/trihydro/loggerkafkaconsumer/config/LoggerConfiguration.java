@@ -10,6 +10,8 @@ public class LoggerConfiguration implements DbInteractionsProps {
     private String depositGroup;
     private String depositTopic;
     private String kafkaHostServer;
+    private int maxPollIntervalMs = 300000;
+    private int maxPollRecords = 500;
     private String dbUsername;
     private String dbPassword;
     private String dbUrl;
@@ -116,4 +118,19 @@ public class LoggerConfiguration implements DbInteractionsProps {
         this.depositGroup = depositGroup;
     }
 
+    public int getMaxPollIntervalMs() {
+        return maxPollIntervalMs;
+    }
+
+    public void setMaxPollIntervalMs(int maxPollIntervalMs) {
+        this.maxPollIntervalMs = maxPollIntervalMs;
+    }
+
+    public int getMaxPollRecords() {
+        return maxPollRecords;
+    }
+
+    public void setMaxPollRecords(int maxPollRecords) {
+        this.maxPollRecords = maxPollRecords;
+    }
 }

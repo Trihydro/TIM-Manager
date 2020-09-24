@@ -32,6 +32,8 @@ public class CleanupBsms implements Runnable {
 
     @Override
     public void run() {
+        utility.logWithDate("Running...", this.getClass());
+
         try {
             var partitions = utilityService.getBsmCoreDataPartitions();
             var toRemove = new ArrayList<BsmCoreDataPartition>();

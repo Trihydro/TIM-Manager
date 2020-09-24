@@ -82,7 +82,7 @@ public class CleanupBsmsTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(0)).logWithDate(any(), any());
+        verify(mockUtility, times(1)).logWithDate(any(), any());
         verify(mockUtilityService, times(0)).dropBsmPartitions(any());
     }
 
@@ -97,7 +97,7 @@ public class CleanupBsmsTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(0)).logWithDate(any(), any());
+        verify(mockUtility, times(1)).logWithDate(any(), any());
         verify(mockUtilityService, times(0)).dropBsmPartitions(any());
     }
 

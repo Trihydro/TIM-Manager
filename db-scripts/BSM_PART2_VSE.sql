@@ -43,7 +43,7 @@
 	"LIGHTS" VARCHAR2(1000 BYTE), 
 	"PH_INITPOS_POSCONFIDENCE_ELEV" VARCHAR2(20 BYTE),
     CONSTRAINT "FK_BSM_CORE_DATA" FOREIGN KEY ("BSM_CORE_DATA_ID") REFERENCES "CVCOMMS"."BSM_CORE_DATA" ("BSM_CORE_DATA_ID") ON DELETE CASCADE
-   )   NO INMEMORY 
+   )  -- NO INMEMORY 
        PARTITION BY REFERENCE("FK_BSM_CORE_DATA");
 
 --------------------------------------------------------
@@ -71,7 +71,7 @@ ALTER TRIGGER "CVCOMMS"."TRG_BSM_PART2_VSE_ID" ENABLE;
 --  DDL for Synonymn DUAL
 --------------------------------------------------------
 
-  CREATE OR REPLACE NONEDITIONABLE PUBLIC SYNONYM "DUAL" FOR "SYS"."DUAL";
+  --CREATE OR REPLACE NONEDITIONABLE PUBLIC SYNONYM "DUAL" FOR "SYS"."DUAL";
 --------------------------------------------------------
 --  Constraints for Table BSM_PART2_VSE
 --------------------------------------------------------

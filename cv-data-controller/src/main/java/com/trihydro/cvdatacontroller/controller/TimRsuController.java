@@ -90,7 +90,9 @@ public class TimRsuController extends BaseController {
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             // build SQL statement
-            rs = statement.executeQuery("select * from TIM_RSU where tim_id = " + timId);
+            // rs = statement.executeQuery("select * from TIM_RSU where tim_id = " + timId);
+            rs = statement.executeQuery("select rsu_id,tim_id,rsu_index from tim_rsu where tim_id = " + timId
+                    + " group by rsu_id,tim_id,rsu_index");
 
             // convert to DriverAlertType objects
             while (rs.next()) {

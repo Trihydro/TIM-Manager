@@ -78,7 +78,8 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
         // Assert
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         Assertions.assertEquals(1, data.getBody().size());
-        verify(mockStatement).executeQuery("select * from TIM_RSU where tim_id = " + timId);
+        verify(mockStatement).executeQuery("select rsu_id,tim_id,rsu_index from tim_rsu where tim_id = " + timId
+                + " group by rsu_id,tim_id,rsu_index");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getLong("RSU_ID");
         verify(mockRs).getInt("RSU_INDEX");
@@ -99,7 +100,8 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         Assertions.assertEquals(0, data.getBody().size());
-        verify(mockStatement).executeQuery("select * from TIM_RSU where tim_id = " + timId);
+        verify(mockStatement).executeQuery("select rsu_id,tim_id,rsu_index from tim_rsu where tim_id = " + timId
+                + " group by rsu_id,tim_id,rsu_index");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();

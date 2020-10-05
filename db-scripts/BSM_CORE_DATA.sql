@@ -65,11 +65,17 @@
 	CREATE INDEX "CVCOMMS"."RECORD_GENERATED_AT" ON "CVCOMMS"."BSM_CORE_DATA" ("RECORD_GENERATED_AT");
 
 --------------------------------------------------------
---  DDL for Index BSM_U
+-- Create conmposite index on POSITION_LAT, POSITION_LONG
 --------------------------------------------------------
 
-  CREATE UNIQUE INDEX "CVCOMMS"."BSM_UI" ON "CVCOMMS"."BSM_CORE_DATA" ("MSGCNT", "SECMARK", "POSITION_LAT", "POSITION_LONG", "POSITION_ELEV", "RECORD_GENERATED_AT", "LOG_FILE_NAME") 
-  ;
+	CREATE INDEX "CVCOMMS"."POSITION" ON "CVCOMMS"."BSM_CORE_DATA" ("POSITION_LAT", "POSITION_LONG");
+
+--------------------------------------------------------
+--  DDL for Index BSM_U
+--------------------------------------------------------
+  -- Implied in BSM_UI1
+  --CREATE UNIQUE INDEX "CVCOMMS"."BSM_UI" ON "CVCOMMS"."BSM_CORE_DATA" ("MSGCNT", "SECMARK", "POSITION_LAT", "POSITION_LONG", "POSITION_ELEV", "RECORD_GENERATED_AT", "LOG_FILE_NAME") 
+  --;
 --------------------------------------------------------
 --  DDL for Index BSM_U1
 --------------------------------------------------------

@@ -247,7 +247,10 @@ public class TimService extends BaseService {
         if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null)
             activeTim.setSatRecordId(metaData.getRequest().getSdw().getRecordId());
 
-        activeTim.setStartDateTime(dframes[0].getStartDateTime());
+        // the ODE now parses all dataframes to find the most recent and sets it
+        // to this new OdeTimStartDateTime. We'll take advantage
+        // activeTim.setStartDateTime(dframes[0].getStartDateTime());
+        activeTim.setStartDateTime(metaData.getOdeTimStartDateTime());
         activeTim.setTimId(timId);
 
         ActiveTimHolding ath = null;

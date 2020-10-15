@@ -6,10 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -1172,5 +1177,93 @@ public class ActiveTimController extends BaseController {
 		}
 
 		return activeTims;
+	}
+
+	@RequestMapping(value = "/packetid-startdate/{packetID}/{startDate}")
+	public ResponseEntity<ActiveTim> GetActiveTimByPacketIdStartDate(@RequestParam String packetID,
+			@RequestParam String startDate) {
+		// Note we are expecting the incoming startDate to be in ISO8601 format
+		// ('2020-10-14T15:37:26.037Z')
+		ActiveTim activeTim = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			String strDate = translateIso8601ToMST(startDate);
+
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+			String query = "select * from active_tim atim";
+			query += " inner join tim on active_tim.tim_id = tim.tim_id";
+			query += " where tim.packet_id = '" + packetID + "' and atim.tim_start = '" + strDate + "'";
+
+			rs = statement.executeQuery(query);
+			List<ActiveTim> activeTims = getActiveTimFromRS(rs, false);
+			if (activeTims.size() > 0) {
+				activeTim = activeTims.get(activeTims.size() - 1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTim);
+	}
+
+	@RequestMapping(value = "/update-expiration/{activeTimId}/{expDate}", method = RequestMethod.PUT)
+	public ResponseEntity<Boolean> UpdateExpiration(@RequestParam Long activeTimId, @RequestParam String expDate) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
+		boolean success = false;
+
+		try {
+			cols.add(new ImmutablePair<String, Object>("EXPIRATION_DATE", translateIso8601ToMST(expDate)));
+			connection = dbInteractions.getConnectionPool();
+			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
+					connection);
+
+			// execute update statement
+			success = dbInteractions.updateOrDelete(preparedStatement);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(success);
+	}
+
+	private String translateIso8601ToMST(String date) throws ParseException {
+		DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+		TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+		sdf.setTimeZone(toTimeZone);
+		DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		Date dte = m_ISO8601Local.parse(date);
+		return sdf.format(dte.getTime());
 	}
 }

@@ -9,12 +9,16 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
@@ -793,6 +797,128 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
+    }
+
+    @Test
+    public void GetActiveTimByPacketIdStartDate_SUCCESS() throws Exception {
+        // Arrange
+        var packetID = "3C8E8DF2470B1A772E";
+        var startDate = "2020-10-14T15:37:26.037Z";
+        DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+        sdf.setTimeZone(toTimeZone);
+        Date dte = m_ISO8601Local.parse(startDate);
+        String strDate = sdf.format(dte.getTime());
+
+        String query = "select * from active_tim atim";
+        query += " inner join tim on active_tim.tim_id = tim.tim_id";
+        query += " where tim.packet_id = '" + packetID + "' and atim.tim_start = '" + strDate + "'";
+
+        // Act
+        ResponseEntity<ActiveTim> data = uut.GetActiveTimByPacketIdStartDate(packetID, startDate);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertNotNull(data.getBody(), "ActiveTim should not be null");
+        verify(mockStatement).executeQuery(query);
+        verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockRs).getLong("TIM_ID");
+        verify(mockRs).getString("SAT_RECORD_ID");
+        verify(mockRs).getString("CLIENT_ID");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getString("TIM_END");
+        verify(mockRs).getString("TIM_START");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getInt("PK");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void GetActiveTimByPacketIdStartDate_FAIL() throws Exception {
+        // Arrange
+        var packetID = "3C8E8DF2470B1A772E";
+        var startDate = "2020-10-14T15:37:26.037Z";
+        DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+        sdf.setTimeZone(toTimeZone);
+        Date dte = m_ISO8601Local.parse(startDate);
+        String strDate = sdf.format(dte.getTime());
+
+        String query = "select * from active_tim atim";
+        query += " inner join tim on active_tim.tim_id = tim.tim_id";
+        query += " where tim.packet_id = '" + packetID + "' and atim.tim_start = '" + strDate + "'";
+        doThrow(new SQLException()).when(mockStatement).executeQuery(query);
+
+        // Act
+        ResponseEntity<ActiveTim> data = uut.GetActiveTimByPacketIdStartDate(packetID, startDate);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertNull(data.getBody(), "ActiveTim should be null");
+        verify(mockStatement).executeQuery(query);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void UpdateExpiration_SUCCESS() {
+        // Arrange
+        // note that expirationDate comes from the topic.OdeTIMCertExpirationTimeJson in
+        // Iso8601 format
+        // so that's what we'll use here
+        var activeTimId = -1l;
+        var expDate = "2020-10-20T16:26:07.000Z";
+        setupPreparedStatement();
+        doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+
+        // Act
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(activeTimId, expDate);
+
+        // Assert
+        Assertions.assertTrue(success.getBody(), "UpdateExpiration failed when it should have succeeded");
+    }
+
+    @Test
+    public void UpdateExpiration_FAIL() {
+        // Arrange
+        // note that expirationDate comes from the topic.OdeTIMCertExpirationTimeJson in
+        // Iso8601 format
+        // so that's what we'll use here
+        var activeTimId = -1l;
+        var expDate = "2020-10-20T16:26:07.000Z";
+        setupPreparedStatement();
+        doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+
+        // Act
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(activeTimId, expDate);
+
+        // Assert
+        Assertions.assertFalse(success.getBody(), "UpdateExpiration succeeded when it should have failed");
+    }
+
+    @Test
+    public void UpdateExpiration_EXCEPTION() throws SQLException {
+        // Arrange
+        // note that expirationDate comes from the topic.OdeTIMCertExpirationTimeJson in
+        // Iso8601 format
+        // so that's what we'll use here
+        var activeTimId = -1l;
+        var expDate = "2020-10-20T16:26:07.000Z";
+        doThrow(new SQLException()).when(mockDbInteractions).getConnectionPool();
+
+        // Act
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(activeTimId, expDate);
+
+        // Assert
+        Assertions.assertFalse(success.getBody(), "UpdateExpiration succeeded when it should have thrown an error");
     }
 
     @Test

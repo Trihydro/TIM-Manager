@@ -1179,64 +1179,36 @@ public class ActiveTimController extends BaseController {
 		return activeTims;
 	}
 
-	@RequestMapping(value = "/packetid-startdate/{packetID}/{startDate}")
-	public ResponseEntity<ActiveTim> GetActiveTimByPacketIdStartDate(@RequestParam String packetID,
-			@RequestParam String startDate) {
-		// Note we are expecting the incoming startDate to be in ISO8601 format
-		// ('2020-10-14T15:37:26.037Z')
-		ActiveTim activeTim = null;
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
-		try {
-			String strDate = translateIso8601ToMST(startDate);
-
-			connection = dbInteractions.getConnectionPool();
-			statement = connection.createStatement();
-			String query = "select * from active_tim atim";
-			query += " inner join tim on active_tim.tim_id = tim.tim_id";
-			query += " where tim.packet_id = '" + packetID + "' and atim.tim_start = '" + strDate + "'";
-
-			rs = statement.executeQuery(query);
-			List<ActiveTim> activeTims = getActiveTimFromRS(rs, false);
-			if (activeTims.size() > 0) {
-				activeTim = activeTims.get(activeTims.size() - 1);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return ResponseEntity.ok(activeTim);
+	private String translateIso8601ToMST(String date) throws ParseException {
+		DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+		TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+		sdf.setTimeZone(toTimeZone);
+		DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		Date dte = m_ISO8601Local.parse(date);
+		return sdf.format(dte.getTime());
 	}
 
-	@RequestMapping(value = "/update-expiration/{activeTimId}/{expDate}", method = RequestMethod.PUT)
-	public ResponseEntity<Boolean> UpdateExpiration(@RequestParam Long activeTimId, @RequestParam String expDate) {
+	@RequestMapping(value = "/update-expiration/{packetID}/{startDate}/{expDate}", method = RequestMethod.PUT)
+	public ResponseEntity<Boolean> UpdateExpiration(@RequestParam String packetID, @RequestParam String startDate,
+			@RequestParam String expDate) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		List<Pair<String, Object>> cols = new ArrayList<Pair<String, Object>>();
 		boolean success = false;
 
+		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
+		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+		query += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+
+		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+		updateStatement += query;
+		updateStatement += ")";
+
 		try {
-			cols.add(new ImmutablePair<String, Object>("EXPIRATION_DATE", translateIso8601ToMST(expDate)));
 			connection = dbInteractions.getConnectionPool();
-			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
-					connection);
+			preparedStatement = connection.prepareStatement(updateStatement);
+			preparedStatement.setObject(1, translateIso8601ToMST(expDate));
+			preparedStatement.setObject(2, packetID);
+			preparedStatement.setObject(3, translateIso8601ToMST(startDate));
 
 			// execute update statement
 			success = dbInteractions.updateOrDelete(preparedStatement);
@@ -1256,14 +1228,5 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 		return ResponseEntity.ok(success);
-	}
-
-	private String translateIso8601ToMST(String date) throws ParseException {
-		DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-		TimeZone toTimeZone = TimeZone.getTimeZone("MST");
-		sdf.setTimeZone(toTimeZone);
-		DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		Date dte = m_ISO8601Local.parse(date);
-		return sdf.format(dte.getTime());
 	}
 }

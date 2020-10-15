@@ -1,8 +1,8 @@
 package com.trihydro.certexpiration;
 
 import com.trihydro.certexpiration.config.CertExpirationConfiguration;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
-import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.CvDataServiceLibrary;
@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
-@Import({ JsonToJavaConverter.class, RestTemplateProvider.class, CvDataServiceLibrary.class, JavaMailSenderImplProvider.class, Utility.class, ActiveTimService.class })
+@Import({ EmailHelper.class, RestTemplateProvider.class, CvDataServiceLibrary.class, JavaMailSenderImplProvider.class, Utility.class, ActiveTimService.class })
 @SpringBootApplication
 @EnableConfigurationProperties(CertExpirationConfiguration.class)
 public class Application {

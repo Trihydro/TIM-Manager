@@ -9,10 +9,13 @@ import java.util.Properties;
 
 import com.google.gson.Gson;
 import com.trihydro.certexpiration.config.CertExpirationConfiguration;
+import com.trihydro.certexpiration.controller.LoopController;
 import com.trihydro.certexpiration.model.CertExpirationModel;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -27,13 +30,17 @@ public class CertExpirationConsumer {
 	private CertExpirationConfiguration configProperties;
 	private Utility utility;
 	private ActiveTimService ats;
+	private EmailHelper emailHelper;
+	private LoopController loopController;
 
 	@Autowired
-	public CertExpirationConsumer(CertExpirationConfiguration configProperties, Utility _utility, ActiveTimService _ats)
-			throws IOException, Exception {
+	public CertExpirationConsumer(CertExpirationConfiguration configProperties, Utility _utility, ActiveTimService _ats,
+			EmailHelper _emailHelper, LoopController _loopController) throws IOException, Exception {
 		this.configProperties = configProperties;
 		utility = _utility;
 		ats = _ats;
+		emailHelper = _emailHelper;
+		loopController = _loopController;
 		System.out.println("starting..............");
 		startKafkaConsumer();
 	}
@@ -57,7 +64,7 @@ public class CertExpirationConsumer {
 		Gson gson = new Gson();
 
 		try {
-			while (true) {
+			while (loopController.loop()) {
 				Duration polTime = Duration.ofMillis(100);
 				ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
 				for (ConsumerRecord<String, String> record : records) {
@@ -75,11 +82,33 @@ public class CertExpirationConsumer {
 						utility.logWithDate("Successfully updated expiration date");
 					} else {
 						utility.logWithDate(String.format("Failed to update expiration for data: %s", record.value()));
+
+						String body = "The CertExpirationConsumer failed attempting to update an ActiveTim record";
+						body += "<br/>";
+						body += "The associated expiration topic record is: <br/>";
+						body += record.value();
+						emailHelper.SendEmail(configProperties.getAlertAddresses(), null,
+								"CertExpirationConsumer Failed To Update ActiveTim", body,
+								configProperties.getMailPort(), configProperties.getMailHost(),
+								configProperties.getFromEmail());
 					}
 				}
 			}
 		} catch (Exception ex) {
 			utility.logWithDate(ex.getMessage());
+			String body = "The CertExpirationConsumer failed attempting to consume records";
+			body += ". <br/>Exception message: ";
+			body += ex.getMessage();
+			body += "<br/>Stacktrace: ";
+			body += ExceptionUtils.getStackTrace(ex);
+			try {
+				emailHelper.SendEmail(configProperties.getAlertAddresses(), null, "CertExpirationConsumer Failed", body,
+						configProperties.getMailPort(), configProperties.getMailHost(),
+						configProperties.getFromEmail());
+			} catch (Exception exception) {
+				utility.logWithDate("CertExpirationConsumer failed, then failed to send email");
+				exception.printStackTrace();
+			}
 			throw (ex);
 		} finally {
 			try {

@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties
 public class CertExpirationConfiguration implements CVRestServiceProps {
     private String kafkaHostServer;
-    private String tracUrl;
 
     private String mailHost;
     private int mailPort;
@@ -18,10 +17,6 @@ public class CertExpirationConfiguration implements CVRestServiceProps {
     private String depositTopic;
     private String depositGroup;
     private String cvRestService;
-
-    public String getTracUrl() {
-        return tracUrl;
-    }
 
     public String getFromEmail() {
         return fromEmail;
@@ -85,9 +80,5 @@ public class CertExpirationConfiguration implements CVRestServiceProps {
 
     public void setDepositTopic(String depositTopic) {
         this.depositTopic = depositTopic;
-    }
-
-    public void setTracUrl(String tracUrl) {
-        this.tracUrl = tracUrl;
     }
 }

@@ -174,4 +174,23 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				ActiveTim[].class);
 		return Arrays.asList(response.getBody());
 	}
+
+	public ActiveTim getActiveTimByPacketIdStartDate(String packetID, String date) {
+		String url = String.format("%s/active-tim/packetid-startdate/%s/%s", config.getCvRestService(), packetID, date);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		ResponseEntity<ActiveTim> response = restTemplateProvider.GetRestTemplate().getForEntity(url, ActiveTim.class);
+		return response.getBody();
+	}
+
+	public Boolean updateActiveTimExpiration(Long aTimId, String expDate) {
+		String url = String.format("%s/active-tim/update-expiration/%d/%s", config.getCvRestService(), aTimId, expDate);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+				Boolean.class);
+		return response.getBody();
+	}
 }

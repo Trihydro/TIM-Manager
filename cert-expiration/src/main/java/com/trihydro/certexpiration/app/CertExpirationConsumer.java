@@ -4,12 +4,11 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Properties;
 
 import com.google.gson.Gson;
 import com.trihydro.certexpiration.config.CertExpirationConfiguration;
 import com.trihydro.certexpiration.controller.LoopController;
+import com.trihydro.certexpiration.factory.KafkaConsumerFactory;
 import com.trihydro.certexpiration.model.CertExpirationModel;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
@@ -32,40 +31,30 @@ public class CertExpirationConsumer {
 	private ActiveTimService ats;
 	private EmailHelper emailHelper;
 	private LoopController loopController;
+	private KafkaConsumerFactory kafkaConsumerFactory;
 
 	@Autowired
 	public CertExpirationConsumer(CertExpirationConfiguration configProperties, Utility _utility, ActiveTimService _ats,
-			EmailHelper _emailHelper, LoopController _loopController) throws IOException, Exception {
+			EmailHelper _emailHelper, LoopController _loopController, KafkaConsumerFactory _kafkaConsumerFactory)
+			throws IOException, Exception {
 		this.configProperties = configProperties;
 		utility = _utility;
 		ats = _ats;
 		emailHelper = _emailHelper;
 		loopController = _loopController;
-		System.out.println("starting..............");
+		kafkaConsumerFactory = _kafkaConsumerFactory;
+		utility.logWithDate("starting..............");
 		startKafkaConsumer();
 	}
 
 	public void startKafkaConsumer() throws Exception {
-		String endpoint = configProperties.getKafkaHostServer() + ":9092";
-
-		// Properties for the kafka topic
-		Properties consumerProps = new Properties();
-		consumerProps.put("bootstrap.servers", endpoint);
-		consumerProps.put("group.id", configProperties.getDepositGroup());
-		consumerProps.put("auto.commit.interval.ms", "1000");
-		consumerProps.put("session.timeout.ms", "30000");
-		consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(consumerProps);
-		String consumerTopic = configProperties.getDepositTopic();
-		stringConsumer.subscribe(Arrays.asList(consumerTopic));
-		utility.logWithDate("Subscribed to topic " + consumerTopic);
+		KafkaConsumer<String, String> stringConsumer = kafkaConsumerFactory.createConsumer();
 
 		Gson gson = new Gson();
+		Duration polTime = Duration.ofMillis(100);
 
 		try {
 			while (loopController.loop()) {
-				Duration polTime = Duration.ofMillis(100);
 				ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
 				for (ConsumerRecord<String, String> record : records) {
 					utility.logWithDate(String.format("Consumed from expiration topic: %s", record.value()));

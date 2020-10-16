@@ -1189,8 +1189,8 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/update-expiration/{packetID}/{startDate}/{expDate}", method = RequestMethod.PUT)
-	public ResponseEntity<Boolean> UpdateExpiration(@RequestParam String packetID, @RequestParam String startDate,
-			@RequestParam String expDate) {
+	public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID, @PathVariable String startDate,
+			@PathVariable String expDate) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		boolean success = false;

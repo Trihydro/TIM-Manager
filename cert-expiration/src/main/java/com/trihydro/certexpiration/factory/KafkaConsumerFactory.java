@@ -6,6 +6,7 @@ import java.util.Properties;
 import com.trihydro.certexpiration.config.CertExpirationConfiguration;
 import com.trihydro.library.helpers.Utility;
 
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class KafkaConsumerFactory {
         utility = _utility;
     }
 
-    public KafkaConsumer<String, String> createConsumer() {
+    public Consumer<String, String> createConsumer() {
         String endpoint = configProperties.getKafkaHostServer() + ":9092";
 
         // Properties for the kafka topic

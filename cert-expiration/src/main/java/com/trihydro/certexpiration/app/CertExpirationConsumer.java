@@ -1,8 +1,6 @@
 package com.trihydro.certexpiration.app;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.time.Duration;
 
 import com.google.gson.Gson;
@@ -15,17 +13,14 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CertExpirationConsumer {
-
-	static PreparedStatement preparedStatement = null;
-	static Statement statement = null;
 	private CertExpirationConfiguration configProperties;
 	private Utility utility;
 	private ActiveTimService ats;
@@ -44,11 +39,10 @@ public class CertExpirationConsumer {
 		loopController = _loopController;
 		kafkaConsumerFactory = _kafkaConsumerFactory;
 		utility.logWithDate("starting..............");
-		startKafkaConsumer();
 	}
 
 	public void startKafkaConsumer() throws Exception {
-		KafkaConsumer<String, String> stringConsumer = kafkaConsumerFactory.createConsumer();
+		Consumer<String, String> stringConsumer = kafkaConsumerFactory.createConsumer();
 
 		Gson gson = new Gson();
 		Duration polTime = Duration.ofMillis(100);

@@ -122,6 +122,7 @@ public class TimRefreshController {
             wydotTim.setEndPoint(aTim.getEndPoint());
 
             List<Milepost> mps = new ArrayList<>();
+            List<Milepost> allMps = new ArrayList<>();
             if (wydotTim.getEndPoint() != null) {
                 mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
             } else {
@@ -131,17 +132,17 @@ public class TimRefreshController {
                 mpb.setCommonName(wydotTim.getRoute());
                 mpb.setDirection(wydotTim.getDirection());
                 mpb.setPoint(wydotTim.getStartPoint());
-                mps = milepostService.getMilepostsByPointWithBuffer(mpb);
+                allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
             }
             // reduce the mileposts by removing straight away posts
-            mps = milepostReduction.applyMilepostReductionAlorithm(mps, configuration.getPathDistanceLimit());
+            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, configuration.getPathDistanceLimit());
 
             if (mps.size() == 0) {
                 System.out.println("Unable to send TIM to SDW, no mileposts found to determine service area");
                 continue;
             }
 
-            OdeTravelerInformationMessage tim = getTim(aTim, mps);
+            OdeTravelerInformationMessage tim = getTim(aTim, mps, allMps);
             if (tim == null) {
                 continue;
             }
@@ -164,7 +165,7 @@ public class TimRefreshController {
         }
     }
 
-    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps) {
+    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
         String nowAsISO = Instant.now().toString();
         DataFrame df = getDataFrame(aTim, nowAsISO, mps);
         // check to see if we have any itis codes
@@ -173,7 +174,7 @@ public class TimRefreshController {
             utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
-        Region region = getRegion(aTim, mps);
+        Region region = getRegion(aTim, mps, allMps);
         Region[] regions = new Region[1];
         regions[0] = region;
         df.setRegions(regions);
@@ -433,7 +434,7 @@ public class TimRefreshController {
         return anchorPosition;
     }
 
-    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps) {
+    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
         // Set region information
         Region region = new Region();
         region.setName(aTim.getRegionName());
@@ -441,7 +442,8 @@ public class TimRefreshController {
         region.setLaneWidth(aTim.getLaneWidth());
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
-            regionDirection = getHeadingSliceFromMileposts(mps, region.getAnchorPosition());
+            // we need to calculate the heading slice from all mileposts and not the subset
+            regionDirection = getHeadingSliceFromMileposts(allMps, region.getAnchorPosition());
         }
         region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
 

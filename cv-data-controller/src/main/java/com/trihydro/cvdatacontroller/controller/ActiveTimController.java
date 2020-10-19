@@ -80,8 +80,12 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
 			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
-			selectStatement += " WHERE tim_start + INTERVAL '14' DAY <= SYSDATE + INTERVAL '1' DAY";
-			selectStatement += " AND (tim_end is null OR tim_end >= SYSDATE + INTERVAL '1' DAY)";
+			// where starting less than tomorrow
+			selectStatement+= " WHERE atim.tim_start <= SYSDATE + INTERVAL '1' DAY";
+			// and expiration_date within 24hrs
+			  selectStatement+= " AND(atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '1' DAY)";
+			// check that end time isn't within 24hrs
+  			selectStatement+= " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '1' DAY)";
 
 			rs = statement.executeQuery(selectStatement);
 

@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.grum.geocalc.Coordinate;
+import com.grum.geocalc.EarthCalc;
+import com.grum.geocalc.Point;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
@@ -209,10 +212,24 @@ public class TimRefreshController {
         return nodes;
     }
 
-    private String getHeadingSliceFromMileposts(List<Milepost> mps) {
+    private String getHeadingSliceFromMileposts(List<Milepost> mps, OdePosition3D anchor) {
         int timDirection = 0;
-        for (int i = 0; i < mps.size(); i++) {
-            timDirection |= utility.getDirection(mps.get(i).getBearing());
+        // path list - change later
+        if (mps != null && mps.size() > 0) {
+            double startLat = anchor.getLatitude().doubleValue();
+            double startLon = anchor.getLongitude().doubleValue();
+            for (int j = 0; j < mps.size(); j++) {
+                double lat = mps.get(j).getLatitude().doubleValue();
+                double lon = mps.get(j).getLongitude().doubleValue();
+
+                Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
+                Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
+
+                timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
+                // reset for next round
+                startLat = lat;
+                startLon = lon;
+            }
         }
 
         // set direction based on bearings
@@ -424,7 +441,7 @@ public class TimRefreshController {
         region.setLaneWidth(aTim.getLaneWidth());
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
-            regionDirection = getHeadingSliceFromMileposts(mps);
+            regionDirection = getHeadingSliceFromMileposts(mps, region.getAnchorPosition());
         }
         region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
 

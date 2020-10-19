@@ -115,7 +115,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         doReturn(getItisCodes()).when(mockItisCodeService).selectAllItisCodes();
 
         // Act
-        Long data = uut.addDriverAlertToOracleDB(odeData);
+        uut.addDriverAlertToOracleDB(odeData);
     
         // Assert
         verify(mockDriverAlertItisCodeService).insertDriverAlertItisCode(-1l, -1);

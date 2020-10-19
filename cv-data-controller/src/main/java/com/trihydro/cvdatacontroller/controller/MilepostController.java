@@ -398,7 +398,6 @@ public class MilepostController extends BaseController {
 				milepost.setDirection(rs.getString("direction"));
 				milepost.setLatitude(rs.getBigDecimal("latitude"));
 				milepost.setLongitude(rs.getBigDecimal("longitude"));
-				milepost.setBearing(rs.getDouble("bearing"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -461,7 +460,6 @@ public class MilepostController extends BaseController {
 				milepost.setDirection(rs.getString("direction"));
 				milepost.setLatitude(rs.getBigDecimal("latitude"));
 				milepost.setLongitude(rs.getBigDecimal("longitude"));
-				milepost.setBearing(rs.getDouble("bearing"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {

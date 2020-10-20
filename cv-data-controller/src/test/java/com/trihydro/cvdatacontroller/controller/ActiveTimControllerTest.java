@@ -66,7 +66,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
         selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
         selectStatement += " WHERE atim.tim_start <= SYSDATE + INTERVAL '1' DAY";
-        selectStatement += " AND(atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '1' DAY)";
+        selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '1' DAY)";
         selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '1' DAY)";
 
         // Act

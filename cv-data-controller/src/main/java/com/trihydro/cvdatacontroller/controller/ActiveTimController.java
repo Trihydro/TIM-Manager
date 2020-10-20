@@ -83,7 +83,7 @@ public class ActiveTimController extends BaseController {
 			// where starting less than tomorrow
 			selectStatement+= " WHERE atim.tim_start <= SYSDATE + INTERVAL '1' DAY";
 			// and expiration_date within 24hrs
-			  selectStatement+= " AND(atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '1' DAY)";
+			  selectStatement+= " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '1' DAY)";
 			// check that end time isn't within 24hrs
   			selectStatement+= " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '1' DAY)";
 

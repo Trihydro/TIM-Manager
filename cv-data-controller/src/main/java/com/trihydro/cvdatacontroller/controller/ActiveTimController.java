@@ -6,10 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -1172,5 +1177,56 @@ public class ActiveTimController extends BaseController {
 		}
 
 		return activeTims;
+	}
+
+	private String translateIso8601ToMST(String date) throws ParseException {
+		DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+		TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+		sdf.setTimeZone(toTimeZone);
+		DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		Date dte = m_ISO8601Local.parse(date);
+		return sdf.format(dte.getTime());
+	}
+
+	@RequestMapping(value = "/update-expiration/{packetID}/{startDate}/{expDate}", method = RequestMethod.PUT)
+	public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID, @PathVariable String startDate,
+			@PathVariable String expDate) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		boolean success = false;
+
+		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
+		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+		query += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+
+		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+		updateStatement += query;
+		updateStatement += ")";
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			preparedStatement = connection.prepareStatement(updateStatement);
+			preparedStatement.setObject(1, translateIso8601ToMST(expDate));
+			preparedStatement.setObject(2, packetID);
+			preparedStatement.setObject(3, translateIso8601ToMST(startDate));
+
+			// execute update statement
+			success = dbInteractions.updateOrDelete(preparedStatement);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(success);
 	}
 }

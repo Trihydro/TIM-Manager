@@ -84,7 +84,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         doReturn(aTim).when(mockResponseEntityActiveTim).getBody();
     }
 
-    private void setupTUMReturn(){
+    private void setupTUMReturn() {
         tumArr = new TimUpdateModel[1];
         TimUpdateModel tum = new TimUpdateModel();
         tum.setActiveTimId(-1l);
@@ -240,8 +240,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         setupActiveTimArrayReturn();
         String url = String.format("%s/active-tim/expired", baseUrl);
-        when(mockRestTemplate.getForEntity(url, ActiveTim[].class))
-                .thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> data = uut.getExpiredActiveTims();
@@ -422,5 +421,45 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         Assertions.assertThrows(RestClientException.class, () -> {
             uut.getActiveTimsWithItisCodes(true);
         });
+    }
+
+    @Test
+    public void updateActiveTimExpiration_SUCCESS() {
+        // Arrange
+        setupBooleanReturn();
+        String packetID= "3C8E8DF2470B1A772E";
+        String startDate = "2020-10-14T15:37:26.037Z";
+        String expDate = "2020-10-20T16:26:07.000Z";
+        HttpEntity<String> entity = getEntity(null, String.class);
+        String url = String.format("%s/active-tim/update-expiration/%s/%s/%s", baseUrl, packetID, startDate, expDate);
+        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
+                .thenReturn(mockResponseEntityBoolean);
+
+        // Act
+        Boolean data = uut.updateActiveTimExpiration(packetID, startDate, expDate);
+
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
+        Assertions.assertTrue(data, "Update failed when should have succeeded");
+    }
+
+    @Test
+    public void updateActiveTimExpiration_FAIL() {
+        // Arrange
+        doReturn(false).when(mockResponseEntityBoolean).getBody();
+        String packetID= "3C8E8DF2470B1A772E";
+        String startDate = "2020-10-14T15:37:26.037Z";
+        String expDate = "2020-10-20T16:26:07.000Z";
+        HttpEntity<String> entity = getEntity(null, String.class);
+        String url = String.format("%s/active-tim/update-expiration/%s/%s/%s", baseUrl, packetID, startDate, expDate);
+        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
+                .thenReturn(mockResponseEntityBoolean);
+
+        // Act
+        Boolean data = uut.updateActiveTimExpiration(packetID, startDate, expDate);
+
+        // Assert
+        verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
+        Assertions.assertFalse(data, "Update succeeded when should have failed");
     }
 }

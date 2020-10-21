@@ -796,6 +796,83 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     }
 
     @Test
+    public void UpdateExpiration_SUCCESS() throws SQLException {
+        // Arrange
+        // note that expirationDate comes from the topic.OdeTIMCertExpirationTimeJson in
+        // Iso8601 format
+        // so that's what we'll use here
+        var packetID = "3C8E8DF2470B1A772E";
+        var startDate = "2020-10-14T15:37:26.037Z";
+        var expDate = "2020-10-20T16:26:07.000Z";
+        doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
+        doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+
+        String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+        updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
+        updateStatement += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+        updateStatement += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+        updateStatement += ")";
+
+        // Act
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, startDate, expDate);
+
+        // Assert
+        Assertions.assertTrue(success.getBody(), "UpdateExpiration failed when it should have succeeded");
+        verify(mockConnection).prepareStatement(updateStatement);
+        verify(mockPreparedStatement).setObject(1, "20-Oct-20 09.26.07.000 AM");
+        verify(mockPreparedStatement).setObject(2, packetID);
+        verify(mockPreparedStatement).setObject(3, "14-Oct-20 08.37.26.037 AM");
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void UpdateExpiration_FAIL() throws SQLException {
+        // Arrange
+        // note that expirationDate comes from the topic.OdeTIMCertExpirationTimeJson in
+        // Iso8601 format
+        // so that's what we'll use here
+        var packetID = "3C8E8DF2470B1A772E";
+        var startDate = "2020-10-14T15:37:26.037Z";
+        var expDate = "2020-10-20T16:26:07.000Z";
+        doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
+        doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+
+        String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+        updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
+        updateStatement += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+        updateStatement += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+        updateStatement += ")";
+
+        // Act
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, startDate, expDate);
+
+        // Assert
+        Assertions.assertFalse(success.getBody(), "UpdateExpiration succeeded when it should have failed");
+        verify(mockConnection).prepareStatement(updateStatement);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void UpdateExpiration_EXCEPTION() throws SQLException {
+        // Arrange
+        // note that expirationDate comes from the topic.OdeTIMCertExpirationTimeJson in
+        // Iso8601 format
+        // so that's what we'll use here
+        var packetID = "3C8E8DF2470B1A772E";
+        var startDate = "2020-10-14T15:37:26.037Z";
+        var expDate = "2020-10-20T16:26:07.000Z";
+        doThrow(new SQLException()).when(mockDbInteractions).getConnectionPool();
+
+        // Act
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, startDate, expDate);
+
+        // Assert
+        Assertions.assertFalse(success.getBody(), "UpdateExpiration succeeded when it should have thrown an error");
+    }
+
+    @Test
     public void InsertActiveTim_SUCCESS() throws SQLException {
         // Arrange
         ActiveTim activeTim = new ActiveTim();

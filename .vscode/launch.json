@@ -97,6 +97,14 @@
       "args": "--spring.profiles.active=local",
       "cwd": "${workspaceRoot}/tim-refresh",
       "mainClass": "com.trihydro.timrefresh.Application"
+    },
+    {
+      "type": "java",
+      "name": "Cert Expiration (Launch)",
+      "request": "launch",
+      "cwd": "${workspaceRoot}/cert-expiration",
+      "args": "--spring.profiles.active=dev",
+      "mainClass": "com.trihydro.certexpiration.Application"
     }
   ],
   "compounds": [

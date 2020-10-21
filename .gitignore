@@ -7,6 +7,7 @@ cv-data-controller/target
 rsu-data-controller/target
 cv-data-tasks/target
 logger-kafka-consumer/target
+cert-expiration/target
 
 ode-data-logger/**/*.class
 ode-mongo-logger/**/*.class

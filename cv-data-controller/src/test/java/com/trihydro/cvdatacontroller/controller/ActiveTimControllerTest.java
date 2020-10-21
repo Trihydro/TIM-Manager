@@ -53,6 +53,21 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Arrange
         // we only set one property to verify its returned
         when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
+        selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
+        selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
+        selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
+        selectStatement += ", r.region_id, r.name as region_name, r.anchor_lat, r.anchor_long, r.lane_width";
+        selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
+        selectStatement += ", r.directionality, r.direction AS region_direction";
+        selectStatement += " FROM active_tim atim";
+        selectStatement += " INNER JOIN tim t ON atim.tim_id = t.tim_id";
+        selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
+        selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
+        selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
+        selectStatement += " WHERE atim.tim_start <= SYSDATE + INTERVAL '2' HOUR";
+        selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '2' HOUR)";
+        selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '2' HOUR)";
 
         // Act
         ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();
@@ -61,6 +76,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(HttpStatus.OK, tums.getStatusCode());
         Assertions.assertEquals(1, tums.getBody().size());
         Assertions.assertEquals(Long.valueOf(999), tums.getBody().get(0).getActiveTimId());
+        verify(mockStatement).executeQuery(selectStatement);
     }
 
     @Test

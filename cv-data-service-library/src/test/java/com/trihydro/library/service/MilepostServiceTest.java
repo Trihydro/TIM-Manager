@@ -46,7 +46,6 @@ public class MilepostServiceTest extends BaseServiceTest {
         WydotTim wydotTim = new WydotTim();
         List<Milepost> mileposts = new ArrayList<>();
         Milepost milepost = new Milepost();
-        milepost.setBearing(22d);
         milepost.setDirection("B");
         milepost.setCommonName("route");
         mileposts.add(milepost);
@@ -72,7 +71,6 @@ public class MilepostServiceTest extends BaseServiceTest {
         MilepostBuffer mpb = new MilepostBuffer();
         List<Milepost> mileposts = new ArrayList<>();
         Milepost milepost = new Milepost();
-        milepost.setBearing(22d);
         milepost.setDirection("B");
         milepost.setCommonName("route");
         mileposts.add(milepost);

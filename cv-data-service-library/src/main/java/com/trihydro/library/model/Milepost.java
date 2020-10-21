@@ -14,7 +14,6 @@ public class Milepost {
     private String direction;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private Double bearing;
 
     public Milepost() {
     }
@@ -31,7 +30,6 @@ public class Milepost {
         direction = mp.direction;
         latitude = mp.latitude;
         longitude = mp.longitude;
-        bearing = mp.bearing;
     }
 
     public String getCommonName() {
@@ -72,15 +70,6 @@ public class Milepost {
 
     public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
-    }
-
-    // TODO: this is used to determine tim direction, but is no longer in the view
-    public Double getBearing() {
-        return bearing;
-    }
-
-    public void setBearing(Double bearing) {
-        this.bearing = bearing;
     }
 
     /**

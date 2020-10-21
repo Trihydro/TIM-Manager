@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.grum.geocalc.Coordinate;
+import com.grum.geocalc.EarthCalc;
+import com.grum.geocalc.Point;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
@@ -119,6 +122,7 @@ public class TimRefreshController {
             wydotTim.setEndPoint(aTim.getEndPoint());
 
             List<Milepost> mps = new ArrayList<>();
+            List<Milepost> allMps = new ArrayList<>();
             if (wydotTim.getEndPoint() != null) {
                 mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
             } else {
@@ -128,17 +132,17 @@ public class TimRefreshController {
                 mpb.setCommonName(wydotTim.getRoute());
                 mpb.setDirection(wydotTim.getDirection());
                 mpb.setPoint(wydotTim.getStartPoint());
-                mps = milepostService.getMilepostsByPointWithBuffer(mpb);
+                allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
             }
             // reduce the mileposts by removing straight away posts
-            mps = milepostReduction.applyMilepostReductionAlorithm(mps, configuration.getPathDistanceLimit());
+            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, configuration.getPathDistanceLimit());
 
             if (mps.size() == 0) {
                 System.out.println("Unable to send TIM to SDW, no mileposts found to determine service area");
                 continue;
             }
 
-            OdeTravelerInformationMessage tim = getTim(aTim, mps);
+            OdeTravelerInformationMessage tim = getTim(aTim, mps, allMps);
             if (tim == null) {
                 continue;
             }
@@ -161,7 +165,7 @@ public class TimRefreshController {
         }
     }
 
-    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps) {
+    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
         String nowAsISO = Instant.now().toString();
         DataFrame df = getDataFrame(aTim, nowAsISO, mps);
         // check to see if we have any itis codes
@@ -170,7 +174,7 @@ public class TimRefreshController {
             utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
-        Region region = getRegion(aTim, mps);
+        Region region = getRegion(aTim, mps, allMps);
         Region[] regions = new Region[1];
         regions[0] = region;
         df.setRegions(regions);
@@ -209,10 +213,24 @@ public class TimRefreshController {
         return nodes;
     }
 
-    private String getHeadingSliceFromMileposts(List<Milepost> mps) {
+    private String getHeadingSliceFromMileposts(List<Milepost> mps, OdePosition3D anchor) {
         int timDirection = 0;
-        for (int i = 0; i < mps.size(); i++) {
-            timDirection |= utility.getDirection(mps.get(i).getBearing());
+        // path list - change later
+        if (mps != null && mps.size() > 0) {
+            double startLat = anchor.getLatitude().doubleValue();
+            double startLon = anchor.getLongitude().doubleValue();
+            for (int j = 0; j < mps.size(); j++) {
+                double lat = mps.get(j).getLatitude().doubleValue();
+                double lon = mps.get(j).getLongitude().doubleValue();
+
+                Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
+                Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
+
+                timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
+                // reset for next round
+                startLat = lat;
+                startLon = lon;
+            }
         }
 
         // set direction based on bearings
@@ -416,7 +434,7 @@ public class TimRefreshController {
         return anchorPosition;
     }
 
-    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps) {
+    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
         // Set region information
         Region region = new Region();
         region.setName(aTim.getRegionName());
@@ -424,7 +442,8 @@ public class TimRefreshController {
         region.setLaneWidth(aTim.getLaneWidth());
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
-            regionDirection = getHeadingSliceFromMileposts(mps);
+            // we need to calculate the heading slice from all mileposts and not the subset
+            regionDirection = getHeadingSliceFromMileposts(allMps, region.getAnchorPosition());
         }
         region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
 

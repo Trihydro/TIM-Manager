@@ -38,10 +38,10 @@ public class CertExpirationConsumer {
 		emailHelper = _emailHelper;
 		loopController = _loopController;
 		kafkaConsumerFactory = _kafkaConsumerFactory;
-		utility.logWithDate("starting..............");
 	}
 
 	public void startKafkaConsumer() throws Exception {
+		utility.logWithDate("starting..............");
 		Consumer<String, String> stringConsumer = kafkaConsumerFactory.createConsumer();
 
 		Gson gson = new Gson();

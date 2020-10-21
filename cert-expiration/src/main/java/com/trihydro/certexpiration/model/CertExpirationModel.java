@@ -3,7 +3,7 @@ package com.trihydro.certexpiration.model;
 public class CertExpirationModel {
     private String expirationDate;
     private String packetID;
-    private String requireExpirationDate;
+    private String requiredExpirationDate;
     private String startDateTime;
     
     public String getStartDateTime(){
@@ -18,12 +18,12 @@ public class CertExpirationModel {
         return expirationDate;
     }
 
-    public String getRequireExpirationDate() {
-		return requireExpirationDate;
+    public String getRequiredExpirationDate() {
+		return requiredExpirationDate;
 	}
 
-	public void setRequireExpirationDate(String requireExpirationDate) {
-		this.requireExpirationDate = requireExpirationDate;
+	public void setRequiredExpirationDate(String requiredExpirationDate) {
+		this.requiredExpirationDate = requiredExpirationDate;
 	}
 
 	public String getPacketID() {

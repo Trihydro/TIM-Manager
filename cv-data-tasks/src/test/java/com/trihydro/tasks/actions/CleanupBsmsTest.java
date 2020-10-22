@@ -1,6 +1,5 @@
 package com.trihydro.tasks.actions;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -30,6 +29,8 @@ public class CleanupBsmsTest {
     @Mock
     private Utility mockUtility;
 
+    private static Integer retentionDays = 1;
+
     @Captor
     private ArgumentCaptor<List<String>> partitionNamesCaptor;
 
@@ -38,13 +39,13 @@ public class CleanupBsmsTest {
 
     @BeforeEach
     public void setup() {
-        lenient().doReturn(1).when(mockConfiguration).getBsmRetentionPeriodDays();
+        lenient().doReturn(retentionDays).when(mockConfiguration).getBsmRetentionPeriodDays();
     }
 
     @Test
     public void cleanupBsms_success() {
         // Arrange
-        doReturn(true).when(mockBsmService).deleteOldBsm(any());
+        doReturn(true).when(mockBsmService).deleteOldBsm(retentionDays);
 
         // Act
         uut.run();
@@ -57,7 +58,7 @@ public class CleanupBsmsTest {
     @Test
     public void cleanupBsms_FAIL() {
         // Arrange
-        doReturn(false).when(mockBsmService).deleteOldBsm(any());
+        doReturn(false).when(mockBsmService).deleteOldBsm(retentionDays);
 
         // Act
         uut.run();

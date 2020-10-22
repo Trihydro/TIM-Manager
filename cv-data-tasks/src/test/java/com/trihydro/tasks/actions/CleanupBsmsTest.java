@@ -1,23 +1,15 @@
 package com.trihydro.tasks.actions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.model.BsmCoreDataPartition;
-import com.trihydro.library.service.UtilityService;
+import com.trihydro.library.service.BsmService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,14 +20,13 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClientException;
 
 @ExtendWith(MockitoExtension.class)
 public class CleanupBsmsTest {
     @Mock
     private DataTasksConfiguration mockConfiguration;
     @Mock
-    private UtilityService mockUtilityService;
+    private BsmService mockBsmService;
     @Mock
     private Utility mockUtility;
 
@@ -53,63 +44,41 @@ public class CleanupBsmsTest {
     @Test
     public void cleanupBsms_success() {
         // Arrange
-        // 1 partition, sys_1, which is 25 hours old (1 hour outside retention period)
-        when(mockUtilityService.getBsmCoreDataPartitions())
-                .thenReturn(
-                        Arrays.asList(new BsmCoreDataPartition[] { new BsmCoreDataPartition("sys_1",
-                                new Date(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
-                                        .toInstant(OffsetDateTime.now().getOffset()).toEpochMilli()
-                                        - 1000 * 60 * 60 * 25)) }));
+        doReturn(true).when(mockBsmService).deleteOldBsm(any());
 
         // Act
         uut.run();
 
         // Assert
-        verify(mockUtility).logWithDate("Removing 1 partitions from BSM_CORE_DATA.", CleanupBsms.class);
-        verify(mockUtilityService).dropBsmPartitions(partitionNamesCaptor.capture());
-
-        List<String> names = partitionNamesCaptor.getValue();
-        assertEquals(1, names.size());
-        assertEquals("sys_1", names.get(0));
+        verify(mockUtility).logWithDate("Running...", CleanupBsms.class);
+        verify(mockUtility).logWithDate("Successfully removed old BSM data");
     }
 
     @Test
-    public void cleanupBsms_noPartitions() {
+    public void cleanupBsms_FAIL() {
         // Arrange
-        when(mockUtilityService.getBsmCoreDataPartitions()).thenReturn(Arrays.asList(new BsmCoreDataPartition[0]));
+        doReturn(false).when(mockBsmService).deleteOldBsm(any());
 
         // Act
         uut.run();
 
         // Assert
-        verify(mockUtility, times(1)).logWithDate(any(), any());
-        verify(mockUtilityService, times(0)).dropBsmPartitions(any());
-    }
-
-    @Test
-    public void cleanupBsms_noOldPartitions() {
-        // Arrange
-        // 1 partition, sys_1, which is brand new
-        when(mockUtilityService.getBsmCoreDataPartitions()).thenReturn(
-                Arrays.asList(new BsmCoreDataPartition[] { new BsmCoreDataPartition("sys_1", new Date()) }));
-
-        // Act
-        uut.run();
-
-        // Assert
-        verify(mockUtility, times(1)).logWithDate(any(), any());
-        verify(mockUtilityService, times(0)).dropBsmPartitions(any());
+        verify(mockUtility).logWithDate("Running...", CleanupBsms.class);
+        verify(mockUtility).logWithDate("Failed to remove old BSM data");
     }
 
     @Test
     public void cleanupBsms_handlesErrors() {
         // Arrange
-        when(mockUtilityService.getBsmCoreDataPartitions())
-                .thenThrow(new RestClientException("something went wrong..."));
+        var exMessage = "exception";
+        doThrow(new NullPointerException(exMessage)).when(mockBsmService).deleteOldBsm(1);
 
         // Act
         // We want to ensure no error propogates up. If it does, the runnable won't be
         // scheduled again until the application is restarted.
         uut.run();
+
+        // Assert
+        verify(mockUtility).logWithDate("Exception during BSM cleanup: exception");
     }
 }

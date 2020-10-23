@@ -15,8 +15,8 @@ public class BsmService extends CvDataServiceLibrary {
 	 * 
 	 * @return
 	 */
-	public boolean deleteOldBsm() {
-		String url = String.format("%s/bsm/delete-old", config.getCvRestService());
+	public boolean deleteOldBsm(int retentionDays) {
+		String url = String.format("%s/bsm/delete-old/%d", config.getCvRestService(), retentionDays);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);

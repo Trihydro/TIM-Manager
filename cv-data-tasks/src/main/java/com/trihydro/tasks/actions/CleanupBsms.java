@@ -1,16 +1,7 @@
 package com.trihydro.tasks.actions;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.stream.Collectors;
-
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.model.BsmCoreDataPartition;
-import com.trihydro.library.service.UtilityService;
+import com.trihydro.library.service.BsmService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +10,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class CleanupBsms implements Runnable {
     private DataTasksConfiguration configuration;
-    private UtilityService utilityService;
+    private BsmService bsmService;
     private Utility utility;
 
     @Autowired
-    public void InjectDependencies(DataTasksConfiguration configuration, UtilityService utilityService,
-            Utility utility) {
+    public void InjectDependencies(DataTasksConfiguration configuration, BsmService _bsmService, Utility utility) {
         this.configuration = configuration;
-        this.utilityService = utilityService;
+        this.bsmService = _bsmService;
         this.utility = utility;
     }
 
@@ -35,25 +25,18 @@ public class CleanupBsms implements Runnable {
         utility.logWithDate("Running...", this.getClass());
 
         try {
-            var partitions = utilityService.getBsmCoreDataPartitions();
-            var toRemove = new ArrayList<BsmCoreDataPartition>();
-
-            var cutoffLocalDate = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
-                    .minusDays(configuration.getBsmRetentionPeriodDays());
-            var cutoff = new Date(cutoffLocalDate.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli());
-
-            for (var part : partitions) {
-                if (part.getHighValue().compareTo(cutoff) < 0) {
-                    toRemove.add(part);
-                }
-            }
-
-            if (toRemove.size() > 0) {
-                utility.logWithDate("Removing " + toRemove.size() + " partitions from BSM_CORE_DATA.", this.getClass());
-                utilityService.dropBsmPartitions(
-                        toRemove.stream().map(x -> x.getPartitionName()).collect(Collectors.toList()));
+            // delete old BSM records based on retention days
+            // this calls out to the BsmController and fetches the largest bsm_core_id 
+            // for the retention period. It then deletes all bsm_part2_vse, bsm_part2_suve
+            // bsm_part2_spve, bsm_core_data less than or equal to the id
+            var success = bsmService.deleteOldBsm(configuration.getBsmRetentionPeriodDays());
+            if (success) {
+                utility.logWithDate("Successfully removed old BSM data");
+            } else {
+                utility.logWithDate("Failed to remove old BSM data");
             }
         } catch (Exception e) {
+            utility.logWithDate("Exception during BSM cleanup: " + e.getMessage());
             e.printStackTrace();
         }
     }

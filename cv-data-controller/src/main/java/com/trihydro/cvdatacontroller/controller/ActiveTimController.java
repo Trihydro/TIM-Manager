@@ -1201,7 +1201,7 @@ public class ActiveTimController extends BaseController {
 
 		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
 		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-		query += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+		query += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
 
 		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
 		updateStatement += query;

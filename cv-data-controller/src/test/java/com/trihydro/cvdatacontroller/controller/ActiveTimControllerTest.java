@@ -826,7 +826,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
         updateStatement += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-        updateStatement += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+        updateStatement += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
         updateStatement += ")";
 
         // Act
@@ -857,7 +857,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
         updateStatement += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-        updateStatement += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+        updateStatement += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
         updateStatement += ")";
 
         // Act

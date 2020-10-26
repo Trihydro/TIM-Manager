@@ -49,14 +49,14 @@ public class ActiveTimService extends BaseService {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
-                else if (col.equals("TIM_START"))
-                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-                            LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
-                else if (col.equals("TIM_END"))
-                    if (activeTim.getEndDateTime() != null)
-                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-                                LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
-                    else
+                else if (col.equals("TIM_START")) {
+                    java.util.Date tim_start_date = convertDate(activeTim.getStartDateTime());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(tim_start_date));
+                } else if (col.equals("TIM_END"))
+                    if (activeTim.getEndDateTime() != null) {
+                        java.util.Date tim_end_date = convertDate(activeTim.getEndDateTime());
+                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(tim_end_date));
+                    } else
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                 else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTim.getExpirationDateTime() != null) {

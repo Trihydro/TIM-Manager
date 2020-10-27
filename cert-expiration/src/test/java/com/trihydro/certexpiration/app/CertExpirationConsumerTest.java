@@ -41,6 +41,7 @@ public class CertExpirationConsumerTest {
     private static final String PACKETID = "3C8E8DF2470B1A772E";
     private static final String STARTDATE = "2020-10-14T15:37:26.037Z";
     private static final String EXPDATE = "2020-10-20T16:26:07.000Z";
+    private static final String MINEXP = "27-OCT-20 06.21.00.000 PM";
 
     @Mock
     private CertExpirationConfiguration mockConfigProperties;
@@ -92,12 +93,14 @@ public class CertExpirationConsumerTest {
     public void startKafkaConsumer_SUCCESS() throws Exception {
         // Arrange
         doReturn(true).when(mockAts).updateActiveTimExpiration(any(), any(), any());
+        doReturn(MINEXP).when(mockAts).getMinExpiration(any(), any(), any());
 
         // Act
         uut.startKafkaConsumer();
 
         // Assert
-        verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, EXPDATE);
+        verify(mockAts).getMinExpiration(PACKETID, STARTDATE, EXPDATE);
+        verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, MINEXP);
         verify(mockUtility).logWithDate("starting..............");
         verify(mockUtility).logWithDate(String.format("Consumed from expiration topic: %s", EXPRECORD));
         verify(mockUtility).logWithDate("Successfully updated expiration date");
@@ -110,12 +113,14 @@ public class CertExpirationConsumerTest {
     public void startKafkaConsumer_FAIL() throws Exception {
         // Arrange
         doReturn(false).when(mockAts).updateActiveTimExpiration(any(), any(), any());
+        doReturn(MINEXP).when(mockAts).getMinExpiration(any(), any(), any());
 
         // Act
         uut.startKafkaConsumer();
 
         // Assert
-        verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, EXPDATE);
+        verify(mockAts).getMinExpiration(PACKETID, STARTDATE, EXPDATE);
+        verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, MINEXP);
         verify(mockUtility).logWithDate("starting..............");
         verify(mockUtility).logWithDate(String.format("Consumed from expiration topic: %s", EXPRECORD));
         verify(mockUtility).logWithDate(String.format("Failed to update expiration for data: %s", EXPRECORD));
@@ -137,6 +142,7 @@ public class CertExpirationConsumerTest {
     public void startKafkaConsumer_EXCEPTION() throws Exception {
         // Arrange
         String exMessage = "Big error";
+        doReturn(MINEXP).when(mockAts).getMinExpiration(any(), any(), any());
         doThrow(new NullPointerException(exMessage)).when(mockAts).updateActiveTimExpiration(any(), any(), any());
 
         // Act
@@ -145,6 +151,8 @@ public class CertExpirationConsumerTest {
         // Assert
         verify(mockUtility).logWithDate("starting..............");
         verify(mockUtility).logWithDate(String.format("Consumed from expiration topic: %s", EXPRECORD));
+        verify(mockAts).getMinExpiration(PACKETID, STARTDATE, EXPDATE);
+        verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, MINEXP);
 
         verify(mockUtility).logWithDate(exMessage);
         String body = "The CertExpirationConsumer failed attempting to consume records";
@@ -166,8 +174,8 @@ public class CertExpirationConsumerTest {
         // Arrange
         String exMessage = "Big error";
         doThrow(new NullPointerException(exMessage)).when(mockAts).updateActiveTimExpiration(any(), any(), any());
-        doThrow(new MessagingException("Mail Exception")).when(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(),
-                any(), any());
+        doThrow(new MessagingException("Mail Exception")).when(mockEmailHelper).SendEmail(any(), any(), any(), any(),
+                any(), any(), any());
 
         // Act
         Exception ex = assertThrows(Exception.class, () -> uut.startKafkaConsumer());

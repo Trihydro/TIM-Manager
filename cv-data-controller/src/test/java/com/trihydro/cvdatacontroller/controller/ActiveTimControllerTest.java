@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -812,6 +813,59 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     }
 
     @Test
+    public void GetMinExpiration_SUCCESS() throws ParseException, SQLException {
+        // Arrange
+        var packetID = "3C8E8DF2470B1A772E";
+        var startDate = "2020-10-14T15:37:26.037Z";
+        var expDate = "2020-10-20T16:26:07.000Z";
+        var minVal = "27-OCT-20 06.21.00.000000000 PM";
+        doReturn(minVal).when(mockRs).getString("MINSTART");
+
+        // Act
+        ResponseEntity<String> response = uut.GetMinExpiration(packetID, startDate, expDate);
+
+        // Assert
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), minVal);
+        String query = "SELECT LEAST('20-Oct-20 09.26.07.000 AM', (";
+        query += "SELECT MIN(TIM_START) FROM ACTIVE_TIM atim";
+        query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+        query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+        query += " AND atim.TIM_START = '14-Oct-20 08.37.26.037 AM'";
+        query += " )) minStart FROM DUAL";
+        verify(mockStatement).executeQuery(query);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void GetMinExpiration_EXCEPTION() throws ParseException, SQLException {
+        // Arrange
+        var packetID = "3C8E8DF2470B1A772E";
+        var startDate = "2020-10-14T15:37:26.037Z";
+        var expDate = "2020-10-20T16:26:07.000Z";
+        doThrow(new SQLException("sql err")).when(mockRs).getString("MINSTART");
+
+        // Act
+        ResponseEntity<String> response = uut.GetMinExpiration(packetID, startDate, expDate);
+
+        // Assert
+        Assertions.assertEquals(response.getBody(), "");
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        String query = "SELECT LEAST('20-Oct-20 09.26.07.000 AM', (";
+        query += "SELECT MIN(TIM_START) FROM ACTIVE_TIM atim";
+        query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+        query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+        query += " AND atim.TIM_START = '14-Oct-20 08.37.26.037 AM'";
+        query += " )) minStart FROM DUAL";
+        verify(mockStatement).executeQuery(query);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
     public void UpdateExpiration_SUCCESS() throws SQLException {
         // Arrange
         // note that expirationDate comes from the topic.OdeTIMCertExpirationTimeJson in
@@ -835,7 +889,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertTrue(success.getBody(), "UpdateExpiration failed when it should have succeeded");
         verify(mockConnection).prepareStatement(updateStatement);
-        verify(mockPreparedStatement).setObject(1, "20-Oct-20 09.26.07.000 AM");
+        verify(mockPreparedStatement).setObject(1, expDate);
         verify(mockPreparedStatement).setObject(2, packetID);
         verify(mockPreparedStatement).setObject(3, "14-Oct-20 08.37.26.037 AM");
         verify(mockPreparedStatement).close();

@@ -81,11 +81,11 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
 			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
 			// where starting less than 2 hours away
-			selectStatement+= " WHERE atim.tim_start <= SYSDATE + INTERVAL '2' HOUR";
+			selectStatement += " WHERE atim.tim_start <= SYSDATE + INTERVAL '2' HOUR";
 			// and expiration_date within 2hrs
-			  selectStatement+= " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '2' HOUR)";
+			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '2' HOUR)";
 			// check that end time isn't within 2hrs
-  			selectStatement+= " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '2' HOUR)";
+			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '2' HOUR)";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -1210,7 +1210,8 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			preparedStatement = connection.prepareStatement(updateStatement);
-			preparedStatement.setObject(1, translateIso8601ToMST(expDate));
+			preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
+													// (GetMinExpiration)
 			preparedStatement.setObject(2, packetID);
 			preparedStatement.setObject(3, translateIso8601ToMST(startDate));
 
@@ -1232,5 +1233,49 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 		return ResponseEntity.ok(success);
+	}
+
+	@RequestMapping(value = "/get-min-expiration/{packetID}/{startDate}/{expDate}")
+	public ResponseEntity<String> GetMinExpiration(@PathVariable String packetID, @PathVariable String startDate,
+			@PathVariable String expDate) throws ParseException {
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		String minStart = "";
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+			String query = "SELECT LEAST('" + translateIso8601ToMST(expDate) + "', (";
+			query += "SELECT MIN(TIM_START) FROM ACTIVE_TIM atim";
+			query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+			query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+			query += " AND atim.TIM_START = '" + translateIso8601ToMST(startDate) + "'";
+			query += " )) minStart FROM DUAL";
+
+			rs = statement.executeQuery(query);
+			while (rs.next()) {
+				minStart = rs.getString("MINSTART");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(minStart);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(minStart);
 	}
 }

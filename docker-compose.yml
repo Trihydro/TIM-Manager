@@ -460,3 +460,20 @@ services:
       options:
         max-size: "20m"
         max-file: "3"
+
+  cert-expiration:
+    build: cert-expiration
+    restart: always
+    environment:
+      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      DEPOSIT_TOPIC: ${EXP_TOPIC}
+      DEPOSIT_GROUP: ${EXP_GROUP}
+      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"

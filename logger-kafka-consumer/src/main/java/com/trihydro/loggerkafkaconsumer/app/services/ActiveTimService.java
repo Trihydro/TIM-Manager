@@ -50,6 +50,7 @@ public class ActiveTimService extends BaseService {
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
                 else if (col.equals("TIM_START")) {
+                    utility.logWithDate(String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
                     java.util.Date tim_start_date = convertDate(activeTim.getStartDateTime());
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(tim_start_date));
                 } else if (col.equals("TIM_END"))

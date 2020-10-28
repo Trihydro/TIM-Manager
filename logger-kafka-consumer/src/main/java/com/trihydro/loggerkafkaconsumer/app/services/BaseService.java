@@ -43,7 +43,7 @@ public class BaseService {
             if (incomingDate != null) {
                 if (incomingDate.contains("."))
                     convertedDate = utcFormatMilliSec.parse(incomingDate);
-                else if (incomingDate.length() == 22)
+                else if (incomingDate.length() == 17)// "2020-10-28T14:53Z"
                     convertedDate = utcFormatMin.parse(incomingDate);
                 else
                     convertedDate = utcFormatSec.parse(incomingDate);

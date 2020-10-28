@@ -1244,15 +1244,23 @@ public class ActiveTimController extends BaseController {
 		String minStart = "";
 
 		try {
+			// Fetch the minimum of passed in expDate and database held
+			// active_tim.expiration_date. To compare like values we convert the expDate
+			// TO_TIMESTAMP. Without this it compares string length.
+			// Also, there are some null values in the db. To get around these, we use the
+			// coalesce function with the expDate passed in value.
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String query = "SELECT LEAST('" + translateIso8601ToMST(expDate) + "', (";
-			query += "SELECT MIN(TIM_START) FROM ACTIVE_TIM atim";
-			query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-			query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-			query += " AND atim.TIM_START = '" + translateIso8601ToMST(startDate) + "'";
-			query += " )) minStart FROM DUAL";
+			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL",
+					translateIso8601ToMST(expDate));
 
+			String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
+			minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+			minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+			minExpDate += " AND atim.TIM_START = '" + translateIso8601ToMST(startDate) + "'";
+
+			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
+					selectTimestamp, selectTimestamp, minExpDate);
 			rs = statement.executeQuery(query);
 			while (rs.next()) {
 				minStart = rs.getString("MINSTART");

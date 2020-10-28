@@ -827,12 +827,13 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), minVal);
-        String query = "SELECT LEAST('20-Oct-20 09.26.07.000 AM', (";
-        query += "SELECT MIN(TIM_START) FROM ACTIVE_TIM atim";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 09.26.07.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL),";
+        query+= " (COALESCE((SELECT TO_TIMESTAMP('20-Oct-20 09.26.07.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)";
+        query += ",(SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
         query += " AND atim.TIM_START = '14-Oct-20 08.37.26.037 AM'";
-        query += " )) minStart FROM DUAL";
+        query += ")))) minStart FROM DUAL";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -853,12 +854,13 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getBody(), "");
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        String query = "SELECT LEAST('20-Oct-20 09.26.07.000 AM', (";
-        query += "SELECT MIN(TIM_START) FROM ACTIVE_TIM atim";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 09.26.07.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL),";
+        query+= " (COALESCE((SELECT TO_TIMESTAMP('20-Oct-20 09.26.07.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)";
+        query += ",(SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
         query += " AND atim.TIM_START = '14-Oct-20 08.37.26.037 AM'";
-        query += " )) minStart FROM DUAL";
+        query += ")))) minStart FROM DUAL";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();

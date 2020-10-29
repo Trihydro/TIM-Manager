@@ -3,7 +3,6 @@ package com.trihydro.tasks.actions;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -28,7 +27,7 @@ public class VerifyHSMFunctional implements Runnable {
 
     public Date errorLastSent = null;
     private SignTimModel signTimModel;
-    private HttpEntity<String> entity;
+    private HttpEntity<SignTimModel> entity;
 
     private static final int sigValidityOverride = 36000000;
     private static final String message = "AB+AhHAVP6+uw89IRtyVmrEPd12bAwnCgIt80Vzq0of/+T8inWB9AKEH+c036tNAxbX6cGotYRIjiMxbOb9KvfZM2jRlAAAAABQEW+aK51aUP95n4AEIUWd7wquPelB+HceDETPJJJ/o+hfPUkhdHQFjWSIKz4TapJENJz/9BBCQAgCe7rs2AA==";
@@ -47,9 +46,7 @@ public class VerifyHSMFunctional implements Runnable {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Gson gson = new Gson();
-        String timToSendJson = gson.toJson(signTimModel);
-        entity = new HttpEntity<String>(timToSendJson, headers);
+        entity = new HttpEntity<SignTimModel>(signTimModel, headers);
     }
 
     public void run() {

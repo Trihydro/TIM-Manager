@@ -49,4 +49,17 @@ public class UtilityTest {
         // Assert
         Assertions.assertNotNull(convertedDate);
     }
+
+    @Test
+    public void convertDate_utcText_SUCCESS() {
+        // Arrange
+        // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        var date = "2020-02-10T17:00:00.000Z[UTC]";
+
+        // Act
+        var convertedDate = uut.convertDate(date);
+
+        // Assert
+        Assertions.assertNotNull(convertedDate);
+    }
 }

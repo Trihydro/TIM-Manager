@@ -21,28 +21,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class Utility {
 	private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+	private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
 	public DateFormat timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-	
+	public DateFormat utcTextFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z[UTC]'");
+
 	public Gson gson = new Gson();
 
 	public Date convertDate(String incomingDate) {
-        Date convertedDate = null;
-        try {
-            if (incomingDate != null) {
-                if (incomingDate.contains("."))
-                    convertedDate = utcFormatMilliSec.parse(incomingDate);
-                else if (incomingDate.length() == 17)
-                    convertedDate = utcFormatMin.parse(incomingDate);
-                else
-                    convertedDate = utcFormatSec.parse(incomingDate);
-            }
-        } catch (ParseException e1) {
-            e1.printStackTrace();
-        }
-        return convertedDate;
-    }
+		Date convertedDate = null;
+		try {
+			if (incomingDate != null) {
+				if (incomingDate.contains("UTC"))
+					convertedDate = utcTextFormat.parse(incomingDate);
+				else if (incomingDate.contains("."))
+					convertedDate = utcFormatMilliSec.parse(incomingDate);
+				else if (incomingDate.length() == 17)
+					convertedDate = utcFormatMin.parse(incomingDate);
+				else
+					convertedDate = utcFormatSec.parse(incomingDate);
+			}
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+		return convertedDate;
+	}
 
 	public <T> void logWithDate(String msg, Class<T> clazz) {
 		logWithDate(clazz.getSimpleName() + ": " + msg);

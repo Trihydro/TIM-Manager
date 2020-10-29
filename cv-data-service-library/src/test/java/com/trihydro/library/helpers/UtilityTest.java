@@ -22,6 +22,7 @@ public class UtilityTest {
 
         // Assert
         Assertions.assertNotNull(convertedDate);
+        Assertions.assertEquals(1603896780000l, convertedDate.getTime());
     }
 
     @Test
@@ -35,6 +36,7 @@ public class UtilityTest {
 
         // Assert
         Assertions.assertNotNull(convertedDate);
+        Assertions.assertEquals(1603896780000l, convertedDate.getTime());
     }
 
     @Test
@@ -48,6 +50,7 @@ public class UtilityTest {
 
         // Assert
         Assertions.assertNotNull(convertedDate);
+        Assertions.assertEquals(1603896780123l, convertedDate.getTime());
     }
 
     @Test
@@ -61,5 +64,6 @@ public class UtilityTest {
 
         // Assert
         Assertions.assertNotNull(convertedDate);
+        Assertions.assertEquals(1581354000000l, convertedDate.getTime());
     }
 }

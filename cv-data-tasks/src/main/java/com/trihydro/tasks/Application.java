@@ -30,6 +30,7 @@ import com.trihydro.tasks.actions.RetentionPolicyEnforcement;
 import com.trihydro.tasks.actions.ValidateRsus;
 import com.trihydro.tasks.actions.ValidateSdx;
 import com.trihydro.tasks.actions.ValidateTmdd;
+import com.trihydro.tasks.actions.VerifyHSMFunctional;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,13 +53,14 @@ public class Application {
         private ValidateSdx sdxValidator;
         private ValidateRsus rsuValidator;
         private ValidateTmdd tmddValidator;
+        private VerifyHSMFunctional hsmFunctional;
         RetentionPolicyEnforcement retentionEnforcement;
 
         @Autowired
         public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
                         CleanupActiveTims _cleanupActiveTims, CleanupBsms _cleanupBsms, ValidateSdx _sdxValidator,
                         ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
-                        RetentionPolicyEnforcement _retentionEnforcement) {
+                        RetentionPolicyEnforcement _retentionEnforcement, VerifyHSMFunctional _hsmFunctional) {
                 config = _config;
                 removeExpiredActiveTims = _removeExpiredActiveTims;
                 cleanupActiveTims = _cleanupActiveTims;
@@ -67,6 +69,7 @@ public class Application {
                 rsuValidator = _rsuValidator;
                 tmddValidator = _tmddValidator;
                 retentionEnforcement = _retentionEnforcement;
+                hsmFunctional = _hsmFunctional;
         }
 
         public static void main(String[] args) {
@@ -91,6 +94,10 @@ public class Application {
 
                 // SDX Validator
                 scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 15, config.getSdxValidationPeriodMinutes(),
+                                TimeUnit.MINUTES);
+
+                // HSM Check
+                scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0, config.getHsmFunctionalityMinutes(),
                                 TimeUnit.MINUTES);
 
                 // RSU Validator

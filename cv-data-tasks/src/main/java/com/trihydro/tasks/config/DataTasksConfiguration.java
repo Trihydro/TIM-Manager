@@ -40,6 +40,9 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private int tmddValidationPeriodMinutes = 1440;
     private int retentionEnforcementPeriodMinutes = 1440;// run once a day by default
     private int bsmCleanupPeriodMinutes = 1440;
+    private int hsmFunctionalityMinutes = 1;// run once a minute by default
+    private String hsmUrl = "http://10.145.9.74:55443/tmc";
+    private int hsmErrorEmailFrequencyMinutes = 10;// send an email every 10 minutes the system is down
 
     public String getCvRestService() {
         return cvRestService;
@@ -259,5 +262,29 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setBsmCleanupPeriodMinutes(int bsmCleanupPeriodMinutes) {
         this.bsmCleanupPeriodMinutes = bsmCleanupPeriodMinutes;
+    }
+
+    public int getHsmFunctionalityMinutes() {
+        return hsmFunctionalityMinutes;
+    }
+
+    public void setHsmFunctionalityMinutes(int hsmFunctionalityMinutes) {
+        this.hsmFunctionalityMinutes = hsmFunctionalityMinutes;
+    }
+
+    public String getHsmUrl() {
+        return hsmUrl;
+    }
+
+    public void setHsmUrl(String hsmUrl) {
+        this.hsmUrl = hsmUrl;
+    }
+
+    public int getHsmErrorEmailFrequencyMinutes(){
+        return hsmErrorEmailFrequencyMinutes;
+    }
+
+    public void setHsmErrorEmailFrequencyMinutes(int hsmErrorEmailFrequencyMinutes){
+        this.hsmErrorEmailFrequencyMinutes = hsmErrorEmailFrequencyMinutes;
     }
 }

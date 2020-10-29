@@ -1,8 +1,5 @@
 package com.trihydro.odewrapper.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -465,17 +462,6 @@ public class WydotTimService {
             System.out.println("Failed to send new TIM to SDW");
             targetException.printStackTrace();
         }
-    }
-
-    public String convertUtcDateTimeToLocal(String utcDateTime) {
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        LocalDateTime startDate = LocalDateTime.parse(utcDateTime, formatter);
-        ZoneId mstZoneId = ZoneId.of("America/Denver");
-        ZonedDateTime mstZonedDateTime = startDate.atZone(mstZoneId);
-        String startDateTime = mstZonedDateTime.toLocalDateTime().toString() + "-06:00";
-
-        return startDateTime;
     }
 
     public void updateTimOnRsu(WydotTravelerInputData timToSend, Long timId, WydotOdeTravelerInformationMessage tim,

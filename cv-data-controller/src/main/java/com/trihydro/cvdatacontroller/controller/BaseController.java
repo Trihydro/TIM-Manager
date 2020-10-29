@@ -28,7 +28,6 @@ public class BaseController {
 
     public String getOneMonthPrior() {
         DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-        // TimeZone toTimeZone = TimeZone.getTimeZone("MST");
         TimeZone toTimeZone = TimeZone.getTimeZone("UTC");
         sdf.setTimeZone(toTimeZone);
         Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));

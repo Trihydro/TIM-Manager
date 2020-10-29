@@ -217,9 +217,9 @@ public class BsmService extends BaseService {
                     bsmPreparedStatement.setString(fieldNum, metadata.getLogFileName());
                 } else if (col.equals("RECORD_GENERATED_AT")) {
                     if (metadata.getRecordGeneratedAt() != null) {
-                        java.util.Date recordGeneratedAtDate = convertDate(metadata.getRecordGeneratedAt());
+                        java.util.Date recordGeneratedAtDate = utility.convertDate(metadata.getRecordGeneratedAt());
                         sqlNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum,
-                                mstFormat.format(recordGeneratedAtDate));
+                                utility.timestampFormat.format(recordGeneratedAtDate));
                     } else
                         bsmPreparedStatement.setString(fieldNum, null);
                 } else if (col.equals("SECURITY_RESULT_CODE")) {
@@ -244,9 +244,9 @@ public class BsmService extends BaseService {
                     bsmPreparedStatement.setLong(fieldNum, metadata.getSerialId().getSerialNumber());
                 } else if (col.equals("ODE_RECEIVED_AT")) {
                     if (metadata.getOdeReceivedAt() != null) {
-                        java.util.Date receivedAtDate = convertDate(metadata.getOdeReceivedAt());
+                        java.util.Date receivedAtDate = utility.convertDate(metadata.getOdeReceivedAt());
                         sqlNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum,
-                                mstFormat.format(receivedAtDate));
+                                utility.timestampFormat.format(receivedAtDate));
                     } else
                         bsmPreparedStatement.setString(fieldNum, null);
                 } else if (col.equals("RECORD_TYPE")) {

@@ -6,8 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
@@ -50,20 +48,23 @@ public class ActiveTimService extends BaseService {
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
                 else if (col.equals("TIM_START")) {
-                    utility.logWithDate(String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
-                    java.util.Date tim_start_date = convertDate(activeTim.getStartDateTime());
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(tim_start_date));
-                } else if (col.equals("TIM_END"))
+                    utility.logWithDate(
+                            String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
+                    java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                            utility.timestampFormat.format(tim_start_date));
+                } else if (col.equals("TIM_END")) {
                     if (activeTim.getEndDateTime() != null) {
-                        java.util.Date tim_end_date = convertDate(activeTim.getEndDateTime());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(tim_end_date));
+                        java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
+                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                                utility.timestampFormat.format(tim_end_date));
                     } else
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
-                else if (col.equals("EXPIRATION_DATE")) {
+                } else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTim.getExpirationDateTime() != null) {
-                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTim.getExpirationDateTime(),
-                                        DateTimeFormatter.ISO_DATE_TIME)));
+                        java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
+                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                                utility.timestampFormat.format(tim_exp_date));
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
@@ -152,14 +153,16 @@ public class ActiveTimService extends BaseService {
             sqlNullHandler.setBigDecimalOrNull(preparedStatement, 3, start_lon);
             sqlNullHandler.setBigDecimalOrNull(preparedStatement, 4, end_lat);
             sqlNullHandler.setBigDecimalOrNull(preparedStatement, 5, end_lon);
-            sqlNullHandler.setTimestampOrNull(preparedStatement, 6, java.sql.Timestamp
-                    .valueOf(LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
+
+            java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
+            sqlNullHandler.setStringOrNull(preparedStatement, 6, utility.timestampFormat.format(tim_start_date));
 
             if (activeTim.getEndDateTime() == null)
                 preparedStatement.setString(7, null);
-            else
-                sqlNullHandler.setTimestampOrNull(preparedStatement, 7, java.sql.Timestamp
-                        .valueOf(LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
+            else {
+                java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
+                sqlNullHandler.setStringOrNull(preparedStatement, 7, utility.timestampFormat.format(tim_end_date));
+            }
 
             sqlNullHandler.setIntegerOrNull(preparedStatement, 8, activeTim.getPk());
             sqlNullHandler.setIntegerOrNull(preparedStatement, 9, activeTim.getProjectKey());

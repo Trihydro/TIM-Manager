@@ -78,10 +78,10 @@ public class DriverAlertService extends BaseService {
                             odeDriverAlertMetadata.getLogFileName());
                 else if (col.equals("RECORD_GENERATED_AT")) {
                     if (odeDriverAlertMetadata.getRecordGeneratedAt() != null) {
-                        java.util.Date recordGeneratedAtDate = convertDate(
-                                odeDriverAlertMetadata.getRecordGeneratedAt());
+                        java.util.Date recordGeneratedAtDate = utility
+                                .convertDate(odeDriverAlertMetadata.getRecordGeneratedAt());
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                mstFormat.format(recordGeneratedAtDate));
+                                utility.timestampFormat.format(recordGeneratedAtDate));
                     } else
                         preparedStatement.setString(fieldNum, null);
                 } else if (col.equals("SANITIZED")) {
@@ -112,8 +112,9 @@ public class DriverAlertService extends BaseService {
                             odeDriverAlertMetadata.getRecordType().toString());
                 else if (col.equals("ODE_RECEIVED_AT")) {
                     if (odeDriverAlertMetadata.getOdeReceivedAt() != null) {
-                        java.util.Date odeReceivedAt = convertDate(odeDriverAlertMetadata.getOdeReceivedAt());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(odeReceivedAt));
+                        java.util.Date odeReceivedAt = utility.convertDate(odeDriverAlertMetadata.getOdeReceivedAt());
+                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                                utility.timestampFormat.format(odeReceivedAt));
                     } else {
                         preparedStatement.setString(fieldNum, null);
                     }

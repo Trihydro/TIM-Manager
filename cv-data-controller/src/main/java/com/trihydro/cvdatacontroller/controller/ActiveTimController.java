@@ -1259,7 +1259,7 @@ public class ActiveTimController extends BaseController {
 			minExpDate += " AND atim.TIM_START = '" + translateIso8601ToTimestampFormat(startDate) + "'";
 
 			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
-					selectTimestamp, selectTimestamp, minExpDate);
+					selectTimestamp, minExpDate, selectTimestamp);
 			rs = statement.executeQuery(query);
 			while (rs.next()) {
 				minStart = rs.getString("MINSTART");

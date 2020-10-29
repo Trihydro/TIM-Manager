@@ -136,7 +136,7 @@ public class VerifyHSMFunctionalTest {
                 doReturn(HttpStatus.I_AM_A_TEAPOT).when(mockResponseEntity).getStatusCode();
                 doReturn(HttpStatus.I_AM_A_TEAPOT.value()).when(mockResponseEntity).getStatusCodeValue();
                 doReturn(10).when(mockConfig).getHsmErrorEmailFrequencyMinutes();// only send email within 10 mins
-                // set date to 5 minutes ago
+                
                 var lastSent = Calendar.getInstance();
                 lastSent.setTime(new Date());
                 lastSent.add(Calendar.MINUTE, -15);// set 15 minutes ago so it fires off

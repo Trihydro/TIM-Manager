@@ -7,8 +7,7 @@ import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -58,6 +57,11 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 activeTimHolding.setStartPoint(startCoord);
                 activeTimHolding.setEndPoint(endCoord);
 
+                var now = Instant.parse(activeTimHolding.getDateCreated());
+                java.util.Date date_created = java.util.Date.from(now);
+                doReturn(date_created).when(mockUtility).convertDate(activeTimHolding.getDateCreated());
+                mockUtility.timestampFormat = timestampFormat;
+
                 // Act
                 ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
 
@@ -76,9 +80,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
-                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
-                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTimHolding.getDateCreated(),
-                                                DateTimeFormatter.ISO_DATE_TIME)));// DATE_CREATED
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11, timestampFormat.format(date_created));// DATE_CREATED
         }
 
         @Test
@@ -94,6 +96,11 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 activeTimHolding.setEndPoint(endCoord);
                 doReturn(null).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim holding");
                 doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+
+                var now = Instant.parse(activeTimHolding.getDateCreated());
+                java.util.Date date_created = java.util.Date.from(now);
+                doReturn(date_created).when(mockUtility).convertDate(activeTimHolding.getDateCreated());
+                mockUtility.timestampFormat = timestampFormat;
 
                 String query = "select active_tim_holding_id from active_tim_holding";
                 query += " where sat_record_id = '" + activeTimHolding.getSatRecordId();
@@ -119,9 +126,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
-                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
-                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTimHolding.getDateCreated(),
-                                                DateTimeFormatter.ISO_DATE_TIME)));// DATE_CREATED
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
+                                timestampFormat.format(date_created));// DATE_CREATED
 
                 verify(mockStatement).executeQuery(query);
         }
@@ -139,6 +145,11 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 activeTimHolding.setEndPoint(endCoord);
                 doReturn(null).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim holding");
                 doReturn(-99l).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+
+                var now = Instant.parse(activeTimHolding.getDateCreated());
+                java.util.Date date_created = java.util.Date.from(now);
+                doReturn(date_created).when(mockUtility).convertDate(activeTimHolding.getDateCreated());
+                mockUtility.timestampFormat = timestampFormat;
 
                 String query = "select active_tim_holding_id from active_tim_holding";
                 query += " where rsu_target = '" + activeTimHolding.getRsuTarget();
@@ -164,9 +175,8 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
-                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11,
-                                java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTimHolding.getDateCreated(),
-                                                DateTimeFormatter.ISO_DATE_TIME)));// DATE_CREATED
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
+                                timestampFormat.format(date_created));// DATE_CREATED
 
                 verify(mockStatement).executeQuery(query);
         }

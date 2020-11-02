@@ -5,8 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,8 +90,9 @@ public class ActiveTimHoldingController extends BaseController {
                 } else if (col.equals("RSU_INDEX")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
                 } else if (col.equals("DATE_CREATED")) {
-                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-                            LocalDateTime.parse(activeTimHolding.getDateCreated(), DateTimeFormatter.ISO_DATE_TIME)));
+                    java.util.Date dateCreated = utility.convertDate(activeTimHolding.getDateCreated());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                            utility.timestampFormat.format(dateCreated));
                 } else if (col.equals("PROJECT_KEY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
                 }
@@ -181,10 +180,10 @@ public class ActiveTimHoldingController extends BaseController {
                 activeTimHolding.setDirection(rs.getString("DIRECTION"));
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-                activeTimHolding
-                        .setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
-                activeTimHolding
-                        .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                activeTimHolding.setStartPoint(
+                        new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(
+                        new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
                 activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
                 int rsu_index = rs.getInt("RSU_INDEX");
                 if (!rs.wasNull()) {

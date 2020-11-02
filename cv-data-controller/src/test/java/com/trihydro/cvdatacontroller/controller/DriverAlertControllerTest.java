@@ -21,7 +21,7 @@ public class DriverAlertControllerTest extends TestBase<DriverAlertController> {
     public void DeleteOldDriverAlert() throws SQLException {
         // Arrange
         DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+        TimeZone toTimeZone = TimeZone.getTimeZone("UTC");
         sdf.setTimeZone(toTimeZone);
         Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
         String strDate = sdf.format(dte.getTime());

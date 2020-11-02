@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,18 +46,16 @@ public class TimControllerTest extends TestBase<TimController> {
         @Mock
         private ResponseEntity<List<SecurityResultCodeType>> mockResponseEntitySecurityResultCodeTypeList;
 
-        private String mstFormatedDate = "03-Feb-20 04.00.00.000 PM";
-
         @BeforeEach
         public void setupSubTest() {
                 uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
-        private void setupInsertQueryStatement(){
+        private void setupInsertQueryStatement() {
                 doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
         }
 
-        private void setupSecurityResultTypes(){
+        private void setupSecurityResultTypes() {
                 List<SecurityResultCodeType> secResultCodeTypes = new ArrayList<>();
                 SecurityResultCodeType srct = new SecurityResultCodeType();
                 srct.setSecurityResultCodeType(SecurityResultCode.success.toString());
@@ -108,6 +107,14 @@ public class TimControllerTest extends TestBase<TimController> {
                 tim.setRegionName("REGIONNAME");
                 OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
 
+                var genTime = Instant.parse(tim.getOdeTimMetadata().getRecordGeneratedAt());
+                var recTime = Instant.parse(tim.getOdeTimMetadata().getOdeReceivedAt());
+                java.util.Date gen_at = java.util.Date.from(genTime);
+                java.util.Date rec_at = java.util.Date.from(recTime);
+                doReturn(gen_at).when(mockUtility).convertDate(tim.getOdeTimMetadata().getRecordGeneratedAt());
+                doReturn(rec_at).when(mockUtility).convertDate(tim.getOdeTimMetadata().getOdeReceivedAt());
+                mockUtility.timestampFormat = timestampFormat;
+
                 // Act
                 Long timId = uut.AddTim(tim);
 
@@ -119,7 +126,7 @@ public class TimControllerTest extends TestBase<TimController> {
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
                                 odeTimMetadata.getSchemaVersion());// SCHEMA_VERSION
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 15, mstFormatedDate);// RECORD_GENERATED_AT
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 15, timestampFormat.format(gen_at));// RECORD_GENERATED_AT
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 17,
                                 odeTimMetadata.getSerialId().getStreamId());// SERIAL_ID_STREAM_ID
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 18,
@@ -131,7 +138,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 21,
                                 odeTimMetadata.getSerialId().getSerialNumber());// SERIAL_ID_SERIAL_NUMBER
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 22, odeTimMetadata.getPayloadType());// PAYLOAD_TYPE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 24, mstFormatedDate);// ODE_RECEIVED_AT
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 24, timestampFormat.format(rec_at));// ODE_RECEIVED_AT
                 verify(mockPreparedStatement).close();
                 verify(mockConnection).close();
         }
@@ -223,7 +230,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 // Assert
                 Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-                Assertions.assertTrue(data.getBody(),"Fail return on success");
+                Assertions.assertTrue(data.getBody(), "Fail return on success");
 
                 verify(uut, times(2)).getOneMonthPrior();
 
@@ -281,7 +288,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
         private OdeMsgMetadata GetOmm() {
                 OdeMsgMetadata omm = new OdeMsgMetadata();
-                omm.setRecordGeneratedAt("2020-02-03T16:00:00.000Z");
+                omm.setRecordGeneratedAt("2020-02-03T16:02:00.000Z");
                 omm.setOdeReceivedAt("2020-02-03T16:00:00.000Z");
                 return omm;
         }

@@ -135,9 +135,9 @@ public class TimController extends BaseController {
                             preparedStatement.setString(fieldNum, null);
                     } else if (col.equals("RECORD_GENERATED_AT")) {
                         if (odeTimMetadata.getRecordGeneratedAt() != null) {
-                            java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());
+                            java.util.Date recordGeneratedAtDate = utility.convertDate(odeTimMetadata.getRecordGeneratedAt());
                             sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(recordGeneratedAtDate));
+                                    utility.timestampFormat.format(recordGeneratedAtDate));
                         } else {
                             preparedStatement.setString(fieldNum, null);
                         }
@@ -152,9 +152,9 @@ public class TimController extends BaseController {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
                     } else if (col.equals("ODE_RECEIVED_AT")) {
                         if (odeTimMetadata.getOdeReceivedAt() != null) {
-                            java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());
+                            java.util.Date receivedAtDate = utility.convertDate(odeTimMetadata.getOdeReceivedAt());
                             sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(receivedAtDate));
+                                    utility.timestampFormat.format(receivedAtDate));
                         } else {
                             preparedStatement.setString(fieldNum, null);
                         }

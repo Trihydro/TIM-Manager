@@ -37,6 +37,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     @Mock
     private ResponseEntity<Integer[]> mockResponseEntityIntegerArray;
     @Mock
+    private ResponseEntity<String> mockResponseEntityString;
+    @Mock
     private ResponseEntity<TimUpdateModel[]> mockResponseEntityTimUpdateModelArray;
     @Mock
     private ResponseEntity<ActiveTim> mockResponseEntityActiveTim;
@@ -427,7 +429,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void updateActiveTimExpiration_SUCCESS() {
         // Arrange
         setupBooleanReturn();
-        String packetID= "3C8E8DF2470B1A772E";
+        String packetID = "3C8E8DF2470B1A772E";
         String startDate = "2020-10-14T15:37:26.037Z";
         String expDate = "2020-10-20T16:26:07.000Z";
         HttpEntity<String> entity = getEntity(null, String.class);
@@ -447,7 +449,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void updateActiveTimExpiration_FAIL() {
         // Arrange
         doReturn(false).when(mockResponseEntityBoolean).getBody();
-        String packetID= "3C8E8DF2470B1A772E";
+        String packetID = "3C8E8DF2470B1A772E";
         String startDate = "2020-10-14T15:37:26.037Z";
         String expDate = "2020-10-20T16:26:07.000Z";
         HttpEntity<String> entity = getEntity(null, String.class);
@@ -461,5 +463,25 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
         Assertions.assertFalse(data, "Update succeeded when should have failed");
+    }
+
+    @Test
+    public void getMinExpiration_SUCCESS() {
+        // Arrange
+        String packetID = "3C8E8DF2470B1A772E";
+        String startDate = "2020-10-14T15:37:26.037Z";
+        String expDate = "2020-10-20T16:26:07.000Z";
+        String minDate = "27-OCT-20 06.21.00.000 PM";
+        String url = String.format("%s/active-tim/get-min-expiration/%s/%s/%s", baseUrl, packetID,
+                startDate, expDate);
+                doReturn(minDate).when(mockResponseEntityString).getBody();
+        when(mockRestTemplate.getForEntity(url, String.class)).thenReturn(mockResponseEntityString);
+
+        // Act
+        String data = uut.getMinExpiration(packetID, startDate, expDate);
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, String.class);
+        Assertions.assertEquals(minDate, data);
     }
 }

@@ -248,9 +248,14 @@ public class TimService extends BaseService {
             activeTim.setSatRecordId(metaData.getRequest().getSdw().getRecordId());
 
         // the ODE now parses all dataframes to find the most recent and sets it
-        // to this new OdeTimStartDateTime. We'll take advantage
-        // activeTim.setStartDateTime(dframes[0].getStartDateTime());
-        activeTim.setStartDateTime(metaData.getOdeTimStartDateTime());
+        // to this new OdeTimStartDateTime. We'll take advantage.
+        // Occasionally the OdeTimStartDateTime is null...set to dfames[0] startDateTime
+        // in that case
+        var stDate = metaData.getOdeTimStartDateTime();
+        if (StringUtils.isEmpty(stDate)) {
+            stDate = dframes[0].getStartDateTime();
+        }
+        activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);
 
         ActiveTimHolding ath = null;
@@ -400,9 +405,10 @@ public class TimService extends BaseService {
                             preparedStatement.setString(fieldNum, null);
                     } else if (col.equals("RECORD_GENERATED_AT")) {
                         if (odeTimMetadata.getRecordGeneratedAt() != null) {
-                            java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());
+                            java.util.Date recordGeneratedAtDate = utility
+                                    .convertDate(odeTimMetadata.getRecordGeneratedAt());
                             sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(recordGeneratedAtDate));
+                                    utility.timestampFormat.format(recordGeneratedAtDate));
                         } else {
                             preparedStatement.setString(fieldNum, null);
                         }
@@ -417,9 +423,9 @@ public class TimService extends BaseService {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
                     } else if (col.equals("ODE_RECEIVED_AT")) {
                         if (odeTimMetadata.getOdeReceivedAt() != null) {
-                            java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());
+                            java.util.Date receivedAtDate = utility.convertDate(odeTimMetadata.getOdeReceivedAt());
                             sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(receivedAtDate));
+                                    utility.timestampFormat.format(receivedAtDate));
                         } else {
                             preparedStatement.setString(fieldNum, null);
                         }

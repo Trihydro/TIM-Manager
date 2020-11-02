@@ -11,6 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.Utility;
@@ -37,6 +39,8 @@ public class TestBase<T extends BaseController> {
         protected DbInteractions mockDbInteractions;
         @Mock
         protected Utility mockUtility;
+
+        protected DateFormat timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
         protected T uut;
 

@@ -176,12 +176,21 @@ public class ActiveTimService extends CvDataServiceLibrary {
 	}
 
 	public Boolean updateActiveTimExpiration(String packetID, String startDate, String expDate) {
-		String url = String.format("%s/active-tim/update-expiration/%s/%s/%s", config.getCvRestService(), packetID, startDate, expDate);
+		String url = String.format("%s/active-tim/update-expiration/%s/%s/%s", config.getCvRestService(), packetID,
+				startDate, expDate);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
 				Boolean.class);
+		return response.getBody();
+	}
+
+	public String getMinExpiration(String packetID, String startDate, String expDate) {
+		/// get-min-expiration/{packetID}/{startDate}/{expDate}
+		String url = String.format("%s/active-tim/get-min-expiration/%s/%s/%s", config.getCvRestService(), packetID,
+				startDate, expDate);
+		ResponseEntity<String> response = restTemplateProvider.GetRestTemplate().getForEntity(url, String.class);
 		return response.getBody();
 	}
 }

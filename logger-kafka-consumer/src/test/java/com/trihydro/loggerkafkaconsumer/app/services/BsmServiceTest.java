@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,6 +174,12 @@ public class BsmServiceTest extends TestBase<BsmService> {
         srct.setSecurityResultCodeTypeId(-1);
         srcts.add(srct);
         doReturn(srcts).when(uut).GetSecurityResultCodeTypes();
+
+        var recTime = Instant.parse(metadata.getOdeReceivedAt());
+        java.util.Date recDate = java.util.Date.from(recTime);
+        doReturn(recDate).when(mockUtility).convertDate(metadata.getOdeReceivedAt());
+        mockUtility.timestampFormat = timestampFormat;
+
         // Act
         Long data = uut.addBSMCoreData(metadata, bsm);
 
@@ -212,8 +219,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         verify(mockPreparedStatement).setLong(32, metadata.getSerialId().getBundleId());// SERIAL_ID_BUNDLE_ID
         verify(mockPreparedStatement).setInt(33, metadata.getSerialId().getRecordId());// SERIAL_ID_RECORD_ID
         verify(mockPreparedStatement).setLong(34, metadata.getSerialId().getSerialNumber());// SERIAL_ID_SERIAL_NUMBER
-        java.util.Date receivedAtDate = uut.convertDate(metadata.getOdeReceivedAt());
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 35, uut.mstFormat.format(receivedAtDate));
+        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 35, timestampFormat.format(recDate)); // ODE_RECEIVED_AT
         verify(mockPreparedStatement).setString(36, metadata.getRecordType().toString());// RECORD_TYPE
         verify(mockPreparedStatement).setString(37, metadata.getPayloadType());// PAYLOAD_TYPE
         verify(mockPreparedStatement).setInt(38, metadata.getSchemaVersion());// SCHEMA_VERSION

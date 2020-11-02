@@ -9,12 +9,9 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -81,11 +78,11 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
 			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
 			// where starting less than 2 hours away
-			selectStatement+= " WHERE atim.tim_start <= SYSDATE + INTERVAL '2' HOUR";
+			selectStatement += " WHERE atim.tim_start <= SYSDATE + INTERVAL '2' HOUR";
 			// and expiration_date within 2hrs
-			  selectStatement+= " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '2' HOUR)";
+			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '2' HOUR)";
 			// check that end time isn't within 2hrs
-  			selectStatement+= " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '2' HOUR)";
+			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '2' HOUR)";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -1067,20 +1064,22 @@ public class ActiveTimController extends BaseController {
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
 				else if (col.equals("DIRECTION"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
-				else if (col.equals("TIM_START"))
-					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-							LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
-				else if (col.equals("TIM_END"))
-					if (activeTim.getEndDateTime() != null)
-						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-								LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
-					else
+				else if (col.equals("TIM_START")) {
+					java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
+					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+							utility.timestampFormat.format(tim_start_date));
+				} else if (col.equals("TIM_END")) {
+					if (activeTim.getEndDateTime() != null) {
+						java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
+						sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+								utility.timestampFormat.format(tim_end_date));
+					} else
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
-				else if (col.equals("EXPIRATION_DATE")) {
+				} else if (col.equals("EXPIRATION_DATE")) {
 					if (activeTim.getExpirationDateTime() != null) {
-						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-								java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTim.getExpirationDateTime(),
-										DateTimeFormatter.ISO_DATE_TIME)));
+						java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
+						sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+								utility.timestampFormat.format(tim_exp_date));
 					} else {
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 					}
@@ -1183,10 +1182,10 @@ public class ActiveTimController extends BaseController {
 		return activeTims;
 	}
 
-	private String translateIso8601ToMST(String date) throws ParseException {
+	private String translateIso8601ToTimestampFormat(String date) throws ParseException {
 		DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-		TimeZone toTimeZone = TimeZone.getTimeZone("MST");
-		sdf.setTimeZone(toTimeZone);
+		// TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+		// sdf.setTimeZone(toTimeZone);
 		DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		Date dte = m_ISO8601Local.parse(date);
 		return sdf.format(dte.getTime());
@@ -1201,7 +1200,7 @@ public class ActiveTimController extends BaseController {
 
 		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
 		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-		query += " WHERE TIM.PACKET_ID = '?' AND atim.TIM_START = '?'";
+		query += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
 
 		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
 		updateStatement += query;
@@ -1210,9 +1209,10 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			preparedStatement = connection.prepareStatement(updateStatement);
-			preparedStatement.setObject(1, translateIso8601ToMST(expDate));
+			preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
+													// (GetMinExpiration)
 			preparedStatement.setObject(2, packetID);
-			preparedStatement.setObject(3, translateIso8601ToMST(startDate));
+			preparedStatement.setObject(3, translateIso8601ToTimestampFormat(startDate));
 
 			// execute update statement
 			success = dbInteractions.updateOrDelete(preparedStatement);
@@ -1232,5 +1232,57 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 		return ResponseEntity.ok(success);
+	}
+
+	@RequestMapping(value = "/get-min-expiration/{packetID}/{startDate}/{expDate}")
+	public ResponseEntity<String> GetMinExpiration(@PathVariable String packetID, @PathVariable String startDate,
+			@PathVariable String expDate) throws ParseException {
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		String minStart = "";
+
+		try {
+			// Fetch the minimum of passed in expDate and database held
+			// active_tim.expiration_date. To compare like values we convert the expDate
+			// TO_TIMESTAMP. Without this it compares string length.
+			// Also, there are some null values in the db. To get around these, we use the
+			// coalesce function with the expDate passed in value.
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL",
+					translateIso8601ToTimestampFormat(expDate));
+
+			String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
+			minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+			minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+			minExpDate += " AND atim.TIM_START = '" + translateIso8601ToTimestampFormat(startDate) + "'";
+
+			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
+					selectTimestamp, minExpDate, selectTimestamp);
+			rs = statement.executeQuery(query);
+			while (rs.next()) {
+				minStart = rs.getString("MINSTART");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(minStart);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(minStart);
 	}
 }

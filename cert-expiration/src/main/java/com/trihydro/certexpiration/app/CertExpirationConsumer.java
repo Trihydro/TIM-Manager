@@ -58,8 +58,12 @@ public class CertExpirationConsumer {
 
 					// parse record.value() as CertExpirationModel
 					var cem = gson.fromJson(record.value(), CertExpirationModel.class);
-					var success = ats.updateActiveTimExpiration(cem.getPacketID(), cem.getStartDateTime(),
+					// get min expiration time
+					var minExp = ats.getMinExpiration(cem.getPacketID(), cem.getStartDateTime(),
 							cem.getExpirationDate());
+
+					// use the minExp to update TIM Expiration in db
+					var success = ats.updateActiveTimExpiration(cem.getPacketID(), cem.getStartDateTime(), minExp);
 
 					if (success) {
 						utility.logWithDate("Successfully updated expiration date");

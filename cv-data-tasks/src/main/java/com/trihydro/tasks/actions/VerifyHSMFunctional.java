@@ -56,7 +56,12 @@ public class VerifyHSMFunctional implements Runnable {
             var response = restTemplateProvider.GetRestTemplate().exchange(config.getHsmUrl() + "/signtim/",
                     HttpMethod.POST, entity, HsmResponse.class);
 
+            if (response.getStatusCode() != HttpStatus.OK) {
+                utility.logWithDate("HSM is not responsive! If an email should be sent, it will be shortly.");
+            }
+
             if (response.getStatusCode() == HttpStatus.OK) {
+                utility.logWithDate("HSM is up!");
                 if (errorLastSent != null) {
                     // send an email telling us its back up
                     String email = "HSM Functional Tester was successful in attempting to sign a TIM";

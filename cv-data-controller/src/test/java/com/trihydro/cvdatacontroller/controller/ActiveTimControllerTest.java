@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -816,15 +817,17 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         var packetID = "3C8E8DF2470B1A772E";
         var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
-        var minVal = "27-OCT-20 06.21.00.000000000 PM";
-        doReturn(minVal).when(mockRs).getString("MINSTART");
+        var minVal = "27-Oct-20 06.21.00.000 PM";
+        var ts = Timestamp.valueOf("2020-10-27 18:21:00");
+        doReturn(ts).when(mockRs).getTimestamp("MINSTART");
+        mockUtility.timestampFormat = timestampFormat;
 
         // Act
         ResponseEntity<String> response = uut.GetMinExpiration(packetID, startDate, expDate);
 
         // Assert
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), minVal);
+        Assertions.assertEquals(minVal, response.getBody());
         String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL),";
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
@@ -843,7 +846,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         var packetID = "3C8E8DF2470B1A772E";
         var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
-        doThrow(new SQLException("sql err")).when(mockRs).getString("MINSTART");
+        doThrow(new SQLException("sql err")).when(mockRs).getTimestamp("MINSTART");
 
         // Act
         ResponseEntity<String> response = uut.GetMinExpiration(packetID, startDate, expDate);

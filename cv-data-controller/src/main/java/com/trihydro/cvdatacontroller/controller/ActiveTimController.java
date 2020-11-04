@@ -1262,7 +1262,7 @@ public class ActiveTimController extends BaseController {
 					selectTimestamp, minExpDate, selectTimestamp);
 			rs = statement.executeQuery(query);
 			while (rs.next()) {
-				minStart = rs.getString("MINSTART");
+				minStart = utility.timestampFormat.format(rs.getTimestamp("MINSTART"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

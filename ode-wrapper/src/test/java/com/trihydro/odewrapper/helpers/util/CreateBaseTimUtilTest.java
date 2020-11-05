@@ -45,8 +45,8 @@ public class CreateBaseTimUtilTest {
     private Milepost anchor;
 
     public void setupSuccessfulTest() {
-        doReturn(BigDecimal.valueOf(327)).when(mockBasicConfiguration).getDefaultLaneWidth();
-        doReturn(.4 * 327).when(mockBasicConfiguration).getPathDistanceLimit();
+        doReturn(BigDecimal.valueOf(50)).when(mockBasicConfiguration).getDefaultLaneWidth();
+        doReturn(.4 * 50).when(mockBasicConfiguration).getPathDistanceLimit();
         setupMileposts();
     }
 

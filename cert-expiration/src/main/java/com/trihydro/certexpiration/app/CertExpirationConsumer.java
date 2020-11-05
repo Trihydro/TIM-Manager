@@ -1,7 +1,11 @@
 package com.trihydro.certexpiration.app;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
 
 import com.google.gson.Gson;
 import com.trihydro.certexpiration.config.CertExpirationConfiguration;
@@ -16,6 +20,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,12 +52,23 @@ public class CertExpirationConsumer {
 
 		Gson gson = new Gson();
 		Duration polTime = Duration.ofMillis(100);
+		var holdingQueue = new LinkedList<ConsumerRecord<String, String>>();
 
 		try {
 			while (loopController.loop()) {
-				ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
-				for (ConsumerRecord<String, String> record : records) {
-					utility.logWithDate(String.format("Consumed from expiration topic: %s", record.value()));
+				if (holdingQueue.size() < configProperties.getMaxQueueSize()) {
+					// proceed to poll and add to our holdingQueue
+					ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
+					records.forEach(consumerRecord -> {
+						holdingQueue.add(consumerRecord);
+					});
+				}
+
+				if (holdingQueue.size() > 0 && shouldBeProcessed(holdingQueue.getFirst())) {
+					// we have a record, try to process it
+					var record = holdingQueue.pop();
+					utility.logWithDate(String.format("Processing from expiration topic: %s", record.value()));
+
 					// ok, we have a new record now:
 					// use packetId, and startDateTime to locate a unique record
 					// update expiration value
@@ -79,6 +96,15 @@ public class CertExpirationConsumer {
 								configProperties.getMailPort(), configProperties.getMailHost(),
 								configProperties.getFromEmail());
 					}
+
+					var offsets = Collections.singletonMap(
+							new TopicPartition(configProperties.getDepositTopic(), record.partition()),
+							new OffsetAndMetadata(record.offset()));
+					stringConsumer.commitAsync(offsets, (offset, exception) -> {
+						utility.logWithDate(
+								String.format("CertExpiration consumer commit callback, offset: %s, exception %s%n",
+										offset, exception));
+					});
 				}
 			}
 		} catch (Exception ex) {
@@ -104,5 +130,12 @@ public class CertExpirationConsumer {
 				consumerEx.printStackTrace();
 			}
 		}
+	}
+
+	private boolean shouldBeProcessed(ConsumerRecord<String, String> record) {
+		// compare the record.timeStamp + configProperties.getWaitTime to current time
+		var date = new Date();
+		var ts = new Timestamp(date.getTime());
+		return record.timestamp() + configProperties.getProcessWaitTime() < ts.getTime();
 	}
 }

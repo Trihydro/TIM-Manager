@@ -18,6 +18,9 @@ public class CertExpirationConfiguration implements CVRestServiceProps {
     private String depositGroup;
     private String cvRestService;
 
+    private int maxQueueSize;
+    private long processWaitTime;
+
     public String getFromEmail() {
         return fromEmail;
     }
@@ -80,5 +83,21 @@ public class CertExpirationConfiguration implements CVRestServiceProps {
 
     public void setDepositTopic(String depositTopic) {
         this.depositTopic = depositTopic;
+    }
+
+    public int getMaxQueueSize() {
+        return maxQueueSize;
+    }
+
+    public void setMaxQueueSize(int maxQueueSize) {
+        this.maxQueueSize = maxQueueSize;
+    }
+
+    public long getProcessWaitTime() {
+        return processWaitTime;
+    }
+
+    private void setProcessWaitTime(long processWaitTime) {
+        this.processWaitTime = processWaitTime;
     }
 }

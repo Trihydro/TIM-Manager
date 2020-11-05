@@ -476,6 +476,8 @@ services:
       DEPOSIT_TOPIC: ${EXP_TOPIC}
       DEPOSIT_GROUP: ${EXP_GROUP}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      MAX_QUEUE_SIZE: ${EXP_MAX_QUEUE_SIZE}
+      PROCESS_WAIT_TIME: ${EXP_PROCESS_WAIT_TIME}
     logging:
       options:
         max-size: "20m"

@@ -1231,6 +1231,9 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
+		utility.logWithDate(
+				String.format("Called UpdateExpiration with packetID: %s, startDate: %s, expDate: %s. Successful: %s",
+						packetID, startDate, expDate, success));
 		return ResponseEntity.ok(success);
 	}
 
@@ -1282,7 +1285,9 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-
+		utility.logWithDate(
+				String.format("Called GetMinExpiration with packetID: %s, startDate: %s, expDate: %s. Min start date: %s",
+						packetID, startDate, expDate, minStart));
 		return ResponseEntity.ok(minStart);
 	}
 }

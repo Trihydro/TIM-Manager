@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 
@@ -23,8 +24,10 @@ import com.trihydro.library.service.ActiveTimService;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.MockConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.record.TimestampType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +45,12 @@ public class CertExpirationConsumerTest {
     private static final String STARTDATE = "2020-10-14T15:37:26.037Z";
     private static final String EXPDATE = "2020-10-20T16:26:07.000Z";
     private static final String MINEXP = "27-OCT-20 06.21.00.000 PM";
+    private static final long TIMESTAMP = System.currentTimeMillis() - 5000;// 5 seconds ago
+    private static final long CHECKSUM = -1l;
+    private static final int KEYSIZE = -1;
+    private static final int VALUESIZE = 32;
+    private static final String CERTTOPIC = "certTopic";
+    private static final int OFFSET = 0;
 
     @Mock
     private CertExpirationConfiguration mockConfigProperties;
@@ -57,6 +66,7 @@ public class CertExpirationConsumerTest {
     private KafkaConsumerFactory mockKafkaConsumerFactory;
 
     private MockConsumer<String, String> mockConsumer;
+    private Map<TopicPartition, OffsetAndMetadata> offset;
 
     @InjectMocks
     private CertExpirationConsumer uut;
@@ -64,17 +74,16 @@ public class CertExpirationConsumerTest {
     @BeforeEach
     public void setUp() throws Exception {
         // init mockConsumer, setup a poll
+        var record = new ConsumerRecord<>(TOPIC, PARTITION, OFFSET, TIMESTAMP, TimestampType.NO_TIMESTAMP_TYPE,
+                CHECKSUM, KEYSIZE, VALUESIZE, "Key", EXPRECORD);
         mockConsumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
         mockConsumer.schedulePollTask(() -> {
             mockConsumer.subscribe(Collections.singleton(TOPIC));
             mockConsumer.rebalance(Collections.singletonList(new TopicPartition(TOPIC, PARTITION)));
-            // if (!badRecord) {
-            mockConsumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, 0, "Key", EXPRECORD));
-            // } else {
-            // mockConsumer.addRecord(new ConsumerRecord<>(TOPIC, PARTITION, 0, "Key",
-            // "asdf"));
-            // }
+            mockConsumer.addRecord(record);
         });
+
+        doReturn(100).when(mockConfigProperties).getMaxQueueSize();
 
         // set offset start
         HashMap<TopicPartition, Long> startOffsets = new HashMap<>();
@@ -87,6 +96,8 @@ public class CertExpirationConsumerTest {
 
         // loop controller returns true, then false to kick out
         when(mockLoopController.loop()).thenReturn(true).thenReturn(false);
+
+        offset = Collections.singletonMap(new TopicPartition(CERTTOPIC, PARTITION), new OffsetAndMetadata(OFFSET));
     }
 
     @Test
@@ -94,6 +105,7 @@ public class CertExpirationConsumerTest {
         // Arrange
         doReturn(true).when(mockAts).updateActiveTimExpiration(any(), any(), any());
         doReturn(MINEXP).when(mockAts).getMinExpiration(any(), any(), any());
+        doReturn(CERTTOPIC).when(mockConfigProperties).getDepositTopic();
 
         // Act
         uut.startKafkaConsumer();
@@ -102,8 +114,11 @@ public class CertExpirationConsumerTest {
         verify(mockAts).getMinExpiration(PACKETID, STARTDATE, EXPDATE);
         verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, MINEXP);
         verify(mockUtility).logWithDate("starting..............");
-        verify(mockUtility).logWithDate(String.format("Consumed from expiration topic: %s", EXPRECORD));
+        verify(mockUtility).logWithDate(String.format("Processing from expiration topic: %s", EXPRECORD));
         verify(mockUtility).logWithDate("Successfully updated expiration date");
+
+        verify(mockUtility).logWithDate(
+                String.format("CertExpiration consumer commit callback, offset: %s, exception %s%n", offset, null));
         verifyNoMoreInteractions(mockUtility);
         verifyNoMoreInteractions(mockAts);
         Assertions.assertTrue(mockConsumer.closed());
@@ -114,6 +129,7 @@ public class CertExpirationConsumerTest {
         // Arrange
         doReturn(false).when(mockAts).updateActiveTimExpiration(any(), any(), any());
         doReturn(MINEXP).when(mockAts).getMinExpiration(any(), any(), any());
+        doReturn(CERTTOPIC).when(mockConfigProperties).getDepositTopic();
 
         // Act
         uut.startKafkaConsumer();
@@ -122,7 +138,7 @@ public class CertExpirationConsumerTest {
         verify(mockAts).getMinExpiration(PACKETID, STARTDATE, EXPDATE);
         verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, MINEXP);
         verify(mockUtility).logWithDate("starting..............");
-        verify(mockUtility).logWithDate(String.format("Consumed from expiration topic: %s", EXPRECORD));
+        verify(mockUtility).logWithDate(String.format("Processing from expiration topic: %s", EXPRECORD));
         verify(mockUtility).logWithDate(String.format("Failed to update expiration for data: %s", EXPRECORD));
 
         String body = "The CertExpirationConsumer failed attempting to update an ActiveTim record";
@@ -132,6 +148,9 @@ public class CertExpirationConsumerTest {
         verify(mockEmailHelper).SendEmail(mockConfigProperties.getAlertAddresses(), null,
                 "CertExpirationConsumer Failed To Update ActiveTim", body, mockConfigProperties.getMailPort(),
                 mockConfigProperties.getMailHost(), mockConfigProperties.getFromEmail());
+
+        verify(mockUtility).logWithDate(
+                String.format("CertExpiration consumer commit callback, offset: %s, exception %s%n", offset, null));
 
         verifyNoMoreInteractions(mockUtility);
         verifyNoMoreInteractions(mockAts);
@@ -150,7 +169,7 @@ public class CertExpirationConsumerTest {
 
         // Assert
         verify(mockUtility).logWithDate("starting..............");
-        verify(mockUtility).logWithDate(String.format("Consumed from expiration topic: %s", EXPRECORD));
+        verify(mockUtility).logWithDate(String.format("Processing from expiration topic: %s", EXPRECORD));
         verify(mockAts).getMinExpiration(PACKETID, STARTDATE, EXPDATE);
         verify(mockAts).updateActiveTimExpiration(PACKETID, STARTDATE, MINEXP);
 
@@ -182,7 +201,7 @@ public class CertExpirationConsumerTest {
 
         // Assert
         verify(mockUtility).logWithDate("starting..............");
-        verify(mockUtility).logWithDate(String.format("Consumed from expiration topic: %s", EXPRECORD));
+        verify(mockUtility).logWithDate(String.format("Processing from expiration topic: %s", EXPRECORD));
 
         verify(mockUtility).logWithDate(exMessage);
         String body = "The CertExpirationConsumer failed attempting to consume records";

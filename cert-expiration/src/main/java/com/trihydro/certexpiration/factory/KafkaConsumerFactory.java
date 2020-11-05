@@ -29,7 +29,8 @@ public class KafkaConsumerFactory {
         Properties consumerProps = new Properties();
         consumerProps.put("bootstrap.servers", endpoint);
         consumerProps.put("group.id", configProperties.getDepositGroup());
-        consumerProps.put("auto.commit.interval.ms", "1000");
+        // turn off auto commit, so we can handle the race condition
+        consumerProps.put("enable.auto.commit", "false");
         consumerProps.put("session.timeout.ms", "30000");
         consumerProps.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumerProps.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");

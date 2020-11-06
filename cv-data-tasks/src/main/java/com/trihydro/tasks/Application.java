@@ -97,8 +97,10 @@ public class Application {
                                 TimeUnit.MINUTES);
 
                 // HSM Check
-                scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0, config.getHsmFunctionalityMinutes(),
-                                TimeUnit.MINUTES);
+                if (config.getRunHSMCheck()) {
+                        scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
+                                        config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
+                }
 
                 // RSU Validator
                 // Since we're validating Active Tims from both environments in the same task,

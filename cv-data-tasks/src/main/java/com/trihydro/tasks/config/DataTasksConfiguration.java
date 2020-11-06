@@ -43,6 +43,7 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private int hsmFunctionalityMinutes = 1;// run once a minute by default
     private String hsmUrl = "http://10.145.9.74:55443/tmc";
     private int hsmErrorEmailFrequencyMinutes = 10;// send an email every 10 minutes the system is down
+    private boolean runHsmCheck;
 
     public String getCvRestService() {
         return cvRestService;
@@ -286,5 +287,13 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setHsmErrorEmailFrequencyMinutes(int hsmErrorEmailFrequencyMinutes){
         this.hsmErrorEmailFrequencyMinutes = hsmErrorEmailFrequencyMinutes;
+    }
+
+    public boolean getRunHSMCheck(){
+        return runHsmCheck;
+    }
+
+    public void setRunHSMCheck(boolean runHsmCheck){
+        this.runHsmCheck = runHsmCheck;
     }
 }

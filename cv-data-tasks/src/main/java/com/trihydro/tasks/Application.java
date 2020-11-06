@@ -55,12 +55,14 @@ public class Application {
         private ValidateTmdd tmddValidator;
         private VerifyHSMFunctional hsmFunctional;
         RetentionPolicyEnforcement retentionEnforcement;
+        private Utility utility;
 
         @Autowired
         public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
                         CleanupActiveTims _cleanupActiveTims, CleanupBsms _cleanupBsms, ValidateSdx _sdxValidator,
                         ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
-                        RetentionPolicyEnforcement _retentionEnforcement, VerifyHSMFunctional _hsmFunctional) {
+                        RetentionPolicyEnforcement _retentionEnforcement, VerifyHSMFunctional _hsmFunctional,
+                        Utility _utility) {
                 config = _config;
                 removeExpiredActiveTims = _removeExpiredActiveTims;
                 cleanupActiveTims = _cleanupActiveTims;
@@ -70,6 +72,7 @@ public class Application {
                 tmddValidator = _tmddValidator;
                 retentionEnforcement = _retentionEnforcement;
                 hsmFunctional = _hsmFunctional;
+                utility = _utility;
         }
 
         public static void main(String[] args) {
@@ -97,9 +100,12 @@ public class Application {
                                 TimeUnit.MINUTES);
 
                 // HSM Check
-                if (config.getRunHSMCheck()) {
+                if (config.getRunHsmCheck()) {
+                        utility.logWithDate("HSM check configured, scheduling...");
                         scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
                                         config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
+                } else {
+                        utility.logWithDate("HSM check not configured, skipping...");
                 }
 
                 // RSU Validator

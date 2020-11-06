@@ -289,11 +289,11 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.hsmErrorEmailFrequencyMinutes = hsmErrorEmailFrequencyMinutes;
     }
 
-    public boolean getRunHSMCheck(){
+    public boolean getRunHsmCheck(){
         return runHsmCheck;
     }
 
-    public void setRunHSMCheck(boolean runHsmCheck){
+    public void setRunHsmCheck(boolean runHsmCheck){
         this.runHsmCheck = runHsmCheck;
     }
 }

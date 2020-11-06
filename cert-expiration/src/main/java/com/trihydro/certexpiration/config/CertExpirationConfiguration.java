@@ -97,7 +97,7 @@ public class CertExpirationConfiguration implements CVRestServiceProps {
         return processWaitTime;
     }
 
-    private void setProcessWaitTime(long processWaitTime) {
+    public void setProcessWaitTime(long processWaitTime) {
         this.processWaitTime = processWaitTime;
     }
 }

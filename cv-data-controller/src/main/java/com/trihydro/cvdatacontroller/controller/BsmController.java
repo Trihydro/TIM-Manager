@@ -22,7 +22,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @ApiIgnore
 public class BsmController extends BaseController {
 
-    @RequestMapping(value = "/delete-old", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/delete-old/{retentionDays}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<Boolean> deleteOldBsm(@PathVariable Integer retentionDays) {
         // delete all bsm_part2_spve, bsm_part2_suve, bsm_part2_vse, bsm_core_data
         // over retentionDays days old

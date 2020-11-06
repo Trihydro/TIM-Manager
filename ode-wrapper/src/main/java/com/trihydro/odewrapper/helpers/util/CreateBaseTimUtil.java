@@ -106,7 +106,7 @@ public class CreateBaseTimUtil {
         region.setName("Temp");
         region.setRegulatorID(0);
 
-        region.setLaneWidth(config.getDefaultLaneWidth());// new BigDecimal(327));
+        region.setLaneWidth(config.getDefaultLaneWidth());
         region.setDirectionality("3");
         region.setClosedPath(false);
 

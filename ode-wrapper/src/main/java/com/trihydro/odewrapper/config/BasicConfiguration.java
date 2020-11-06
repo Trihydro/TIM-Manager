@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("config")
 public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps {
-    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(327);
+    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);
     private String cvRestService;
     private String[] rsuRoutes;
     private Integer httpLoggingMaxSize;

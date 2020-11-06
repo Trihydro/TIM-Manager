@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 public class MilepostReductionTest {
 
     private MilepostReduction uut = new MilepostReduction();
+    private int defaultLaneWidth = 50;
 
     @Test
     public void applyMilepostReductionAlorithm_SUCCESS() {
@@ -19,7 +20,7 @@ public class MilepostReductionTest {
         List<Milepost> mps = getMileposts();
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertTrue(mps.size() > reduced.size());
@@ -31,7 +32,7 @@ public class MilepostReductionTest {
         List<Milepost> mps = getMpVsl();
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertTrue(mps.size() > reduced.size());
@@ -42,7 +43,7 @@ public class MilepostReductionTest {
         // Arrange
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(null, Double.valueOf(327 / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(null, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertNull(reduced);
@@ -54,7 +55,7 @@ public class MilepostReductionTest {
         List<Milepost> mps = new ArrayList<>();
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(327 / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertEquals(0, reduced.size());

@@ -65,7 +65,7 @@ public class CleanupBsmsTest {
 
         // Assert
         verify(mockUtility).logWithDate("Running...", CleanupBsms.class);
-        verify(mockUtility).logWithDate("Failed to remove old BSM data");
+        verify(mockUtility).logWithDate("Either no old BSM data was found to remove, or the data failed to delete. Exceptions are logged separately.");
     }
 
     @Test

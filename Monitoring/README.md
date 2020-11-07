@@ -59,3 +59,35 @@ The system is deployed using docker/docker compose and the configuraton files fo
 - [docker_exporter](https://github.com/prometheus-net/docker_exporter)
 - [Grafana](https://grafana.com/)
 - [Alert Manager](https://github.com/prometheus/alertmanager)
+
+## Additional Configurations
+### CentOS
+When setting up the new CentOS machine, we ran into irregularities compared with the previous setups. Mainly this deals with the node exporter module. In order for this module to work properly on the CentOS machine, the following configuration changes were neccessary:
+ - docker-compose file, addition of `path.rootfs` variable
+   ```
+   node-exporter:
+    image: prom/node-exporter
+    restart: always
+    ports:
+      - 9100:9100
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+
+   ```
+ - `*.rules` file mountpoint adjustment to reflect docker-compose change:
+    ```
+     - alert: high_storage_load
+    expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/var/lib/docker"}/node_filesystem_size_bytes{mountpoint="/var/lib/docker"}) * 100) > 75
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Server storage is almost full on machine 10.145.9.101"
+      description: "Docker host storage usage is {{ humanize $value}}%. Reported by instance {{ $labels.instance }} of job {{ $labels.job }}."
+    ```

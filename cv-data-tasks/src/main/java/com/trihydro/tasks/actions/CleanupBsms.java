@@ -33,7 +33,7 @@ public class CleanupBsms implements Runnable {
             if (success) {
                 utility.logWithDate("Successfully removed old BSM data");
             } else {
-                utility.logWithDate("Failed to remove old BSM data");
+                utility.logWithDate("Either no old BSM data was found to remove, or the data failed to delete. Exceptions are logged separately.");
             }
         } catch (Exception e) {
             utility.logWithDate("Exception during BSM cleanup: " + e.getMessage());

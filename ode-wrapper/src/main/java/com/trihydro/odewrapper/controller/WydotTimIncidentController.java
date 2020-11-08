@@ -130,8 +130,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         new Thread(new Runnable() {
             public void run() {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-
+                var startTime = getStartTime();
                 for (WydotTimIncident wydotTim : wydotTims) {
                     // set route
                     wydotTim.setRoute(wydotTim.getHighway());

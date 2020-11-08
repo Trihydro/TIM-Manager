@@ -92,7 +92,7 @@ public class WydotTimCcController extends WydotTimBaseController {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
+                var startTime = getStartTime();
                 for (WydotTim tim : wydotTims) {
                     processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
                             TravelerInfoType.advisory);

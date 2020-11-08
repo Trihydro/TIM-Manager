@@ -99,6 +99,7 @@ public class LoggerKafkaConsumer {
                         switch (tdw.getTopic()) {
                             case "topic.OdeTimJson":
                                 odeData = timDataConverter.processTimJson(tdw.getData());
+                                utility.logWithDate(String.format("Parsed TIM: %s", gson.toJson(odeData)));
                                 if (odeData != null) {
                                     if (odeData.getMetadata()
                                             .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {

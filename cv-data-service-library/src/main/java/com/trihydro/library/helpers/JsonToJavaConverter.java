@@ -183,11 +183,11 @@ public class JsonToJavaConverter {
             int rsuIndex;
             if (rsusNode == null) {
                 odeTimMetadata = mapper.treeToValue(metaDataNode, OdeRequestMsgMetadata.class);
-                return odeTimMetadata;
             } else {
                 odeTimMetadata = new OdeRequestMsgMetadata();
                 ServiceRequest serviceRequest = new ServiceRequest();
 
+                var timStartDateTime = metaDataNode.get("odeTimStartDateTime").asText();
                 RSU rsuTemp = new RSU();
                 rsuTarget = rsusNode.get("rsus").get("rsuTarget").asText();
                 rsuIndex = rsusNode.get("rsus").get("rsuIndex").asInt();
@@ -216,6 +216,7 @@ public class JsonToJavaConverter {
                 odeTimMetadata.setSanitized(metaDataNode.get("sanitized").asBoolean());
                 odeTimMetadata.setRecordGeneratedAt(metaDataNode.get("recordGeneratedAt").asText());
                 odeTimMetadata.setOdeReceivedAt(metaDataNode.get("odeReceivedAt").asText());
+                odeTimMetadata.setOdeTimStartDateTime(timStartDateTime);
             }
 
         } catch (IOException e) {
@@ -224,7 +225,6 @@ public class JsonToJavaConverter {
         } catch (NullPointerException e) {
             System.out.println(e.getMessage());
         }
-
         return odeTimMetadata;
     }
 

@@ -254,6 +254,7 @@ public class TimService extends BaseService {
         var stDate = metaData.getOdeTimStartDateTime();
         if (StringUtils.isEmpty(stDate)) {
             stDate = dframes[0].getStartDateTime();
+            utility.logWithDate(String.format("addActiveTimToOracleDB did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
         }
         activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);

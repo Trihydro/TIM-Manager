@@ -133,7 +133,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public void processRequestAsync(List<WydotTimParking> wydotTims) {
         new Thread(new Runnable() {
             public void run() {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
+                var startTime = getStartTime();
                 for (WydotTimParking wydotTim : wydotTims) {
                     processRequest(wydotTim, getTimType(type), startTime, null, null, ContentEnum.exitService,
                             TravelerInfoType.advisory);

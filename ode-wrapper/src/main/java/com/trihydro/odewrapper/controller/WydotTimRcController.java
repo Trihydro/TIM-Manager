@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
@@ -127,7 +128,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
+                var startTime = getStartTime();
                 for (WydotTim tim : wydotTims) {
                     processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
                             TravelerInfoType.advisory);

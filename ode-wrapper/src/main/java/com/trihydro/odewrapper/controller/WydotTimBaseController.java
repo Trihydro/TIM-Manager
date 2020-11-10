@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.google.gson.Gson;
 import com.trihydro.library.model.ContentEnum;
@@ -58,6 +59,14 @@ public abstract class WydotTimBaseController {
         setItisCodes = _setItisCodes;
         activeTimService = _activeTimService;
         restTemplateProvider = _restTemplateProvider;
+    }
+
+    protected String getStartTime() {
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String startTime = sdf.format(date);
+        return startTime;
     }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {

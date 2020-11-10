@@ -63,8 +63,7 @@ public abstract class WydotTimBaseController {
 
     protected String getStartTime() {
         Date date = new Date();
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String startTime = sdf.format(date);
         return startTime;

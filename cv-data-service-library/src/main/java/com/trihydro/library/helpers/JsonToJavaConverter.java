@@ -187,7 +187,10 @@ public class JsonToJavaConverter {
                 odeTimMetadata = new OdeRequestMsgMetadata();
                 ServiceRequest serviceRequest = new ServiceRequest();
 
-                var timStartDateTime = metaDataNode.get("odeTimStartDateTime").asText();
+                String timStartDateTime = "";
+                if (metaDataNode.get("odeTimStartDateTime") != null) {
+                    timStartDateTime = metaDataNode.get("odeTimStartDateTime").asText();
+                }
                 RSU rsuTemp = new RSU();
                 rsuTarget = rsusNode.get("rsus").get("rsuTarget").asText();
                 rsuIndex = rsusNode.get("rsus").get("rsuIndex").asInt();

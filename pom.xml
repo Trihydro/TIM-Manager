@@ -1,109 +1,103 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-      
+
   <modelVersion>4.0.0</modelVersion>
-      
-  <parent>            
-    <groupId>org.springframework.boot</groupId>            
-    <artifactId>spring-boot-starter-parent</artifactId>            
-    <version>2.2.4.RELEASE</version>            
-    <relativePath/>             
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.2.4.RELEASE</version>
+    <relativePath />
   </parent>
-      
-  <groupId>com.wyocv</groupId>      
-  <artifactId>wyo-cv</artifactId>      
-  <version>0.0.1-SNAPSHOT</version>      
+
+  <groupId>com.wyocv</groupId>
+  <artifactId>wyo-cv</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-      
-  <properties>      
-    <junit.jupiter.version>5.6.2</junit.jupiter.version>        
+
+  <properties>
+    <junit.jupiter.version>5.6.2</junit.jupiter.version>
   </properties>
-      
-  <modules>            
-    <module>cv-data-service-library</module>            
-    <module>cv-data-controller</module>            
+
+  <modules>
+    <module>cv-data-service-library</module>
+    <module>cv-data-controller</module>
     <module>rsu-data-controller</module>
-    <module>ode-data-logger</module>            
-    <module>ode-mongo-logger</module>            
-    <module>ode-wrapper</module>            
-    <module>cv-data-tasks</module>            
-    <module>tim-refresh</module>            
-    <module>logger-kafka-consumer</module>        
-    <module>cert-expiration</module>      
+    <module>ode-data-logger</module>
+    <module>ode-mongo-logger</module>
+    <module>ode-wrapper</module>
+    <module>cv-data-tasks</module>
+    <module>tim-refresh</module>
+    <module>logger-kafka-consumer</module>
+    <module>cert-expiration</module>
   </modules>
-      
-  <dependencies>            
-    <dependency>                  
-      <groupId>com.google.code.gson</groupId>  
-      <artifactId>gson</artifactId>                  
-      <version>2.8.1</version>              
-    </dependency>            
-    <dependency>                  
-      <groupId>us.dot.jpo.ode</groupId>                  
-      <artifactId>jpo-ode-core</artifactId>                  
-      <version>1.2.0</version>              
-    </dependency>            
-    <dependency>                  
-      <groupId>us.dot.jpo.ode</groupId>                  
-      <artifactId>jpo-ode-plugins</artifactId>                  
-      <version>1.2.0</version>              
-    </dependency>            
-    <dependency>                  
-      <groupId>us.dot.jpo.ode</groupId>                  
-      <artifactId>jpo-ode-common</artifactId>                  
-      <version>1.2.0</version>              
-    </dependency>            
-    <dependency>                  
-      <groupId>us.dot.jpo.ode</groupId>                  
-      <artifactId>jpo-ode-svcs</artifactId>                  
-      <version>1.2.0</version>              
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.1</version>
     </dependency>
-    <dependency>                  
-      <groupId>com.oracle</groupId>                  
-      <artifactId>ojdbc8</artifactId>                  
-      <version>12.2.0.1.0</version>              
-    </dependency>            
-    <dependency>                  
-      <groupId>com.h2database</groupId>                  
-      <artifactId>h2</artifactId>                  
-      <version>1.4.194</version>                  
-      <scope>test</scope>              
-    </dependency>            
-    <dependency>                  
-      <groupId>com.oracle</groupId>                  
-      <artifactId>ucp</artifactId>                  
-      <version>12.2.0.1.0</version>              
-    </dependency>     
-    <dependency>                  
-      <groupId>com.zaxxer</groupId>                  
-      <artifactId>HikariCP</artifactId>                  
-      <version>3.4.5</version>              
-    </dependency>     
-    <dependency>                  
-      <groupId>org.junit.vintage</groupId>                  
-      <artifactId>junit-vintage-engine</artifactId>                  
-      <version>${junit.jupiter.version}</version>                  
-      <scope>test</scope>              
-    </dependency>        
+    <dependency>
+      <groupId>us.dot.jpo.ode</groupId>
+      <artifactId>jpo-ode-core</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>us.dot.jpo.ode</groupId>
+      <artifactId>jpo-ode-plugins</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>us.dot.jpo.ode</groupId>
+      <artifactId>jpo-ode-common</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>us.dot.jpo.ode</groupId>
+      <artifactId>jpo-ode-svcs</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>ojdbc8</artifactId>
+      <version>12.2.0.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.194</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>ucp</artifactId>
+      <version>12.2.0.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>3.4.5</version>
+    </dependency>
   </dependencies>
-    
-  <build>            
-    <plugins>                  
-      <plugin>                        
-        <artifactId>maven-compiler-plugin</artifactId>                        
-        <version>3.8.0</version>                        
-        <configuration>                              
-          <release>11</release>                          
-        </configuration>                    
-      </plugin>                  
-      <plugin>                        
-        <artifactId>maven-surefire-plugin</artifactId>                        
-        <version>2.22.2</version>                    
-      </plugin>                  
-      <plugin>                        
-        <artifactId>maven-failsafe-plugin</artifactId>                        
-        <version>2.22.2</version>                    
-      </plugin>              
-    </plugins>        
-  </build>  
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <release>11</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.2</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>

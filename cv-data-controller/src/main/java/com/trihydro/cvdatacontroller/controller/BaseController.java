@@ -18,7 +18,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class BaseController {
     protected Utility utility;
     protected DbInteractions dbInteractions;
-
+    
     @Autowired
     public void InjectBaseDependencies(DbInteractions _dbInteractions, Utility _utility) {
         dbInteractions = _dbInteractions;

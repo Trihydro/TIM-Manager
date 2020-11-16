@@ -819,7 +819,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         var expDate = "2020-10-20T16:26:07.000Z";
         var minVal = "27-Oct-20 06.21.00.000 PM";
         var ts = Timestamp.valueOf("2020-10-27 18:21:00");
-        doReturn(ts).when(mockRs).getTimestamp("MINSTART");
+        doReturn(ts).when(mockRs).getTimestamp("MINSTART", uut.UTCCalendar);
         mockUtility.timestampFormat = timestampFormat;
 
         // Act
@@ -846,7 +846,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         var packetID = "3C8E8DF2470B1A772E";
         var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
-        doThrow(new SQLException("sql err")).when(mockRs).getTimestamp("MINSTART");
+        doThrow(new SQLException("sql err")).when(mockRs).getTimestamp("MINSTART", uut.UTCCalendar);
 
         // Act
         ResponseEntity<String> response = uut.GetMinExpiration(packetID, startDate, expDate);

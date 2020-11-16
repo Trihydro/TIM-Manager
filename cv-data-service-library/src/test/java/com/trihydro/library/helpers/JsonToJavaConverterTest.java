@@ -167,8 +167,6 @@ public class JsonToJavaConverterTest {
                 Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
                 Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
-                // assertEquals(odeTimPayload.getTim().getTimeStamp(),
-                // odeTimPayloadTest.getTim().getTimeStamp());
 
                 Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
                 Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
@@ -281,8 +279,6 @@ public class JsonToJavaConverterTest {
                 Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
                                 odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
                 Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
-                // assertEquals(odeTimPayload.getTim().getTimeStamp(),
-                // odeTimPayloadTest.getTim().getTimeStamp());
 
                 Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
                 Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());

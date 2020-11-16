@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -19,12 +18,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class BaseController {
     protected Utility utility;
     protected DbInteractions dbInteractions;
-    protected Calendar UTCCalendar;
-
-    public BaseController() {
-        UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-    }
-
+    
     @Autowired
     public void InjectBaseDependencies(DbInteractions _dbInteractions, Utility _utility) {
         dbInteractions = _dbInteractions;

@@ -10,8 +10,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -45,6 +47,11 @@ public class ActiveTimController extends BaseController {
 
 	private TimOracleTables timOracleTables;
 	private SQLNullHandler sqlNullHandler;
+	protected Calendar UTCCalendar;
+
+	public ActiveTimController() {
+		UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+	}
 
 	@Autowired
 	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
@@ -117,8 +124,8 @@ public class ActiveTimController extends BaseController {
 				}
 				activeTim.setEndPoint(endPoint);
 
-				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START"));
-				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END"));
+				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START", UTCCalendar));
+				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END", UTCCalendar));
 
 				// Tim properties
 				activeTim.setMsgCnt(rs.getInt("MSG_CNT"));
@@ -1265,7 +1272,8 @@ public class ActiveTimController extends BaseController {
 					selectTimestamp, minExpDate, selectTimestamp);
 			rs = statement.executeQuery(query);
 			while (rs.next()) {
-				minStart = utility.timestampFormat.format(rs.getTimestamp("MINSTART"));
+				var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);
+				minStart = utility.timestampFormat.format(tmpTs);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1285,9 +1293,9 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		utility.logWithDate(
-				String.format("Called GetMinExpiration with packetID: %s, startDate: %s, expDate: %s. Min start date: %s",
-						packetID, startDate, expDate, minStart));
+		utility.logWithDate(String.format(
+				"Called GetMinExpiration with packetID: %s, startDate: %s, expDate: %s. Min start date: %s", packetID,
+				startDate, expDate, minStart));
 		return ResponseEntity.ok(minStart);
 	}
 }

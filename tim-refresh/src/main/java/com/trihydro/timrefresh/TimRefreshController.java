@@ -8,10 +8,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
 import com.google.gson.Gson;
 import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
@@ -38,6 +41,7 @@ import com.trihydro.timrefresh.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -65,6 +69,7 @@ public class TimRefreshController {
     protected TimRefreshConfiguration configuration;
     private SdwService sdwService;
     private Utility utility;
+    private EmailHelper emailHelper;
     private OdeService odeService;
     private MilepostService milepostService;
     private ActiveTimHoldingService activeTimHoldingService;
@@ -81,7 +86,7 @@ public class TimRefreshController {
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, DataFrameService _dataFrameService,
             PathNodeXYService _pathNodeXYService, RegionService _regionService, RsuService _rsuService,
-            WydotTimService _WydotTimService, MilepostReduction _milepostReduction) {
+            WydotTimService _WydotTimService, MilepostReduction _milepostReduction, EmailHelper _emailHelper) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -95,6 +100,7 @@ public class TimRefreshController {
         rsuService = _rsuService;
         wydotTimService = _WydotTimService;
         milepostReduction = _milepostReduction;
+        emailHelper = _emailHelper;
     }
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
@@ -112,6 +118,23 @@ public class TimRefreshController {
 
             if (aTim.getLaneWidth() == null) {
                 aTim.setLaneWidth(configuration.getDefaultLaneWidth());
+            }
+
+            // Validation
+
+            if (!isValidTim(aTim)) {
+                String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
+                body += "<br/>";
+                body += "The associated ActiveTim record is: <br/>";
+                body += gson.toJson(aTim);
+                try {
+                    emailHelper.SendEmail(configuration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+                            configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
+                } catch (Exception e) {
+                    utility.logWithDate("Exception attempting to send email for invalid TIM:");
+                    e.printStackTrace();
+                }
+                continue;
             }
 
             // Mileposts
@@ -163,6 +186,24 @@ public class TimRefreshController {
                         + " not sent to SDX (no SAT_RECORD_ID found in database)");
             }
         }
+    }
+
+    private boolean isValidTim(TimUpdateModel tum) {
+
+        // start point
+        var stPt = tum.getStartPoint();
+        if (stPt == null || stPt.getLatitude() == null || stPt.getLongitude() == null)
+            return false;
+
+        // direction
+        if (tum.getDirection() == null || tum.getDirection().isEmpty())
+            return false;
+
+        // route
+        if (tum.getRoute() == null || tum.getRoute().isEmpty())
+            return false;
+
+        return true;
     }
 
     private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {

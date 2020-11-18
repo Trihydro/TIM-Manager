@@ -2,6 +2,7 @@ package com.trihydro.timrefresh.config;
 
 import java.math.BigDecimal;
 
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CVRestServiceProps;
@@ -27,7 +28,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 @ConfigurationProperties("config")
 @Import({ ActiveTimHoldingService.class, ActiveTimService.class, DataFrameService.class, MilepostService.class,
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
-        Utility.class, RestTemplateProvider.class, MilepostReduction.class })
+        Utility.class, RestTemplateProvider.class, MilepostReduction.class, EmailHelper.class })
 public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
 
     private TimeToLive sdwTtl;
@@ -39,6 +40,12 @@ public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
     private String sdwApiKey;
     private Double pointIncidentBufferMiles;
 
+    private String mailHost;
+    private int mailPort;
+
+    private String[] alertAddresses;
+    private String fromEmail;
+
     /**
      * Returns the defaultLaneWidth / 2
      * 
@@ -46,6 +53,38 @@ public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
      */
     public Double getPathDistanceLimit() {
         return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
+
+    public String getFromEmail() {
+        return fromEmail;
+    }
+
+    public void setFromEmail(String fromEmail) {
+        this.fromEmail = fromEmail;
+    }
+
+    public String[] getAlertAddresses() {
+        return alertAddresses;
+    }
+
+    public void setAlertAddresses(String[] alertAddresses) {
+        this.alertAddresses = alertAddresses;
+    }
+
+    public int getMailPort() {
+        return mailPort;
+    }
+
+    public void setMailPort(int mailPort) {
+        this.mailPort = mailPort;
+    }
+
+    public String getMailHost() {
+        return mailHost;
+    }
+
+    public void setMailHost(String mailHost) {
+        this.mailHost = mailHost;
     }
 
     public TimeToLive getSdwTtl() {

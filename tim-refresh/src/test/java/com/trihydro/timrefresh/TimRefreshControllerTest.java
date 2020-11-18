@@ -14,6 +14,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
+import com.google.gson.Gson;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
@@ -41,6 +45,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailException;
 
 @ExtendWith(MockitoExtension.class)
 public class TimRefreshControllerTest {
@@ -68,6 +73,8 @@ public class TimRefreshControllerTest {
     WydotTimService mockWydotTimService;
     @Mock
     MilepostReduction mockMilepostReduction;
+    @Mock
+    EmailHelper mockEmailHelper;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
@@ -77,7 +84,7 @@ public class TimRefreshControllerTest {
         System.out.println("Executing " + testInfo.getTestMethod().get().getName());
     }
 
-    private void setupRoutes(){
+    private void setupRoutes() {
         String[] routes = new String[1];
         routes[0] = "I 80";
         doReturn(routes).when(mockConfiguration).getRsuRoutes();
@@ -123,6 +130,8 @@ public class TimRefreshControllerTest {
         verifyNoMoreInteractions(mockActiveTimService);
         // verify nothing on WyDotTimService was called
         verifyNoInteractions(mockWydotTimService);
+        // verify no emails sent
+        verifyNoInteractions(mockEmailHelper);
     }
 
     @Test
@@ -148,6 +157,8 @@ public class TimRefreshControllerTest {
         verify(mockRsuService).getRsusByLatLong(anyString(), any(), any(), anyString());
         verifyNoMoreInteractions(mockRsuService);
         verifyNoMoreInteractions(mockWydotTimService);
+        // verify no emails sent
+        verifyNoInteractions(mockEmailHelper);
     }
 
     @Test
@@ -181,6 +192,8 @@ public class TimRefreshControllerTest {
 
         verifyNoMoreInteractions(mockRsuService);
         verifyNoMoreInteractions(mockWydotTimService);
+        // verify no emails sent
+        verifyNoInteractions(mockEmailHelper);
     }
 
     @Test
@@ -209,6 +222,83 @@ public class TimRefreshControllerTest {
 
         verifyNoMoreInteractions(mockMilepostService);
         verifyNoMoreInteractions(mockActiveTimService);
+        verifyNoMoreInteractions(mockWydotTimService);
+        // verify no emails sent
+        verifyNoInteractions(mockEmailHelper);
+    }
+
+    @Test
+    public void TestPerformTaskUsingCron_InvalidData_Milepost() throws MailException, MessagingException {
+        // Arrange
+        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+        TimUpdateModel tum = getRsuTim();
+        tum.setStartPoint(new Coordinate());
+        arrLst.add(tum);
+
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+
+        // Act
+        controllerUnderTest.performTaskUsingCron();
+
+        // Assert
+        Gson gson = new Gson();
+        String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
+        body += "<br/>";
+        body += "The associated ActiveTim record is: <br/>";
+        body += gson.toJson(tum);
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
+        verifyNoMoreInteractions(mockRsuService);
+        verifyNoMoreInteractions(mockWydotTimService);
+    }
+
+    @Test
+    public void TestPerformTaskUsingCron_InvalidData_Direction() throws MailException, MessagingException {
+        // Arrange
+        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+        TimUpdateModel tum = getRsuTim();
+        tum.setDirection("");
+        arrLst.add(tum);
+
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+
+        // Act
+        controllerUnderTest.performTaskUsingCron();
+
+        // Assert
+        Gson gson = new Gson();
+        String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
+        body += "<br/>";
+        body += "The associated ActiveTim record is: <br/>";
+        body += gson.toJson(tum);
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
+        verifyNoMoreInteractions(mockRsuService);
+        verifyNoMoreInteractions(mockWydotTimService);
+    }
+
+    @Test
+    public void TestPerformTaskUsingCron_InvalidData_Route() throws MailException, MessagingException {
+        // Arrange
+        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+        TimUpdateModel tum = getRsuTim();
+        tum.setRoute("");
+        arrLst.add(tum);
+
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+
+        // Act
+        controllerUnderTest.performTaskUsingCron();
+
+        // Assert
+        Gson gson = new Gson();
+        String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
+        body += "<br/>";
+        body += "The associated ActiveTim record is: <br/>";
+        body += gson.toJson(tum);
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
+        verifyNoMoreInteractions(mockRsuService);
         verifyNoMoreInteractions(mockWydotTimService);
     }
 

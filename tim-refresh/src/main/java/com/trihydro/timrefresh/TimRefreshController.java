@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import com.google.gson.Gson;
 import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
@@ -41,7 +39,6 @@ import com.trihydro.timrefresh.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

@@ -22,6 +22,7 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.Logging_TimUpdateModel;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.TimeToLive;
@@ -245,7 +246,7 @@ public class TimRefreshControllerTest {
         String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
         body += "<br/>";
         body += "The associated ActiveTim records are: <br/>";
-        body += gson.toJson(tum);
+        body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
@@ -271,7 +272,7 @@ public class TimRefreshControllerTest {
         String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
         body += "<br/>";
         body += "The associated ActiveTim records are: <br/>";
-        body += gson.toJson(tum);
+        body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
@@ -297,7 +298,7 @@ public class TimRefreshControllerTest {
         String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
         body += "<br/>";
         body += "The associated ActiveTim records are: <br/>";
-        body += gson.toJson(tum);
+        body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());

@@ -17,6 +17,7 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.Logging_TimUpdateModel;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.TimQuery;
@@ -108,7 +109,7 @@ public class TimRefreshController {
         List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
         System.out.println(expiringTims.size() + " expiring TIMs found");
-        List<TimUpdateModel> invalidTims = new ArrayList<TimUpdateModel>();
+        List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
 
         // loop through and issue new TIM to ODE
         for (TimUpdateModel aTim : expiringTims) {
@@ -121,7 +122,7 @@ public class TimRefreshController {
             // Validation
 
             if (!isValidTim(aTim)) {
-                invalidTims.add(aTim);
+                invalidTims.add(new Logging_TimUpdateModel(aTim));
                 continue;
             }
 
@@ -179,7 +180,7 @@ public class TimRefreshController {
             String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
             body += "<br/>";
             body += "The associated ActiveTim records are: <br/>";
-            for (TimUpdateModel timUpdateModel : invalidTims) {
+            for (Logging_TimUpdateModel timUpdateModel : invalidTims) {
                 body += gson.toJson(timUpdateModel);
                 body += "<br/><br/>";
             }

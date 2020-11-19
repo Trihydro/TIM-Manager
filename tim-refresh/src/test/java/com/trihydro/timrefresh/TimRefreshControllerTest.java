@@ -242,10 +242,11 @@ public class TimRefreshControllerTest {
 
         // Assert
         Gson gson = new Gson();
-        String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
+        String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
         body += "<br/>";
-        body += "The associated ActiveTim record is: <br/>";
+        body += "The associated ActiveTim records are: <br/>";
         body += gson.toJson(tum);
+        body += "<br/><br/>";
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
         verifyNoMoreInteractions(mockRsuService);
@@ -267,10 +268,11 @@ public class TimRefreshControllerTest {
 
         // Assert
         Gson gson = new Gson();
-        String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
+        String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
         body += "<br/>";
-        body += "The associated ActiveTim record is: <br/>";
+        body += "The associated ActiveTim records are: <br/>";
         body += gson.toJson(tum);
+        body += "<br/><br/>";
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
         verifyNoMoreInteractions(mockRsuService);
@@ -292,10 +294,11 @@ public class TimRefreshControllerTest {
 
         // Assert
         Gson gson = new Gson();
-        String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
+        String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
         body += "<br/>";
-        body += "The associated ActiveTim record is: <br/>";
+        body += "The associated ActiveTim records are: <br/>";
         body += gson.toJson(tum);
+        body += "<br/><br/>";
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
         verifyNoMoreInteractions(mockRsuService);

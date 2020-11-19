@@ -108,6 +108,7 @@ public class TimRefreshController {
         List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
         System.out.println(expiringTims.size() + " expiring TIMs found");
+        List<TimUpdateModel> invalidTims = new ArrayList<TimUpdateModel>();
 
         // loop through and issue new TIM to ODE
         for (TimUpdateModel aTim : expiringTims) {
@@ -120,17 +121,7 @@ public class TimRefreshController {
             // Validation
 
             if (!isValidTim(aTim)) {
-                String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
-                body += "<br/>";
-                body += "The associated ActiveTim record is: <br/>";
-                body += gson.toJson(aTim);
-                try {
-                    emailHelper.SendEmail(configuration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
-                            configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
-                } catch (Exception e) {
-                    utility.logWithDate("Exception attempting to send email for invalid TIM:");
-                    e.printStackTrace();
-                }
+                invalidTims.add(aTim);
                 continue;
             }
 
@@ -181,6 +172,24 @@ public class TimRefreshController {
             } else {
                 utility.logWithDate("active_tim_id " + aTim.getActiveTimId()
                         + " not sent to SDX (no SAT_RECORD_ID found in database)");
+            }
+        }
+
+        if (invalidTims.size() > 0) {
+            String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
+            body += "<br/>";
+            body += "The associated ActiveTim records are: <br/>";
+            for (TimUpdateModel timUpdateModel : invalidTims) {
+                body += gson.toJson(timUpdateModel);
+                body += "<br/><br/>";
+            }
+
+            try {
+                emailHelper.SendEmail(configuration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+                        configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
+            } catch (Exception e) {
+                utility.logWithDate("Exception attempting to send email for invalid TIM:");
+                e.printStackTrace();
             }
         }
     }

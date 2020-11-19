@@ -3,6 +3,7 @@ package com.trihydro.timrefresh.config;
 import java.math.BigDecimal;
 
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CVRestServiceProps;
@@ -28,7 +29,8 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 @ConfigurationProperties("config")
 @Import({ ActiveTimHoldingService.class, ActiveTimService.class, DataFrameService.class, MilepostService.class,
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
-        Utility.class, RestTemplateProvider.class, MilepostReduction.class, EmailHelper.class })
+        Utility.class, RestTemplateProvider.class, MilepostReduction.class, JavaMailSenderImplProvider.class,
+        EmailHelper.class })
 public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
 
     private TimeToLive sdwTtl;

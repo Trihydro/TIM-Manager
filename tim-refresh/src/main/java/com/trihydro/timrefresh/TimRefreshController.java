@@ -17,6 +17,7 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.Logging_TimUpdateModel;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.TimQuery;
@@ -108,6 +109,7 @@ public class TimRefreshController {
         List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
         System.out.println(expiringTims.size() + " expiring TIMs found");
+        List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
 
         // loop through and issue new TIM to ODE
         for (TimUpdateModel aTim : expiringTims) {
@@ -120,17 +122,7 @@ public class TimRefreshController {
             // Validation
 
             if (!isValidTim(aTim)) {
-                String body = "The Tim Refresh application found an invalid TIM while attempting to refresh.";
-                body += "<br/>";
-                body += "The associated ActiveTim record is: <br/>";
-                body += gson.toJson(aTim);
-                try {
-                    emailHelper.SendEmail(configuration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
-                            configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
-                } catch (Exception e) {
-                    utility.logWithDate("Exception attempting to send email for invalid TIM:");
-                    e.printStackTrace();
-                }
+                invalidTims.add(new Logging_TimUpdateModel(aTim));
                 continue;
             }
 
@@ -181,6 +173,26 @@ public class TimRefreshController {
             } else {
                 utility.logWithDate("active_tim_id " + aTim.getActiveTimId()
                         + " not sent to SDX (no SAT_RECORD_ID found in database)");
+            }
+        }
+
+        if (invalidTims.size() > 0) {
+            String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
+            body += "<br/>";
+            body += "The associated ActiveTim records are: <br/>";
+            for (Logging_TimUpdateModel timUpdateModel : invalidTims) {
+                body += gson.toJson(timUpdateModel);
+                body += "<br/><br/>";
+            }
+
+            try {
+                utility.logWithDate(
+                        "Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
+                emailHelper.SendEmail(configuration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+                        configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
+            } catch (Exception e) {
+                utility.logWithDate("Exception attempting to send email for invalid TIM:");
+                e.printStackTrace();
             }
         }
     }

@@ -136,7 +136,7 @@ public class TimRefreshController {
             List<Milepost> mps = new ArrayList<>();
             List<Milepost> allMps = new ArrayList<>();
             if (wydotTim.getEndPoint() != null) {
-                mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+                allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
                 utility.logWithDate(String.format("Found %d mileposts between %s and %s", mps.size(),
                         gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
             } else {

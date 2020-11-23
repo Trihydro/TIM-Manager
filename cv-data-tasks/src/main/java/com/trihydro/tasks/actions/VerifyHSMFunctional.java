@@ -90,6 +90,7 @@ public class VerifyHSMFunctional implements Runnable {
             // restarted.
 
             try {
+                errorLastSent = new Date();
                 String email = "HSM Functional Tester encountered an exception while attempting to sign a TIM:";
                 email += "<br/><br/>";
                 email += e.getMessage();

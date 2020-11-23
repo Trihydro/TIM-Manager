@@ -1,9 +1,13 @@
 package com.trihydro.library.helpers;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.library.model.Milepost;
 
 import org.junit.jupiter.api.Assertions;
@@ -59,6 +63,26 @@ public class MilepostReductionTest {
 
         // Assert
         Assertions.assertEquals(0, reduced.size());
+    }
+
+    @Test
+    public void applyMilepostReductionAlgorithm_live() throws IOException {
+        // Arrange
+        var mps = getMilepostsFromFile();
+    
+        // Act
+        var reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
+    
+        // Assert
+        Assertions.assertEquals(18, reduced.size());
+    }
+
+    private List<Milepost> getMilepostsFromFile() throws IOException {
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/mileposts_I80.json")));
+        ObjectMapper mapper = new ObjectMapper();
+        var factory = mapper.getTypeFactory();
+        List<Milepost> mps = mapper.readValue(value, factory.constructCollectionType(List.class, Milepost.class));
+        return mps;
     }
 
     private List<Milepost> getMileposts() {

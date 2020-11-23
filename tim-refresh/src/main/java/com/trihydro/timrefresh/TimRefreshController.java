@@ -137,6 +137,8 @@ public class TimRefreshController {
             List<Milepost> allMps = new ArrayList<>();
             if (wydotTim.getEndPoint() != null) {
                 mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+                utility.logWithDate(String.format("Found %d mileposts between %s and %s", mps.size(),
+                        gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
             } else {
                 // point incident
                 MilepostBuffer mpb = new MilepostBuffer();
@@ -145,17 +147,23 @@ public class TimRefreshController {
                 mpb.setDirection(wydotTim.getDirection());
                 mpb.setPoint(wydotTim.getStartPoint());
                 allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
+                utility.logWithDate(String.format("Found %d mileposts for point %s", mps.size(),
+                        gson.toJson(wydotTim.getStartPoint())));
             }
             // reduce the mileposts by removing straight away posts
             mps = milepostReduction.applyMilepostReductionAlorithm(allMps, configuration.getPathDistanceLimit());
 
             if (mps.size() == 0) {
-                System.out.println("Unable to send TIM to SDW, no mileposts found to determine service area");
+                utility.logWithDate(String.format(
+                        "Unable to send TIM to SDX, no mileposts found to determine service area for Active_Tim %s",
+                        aTim.getActiveTimId()));
                 continue;
             }
 
             OdeTravelerInformationMessage tim = getTim(aTim, mps, allMps);
             if (tim == null) {
+                utility.logWithDate(
+                        String.format("Failed to instantiate TIM for active_tim_id %s", aTim.getActiveTimId()));
                 continue;
             }
             WydotTravelerInputData timToSend = new WydotTravelerInputData();

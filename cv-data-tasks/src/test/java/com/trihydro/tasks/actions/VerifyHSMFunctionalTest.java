@@ -51,7 +51,7 @@ public class VerifyHSMFunctionalTest {
 
         @BeforeEach
         public void setup() {
-                doReturn(mockRestTemplate).when(mockRestTemplateProvider).GetRestTemplate();
+                doReturn(mockRestTemplate).when(mockRestTemplateProvider).GetRestTemplate_NoErrors();
                 doReturn(mockResponseEntity).when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
                                 Mockito.<HttpEntity<String>>any(), Mockito.<Class<HsmResponse>>any());
         }

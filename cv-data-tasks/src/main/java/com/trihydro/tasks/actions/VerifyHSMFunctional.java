@@ -53,7 +53,7 @@ public class VerifyHSMFunctional implements Runnable {
         utility.logWithDate("Running...", this.getClass());
         try {
             // ping HSM
-            var response = restTemplateProvider.GetRestTemplate().exchange(config.getHsmUrl() + "/signtim/",
+            var response = restTemplateProvider.GetRestTemplate_NoErrors().exchange(config.getHsmUrl() + "/signtim/",
                     HttpMethod.POST, entity, HsmResponse.class);
 
             if (response.getStatusCode() != HttpStatus.OK) {
@@ -61,12 +61,14 @@ public class VerifyHSMFunctional implements Runnable {
             }
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                utility.logWithDate("HSM is up!");
                 if (errorLastSent != null) {
                     // send an email telling us its back up
                     String email = "HSM Functional Tester was successful in attempting to sign a TIM";
                     mailHelper.SendEmail(config.getAlertAddresses(), null, "HSM Back Up", email, config.getMailPort(),
                             config.getMailHost(), config.getFromEmail());
+                    utility.logWithDate("HSM is back up! Email sent.");
+                } else {
+                    utility.logWithDate("HSM is up!");
                 }
                 errorLastSent = null;
             } else if (shouldSendEmail(errorLastSent)) {
@@ -111,6 +113,7 @@ public class VerifyHSMFunctional implements Runnable {
             return true;
         }
 
+        utility.logWithDate("Email should not be sent at this time");
         return false;
     }
 }

@@ -266,8 +266,7 @@ public class WydotTimService {
                 // if unable to find next available index,
                 // log error and continue
                 if (nextRsuIndex == null) {
-                    WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
-                    utility.logWithDate("Unable to find an available index for RSU " + gson.toJson(wydotRsu));
+                    utility.logWithDate("Unable to find an available index for RSU " + gson.toJson(rsu));
                     continue;
                 }
 

@@ -83,7 +83,7 @@ public class TimRefreshController {
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, DataFrameService _dataFrameService,
-            PathNodeLLService _pathNodeXYService, RegionService _regionService, RsuService _rsuService,
+            PathNodeLLService _pathNodeLLService, RegionService _regionService, RsuService _rsuService,
             WydotTimService _WydotTimService, MilepostReduction _milepostReduction, EmailHelper _emailHelper) {
         configuration = configurationRhs;
         sdwService = _sdwService;
@@ -93,7 +93,7 @@ public class TimRefreshController {
         activeTimHoldingService = _activeTimHoldingService;
         activeTimService = _activeTimService;
         dataFrameService = _dataFrameService;
-        pathNodeLLService = _pathNodeXYService;
+        pathNodeLLService = _pathNodeLLService;
         regionService = _regionService;
         rsuService = _rsuService;
         wydotTimService = _WydotTimService;

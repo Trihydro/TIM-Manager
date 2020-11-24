@@ -31,7 +31,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.OdeService;
-import com.trihydro.library.service.PathNodeXYService;
+import com.trihydro.library.service.PathNodeLLService;
 import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
@@ -73,7 +73,7 @@ public class TimRefreshController {
     private ActiveTimHoldingService activeTimHoldingService;
     private ActiveTimService activeTimService;
     private DataFrameService dataFrameService;
-    private PathNodeXYService pathNodeXYService;
+    private PathNodeLLService pathNodeLLService;
     private RegionService regionService;
     private RsuService rsuService;
     private WydotTimService wydotTimService;
@@ -83,7 +83,7 @@ public class TimRefreshController {
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, DataFrameService _dataFrameService,
-            PathNodeXYService _pathNodeXYService, RegionService _regionService, RsuService _rsuService,
+            PathNodeLLService _pathNodeXYService, RegionService _regionService, RsuService _rsuService,
             WydotTimService _WydotTimService, MilepostReduction _milepostReduction, EmailHelper _emailHelper) {
         configuration = configurationRhs;
         sdwService = _sdwService;
@@ -93,7 +93,7 @@ public class TimRefreshController {
         activeTimHoldingService = _activeTimHoldingService;
         activeTimService = _activeTimService;
         dataFrameService = _dataFrameService;
-        pathNodeXYService = _pathNodeXYService;
+        pathNodeLLService = _pathNodeXYService;
         regionService = _regionService;
         rsuService = _rsuService;
         wydotTimService = _WydotTimService;
@@ -151,6 +151,7 @@ public class TimRefreshController {
                         gson.toJson(wydotTim.getStartPoint())));
             }
             // reduce the mileposts by removing straight away posts
+            var anchorMp = allMps.remove(0);
             mps = milepostReduction.applyMilepostReductionAlorithm(allMps, configuration.getPathDistanceLimit());
 
             if (mps.size() == 0) {
@@ -160,7 +161,7 @@ public class TimRefreshController {
                 continue;
             }
 
-            OdeTravelerInformationMessage tim = getTim(aTim, mps, allMps);
+            OdeTravelerInformationMessage tim = getTim(aTim, mps, allMps, anchorMp);
             if (tim == null) {
                 utility.logWithDate(
                         String.format("Failed to instantiate TIM for active_tim_id %s", aTim.getActiveTimId()));
@@ -223,16 +224,17 @@ public class TimRefreshController {
         return true;
     }
 
-    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
+    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,
+            Milepost anchor) {
         String nowAsISO = Instant.now().toString();
-        DataFrame df = getDataFrame(aTim, nowAsISO, mps);
+        DataFrame df = getDataFrame(aTim, nowAsISO, anchor);
         // check to see if we have any itis codes
         // if not, just continue on
         if (df.getItems() == null || df.getItems().length == 0) {
             utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
-        Region region = getRegion(aTim, mps, allMps);
+        Region region = getRegion(aTim, mps, allMps, anchor);
         Region[] regions = new Region[1];
         regions[0] = region;
         df.setRegions(regions);
@@ -259,16 +261,22 @@ public class TimRefreshController {
             return currentCnt++;
     }
 
-    private NodeXY[] buildNodePathFromMileposts(List<Milepost> mps) {
-        NodeXY[] nodes = new NodeXY[mps.size()];
+    private NodeXY[] buildNodePathFromMileposts(List<Milepost> mps, Milepost anchor) {
+        ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+        var startMp = anchor;
         for (int i = 0; i < mps.size(); i++) {
-            NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-            node.setNodeLat(mps.get(i).getLatitude());
-            node.setNodeLong(mps.get(i).getLongitude());
-            node.setDelta("node-LatLon");
-            nodes[i] = node;
+            // note that even though we are setting node-LL type here, the ODE only has a
+            // NodeXY object, as the structure is the same.
+            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
+                BigDecimal lat = mps.get(i).getLatitude().subtract(startMp.getLatitude());
+                BigDecimal lon = mps.get(i).getLongitude().subtract(startMp.getLongitude());
+                node.setNodeLat(lat);
+                node.setNodeLong(lon);
+                node.setDelta("node-LL");
+                nodes.add(node);
+                startMp = mps.get(i);
         }
-        return nodes;
+        return nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]);
     }
 
     private String getHeadingSliceFromMileposts(List<Milepost> mps, OdePosition3D anchor) {
@@ -435,12 +443,12 @@ public class TimRefreshController {
         wydotTimService.sendNewTimToSdw(timToSend, recordId, mps);
     }
 
-    private DataFrame getDataFrame(TimUpdateModel aTim, String nowAsISO, List<Milepost> mps) {
+    private DataFrame getDataFrame(TimUpdateModel aTim, String nowAsISO, Milepost anchor) {
         // RoadSignID
         RoadSignID rsid = new RoadSignID();
         rsid.setMutcdCode(MutcdCodeEnum.warning);
         rsid.setViewAngle("1111111111111111");
-        rsid.setPosition(getAnchorPosition(aTim, mps));
+        rsid.setPosition(getAnchorPosition(aTim, anchor));
 
         // MsgId
         MsgId msgId = new MsgId();
@@ -474,15 +482,15 @@ public class TimRefreshController {
         return df;
     }
 
-    private OdePosition3D getAnchorPosition(TimUpdateModel aTim, List<Milepost> mps) {
+    private OdePosition3D getAnchorPosition(TimUpdateModel aTim, Milepost anchor) {
         OdePosition3D anchorPosition = new OdePosition3D();
         if (aTim.getAnchorLat() != null && aTim.getAnchorLong() != null) {
             anchorPosition.setLatitude(aTim.getAnchorLat());
             anchorPosition.setLongitude(aTim.getAnchorLong());
         } else {
-            if (mps.size() > 0) {
-                anchorPosition.setLatitude(mps.get(0).getLatitude());
-                anchorPosition.setLongitude(mps.get(0).getLongitude());
+            if (anchor != null) {
+                anchorPosition.setLatitude(anchor.getLatitude());
+                anchorPosition.setLongitude(anchor.getLongitude());
             } else {
                 anchorPosition.setLatitude(BigDecimal.valueOf(0));
                 anchorPosition.setLongitude(BigDecimal.valueOf(0));
@@ -492,11 +500,11 @@ public class TimRefreshController {
         return anchorPosition;
     }
 
-    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
+    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps, Milepost anchor) {
         // Set region information
         Region region = new Region();
         region.setName(aTim.getRegionName());
-        region.setAnchorPosition(getAnchorPosition(aTim, mps));
+        region.setAnchorPosition(getAnchorPosition(aTim, anchor));
         region.setLaneWidth(aTim.getLaneWidth());
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
@@ -521,13 +529,13 @@ public class TimRefreshController {
         region.setDescription(regionDescrip);
 
         if (aTim.getPathId() != null) {
-            NodeXY[] nodes = pathNodeXYService.getNodeXYForPath(aTim.getPathId());
+            NodeXY[] nodes = pathNodeLLService.getNodeLLForPath(aTim.getPathId());
             if (nodes == null || nodes.length == 0) {
-                nodes = buildNodePathFromMileposts(mps);
+                nodes = buildNodePathFromMileposts(mps, anchor);
             }
             Path path = new Path();
             path.setScale(0);
-            path.setType("xy");
+            path.setType("ll");// offset path is now standard
             path.setNodes(nodes);
             region.setPath(path);
         }

@@ -11,7 +11,7 @@ public class LoggerConfiguration implements DbInteractionsProps {
     private String depositTopic;
     private String kafkaHostServer;
     private int maxPollIntervalMs = 300000;
-    private int maxPollRecords = 500;
+    private int maxPollRecords = 50;
     private String dbUsername;
     private String dbPassword;
     private String dbUrl;

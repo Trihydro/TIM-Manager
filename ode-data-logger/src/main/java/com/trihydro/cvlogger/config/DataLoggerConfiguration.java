@@ -1,11 +1,12 @@
 package com.trihydro.cvlogger.config;
 
 import com.trihydro.library.model.CVRestServiceProps;
+import com.trihydro.library.model.EmailProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class DataLoggerConfiguration implements CVRestServiceProps {
+public class DataLoggerConfiguration implements CVRestServiceProps, EmailProps {
     private String kafkaHostServer;
     private String tracUrl;
 

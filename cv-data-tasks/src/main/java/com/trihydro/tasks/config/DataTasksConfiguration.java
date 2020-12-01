@@ -1,6 +1,7 @@
 package com.trihydro.tasks.config;
 
 import com.trihydro.library.model.CVRestServiceProps;
+import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.TmddProps;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps {
+public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps {
 
     private String cvRestService;
     private String cvRestServiceDev; // Temporary

@@ -7,6 +7,7 @@ import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CVRestServiceProps;
+import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
@@ -31,7 +32,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
         Utility.class, RestTemplateProvider.class, MilepostReduction.class, JavaMailSenderImplProvider.class,
         EmailHelper.class })
-public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps {
+public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, EmailProps {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);

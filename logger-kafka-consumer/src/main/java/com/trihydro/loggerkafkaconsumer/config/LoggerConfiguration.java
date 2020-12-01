@@ -1,11 +1,12 @@
 package com.trihydro.loggerkafkaconsumer.config;
 
 import com.trihydro.library.model.DbInteractionsProps;
+import com.trihydro.library.model.EmailProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class LoggerConfiguration implements DbInteractionsProps {
+public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
 
     private String depositGroup;
     private String depositTopic;

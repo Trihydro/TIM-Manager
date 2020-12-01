@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
+import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.TmddProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps {
+public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps, EmailProps
+{
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);
     private String cvRestService;
     private String[] rsuRoutes;

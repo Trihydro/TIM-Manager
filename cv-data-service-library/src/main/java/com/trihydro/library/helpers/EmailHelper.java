@@ -45,4 +45,21 @@ public class EmailHelper {
 
         mailSender.send(mimeMessage);
     }
+
+    /**
+     * Sends an email stating the provided container was forced to restart.
+     * @param to
+     * @param mailPort
+     * @param mailHost
+     * @param from
+     * @param containerInfo
+     * @throws MailException
+     * @throws MessagingException
+     */
+    public void ContainerRestarted(String[] to, Integer mailPort, String mailHost, String from, String containerInfo)
+            throws MailException, MessagingException {
+        String body = "The following container ran into an unrecoverable exception, causing a container restart:<br/>";
+        body += containerInfo;
+        SendEmail(to, null, "Container Error Caused Restart", body, mailPort, mailHost, from);
+    }
 }

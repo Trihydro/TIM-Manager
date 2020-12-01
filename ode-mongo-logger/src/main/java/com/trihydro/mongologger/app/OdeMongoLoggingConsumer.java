@@ -6,9 +6,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Properties;
 
+import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.mongologger.app.loggers.MongoLogger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -24,14 +25,18 @@ public class OdeMongoLoggingConsumer {
 	Statement statement = null;
 	private MongoLoggerConfiguration mongoLoggerConfig;
 	private MongoLogger mongoLogger;
+	private Utility utility;
+	private EmailHelper emailHelper;
 
 	@Autowired
-	public OdeMongoLoggingConsumer(MongoLoggerConfiguration _mongoLoggerConfig, MongoLogger _mongoLogger)
-			throws IOException, SQLException, Exception {
+	public OdeMongoLoggingConsumer(MongoLoggerConfiguration _mongoLoggerConfig, MongoLogger _mongoLogger,
+			Utility _utility, EmailHelper _emailHelper) throws IOException, SQLException, Exception {
 		this.mongoLoggerConfig = _mongoLoggerConfig;
 		mongoLogger = _mongoLogger;
+		utility = _utility;
+		emailHelper = _emailHelper;
 
-		System.out.println("starting..............");
+		utility.logWithDate("starting..............");
 		startKafkaConsumer();
 	}
 
@@ -61,6 +66,7 @@ public class OdeMongoLoggingConsumer {
 				}
 
 				if (recStrings.size() > 0) {
+					utility.logWithDate(String.format("Found %d %s records to parse", recStrings.size(), topic));
 					String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
 
 					if (topic.equals("topic.OdeTimJson")) {
@@ -73,8 +79,9 @@ public class OdeMongoLoggingConsumer {
 				}
 			}
 		} catch (Exception ex) {
-			Date date = new Date();
-			System.out.println(date + " " + ex.getMessage());
+			utility.logWithDate("Exception in mongo logger application " + ex.getMessage());
+			emailHelper.ContainerRestarted(mongoLoggerConfig.getAlertAddresses(), mongoLoggerConfig.getMailPort(),
+					mongoLoggerConfig.getMailHost(), mongoLoggerConfig.getFromEmail(), topic + " Mongo Consumer");
 			throw (ex);
 		} finally {
 			try {

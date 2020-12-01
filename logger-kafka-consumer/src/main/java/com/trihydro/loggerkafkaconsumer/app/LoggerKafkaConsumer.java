@@ -84,9 +84,10 @@ public class LoggerKafkaConsumer {
 
         try {
             OdeData odeData = new OdeData();
+            var recordCount = 0;
             while (true) {
                 ConsumerRecords<String, String> records = stringConsumer.poll(100);
-                var recordCount = records.count();
+                recordCount = records.count();
                 if(recordCount > 0){
                     utility.logWithDate(String.format("Found %d records to parse", recordCount));
                 }

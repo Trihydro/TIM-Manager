@@ -144,7 +144,7 @@ public class LoggerKafkaConsumer {
         } catch (Exception ex) {
             utility.logWithDate(ex.getMessage());
             emailHelper.ContainerRestarted(loggerConfig.getAlertAddresses(), loggerConfig.getMailPort(),
-                    loggerConfig.getMailHost(), loggerConfig.getFromEmail(), topic + " Mongo Consumer");
+                    loggerConfig.getMailHost(), loggerConfig.getFromEmail(), "Logger Kafka Consumer");
             throw (ex);
         } finally {
             try {

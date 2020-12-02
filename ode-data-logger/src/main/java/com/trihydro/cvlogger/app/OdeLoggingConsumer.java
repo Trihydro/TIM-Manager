@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import com.google.gson.Gson;
 import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 
@@ -34,13 +35,15 @@ public class OdeLoggingConsumer {
 	private DataLoggerConfiguration configProperties;
 	private TracManager tracManager;
 	private Utility utility;
+	private EmailHelper emailHelper;
 
 	@Autowired
-	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TracManager _tracManager, Utility _utility)
-			throws IOException, Exception {
+	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TracManager _tracManager, Utility _utility,
+			EmailHelper _emailHelper) throws IOException, Exception {
 		this.configProperties = configProperties;
 		tracManager = _tracManager;
 		utility = _utility;
+		emailHelper = _emailHelper;
 		System.out.println("starting..............");
 		setupTopic();
 		startKafkaConsumer();
@@ -127,6 +130,8 @@ public class OdeLoggingConsumer {
 			}
 		} catch (Exception ex) {
 			utility.logWithDate(ex.getMessage());
+			emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
+					configProperties.getMailHost(), configProperties.getFromEmail(), consumerTopic + " Consumer");
 			throw (ex);
 		} finally {
 			try {

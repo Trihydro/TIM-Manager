@@ -2,7 +2,6 @@ package com.trihydro.mongologger.app.loggers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -11,6 +10,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.mongologger.app.MongoLoggerConfiguration;
 
 import org.bson.Document;
@@ -25,14 +26,20 @@ public class MongoLogger {
         private String password;
         private String databaseName;
         private MongoCredential credential;
+        private Utility utility;
+        private EmailHelper emailHelper;
+        private MongoLoggerConfiguration config;
 
         @Autowired
-        public void InjectDependencies(MongoLoggerConfiguration config) {
+        public void InjectDependencies(MongoLoggerConfiguration _config, Utility _utility, EmailHelper _emailHelper) {
+                config = _config;
                 username = config.getMongoUsername(); // the user name
                 databaseName = config.getMongoDatabase(); // the name of the database in which the user is defined
                 password = config.getMongoPassword(); // the password as a character array
                 serverAddress = config.getMongoHost();
                 credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
+                utility = _utility;
+                emailHelper = _emailHelper;
         }
 
         public void logTim(String[] timRecord) {
@@ -66,8 +73,21 @@ public class MongoLogger {
                                 MongoCollection<Document> collection = database.getCollection(collectionName);
                                 collection.insertMany(docs);
                         } catch (Exception ex) {
-                                Date date = new Date();
-                                System.out.println(date + " " + ex.getMessage());
+                                utility.logWithDate("Error logging to mongo collection: " + ex.getMessage());
+
+                                String body = "The MongoLogger failed attempting to insert a record to ";
+                                body += collectionName;
+                                body += "<br/><br/>";
+                                body += "Exception: <br/>";
+                                body += ex.getMessage();
+                                try {
+                                        emailHelper.SendEmail(config.getAlertAddresses(), null,
+                                                        "MongoLogger Failed to Connect to MongoDB", body,
+                                                        config.getMailPort(), config.getMailHost(),
+                                                        config.getFromEmail());
+                                } catch (Exception e) {
+                                        e.printStackTrace();
+                                }
                         } finally {
                                 if (mongoClient != null) {
                                         mongoClient.close();

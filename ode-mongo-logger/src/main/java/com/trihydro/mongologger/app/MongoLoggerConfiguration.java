@@ -1,9 +1,11 @@
 package com.trihydro.mongologger.app;
 
+import com.trihydro.library.model.EmailProps;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class MongoLoggerConfiguration {
+public class MongoLoggerConfiguration implements EmailProps {
     private String mongoDatabase;
     private String mongoUsername;
     private String mongoPassword;

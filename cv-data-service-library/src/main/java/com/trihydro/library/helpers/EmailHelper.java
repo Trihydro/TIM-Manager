@@ -26,8 +26,9 @@ public class EmailHelper {
      * @param bcc        BCC email list
      * @param subject    Subject of the email
      * @param body       Body of the email. Can include html
-     * @param properties the ConfigProperties object containing the fromEmail,
-     *                   mailHost, and mailPort
+     * @param mailPort   The port of the mail server to use when sending emails
+     * @param mailHost   The host ip of the mail server
+     * @param from       The email address to send this message from
      * @throws MailException
      * @throws MessagingException
      */
@@ -44,5 +45,22 @@ public class EmailHelper {
         helper.setText(body, true);
 
         mailSender.send(mimeMessage);
+    }
+
+    /**
+     * Sends an email stating the provided container was forced to restart.
+     * @param to            Array of emails to send email to
+     * @param mailPort      The port of the mail server to use when sending emails
+     * @param mailHost      The host ip of the mail server
+     * @param from          The email address to send this message from
+     * @param containerInfo A descriptor of the container calling this function
+     * @throws MailException
+     * @throws MessagingException
+     */
+    public void ContainerRestarted(String[] to, Integer mailPort, String mailHost, String from, String containerInfo)
+            throws MailException, MessagingException {
+        String body = "The following container ran into an unrecoverable exception, causing a container restart:<br/>";
+        body += containerInfo;
+        SendEmail(to, null, "Container Error Caused Restart", body, mailPort, mailHost, from);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Properties;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.BsmDataConverter;
@@ -37,12 +38,13 @@ public class LoggerKafkaConsumer {
     private BsmDataConverter bsmDataConverter;
     private DriverAlertDataConverter daConverter;
     private Utility utility;
+    private EmailHelper emailHelper;
 
     @Autowired
     public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService,
             DriverAlertService _driverAlertService, TimDataConverter _timDataConverter,
-            BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter, Utility _utility)
-            throws IOException, Exception {
+            BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter, Utility _utility,
+            EmailHelper _emailHelper) throws IOException, Exception {
         loggerConfig = _loggerConfig;
         bsmService = _bsmService;
         timService = _timService;
@@ -51,6 +53,7 @@ public class LoggerKafkaConsumer {
         bsmDataConverter = _bsmDataConverter;
         daConverter = _daConverter;
         utility = _utility;
+        emailHelper = _emailHelper;
 
         System.out.println("starting..............");
 
@@ -145,6 +148,8 @@ public class LoggerKafkaConsumer {
             }
         } catch (Exception ex) {
             utility.logWithDate(ex.getMessage());
+            emailHelper.ContainerRestarted(loggerConfig.getAlertAddresses(), loggerConfig.getMailPort(),
+                    loggerConfig.getMailHost(), loggerConfig.getFromEmail(), "Logger Kafka Consumer");
             throw (ex);
         } finally {
             try {

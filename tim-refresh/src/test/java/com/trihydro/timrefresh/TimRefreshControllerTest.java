@@ -19,6 +19,7 @@ import javax.mail.MessagingException;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Coordinate;
@@ -37,7 +38,6 @@ import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
-import com.trihydro.timrefresh.service.WydotTimService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +47,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailException;
+
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 
 @ExtendWith(MockitoExtension.class)
 public class TimRefreshControllerTest {
@@ -71,11 +75,11 @@ public class TimRefreshControllerTest {
     @Mock
     RsuService mockRsuService;
     @Mock
-    WydotTimService mockWydotTimService;
-    @Mock
     MilepostReduction mockMilepostReduction;
     @Mock
     EmailHelper mockEmailHelper;
+    @Mock
+    TimGenerationHelper mockTimGenerationHelper;
 
     @InjectMocks
     private TimRefreshController controllerUnderTest;
@@ -129,8 +133,6 @@ public class TimRefreshControllerTest {
         verify(mockActiveTimService).getExpiringActiveTims();
         // verify no further interactions on ActiveTimService
         verifyNoMoreInteractions(mockActiveTimService);
-        // verify nothing on WyDotTimService was called
-        verifyNoInteractions(mockWydotTimService);
         // verify no emails sent
         verifyNoInteractions(mockEmailHelper);
     }
@@ -140,12 +142,12 @@ public class TimRefreshControllerTest {
         // setup return
         setupRoutes();
         setupMilePost();
-        setupDataFrameService();
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
         ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
         ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
         TimUpdateModel tum = getRsuTim();
         arrLst.add(tum);
+        when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(new OdeTravelerInformationMessage());
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockRsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
         doReturn(rsus).when(mockRsuService).getRsusByLatLong(anyString(), any(), any(), anyString());
@@ -157,7 +159,6 @@ public class TimRefreshControllerTest {
         verify(mockRsuService).getFullRsusTimIsOn(timID);
         verify(mockRsuService).getRsusByLatLong(anyString(), any(), any(), anyString());
         verifyNoMoreInteractions(mockRsuService);
-        verifyNoMoreInteractions(mockWydotTimService);
         // verify no emails sent
         verifyNoInteractions(mockEmailHelper);
     }
@@ -167,7 +168,6 @@ public class TimRefreshControllerTest {
         // setup return
         setupRoutes();
         setupMilePost();
-        setupDataFrameService();
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
         ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
 
@@ -181,6 +181,7 @@ public class TimRefreshControllerTest {
         TimUpdateModel tum = getRsuTim();
         arrLst.add(tum);
 
+        when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(getTim());
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockRsuService.getFullRsusTimIsOn(any(long.class))).thenReturn(wydotRsuTims);
 
@@ -189,10 +190,9 @@ public class TimRefreshControllerTest {
 
         // verify static functions were called
         verify(mockRsuService).getFullRsusTimIsOn(timID);
-        verify(mockWydotTimService).updateTimOnRsu(any(WydotTravelerInputData.class));
+        verify(mockOdeService).updateTimOnRsu(any(WydotTravelerInputData.class));
 
         verifyNoMoreInteractions(mockRsuService);
-        verifyNoMoreInteractions(mockWydotTimService);
         // verify no emails sent
         verifyNoInteractions(mockEmailHelper);
     }
@@ -202,12 +202,12 @@ public class TimRefreshControllerTest {
         // setup return
         setupRoutes();
         setupMilePost();
-        setupDataFrameService();
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
 
         TimUpdateModel tum = getSdwTim();
         arrLst.add(tum);
 
+        when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(new OdeTravelerInformationMessage());
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockSdwService.getSdwDataByRecordId(any(String.class))).thenReturn(getAdvisorySituationDataDeposit());
 
@@ -216,14 +216,13 @@ public class TimRefreshControllerTest {
 
         // verify functions were called
         verify(mockActiveTimService).getExpiringActiveTims();
-        verify(mockWydotTimService).getServiceRegion(any());
-        verify(mockWydotTimService).updateTimOnSdw(any());
+        verify(mockOdeService).getServiceRegion(any());
+        verify(mockOdeService).updateTimOnSdw(any());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
 
         verifyNoMoreInteractions(mockMilepostService);
         verifyNoMoreInteractions(mockActiveTimService);
-        verifyNoMoreInteractions(mockWydotTimService);
         // verify no emails sent
         verifyNoInteractions(mockEmailHelper);
     }
@@ -251,7 +250,6 @@ public class TimRefreshControllerTest {
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
         verifyNoMoreInteractions(mockRsuService);
-        verifyNoMoreInteractions(mockWydotTimService);
     }
 
     @Test
@@ -277,7 +275,6 @@ public class TimRefreshControllerTest {
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
         verifyNoMoreInteractions(mockRsuService);
-        verifyNoMoreInteractions(mockWydotTimService);
     }
 
     @Test
@@ -303,7 +300,24 @@ public class TimRefreshControllerTest {
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
         verifyNoMoreInteractions(mockRsuService);
-        verifyNoMoreInteractions(mockWydotTimService);
+    }
+
+    private OdeTravelerInformationMessage getTim() {
+        var tim = new OdeTravelerInformationMessage();
+        tim.setDataframes(getDataFrames());
+
+        return tim;
+    }
+
+    private DataFrame[] getDataFrames() {
+        DataFrame df = new DataFrame();
+        df.setRegions(getRegions());
+        return new DataFrame[] { df };
+    }
+
+    private Region[] getRegions() {
+        var region = new Region();
+        return new Region[] { region };
     }
 
     private TimUpdateModel getTumBase() {

@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
@@ -27,6 +29,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
 import us.dot.its.jpo.ode.plugin.SNMP;
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
+import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
 @Component
@@ -38,7 +44,7 @@ public class OdeService {
     private OdeProps odeProps;
 
     @Autowired
-    public void InjectDependencies(Utility _utility, RestTemplateProvider _restTemplateProvider,OdeProps _odeProps) {
+    public void InjectDependencies(Utility _utility, RestTemplateProvider _restTemplateProvider, OdeProps _odeProps) {
         utility = _utility;
         restTemplateProvider = _restTemplateProvider;
         odeProps = _odeProps;
@@ -57,7 +63,8 @@ public class OdeService {
         // send TIM if not a test
         try {
             utility.logWithDate("Sending new TIM to RSU");
-            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
             TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
             System.out.println("Send new TIM to RSU exception: " + targetException.getMessage());
@@ -65,7 +72,44 @@ public class OdeService {
             e.printStackTrace();
         }
     }
-    
+
+    public void updateTimOnRsu(WydotTravelerInputData timToSend) {
+
+        String timToSendJson = gson.toJson(timToSend);
+        restTemplateProvider.GetRestTemplate().put(odeProps.getOdeUrl() + "/tim", timToSendJson, String.class);
+    }
+
+    public void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps, TimeToLive ttl) {
+
+        // set msgCnt to 1 and create new packetId
+        timToSend.getTim().setMsgCnt(1);
+
+        SDW sdw = new SDW();
+
+        // calculate service region
+        sdw.setServiceRegion(getServiceRegion(mps));
+
+        // set time to live
+        sdw.setTtl(ttl);
+        // set new record id
+        sdw.setRecordId(recordId);
+
+        // set sdw block in TIM
+        timToSend.getRequest().setSdw(sdw);
+
+        // send to ODE
+        String timToSendJson = gson.toJson(timToSend);
+
+        try {
+            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
+            System.out.println("Successfully sent POST to ODE to send new TIM: " + timToSendJson);
+        } catch (RuntimeException targetException) {
+            System.out.println("Failed to POST new SDX TIM: " + timToSendJson);
+            targetException.printStackTrace();
+        }
+    }
+
     public void updateTimOnSdw(WydotTravelerInputData timToSend) {
         String timToSendJson = gson.toJson(timToSend);
 
@@ -108,8 +152,8 @@ public class OdeService {
         String responseStr = null;
 
         try {
-            responseStr = restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim/query", entity,
-                    String.class);
+            responseStr = restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim/query",
+                    entity, String.class);
         } catch (RestClientException e) {
             return submitTimQuery(rsu, counter + 1);
         }
@@ -170,4 +214,37 @@ public class OdeService {
 
         return snmp;
     }
+
+    public OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {
+
+        Comparator<Milepost> compLat = (l1, l2) -> l1.getLatitude().compareTo(l2.getLatitude());
+        Comparator<Milepost> compLong = (l1, l2) -> l1.getLongitude().compareTo(l2.getLongitude());
+        OdeGeoRegion serviceRegion = new OdeGeoRegion();
+
+        if (mileposts.size() > 0) {
+
+            Milepost maxLat = mileposts.stream().max(compLat).get();
+
+            Milepost minLat = mileposts.stream().min(compLat).get();
+
+            Milepost maxLong = mileposts.stream().max(compLong).get();
+
+            Milepost minLong = mileposts.stream().min(compLong).get();
+
+            OdePosition3D nwCorner = new OdePosition3D();
+            nwCorner.setLatitude(maxLat.getLatitude());
+            nwCorner.setLongitude(minLong.getLongitude());
+
+            OdePosition3D seCorner = new OdePosition3D();
+            seCorner.setLatitude(minLat.getLatitude());
+            seCorner.setLongitude(maxLong.getLongitude());
+
+            serviceRegion.setNwCorner(nwCorner);
+            serviceRegion.setSeCorner(seCorner);
+        } else {
+            System.out.println("getServiceRegion fails due to no mileposts");
+        }
+        return serviceRegion;
+    }
+
 }

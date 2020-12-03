@@ -30,7 +30,6 @@ import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
-import com.trihydro.timrefresh.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,6 @@ public class TimRefreshController {
     private ActiveTimService activeTimService;
     private RegionService regionService;
     private RsuService rsuService;
-    private WydotTimService wydotTimService;
     private MilepostReduction milepostReduction;
     private TimGenerationHelper timGenerationHelper;
 
@@ -67,8 +65,7 @@ public class TimRefreshController {
     public TimRefreshController(TimRefreshConfiguration configurationRhs, SdwService _sdwService, Utility _utility,
             OdeService _odeService, MilepostService _milepostService, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, RegionService _regionService, RsuService _rsuService,
-            WydotTimService _WydotTimService, MilepostReduction _milepostReduction, EmailHelper _emailHelper,
-            TimGenerationHelper _timGenerationHelper) {
+            MilepostReduction _milepostReduction, EmailHelper _emailHelper, TimGenerationHelper _timGenerationHelper) {
         configuration = configurationRhs;
         sdwService = _sdwService;
         utility = _utility;
@@ -78,7 +75,6 @@ public class TimRefreshController {
         activeTimService = _activeTimService;
         regionService = _regionService;
         rsuService = _rsuService;
-        wydotTimService = _WydotTimService;
         milepostReduction = _milepostReduction;
         emailHelper = _emailHelper;
         timGenerationHelper = _timGenerationHelper;
@@ -248,7 +244,7 @@ public class TimRefreshController {
 
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
                 System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
-                wydotTimService.updateTimOnRsu(timToSend);
+                odeService.updateTimOnRsu(timToSend);
             }
         } else {
             // we don't have any existing RSUs, but some fall within the boundary so send
@@ -314,7 +310,7 @@ public class TimRefreshController {
         }
 
         // fetch all mileposts, get service region by bounding box
-        OdeGeoRegion serviceRegion = wydotTimService.getServiceRegion(mps);
+        OdeGeoRegion serviceRegion = odeService.getServiceRegion(mps);
 
         // we are saving our ttl unencoded at the root level of the object as an int
         // representing the enum
@@ -327,7 +323,7 @@ public class TimRefreshController {
         // set sdw block in TIM
         utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
-        wydotTimService.updateTimOnSdw(timToSend);
+        odeService.updateTimOnSdw(timToSend);
     }
 
     private void updateAndSendNewSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
@@ -340,7 +336,7 @@ public class TimRefreshController {
         // Update active_tim.
         activeTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
-        wydotTimService.sendNewTimToSdw(timToSend, recordId, mps);
+        odeService.sendNewTimToSdw(timToSend, recordId, mps, configuration.getSdwTtl());
     }
 
     private String getRsuRegionName(TimUpdateModel aTim, RSU rsu) {

@@ -127,7 +127,6 @@ public class UtilityControllerTest {
         // Arrange
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
-        when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(null);
 
@@ -152,7 +151,6 @@ public class UtilityControllerTest {
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
 
-        when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(mockTimQuery);
 
@@ -178,7 +176,6 @@ public class UtilityControllerTest {
         addresses[0] = rsuTarget;
         addresses[1] = rsuTarget2;
 
-        when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(mockTimQuery);
 

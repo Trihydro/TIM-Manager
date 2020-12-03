@@ -18,6 +18,7 @@ import com.trihydro.library.service.HmiLogService;
 import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuDataService;
+import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.StatusLogService;
 import com.trihydro.library.service.TimService;
@@ -40,7 +41,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
-                BsmService.class, ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
+                BsmService.class, ItisCodeService.class, RsuService.class, RsuDataService.class, RestTemplateProvider.class,
                 TmddService.class, GsonFactory.class, DriverAlertService.class, HmiLogService.class,
                 StatusLogService.class, TimService.class, UtilityService.class })
 

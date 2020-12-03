@@ -12,6 +12,7 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RsuDataService;
+import com.trihydro.library.service.RsuService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.ExecutorFactory;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 public class ValidateRsus implements Runnable {
     private DataTasksConfiguration config;
     private ActiveTimService activeTimService;
+    private RsuService rsuService;
     private RsuDataService rsuDataService;
     private ExecutorFactory executorFactory;
     private EmailFormatter emailFormatter;
@@ -35,10 +37,11 @@ public class ValidateRsus implements Runnable {
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
-            RsuDataService _rsuDataService, ExecutorFactory _executorFactory, EmailFormatter _emailFormatter,
-            EmailHelper _mailHelper, Utility _utility) {
+            RsuService _rsuService, RsuDataService _rsuDataService, ExecutorFactory _executorFactory,
+            EmailFormatter _emailFormatter, EmailHelper _mailHelper, Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
+        rsuService = _rsuService;
         rsuDataService = _rsuDataService;
         executorFactory = _executorFactory;
         emailFormatter = _emailFormatter;
@@ -60,6 +63,11 @@ public class ValidateRsus implements Runnable {
     }
 
     private void validateRsus() {
+        // Validation result sets
+        List<String> unresponsiveRsus = new ArrayList<>();
+        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
+        List<String> unexpectedErrors = new ArrayList<>();
+
         // The data structure being used here is temporary. Since we have RSUs shared
         // between our dev and prod environment, we need to fetch Active Tims from both
         // the dev and prod Oracle db. THEN we need to merge those records into the
@@ -90,19 +98,39 @@ public class ValidateRsus implements Runnable {
             return;
         }
 
-        // If there isn't anything to verify, exit early.
-        if (activeTims.size() == 0) {
-            return;
+        // Organize ActiveTim records by RSU
+        List<PopulatedRsu> rsusToValidate = getRsusFromActiveTims(activeTims);
+
+        // rsusToValidate now contains a list of all RSUs that have at least one active TIM record.
+        // We still need to validate RSUs that may not have active TIMs right now.
+        // Fetch all RSUs, and add any that are missing to rsusToValidate
+        try {
+            var allRsus = rsuService.selectAll();
+            for(var rsu : allRsus) {
+                var popRsu = new PopulatedRsu(rsu);
+                if(!rsusToValidate.contains(popRsu)) {
+                    rsusToValidate.add(popRsu);
+                }
+            }
+        }
+        catch(Exception ex) {
+            utility.logWithDate("Unable to fetch all RSUs - will proceed with partial validation",
+                    this.getClass());
+
+            unexpectedErrors.add("Error occurred while fetching all RSUs - " + 
+                "unable to validate any RSUs that don't have an existing, active TIM. Error:\n" + ex.toString());
         }
 
-        // Organize ActiveTim records by RSU
-        List<PopulatedRsu> rsusWithRecords = getRsusFromActiveTims(activeTims);
+        // If there isn't anything to verify, exit early.
+        if (rsusToValidate.size() == 0) {
+            return;
+        }
 
         ExecutorService workerThreadPool = executorFactory.getFixedThreadPool(config.getRsuValThreadPoolSize());
 
         // Map each RSU to an asynchronous "task" that will validate that RSU
         List<ValidateRsu> tasks = new ArrayList<>();
-        for (PopulatedRsu rsu : rsusWithRecords) {
+        for (PopulatedRsu rsu : rsusToValidate) {
             tasks.add(new ValidateRsu(rsu, rsuDataService));
         }
 
@@ -117,10 +145,6 @@ public class ValidateRsus implements Runnable {
             utility.logWithDate("Error while executing validation tasks:", this.getClass());
             e.printStackTrace();
         }
-
-        List<String> unresponsiveRsus = new ArrayList<>();
-        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
-        List<String> unexpectedErrors = new ArrayList<>();
 
         // Go through the validation results, and collect results to be reported
         for (int i = 0; i < futureResults.size(); i++) {

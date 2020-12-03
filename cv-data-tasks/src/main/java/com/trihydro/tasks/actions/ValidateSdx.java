@@ -2,7 +2,11 @@ package com.trihydro.tasks.actions;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
@@ -16,6 +20,7 @@ import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -140,6 +145,7 @@ public class ValidateSdx implements Runnable {
         }
 
         if (toResend.size() > 0 || deleteFromSdx.size() > 0 || invOracleRecords.size() > 0) {
+            cleanupData(toResend, deleteFromSdx, invOracleRecords);
             String email = emailFormatter.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
                     numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords);
 
@@ -148,6 +154,49 @@ public class ValidateSdx implements Runnable {
                         config.getMailPort(), config.getMailHost(), config.getFromEmail());
             } catch (Exception ex) {
                 ex.printStackTrace();
+            }
+        }
+    }
+
+    private void cleanupData(List<CActiveTim> toResend, List<CAdvisorySituationDataDeposit> deleteFromSdx,
+            List<CActiveTim> invOracleRecords) {
+        // TODO: cleanup the data!
+        // migrate the refresh logic to service, then send toResend active_tim_ids
+        if (toResend.size() > 0) {
+            resendTims(toResend.stream().map(x -> x.getActiveTim().getActiveTimId()).collect(Collectors.toList()));
+        }
+        // delete from SDX the given records
+        if (deleteFromSdx.size() > 0) {
+            removeFromSdx(deleteFromSdx);
+        }
+
+        // delete from oracle the invOracleRecords?
+    }
+
+    private void resendTims(List<Long> activeTimIds) {
+        // TODO: migrate refresh logic to service and call
+    }
+
+    private void removeFromSdx(List<CAdvisorySituationDataDeposit> deleteFromSdx) {
+        // Issue one delete call to the REST service, encompassing all sat_record_ids
+        var satRecordIds = deleteFromSdx.stream().map(x -> x.getAsdd().getRecordId()).collect(Collectors.toList());
+        HashMap<Integer, Boolean> sdxDelResults = sdwService.deleteSdxDataByRecordIdIntegers(satRecordIds);
+
+        // Determine if anything failed
+        Boolean errorsOccurred = sdxDelResults.entrySet().stream()
+                .anyMatch(x -> x.getValue() != null && x.getValue() == false);
+        if (errorsOccurred) {
+            String failedResultsText = sdxDelResults.entrySet().stream().filter(x -> x.getValue() == false)
+                    .map(x -> x.getKey().toString()).collect(Collectors.joining(","));
+            if (StringUtils.isNotBlank(failedResultsText)) {
+                String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
+                try {
+                    mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Delete Fail", body,
+                            config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                } catch (Exception ex) {
+                    utility.logWithDate(body + ", and the email failed to send to support");
+                    ex.printStackTrace();
+                }
             }
         }
     }

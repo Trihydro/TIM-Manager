@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
@@ -34,14 +35,16 @@ public class OdeService {
     private Gson gson = new Gson();
     private RestTemplateProvider restTemplateProvider;
     private Utility utility;
+    private OdeProps odeProps;
 
     @Autowired
-    public void InjectDependencies(Utility _utility, RestTemplateProvider _restTemplateProvider) {
+    public void InjectDependencies(Utility _utility, RestTemplateProvider _restTemplateProvider,OdeProps _odeProps) {
         utility = _utility;
         restTemplateProvider = _restTemplateProvider;
+        odeProps = _odeProps;
     }
 
-    public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, String odeUrl, Integer index) {
+    public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, Integer index) {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
@@ -54,12 +57,24 @@ public class OdeService {
         // send TIM if not a test
         try {
             utility.logWithDate("Sending new TIM to RSU");
-            restTemplateProvider.GetRestTemplate().postForObject(odeUrl + "/tim", timToSendJson, String.class);
+            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson, String.class);
             TimeUnit.SECONDS.sleep(10);
         } catch (RuntimeException targetException) {
             System.out.println("Send new TIM to RSU exception: " + targetException.getMessage());
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+    
+    public void updateTimOnSdw(WydotTravelerInputData timToSend) {
+        String timToSendJson = gson.toJson(timToSend);
+
+        // send TIM
+        try {
+            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
+                    String.class);
+        } catch (RuntimeException targetException) {
+            System.out.println("exception");
         }
     }
 
@@ -77,7 +92,7 @@ public class OdeService {
         return null;
     }
 
-    public TimQuery submitTimQuery(WydotRsu rsu, int counter, String odeUrl) {
+    public TimQuery submitTimQuery(WydotRsu rsu, int counter) {
 
         // stop if this fails twice
         if (counter == 2)
@@ -93,10 +108,10 @@ public class OdeService {
         String responseStr = null;
 
         try {
-            responseStr = restTemplateProvider.GetRestTemplate().postForObject(odeUrl + "/tim/query", entity,
+            responseStr = restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim/query", entity,
                     String.class);
         } catch (RestClientException e) {
-            return submitTimQuery(rsu, counter + 1, odeUrl);
+            return submitTimQuery(rsu, counter + 1);
         }
 
         String[] items = responseStr.replaceAll("\\\"", "").replaceAll("\\:", "").replaceAll("indicies_set", "")

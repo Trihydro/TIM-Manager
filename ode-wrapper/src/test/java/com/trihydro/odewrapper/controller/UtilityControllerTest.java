@@ -69,7 +69,7 @@ public class UtilityControllerTest {
         wydotRsus.add(wydotRsu);
     }
 
-    private void setupIndicesSet(){
+    private void setupIndicesSet() {
         List<Integer> indices = new ArrayList<>();
         indices.add(1);
         indices.add(2);
@@ -129,8 +129,7 @@ public class UtilityControllerTest {
         addresses[0] = rsuTarget;
         when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
-                .thenReturn(null);
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(null);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -155,8 +154,7 @@ public class UtilityControllerTest {
 
         when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
-                .thenReturn(mockTimQuery);
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(mockTimQuery);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -182,8 +180,7 @@ public class UtilityControllerTest {
 
         when(mockConfiguration.getOdeUrl()).thenReturn("ode_url");
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class), isA(String.class)))
-                .thenReturn(mockTimQuery);
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(mockTimQuery);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -213,7 +210,7 @@ public class UtilityControllerTest {
         // Assert
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         MatcherAssert.assertThat(result.getBody(), instanceOf(TimDeleteSummary.class));
-        Assertions.assertNotNull((TimDeleteSummary)result.getBody());
+        Assertions.assertNotNull((TimDeleteSummary) result.getBody());
         verify(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
     }
 }

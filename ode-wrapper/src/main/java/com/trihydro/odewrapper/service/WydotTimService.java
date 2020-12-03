@@ -250,7 +250,7 @@ public class WydotTimService {
                 List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
                         .getActiveTimHoldingForRsu(rsu.getRsuTarget());
 
-                TimQuery timQuery = odeService.submitTimQuery(rsu, 0, configuration.getOdeUrl());
+                TimQuery timQuery = odeService.submitTimQuery(rsu, 0);
 
                 // if query failed, don't send TIM,
                 // log the error and continue
@@ -276,7 +276,7 @@ public class WydotTimService {
                 // add rsu to tim
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                odeService.sendNewTimToRsu(timToSend, endDateTime, configuration.getOdeUrl(), nextRsuIndex);
+                odeService.sendNewTimToRsu(timToSend, endDateTime, nextRsuIndex);
             }
         }
     }

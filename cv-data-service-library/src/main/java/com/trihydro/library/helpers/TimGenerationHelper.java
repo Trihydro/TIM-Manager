@@ -1,23 +1,17 @@
 package com.trihydro.library.helpers;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
 import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
-import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.MilepostReduction;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
-import com.trihydro.library.model.Logging_TimUpdateModel;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.ResubmitTimException;
@@ -40,7 +34,6 @@ import com.trihydro.library.service.TimGenerationProps;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;

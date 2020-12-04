@@ -12,19 +12,16 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.TimGenerationHelper;
-import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.model.Logging_TimUpdateModel;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimUpdateModel;
+import com.trihydro.library.model.TimeToLive;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 import com.trihydro.library.service.ActiveTimHoldingService;
@@ -39,14 +36,11 @@ import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimGenerationProps;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.MailException;
 
 @ExtendWith(MockitoExtension.class)
 public class TimGenerationHelperTest {
@@ -474,4 +468,157 @@ public class TimGenerationHelperTest {
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
+
+    @Test
+    public void resubmitToOde_SdxNewFail() {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<Long>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+        tum.setRoute("I 80");
+        tum.setSatRecordId("satRecordId");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 25" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+        doReturn("exception").when(mockOdeService).sendNewTimToSdw(any(), any(), any(), any());
+        doReturn("recId").when(mockSdwService).getNewRecordId();
+
+        // Act
+        var exceptions = uut.resubmitToOde(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, "exception"), ex);
+
+        verify(mockRegionService).updateRegionName(any(), any());
+        verify(mockActiveTimService).updateActiveTim_SatRecordId(any(), any());
+        verify(mockSdwService).getSdwDataByRecordId(any());
+        verify(mockSdwService).getNewRecordId();
+        verifyNoInteractions(mockPathNodeXYService);
+
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+    }
+
+    @Test
+    public void resubmitToOde_SdxNewSuccess() {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<Long>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+        tum.setRoute("I 80");
+        tum.setSatRecordId("satRecordId");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 25" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+        doReturn("").when(mockOdeService).sendNewTimToSdw(any(), any(), any(), any());
+        doReturn("recId").when(mockSdwService).getNewRecordId();
+
+        // Act
+        var exceptions = uut.resubmitToOde(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verify(mockRegionService).updateRegionName(any(), any());
+        verify(mockActiveTimService).updateActiveTim_SatRecordId(any(), any());
+        verify(mockSdwService).getSdwDataByRecordId(any());
+        verify(mockSdwService).getNewRecordId();
+        verifyNoInteractions(mockPathNodeXYService);
+
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+
+    }
+
+    @Test
+    public void resubmitToOde_SdxExistingFail() {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<Long>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+        tum.setRoute("I 80");
+        tum.setSatRecordId("satRecordId");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 25" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+        doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
+
+        var asdd = new AdvisorySituationDataDeposit();
+        asdd.setTimeToLive(TimeToLive.Day);
+        doReturn(asdd).when(mockSdwService).getSdwDataByRecordId(any());
+
+        // Act
+        var exceptions = uut.resubmitToOde(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, "exception"), ex);
+        verify(mockSdwService).getSdwDataByRecordId(any());
+        verify(mockOdeService).getServiceRegion(any());
+        verifyNoInteractions(mockPathNodeXYService);
+
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+    }
+
+    @Test
+    public void resubmitToOde_SdxExistingSuccess() {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<Long>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+        tum.setRoute("I 80");
+        tum.setSatRecordId("satRecordId");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 25" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+        doReturn("").when(mockOdeService).updateTimOnSdw(any());
+
+        var asdd = new AdvisorySituationDataDeposit();
+        asdd.setTimeToLive(TimeToLive.Day);
+        doReturn(asdd).when(mockSdwService).getSdwDataByRecordId(any());
+
+        // Act
+        var exceptions = uut.resubmitToOde(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verify(mockSdwService).getSdwDataByRecordId(any());
+        verify(mockOdeService).getServiceRegion(any());
+        verifyNoInteractions(mockPathNodeXYService);
+
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+    }
+
 }

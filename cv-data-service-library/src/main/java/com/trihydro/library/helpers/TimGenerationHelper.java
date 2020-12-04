@@ -97,7 +97,88 @@ public class TimGenerationHelper {
         sdwService = _sdwService;
     }
 
-    public OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
+    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
+        List<ResubmitTimException> exceptions = new ArrayList<>();
+        // iterate over tims, fetch, and push out
+        for (Long activeTimId : activeTimIds) {
+            var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
+
+            if (tum.getLaneWidth() == null) {
+                tum.setLaneWidth(config.getDefaultLaneWidth());
+            }
+
+            // Mileposts
+            WydotTim wydotTim = new WydotTim();
+            wydotTim.setRoute(tum.getRoute());
+            wydotTim.setDirection(tum.getDirection());
+            wydotTim.setStartPoint(tum.getStartPoint());
+            wydotTim.setEndPoint(tum.getEndPoint());
+
+            List<Milepost> mps = new ArrayList<>();
+            List<Milepost> allMps = new ArrayList<>();
+            if (wydotTim.getEndPoint() != null) {
+                mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+                utility.logWithDate(String.format("Found %d mileposts between %s and %s", mps.size(),
+                        gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
+            } else {
+                // point incident
+                MilepostBuffer mpb = new MilepostBuffer();
+                mpb.setBufferMiles(config.getPointIncidentBufferMiles());
+                mpb.setCommonName(wydotTim.getRoute());
+                mpb.setDirection(wydotTim.getDirection());
+                mpb.setPoint(wydotTim.getStartPoint());
+                allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
+                utility.logWithDate(String.format("Found %d mileposts for point %s", mps.size(),
+                        gson.toJson(wydotTim.getStartPoint())));
+            }
+            // reduce the mileposts by removing straight away posts
+            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+
+            if (mps.size() == 0) {
+                String exMsg = String.format(
+                        "Unable to send TIM to SDX, no mileposts found to determine service area for Active_Tim %s",
+                        tum.getActiveTimId());
+                utility.logWithDate(exMsg);
+                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                continue;
+            }
+
+            OdeTravelerInformationMessage tim = getTim(tum, mps, allMps);
+            if (tim == null) {
+                String exMsg = String.format("Failed to instantiate TIM for active_tim_id %s", tum.getActiveTimId());
+                utility.logWithDate(exMsg);
+                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                continue;
+            }
+            WydotTravelerInputData timToSend = new WydotTravelerInputData();
+            timToSend.setRequest(new ServiceRequest());
+            timToSend.setTim(tim);
+
+            // try to send to RSU if along route with RSUs
+            if (Arrays.asList(config.getRsuRoutes()).contains(tum.getRoute())) {
+                var exMsg = updateAndSendRSU(timToSend, tum);
+                if (StringUtils.isNotBlank(exMsg)) {
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                }
+            }
+
+            // only send to SDX if the sat record id exists
+            if (!StringUtils.isEmpty(tum.getSatRecordId()) && !StringUtils.isBlank(tum.getSatRecordId())) {
+                var exMsg = updateAndSendSDX(timToSend, tum, mps);
+                if (StringUtils.isNotBlank(exMsg)) {
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                }
+            } else {
+                String exMsg = "active_tim_id " + tum.getActiveTimId()
+                        + " not sent to SDX (no SAT_RECORD_ID found in database)";
+                utility.logWithDate(exMsg);
+                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+            }
+        }
+        return exceptions;
+    }
+
+    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps) {
         String nowAsISO = Instant.now().toString();
         DataFrame df = getDataFrame(aTim, nowAsISO, mps);
         // check to see if we have any itis codes
@@ -272,7 +353,7 @@ public class TimGenerationHelper {
         return region;
     }
 
-    public String getRsuRegionName(TimUpdateModel aTim, RSU rsu) {
+    private String getRsuRegionName(TimUpdateModel aTim, RSU rsu) {
         return getBaseRegionName(aTim, "_RSU-" + rsu.getRsuTarget());
     }
 
@@ -300,7 +381,7 @@ public class TimGenerationHelper {
         return regionName;
     }
 
-    public String getSATRegionName(TimUpdateModel aTim, String recordId) {
+    private String getSATRegionName(TimUpdateModel aTim, String recordId) {
 
         // name is direction_route_startMP_endMP_SAT-satRecordId_TIMType_ClientId_pk
         String oldName = aTim.getRegionName();
@@ -311,87 +392,6 @@ public class TimGenerationHelper {
             // generating from scratch...
             return getBaseRegionName(aTim, "_SAT-" + recordId);
         }
-    }
-
-    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
-        List<ResubmitTimException> exceptions = new ArrayList<>();
-        // iterate over tims, fetch, and push out
-        for (Long activeTimId : activeTimIds) {
-            var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
-
-            if (tum.getLaneWidth() == null) {
-                tum.setLaneWidth(config.getDefaultLaneWidth());
-            }
-
-            // Mileposts
-            WydotTim wydotTim = new WydotTim();
-            wydotTim.setRoute(tum.getRoute());
-            wydotTim.setDirection(tum.getDirection());
-            wydotTim.setStartPoint(tum.getStartPoint());
-            wydotTim.setEndPoint(tum.getEndPoint());
-
-            List<Milepost> mps = new ArrayList<>();
-            List<Milepost> allMps = new ArrayList<>();
-            if (wydotTim.getEndPoint() != null) {
-                mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
-                utility.logWithDate(String.format("Found %d mileposts between %s and %s", mps.size(),
-                        gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
-            } else {
-                // point incident
-                MilepostBuffer mpb = new MilepostBuffer();
-                mpb.setBufferMiles(config.getPointIncidentBufferMiles());
-                mpb.setCommonName(wydotTim.getRoute());
-                mpb.setDirection(wydotTim.getDirection());
-                mpb.setPoint(wydotTim.getStartPoint());
-                allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
-                utility.logWithDate(String.format("Found %d mileposts for point %s", mps.size(),
-                        gson.toJson(wydotTim.getStartPoint())));
-            }
-            // reduce the mileposts by removing straight away posts
-            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-
-            if (mps.size() == 0) {
-                String exMsg = String.format(
-                        "Unable to send TIM to SDX, no mileposts found to determine service area for Active_Tim %s",
-                        tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                continue;
-            }
-
-            OdeTravelerInformationMessage tim = getTim(tum, mps, allMps);
-            if (tim == null) {
-                String exMsg = String.format("Failed to instantiate TIM for active_tim_id %s", tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                continue;
-            }
-            WydotTravelerInputData timToSend = new WydotTravelerInputData();
-            timToSend.setRequest(new ServiceRequest());
-            timToSend.setTim(tim);
-
-            // try to send to RSU if along route with RSUs
-            if (Arrays.asList(config.getRsuRoutes()).contains(tum.getRoute())) {
-                var exMsg = updateAndSendRSU(timToSend, tum);
-                if (StringUtils.isNotBlank(exMsg)) {
-                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                }
-            }
-
-            // only send to SDX if the sat record id exists
-            if (!StringUtils.isEmpty(tum.getSatRecordId()) && !StringUtils.isBlank(tum.getSatRecordId())) {
-                var exMsg = updateAndSendSDX(timToSend, tum, mps);
-                if (StringUtils.isNotBlank(exMsg)) {
-                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                }
-            } else {
-                String exMsg = "active_tim_id " + tum.getActiveTimId()
-                        + " not sent to SDX (no SAT_RECORD_ID found in database)";
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-            }
-        }
-        return exceptions;
     }
 
     private String updateAndSendRSU(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
@@ -406,7 +406,7 @@ public class TimGenerationHelper {
 
             // if no RSUs found
             if (dbRsus.size() == 0) {
-                exMsg = "No possible RSUs found for active_tim_id " + aTim.getActiveTimId()
+                exMsg = "No possible RSUs found for active_tim_id " + aTim.getActiveTimId();
                 utility.logWithDate(exMsg);
                 return exMsg;
             }
@@ -439,8 +439,8 @@ public class TimGenerationHelper {
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
                 System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
                 var rsuExMsg = odeService.updateTimOnRsu(timToSend);
-                if(!StringUtils.isEmpty(rsuExMsg)){
-                    exMsg+=rsuExMsg+ "\n";
+                if (!StringUtils.isEmpty(rsuExMsg)) {
+                    exMsg += rsuExMsg + "\n";
                 }
             }
         } else {
@@ -462,7 +462,7 @@ public class TimGenerationHelper {
                 if (timQuery == null) {
                     WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
                     var tmpErrMsg = "Returning without sending TIM to RSU. submitTimQuery failed for RSU "
-                    + gson.toJson(wydotRsu);
+                            + gson.toJson(wydotRsu);
                     exMsg += tmpErrMsg + "\n";
                     utility.logWithDate(tmpErrMsg);
                     continue;
@@ -476,7 +476,7 @@ public class TimGenerationHelper {
                 if (nextRsuIndex == null) {
                     WydotRsu wydotRsu = (WydotRsu) timToSend.getRequest().getRsus()[0];
                     var tmpErrMsg = "Unable to find an available index for RSU " + gson.toJson(wydotRsu);
-                    exMsg+= tmpErrMsg + "\n";
+                    exMsg += tmpErrMsg + "\n";
                     utility.logWithDate(tmpErrMsg);
                     continue;
                 }
@@ -493,7 +493,7 @@ public class TimGenerationHelper {
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
                 var newRsuEx = odeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), nextRsuIndex);
-                if(!StringUtils.isEmpty(newRsuEx)){
+                if (!StringUtils.isEmpty(newRsuEx)) {
                     exMsg += newRsuEx + "\n";
                 }
                 rsus[0] = dbRsus.get(i);
@@ -504,7 +504,6 @@ public class TimGenerationHelper {
     }
 
     private String updateAndSendSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
-        String exMsg = "";
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
         SDW sdw = new SDW();

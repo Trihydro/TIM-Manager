@@ -1,9 +1,6 @@
 package com.trihydro.timrefresh;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -12,30 +9,20 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.mail.MessagingException;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Logging_TimUpdateModel;
-import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.TimUpdateModel;
-import com.trihydro.library.model.TimeToLive;
-import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.model.WydotRsuTim;
-import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.DataFrameService;
-import com.trihydro.library.service.MilepostService;
-import com.trihydro.library.service.OdeService;
-import com.trihydro.library.service.RegionService;
-import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 
@@ -48,10 +35,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailException;
 
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
-
 @ExtendWith(MockitoExtension.class)
 public class TimRefreshControllerTest {
     private long timID = 1l;
@@ -63,19 +46,7 @@ public class TimRefreshControllerTest {
     @Mock
     Utility mockUtility;
     @Mock
-    OdeService mockOdeService;
-    @Mock
-    MilepostService mockMilepostService;
-    @Mock
     ActiveTimService mockActiveTimService;
-    @Mock
-    DataFrameService mockDataFrameService;
-    @Mock
-    RegionService mockRegionService;
-    @Mock
-    RsuService mockRsuService;
-    @Mock
-    MilepostReduction mockMilepostReduction;
     @Mock
     EmailHelper mockEmailHelper;
     @Mock
@@ -89,39 +60,6 @@ public class TimRefreshControllerTest {
         System.out.println("Executing " + testInfo.getTestMethod().get().getName());
     }
 
-    private void setupRoutes() {
-        String[] routes = new String[1];
-        routes[0] = "I 80";
-        doReturn(routes).when(mockConfiguration).getRsuRoutes();
-    }
-
-    private void setupDataFrameService() {
-        String[] itisCodes = new String[1];
-        itisCodes[0] = "1";
-        when(mockDataFrameService.getItisCodesForDataFrameId(isA(Integer.class))).thenReturn(itisCodes);
-    }
-
-    private void setupMilePost() {
-        List<Milepost> mps = new ArrayList<Milepost>();
-        Milepost startMp = new Milepost();
-        startMp.setCommonName("route1");
-        startMp.setMilepost(250d);
-        startMp.setDirection("i");
-        startMp.setLatitude(BigDecimal.valueOf(105));
-        startMp.setLongitude(BigDecimal.valueOf(45d));
-
-        Milepost endMp = new Milepost();
-        endMp.setCommonName("route1");
-        endMp.setMilepost(255d);
-        endMp.setDirection("i");
-        endMp.setLatitude(BigDecimal.valueOf(105d));
-        endMp.setLongitude(BigDecimal.valueOf(45d));
-        mps.add(startMp);
-        mps.add(endMp);
-        doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-    }
-
     @Test
     public void TestPerformTaskUsingCron_NoData() {
         // setup return
@@ -132,96 +70,6 @@ public class TimRefreshControllerTest {
         // verify getExpiringActiveTims called once
         verify(mockActiveTimService).getExpiringActiveTims();
         // verify no further interactions on ActiveTimService
-        verifyNoMoreInteractions(mockActiveTimService);
-        // verify no emails sent
-        verifyNoInteractions(mockEmailHelper);
-    }
-
-    @Test
-    public void TestPerformTaskUsingCron_Rsu_NotFound() {
-        // setup return
-        setupRoutes();
-        setupMilePost();
-        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
-        ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
-        ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
-        TimUpdateModel tum = getRsuTim();
-        arrLst.add(tum);
-        when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(new OdeTravelerInformationMessage());
-        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-        when(mockRsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
-        doReturn(rsus).when(mockRsuService).getRsusByLatLong(anyString(), any(), any(), anyString());
-
-        // call the function to test
-        controllerUnderTest.performTaskUsingCron();
-
-        // verify functions were called
-        verify(mockRsuService).getFullRsusTimIsOn(timID);
-        verify(mockRsuService).getRsusByLatLong(anyString(), any(), any(), anyString());
-        verifyNoMoreInteractions(mockRsuService);
-        // verify no emails sent
-        verifyNoInteractions(mockEmailHelper);
-    }
-
-    @Test
-    public void TestPerformTaskUsingCron_Rsu() {
-        // setup return
-        setupRoutes();
-        setupMilePost();
-        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
-        ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
-
-        WydotRsuTim wydotRsuTim = new WydotRsuTim();
-        wydotRsuTim.setRsuIndex(1);
-        wydotRsuTim.setRsuTarget("0.0.0.0");
-        wydotRsuTim.setRsuUsername("user");
-        wydotRsuTim.setRsuPassword("pass");
-        wydotRsuTims.add(wydotRsuTim);
-
-        TimUpdateModel tum = getRsuTim();
-        arrLst.add(tum);
-
-        when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(getTim());
-        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-        when(mockRsuService.getFullRsusTimIsOn(any(long.class))).thenReturn(wydotRsuTims);
-
-        // call the function to test
-        controllerUnderTest.performTaskUsingCron();
-
-        // verify static functions were called
-        verify(mockRsuService).getFullRsusTimIsOn(timID);
-        verify(mockOdeService).updateTimOnRsu(any(WydotTravelerInputData.class));
-
-        verifyNoMoreInteractions(mockRsuService);
-        // verify no emails sent
-        verifyNoInteractions(mockEmailHelper);
-    }
-
-    @Test
-    public void TestPerformTaskUsingCron_Sdw() {
-        // setup return
-        setupRoutes();
-        setupMilePost();
-        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
-
-        TimUpdateModel tum = getSdwTim();
-        arrLst.add(tum);
-
-        when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(new OdeTravelerInformationMessage());
-        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-        when(mockSdwService.getSdwDataByRecordId(any(String.class))).thenReturn(getAdvisorySituationDataDeposit());
-
-        // call the function to test
-        controllerUnderTest.performTaskUsingCron();
-
-        // verify functions were called
-        verify(mockActiveTimService).getExpiringActiveTims();
-        verify(mockOdeService).getServiceRegion(any());
-        verify(mockOdeService).updateTimOnSdw(any());
-        verify(mockRsuService).getFullRsusTimIsOn(any());
-        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-
-        verifyNoMoreInteractions(mockMilepostService);
         verifyNoMoreInteractions(mockActiveTimService);
         // verify no emails sent
         verifyNoInteractions(mockEmailHelper);
@@ -247,9 +95,9 @@ public class TimRefreshControllerTest {
         body += "The associated ActiveTim records are: <br/>";
         body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
-        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
-        verifyNoMoreInteractions(mockRsuService);
+        verifyNoInteractions(mockTimGenerationHelper);
     }
 
     @Test
@@ -272,9 +120,9 @@ public class TimRefreshControllerTest {
         body += "The associated ActiveTim records are: <br/>";
         body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
-        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
-        verifyNoMoreInteractions(mockRsuService);
+        verifyNoInteractions(mockTimGenerationHelper);
     }
 
     @Test
@@ -297,27 +145,57 @@ public class TimRefreshControllerTest {
         body += "The associated ActiveTim records are: <br/>";
         body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
-        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Invalid TIM", body,
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
-        verifyNoMoreInteractions(mockRsuService);
+        verifyNoInteractions(mockTimGenerationHelper);
     }
 
-    private OdeTravelerInformationMessage getTim() {
-        var tim = new OdeTravelerInformationMessage();
-        tim.setDataframes(getDataFrames());
+    @Test
+    public void TestPerformTaskUsingCron_RefreshException() throws MailException, MessagingException {
+        // setup return
+        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+        TimUpdateModel tum = getRsuTim();
+        arrLst.add(tum);
 
-        return tim;
+        List<ResubmitTimException> resubExceptions = new ArrayList<>();
+        resubExceptions.add(new ResubmitTimException(-1l, "exception message"));
+
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExceptions);
+
+        // call the function to test
+        controllerUnderTest.performTaskUsingCron();
+
+        // verify static functions were called
+        verify(mockTimGenerationHelper).resubmitToOde(Collections.singletonList(tum.getActiveTimId()));
+        var gson = new Gson();
+        String body = "The TIM Refresh application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
+        body += "<br/>";
+        body += gson.toJson(resubExceptions.get(0));
+        body += "<br/>";
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
+                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
     }
 
-    private DataFrame[] getDataFrames() {
-        DataFrame df = new DataFrame();
-        df.setRegions(getRegions());
-        return new DataFrame[] { df };
-    }
+    @Test
+    public void TestPerformTaskUsingCron_Success() throws MailException, MessagingException {
+        // setup return
+        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+        TimUpdateModel tum = getRsuTim();
+        arrLst.add(tum);
 
-    private Region[] getRegions() {
-        var region = new Region();
-        return new Region[] { region };
+        List<ResubmitTimException> resubExceptions = new ArrayList<>();
+
+        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExceptions);
+
+        // call the function to test
+        controllerUnderTest.performTaskUsingCron();
+
+        // verify static functions were called
+        verify(mockTimGenerationHelper).resubmitToOde(Collections.singletonList(tum.getActiveTimId()));
+        // verify no emails sent
+        verifyNoInteractions(mockEmailHelper);
     }
 
     private TimUpdateModel getTumBase() {
@@ -342,16 +220,157 @@ public class TimRefreshControllerTest {
         return tum;
     }
 
-    private TimUpdateModel getSdwTim() {
-        TimUpdateModel tum = getTumBase();
-        tum.setSatRecordId("SatRecord");
-        return tum;
-    }
+    // private void setupRoutes() {
+    // String[] routes = new String[1];
+    // routes[0] = "I 80";
+    // doReturn(routes).when(mockConfiguration).getRsuRoutes();
+    // }
 
-    private AdvisorySituationDataDeposit getAdvisorySituationDataDeposit() {
-        AdvisorySituationDataDeposit asdd = new AdvisorySituationDataDeposit();
-        asdd.setTimeToLive(TimeToLive.Day);
+    // private void setupMilePost() {
+    // List<Milepost> mps = new ArrayList<Milepost>();
+    // Milepost startMp = new Milepost();
+    // startMp.setCommonName("route1");
+    // startMp.setMilepost(250d);
+    // startMp.setDirection("i");
+    // startMp.setLatitude(BigDecimal.valueOf(105));
+    // startMp.setLongitude(BigDecimal.valueOf(45d));
 
-        return asdd;
-    }
+    // Milepost endMp = new Milepost();
+    // endMp.setCommonName("route1");
+    // endMp.setMilepost(255d);
+    // endMp.setDirection("i");
+    // endMp.setLatitude(BigDecimal.valueOf(105d));
+    // endMp.setLongitude(BigDecimal.valueOf(45d));
+    // mps.add(startMp);
+    // mps.add(endMp);
+    // doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+    // doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(),
+    // any());
+    // }
+
+    // @Test
+    // public void TestPerformTaskUsingCron_Rsu_NotFound() {
+    // // setup return
+    // setupRoutes();
+    // setupMilePost();
+    // ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+    // ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
+    // ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
+    // TimUpdateModel tum = getRsuTim();
+    // arrLst.add(tum);
+    // when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(new
+    // OdeTravelerInformationMessage());
+    // when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+    // when(mockRsuService.getFullRsusTimIsOn(isA(long.class))).thenReturn(wydotRsuTims);
+    // doReturn(rsus).when(mockRsuService).getRsusByLatLong(anyString(), any(),
+    // any(), anyString());
+
+    // // call the function to test
+    // controllerUnderTest.performTaskUsingCron();
+
+    // // verify functions were called
+    // verify(mockRsuService).getFullRsusTimIsOn(timID);
+    // verify(mockRsuService).getRsusByLatLong(anyString(), any(), any(),
+    // anyString());
+    // verifyNoMoreInteractions(mockRsuService);
+    // // verify no emails sent
+    // verifyNoInteractions(mockEmailHelper);
+    // }
+
+    // @Test
+    // public void TestPerformTaskUsingCron_Rsu() {
+    // // setup return
+    // setupRoutes();
+    // setupMilePost();
+    // ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+    // ArrayList<WydotRsuTim> wydotRsuTims = new ArrayList<WydotRsuTim>();
+
+    // WydotRsuTim wydotRsuTim = new WydotRsuTim();
+    // wydotRsuTim.setRsuIndex(1);
+    // wydotRsuTim.setRsuTarget("0.0.0.0");
+    // wydotRsuTim.setRsuUsername("user");
+    // wydotRsuTim.setRsuPassword("pass");
+    // wydotRsuTims.add(wydotRsuTim);
+
+    // TimUpdateModel tum = getRsuTim();
+    // arrLst.add(tum);
+
+    // when(mockTimGenerationHelper.getTim(any(), any(),
+    // any())).thenReturn(getTim());
+    // when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+    // when(mockRsuService.getFullRsusTimIsOn(any(long.class))).thenReturn(wydotRsuTims);
+
+    // // call the function to test
+    // controllerUnderTest.performTaskUsingCron();
+
+    // // verify static functions were called
+    // verify(mockRsuService).getFullRsusTimIsOn(timID);
+    // verify(mockOdeService).updateTimOnRsu(any(WydotTravelerInputData.class));
+
+    // verifyNoMoreInteractions(mockRsuService);
+    // // verify no emails sent
+    // verifyNoInteractions(mockEmailHelper);
+    // }
+
+    // @Test
+    // public void TestPerformTaskUsingCron_Sdw() {
+    // // setup return
+    // setupRoutes();
+    // setupMilePost();
+    // ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
+
+    // TimUpdateModel tum = getSdwTim();
+    // arrLst.add(tum);
+
+    // when(mockTimGenerationHelper.getTim(any(), any(), any())).thenReturn(new
+    // OdeTravelerInformationMessage());
+    // when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+    // when(mockSdwService.getSdwDataByRecordId(any(String.class))).thenReturn(getAdvisorySituationDataDeposit());
+
+    // // call the function to test
+    // controllerUnderTest.performTaskUsingCron();
+
+    // // verify functions were called
+    // verify(mockActiveTimService).getExpiringActiveTims();
+    // verify(mockOdeService).getServiceRegion(any());
+    // verify(mockOdeService).updateTimOnSdw(any());
+    // verify(mockRsuService).getFullRsusTimIsOn(any());
+    // verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+
+    // verifyNoMoreInteractions(mockMilepostService);
+    // verifyNoMoreInteractions(mockActiveTimService);
+    // // verify no emails sent
+    // verifyNoInteractions(mockEmailHelper);
+    // }
+
+    // private OdeTravelerInformationMessage getTim() {
+    // var tim = new OdeTravelerInformationMessage();
+    // tim.setDataframes(getDataFrames());
+
+    // return tim;
+    // }
+
+    // private DataFrame[] getDataFrames() {
+    // DataFrame df = new DataFrame();
+    // df.setRegions(getRegions());
+    // return new DataFrame[] { df };
+    // }
+
+    // private Region[] getRegions() {
+    // var region = new Region();
+    // return new Region[] { region };
+    // }
+
+    // private TimUpdateModel getSdwTim() {
+    // TimUpdateModel tum = getTumBase();
+    // tum.setSatRecordId("SatRecord");
+    // return tum;
+    // }
+
+    // private AdvisorySituationDataDeposit getAdvisorySituationDataDeposit() {
+    // AdvisorySituationDataDeposit asdd = new AdvisorySituationDataDeposit();
+    // asdd.setTimeToLive(TimeToLive.Day);
+
+    // return asdd;
+    // }
 }

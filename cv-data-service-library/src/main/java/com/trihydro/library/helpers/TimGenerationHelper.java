@@ -99,9 +99,17 @@ public class TimGenerationHelper {
 
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
+        if (activeTimIds == null) {
+            return exceptions;
+        }
         // iterate over tims, fetch, and push out
         for (Long activeTimId : activeTimIds) {
             var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
+
+            if (tum == null) {
+                exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
+                continue;
+            }
 
             if (tum.getLaneWidth() == null) {
                 tum.setLaneWidth(config.getDefaultLaneWidth());
@@ -117,7 +125,7 @@ public class TimGenerationHelper {
             List<Milepost> mps = new ArrayList<>();
             List<Milepost> allMps = new ArrayList<>();
             if (wydotTim.getEndPoint() != null) {
-                mps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+                allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
                 utility.logWithDate(String.format("Found %d mileposts between %s and %s", mps.size(),
                         gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
             } else {
@@ -172,7 +180,6 @@ public class TimGenerationHelper {
                 String exMsg = "active_tim_id " + tum.getActiveTimId()
                         + " not sent to SDX (no SAT_RECORD_ID found in database)";
                 utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
             }
         }
         return exceptions;

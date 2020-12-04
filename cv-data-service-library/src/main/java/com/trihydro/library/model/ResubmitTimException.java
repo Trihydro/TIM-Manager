@@ -27,4 +27,19 @@ public class ResubmitTimException {
     public void setActiveTimId(Long activeTimId) {
         this.activeTimId = activeTimId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof ResubmitTimException)) {
+            return false;
+        }
+
+        ResubmitTimException comp = (ResubmitTimException) o;
+        return this.activeTimId == comp.getActiveTimId()
+                && this.getExceptionMessage().equals(comp.getExceptionMessage());
+    }
 }

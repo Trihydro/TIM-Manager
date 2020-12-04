@@ -59,7 +59,6 @@ public class ActiveTimController extends BaseController {
 		sqlNullHandler = _sqlNullHandler;
 	}
 
-	// select all ITIS codes
 	@RequestMapping(value = "/expiring", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<TimUpdateModel>> GetExpiringActiveTims() {
 		TimUpdateModel activeTim = null;
@@ -191,6 +190,129 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(activeTims);
 	}
 
+	@RequestMapping(value = "/update-model", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<TimUpdateModel> GetUpdateModelFromActiveTimId(@PathVariable Long activeTimId) {
+		TimUpdateModel activeTim = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+
+			String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
+			selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
+			selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
+			selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
+			selectStatement += ", r.region_id, r.name as region_name, r.anchor_lat, r.anchor_long, r.lane_width";
+			selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
+			selectStatement += ", r.directionality, r.direction AS region_direction";
+			selectStatement += " FROM active_tim atim";
+			selectStatement += " INNER JOIN tim t ON atim.tim_id = t.tim_id";
+			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
+			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
+			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
+			// where active_tim_id is provided
+			selectStatement += " WHERE atim.active_tim_id = " + activeTimId;
+			rs = statement.executeQuery(selectStatement);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new TimUpdateModel();
+
+				// Active_Tim properties
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+
+				Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+				BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
+
+				BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+				BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
+
+				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START", UTCCalendar));
+				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END", UTCCalendar));
+
+				// Tim properties
+				activeTim.setMsgCnt(rs.getInt("MSG_CNT"));
+				activeTim.setUrlB(rs.getString("URL_B"));
+				activeTim.setPacketId(rs.getString("PACKET_ID"));
+
+				// Tim Type properties
+				activeTim.setTimTypeName(rs.getString("TIM_TYPE_NAME"));
+				activeTim.setTimTypeDescription(rs.getString("TIM_TYPE_DESCRIPTION"));
+
+				// Region Properties
+				activeTim.setRegionId(rs.getInt("REGION_ID"));
+				activeTim.setRegionName(rs.getString("REGION_NAME"));
+				activeTim.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
+				activeTim.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
+
+				activeTim.setLaneWidth(rs.getBigDecimal("LANE_WIDTH"));
+				activeTim.setRegionDirection(rs.getString("REGION_DIRECTION"));
+				activeTim.setDirectionality(rs.getString("DIRECTIONALITY"));
+				activeTim.setClosedPath(rs.getBoolean("CLOSED_PATH"));
+				activeTim.setPathId(rs.getInt("PATH_ID"));
+				activeTim.setRegionDescription(rs.getString("REGION_DESCRIPTION"));
+
+				// DataFrame properties
+				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
+				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
+				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
+				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
+				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
+				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
+				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+
+				// set dataFrame content. it's required for the ODE, so if we didn't record it,
+				// assume Advisory
+				String dfContent = rs.getString("DF_CONTENT");
+				if (dfContent == null || dfContent.isEmpty()) {
+					dfContent = "advisory";
+				}
+				activeTim.setDfContent(dfContent);
+				activeTim.setUrl(rs.getString("URL"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTim);
+	}
+	
 	@RequestMapping(value = "/update-sat-record-id/{activeTimId}/{satRecordId}", method = RequestMethod.PUT)
 	public ResponseEntity<Boolean> updateActiveTim_SatRecordId(@PathVariable Long activeTimId,
 			@PathVariable String satRecordId) {

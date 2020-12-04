@@ -193,4 +193,11 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		ResponseEntity<String> response = restTemplateProvider.GetRestTemplate().getForEntity(url, String.class);
 		return response.getBody();
 	}
+
+	public TimUpdateModel getUpdateModelFromActiveTimId(Long activeTimId) {
+		String url = String.format("%s/active-tim/update-model/%d", config.getCvRestService(), activeTimId);
+		ResponseEntity<TimUpdateModel> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
+				TimUpdateModel.class);
+		return response.getBody();
+	}
 }

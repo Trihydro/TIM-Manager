@@ -20,6 +20,7 @@ import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
+import com.trihydro.library.service.TimGenerationProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Import;
@@ -33,7 +34,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
         Utility.class, RestTemplateProvider.class, MilepostReduction.class, JavaMailSenderImplProvider.class,
         EmailHelper.class })
-public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, EmailProps, OdeProps {
+public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, EmailProps, OdeProps, TimGenerationProps {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);

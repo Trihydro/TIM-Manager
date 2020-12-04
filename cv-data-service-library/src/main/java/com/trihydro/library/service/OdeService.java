@@ -24,7 +24,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
@@ -50,7 +53,7 @@ public class OdeService {
         odeProps = _odeProps;
     }
 
-    public void sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, Integer index) {
+    public String sendNewTimToRsu(WydotTravelerInputData timToSend, String endDateTime, Integer index) {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         timToSend.getRequest().setSnmp(getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
@@ -58,29 +61,44 @@ public class OdeService {
         timToSend.getTim().setMsgCnt(1);
         timToSend.getRequest().getRsus()[0].setRsuIndex(index);
 
-        String timToSendJson = gson.toJson(timToSend);
+        // String timToSendJson = gson.toJson(timToSend);
 
-        // send TIM if not a test
-        try {
-            utility.logWithDate("Sending new TIM to RSU");
-            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
-                    String.class);
-            TimeUnit.SECONDS.sleep(10);
-        } catch (RuntimeException targetException) {
-            System.out.println("Send new TIM to RSU exception: " + targetException.getMessage());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        String exMsg = "";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<WydotTravelerInputData> entity = new HttpEntity<WydotTravelerInputData>(timToSend, headers);
+        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
+                .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.POST, entity, String.class);
+        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
+            exMsg = "Failed to send new TIM to RSU: " + response.getBody();
+            utility.logWithDate(exMsg);
         }
+        return exMsg;
     }
 
-    public void updateTimOnRsu(WydotTravelerInputData timToSend) {
-
-        String timToSendJson = gson.toJson(timToSend);
-        restTemplateProvider.GetRestTemplate().put(odeProps.getOdeUrl() + "/tim", timToSendJson, String.class);
+    /**
+     * 
+     * @param timToSend The TIM to submit to the ODE
+     * @return String representing any errors. If string is empty, no errors
+     *         occured.
+     */
+    public String updateTimOnRsu(WydotTravelerInputData timToSend) {
+        String exMsg = "";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<WydotTravelerInputData> entity = new HttpEntity<WydotTravelerInputData>(timToSend, headers);
+        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
+                .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.PUT, entity, String.class);
+        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
+            exMsg = "Failed to update TIM on RSU: " + response.getBody();
+            utility.logWithDate(exMsg);
+        }
+        return exMsg;
     }
 
-    public void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps, TimeToLive ttl) {
-
+    public String sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps,
+            TimeToLive ttl) {
+        String exMsg = "";
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
 
@@ -97,29 +115,31 @@ public class OdeService {
         // set sdw block in TIM
         timToSend.getRequest().setSdw(sdw);
 
-        // send to ODE
-        String timToSendJson = gson.toJson(timToSend);
-
-        try {
-            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
-                    String.class);
-            System.out.println("Successfully sent POST to ODE to send new TIM: " + timToSendJson);
-        } catch (RuntimeException targetException) {
-            System.out.println("Failed to POST new SDX TIM: " + timToSendJson);
-            targetException.printStackTrace();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<WydotTravelerInputData> entity = new HttpEntity<WydotTravelerInputData>(timToSend, headers);
+        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
+                .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.POST, entity, String.class);
+        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
+            exMsg = "Failed to send new TIM to SDX: " + response.getBody();
+            utility.logWithDate(exMsg);
         }
+        return exMsg;
     }
 
-    public void updateTimOnSdw(WydotTravelerInputData timToSend) {
-        String timToSendJson = gson.toJson(timToSend);
+    public String updateTimOnSdw(WydotTravelerInputData timToSend) {
 
-        // send TIM
-        try {
-            restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
-                    String.class);
-        } catch (RuntimeException targetException) {
-            System.out.println("exception");
+        String exMsg = "";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<WydotTravelerInputData> entity = new HttpEntity<WydotTravelerInputData>(timToSend, headers);
+        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
+                .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.PUT, entity, String.class);
+        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
+            exMsg = "Failed to update TIM on SDX: " + response.getBody();
+            utility.logWithDate(exMsg);
         }
+        return exMsg;
     }
 
     public Integer findFirstAvailableIndexWithRsuIndex(List<Integer> indicies) {

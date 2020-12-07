@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
@@ -72,13 +73,15 @@ public class WydotTimService {
     private TimRsuService timRsuService;
     private RsuService rsuService;
     private TimService timService;
+    private TimGenerationHelper timGenerationHelper;
 
     @Autowired
     public void InjectDependencies(BasicConfiguration configurationRhs, EmailHelper _emailHelper,
             TimTypeService _timTypeService, SdwService _sdwService, Utility _utility, OdeService _odeService,
             CreateBaseTimUtil _createBaseTimUtil, ActiveTimHoldingService _activeTimHoldingService,
             ActiveTimService _activeTimService, TimRsuService _timRsuService,
-            RestTemplateProvider _restTemplateProvider, RsuService _rsuService, TimService _timService) {
+            RestTemplateProvider _restTemplateProvider, RsuService _rsuService, TimService _timService,
+            TimGenerationHelper _timGenerationHelper) {
         configuration = configurationRhs;
         emailHelper = _emailHelper;
         timTypeService = _timTypeService;
@@ -92,6 +95,7 @@ public class WydotTimService {
         restTemplateProvider = _restTemplateProvider;
         rsuService = _rsuService;
         timService = _timService;
+        timGenerationHelper = _timGenerationHelper;
     }
 
     private RestTemplateProvider restTemplateProvider;
@@ -105,7 +109,8 @@ public class WydotTimService {
             String startDateTime, String endDateTime, ContentEnum content, TravelerInfoType frameType) {
 
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration, content, frameType);
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, configuration, content,
+                frameType);
 
         if (timToSend == null) {
             return null;
@@ -122,7 +127,7 @@ public class WydotTimService {
             int durationTime = utility.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
             // J2735 has duration time of 0-32000
             // the ODE fails if we have greater than 32000
-            if(durationTime > 32000){
+            if (durationTime > 32000) {
                 durationTime = 32000;
             }
             timToSend.getTim().getDataframes()[0].setDurationTime(durationTime);
@@ -274,9 +279,13 @@ public class WydotTimService {
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
                 // add rsu to tim
+                rsu.setRsuIndex(nextRsuIndex);
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
-                odeService.sendNewTimToRsu(timToSend, endDateTime, nextRsuIndex);
+
+                // set msgCnt to 1
+                timToSend.getTim().setMsgCnt(1);
+                odeService.sendNewTimToRsu(timToSend);
             }
         }
     }
@@ -472,7 +481,7 @@ public class WydotTimService {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         TimRsu timRsu = timRsuService.getTimRsu(timId, rsuId);
         timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
-        timToSend.getRequest().setSnmp(odeService.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
+        timToSend.getRequest().setSnmp(timGenerationHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
         String timToSendJson = gson.toJson(updatedTim);
 

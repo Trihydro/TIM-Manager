@@ -1,10 +1,17 @@
 package com.trihydro.library.helpers;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.google.gson.Gson;
 import com.grum.geocalc.Coordinate;
@@ -423,7 +430,7 @@ public class TimGenerationHelper {
                 : "";
         String endTimeString = aTim.getEndDate_Timestamp() != null ? aTim.getEndDate_Timestamp().toInstant().toString()
                 : "";
-        SNMP snmp = odeService.getSnmp(startTimeString, endTimeString, timToSend);
+        SNMP snmp = getSnmp(startTimeString, endTimeString, timToSend);
         timToSend.getRequest().setSnmp(snmp);
 
         RSU[] rsus = new RSU[1];
@@ -498,7 +505,11 @@ public class TimGenerationHelper {
                 activeTimHolding.setRsuIndex(nextRsuIndex);
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
-                var newRsuEx = odeService.sendNewTimToRsu(timToSend, aTim.getEndDateTime(), nextRsuIndex);
+                // set msgCnt to 1 and create new packetId
+                timToSend.getTim().setMsgCnt(1);
+                timToSend.getRequest().getRsus()[0].setRsuIndex(nextRsuIndex);
+
+                var newRsuEx = odeService.sendNewTimToRsu(timToSend);
                 if (!StringUtils.isEmpty(newRsuEx)) {
                     exMsg += newRsuEx + "\n";
                 }
@@ -520,7 +531,7 @@ public class TimGenerationHelper {
         }
 
         // fetch all mileposts, get service region by bounding box
-        OdeGeoRegion serviceRegion = odeService.getServiceRegion(mps);
+        OdeGeoRegion serviceRegion = getServiceRegion(mps);
 
         // we are saving our ttl unencoded at the root level of the object as an int
         // representing the enum
@@ -546,7 +557,92 @@ public class TimGenerationHelper {
         // Update active_tim.
         activeTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
-        return odeService.sendNewTimToSdw(timToSend, recordId, mps, config.getSdwTtl());
+
+        // set msgCnt to 1 and create new packetId
+        timToSend.getTim().setMsgCnt(1);
+
+        SDW sdw = new SDW();
+
+        // calculate service region
+        sdw.setServiceRegion(getServiceRegion(mps));
+
+        // set time to live
+        sdw.setTtl(config.getSdwTtl());
+        // set new record id
+        sdw.setRecordId(recordId);
+
+        // set sdw block in TIM
+        timToSend.getRequest().setSdw(sdw);
+
+        return odeService.sendNewTimToSdw(timToSend, recordId, mps);
+    }
+
+    private OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {
+
+        Comparator<Milepost> compLat = (l1, l2) -> l1.getLatitude().compareTo(l2.getLatitude());
+        Comparator<Milepost> compLong = (l1, l2) -> l1.getLongitude().compareTo(l2.getLongitude());
+        OdeGeoRegion serviceRegion = new OdeGeoRegion();
+
+        if (mileposts.size() > 0) {
+
+            Milepost maxLat = mileposts.stream().max(compLat).get();
+
+            Milepost minLat = mileposts.stream().min(compLat).get();
+
+            Milepost maxLong = mileposts.stream().max(compLong).get();
+
+            Milepost minLong = mileposts.stream().min(compLong).get();
+
+            OdePosition3D nwCorner = new OdePosition3D();
+            nwCorner.setLatitude(maxLat.getLatitude());
+            nwCorner.setLongitude(minLong.getLongitude());
+
+            OdePosition3D seCorner = new OdePosition3D();
+            seCorner.setLatitude(minLat.getLatitude());
+            seCorner.setLongitude(maxLong.getLongitude());
+
+            serviceRegion.setNwCorner(nwCorner);
+            serviceRegion.setSeCorner(seCorner);
+        } else {
+            System.out.println("getServiceRegion fails due to no mileposts");
+        }
+        return serviceRegion;
+    }
+
+    public SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
+        SNMP snmp = new SNMP();
+        snmp.setChannel(178);
+        snmp.setRsuid("83");// RSU wants hex 83, and the ODE is expecting a hex value to parse. This parses
+                            // to hex string 8003 when p-encoded
+        snmp.setMsgid(31);
+        snmp.setMode(1);
+        snmp.setChannel(178);
+        snmp.setInterval(2);
+        snmp.setDeliverystart(startDateTime);// "2018-01-01T00:00:00-06:00");
+
+        if (endDateTime == null || StringUtils.isBlank(endDateTime)) {
+            try {
+                int durationTime = timToSend.getTim().getDataframes()[0].getDurationTime();
+                Calendar cal = javax.xml.bind.DatatypeConverter.parseDateTime(startDateTime);
+                cal.add(Calendar.MINUTE, durationTime);
+                Date endDate = cal.getTime();
+
+                TimeZone tz = TimeZone.getTimeZone("UTC");
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+                df.setTimeZone(tz);
+                endDateTime = df.format(endDate);
+            } catch (IllegalArgumentException illArg) {
+                // if we failed here, set the endDateTime for 2 weeks from current time
+                System.out.println("Illegal Argument exception for endDate: " + illArg.getMessage());
+                endDateTime = java.time.Clock.systemUTC().instant().plus(2, ChronoUnit.WEEKS).toString();
+            }
+        }
+
+        snmp.setDeliverystop(endDateTime);
+        snmp.setEnable(1);
+        snmp.setStatus(4);
+
+        return snmp;
     }
 
 }

@@ -293,7 +293,6 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).getSnmp(any(), any(), any());
         verify(mockOdeService).updateTimOnRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockActiveTimHoldingService, mockSdwService);
 
@@ -340,7 +339,6 @@ public class TimGenerationHelperTest {
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).getSnmp(any(), any(), any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
@@ -389,7 +387,6 @@ public class TimGenerationHelperTest {
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).getSnmp(any(), any(), any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
@@ -423,7 +420,7 @@ public class TimGenerationHelperTest {
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
-        doReturn("exception").when(mockOdeService).sendNewTimToRsu(any(), any(), any());
+        doReturn("exception").when(mockOdeService).sendNewTimToRsu(any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -438,11 +435,10 @@ public class TimGenerationHelperTest {
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).getSnmp(any(), any(), any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
         verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
-        verify(mockOdeService).sendNewTimToRsu(any(), any(), any());
+        verify(mockOdeService).sendNewTimToRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
@@ -483,11 +479,10 @@ public class TimGenerationHelperTest {
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).getSnmp(any(), any(), any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
         verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
-        verify(mockOdeService).sendNewTimToRsu(any(), any(), any());
+        verify(mockOdeService).sendNewTimToRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
@@ -513,7 +508,7 @@ public class TimGenerationHelperTest {
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
-        doReturn("exception").when(mockOdeService).sendNewTimToSdw(any(), any(), any(), any());
+        doReturn("exception").when(mockOdeService).sendNewTimToSdw(any(), any(), any());
         doReturn("recId").when(mockSdwService).getNewRecordId();
 
         // Act
@@ -553,7 +548,7 @@ public class TimGenerationHelperTest {
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
-        doReturn("").when(mockOdeService).sendNewTimToSdw(any(), any(), any(), any());
+        doReturn("").when(mockOdeService).sendNewTimToSdw(any(), any(), any());
         doReturn("recId").when(mockSdwService).getNewRecordId();
 
         // Act
@@ -605,7 +600,6 @@ public class TimGenerationHelperTest {
         var ex = exceptions.get(0);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, "exception"), ex);
         verify(mockSdwService).getSdwDataByRecordId(any());
-        verify(mockOdeService).getServiceRegion(any());
         verifyNoInteractions(mockPathNodeXYService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
@@ -643,7 +637,6 @@ public class TimGenerationHelperTest {
         // Assert
         Assertions.assertEquals(0, exceptions.size());
         verify(mockSdwService).getSdwDataByRecordId(any());
-        verify(mockOdeService).getServiceRegion(any());
         verifyNoInteractions(mockPathNodeXYService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());

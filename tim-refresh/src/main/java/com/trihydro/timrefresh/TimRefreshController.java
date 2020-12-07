@@ -33,9 +33,6 @@ public class TimRefreshController {
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, Utility _utility,
             ActiveTimService _activeTimService, EmailHelper _emailHelper, TimGenerationHelper _timGenerationHelper) {
-        configuration = configurationRhs;
-        utility = _utility;
-        activeTimService = _activeTimService;
         emailHelper = _emailHelper;
         timGenerationHelper = _timGenerationHelper;
     }

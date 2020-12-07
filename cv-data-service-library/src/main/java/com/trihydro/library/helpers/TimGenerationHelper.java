@@ -57,7 +57,6 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class TimGenerationHelper {
     private Utility utility;
     private DataFrameService dataFrameService;
-    // private PathNodeXYService pathNodeXYService;
     private PathNodeLLService pathNodeLLService;
     private ActiveTimService activeTimService;
     private MilepostService milepostService;

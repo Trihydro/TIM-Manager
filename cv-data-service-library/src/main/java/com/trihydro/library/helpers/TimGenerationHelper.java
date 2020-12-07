@@ -290,8 +290,7 @@ public class TimGenerationHelper {
                     aTim.getEndDateTime());
             df.setDurationTime(durationTime);
         } else {
-            // we don't have an endDate so set duration time to 22 days worth of minutes
-            // (max time)
+            // we don't have an endDate so set duration to max time (never expire)
             df.setDurationTime(32000);
         }
 
@@ -338,7 +337,7 @@ public class TimGenerationHelper {
         region.setDirectionality(directionality);
         region.setClosedPath(aTim.getClosedPath());
 
-        String regionDescrip = aTim.getRegionDescription();// J2736 - one of path, geometry, oldRegion
+        String regionDescrip = aTim.getRegionDescription();// J2735 - one of path, geometry, oldRegion
         if (regionDescrip == null || regionDescrip.isEmpty()) {
             regionDescrip = "path";// if null, set it to path...we only support path anyway, and only have tables
                                    // supporting path

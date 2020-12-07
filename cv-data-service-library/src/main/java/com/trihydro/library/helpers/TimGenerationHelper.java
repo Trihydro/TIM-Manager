@@ -164,7 +164,7 @@ public class TimGenerationHelper {
             }
 
             // only send to SDX if the sat record id exists
-            if (!StringUtils.isEmpty(tum.getSatRecordId()) && !StringUtils.isBlank(tum.getSatRecordId())) {
+            if (!StringUtils.isBlank(tum.getSatRecordId())) {
                 var exMsg = updateAndSendSDX(timToSend, tum, mps);
                 if (StringUtils.isNotBlank(exMsg)) {
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));

@@ -134,7 +134,7 @@ public class TimGenerationHelper {
             }
             if (allMps.size() == 0) {
                 String exMsg = String.format(
-                        "Unable to send TIM to SDX, no mileposts found to determine service area for Active_Tim %s",
+                        "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
                         tum.getActiveTimId());
                 utility.logWithDate(exMsg);
                 exceptions.add(new ResubmitTimException(activeTimId, exMsg));
@@ -146,7 +146,7 @@ public class TimGenerationHelper {
             mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
             OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
             if (tim == null) {
-                String exMsg = String.format("Failed to instantiate TIM for active_tim_id %s", tum.getActiveTimId());
+                String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d", tum.getActiveTimId());
                 utility.logWithDate(exMsg);
                 exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                 continue;
@@ -444,7 +444,7 @@ public class TimGenerationHelper {
                 timToSend.getRequest().setRsus(rsus);
 
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
-                System.out.println("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
+                utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
                 var rsuExMsg = odeService.updateTimOnRsu(timToSend);
                 if (!StringUtils.isEmpty(rsuExMsg)) {
                     exMsg += rsuExMsg + "\n";
@@ -516,7 +516,7 @@ public class TimGenerationHelper {
         SDW sdw = new SDW();
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
-            System.out.println("SAT record not found for id " + aTim.getSatRecordId());
+            utility.logWithDate("SAT record not found for id " + aTim.getSatRecordId());
             return updateAndSendNewSDX(timToSend, aTim, mps);
         }
 
@@ -539,7 +539,7 @@ public class TimGenerationHelper {
 
     private String updateAndSendNewSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
         String recordId = sdwService.getNewRecordId();
-        System.out.println("Generating new SAT id and TIM: " + recordId);
+        utility.logWithDate("Generating new SAT id and TIM: " + recordId);
         String regionName = getSATRegionName(aTim, recordId);
 
         // Update region.name in database

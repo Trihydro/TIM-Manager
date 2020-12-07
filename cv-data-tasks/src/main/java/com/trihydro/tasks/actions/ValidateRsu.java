@@ -15,22 +15,22 @@ import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.EnvActiveTim;
-import com.trihydro.tasks.models.PopulatedRsu;
+import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 public class ValidateRsu implements Callable<RsuValidationResult> {
     private RsuDataService rsuDataService;
 
-    private PopulatedRsu rsu;
+    private RsuInformation rsu;
     private List<RsuIndexInfo> rsuIndices;
     private RsuValidationResult result;
 
-    public ValidateRsu(PopulatedRsu rsu, RsuDataService rsuDataService) {
+    public ValidateRsu(RsuInformation rsu, RsuDataService rsuDataService) {
         this.rsu = rsu;
         this.rsuDataService = rsuDataService;
     }
 
-    public PopulatedRsu getRsu() {
+    public RsuInformation getRsu() {
         return rsu;
     }
 
@@ -46,7 +46,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
 
     @Override
     public RsuValidationResult call() {
-        result = new RsuValidationResult(rsu.getIpv4Address());
+        result = new RsuValidationResult();
 
         // Retrieve info for populates indexes on RSU
         rsuIndices = rsuDataService.getRsuDeliveryStartTimes(rsu.getIpv4Address());

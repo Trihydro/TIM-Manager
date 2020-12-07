@@ -5,15 +5,15 @@ import java.util.List;
 
 import com.trihydro.library.model.WydotRsu;
 
-public class PopulatedRsu {
+public class RsuInformation {
     private String ipv4Address;
     private List<EnvActiveTim> rsuActiveTims = new ArrayList<>();
 
-    public PopulatedRsu(String ipv4Address) {
+    public RsuInformation(String ipv4Address) {
         this.ipv4Address = ipv4Address;
     }
 
-    public PopulatedRsu(WydotRsu rsu) {
+    public RsuInformation(WydotRsu rsu) {
         this.ipv4Address = rsu.getRsuTarget();
     }
 
@@ -40,10 +40,10 @@ public class PopulatedRsu {
         if(obj == null)
             return false;
         
-        if(!(obj instanceof PopulatedRsu))
+        if(!(obj instanceof RsuInformation))
             return false;
 
-        var toCompare = (PopulatedRsu)obj;
+        var toCompare = (RsuInformation)obj;
 
         if(ipv4Address == null)
         {

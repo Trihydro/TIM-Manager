@@ -149,6 +149,27 @@ public class TimGenerationHelperTest {
         doReturn(tum).when(mockActiveTimService).getUpdateModelFromActiveTimId(any());
     }
 
+    private void setupMilepostReturn() {
+        List<Milepost> allMps = new ArrayList<>();
+        var latitude = BigDecimal.valueOf(-1l);
+        var longitude = BigDecimal.valueOf(-2l);
+        var mp = new Milepost();
+        mp.setCommonName("I 80");
+        mp.setDirection("I");
+        mp.setLatitude(latitude);
+        mp.setLongitude(longitude);
+        allMps.add(mp);
+
+        var mp2= new Milepost();
+        mp.setCommonName("I 80");
+        mp.setDirection("D");
+        mp.setLatitude(latitude);
+        mp.setLongitude(longitude);
+        allMps.add(mp2);
+
+        doReturn(allMps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+    }
+
     @Test
     public void resubmitToOde_NoMileposts() {
         // Arrange
@@ -157,7 +178,7 @@ public class TimGenerationHelperTest {
         setupActiveTimModel();
 
         List<Milepost> mps = new ArrayList<Milepost>();
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -172,7 +193,6 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService, mockSdwService);
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction);
     }
 
@@ -182,6 +202,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
 
         List<Milepost> mps = new ArrayList<Milepost>();
@@ -212,6 +233,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
 
         List<Milepost> mps = new ArrayList<Milepost>();
@@ -248,6 +270,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
 
         List<Milepost> mps = new ArrayList<Milepost>();
@@ -286,6 +309,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
 
         List<Milepost> mps = new ArrayList<Milepost>();
@@ -333,6 +357,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
 
         List<Milepost> mps = new ArrayList<Milepost>();
@@ -381,6 +406,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
 
         List<Milepost> mps = new ArrayList<Milepost>();
@@ -431,6 +457,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
 
         List<Milepost> mps = new ArrayList<Milepost>();
@@ -475,6 +502,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
         tum.setSatRecordId("satRecordId");
 
@@ -514,6 +542,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
         tum.setSatRecordId("satRecordId");
 
@@ -551,6 +580,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
         tum.setSatRecordId("satRecordId");
 
@@ -590,6 +620,7 @@ public class TimGenerationHelperTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
         tum.setRoute("I 80");
         tum.setSatRecordId("satRecordId");
 

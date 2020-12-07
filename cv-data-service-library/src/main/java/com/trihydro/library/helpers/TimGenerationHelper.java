@@ -133,11 +133,7 @@ public class TimGenerationHelper {
                 utility.logWithDate(String.format("Found %d mileposts for point %s", mps.size(),
                         gson.toJson(wydotTim.getStartPoint())));
             }
-            // reduce the mileposts by removing straight away posts
-            var anchorMp = allMps.remove(0);
-            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-
-            if (mps.size() == 0) {
+            if (allMps.size() == 0) {
                 String exMsg = String.format(
                         "Unable to send TIM to SDX, no mileposts found to determine service area for Active_Tim %s",
                         tum.getActiveTimId());
@@ -146,6 +142,9 @@ public class TimGenerationHelper {
                 continue;
             }
 
+            // reduce the mileposts by removing straight away posts
+            var anchorMp = allMps.remove(0);
+            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
             OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
             if (tim == null) {
                 String exMsg = String.format("Failed to instantiate TIM for active_tim_id %s", tum.getActiveTimId());

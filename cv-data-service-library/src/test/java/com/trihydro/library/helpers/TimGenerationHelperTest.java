@@ -187,7 +187,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to send TIM to SDX, no mileposts found to determine service area for Active_Tim %s",
+                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
                 activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,

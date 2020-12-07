@@ -5,9 +5,11 @@ import java.math.BigDecimal;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.EmailProps;
+import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
@@ -19,6 +21,7 @@ import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
+import com.trihydro.library.service.TimGenerationProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Import;
@@ -31,8 +34,8 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 @Import({ ActiveTimHoldingService.class, ActiveTimService.class, DataFrameService.class, MilepostService.class,
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
         Utility.class, RestTemplateProvider.class, MilepostReduction.class, JavaMailSenderImplProvider.class,
-        EmailHelper.class })
-public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, EmailProps {
+        EmailHelper.class,TimGenerationHelper.class })
+public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, EmailProps, OdeProps, TimGenerationProps {
 
     private TimeToLive sdwTtl;
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);

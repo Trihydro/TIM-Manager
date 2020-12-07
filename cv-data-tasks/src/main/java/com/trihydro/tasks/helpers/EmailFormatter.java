@@ -50,7 +50,7 @@ public class EmailFormatter {
 
     public String generateSdxSummaryEmail(int numSdxOrphaned, int numOutdatedSdx, int numNotOnSdx,
             List<CActiveTim> toResend, List<CAdvisorySituationDataDeposit> deleteFromSdx,
-            List<CActiveTim> invOracleRecords) {
+            List<CActiveTim> invOracleRecords, String exceptions) {
         // Create summary
         String body = formatSdxMain.replaceAll("\\{num-stale\\}", Integer.toString(numOutdatedSdx));
         body = body.replaceAll("\\{num-sdx-orphaned\\}", Integer.toString(numSdxOrphaned));
@@ -105,6 +105,8 @@ public class EmailFormatter {
         }
 
         body = body.replaceAll("\\{summary-tables\\}", content);
+
+        body = body.replaceAll("\\{exception-summary\\}", exceptions);
 
         // Remove unnecessary whitespace
         body = body.replaceAll("\\s*\n\\s*", "");

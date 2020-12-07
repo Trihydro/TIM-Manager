@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.SemiDialogID;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.SdwService;
@@ -30,17 +33,19 @@ public class ValidateSdx implements Runnable {
     private EmailHelper mailHelper;
     private EmailFormatter emailFormatter;
     private Utility utility;
+    private TimGenerationHelper timGenerationHelper;
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, SdwService _sdwService,
             ActiveTimService _activeTimService, EmailFormatter _emailFormatter, EmailHelper _mailHelper,
-            Utility _utility) {
+            Utility _utility, TimGenerationHelper _timGenerationHelper) {
         config = _config;
         sdwService = _sdwService;
         activeTimService = _activeTimService;
         emailFormatter = _emailFormatter;
         mailHelper = _mailHelper;
         utility = _utility;
+        timGenerationHelper = _timGenerationHelper;
     }
 
     public void run() {
@@ -143,9 +148,10 @@ public class ValidateSdx implements Runnable {
         }
 
         if (toResend.size() > 0 || deleteFromSdx.size() > 0 || invOracleRecords.size() > 0) {
-            cleanupData(toResend, deleteFromSdx, invOracleRecords);
+            // For now, we'll just report on the invOracleRecords
+            String exceptionText = cleanupData(toResend, deleteFromSdx);
             String email = emailFormatter.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
-                    numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords);
+                    numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords, exceptionText);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Validation Results", email,
@@ -156,47 +162,63 @@ public class ValidateSdx implements Runnable {
         }
     }
 
-    private void cleanupData(List<CActiveTim> toResend, List<CAdvisorySituationDataDeposit> deleteFromSdx,
-            List<CActiveTim> invOracleRecords) {
-        // TODO: cleanup the data!
-        // migrate the refresh logic to service, then send toResend active_tim_ids
+    /**
+     * Call out to appropriate endpoints to remove, or refresh data as appropriate
+     * 
+     * @param toResend      List of records to resubmit to the ODE for processing
+     * @param deleteFromSdx List of records to delete from the SDX
+     * @return A String representing exceptions to include in the summary email
+     */
+    private String cleanupData(List<CActiveTim> toResend, List<CAdvisorySituationDataDeposit> deleteFromSdx) {
+        String deleteError = "";
+        List<ResubmitTimException> resendExceptions = new ArrayList<>();
         if (toResend.size() > 0) {
-            resendTims(toResend.stream().map(x -> x.getActiveTim().getActiveTimId()).collect(Collectors.toList()));
+            resendExceptions = resendTims(toResend);
         }
         // delete from SDX the given records
         if (deleteFromSdx.size() > 0) {
-            removeFromSdx(deleteFromSdx);
+            deleteError = removeFromSdx(deleteFromSdx);
         }
 
-        // delete from oracle the invOracleRecords?
+        String exceptionText = "";
+        if (StringUtils.isNotBlank(deleteError) || resendExceptions.size() > 0) {
+            if (StringUtils.isNotBlank(deleteError)) {
+                exceptionText += "The following recordIds failed to delete from the SDX: " + deleteError;
+                exceptionText += "<br>";
+            }
+
+            if (resendExceptions.size() > 0) {
+                Gson gson = new Gson();
+                exceptionText += "The following exceptions were found while attempting to resubmit TIMs: ";
+                exceptionText += "<br/>";
+                for (ResubmitTimException rte : resendExceptions) {
+                    exceptionText += gson.toJson(rte);
+                    exceptionText += "<br/>";
+                }
+            }
+        }
+        return exceptionText;
     }
 
-    private void resendTims(List<Long> activeTimIds) {
-        // TODO: migrate refresh logic to service and call
+    private List<ResubmitTimException> resendTims(List<CActiveTim> toResend) {
+        var activeTimIds = toResend.stream().map(x -> x.getActiveTim().getActiveTimId()).collect(Collectors.toList());
+        return timGenerationHelper.resubmitToOde(activeTimIds);
     }
 
-    private void removeFromSdx(List<CAdvisorySituationDataDeposit> deleteFromSdx) {
+    private String removeFromSdx(List<CAdvisorySituationDataDeposit> deleteFromSdx) {
         // Issue one delete call to the REST service, encompassing all sat_record_ids
         var satRecordIds = deleteFromSdx.stream().map(x -> x.getAsdd().getRecordId()).collect(Collectors.toList());
         HashMap<Integer, Boolean> sdxDelResults = sdwService.deleteSdxDataByRecordIdIntegers(satRecordIds);
+        String failedResultsText = "";
 
         // Determine if anything failed
         Boolean errorsOccurred = sdxDelResults.entrySet().stream()
                 .anyMatch(x -> x.getValue() != null && x.getValue() == false);
         if (errorsOccurred) {
-            String failedResultsText = sdxDelResults.entrySet().stream().filter(x -> x.getValue() == false)
+            failedResultsText = sdxDelResults.entrySet().stream().filter(x -> x.getValue() == false)
                     .map(x -> x.getKey().toString()).collect(Collectors.joining(","));
-            if (StringUtils.isNotBlank(failedResultsText)) {
-                String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
-                try {
-                    mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Delete Fail", body,
-                            config.getMailPort(), config.getMailHost(), config.getFromEmail());
-                } catch (Exception ex) {
-                    utility.logWithDate(body + ", and the email failed to send to support");
-                    ex.printStackTrace();
-                }
-            }
         }
+        return failedResultsText;
     }
 
     private boolean sameItisCodes(List<Integer> o1, List<Integer> o2) {

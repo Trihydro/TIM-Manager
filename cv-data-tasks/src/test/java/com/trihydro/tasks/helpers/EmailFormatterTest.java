@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class EmailFormatterTest {
+    private String exText = "This is a great exception summary";
+
     @Test
     public void generateSdxSummaryEmail_success() throws IOException {
         // Arrange
@@ -34,7 +36,7 @@ public class EmailFormatterTest {
         List<CActiveTim> invOracleRecords = new ArrayList<>();
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(1, 2, 3, toResend, deleteFromSdx, invOracleRecords);
+        String emailBody = uut.generateSdxSummaryEmail(1, 2, 3, toResend, deleteFromSdx, invOracleRecords, exText);
 
         // Assert
         Assertions.assertTrue(
@@ -49,6 +51,8 @@ public class EmailFormatterTest {
                 "Number of Oracle records without corresponding message in SDX: 3");
         Assertions.assertTrue(emailBody.matches(".*Number of invalid records in Oracle:</td>\\s*<td>0.*"),
                 "Number of invalid records in Oracle: 0");
+        Assertions.assertTrue(emailBody.matches(".*Exceptions while attempting automatic cleanup.*"));
+        Assertions.assertTrue(emailBody.matches(".*" + exText + ".*"));
     }
 
     @Test
@@ -67,7 +71,7 @@ public class EmailFormatterTest {
         invOracleRecords.add(new CActiveTim(invRecord));
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(0, 0, 0, toResend, deleteFromSdx, invOracleRecords);
+        String emailBody = uut.generateSdxSummaryEmail(0, 0, 0, toResend, deleteFromSdx, invOracleRecords, "");
 
         // Assert
         Assertions.assertTrue(emailBody.matches(".*<h3>Invalid Oracle records</h3>.*"),
@@ -92,7 +96,7 @@ public class EmailFormatterTest {
         toResend.add(new CActiveTim(resend));
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(0, 1, 0, toResend, deleteFromSdx, invOracleRecords);
+        String emailBody = uut.generateSdxSummaryEmail(0, 1, 0, toResend, deleteFromSdx, invOracleRecords, "");
 
         // Assert
         Assertions.assertTrue(emailBody.matches(".*<h3>ActiveTims to resend to SDX</h3>.*"),
@@ -115,7 +119,7 @@ public class EmailFormatterTest {
         deleteFromSdx.add(new CAdvisorySituationDataDeposit(invAsdd, null));
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(1, 0, 0, toResend, deleteFromSdx, invOracleRecords);
+        String emailBody = uut.generateSdxSummaryEmail(1, 0, 0, toResend, deleteFromSdx, invOracleRecords, "");
 
         // Assert
         Assertions.assertTrue(emailBody.matches(".*<h3>Orphaned records to delete from SDX</h3>.*"),

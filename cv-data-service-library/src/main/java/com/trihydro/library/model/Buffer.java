@@ -1,4 +1,4 @@
-package com.trihydro.odewrapper.model;
+package com.trihydro.library.model;
 
 public class Buffer {
 	private Double distance;
@@ -24,5 +24,4 @@ public class Buffer {
 	public void setAction(String action) {
 		this.action = action;
 	}
-
 }

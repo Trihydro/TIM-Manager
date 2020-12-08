@@ -1,4 +1,4 @@
-package com.trihydro.odewrapper.model;
+package com.trihydro.library.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,5 +40,4 @@ public class TimDeleteSummary {
     public void setSuccessfulSatelliteDeletions(List<Long> satDelSuccess) {
         this.successfulSatelliteDeletions = satDelSuccess;
     }
-
 }

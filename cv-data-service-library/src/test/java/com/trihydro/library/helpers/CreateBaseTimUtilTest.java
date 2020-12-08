@@ -1,4 +1,4 @@
-package com.trihydro.odewrapper.helpers.util;
+package com.trihydro.library.helpers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -8,14 +8,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.library.helpers.MilepostReduction;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.MilepostService;
-import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.library.service.TimGenerationProps;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,7 +33,7 @@ public class CreateBaseTimUtilTest {
     @Mock
     MilepostReduction mockMilepostReduction;
     @Mock
-    BasicConfiguration mockBasicConfiguration;
+    TimGenerationProps genProps;
 
     @InjectMocks
     CreateBaseTimUtil uut;
@@ -45,8 +43,8 @@ public class CreateBaseTimUtilTest {
     private Milepost anchor;
 
     public void setupSuccessfulTest() {
-        doReturn(BigDecimal.valueOf(50)).when(mockBasicConfiguration).getDefaultLaneWidth();
-        doReturn(.4 * 50).when(mockBasicConfiguration).getPathDistanceLimit();
+        doReturn(BigDecimal.valueOf(50)).when(genProps).getDefaultLaneWidth();
+        doReturn(.4 * 50).when(genProps).getPathDistanceLimit();
         setupMileposts();
     }
 
@@ -98,7 +96,7 @@ public class CreateBaseTimUtilTest {
         var frameType = TravelerInfoType.advisory;
 
         // Act
-        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content, frameType);
+        var data = uut.buildTim(wydotTim, direction, genProps, content, frameType);
 
         // Assert
         Assertions.assertNull(data);
@@ -124,7 +122,7 @@ public class CreateBaseTimUtilTest {
         doReturn(allMileposts).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
 
         // Act
-        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content, frameType);
+        var data = uut.buildTim(wydotTim, direction, genProps, content, frameType);
 
         // Assert
         // validate dataFrame
@@ -160,7 +158,7 @@ public class CreateBaseTimUtilTest {
     public void buildTim_singlePointSUCCESS() {
         // Arrange
         setupSuccessfulTest();
-        doReturn(1d).when(mockBasicConfiguration).getPointIncidentBufferMiles();
+        doReturn(1d).when(genProps).getPointIncidentBufferMiles();
         var wydotTim = new WydotTim();
         wydotTim.setRoute("80");
         wydotTim.setStartPoint(new Coordinate());
@@ -176,7 +174,7 @@ public class CreateBaseTimUtilTest {
         doReturn(allMileposts).when(mockMilepostService).getMilepostsByPointWithBuffer(any());
 
         // Act
-        var data = uut.buildTim(wydotTim, direction, mockBasicConfiguration, content, frameType);
+        var data = uut.buildTim(wydotTim, direction, genProps, content, frameType);
 
         // Assert
         // validate dataFrame

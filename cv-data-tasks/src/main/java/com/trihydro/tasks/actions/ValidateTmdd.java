@@ -214,6 +214,7 @@ public class ValidateTmdd implements Runnable {
         }
 
         if (unableToVerify.size() > 0 || validationResults.size() > 0) {
+            var exceptions = cleanupData(unableToVerify);
             String email = emailFormatter.generateTmddSummaryEmail(unableToVerify, validationResults);
 
             try {
@@ -401,4 +402,19 @@ public class ValidateTmdd implements Runnable {
 
         return result;
     }
+
+    private String cleanupData(List<ActiveTim> unableToVerify) {
+        // TODO: delete unableToVerify, update and resend others
+        String deleteError = "";
+        if (unableToVerify.size() > 0) {
+            deleteError = deleteActiveTims(unableToVerify);
+        }
+        return deleteError;
+    }
+
+    private String deleteActiveTims(List<ActiveTim> unableToVerify) {
+        return null;
+        // wydotTimService.deleteTimsFromRsusAndSdx(unableToVerify);
+    }
+
 }

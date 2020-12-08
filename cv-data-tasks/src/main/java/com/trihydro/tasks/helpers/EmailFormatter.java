@@ -143,7 +143,7 @@ public class EmailFormatter {
     }
 
     public String generateTmddSummaryEmail(List<ActiveTim> unableToVerify,
-            List<ActiveTimValidationResult> validationResults) {
+            List<ActiveTimValidationResult> validationResults, String exceptions) {
         String body = formatTmddMain;
 
         // List Active TIMs that couldn't be verified
@@ -160,6 +160,9 @@ public class EmailFormatter {
             inconsistencies += getTmddResult(result);
         }
         body = body.replaceAll("\\{content\\}", inconsistencies);
+
+        // Add in any exceptions
+        body = body.replaceAll("\\{exception-summary\\}", exceptions);
 
         // Remove unnecessary whitespace
         body = body.replaceAll("\\s*\n\\s*", "");

@@ -23,6 +23,7 @@ import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.OdeProps;
+import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
@@ -31,16 +32,6 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTimRw;
 import com.trihydro.library.model.WydotTravelerInputData;
-import com.trihydro.library.service.ActiveTimHoldingService;
-import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.OdeService;
-import com.trihydro.library.service.RestTemplateProvider;
-import com.trihydro.library.service.RsuService;
-import com.trihydro.library.service.SdwService;
-import com.trihydro.library.service.TimRsuService;
-import com.trihydro.library.service.TimService;
-import com.trihydro.library.service.TimTypeService;
-import com.trihydro.library.model.TimDeleteSummary;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +40,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
@@ -319,12 +309,16 @@ public class WydotTimService {
                     rsu = getRsu(timRsu.getRsuId());
                     // delete tim off rsu
                     utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
-                    deleteTimFromRsu(rsu, timRsu.getRsuIndex());
+                    if (!deleteTimFromRsu(rsu, timRsu.getRsuIndex())) {
+                        returnValue.addfailedRsuTimJson(gson.toJson(timRsu));
+                    }
                 }
             }
             // delete active tim
             if (activeTimService.deleteActiveTim(activeTim.getActiveTimId())) {
                 returnValue.addSuccessfulRsuDeletions(activeTim.getActiveTimId());
+            } else {
+                returnValue.addFailedActiveTimDeletions(activeTim.getActiveTimId());
             }
         }
 
@@ -546,7 +540,7 @@ public class WydotTimService {
         return timToSend;
     }
 
-    public void deleteTimFromRsu(WydotRsu rsu, Integer index) {
+    public Boolean deleteTimFromRsu(WydotRsu rsu, Integer index) {
 
         String rsuJson = gson.toJson(rsu);
 
@@ -554,15 +548,11 @@ public class WydotTimService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        try {
-            utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
-            restTemplateProvider.GetRestTemplate().exchange(odeProps.getOdeUrl() + "/tim?index=" + index.toString(),
-                    HttpMethod.DELETE, entity, String.class);
-        } catch (HttpClientErrorException e) {
-            System.out.println(e.getMessage());
-        } catch (RuntimeException targetException) {
-            System.out.println("exception");
-        }
+        utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+        var response = restTemplateProvider.GetRestTemplate_NoErrors().exchange(
+                odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
+
+        return response.getStatusCode().is2xxSuccessful();
     }
 
     public TimType getTimType(String timTypeName) {

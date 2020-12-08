@@ -9,6 +9,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TmddItisCode;
 import com.trihydro.library.model.tmdd.EventDescription;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
@@ -17,12 +18,14 @@ import com.trihydro.library.model.tmdd.PointOnLink;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.library.service.TmddService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
 import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimValidationResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gavaghan.geodesy.Ellipsoid;
 import org.gavaghan.geodesy.GeodeticCalculator;
 import org.gavaghan.geodesy.GeodeticCurve;
@@ -40,6 +43,7 @@ public class ValidateTmdd implements Runnable {
     private EmailFormatter emailFormatter;
     private EmailHelper mailHelper;
     private Utility utility;
+    private WydotTimService wydotTimService;
 
     private Map<String, Integer> tmddItisCodes;
 
@@ -48,7 +52,7 @@ public class ValidateTmdd implements Runnable {
     @Autowired
     public void InjectDependencies(DataTasksConfiguration config, TmddService tmddService,
             ActiveTimService activeTimService, ItisCodeService itisCodeService, IdNormalizer idNormalizer,
-            EmailFormatter emailFormatter, EmailHelper mailHelper, Utility utility) {
+            EmailFormatter emailFormatter, EmailHelper mailHelper, Utility utility, WydotTimService _wydotTimService) {
         this.config = config;
         this.tmddService = tmddService;
         this.activeTimService = activeTimService;
@@ -57,6 +61,7 @@ public class ValidateTmdd implements Runnable {
         this.emailFormatter = emailFormatter;
         this.mailHelper = mailHelper;
         this.utility = utility;
+        wydotTimService = _wydotTimService;
     }
 
     public void run() {
@@ -215,7 +220,8 @@ public class ValidateTmdd implements Runnable {
 
         if (unableToVerify.size() > 0 || validationResults.size() > 0) {
             var exceptions = cleanupData(unableToVerify);
-            String email = emailFormatter.generateTmddSummaryEmail(unableToVerify, validationResults);
+            // TODO: add validationResults check in cleanupData
+            String email = emailFormatter.generateTmddSummaryEmail(unableToVerify, validationResults, exceptions);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Results", email,
@@ -404,7 +410,7 @@ public class ValidateTmdd implements Runnable {
     }
 
     private String cleanupData(List<ActiveTim> unableToVerify) {
-        // TODO: delete unableToVerify, update and resend others
+        // TODO: update and resend others
         String deleteError = "";
         if (unableToVerify.size() > 0) {
             deleteError = deleteActiveTims(unableToVerify);
@@ -413,8 +419,29 @@ public class ValidateTmdd implements Runnable {
     }
 
     private String deleteActiveTims(List<ActiveTim> unableToVerify) {
-        return null;
-        // wydotTimService.deleteTimsFromRsusAndSdx(unableToVerify);
+        String errSummary = "";
+        TimDeleteSummary tds = wydotTimService.deleteTimsFromRsusAndSdx(unableToVerify);
+
+        // Check for exceptions and add to errSummary
+        if (StringUtils.isNotBlank(tds.getSatelliteErrorSummary())) {
+            errSummary += tds.getSatelliteErrorSummary();
+            errSummary += "<br/>";
+        }
+        if (tds.getFailedActiveTimDeletions().size() > 0) {
+            errSummary += "The following active tim record failed to delete: <br/>";
+        }
+        for (Long aTimId : tds.getFailedActiveTimDeletions()) {
+            errSummary += aTimId;
+            errSummary += "<br/>";
+        }
+        if (tds.getFailedRsuTimJson().size() > 0) {
+            errSummary += "<br/><br/>";
+            errSummary += "The following RsuTim records failed to remove values from associated RSUs: <br/>";
+            errSummary += tds.getRsuErrorSummary();
+        }
+
+        return errSummary;
+
     }
 
 }

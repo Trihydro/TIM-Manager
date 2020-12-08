@@ -255,12 +255,16 @@ public class EmailFormatterTest {
         });
         List<ActiveTimValidationResult> validationResults = new ArrayList<>();
 
+        String exText = "A great exception";
+
         // Act
-        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
+        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults, exText);
 
         // Assert
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.matches(".*<p>1234 \\(AA1234\\)</p>.*"));
+        Assertions.assertTrue(result.matches(".*Exceptions while attempting automatic cleanup.*"));
+        Assertions.assertTrue(result.matches(".*" + exText + ".*"));
     }
 
     @Test
@@ -282,7 +286,7 @@ public class EmailFormatterTest {
         validationResults.add(valResult);
 
         // Act
-        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
+        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults, "");
 
         // Assert
         Assertions.assertNotNull(result);
@@ -309,7 +313,7 @@ public class EmailFormatterTest {
         validationResults.add(valResult);
 
         // Act
-        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults);
+        String result = uut.generateTmddSummaryEmail(unableToVerify, validationResults, "");
 
         // Assert
         Assertions.assertNotNull(result);

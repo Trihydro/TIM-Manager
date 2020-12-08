@@ -21,8 +21,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import us.dot.its.jpo.ode.plugin.SNMP;
@@ -154,5 +156,25 @@ public class OdeService {
         snmp.setStatus(4);
 
         return snmp;
+    }
+
+    public void deleteTimFromRsu(WydotRsu rsu, Integer index, String odeUrl) {
+
+        String rsuJson = gson.toJson(rsu);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
+
+        try {
+            utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+            restTemplateProvider.GetRestTemplate().exchange(
+                odeUrl + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity,
+                    String.class);
+        } catch (HttpClientErrorException e) {
+            System.out.println(e.getMessage());
+        } catch (RuntimeException targetException) {
+            System.out.println("exception");
+        }
     }
 }

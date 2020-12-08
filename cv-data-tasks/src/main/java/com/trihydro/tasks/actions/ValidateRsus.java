@@ -10,7 +10,9 @@ import java.util.concurrent.TimeUnit;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
@@ -31,6 +33,7 @@ public class ValidateRsus implements Runnable {
     private ActiveTimService activeTimService;
     private RsuService rsuService;
     private RsuDataService rsuDataService;
+    private OdeService odeService;
     private ExecutorFactory executorFactory;
     private EmailFormatter emailFormatter;
     private EmailHelper mailHelper;
@@ -38,12 +41,14 @@ public class ValidateRsus implements Runnable {
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
-            RsuService _rsuService, RsuDataService _rsuDataService, ExecutorFactory _executorFactory,
-            EmailFormatter _emailFormatter, EmailHelper _mailHelper, Utility _utility) {
+            RsuService _rsuService, RsuDataService _rsuDataService, OdeService _odeService, 
+            ExecutorFactory _executorFactory, EmailFormatter _emailFormatter, EmailHelper _mailHelper, 
+            Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
         rsuService = _rsuService;
         rsuDataService = _rsuDataService;
+        odeService = _odeService;
         executorFactory = _executorFactory;
         emailFormatter = _emailFormatter;
         mailHelper = _mailHelper;
@@ -56,6 +61,7 @@ public class ValidateRsus implements Runnable {
         try {
             validateRsus();
         } catch (Exception ex) {
+            // Send email saying validation bombed
             utility.logWithDate("Error while validating RSUs:", this.getClass());
             ex.printStackTrace();
             // don't rethrow error, or the task won't be reran until the service is
@@ -63,13 +69,12 @@ public class ValidateRsus implements Runnable {
         }
     }
 
-    private void validateRsus() {
+    private void validateRsus() throws Exception {
         List<String> unexpectedErrors = new ArrayList<>();
         List<RsuValidationRecord> validationRecords = new ArrayList<>();
 
-        try {
-            List<EnvActiveTim> activeTims = getActiveRsuTims();
-        if(activeTims == null) {
+        List<EnvActiveTim> activeTims = getActiveRsuTims();
+        if (activeTims == null) {
             // Cannot proceed with validation.
             return;
         }
@@ -102,7 +107,7 @@ public class ValidateRsus implements Runnable {
         }
 
         // Create a validation record (or log) for each RSU to be verified
-        for(var rsuInfo : rsusToValidate) {
+        for (var rsuInfo : rsusToValidate) {
             validationRecords.add(new RsuValidationRecord(rsuInfo));
         }
 
@@ -111,87 +116,85 @@ public class ValidateRsus implements Runnable {
 
         // Pick out the RSUs with issues that we can try to correct automatically
         List<RsuValidationRecord> rsusWithResolvableIssues = new ArrayList<>();
-        for(var rsuRecord : validationRecords)
-        {
-            if(rsuRecord.getError() != null || 
-                rsuRecord.getValidationResults().size() != 1 ||
-                rsuRecord.getValidationResults().get(0) == null) {
+
+        // Some TIMs may be live on multiple RSUs. By using a TreeSet, we ensure that
+        // TIMs meant for multiple RSUs won't be re-submitted multiple times.
+        TreeSet<EnvActiveTim> timsToResend = new TreeSet<>();
+
+        boolean unresolvableIssueFound = false;
+        for (var rsuRecord : validationRecords) {
+            if (rsuRecord.getError() != null || rsuRecord.getValidationResults().size() != 1
+                    || rsuRecord.getValidationResults().get(0) == null) {
+                unresolvableIssueFound = true;
                 continue;
+            }
+
+            var result = rsuRecord.getValidationResults().get(0);
+
+            if (result.getRsuUnresponsive()) {
+                unresolvableIssueFound = true;
+            }
+
+            if (result.getMissingFromRsu().size() == 0 && result.getStaleIndexes().size() == 0
+                    && result.getUnaccountedForIndices().size() == 0) {
+                continue;
+            }
+
+            rsusWithResolvableIssues.add(rsuRecord);
+
+            // Resend Production TIMs that should be on this RSU but aren't
+            for (var tim : result.getMissingFromRsu()) {
+                if (tim.getEnvironment() == Environment.PROD) {
+                    timsToResend.add(tim);
+                }
+            }
+
+            // Resend Production TIMs that haven't been updated on this RSU
+            for (var staleIndex : result.getStaleIndexes()) {
+                if (staleIndex.getEnvTim().getEnvironment() == Environment.PROD) {
+                    timsToResend.add(staleIndex.getEnvTim());
+                }
+            }
+
+            // If this RSU has any indices that are unaccounted for, clear them
+            if(result.getUnaccountedForIndices().size() > 0) {
+                var rsu = new WydotRsu();
+                rsu.setRsuTarget(rsuRecord.getRsuInformation().getIpv4Address());
+                rsu.setRsuRetries(2);
+                rsu.setRsuTimeout(3000);
+
+                for (var index : result.getUnaccountedForIndices()) {
+                    odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
+                }
             }
         }
 
-        // ExecutorService workerThreadPool = executorFactory.getFixedThreadPool(config.getRsuValThreadPoolSize());
+        // TODO: resend TIMs in timsToResend
 
-        // // Map each RSU to an asynchronous "task" that will validate that RSU
-        // List<ValidateRsu> tasks = new ArrayList<>();
-        // for (RsuInformation rsu : rsusToValidate) {
-        //     tasks.add(new ValidateRsu(rsu, rsuDataService));
-        // }
-
-        // utility.logWithDate("Validating " + tasks.size() + " RSUs...", this.getClass());
-
-        // List<Future<RsuValidationResult>> futureResults = null;
-        // try {
-        //     // Invoke all validation tasks, and wait for them to complete
-        //     futureResults = workerThreadPool.invokeAll(tasks, config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS);
-        //     shutDownThreadPool(workerThreadPool);
-        // } catch (InterruptedException e) {
-        //     utility.logWithDate("Error while executing validation tasks:", this.getClass());
-        //     e.printStackTrace();
-        // }
-
-        // // Go through the validation results, and collect results to be reported
-        // for (int i = 0; i < futureResults.size(); i++) {
-        //     RsuValidationResult result = null;
-
-        //     try {
-        //         result = futureResults.get(i).get();
-        //     } catch (Exception e) {
-        //         String rsuIpv4Address = tasks.get(i).getRsu().getIpv4Address();
-        //         // Something went wrong, and the validation task for this RSU wasn't completed.
-        //         utility.logWithDate("Error while validating RSU " + rsuIpv4Address + ":", this.getClass());
-        //         e.printStackTrace();
-        //         // "10.145.xx.xx: What went wrong..."
-        //         unexpectedErrors.add(rsuIpv4Address + ": " + e.toString() + " - " + e.getMessage());
-        //         continue;
-        //     }
-
-        //     // Check if we were able to initiate a SNMP session with the RSU
-        //     if (result.getRsuUnresponsive()) {
-        //         unresponsiveRsus.add(result.getRsu());
-        //         continue;
-        //     }
-
-        //     // We were able to validate this RSU. If any oddities were found, queue this RSU
-        //     // for the report
-        //     if (result.getCollisions().size() > 0 || result.getMissingFromRsu().size() > 0
-        //             || result.getUnaccountedForIndices().size() > 0 || result.getStaleIndexes().size() > 0) {
-        //         rsusWithErrors.add(result);
-        //     }
-        // }
-
-        // // If we have any metrics to report...
-        // if (unresponsiveRsus.size() > 0 || rsusWithErrors.size() > 0 || unexpectedErrors.size() > 0) {
-        //     // ... generate and send email
-        //     String email = emailFormatter.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
-
-        //     try {
-        //         mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Results", email,
-        //                 config.getMailPort(), config.getMailHost(), config.getFromEmail());
-        //     } catch (Exception ex) {
-        //         ex.printStackTrace();
-        //     }
+        // Now that we've attempted to cleanup the RSU, perform second validation pass
+        // Note that we only need to re-validate RSUs we attempted to correct
+        if (rsusWithResolvableIssues.size() > 0) {
+            validateRsus(rsusWithResolvableIssues);
         }
-        }catch(
 
-    Exception ex)
-    {
-        // An error occurred while we were performing validation.
-        unexpectedErrors.add("An error occurred during the validation process. Validation terminated early. Error:\n"
-                + ex.toString());
-    }
-    // TODO: send validation summary email (may be partial if validation failed
-    // early)
+        // We should only send a validation summary if any inconsistencies were found
+        // or if any errors occurred
+        if (unexpectedErrors.size() > 0 || rsusWithResolvableIssues.size() > 0 || unresolvableIssueFound) {
+            // TODO: send email
+
+            // String email = emailFormatter.generateRsuSummaryEmail(unresponsiveRsus,
+            // rsusWithErrors, unexpectedErrors);
+
+            // try {
+            // mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation
+            // Results", email,
+            // config.getMailPort(), config.getMailHost(), config.getFromEmail());
+            // } catch (Exception ex) {
+            // ex.printStackTrace();
+            // }
+            // TODO: send validation summary email (may be partial if validation failed
+            // early)
+        }
     }
 
     /**

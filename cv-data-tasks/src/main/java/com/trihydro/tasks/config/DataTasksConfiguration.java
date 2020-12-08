@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps {
+public class DataTasksConfiguration
+        implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps {
 
     private String cvRestService;
     private String cvRestServiceDev; // Temporary
@@ -20,6 +21,7 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private String wrapperUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
+    private String odeUrl;
     private String tmddUrl;
     private String tmddUser;
     private String tmddPassword;
@@ -108,6 +110,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setSdwApiKey(String sdwApiKey) {
         this.sdwApiKey = sdwApiKey;
+    }
+
+    public String getOdeUrl() {
+        return odeUrl;
+    }
+
+    public void setOdeUrl(String odeUrl) {
+        this.odeUrl = odeUrl;
     }
 
     public String[] getAlertAddresses() {

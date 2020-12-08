@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.GsonFactory;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.BsmService;
@@ -43,7 +44,7 @@ import org.springframework.context.annotation.Import;
 @Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
                 BsmService.class, ItisCodeService.class, RsuService.class, RsuDataService.class, RestTemplateProvider.class,
                 TmddService.class, GsonFactory.class, DriverAlertService.class, HmiLogService.class,
-                StatusLogService.class, TimService.class, UtilityService.class })
+                StatusLogService.class, TimService.class, UtilityService.class, TimGenerationHelper.class })
 
 public class Application {
         protected static DataTasksConfiguration config;

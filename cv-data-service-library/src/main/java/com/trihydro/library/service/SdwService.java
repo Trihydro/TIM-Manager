@@ -196,6 +196,33 @@ public class SdwService {
         return response.getBody();
     }
 
+    public HashMap<Integer, Boolean> deleteSdxDataByRecordIdIntegers(List<Integer> satRecordInts) {
+        HashMap<Integer, Boolean> results = null;
+        if (satRecordInts == null || satRecordInts.size() == 0 || configProperties.getSdwApiKey() == null) {
+            if (configProperties.getSdwApiKey() == null) {
+                utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
+            } else {
+                utility.logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
+            }
+            return results;
+        }
+
+        String url = getBaseUrlString("api/delete-multiple-by-recordid");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("apikey", configProperties.getSdwApiKey());
+        HttpEntity<List<Integer>> entity = new HttpEntity<List<Integer>>(satRecordInts, headers);
+        ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
+        };
+        ResponseEntity<HashMap<Integer, Boolean>> response = restTemplateProvider.GetRestTemplate().exchange(url,
+                HttpMethod.DELETE, entity, responseType);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
+        }
+        return response.getBody();
+    }
+
     private String getBaseUrlString(String end) {
         String baseUrl = configProperties.getSdwRestUrl();
         if (!baseUrl.endsWith("/")) {

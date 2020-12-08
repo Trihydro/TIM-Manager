@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.mail.MessagingException;
 
+import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
@@ -29,7 +30,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestTemplate;
 
@@ -60,6 +66,8 @@ public class WydotTimServiceTest {
     TimRsuService mockTimRsuService;
     @Mock
     RestTemplateProvider mockRestTemplateProvider;
+    @Mock
+    RestTemplate mockRestTemplate;
     @Mock
     RsuService mockRsuService;
     @Mock
@@ -97,6 +105,10 @@ public class WydotTimServiceTest {
         return activeTims;
     }
 
+    public void setupRestTemplate() {
+        doReturn(mockRestTemplate).when(mockRestTemplateProvider).GetRestTemplate_NoErrors();
+    }
+
     @Test
     public void deleteTimsFromRsusAndSdx_Rsu() {
         // Arrange
@@ -115,6 +127,9 @@ public class WydotTimServiceTest {
         allRsus.add(wydotRsu);
         when(mockRsuService.selectAll()).thenReturn(allRsus);
         doReturn(true).when(mockActiveTimService).deleteActiveTim(any());
+        setupRestTemplate();
+        doReturn(new ResponseEntity<String>("ok", HttpStatus.OK)).when(mockRestTemplate).exchange(any(String.class),
+                any(HttpMethod.class), Mockito.<HttpEntity<?>>any(), Mockito.<Class<String>>any());
 
         // Act
         var result = uut.deleteTimsFromRsusAndSdx(activeTims);
@@ -168,5 +183,42 @@ public class WydotTimServiceTest {
         delIds.add(-1l);
         delIds.add(-2l);
         verify(mockActiveTimService).deleteActiveTimsById(delIds);
+    }
+
+    @Test
+    public void deleteTimsFromRsusAndSdx_Exceptions() {
+        // Arrange
+        List<ActiveTim> activeTims = getActiveTims(false);
+        List<TimRsu> timRsus = new ArrayList<>();
+        TimRsu timRsu = new TimRsu();
+        timRsu.setRsuId(-10l);
+        timRsu.setRsuIndex(-1);
+        timRsus.add(timRsu);
+        when(mockTimRsuService.getTimRsusByTimId(-10l)).thenReturn(new ArrayList<>());
+        when(mockTimRsuService.getTimRsusByTimId(-20l)).thenReturn(timRsus);
+        ArrayList<WydotRsu> allRsus = new ArrayList<>();
+        WydotRsu wydotRsu = new WydotRsu();
+        wydotRsu.setRsuId(-10);
+        wydotRsu.setRsuIndex(-1);
+        allRsus.add(wydotRsu);
+        when(mockRsuService.selectAll()).thenReturn(allRsus);
+        doReturn(true).when(mockActiveTimService).deleteActiveTim(any());
+        setupRestTemplate();
+        doReturn(new ResponseEntity<String>("fail", HttpStatus.I_AM_A_TEAPOT)).when(mockRestTemplate).exchange(
+                any(String.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(), Mockito.<Class<String>>any());
+
+        // Act
+        var result = uut.deleteTimsFromRsusAndSdx(activeTims);
+
+        // Assert
+        verify(mockActiveTimService).deleteActiveTim(-1l);
+        verify(mockActiveTimService).deleteActiveTim(-2l);
+        List<String> timRsuJson = new ArrayList<String>();
+        Gson gson = new Gson();
+        for (TimRsu tr : timRsus) {
+            timRsuJson.add(gson.toJson(tr));
+        }
+        String jsonVal = String.join(",", timRsuJson);
+        Assertions.assertEquals(jsonVal, result.getRsuErrorSummary());
     }
 }

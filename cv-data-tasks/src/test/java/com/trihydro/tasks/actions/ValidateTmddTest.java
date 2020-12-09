@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,8 +17,12 @@ import javax.mail.MessagingException;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.GsonFactory;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimError;
+import com.trihydro.library.model.ActiveTimValidationResult;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TmddItisCode;
@@ -29,8 +34,6 @@ import com.trihydro.library.service.WydotTimService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
-import com.trihydro.tasks.models.ActiveTimError;
-import com.trihydro.tasks.models.ActiveTimValidationResult;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
@@ -74,6 +77,9 @@ public class ValidateTmddTest {
 
     @Mock
     private WydotTimService mockWydotTimService;
+
+    @Mock
+    private TimGenerationHelper mockTimGenerationHelper;
 
     @Captor
     private ArgumentCaptor<List<ActiveTim>> unableToVerifyCaptor;
@@ -164,29 +170,31 @@ public class ValidateTmddTest {
         Assertions.assertTrue(StringUtils.isBlank(exceptionMessageCaptor.getValue()));
         Assertions.assertEquals(1, validationResults.size());
         Assertions.assertEquals(1l, (long) validationResults.get(0).getActiveTim().getActiveTimId());
-        Assertions.assertEquals(5, validationResults.get(0).getErrors().size());
+        Assertions.assertEquals(4, validationResults.get(0).getErrors().size());
 
         // Check errors individually
         List<ActiveTimError> errors = validationResults.get(0).getErrors();
-        Assertions.assertEquals("Start Time", errors.get(0).getName());
-        Assertions.assertEquals("2020-04-27 10:00:00", errors.get(0).getTimValue());
-        Assertions.assertEquals("2020-04-27 09:43:00", errors.get(0).getTmddValue());
 
-        Assertions.assertEquals("End Time", errors.get(1).getName());
-        Assertions.assertEquals("2020-04-27 11:00:00", errors.get(1).getTimValue());
-        Assertions.assertEquals(null, errors.get(1).getTmddValue());
+        Assertions.assertEquals("End Time", errors.get(0).getName().getStringValue());
+        Assertions.assertEquals("2020-04-27 11:00:00", errors.get(0).getTimValue());
+        Assertions.assertEquals(null, errors.get(0).getTmddValue());
 
-        Assertions.assertEquals("Start Point", errors.get(2).getName());
-        Assertions.assertEquals("{ lat: 42.750000, lon: -110.940000 }", errors.get(2).getTimValue());
-        Assertions.assertEquals("{ lat: 42.739996, lon: -110.933278 }", errors.get(2).getTmddValue());
+        var gson = new Gson();
+        Assertions.assertEquals("Start Point", errors.get(1).getName().getStringValue());
+        var c1 = new Coordinate(BigDecimal.valueOf(42.75), BigDecimal.valueOf(-110.94));
+        var c2 = new Coordinate(BigDecimal.valueOf(42.739996), BigDecimal.valueOf(-110.933278));
+        Assertions.assertEquals(gson.toJson(c1), errors.get(1).getTimValue());
+        Assertions.assertEquals(gson.toJson(c2), errors.get(1).getTmddValue());
 
-        Assertions.assertEquals("End Point", errors.get(3).getName());
-        Assertions.assertEquals("{ lat: 43.180000, lon: -111.010000 }", errors.get(3).getTimValue());
-        Assertions.assertEquals("{ lat: 43.175668, lon: -111.001784 }", errors.get(3).getTmddValue());
+        var c3 = new Coordinate(BigDecimal.valueOf(43.18), BigDecimal.valueOf(-111.01));
+        var c4 = new Coordinate(BigDecimal.valueOf(43.175668), BigDecimal.valueOf(-111.001784));
+        Assertions.assertEquals("End Point", errors.get(2).getName().getStringValue());
+        Assertions.assertEquals(gson.toJson(c3), errors.get(2).getTimValue());
+        Assertions.assertEquals(gson.toJson(c4), errors.get(2).getTmddValue());
 
-        Assertions.assertEquals("ITIS Codes", errors.get(4).getName());
-        Assertions.assertEquals("{ 5906 }", errors.get(4).getTimValue());
-        Assertions.assertEquals("{ 6011 }", errors.get(4).getTmddValue());
+        Assertions.assertEquals("ITIS Codes", errors.get(3).getName().getStringValue());
+        Assertions.assertEquals("{ 5906 }", errors.get(3).getTimValue());
+        Assertions.assertEquals("{ 6011 }", errors.get(3).getTmddValue());
 
         // Email was sent
         verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());

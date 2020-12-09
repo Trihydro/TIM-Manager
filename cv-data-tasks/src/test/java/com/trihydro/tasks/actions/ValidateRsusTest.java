@@ -2,9 +2,11 @@ package com.trihydro.tasks.actions;
 
 import static com.trihydro.tasks.TestHelper.importJsonArray;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,15 +22,18 @@ import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
 
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.ExecutorFactory;
+import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.junit.jupiter.api.Assertions;
@@ -54,6 +59,10 @@ public class ValidateRsusTest {
     @Mock
     private RsuDataService mockRsuDataService;
     @Mock
+    private OdeService mockOdeService;
+    @Mock
+    private TimGenerationHelper mockTimGenerationHelper;
+    @Mock
     private ExecutorFactory mockExecutorFactory;
     @Mock
     private EmailFormatter mockEmailFormatter;
@@ -72,11 +81,9 @@ public class ValidateRsusTest {
     private Future<RsuValidationResult> thirdTask;
 
     @Captor
+    private ArgumentCaptor<List<RsuValidationRecord>> rsuValidationRecords;
+    @Captor
     private ArgumentCaptor<List<ValidateRsu>> rsuValidationTasks;
-    @Captor
-    private ArgumentCaptor<List<String>> unresponsiveRsus;
-    @Captor
-    private ArgumentCaptor<List<RsuValidationResult>> rsusWithErrors;
     @Captor
     private ArgumentCaptor<List<String>> unexpectedErrors;
 
@@ -146,8 +153,8 @@ public class ValidateRsusTest {
         setupThreadpool();
         configureServiceReturns(); // Service responds with with 4 Active Tims (across 2 RSUs)
         // 2 validation tasks generated, as a result. Simulate their responses.
-        when(firstTask.get()).thenReturn(new RsuValidationResult("0.0.0.0"));
-        when(secondTask.get()).thenReturn(new RsuValidationResult("0.0.0.1"));
+        when(firstTask.get()).thenReturn(new RsuValidationResult());
+        when(secondTask.get()).thenReturn(new RsuValidationResult());
 
         List<Future<RsuValidationResult>> results = Arrays.asList(firstTask, secondTask);
         doReturn(results).when(mockExecutorService).invokeAll(any(), any(Long.class), any(TimeUnit.class));
@@ -170,29 +177,44 @@ public class ValidateRsusTest {
         // - first RSU to be unresponsive
         // - second RSU to contain errors
         setupThreadpool();
-        RsuValidationResult firstRsu = new RsuValidationResult("0.0.0.0");
-        RsuValidationResult secondRsu = new RsuValidationResult("0.0.0.1");
+        RsuValidationResult firstRsu = new RsuValidationResult();
+        RsuValidationResult secondRsu = new RsuValidationResult();
+        RsuValidationResult secondRsuSecondPass = new RsuValidationResult();
+
         firstRsu.setRsuUnresponsive(true);
         secondRsu.setUnaccountedForIndices(Arrays.asList(5));
 
         configureServiceReturns(); // Service responds with with 4 Active Tims (across 2 RSUs)
         // 2 validation tasks generated, as a result. Simulate their responses.
         when(firstTask.get()).thenReturn(firstRsu);
-        when(secondTask.get()).thenReturn(secondRsu);
+        when(secondTask.get()).thenReturn(secondRsu).thenReturn(secondRsuSecondPass);
 
-        List<Future<RsuValidationResult>> results = Arrays.asList(firstTask, secondTask);
-        doReturn(results).when(mockExecutorService).invokeAll(any(), any(Long.class), any(TimeUnit.class));
+        when(mockExecutorService.invokeAll(any(), any(Long.class), any(TimeUnit.class)))
+                .thenAnswer(x -> Arrays.asList(firstTask, secondTask)).thenAnswer(x -> Arrays.asList(secondTask));
 
         // Act
         uut.run();
 
         // Assert
-        verify(mockEmailFormatter).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
-                unexpectedErrors.capture());
+        verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
-        Assertions.assertEquals(1, unresponsiveRsus.getValue().size());
-        Assertions.assertEquals(1, rsusWithErrors.getValue().size());
+        // The first RSU was unresponsive. Not an auto-correctable error so we only
+        // tried validating it once.
+        // The second RSU had an unaccounted for incide, so we tried re-validating it
+        // after attempting corrective action
+        Assertions.assertEquals(1, rsuValidationRecords.getValue().get(0).getValidationResults().size());
+        Assertions.assertEquals(2, rsuValidationRecords.getValue().get(1).getValidationResults().size());
+
+        // We tried to fix the unaccounted for index error
+        verify(mockOdeService).deleteTimFromRsu(any(), eq(5), any());
+
+        Assertions
+                .assertTrue(rsuValidationRecords.getValue().get(0).getValidationResults().get(0).getRsuUnresponsive());
+        Assertions
+                .assertFalse(rsuValidationRecords.getValue().get(1).getValidationResults().get(0).getRsuUnresponsive());
+        Assertions.assertEquals(1,
+                rsuValidationRecords.getValue().get(1).getValidationResults().get(0).getUnaccountedForIndices().size());
         Assertions.assertEquals(0, unexpectedErrors.getValue().size());
     }
 
@@ -205,7 +227,7 @@ public class ValidateRsusTest {
         setupThreadpool();
         configureServiceReturns(); // Service responds with with 4 Active Tims (across 2 RSUs)
         // 2 validation tasks generated, as a result. Simulate their responses.
-        when(firstTask.get()).thenReturn(new RsuValidationResult("0.0.0.0"));
+        when(firstTask.get()).thenReturn(new RsuValidationResult());
         when(secondTask.get()).thenThrow(new CancellationException());
 
         List<Future<RsuValidationResult>> results = Arrays.asList(firstTask, secondTask);
@@ -215,15 +237,13 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockEmailFormatter).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
-                unexpectedErrors.capture());
+        verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
-        Assertions.assertEquals(0, unresponsiveRsus.getValue().size());
-        Assertions.assertEquals(0, rsusWithErrors.getValue().size());
-        Assertions.assertEquals(1, unexpectedErrors.getValue().size());
-        Assertions.assertEquals("0.0.0.1: java.util.concurrent.CancellationException - null",
-                unexpectedErrors.getValue().get(0));
+        Assertions.assertEquals(0, unexpectedErrors.getValue().size());
+        Assertions.assertNotNull(rsuValidationRecords.getValue().get(1).getError());
+        Assertions.assertEquals("Error while validating RSU 0.0.0.1:\njava.util.concurrent.CancellationException",
+                rsuValidationRecords.getValue().get(1).getError());
     }
 
     // Suppose we have at least one RSU that doesn't have an Active TIM.
@@ -239,9 +259,9 @@ public class ValidateRsusTest {
         configureServiceReturns();
         configureRsuServiceReturns();
 
-        when(firstTask.get()).thenReturn(new RsuValidationResult("0.0.0.0"));
-        when(secondTask.get()).thenReturn(new RsuValidationResult("0.0.0.1"));
-        when(thirdTask.get()).thenReturn(new RsuValidationResult("0.0.0.2"));
+        when(firstTask.get()).thenReturn(new RsuValidationResult());
+        when(secondTask.get()).thenReturn(new RsuValidationResult());
+        when(thirdTask.get()).thenReturn(new RsuValidationResult());
 
         List<Future<RsuValidationResult>> results = Arrays.asList(firstTask, secondTask, thirdTask);
         doReturn(results).when(mockExecutorService).invokeAll(any(), any(Long.class), any(TimeUnit.class));
@@ -270,34 +290,36 @@ public class ValidateRsusTest {
         setupThreadpool();
         configureRsuServiceReturns();
 
-        when(firstTask.get()).thenReturn(new RsuValidationResult("0.0.0.0"));
-        when(secondTask.get()).thenReturn(new RsuValidationResult("0.0.0.1"));
+        when(firstTask.get()).thenReturn(new RsuValidationResult());
+        when(secondTask.get()).thenReturn(new RsuValidationResult());
 
-        RsuValidationResult lastRsu = new RsuValidationResult("0.0.0.2");
+        RsuValidationResult lastRsu = new RsuValidationResult();
         lastRsu.setUnaccountedForIndices(Arrays.asList(2));
         when(thirdTask.get()).thenReturn(lastRsu);
 
-        List<Future<RsuValidationResult>> results = Arrays.asList(firstTask, secondTask, thirdTask);
-        doReturn(results).when(mockExecutorService).invokeAll(any(), any(Long.class), any(TimeUnit.class));
+        when(mockExecutorService.invokeAll(any(), any(Long.class), any(TimeUnit.class)))
+                .thenAnswer(x -> Arrays.asList(firstTask, secondTask, thirdTask)).thenAnswer(x -> Arrays.asList(thirdTask));
 
         // Act
         uut.run();
 
         // Assert
-        verify(mockEmailFormatter).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
-                unexpectedErrors.capture());
+        verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
-        Assertions.assertEquals(0, unresponsiveRsus.getValue().size());
-        Assertions.assertEquals(1, rsusWithErrors.getValue().size());
+        var lastRsuResult = rsuValidationRecords.getValue().get(2);
+        Assertions.assertEquals(2, lastRsuResult.getValidationResults().size());
+        Assertions.assertEquals(1, lastRsuResult.getValidationResults().get(0).getUnaccountedForIndices().size());
+        Assertions.assertEquals(2, lastRsuResult.getValidationResults().get(0).getUnaccountedForIndices().get(0));
+
+        // We attempted to clear 0.0.0.2's unaccounted for indices
+        verify(mockOdeService).deleteTimFromRsu(any(), eq(2), any());
+
         Assertions.assertEquals(0, unexpectedErrors.getValue().size());
 
-        var errors = rsusWithErrors.getValue().get(0);
-        Assertions.assertEquals(1, errors.getUnaccountedForIndices().size());
-        Assertions.assertEquals(2, errors.getUnaccountedForIndices().get(0));
-
-        verify(mockExecutorService).invokeAll(rsuValidationTasks.capture(), any(Long.class), any(TimeUnit.class));
-        Assertions.assertEquals(3, rsuValidationTasks.getValue().size());
+        verify(mockExecutorService, times(2)).invokeAll(rsuValidationTasks.capture(), any(Long.class), any(TimeUnit.class));
+        Assertions.assertEquals(3, rsuValidationTasks.getAllValues().get(0).size());
+        Assertions.assertEquals(1, rsuValidationTasks.getAllValues().get(1).size());
     }
 
     @Test
@@ -310,8 +332,8 @@ public class ValidateRsusTest {
         // Error when attempting to get all RSUs
         when(mockRsuService.selectAll()).thenThrow(new RestClientException("timeout"));
 
-        when(firstTask.get()).thenReturn(new RsuValidationResult("0.0.0.0"));
-        when(secondTask.get()).thenReturn(new RsuValidationResult("0.0.0.1"));
+        when(firstTask.get()).thenReturn(new RsuValidationResult());
+        when(secondTask.get()).thenReturn(new RsuValidationResult());
 
         List<Future<RsuValidationResult>> results = Arrays.asList(firstTask, secondTask);
         doReturn(results).when(mockExecutorService).invokeAll(any(), any(Long.class), any(TimeUnit.class));
@@ -320,17 +342,15 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockEmailFormatter).generateRsuSummaryEmail(unresponsiveRsus.capture(), rsusWithErrors.capture(),
-                unexpectedErrors.capture());
+        verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
         verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
 
-        // 2 validation tasks were still performed. 2 RSUs (0.0.0.0 and 0.0.0.1) had Active TIMs, and were found
+        // 2 validation tasks were still performed. 2 RSUs (0.0.0.0 and 0.0.0.1) had
+        // Active TIMs, and were found
         // during the first fetch
         verify(mockExecutorService).invokeAll(rsuValidationTasks.capture(), any(Long.class), any(TimeUnit.class));
         Assertions.assertEquals(2, rsuValidationTasks.getValue().size());
 
-        Assertions.assertEquals(0, unresponsiveRsus.getValue().size());
-        Assertions.assertEquals(0, rsusWithErrors.getValue().size());
         Assertions.assertEquals(1, unexpectedErrors.getValue().size());
         Assertions.assertEquals(
                 "Error occurred while fetching all RSUs - "

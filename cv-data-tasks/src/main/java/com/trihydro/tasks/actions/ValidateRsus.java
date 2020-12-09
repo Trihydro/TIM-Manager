@@ -176,13 +176,16 @@ public class ValidateRsus implements Runnable {
         // Resubmit stale TIMs
         List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTim().getActiveTimId())
                 .collect(Collectors.toList());
-        var resubmitErrors = timGenerationHelper.resubmitToOde(activeTimIds);
 
-        for (var error : resubmitErrors) {
-            String message = String.format("Error resubmitting Active TIM %d. Error: %s", error.getActiveTimId(),
-                    error.getExceptionMessage());
-            utility.logWithDate(message, this.getClass());
-            unexpectedErrors.add(message);
+        if (activeTimIds.size() > 0) {
+            var resubmitErrors = timGenerationHelper.resubmitToOde(activeTimIds);
+
+            for (var error : resubmitErrors) {
+                String message = String.format("Error resubmitting Active TIM %d. Error: %s", error.getActiveTimId(),
+                        error.getExceptionMessage());
+                utility.logWithDate(message, this.getClass());
+                unexpectedErrors.add(message);
+            }
         }
 
         // Now that we've attempted to cleanup the RSU, perform second validation pass

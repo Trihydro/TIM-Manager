@@ -8,11 +8,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimError;
+import com.trihydro.library.model.ActiveTimErrorType;
+import com.trihydro.library.model.ActiveTimValidationResult;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.RsuIndexInfo;
-import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimMapping;
-import com.trihydro.tasks.models.ActiveTimValidationResult;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
@@ -278,7 +279,7 @@ public class EmailFormatterTest {
         ActiveTim tim = new ActiveTim();
         tim.setActiveTimId(1234l);
         tim.setClientId("AA1234");
-        ActiveTimError error = new ActiveTimError("fieldName", "timValue", "tmddValue");
+        ActiveTimError error = new ActiveTimError(ActiveTimErrorType.endPoint, "timValue", "tmddValue");
 
         ActiveTimValidationResult valResult = new ActiveTimValidationResult();
         valResult.setActiveTim(tim);
@@ -291,7 +292,7 @@ public class EmailFormatterTest {
         // Assert
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
-        Assertions.assertTrue(result.contains("<td>fieldName</td><td>timValue</td><td>tmddValue</td>"));
+        Assertions.assertTrue(result.contains("<td>End Point</td><td>timValue</td><td>tmddValue</td>"));
     }
 
     @Test
@@ -305,7 +306,7 @@ public class EmailFormatterTest {
         ActiveTim tim = new ActiveTim();
         tim.setActiveTimId(1234l);
         tim.setClientId("AA1234");
-        ActiveTimError error = new ActiveTimError("fieldName", null, "tmddValue");
+        ActiveTimError error = new ActiveTimError(ActiveTimErrorType.endPoint, null, "tmddValue");
 
         ActiveTimValidationResult valResult = new ActiveTimValidationResult();
         valResult.setActiveTim(tim);
@@ -318,7 +319,7 @@ public class EmailFormatterTest {
         // Assert
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("<h4>1234 (AA1234)</h4>"));
-        Assertions.assertTrue(result.contains("<td>fieldName</td><td>null</td><td>tmddValue</td>"));
+        Assertions.assertTrue(result.contains("<td>End Point</td><td>null</td><td>tmddValue</td>"));
     }
 
     // RSU Validation Email helper method

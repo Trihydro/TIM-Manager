@@ -1,21 +1,21 @@
-package com.trihydro.tasks.models;
+package com.trihydro.library.model;
 
 public class ActiveTimError {
-    private String name;
+    private ActiveTimErrorType name;
     private String timValue;
     private String tmddValue;
 
-    public ActiveTimError(String name, String timValue, String tmddValue) {
+    public ActiveTimError(ActiveTimErrorType name, String timValue, String tmddValue) {
         this.name = name;
         this.timValue = timValue;
         this.tmddValue = tmddValue;
     }
 
-    public String getName() {
+    public ActiveTimErrorType getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(ActiveTimErrorType name) {
         this.name = name;
     }
 

@@ -6,11 +6,12 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuDataService;
@@ -34,6 +35,7 @@ public class ValidateRsus implements Runnable {
     private RsuService rsuService;
     private RsuDataService rsuDataService;
     private OdeService odeService;
+    private TimGenerationHelper timGenerationHelper;
     private ExecutorFactory executorFactory;
     private EmailFormatter emailFormatter;
     private EmailHelper mailHelper;
@@ -42,13 +44,14 @@ public class ValidateRsus implements Runnable {
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
             RsuService _rsuService, RsuDataService _rsuDataService, OdeService _odeService, 
-            ExecutorFactory _executorFactory, EmailFormatter _emailFormatter, EmailHelper _mailHelper, 
-            Utility _utility) {
+            TimGenerationHelper _timGenerationHelper, ExecutorFactory _executorFactory, EmailFormatter _emailFormatter, 
+            EmailHelper _mailHelper,  Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
         rsuService = _rsuService;
         rsuDataService = _rsuDataService;
         odeService = _odeService;
+        timGenerationHelper = _timGenerationHelper;
         executorFactory = _executorFactory;
         emailFormatter = _emailFormatter;
         mailHelper = _mailHelper;
@@ -157,19 +160,28 @@ public class ValidateRsus implements Runnable {
             }
 
             // If this RSU has any indices that are unaccounted for, clear them
-            if(result.getUnaccountedForIndices().size() > 0) {
-                var rsu = new WydotRsu();
-                rsu.setRsuTarget(rsuRecord.getRsuInformation().getIpv4Address());
-                rsu.setRsuRetries(2);
-                rsu.setRsuTimeout(3000);
+            // if(result.getUnaccountedForIndices().size() > 0) {
+            //     var rsu = new WydotRsu();
+            //     rsu.setRsuTarget(rsuRecord.getRsuInformation().getIpv4Address());
+            //     rsu.setRsuRetries(2);
+            //     rsu.setRsuTimeout(3000);
 
-                for (var index : result.getUnaccountedForIndices()) {
-                    odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
-                }
-            }
+            //     for (var index : result.getUnaccountedForIndices()) {
+            //         odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
+            //     }
+            // }
         }
+        
+        // Resubmit stale TIMs
+        List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTim().getActiveTimId()).collect(Collectors.toList());
+        var resubmitErrors = timGenerationHelper.resubmitToOde(activeTimIds);
 
-        // TODO: resend TIMs in timsToResend
+        for(var error : resubmitErrors) {
+            String message = String.format("Error resubmitting Active TIM %d. Error: %s",
+            error.getActiveTimId(), error.getExceptionMessage());
+            utility.logWithDate(message, this.getClass());
+            unexpectedErrors.add(message);
+        }
 
         // Now that we've attempted to cleanup the RSU, perform second validation pass
         // Note that we only need to re-validate RSUs we attempted to correct

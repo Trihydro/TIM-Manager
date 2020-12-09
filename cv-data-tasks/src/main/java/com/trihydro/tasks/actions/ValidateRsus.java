@@ -12,6 +12,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuDataService;
@@ -43,9 +44,9 @@ public class ValidateRsus implements Runnable {
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
-            RsuService _rsuService, RsuDataService _rsuDataService, OdeService _odeService, 
-            TimGenerationHelper _timGenerationHelper, ExecutorFactory _executorFactory, EmailFormatter _emailFormatter, 
-            EmailHelper _mailHelper,  Utility _utility) {
+            RsuService _rsuService, RsuDataService _rsuDataService, OdeService _odeService,
+            TimGenerationHelper _timGenerationHelper, ExecutorFactory _executorFactory, EmailFormatter _emailFormatter,
+            EmailHelper _mailHelper, Utility _utility) {
         config = _config;
         activeTimService = _activeTimService;
         rsuService = _rsuService;
@@ -160,25 +161,26 @@ public class ValidateRsus implements Runnable {
             }
 
             // If this RSU has any indices that are unaccounted for, clear them
-            // if(result.getUnaccountedForIndices().size() > 0) {
-            //     var rsu = new WydotRsu();
-            //     rsu.setRsuTarget(rsuRecord.getRsuInformation().getIpv4Address());
-            //     rsu.setRsuRetries(2);
-            //     rsu.setRsuTimeout(3000);
+            if (result.getUnaccountedForIndices().size() > 0) {
+                var rsu = new WydotRsu();
+                rsu.setRsuTarget(rsuRecord.getRsuInformation().getIpv4Address());
+                rsu.setRsuRetries(2);
+                rsu.setRsuTimeout(3000);
 
-            //     for (var index : result.getUnaccountedForIndices()) {
-            //         odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
-            //     }
-            // }
+                for (var index : result.getUnaccountedForIndices()) {
+                    odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
+                }
+            }
         }
-        
+
         // Resubmit stale TIMs
-        List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTim().getActiveTimId()).collect(Collectors.toList());
+        List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTim().getActiveTimId())
+                .collect(Collectors.toList());
         var resubmitErrors = timGenerationHelper.resubmitToOde(activeTimIds);
 
-        for(var error : resubmitErrors) {
-            String message = String.format("Error resubmitting Active TIM %d. Error: %s",
-            error.getActiveTimId(), error.getExceptionMessage());
+        for (var error : resubmitErrors) {
+            String message = String.format("Error resubmitting Active TIM %d. Error: %s", error.getActiveTimId(),
+                    error.getExceptionMessage());
             utility.logWithDate(message, this.getClass());
             unexpectedErrors.add(message);
         }
@@ -192,20 +194,15 @@ public class ValidateRsus implements Runnable {
         // We should only send a validation summary if any inconsistencies were found
         // or if any errors occurred
         if (unexpectedErrors.size() > 0 || rsusWithResolvableIssues.size() > 0 || unresolvableIssueFound) {
-            // TODO: send email
+            // Send validationRecords (all RSUs that were validated) to the email generator.
+            String email = emailFormatter.generateRsuSummaryEmail(validationRecords, unexpectedErrors);
 
-            // String email = emailFormatter.generateRsuSummaryEmail(unresponsiveRsus,
-            // rsusWithErrors, unexpectedErrors);
-
-            // try {
-            // mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation
-            // Results", email,
-            // config.getMailPort(), config.getMailHost(), config.getFromEmail());
-            // } catch (Exception ex) {
-            // ex.printStackTrace();
-            // }
-            // TODO: send validation summary email (may be partial if validation failed
-            // early)
+            try {
+                mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Results", email,
+                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -246,10 +243,9 @@ public class ValidateRsus implements Runnable {
 
         // Go through each result, and update the corresponding validation record
         for (int i = 0; i < futureResults.size(); i++) {
-            RsuValidationResult result = null;
-
             try {
-                result = futureResults.get(i).get();
+                var result = futureResults.get(i).get();
+                rsusToValidate.get(i).addValidationResult(result);
             } catch (Exception e) {
                 // Something went wrong, and the validation task for this RSU wasn't completed.
                 String rsuIpv4Address = tasks.get(i).getRsu().getIpv4Address();
@@ -257,10 +253,6 @@ public class ValidateRsus implements Runnable {
                 utility.logWithDate(message, this.getClass());
                 rsusToValidate.get(i).setError(message);
             }
-
-            // If the validation task completed, we have a non-null object.
-            // If the validation task bombed or was cancelled, the result is null
-            rsusToValidate.get(i).addValidationResult(result);
         }
     }
 

@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 @Component
@@ -159,23 +158,22 @@ public class OdeService {
         return timQuery;
     }
 
-    public void deleteTimFromRsu(WydotRsu rsu, Integer index, String odeUrl) {
-
+    public String deleteTimFromRsu(WydotRsu rsu, Integer index, String odeUrl) {
+        String exMsg = "";
         String rsuJson = gson.toJson(rsu);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        try {
-            utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
-            restTemplateProvider.GetRestTemplate().exchange(
-                odeUrl + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity,
-                    String.class);
-        } catch (HttpClientErrorException e) {
-            System.out.println(e.getMessage());
-        } catch (RuntimeException targetException) {
-            System.out.println("exception");
+        utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
+                .exchange(odeUrl + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
+
+        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
+            exMsg = "Failed to delete message from RSU: " + response.getBody();
+            utility.logWithDate(exMsg);
         }
+        return exMsg;
     }
 }

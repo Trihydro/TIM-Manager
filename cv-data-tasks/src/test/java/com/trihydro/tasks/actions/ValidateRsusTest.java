@@ -201,7 +201,7 @@ public class ValidateRsusTest {
 
         // The first RSU was unresponsive. Not an auto-correctable error so we only
         // tried validating it once.
-        // The second RSU had an unaccounted for incide, so we tried re-validating it
+        // The second RSU had an unaccounted for index, so we tried re-validating it
         // after attempting corrective action
         Assertions.assertEquals(1, rsuValidationRecords.getValue().get(0).getValidationResults().size());
         Assertions.assertEquals(2, rsuValidationRecords.getValue().get(1).getValidationResults().size());

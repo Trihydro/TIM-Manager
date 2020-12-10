@@ -52,7 +52,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
     public RsuValidationResult call() {
         result = new RsuValidationResult();
 
-        // Retrieve info for populates indexes on RSU
+        // Retrieve info for populated indexes on RSU
         rsuIndices = rsuDataService.getRsuDeliveryStartTimes(ipv4Address);
 
         // Check if error occurred querying indices.

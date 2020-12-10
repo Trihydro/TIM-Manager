@@ -26,6 +26,7 @@ import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -65,9 +66,16 @@ public class ValidateRsus implements Runnable {
         try {
             validateRsus();
         } catch (Exception ex) {
-            // Send email saying validation bombed
-            utility.logWithDate("Error while validating RSUs:", this.getClass());
-            ex.printStackTrace();
+            var msg = "An unexpected error occurred that prevented RSU validation from completing.\n";
+            msg += ex.getMessage();
+            utility.logWithDate(msg, this.getClass());
+
+            try {
+                mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Error", msg,
+                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+            } catch (Exception mailException) {
+                mailException.printStackTrace();
+            }
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
         }
@@ -78,10 +86,6 @@ public class ValidateRsus implements Runnable {
         List<RsuValidationRecord> validationRecords = new ArrayList<>();
 
         List<EnvActiveTim> activeTims = getActiveRsuTims();
-        if (activeTims == null) {
-            // Cannot proceed with validation.
-            return;
-        }
 
         // Organize ActiveTim records by RSU
         List<RsuInformation> rsusToValidate = getRsusFromActiveTims(activeTims);
@@ -107,6 +111,16 @@ public class ValidateRsus implements Runnable {
 
         // If there isn't anything to verify, exit early.
         if (rsusToValidate.size() == 0) {
+            var msg = "Unable to find any RSUs to validate.";
+            utility.logWithDate(msg, this.getClass());
+
+            try {
+                mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Error", msg,
+                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             return;
         }
 
@@ -137,6 +151,7 @@ public class ValidateRsus implements Runnable {
 
             if (result.getRsuUnresponsive()) {
                 unresolvableIssueFound = true;
+                continue;
             }
 
             if (result.getMissingFromRsu().size() == 0 && result.getStaleIndexes().size() == 0
@@ -168,7 +183,10 @@ public class ValidateRsus implements Runnable {
                 rsu.setRsuTimeout(3000);
 
                 for (var index : result.getUnaccountedForIndices()) {
-                    odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
+                    var exMsg = odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
+                    if (StringUtils.isNotBlank(exMsg)) {
+                        unexpectedErrors.add(exMsg);
+                    }
                 }
             }
         }

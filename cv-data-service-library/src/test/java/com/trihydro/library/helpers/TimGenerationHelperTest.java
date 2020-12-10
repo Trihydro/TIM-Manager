@@ -636,6 +636,9 @@ public class TimGenerationHelperTest {
 
         // Assert
         Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        String exMsg = "Failed to get Update Model from active tim";
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockActiveTimService).getUpdateModelFromActiveTimId(any());
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService, mockSdwService, mockMilepostService,
@@ -667,7 +670,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void updateAndResubmitToOde_RsuUpdateTimFail_EndPointMps() {
+    public void updateAndResubmitToOde_RsuNewTimFail_EndPointMps() {
         // Arrange
         setupActiveTimModel();
         setupMilepostReturnSecondFail();
@@ -703,7 +706,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void updateAndResubmitToOde_RsuUpdateTimFail_EndTimeParse() {
+    public void updateAndResubmitToOde_RsuNewTimFail_EndTimeParse() {
         // Arrange
         setupActiveTimModel();
         setupMilepostReturnSecondFail();
@@ -737,7 +740,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void updateAndResubmitToOde_RsuUpdateTimFail_StartPointMps() {
+    public void updateAndResubmitToOde_RsuNewTimFail_StartPointMps() {
         // Arrange
         setupActiveTimModel();
         setupMilepostReturnSecondFail();
@@ -773,7 +776,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void updateAndResubmitToOde_RsuUpdateTimSuccess_StartPoint() {
+    public void updateAndResubmitToOde_RsuNewTimSuccess_StartPoint() {
         // Arrange
         setupActiveTimModel();
         setupMilepostReturn();
@@ -822,7 +825,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void updateAndResubmitToOde_RsuUpdateTimSuccess_EndPoint() {
+    public void updateAndResubmitToOde_RsuNewTimSuccess_EndPoint() {
         // Arrange
         setupActiveTimModel();
         setupMilepostReturn();
@@ -871,7 +874,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void updateAndResubmitToOde_RsuUpdateTimSuccess_EndTime() {
+    public void updateAndResubmitToOde_RsuNewTimSuccess_EndTime() {
         // Arrange
         setupActiveTimModel();
         setupMilepostReturn();
@@ -936,13 +939,11 @@ public class TimGenerationHelperTest {
         errors.add(new ActiveTimError(ActiveTimErrorType.itisCodes, "timValue", "{1234,4321}"));
         validationResults.get(0).setErrors(errors);
 
-        List<WydotRsu> dbRsus = new ArrayList<>();
-        var rsu = new WydotRsu();
-        rsu.setRsuTarget("10.10.10.10");
-        dbRsus.add(rsu);
-        doReturn(dbRsus).when(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
-        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
-        when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
+        List<WydotRsuTim> wydotRsus = new ArrayList<>();
+        var wydotRsuTim = new WydotRsuTim();
+        wydotRsuTim.setIndex(-1);
+        wydotRsus.add(wydotRsuTim);
+        doReturn(wydotRsus).when(mockRsuService).getFullRsusTimIsOn(any());
 
         // Act
         var exceptions = uut.updateAndResubmitToOde(validationResults);
@@ -950,12 +951,8 @@ public class TimGenerationHelperTest {
         // Assert
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
-        verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
-        verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
-        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
-        verify(mockOdeService).sendNewTimToRsu(any());
+        verify(mockOdeService).updateTimOnRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());

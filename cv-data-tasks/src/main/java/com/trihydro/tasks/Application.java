@@ -10,17 +10,26 @@ import javax.annotation.PostConstruct;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.GsonFactory;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
+import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.BsmService;
+import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.DriverAlertService;
 import com.trihydro.library.service.HmiLogService;
 import com.trihydro.library.service.ItisCodeService;
+import com.trihydro.library.service.MilepostService;
+import com.trihydro.library.service.OdeService;
+import com.trihydro.library.service.PathNodeLLService;
+import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.RsuDataService;
+import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.StatusLogService;
+import com.trihydro.library.service.TimGenerationProps;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TmddService;
 import com.trihydro.library.service.UtilityService;
@@ -43,7 +52,9 @@ import org.springframework.context.annotation.Import;
 @Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
                 BsmService.class, ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
                 TmddService.class, GsonFactory.class, DriverAlertService.class, HmiLogService.class,
-                StatusLogService.class, TimService.class, UtilityService.class, TimGenerationHelper.class })
+                StatusLogService.class, TimService.class, UtilityService.class, DataFrameService.class,
+                TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class, MilepostReduction.class,
+                RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class })
 
 public class Application {
         protected static DataTasksConfiguration config;

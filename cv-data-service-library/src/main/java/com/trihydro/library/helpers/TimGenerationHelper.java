@@ -107,54 +107,67 @@ public class TimGenerationHelper {
         }
         // iterate over tims, fetch, and push out
         for (ActiveTimValidationResult validationResult : validationResults) {
-            var activeTimId = validationResult.getActiveTim().getActiveTimId();
-            var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
+            try {
+                var activeTimId = validationResult.getActiveTim().getActiveTimId();
+                var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
 
-            if (tum == null) {
-                exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
-                continue;
-            }
+                if (tum == null) {
+                    exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
+                    continue;
+                }
 
-            if (tum.getLaneWidth() == null) {
-                tum.setLaneWidth(config.getDefaultLaneWidth());
-            }
+                if (tum.getLaneWidth() == null) {
+                    tum.setLaneWidth(config.getDefaultLaneWidth());
+                } else {
+                    // Oracle has lane width as cm, but ODE takes m
+                    tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
+                }
 
-            WydotTim wydotTim = getWydotTimFromTum(tum);
-            List<Milepost> mps = new ArrayList<>();
-            List<Milepost> allMps = getAllMps(wydotTim);
-            if (allMps.size() == 0) {
-                String exMsg = String.format(
-                        "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
-                        tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                continue;
-            }
+                WydotTim wydotTim = getWydotTimFromTum(tum);
+                List<Milepost> mps = new ArrayList<>();
+                List<Milepost> allMps = getAllMps(wydotTim);
+                if (allMps.size() == 0) {
+                    String exMsg = String.format(
+                            "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
 
-            // reduce the mileposts by removing straight away posts
-            var anchorMp = allMps.remove(0);
-            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-            OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
-            if (tim == null) {
-                String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d", tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                continue;
-            }
+                // reduce the mileposts by removing straight away posts
+                var anchorMp = allMps.remove(0);
+                mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
+                if (tim == null) {
+                    String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
 
-            // update the TIM based on validationResult
-            tim = updateTim(tum, tim, validationResult, exceptions);
+                // update the TIM based on validationResult
+                tim = updateTim(tum, tim, validationResult, exceptions);
 
-            // check for any exceptions while updating TIM
-            if (tim == null || exceptions.size() > 0) {
-                continue;
-            }
-            WydotTravelerInputData timToSend = new WydotTravelerInputData();
-            timToSend.setRequest(new ServiceRequest());
-            timToSend.setTim(tim);
-            var extraEx = sendTim(timToSend, tum, activeTimId, mps);
-            if (extraEx.size() > 0) {
-                exceptions.addAll(extraEx);
+                // check for any exceptions while updating TIM
+                if (tim == null || exceptions.size() > 0) {
+                    utility.logWithDate("Unable to update TIM (active_tim_id " + tum.getActiveTimId()
+                            + ") with validationResult: " + gson.toJson(validationResult));
+                    continue;
+                }
+                WydotTravelerInputData timToSend = new WydotTravelerInputData();
+                timToSend.setRequest(new ServiceRequest());
+                timToSend.setTim(tim);
+                var extraEx = sendTim(timToSend, tum, activeTimId, mps);
+                if (extraEx.size() > 0) {
+                    exceptions.addAll(extraEx);
+                }
+            } catch (Exception ex) {
+                utility.logWithDate("Failed attempting to update TIM (active_tim_id "
+                        + validationResult.getActiveTim().getActiveTimId() + ") with ActiveTimValidationResult: "
+                        + gson.toJson(validationResult));
+                ex.printStackTrace();
             }
         }
         return exceptions;
@@ -299,6 +312,9 @@ public class TimGenerationHelper {
 
             if (tum.getLaneWidth() == null) {
                 tum.setLaneWidth(config.getDefaultLaneWidth());
+            } else {
+                // Oracle has lane width as cm, but ODE takes m
+                tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
             }
 
             WydotTim wydotTim = getWydotTimFromTum(tum);

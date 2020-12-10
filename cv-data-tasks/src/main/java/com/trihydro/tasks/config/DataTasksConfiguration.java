@@ -1,17 +1,23 @@
 package com.trihydro.tasks.config;
 
+import java.math.BigDecimal;
+
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.TmddProps;
+import com.trihydro.library.service.TimGenerationProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps {
+public class DataTasksConfiguration
+        implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps, TimGenerationProps {
 
     private String cvRestService;
     private String cvRestServiceDev; // Temporary
@@ -46,8 +52,54 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private int hsmErrorEmailFrequencyMinutes = 10;// send an email every 10 minutes the system is down
     private boolean runHsmCheck;
 
+    private TimeToLive sdwTtl;
+    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);
+    private String[] rsuRoutes;
+    private Double pointIncidentBufferMiles;
+
+    /**
+     * Returns the defaultLaneWidth / 2
+     *
+     * @return
+     */
+    public Double getPathDistanceLimit() {
+        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
+
     public String getCvRestService() {
         return cvRestService;
+    }
+
+    public Double getPointIncidentBufferMiles() {
+        return pointIncidentBufferMiles;
+    }
+
+    public void setPointIncidentBufferMiles(Double pointIncidentBufferMiles) {
+        this.pointIncidentBufferMiles = pointIncidentBufferMiles;
+    }
+
+    public String[] getRsuRoutes() {
+        return rsuRoutes;
+    }
+
+    public void setRsuRoutes(String[] rsuRoutes) {
+        this.rsuRoutes = rsuRoutes;
+    }
+
+    public BigDecimal getDefaultLaneWidth() {
+        return defaultLaneWidth;
+    }
+
+    public void setDefaultLaneWidth(BigDecimal defaultLaneWidth) {
+        this.defaultLaneWidth = defaultLaneWidth;
+    }
+
+    public TimeToLive getSdwTtl() {
+        return sdwTtl;
+    }
+
+    public void setSdwTtl(TimeToLive sdwTtl) {
+        this.sdwTtl = sdwTtl;
     }
 
     public int getRetentionEnforcementPeriodMinutes() {
@@ -282,19 +334,19 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.hsmUrl = hsmUrl;
     }
 
-    public int getHsmErrorEmailFrequencyMinutes(){
+    public int getHsmErrorEmailFrequencyMinutes() {
         return hsmErrorEmailFrequencyMinutes;
     }
 
-    public void setHsmErrorEmailFrequencyMinutes(int hsmErrorEmailFrequencyMinutes){
+    public void setHsmErrorEmailFrequencyMinutes(int hsmErrorEmailFrequencyMinutes) {
         this.hsmErrorEmailFrequencyMinutes = hsmErrorEmailFrequencyMinutes;
     }
 
-    public boolean getRunHsmCheck(){
+    public boolean getRunHsmCheck() {
         return runHsmCheck;
     }
 
-    public void setRunHsmCheck(boolean runHsmCheck){
+    public void setRunHsmCheck(boolean runHsmCheck) {
         this.runHsmCheck = runHsmCheck;
     }
 }

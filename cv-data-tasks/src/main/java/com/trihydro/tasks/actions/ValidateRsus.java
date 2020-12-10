@@ -251,7 +251,7 @@ public class ValidateRsus implements Runnable {
                 rsusToValidate.get(i).addValidationResult(result);
             } catch (Exception e) {
                 // Something went wrong, and the validation task for this RSU wasn't completed.
-                String rsuIpv4Address = tasks.get(i).getRsu().getIpv4Address();
+                String rsuIpv4Address = tasks.get(i).getIpv4Address();
                 String message = "Error while validating RSU " + rsuIpv4Address + ":\n" + e.toString();
                 utility.logWithDate(message, this.getClass());
                 rsusToValidate.get(i).setError(message);

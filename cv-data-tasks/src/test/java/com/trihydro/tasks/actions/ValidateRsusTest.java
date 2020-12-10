@@ -166,8 +166,8 @@ public class ValidateRsusTest {
         verify(mockMailHelper, never()).SendEmail(any(), any(), any(), any(), any(), any(), any());
         verify(mockExecutorService).invokeAll(rsuValidationTasks.capture(), any(Long.class), any(TimeUnit.class));
         Assertions.assertEquals(2, rsuValidationTasks.getValue().size());
-        Assertions.assertEquals("0.0.0.0", rsuValidationTasks.getValue().get(0).getRsu().getIpv4Address());
-        Assertions.assertEquals("0.0.0.1", rsuValidationTasks.getValue().get(1).getRsu().getIpv4Address());
+        Assertions.assertEquals("0.0.0.0", rsuValidationTasks.getValue().get(0).getIpv4Address());
+        Assertions.assertEquals("0.0.0.1", rsuValidationTasks.getValue().get(1).getIpv4Address());
     }
 
     @Test
@@ -275,9 +275,9 @@ public class ValidateRsusTest {
 
         verify(mockExecutorService).invokeAll(rsuValidationTasks.capture(), any(Long.class), any(TimeUnit.class));
         Assertions.assertEquals(3, rsuValidationTasks.getValue().size());
-        Assertions.assertEquals("0.0.0.0", rsuValidationTasks.getValue().get(0).getRsu().getIpv4Address());
-        Assertions.assertEquals("0.0.0.1", rsuValidationTasks.getValue().get(1).getRsu().getIpv4Address());
-        Assertions.assertEquals("0.0.0.2", rsuValidationTasks.getValue().get(2).getRsu().getIpv4Address());
+        Assertions.assertEquals("0.0.0.0", rsuValidationTasks.getValue().get(0).getIpv4Address());
+        Assertions.assertEquals("0.0.0.1", rsuValidationTasks.getValue().get(1).getIpv4Address());
+        Assertions.assertEquals("0.0.0.2", rsuValidationTasks.getValue().get(2).getIpv4Address());
     }
 
     @Test

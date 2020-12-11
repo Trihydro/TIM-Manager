@@ -15,23 +15,27 @@ import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.EnvActiveTim;
-import com.trihydro.tasks.models.PopulatedRsu;
+import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 public class ValidateRsu implements Callable<RsuValidationResult> {
     private RsuDataService rsuDataService;
 
-    private PopulatedRsu rsu;
+    private String ipv4Address;
+    private List<EnvActiveTim> activeTims;
     private List<RsuIndexInfo> rsuIndices;
     private RsuValidationResult result;
 
-    public ValidateRsu(PopulatedRsu rsu, RsuDataService rsuDataService) {
-        this.rsu = rsu;
+    public ValidateRsu(RsuInformation rsu, RsuDataService rsuDataService) {
+        this.ipv4Address = rsu.getIpv4Address();
         this.rsuDataService = rsuDataService;
+
+        // We need to copy this list since we'll be manipulating the list contents
+        activeTims = new ArrayList<>(rsu.getRsuActiveTims());
     }
 
-    public PopulatedRsu getRsu() {
-        return rsu;
+    public String getIpv4Address() {
+        return ipv4Address;
     }
 
     private static Comparator<RsuIndexInfo> findByIndex;
@@ -46,10 +50,10 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
 
     @Override
     public RsuValidationResult call() {
-        result = new RsuValidationResult(rsu.getIpv4Address());
+        result = new RsuValidationResult();
 
-        // Retrieve info for populates indexes on RSU
-        rsuIndices = rsuDataService.getRsuDeliveryStartTimes(rsu.getIpv4Address());
+        // Retrieve info for populated indexes on RSU
+        rsuIndices = rsuDataService.getRsuDeliveryStartTimes(ipv4Address);
 
         // Check if error occurred querying indices.
         if (rsuIndices == null) {
@@ -61,7 +65,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         calculateCollisions();
 
         // Verify Active TIMs
-        for (EnvActiveTim record : rsu.getRsuActiveTims()) {
+        for (EnvActiveTim record : activeTims) {
             ActiveTim tim = record.getActiveTim();
 
             // Check if index claimed by ActiveTim is populated on RSU
@@ -97,7 +101,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         Map<Integer, List<EnvActiveTim>> indexAssignments = new HashMap<>();
 
         // Iterate over the Active Tims on this rsu. Group by assigned rsu index
-        for (EnvActiveTim record : rsu.getRsuActiveTims()) {
+        for (EnvActiveTim record : activeTims) {
             int currentIndex = record.getActiveTim().getRsuIndex();
             // If this RSU index isn't present in the map, initialize value
             // to be an empty list of ActiveTims.
@@ -130,6 +134,6 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
             rsuIndices.remove(pos);
         }
 
-        rsu.getRsuActiveTims().removeIf((t) -> t.getActiveTim().getRsuIndex().equals(index));
+        activeTims.removeIf((t) -> t.getActiveTim().getRsuIndex().equals(index));
     }
 }

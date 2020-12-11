@@ -17,6 +17,7 @@ import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.Environment;
+import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ public class EmailFormatter {
     private String formatSection;
     private String formatRsuMain;
     private String formatRsuResults;
+    private String formatRsuValSummary;
     private String formatTmddMain;
     private String formatTmddResults;
 
@@ -35,6 +37,7 @@ public class EmailFormatter {
         formatSection = readFile("/email-templates/section.html");
         formatRsuMain = readFile("/email-templates/rsu-main.html");
         formatRsuResults = readFile("/email-templates/rsu-results.html");
+        formatRsuValSummary = readFile("/email-templates/rsu-val-summary.html");
         formatTmddMain = readFile("/email-templates/tmdd-main.html");
         formatTmddResults = readFile("/email-templates/tmdd-results.html");
     }
@@ -114,17 +117,21 @@ public class EmailFormatter {
         return body;
     }
 
-    public String generateRsuSummaryEmail(List<String> unresponsiveRsus, List<RsuValidationResult> rsusWithErrors,
+    public String generateRsuSummaryEmail(List<RsuValidationRecord> rsuValidationRecords,
             List<String> unexpectedErrors) {
         String body = formatRsuMain;
 
         // List RSUs that couldn't be verified
+        var unresponsiveRsus = rsuValidationRecords.stream().filter(
+                rsu -> rsu.getValidationResults().size() > 0 && rsu.getValidationResults().get(0).getRsuUnresponsive())
+                .map(rsu -> rsu.getRsuInformation().getIpv4Address()).collect(Collectors.toList());
+
         String failedIpAddresses = String.join(", ", unresponsiveRsus);
         body = body.replaceAll("\\{failedIpAddresses\\}", failedIpAddresses);
 
         // Populate RSUs With Errors section (if applicable)
         String rsuResults = "";
-        for (RsuValidationResult rsuResult : rsusWithErrors) {
+        for (var rsuResult : rsuValidationRecords) {
             rsuResults += getRsuResult(rsuResult);
         }
         body = body.replaceAll("\\{rsusWithErrors\\}", rsuResults);
@@ -167,13 +174,68 @@ public class EmailFormatter {
         return body;
     }
 
-    private String getRsuResult(RsuValidationResult result) {
-        String section = formatRsuResults.replaceAll("\\{ipv4Address\\}", result.getRsu());
-        String subSection = "";
+    private String getRsuResult(RsuValidationRecord rsuValRecord) {
+        // This RSU has reportable errors if there are 2 validation results (we found
+        // inconsistencies
+        // then attempted to correct them), there are index collisions, or there's an
+        // error
+        if (!(rsuValRecord.getValidationResults().size() == 2
+                || (rsuValRecord.getValidationResults().size() > 0
+                        && rsuValRecord.getValidationResults().get(0).getCollisions().size() > 0)
+                || rsuValRecord.getError() != null)) {
+            return "";
+        }
+
+        String section = formatRsuResults.replaceAll("\\{ipv4Address\\}",
+                rsuValRecord.getRsuInformation().getIpv4Address());
+
+        // If we encountered an error before being able to perform the initial
+        // validation, note it.
+        if (rsuValRecord.getValidationResults().size() == 0) {
+            if (rsuValRecord.getError() != null) {
+                section = section.replaceAll("\\{beforeCorrections\\}", rsuValRecord.getError());
+            } else {
+                section = section.replaceAll("\\{beforeCorrections\\}",
+                        "Unknown error occurred during initial validation attempt.");
+            }
+
+            section = section.replaceAll("\\{afterCorrections\\}",
+                    "Second validation attempt wasn't completed due to error in first attempt.");
+
+            return section;
+        }
+
+        section = section.replaceAll("\\{beforeCorrections\\}",
+                getRsuValSummary(rsuValRecord.getValidationResults().get(0)));
+
+        if(rsuValRecord.getValidationResults().size() == 1) {
+            if (rsuValRecord.getError() != null) {
+                section = section.replaceAll("\\{afterCorrections\\}", rsuValRecord.getError());
+            } else {
+                section = section.replaceAll("\\{afterCorrections\\}",
+                        "Second validation attempt wasn't performed." + 
+                        " Errors found may not be automatically correctable (e.g. index collisions)");
+            }
+
+            return section;
+        }
+        
+        section = section.replaceAll("\\{afterCorrections\\}",
+                getRsuValSummary(rsuValRecord.getValidationResults().get(1)));
+
+        return section;
+    }
+
+    private String getRsuValSummary(RsuValidationResult valResult) {
+        if(valResult.getRsuUnresponsive()) {
+            return "RSU was unresponsive.";
+        }
+        
+        String section = formatRsuValSummary;
 
         // List unaccounted for indexes
-        subSection = "";
-        for (Integer index : result.getUnaccountedForIndices()) {
+        String subSection = "";
+        for (Integer index : valResult.getUnaccountedForIndices()) {
             if (!subSection.equals("")) {
                 subSection += ", ";
             }
@@ -183,7 +245,7 @@ public class EmailFormatter {
 
         // List Active TIMs missing from RSU
         subSection = "";
-        for (EnvActiveTim record : result.getMissingFromRsu()) {
+        for (EnvActiveTim record : valResult.getMissingFromRsu()) {
             ActiveTim tim = record.getActiveTim();
             subSection += getRow(record.getEnvironment().toString(), tim.getActiveTimId().toString(),
                     tim.getRsuIndex().toString());
@@ -192,7 +254,7 @@ public class EmailFormatter {
 
         // List Stale TIMs on RSU
         subSection = "";
-        for (ActiveTimMapping staleTim : result.getStaleIndexes()) {
+        for (ActiveTimMapping staleTim : valResult.getStaleIndexes()) {
             Environment env = staleTim.getEnvTim().getEnvironment();
             ActiveTim tim = staleTim.getEnvTim().getActiveTim();
             RsuIndexInfo rsuIndex = staleTim.getRsuIndexInfo();
@@ -203,7 +265,7 @@ public class EmailFormatter {
 
         // List Active TIMs claiming same index
         subSection = "";
-        for (Collision collision : result.getCollisions()) {
+        for (Collision collision : valResult.getCollisions()) {
             String activeTimIds = "";
             for (EnvActiveTim record : collision.getTims()) {
                 if (!activeTimIds.equals("")) {

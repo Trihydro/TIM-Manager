@@ -190,7 +190,7 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(activeTims);
 	}
 
-	@RequestMapping(value = "/update-model", method = RequestMethod.GET, headers = "Accept=application/json")
+	@RequestMapping(value = "/update-model/{activeTimId}", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<TimUpdateModel> GetUpdateModelFromActiveTimId(@PathVariable Long activeTimId) {
 		TimUpdateModel activeTim = null;
 		Connection connection = null;

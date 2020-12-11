@@ -125,12 +125,15 @@ public class ValidateRsusTest {
         // Arrange
         // Simulate when the service responds with no Active Tims
         when(mockActiveTimService.getActiveRsuTims(any())).thenReturn(new ArrayList<>());
+        when(mockRsuService.selectAll()).thenReturn(new ArrayList<>());
 
         // Act
         uut.run();
 
         // Assert
-        verify(mockMailHelper, never()).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        // If we're unable to find any RSUs to validate, we'll send an email to let us know
+        // that there was a validation error.
+        verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test

@@ -359,41 +359,4 @@ public class DataTasksConfiguration
     public void setRunHsmCheck(boolean runHsmCheck) {
         this.runHsmCheck = runHsmCheck;
     }
-
-
-    public Double getPathDistanceLimit() {
-        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
-    }
-
-    public TimeToLive getSdwTtl() {
-        return sdwTtl;
-    }
-
-    public void setSdwTtl(TimeToLive sdwTtl) {
-        this.sdwTtl = sdwTtl;
-    }
-
-    public BigDecimal getDefaultLaneWidth() {
-        return defaultLaneWidth;
-    }
-
-    public void setDefaultLaneWidth(BigDecimal defaultLaneWidth) {
-        this.defaultLaneWidth = defaultLaneWidth;
-    }
-
-    public Double getPointIncidentBufferMiles() {
-        return pointIncidentBufferMiles;
-    }
-
-    public void setPointIncidentBufferMiles(Double pointIncidentBufferMiles) {
-        this.pointIncidentBufferMiles = pointIncidentBufferMiles;
-    }
-
-    public String[] getRsuRoutes() {
-        return rsuRoutes;
-    }
-
-    public void setRsuRoutes(String[] rsuRoutes) {
-        this.rsuRoutes = rsuRoutes;
-    }
 }

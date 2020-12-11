@@ -306,6 +306,11 @@ public class TimGenerationHelper {
             try {
                 var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
 
+                if (tum == null) {
+                    exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
+                    continue;
+                }
+                
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
                 } else {

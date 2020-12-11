@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.EmailProps;
+import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.TmddProps;
@@ -17,7 +18,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 @Component
 @ConfigurationProperties("config")
 public class DataTasksConfiguration
-        implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps, TimGenerationProps {
+        implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps, TimGenerationProps, OdeProps {
 
     private String cvRestService;
     private String cvRestServiceDev; // Temporary
@@ -26,6 +27,7 @@ public class DataTasksConfiguration
     private String wrapperUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
+    private String odeUrl;
     private String tmddUrl;
     private String tmddUser;
     private String tmddPassword;
@@ -160,6 +162,14 @@ public class DataTasksConfiguration
 
     public void setSdwApiKey(String sdwApiKey) {
         this.sdwApiKey = sdwApiKey;
+    }
+
+    public String getOdeUrl() {
+        return odeUrl;
+    }
+
+    public void setOdeUrl(String odeUrl) {
+        this.odeUrl = odeUrl;
     }
 
     public String[] getAlertAddresses() {
@@ -348,5 +358,42 @@ public class DataTasksConfiguration
 
     public void setRunHsmCheck(boolean runHsmCheck) {
         this.runHsmCheck = runHsmCheck;
+    }
+
+
+    public Double getPathDistanceLimit() {
+        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
+
+    public TimeToLive getSdwTtl() {
+        return sdwTtl;
+    }
+
+    public void setSdwTtl(TimeToLive sdwTtl) {
+        this.sdwTtl = sdwTtl;
+    }
+
+    public BigDecimal getDefaultLaneWidth() {
+        return defaultLaneWidth;
+    }
+
+    public void setDefaultLaneWidth(BigDecimal defaultLaneWidth) {
+        this.defaultLaneWidth = defaultLaneWidth;
+    }
+
+    public Double getPointIncidentBufferMiles() {
+        return pointIncidentBufferMiles;
+    }
+
+    public void setPointIncidentBufferMiles(Double pointIncidentBufferMiles) {
+        this.pointIncidentBufferMiles = pointIncidentBufferMiles;
+    }
+
+    public String[] getRsuRoutes() {
+        return rsuRoutes;
+    }
+
+    public void setRsuRoutes(String[] rsuRoutes) {
+        this.rsuRoutes = rsuRoutes;
     }
 }

@@ -29,7 +29,6 @@ import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.StatusLogService;
-import com.trihydro.library.service.TimGenerationProps;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TmddService;
 import com.trihydro.library.service.UtilityService;
@@ -57,88 +56,87 @@ import org.springframework.context.annotation.Import;
                 RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class })
 
 public class Application {
-        protected static DataTasksConfiguration config;
+    protected static DataTasksConfiguration config;
 
-        private RemoveExpiredActiveTims removeExpiredActiveTims;
-        private CleanupActiveTims cleanupActiveTims;
-        private CleanupBsms cleanupBsms;
-        private ValidateSdx sdxValidator;
-        private ValidateRsus rsuValidator;
-        private ValidateTmdd tmddValidator;
-        private VerifyHSMFunctional hsmFunctional;
-        RetentionPolicyEnforcement retentionEnforcement;
-        private Utility utility;
+    private RemoveExpiredActiveTims removeExpiredActiveTims;
+    private CleanupActiveTims cleanupActiveTims;
+    private CleanupBsms cleanupBsms;
+    private ValidateSdx sdxValidator;
+    private ValidateRsus rsuValidator;
+    private ValidateTmdd tmddValidator;
+    private VerifyHSMFunctional hsmFunctional;
+    RetentionPolicyEnforcement retentionEnforcement;
+    private Utility utility;
 
-        @Autowired
-        public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
-                        CleanupActiveTims _cleanupActiveTims, CleanupBsms _cleanupBsms, ValidateSdx _sdxValidator,
-                        ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
-                        RetentionPolicyEnforcement _retentionEnforcement, VerifyHSMFunctional _hsmFunctional,
-                        Utility _utility) {
-                config = _config;
-                removeExpiredActiveTims = _removeExpiredActiveTims;
-                cleanupActiveTims = _cleanupActiveTims;
-                cleanupBsms = _cleanupBsms;
-                sdxValidator = _sdxValidator;
-                rsuValidator = _rsuValidator;
-                tmddValidator = _tmddValidator;
-                retentionEnforcement = _retentionEnforcement;
-                hsmFunctional = _hsmFunctional;
-                utility = _utility;
+    @Autowired
+    public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
+            CleanupActiveTims _cleanupActiveTims, CleanupBsms _cleanupBsms, ValidateSdx _sdxValidator,
+            ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator, RetentionPolicyEnforcement _retentionEnforcement,
+            VerifyHSMFunctional _hsmFunctional, Utility _utility) {
+        config = _config;
+        removeExpiredActiveTims = _removeExpiredActiveTims;
+        cleanupActiveTims = _cleanupActiveTims;
+        cleanupBsms = _cleanupBsms;
+        sdxValidator = _sdxValidator;
+        rsuValidator = _rsuValidator;
+        tmddValidator = _tmddValidator;
+        retentionEnforcement = _retentionEnforcement;
+        hsmFunctional = _hsmFunctional;
+        utility = _utility;
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+
+    @PostConstruct
+    public void run() throws IOException {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
+
+        // Remove Expired Active Tims
+        scheduledExecutorService.scheduleAtFixedRate(removeExpiredActiveTims, 0, config.getRemoveExpiredPeriodMinutes(),
+                TimeUnit.MINUTES);
+
+        // Cleanup Active Tims
+        scheduledExecutorService.scheduleAtFixedRate(cleanupActiveTims, 5, config.getCleanupPeriodMinutes(),
+                TimeUnit.MINUTES);
+
+        // Cleanup BSMs
+        scheduledExecutorService.scheduleAtFixedRate(cleanupBsms, 10, config.getBsmCleanupPeriodMinutes(),
+                TimeUnit.MINUTES);
+
+        // SDX Validator
+        scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 15, config.getSdxValidationPeriodMinutes(),
+                TimeUnit.MINUTES);
+
+        // HSM Check
+        if (config.getRunHsmCheck()) {
+            utility.logWithDate("HSM check configured, scheduling...");
+            scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0, config.getHsmFunctionalityMinutes(),
+                    TimeUnit.MINUTES);
+        } else {
+            utility.logWithDate("HSM check not configured, skipping...");
         }
 
-        public static void main(String[] args) {
-                SpringApplication.run(Application.class, args);
+        // RSU Validator
+        // Since we're validating Active Tims from both environments in the same task,
+        // we only want this running in 1 environment, or else we'll receive duplicate
+        // emails
+        if (config.getRunRsuValidation()) {
+            scheduledExecutorService.scheduleAtFixedRate(rsuValidator, 20, config.getRsuValidationPeriodMinutes(),
+                    TimeUnit.MINUTES);
         }
 
-        @PostConstruct
-        public void run() throws IOException {
-                ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
-
-                // Remove Expired Active Tims
-                scheduledExecutorService.scheduleAtFixedRate(removeExpiredActiveTims, 0,
-                                config.getRemoveExpiredPeriodMinutes(), TimeUnit.MINUTES);
-
-                // Cleanup Active Tims
-                scheduledExecutorService.scheduleAtFixedRate(cleanupActiveTims, 5, config.getCleanupPeriodMinutes(),
-                                TimeUnit.MINUTES);
-
-                // Cleanup BSMs
-                scheduledExecutorService.scheduleAtFixedRate(cleanupBsms, 10, config.getBsmCleanupPeriodMinutes(),
-                                TimeUnit.MINUTES);
-
-                // SDX Validator
-                scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 15, config.getSdxValidationPeriodMinutes(),
-                                TimeUnit.MINUTES);
-
-                // HSM Check
-                if (config.getRunHsmCheck()) {
-                        utility.logWithDate("HSM check configured, scheduling...");
-                        scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
-                                        config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
-                } else {
-                        utility.logWithDate("HSM check not configured, skipping...");
-                }
-
-                // RSU Validator
-                // Since we're validating Active Tims from both environments in the same task,
-                // we only want this running in 1 environment, or else we'll receive duplicate
-                // emails
-                if (config.getRunRsuValidation()) {
-                        scheduledExecutorService.scheduleAtFixedRate(rsuValidator, 20,
-                                        config.getRsuValidationPeriodMinutes(), TimeUnit.MINUTES);
-                }
-
-                // TMDD Validator
-                // Since dev has many Active TIMs that aren't present on the TMDD,
-                // we should only be running the TMDD validation in prod.
-                if (config.getRunTmddValidation()) {
-                        scheduledExecutorService.scheduleAtFixedRate(tmddValidator, 25,
-                                        config.getTmddValidationPeriodMinutes(), TimeUnit.MINUTES);
-                }
-
-                // Retention Policy Enforcement
-                scheduledExecutorService.scheduleAtFixedRate(retentionEnforcement, 30,
-                                config.getRetentionEnforcementPeriodMinutes(), TimeUnit.MINUTES);
+        // TMDD Validator
+        // Since dev has many Active TIMs that aren't present on the TMDD,
+        // we should only be running the TMDD validation in prod.
+        if (config.getRunTmddValidation()) {
+            scheduledExecutorService.scheduleAtFixedRate(tmddValidator, 25, config.getTmddValidationPeriodMinutes(),
+                    TimeUnit.MINUTES);
         }
+
+        // Retention Policy Enforcement
+        scheduledExecutorService.scheduleAtFixedRate(retentionEnforcement, 30,
+                config.getRetentionEnforcementPeriodMinutes(), TimeUnit.MINUTES);
+    }
 }

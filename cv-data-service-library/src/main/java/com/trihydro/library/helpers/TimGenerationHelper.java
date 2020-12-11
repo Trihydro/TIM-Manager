@@ -303,48 +303,48 @@ public class TimGenerationHelper {
         }
         // iterate over tims, fetch, and push out
         for (Long activeTimId : activeTimIds) {
-            var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
+            try {
+                var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
 
-            if (tum == null) {
-                exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
-                continue;
-            }
+                if (tum.getLaneWidth() == null) {
+                    tum.setLaneWidth(config.getDefaultLaneWidth());
+                } else {
+                    // Oracle has lane width as cm, but ODE takes m
+                    tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
+                }
 
-            if (tum.getLaneWidth() == null) {
-                tum.setLaneWidth(config.getDefaultLaneWidth());
-            } else {
-                // Oracle has lane width as cm, but ODE takes m
-                tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
-            }
+                WydotTim wydotTim = getWydotTimFromTum(tum);
+                List<Milepost> mps = new ArrayList<>();
+                List<Milepost> allMps = getAllMps(wydotTim);
+                if (allMps.size() == 0) {
+                    String exMsg = String.format(
+                            "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
 
-            WydotTim wydotTim = getWydotTimFromTum(tum);
-            List<Milepost> mps = new ArrayList<>();
-            List<Milepost> allMps = getAllMps(wydotTim);
-            if (allMps.size() == 0) {
-                String exMsg = String.format(
-                        "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
-                        tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                continue;
-            }
-
-            // reduce the mileposts by removing straight away posts
-            var anchorMp = allMps.remove(0);
-            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-            OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
-            if (tim == null) {
-                String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d", tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                continue;
-            }
-            WydotTravelerInputData timToSend = new WydotTravelerInputData();
-            timToSend.setRequest(new ServiceRequest());
-            timToSend.setTim(tim);
-            var extraEx = sendTim(timToSend, tum, activeTimId, mps);
-            if (extraEx.size() > 0) {
-                exceptions.addAll(extraEx);
+                // reduce the mileposts by removing straight away posts
+                var anchorMp = allMps.remove(0);
+                mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
+                if (tim == null) {
+                    String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
+                WydotTravelerInputData timToSend = new WydotTravelerInputData();
+                timToSend.setRequest(new ServiceRequest());
+                timToSend.setTim(tim);
+                var extraEx = sendTim(timToSend, tum, activeTimId, mps);
+                if (extraEx.size() > 0) {
+                    exceptions.addAll(extraEx);
+                }
+            } catch (Exception ex) {
+                exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
             }
         }
         return exceptions;
@@ -637,7 +637,7 @@ public class TimGenerationHelper {
             for (int i = 0; i < wydotRsus.size(); i++) {
                 // set RSUS
                 rsu = new RSU();
-                rsu.setRsuIndex(wydotRsus.get(i).getRsuIndex());
+                rsu.setRsuIndex(wydotRsus.get(i).getIndex());
                 rsu.setRsuTarget(wydotRsus.get(i).getRsuTarget());
                 rsu.setRsuUsername(wydotRsus.get(i).getRsuUsername());
                 rsu.setRsuPassword(wydotRsus.get(i).getRsuPassword());
@@ -649,6 +649,7 @@ public class TimGenerationHelper {
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
                 utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
                 var rsuExMsg = odeService.updateTimOnRsu(timToSend);
+
                 if (!StringUtils.isEmpty(rsuExMsg)) {
                     exMsg += rsuExMsg + "\n";
                 }

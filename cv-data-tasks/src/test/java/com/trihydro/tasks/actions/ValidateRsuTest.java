@@ -11,7 +11,7 @@ import com.trihydro.library.model.RsuIndexInfo;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.Collision;
-import com.trihydro.tasks.models.PopulatedRsu;
+import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.junit.jupiter.api.Assertions;
@@ -30,13 +30,12 @@ public class ValidateRsuTest {
     public void call_noMessages() {
         // Arrange
         when(mockRsuDataService.getRsuDeliveryStartTimes("0.0.0.0")).thenReturn(new ArrayList<RsuIndexInfo>());
-        ValidateRsu uut = new ValidateRsu(new PopulatedRsu("0.0.0.0"), mockRsuDataService);
+        ValidateRsu uut = new ValidateRsu(new RsuInformation("0.0.0.0"), mockRsuDataService);
 
         // Act
         RsuValidationResult result = uut.call();
 
         // Assert
-        Assertions.assertEquals(result.getRsu(), "0.0.0.0");
         Assertions.assertFalse(result.getRsuUnresponsive());
         Assertions.assertEquals(0, result.getCollisions().size());
         Assertions.assertEquals(0, result.getStaleIndexes().size());
@@ -49,13 +48,12 @@ public class ValidateRsuTest {
         // Arrange
         // Rsu Service will return null, implying that the RSU was unresponsive
         when(mockRsuDataService.getRsuDeliveryStartTimes("0.0.0.0")).thenReturn(null);
-        ValidateRsu uut = new ValidateRsu(new PopulatedRsu("0.0.0.0"), mockRsuDataService);
+        ValidateRsu uut = new ValidateRsu(new RsuInformation("0.0.0.0"), mockRsuDataService);
 
         // Act
         RsuValidationResult result = uut.call();
 
         // Assert
-        Assertions.assertEquals(result.getRsu(), "0.0.0.0");
         Assertions.assertTrue(result.getRsuUnresponsive());
         Assertions.assertEquals(0, result.getCollisions().size());
         Assertions.assertEquals(0, result.getStaleIndexes().size());
@@ -67,7 +65,7 @@ public class ValidateRsuTest {
     public void call_rsuServiceError() {
         // Arrange
         when(mockRsuDataService.getRsuDeliveryStartTimes("0.0.0.0")).thenThrow(new RestClientException("timeout"));
-        ValidateRsu uut = new ValidateRsu(new PopulatedRsu("0.0.0.0"), mockRsuDataService);
+        ValidateRsu uut = new ValidateRsu(new RsuInformation("0.0.0.0"), mockRsuDataService);
 
         // Act
         Assertions.assertThrows(RestClientException.class, () -> uut.call());
@@ -77,7 +75,7 @@ public class ValidateRsuTest {
     public void call_collisions() {
         // Arrange
         RsuIndexInfo[] rsuIndexInfos = importJsonArray("/rsuIndexInfo_1.json", RsuIndexInfo[].class);
-        PopulatedRsu assumedRsuState = importJsonArray("/populatedRsu_1.json", PopulatedRsu.class);
+        RsuInformation assumedRsuState = importJsonArray("/populatedRsu_1.json", RsuInformation.class);
 
         // Due to the way validation occurs, we can't use an array-backed list
         // (Arrays.asList(...)) since we need to be able to remove elements from it.
@@ -92,7 +90,6 @@ public class ValidateRsuTest {
 
         // Assert
         // Verify that only collisions occurred
-        Assertions.assertEquals(result.getRsu(), "0.0.0.0");
         Assertions.assertFalse(result.getRsuUnresponsive());
         Assertions.assertEquals(0, result.getStaleIndexes().size());
         Assertions.assertEquals(0, result.getMissingFromRsu().size());
@@ -120,7 +117,7 @@ public class ValidateRsuTest {
         // Arrange
         // 2 Active Tims on RSU - 1 of which is stale
         RsuIndexInfo[] rsuIndexInfos = importJsonArray("/rsuIndexInfo_2.json", RsuIndexInfo[].class);
-        PopulatedRsu assumedRsuState = importJsonArray("/populatedRsu_2.json", PopulatedRsu.class);
+        RsuInformation assumedRsuState = importJsonArray("/populatedRsu_2.json", RsuInformation.class);
 
         List<RsuIndexInfo> rsuResponse = new ArrayList<>();
         Collections.addAll(rsuResponse, rsuIndexInfos);
@@ -132,7 +129,6 @@ public class ValidateRsuTest {
         RsuValidationResult result = uut.call();
 
         // Assert
-        Assertions.assertEquals(result.getRsu(), "0.0.0.0");
         Assertions.assertFalse(result.getRsuUnresponsive());
         Assertions.assertEquals(0, result.getCollisions().size());
         Assertions.assertEquals(0, result.getMissingFromRsu().size());
@@ -151,7 +147,7 @@ public class ValidateRsuTest {
     public void call_missingFromRsu() {
         // Arrange
         // 2 Active Tims, claiming to be on RSU...
-        PopulatedRsu assumedRsuState = importJsonArray("/populatedRsu_2.json", PopulatedRsu.class);
+        RsuInformation assumedRsuState = importJsonArray("/populatedRsu_2.json", RsuInformation.class);
 
         // ...but the RSU service will imply that there aren't any populated indexes on
         // the RSU
@@ -162,7 +158,6 @@ public class ValidateRsuTest {
         RsuValidationResult result = uut.call();
 
         // Assert
-        Assertions.assertEquals(result.getRsu(), "0.0.0.0");
         Assertions.assertFalse(result.getRsuUnresponsive());
         Assertions.assertEquals(0, result.getCollisions().size());
         Assertions.assertEquals(0, result.getStaleIndexes().size());
@@ -182,13 +177,12 @@ public class ValidateRsuTest {
         // RSU Service implies that 2 indexes are populated... however we don't have any
         // corresponding Active Tims
         when(mockRsuDataService.getRsuDeliveryStartTimes("0.0.0.0")).thenReturn(rsuResponse);
-        ValidateRsu uut = new ValidateRsu(new PopulatedRsu("0.0.0.0"), mockRsuDataService);
+        ValidateRsu uut = new ValidateRsu(new RsuInformation("0.0.0.0"), mockRsuDataService);
 
         // Act
         RsuValidationResult result = uut.call();
 
         // Assert
-        Assertions.assertEquals(result.getRsu(), "0.0.0.0");
         Assertions.assertFalse(result.getRsuUnresponsive());
         Assertions.assertEquals(0, result.getCollisions().size());
         Assertions.assertEquals(0, result.getStaleIndexes().size());

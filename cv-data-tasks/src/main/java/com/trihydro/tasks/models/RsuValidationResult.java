@@ -4,20 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RsuValidationResult {
-    private String rsuAddress;
     private boolean rsuUnresponsive;
     private List<Collision> collisions = new ArrayList<>();
     private List<ActiveTimMapping> staleIndexes = new ArrayList<>();
     private List<EnvActiveTim> missingFromRsu = new ArrayList<>();
     private List<Integer> unaccountedForIndices = new ArrayList<>();
-
-    public RsuValidationResult(String rsuAddress) {
-        this.rsuAddress = rsuAddress;
-    }
-
-    public String getRsu() {
-        return rsuAddress;
-    }
 
     public boolean getRsuUnresponsive() {
         return rsuUnresponsive;

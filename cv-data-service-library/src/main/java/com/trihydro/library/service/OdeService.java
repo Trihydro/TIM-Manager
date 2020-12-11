@@ -158,4 +158,22 @@ public class OdeService {
         return timQuery;
     }
 
+    public String deleteTimFromRsu(WydotRsu rsu, Integer index, String odeUrl) {
+        String exMsg = "";
+        String rsuJson = gson.toJson(rsu);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
+
+        utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
+                .exchange(odeUrl + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
+
+        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
+            exMsg = "Failed to delete message from RSU: " + response.getBody();
+            utility.logWithDate(exMsg);
+        }
+        return exMsg;
+    }
 }

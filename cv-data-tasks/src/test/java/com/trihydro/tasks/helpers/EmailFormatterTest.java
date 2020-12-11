@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimError;
@@ -13,12 +11,16 @@ import com.trihydro.library.model.ActiveTimErrorType;
 import com.trihydro.library.model.ActiveTimValidationResult;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.RsuIndexInfo;
+import com.trihydro.tasks.TestHelper;
+import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
 import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.Environment;
+import com.trihydro.tasks.models.RsuInformation;
+import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 import org.junit.jupiter.api.Assertions;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 public class EmailFormatterTest {
     private String exText = "This is a great exception summary";
+    private RsuInformation testRsuInfo = new RsuInformation("0.0.0.0");
 
     @Test
     public void generateSdxSummaryEmail_success() throws IOException {
@@ -131,115 +134,109 @@ public class EmailFormatterTest {
     @Test
     public void generateRsuSummaryEmail_success() throws IOException {
         // Arrange
+        String expectedEmail = TestHelper.readFile("/email-snapshots/rsuSummary_success.html", getClass());
         EmailFormatter uut = new EmailFormatter();
 
-        List<String> unresponsiveRsus = new ArrayList<>();
+        List<RsuValidationRecord> valRecords = new ArrayList<>();
+        valRecords.add(new RsuValidationRecord(testRsuInfo));
         List<String> unexpectedErrors = new ArrayList<>();
-        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
-
-        unresponsiveRsus.add("10.145.0.0");
 
         // Act
-        String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
+        String emailBody = uut.generateRsuSummaryEmail(valRecords, unexpectedErrors);
 
         // Assert
-        Assertions.assertTrue(emailBody.matches(".*<div class=\"indent\"><p>10.145.0.0</p></div>.*"),
-                "Unable to verify the following RSUs 10.145.0.0");
+        Assertions.assertEquals(expectedEmail, emailBody);
+    }
+
+    @Test
+    public void generateRsuSummaryEmail_unresponsiveRsu() throws IOException {
+        // Arrange
+        String expectedEmail = TestHelper.readFile("/email-snapshots/rsuSummary_unresponsiveRsu.html", getClass());
+        EmailFormatter uut = new EmailFormatter();
+
+        List<RsuValidationRecord> valRecords = new ArrayList<>();
+        List<String> unexpectedErrors = new ArrayList<>();
+
+        RsuValidationResult valResult = new RsuValidationResult();
+        valResult.setRsuUnresponsive(true);
+
+        RsuValidationRecord record = new RsuValidationRecord(testRsuInfo);
+        record.addValidationResult(valResult);
+        valRecords.add(record);
+
+        // Act
+        String emailBody = uut.generateRsuSummaryEmail(valRecords, unexpectedErrors);
+
+        // Assert
+        Assertions.assertEquals(expectedEmail, emailBody);
     }
 
     @Test
     public void generateRsuSummaryEmail_invalidRsu() throws IOException {
         // Arrange
+        String expectedEmail = TestHelper.readFile("/email-snapshots/rsuSummary_invalidRsu.html", getClass());
         EmailFormatter uut = new EmailFormatter();
 
-        List<String> unresponsiveRsus = new ArrayList<>();
+        List<RsuValidationRecord> valRecords = new ArrayList<>();
         List<String> unexpectedErrors = new ArrayList<>();
-        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
 
-        RsuValidationResult invalidRsu = new RsuValidationResult("10.145.0.0");
+        RsuValidationRecord record = new RsuValidationRecord(testRsuInfo);
+        RsuValidationResult firstPass = resultWithInconsistencies(true);
+        record.addValidationResult(firstPass);
+        RsuValidationResult secondPass = resultWithInconsistencies(false);
+        record.addValidationResult(secondPass);
 
-        // ActiveTim missing from RSU
-        EnvActiveTim missing = new EnvActiveTim(new ActiveTim() {
-            {
-                setActiveTimId(1l);
-                setRsuIndex(1);
-            }
-        }, Environment.DEV);
-        invalidRsu.setMissingFromRsu(Arrays.asList(missing));
-
-        // 2 ActiveTims, collided at index 2 on RSU
-        EnvActiveTim coll1 = new EnvActiveTim(new ActiveTim() {
-            {
-                setActiveTimId(2l);
-            }
-        }, Environment.DEV);
-
-        EnvActiveTim coll2 = new EnvActiveTim(new ActiveTim() {
-            {
-                setActiveTimId(3l);
-            }
-        }, Environment.PROD);
-        Collision c = new Collision(2, Arrays.asList(coll1, coll2));
-        invalidRsu.setCollisions(Arrays.asList(c));
-
-        // ActiveTim stale on index 3
-        EnvActiveTim staleTim = new EnvActiveTim(new ActiveTim() {
-            {
-                setActiveTimId(4l);
-                setStartDateTime("2020-01-01");
-                setRsuIndex(3);
-            }
-        }, Environment.DEV);
-        RsuIndexInfo indexInfo = new RsuIndexInfo(3, "2020-02-02");
-
-        ActiveTimMapping staleMapping = new ActiveTimMapping(staleTim, indexInfo);
-        invalidRsu.getStaleIndexes().add(staleMapping);
-
-        // Unaccounted for RSU index
-        invalidRsu.setUnaccountedForIndices(Arrays.asList(3));
-
-        rsusWithErrors.add(invalidRsu);
+        valRecords.add(record);
 
         // Act
-        String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
+        String emailBody = uut.generateRsuSummaryEmail(valRecords, unexpectedErrors);
 
         // Assert
-        Assertions.assertTrue(emailBody.matches(".*<h3>RSUs with Errors</h3><h4>10.145.0.0</h4>.*"),
-                "<h3>RSUs with Errors</h3><h4>10.145.0.0</h4>");
-        Assertions.assertTrue(emailBody.matches(".*Populated indexes without record.*3.*"),
-                "... Populated indexes without record ... 3 ...");
-
-        String tbody = getRowsForListItem("Active TIMs missing from RSU", emailBody);
-        Assertions.assertEquals("<tr><td>DEV</td><td>1</td><td>1</td></tr>", tbody);
-
-        tbody = getRowsForListItem("Stale TIMs on RSU", emailBody);
-        Assertions.assertEquals("<tr><td>DEV</td><td>4</td><td>3</td><td>2020-01-01</td><td>2020-02-02</td></tr>",
-                tbody);
-
-        tbody = getRowsForListItem("Active TIM index collisions", emailBody);
-        Assertions.assertEquals("<tr><td>2</td><td>2 (DEV), 3 (PROD)</td></tr>", tbody);
+        Assertions.assertEquals(expectedEmail, emailBody);
     }
 
     @Test
     public void generateRsuSummaryEmail_unexpectedError() throws IOException {
         // Arrange
+        String expectedEmail = TestHelper.readFile("/email-snapshots/rsuSummary_unexpectedError.html", getClass());
         EmailFormatter uut = new EmailFormatter();
 
-        List<String> unresponsiveRsus = new ArrayList<>();
+        List<RsuValidationRecord> valRecords = new ArrayList<>();
         List<String> unexpectedErrors = new ArrayList<>();
-        List<RsuValidationResult> rsusWithErrors = new ArrayList<>();
 
-        unexpectedErrors.add("10.145.0.0: InterruptedException");
+        unexpectedErrors.add("Error occurred while fetching all RSUs - "
+                + "unable to validate any RSUs that don't have an existing, active TIM.");
 
         // Act
-        String emailBody = uut.generateRsuSummaryEmail(unresponsiveRsus, rsusWithErrors, unexpectedErrors);
+        String emailBody = uut.generateRsuSummaryEmail(valRecords, unexpectedErrors);
 
         // Assert
-        Assertions.assertTrue(
+        Assertions.assertEquals(expectedEmail, emailBody);
+    }
 
-                emailBody.matches(
-                        ".*<h3>Unexpected Errors Processing RSUs</h3><ul><li>10.145.0.0: InterruptedException</li></ul>.*"),
-                "... <h3>Unexpected Errors Processing RSUs</h3> ... <li>10.145.0.0: InterruptedException</li> ...");
+    @Test
+    public void generateRsuSummaryEmail_error2ndPass() throws IOException {
+        // Arrange
+        String expectedEmail = TestHelper.readFile("/email-snapshots/rsuSummary_error2ndPass.html", getClass());
+        EmailFormatter uut = new EmailFormatter();
+
+        List<RsuValidationRecord> valRecords = new ArrayList<>();
+        List<String> unexpectedErrors = new ArrayList<>();
+        
+        RsuValidationRecord record = new RsuValidationRecord(testRsuInfo);
+        RsuValidationResult firstPass = resultWithInconsistencies(true);
+        record.addValidationResult(firstPass);
+        
+        // An error occurred during the second call to validateRsu.
+        record.setError("Error while validating RSU");
+
+        valRecords.add(record);
+        
+        // Act
+        String emailBody = uut.generateRsuSummaryEmail(valRecords, unexpectedErrors);
+
+        // Assert
+        Assertions.assertEquals(expectedEmail, emailBody);
     }
 
     @Test
@@ -322,16 +319,51 @@ public class EmailFormatterTest {
         Assertions.assertTrue(result.contains("<td>End Point</td><td>null</td><td>tmddValue</td>"));
     }
 
-    // RSU Validation Email helper method
-    private String getRowsForListItem(String listItemHeader, String emailBody) {
-        String row = "";
+    private RsuValidationResult resultWithInconsistencies(boolean beforeAutocorrect) {
+        RsuValidationResult result = new RsuValidationResult();
 
-        Pattern p = Pattern.compile("<li>" + listItemHeader + ".*?<tbody>(.*?)<\\/tbody>.*?<\\/li>");
-        Matcher m = p.matcher(emailBody);
-        if (m.find()) {
-            row = m.group(1);
+        // 2 ActiveTims, collided at index 2 on RSU
+        EnvActiveTim coll1 = new EnvActiveTim(new ActiveTim() {
+            {
+                setActiveTimId(2l);
+            }
+        }, Environment.DEV);
+
+        EnvActiveTim coll2 = new EnvActiveTim(new ActiveTim() {
+            {
+                setActiveTimId(3l);
+            }
+        }, Environment.PROD);
+        Collision c = new Collision(2, Arrays.asList(coll1, coll2));
+        result.setCollisions(Arrays.asList(c));
+
+        if (beforeAutocorrect) {
+            // ActiveTim missing from RSU
+            EnvActiveTim missing = new EnvActiveTim(new ActiveTim() {
+                {
+                    setActiveTimId(1l);
+                    setRsuIndex(1);
+                }
+            }, Environment.DEV);
+            result.setMissingFromRsu(Arrays.asList(missing));
+
+            // ActiveTim stale on index 3
+            EnvActiveTim staleTim = new EnvActiveTim(new ActiveTim() {
+                {
+                    setActiveTimId(4l);
+                    setStartDateTime("2020-01-01");
+                    setRsuIndex(3);
+                }
+            }, Environment.DEV);
+            RsuIndexInfo indexInfo = new RsuIndexInfo(3, "2020-02-02");
+
+            ActiveTimMapping staleMapping = new ActiveTimMapping(staleTim, indexInfo);
+            result.getStaleIndexes().add(staleMapping);
+
+            // Unaccounted for RSU index
+            result.setUnaccountedForIndices(Arrays.asList(3));
         }
 
-        return row;
+        return result;
     }
 }

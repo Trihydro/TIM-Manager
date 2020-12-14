@@ -5,14 +5,11 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import com.google.gson.Gson;
 import com.grum.geocalc.EarthCalc;
@@ -78,13 +75,14 @@ public class TimGenerationHelper {
     private OdeService odeService;
     private ActiveTimHoldingService activeTimHoldingService;
     private SdwService sdwService;
+    private SnmpHelper snmpHelper;
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
             MilepostReduction _milepostReduction, TimGenerationProps _config, RegionService _regionService,
             RsuService _rsuService, OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService,
-            SdwService _sdwService) {
+            SdwService _sdwService, SnmpHelper _snmpHelper) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -98,6 +96,7 @@ public class TimGenerationHelper {
         odeService = _odeService;
         activeTimHoldingService = _activeTimHoldingService;
         sdwService = _sdwService;
+        snmpHelper = _snmpHelper;
     }
 
     public List<ResubmitTimException> updateAndResubmitToOde(List<ActiveTimValidationResult> validationResults) {
@@ -310,7 +309,7 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
                     continue;
                 }
-                
+
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
                 } else {
@@ -632,7 +631,7 @@ public class TimGenerationHelper {
                 : "";
         String endTimeString = aTim.getEndDate_Timestamp() != null ? aTim.getEndDate_Timestamp().toInstant().toString()
                 : "";
-        SNMP snmp = getSnmp(startTimeString, endTimeString, timToSend);
+        SNMP snmp = snmpHelper.getSnmp(startTimeString, endTimeString, timToSend);
         timToSend.getRequest().setSnmp(snmp);
 
         RSU[] rsus = new RSU[1];
@@ -811,41 +810,4 @@ public class TimGenerationHelper {
         }
         return serviceRegion;
     }
-
-    public SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
-        SNMP snmp = new SNMP();
-        snmp.setChannel(178);
-        snmp.setRsuid("83");// RSU wants hex 83, and the ODE is expecting a hex value to parse. This parses
-                            // to hex string 8003 when p-encoded
-        snmp.setMsgid(31);
-        snmp.setMode(1);
-        snmp.setChannel(178);
-        snmp.setInterval(2);
-        snmp.setDeliverystart(startDateTime);// "2018-01-01T00:00:00-06:00");
-
-        if (endDateTime == null || StringUtils.isBlank(endDateTime)) {
-            try {
-                int durationTime = timToSend.getTim().getDataframes()[0].getDurationTime();
-                Calendar cal = javax.xml.bind.DatatypeConverter.parseDateTime(startDateTime);
-                cal.add(Calendar.MINUTE, durationTime);
-                Date endDate = cal.getTime();
-
-                TimeZone tz = TimeZone.getTimeZone("UTC");
-                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-                df.setTimeZone(tz);
-                endDateTime = df.format(endDate);
-            } catch (IllegalArgumentException illArg) {
-                // if we failed here, set the endDateTime for 2 weeks from current time
-                System.out.println("Illegal Argument exception for endDate: " + illArg.getMessage());
-                endDateTime = java.time.Clock.systemUTC().instant().plus(2, ChronoUnit.WEEKS).toString();
-            }
-        }
-
-        snmp.setDeliverystop(endDateTime);
-        snmp.setEnable(1);
-        snmp.setStatus(4);
-
-        return snmp;
-    }
-
 }

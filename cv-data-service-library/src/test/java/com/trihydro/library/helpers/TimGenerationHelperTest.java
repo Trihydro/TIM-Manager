@@ -74,6 +74,8 @@ public class TimGenerationHelperTest {
     private ActiveTimHoldingService mockActiveTimHoldingService;
     @Mock
     private SdwService mockSdwService;
+    @Mock
+    private SnmpHelper mockSnmpHelper;
 
     private static Long activeTimId = -1l;
     private TimUpdateModel tum;

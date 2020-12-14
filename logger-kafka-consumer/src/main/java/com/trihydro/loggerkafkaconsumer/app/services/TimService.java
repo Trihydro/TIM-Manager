@@ -95,12 +95,20 @@ public class TimService extends BaseService {
 
             utility.logWithDate("Called addTimToOracleDB");
 
-            Long timId = AddTim(odeData.getMetadata(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
-                    ((OdeTimPayload) odeData.getPayload()).getTim(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getRecordType(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null, null);
+            ReceivedMessageDetails rxMsgDet = null;
+            RecordType recType = null;
+            String logFileName = null;
+            SecurityResultCode secResCode = null;
+            if (odeData.getMetadata() instanceof OdeLogMetadata) {
+                var odeLogMetadata = (OdeLogMetadata) odeData.getMetadata();
+                rxMsgDet = odeLogMetadata.getReceivedMessageDetails();
+                recType = odeLogMetadata.getRecordType();
+                logFileName = odeLogMetadata.getLogFileName();
+                secResCode = odeLogMetadata.getSecurityResultCode();
+            }
+
+            Long timId = AddTim(odeData.getMetadata(), rxMsgDet, ((OdeTimPayload) odeData.getPayload()).getTim(),
+                    recType, logFileName, secResCode, null, null);
 
             // return if TIM is not inserted
             if (timId == null)

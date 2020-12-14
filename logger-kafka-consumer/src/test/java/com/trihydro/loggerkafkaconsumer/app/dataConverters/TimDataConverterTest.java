@@ -182,8 +182,8 @@ public class TimDataConverterTest {
         @Test
         public void processTimJson_odeTimStartDateTime() throws IOException {
                 // Arrange
-                String value = new String(Files
-                                .readAllBytes(Paths.get("src/test/resources/TIM_odeTimStartDateTime.json")));
+                String value = new String(
+                                Files.readAllBytes(Paths.get("src/test/resources/TIM_odeTimStartDateTime.json")));
 
                 // Act
                 var data = uut.processTimJson(value);
@@ -192,6 +192,19 @@ public class TimDataConverterTest {
                 Assertions.assertNotNull(data);
                 Assertions.assertNotNull(data.getMetadata());
                 Assertions.assertEquals("2020-11-11T07:36:53.035Z", data.getMetadata().getOdeTimStartDateTime());
+        }
+
+        @Test
+        public void processTimJson_odeTimWithRsus() throws IOException {
+                // Arrange
+                String value = new String(Files.readAllBytes(Paths.get("src/test/resources/TIM_odeTim_Rsus.json")));
+
+                // Act
+                var data = uut.processTimJson(value);
+
+                // Assert
+                Assertions.assertNotNull(data);
+                Assertions.assertNotNull(data.getMetadata());
 
         }
 }

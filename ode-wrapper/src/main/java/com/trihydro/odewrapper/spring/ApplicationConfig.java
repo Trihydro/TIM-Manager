@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.spring;
 
+import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.MilepostReduction;
@@ -29,7 +30,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         TimTypeService.class, MilepostService.class, TimRsuService.class, WydotTimService.class, RsuService.class,
         TimService.class, ItisCodeService.class, IncidentChoicesService.class, MilepostReduction.class,
         RestTemplateProvider.class, LoggingService.class, Utility.class, EmailHelper.class,
-        JavaMailSenderImplProvider.class, SnmpHelper.class })
+        JavaMailSenderImplProvider.class, SnmpHelper.class, CreateBaseTimUtil.class })
 public class ApplicationConfig implements WebMvcConfigurer {
     public ApplicationConfig() {
         super();

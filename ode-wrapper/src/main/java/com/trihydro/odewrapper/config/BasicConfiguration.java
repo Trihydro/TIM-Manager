@@ -8,14 +8,17 @@ import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.TmddProps;
+import com.trihydro.library.service.TimGenerationProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+
 @Component
 @ConfigurationProperties("config")
-public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps, EmailProps, OdeProps
-{
+public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps, EmailProps,
+        OdeProps, TimGenerationProps {
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);
     private String cvRestService;
     private String[] rsuRoutes;
@@ -33,6 +36,7 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     private String tmddPassword;
 
     private Double pointIncidentBufferMiles;
+    private TimeToLive sdwTtl;
 
     public String getOdeUrl() {
         return odeUrl;
@@ -173,5 +177,13 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
 
     public void setDefaultLaneWidth(BigDecimal defaultLaneWidth) {
         this.defaultLaneWidth = defaultLaneWidth;
+    }
+
+    public TimeToLive getSdwTtl() {
+        return sdwTtl;
+    }
+
+    public void setSdwTtl(TimeToLive sdwTtl) {
+        this.sdwTtl = sdwTtl;
     }
 }

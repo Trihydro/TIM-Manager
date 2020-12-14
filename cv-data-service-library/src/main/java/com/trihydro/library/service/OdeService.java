@@ -38,6 +38,7 @@ public class OdeService {
     }
 
     public String sendNewTimToRsu(WydotTravelerInputData timToSend) {
+        utility.logWithDate("Sending the following new TIM to ODE for processing: " + gson.toJson(timToSend));
         String exMsg = "";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

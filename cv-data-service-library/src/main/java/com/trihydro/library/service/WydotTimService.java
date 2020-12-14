@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
-import com.trihydro.library.helpers.TimGenerationHelper;
+import com.trihydro.library.helpers.SnmpHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
@@ -66,7 +66,7 @@ public class WydotTimService {
     private TimRsuService timRsuService;
     private RsuService rsuService;
     private TimService timService;
-    private TimGenerationHelper timGenerationHelper;
+    private SnmpHelper snmpHelper;
 
     @Autowired
     public void InjectDependencies(EmailProps _emailProps, OdeProps _odeProps, TimGenerationProps _genProps,
@@ -74,7 +74,7 @@ public class WydotTimService {
             OdeService _odeService, CreateBaseTimUtil _createBaseTimUtil,
             ActiveTimHoldingService _activeTimHoldingService, ActiveTimService _activeTimService,
             TimRsuService _timRsuService, RestTemplateProvider _restTemplateProvider, RsuService _rsuService,
-            TimService _timService, TimGenerationHelper _timGenerationHelper) {
+            TimService _timService, SnmpHelper _snmpHelper) {
         emailProps = _emailProps;
         odeProps = _odeProps;
         genProps = _genProps;
@@ -90,7 +90,7 @@ public class WydotTimService {
         restTemplateProvider = _restTemplateProvider;
         rsuService = _rsuService;
         timService = _timService;
-        timGenerationHelper = _timGenerationHelper;
+        snmpHelper = _snmpHelper;
     }
 
     private RestTemplateProvider restTemplateProvider;
@@ -480,7 +480,7 @@ public class WydotTimService {
         DataFrame df = timToSend.getTim().getDataframes()[0];
         TimRsu timRsu = timRsuService.getTimRsu(timId, rsuId);
         timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
-        timToSend.getRequest().setSnmp(timGenerationHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
+        timToSend.getRequest().setSnmp(snmpHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
         String timToSendJson = gson.toJson(updatedTim);
 

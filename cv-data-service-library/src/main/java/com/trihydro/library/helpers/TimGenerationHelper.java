@@ -2,6 +2,7 @@ package com.trihydro.library.helpers;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -14,11 +15,13 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.google.gson.Gson;
-import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
+import com.trihydro.library.model.ActiveTimError;
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.ActiveTimValidationResult;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.ResubmitTimException;
@@ -97,6 +100,202 @@ public class TimGenerationHelper {
         sdwService = _sdwService;
     }
 
+    public List<ResubmitTimException> updateAndResubmitToOde(List<ActiveTimValidationResult> validationResults) {
+        List<ResubmitTimException> exceptions = new ArrayList<>();
+        if (validationResults == null || validationResults.size() == 0) {
+            return exceptions;
+        }
+        // iterate over tims, fetch, and push out
+        for (ActiveTimValidationResult validationResult : validationResults) {
+            try {
+                var activeTimId = validationResult.getActiveTim().getActiveTimId();
+                var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
+
+                if (tum == null) {
+                    exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
+                    continue;
+                }
+
+                if (tum.getLaneWidth() == null) {
+                    tum.setLaneWidth(config.getDefaultLaneWidth());
+                } else {
+                    // Oracle has lane width as cm, but ODE takes m
+                    tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
+                }
+
+                WydotTim wydotTim = getWydotTimFromTum(tum);
+                List<Milepost> mps = new ArrayList<>();
+                List<Milepost> allMps = getAllMps(wydotTim);
+                if (allMps.size() == 0) {
+                    String exMsg = String.format(
+                            "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
+
+                // reduce the mileposts by removing straight away posts
+                var anchorMp = allMps.remove(0);
+                mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
+                if (tim == null) {
+                    String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
+
+                // update the TIM based on validationResult
+                tim = updateTim(tum, tim, validationResult, exceptions);
+
+                // check for any exceptions while updating TIM
+                if (tim == null || exceptions.size() > 0) {
+                    utility.logWithDate("Unable to update TIM (active_tim_id " + tum.getActiveTimId()
+                            + ") with validationResult: " + gson.toJson(validationResult));
+                    continue;
+                }
+                WydotTravelerInputData timToSend = new WydotTravelerInputData();
+                timToSend.setRequest(new ServiceRequest());
+                timToSend.setTim(tim);
+                var extraEx = sendTim(timToSend, tum, activeTimId, mps);
+                if (extraEx.size() > 0) {
+                    exceptions.addAll(extraEx);
+                }
+            } catch (Exception ex) {
+                utility.logWithDate("Failed attempting to update TIM (active_tim_id "
+                        + validationResult.getActiveTim().getActiveTimId() + ") with ActiveTimValidationResult: "
+                        + gson.toJson(validationResult));
+                ex.printStackTrace();
+            }
+        }
+        return exceptions;
+    }
+
+    private OdeTravelerInformationMessage updateTim(TimUpdateModel tum, OdeTravelerInformationMessage tim,
+            ActiveTimValidationResult validationResult, List<ResubmitTimException> exceptions) {
+
+        DateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yy HH.MM.SS");
+        var rebuildTim = false;
+        for (ActiveTimError ate : validationResult.getErrors()) {
+            switch (ate.getName()) {
+                case endPoint:
+                    // FEU is Coordinate
+                    var endPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
+                    tum.setEndPoint(endPt);
+                    rebuildTim = true;
+                    break;
+
+                case endTime:
+                    // change the end time on our TIM
+                    // note that we are only interested in changing the DataFrame.durationTime here,
+                    // as the endDateTime is calculated later based on startDateTime and this
+                    // duration
+                    // FEU is text formatted as 2020-12-08 09:31:00
+                    try {
+                        Date endDateTime = dFormat.parse(ate.getTmddValue());
+                        int durationTime = utility.getMinutesDurationBetweenTwoDates(tum.getStartDateTime(),
+                                simpleDateFormat.format(endDateTime));
+                        // J2735 has duration time of 0-32000
+                        // the ODE fails if we have greater than 32000
+                        if (durationTime > 32000) {
+                            durationTime = 32000;
+                        }
+                        tim.getDataframes()[0].setDurationTime(durationTime);
+                    } catch (ParseException e) {
+                        String exMsg = String.format("Failed to parse associated FEU date: %s", ate.getTmddValue());
+                        utility.logWithDate(exMsg);
+                        exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                    }
+                    break;
+
+                case itisCodes:
+                    // FEU is { ### }
+                    // since we will set codes to those in FEU all we need to do is deserialize them
+                    // and set
+                    var codes = ate.getTmddValue();
+                    // remove end brackets
+                    codes = codes.replace("{", "");
+                    codes = codes.replace("}", "");
+
+                    // codes not looks like: 1234,5678,0987
+                    String[] itisCodes = codes.split(",");
+                    DataFrame df = tim.getDataframes()[0];
+                    df.setItems(itisCodes);
+                    break;
+
+                case startPoint:
+                    var startPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
+                    tum.setStartPoint(startPt);
+                    rebuildTim = true;
+                    break;
+
+                case other:
+                default:
+                    break;
+            }
+        }
+
+        if (rebuildTim) {
+            // rebuild tim...this should maybe be extracted to another function and called
+            // from multiple locations
+            WydotTim wydotTim = getWydotTimFromTum(tum);
+            List<Milepost> mps = new ArrayList<>();
+            List<Milepost> allMps = getAllMps(wydotTim);
+            if (allMps.size() == 0) {
+                String exMsg = String.format(
+                        "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                        tum.getActiveTimId());
+                utility.logWithDate(exMsg);
+                exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                return null;
+            }
+
+            // reduce the mileposts by removing straight away posts
+            var anchorMp = allMps.remove(0);
+            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+            tim = getTim(tum, mps, allMps, anchorMp);
+            if (tim == null) {
+                String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d", tum.getActiveTimId());
+                utility.logWithDate(exMsg);
+                exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                return null;
+            }
+        }
+        return tim;
+    }
+
+    private WydotTim getWydotTimFromTum(TimUpdateModel tum) {
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setRoute(tum.getRoute());
+        wydotTim.setDirection(tum.getDirection());
+        wydotTim.setStartPoint(tum.getStartPoint());
+        wydotTim.setEndPoint(tum.getEndPoint());
+        return wydotTim;
+    }
+
+    private List<Milepost> getAllMps(WydotTim wydotTim) {
+        List<Milepost> allMps = new ArrayList<>();
+        if (wydotTim.getEndPoint() != null) {
+            allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+            utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
+                    gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
+        } else {
+            // point incident
+            MilepostBuffer mpb = new MilepostBuffer();
+            mpb.setBufferMiles(config.getPointIncidentBufferMiles());
+            mpb.setCommonName(wydotTim.getRoute());
+            mpb.setDirection(wydotTim.getDirection());
+            mpb.setPoint(wydotTim.getStartPoint());
+            allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
+            utility.logWithDate(String.format("Found %d mileposts for point %s", allMps.size(),
+                    gson.toJson(wydotTim.getStartPoint())));
+        }
+        return allMps;
+    }
+
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
@@ -111,39 +310,17 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
                     continue;
                 }
-
+                
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
-                }
-                else {
-                    // LaneWidth stored as centimeters in Oracle. ODE expects meters
-                    tum.setLaneWidth(tum.getLaneWidth().divide(new BigDecimal(100)));
-                }
-
-                // Mileposts
-                WydotTim wydotTim = new WydotTim();
-                wydotTim.setRoute(tum.getRoute());
-                wydotTim.setDirection(tum.getDirection());
-                wydotTim.setStartPoint(tum.getStartPoint());
-                wydotTim.setEndPoint(tum.getEndPoint());
-
-                List<Milepost> mps = new ArrayList<>();
-                List<Milepost> allMps = new ArrayList<>();
-                if (wydotTim.getEndPoint() != null) {
-                    allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
-                    utility.logWithDate(String.format("Found %d mileposts between %s and %s", mps.size(),
-                            gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
                 } else {
-                    // point incident
-                    MilepostBuffer mpb = new MilepostBuffer();
-                    mpb.setBufferMiles(config.getPointIncidentBufferMiles());
-                    mpb.setCommonName(wydotTim.getRoute());
-                    mpb.setDirection(wydotTim.getDirection());
-                    mpb.setPoint(wydotTim.getStartPoint());
-                    allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
-                    utility.logWithDate(String.format("Found %d mileposts for point %s", mps.size(),
-                            gson.toJson(wydotTim.getStartPoint())));
+                    // Oracle has lane width as cm, but ODE takes m
+                    tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
                 }
+
+                WydotTim wydotTim = getWydotTimFromTum(tum);
+                List<Milepost> mps = new ArrayList<>();
+                List<Milepost> allMps = getAllMps(wydotTim);
                 if (allMps.size() == 0) {
                     String exMsg = String.format(
                             "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
@@ -167,25 +344,9 @@ public class TimGenerationHelper {
                 WydotTravelerInputData timToSend = new WydotTravelerInputData();
                 timToSend.setRequest(new ServiceRequest());
                 timToSend.setTim(tim);
-
-                // try to send to RSU if along route with RSUs
-                if (Arrays.asList(config.getRsuRoutes()).contains(tum.getRoute())) {
-                    var exMsg = updateAndSendRSU(timToSend, tum);
-                    if (StringUtils.isNotBlank(exMsg)) {
-                        exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                    }
-                }
-
-                // only send to SDX if the sat record id exists
-                if (!StringUtils.isBlank(tum.getSatRecordId())) {
-                    var exMsg = updateAndSendSDX(timToSend, tum, mps);
-                    if (StringUtils.isNotBlank(exMsg)) {
-                        exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                    }
-                } else {
-                    String exMsg = "active_tim_id " + tum.getActiveTimId()
-                            + " not sent to SDX (no SAT_RECORD_ID found in database)";
-                    utility.logWithDate(exMsg);
+                var extraEx = sendTim(timToSend, tum, activeTimId, mps);
+                if (extraEx.size() > 0) {
+                    exceptions.addAll(extraEx);
                 }
             } catch (Exception ex) {
                 exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
@@ -221,6 +382,31 @@ public class TimGenerationHelper {
 
         tim.setUrlB(aTim.getUrlB());
         return tim;
+    }
+
+    private List<ResubmitTimException> sendTim(WydotTravelerInputData timToSend, TimUpdateModel tum, Long activeTimId,
+            List<Milepost> mps) {
+        List<ResubmitTimException> exceptions = new ArrayList<>();
+        // try to send to RSU if along route with RSUs
+        if (Arrays.asList(config.getRsuRoutes()).contains(tum.getRoute())) {
+            var exMsg = updateAndSendRSU(timToSend, tum);
+            if (StringUtils.isNotBlank(exMsg)) {
+                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+            }
+        }
+
+        // only send to SDX if the sat record id exists
+        if (!StringUtils.isBlank(tum.getSatRecordId())) {
+            var exMsg = updateAndSendSDX(timToSend, tum, mps);
+            if (StringUtils.isNotBlank(exMsg)) {
+                exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+            }
+        } else {
+            String exMsg = "active_tim_id " + tum.getActiveTimId()
+                    + " not sent to SDX (no SAT_RECORD_ID found in database)";
+            utility.logWithDate(exMsg);
+        }
+        return exceptions;
     }
 
     private int getMsgCnt(int currentCnt) {
@@ -259,8 +445,10 @@ public class TimGenerationHelper {
                 double lat = mps.get(j).getLatitude().doubleValue();
                 double lon = mps.get(j).getLongitude().doubleValue();
 
-                Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
-                Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
+                Point standPoint = Point.at(com.grum.geocalc.Coordinate.fromDegrees(startLat),
+                        com.grum.geocalc.Coordinate.fromDegrees(startLon));
+                Point forePoint = Point.at(com.grum.geocalc.Coordinate.fromDegrees(lat),
+                        com.grum.geocalc.Coordinate.fromDegrees(lon));
 
                 timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
                 // reset for next round
@@ -304,6 +492,11 @@ public class TimGenerationHelper {
         if (aTim.getEndDateTime() != null) {
             int durationTime = utility.getMinutesDurationBetweenTwoDates(aTim.getStartDateTime(),
                     aTim.getEndDateTime());
+            // J2735 has duration time of 0-32000
+            // the ODE fails if we have greater than 32000
+            if (durationTime > 32000) {
+                durationTime = 32000;
+            }
             df.setDurationTime(durationTime);
         } else {
             // we don't have an endDate so set duration to max time (never expire)

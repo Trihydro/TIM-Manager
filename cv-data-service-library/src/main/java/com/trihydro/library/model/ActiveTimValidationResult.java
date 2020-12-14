@@ -1,9 +1,7 @@
-package com.trihydro.tasks.models;
+package com.trihydro.library.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.trihydro.library.model.ActiveTim;
 
 public class ActiveTimValidationResult {
     private ActiveTim activeTim;

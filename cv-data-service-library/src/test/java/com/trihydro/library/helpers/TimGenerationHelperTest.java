@@ -3,6 +3,7 @@ package com.trihydro.library.helpers;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -12,9 +13,14 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimError;
+import com.trihydro.library.model.ActiveTimErrorType;
+import com.trihydro.library.model.ActiveTimValidationResult;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
@@ -118,58 +124,6 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
     }
 
-    private void setupActiveTimModel() {
-        tum = new TimUpdateModel();
-        tum.setActiveTimId(activeTimId);
-        tum.setStartPoint(new Coordinate(BigDecimal.valueOf(-1l), BigDecimal.valueOf(-2l)));
-        tum.setEndPoint(new Coordinate(BigDecimal.valueOf(-3l), BigDecimal.valueOf(-4l)));
-
-        // TIM Props
-        tum.setMsgCnt(1);// int
-        tum.setUrlB("urlb");// String
-        tum.setStartDate_Timestamp(Timestamp.from(Instant.now()));// Timestamp
-        tum.setEndDate_Timestamp(Timestamp.from(Instant.now()));// Timestamp
-        tum.setPacketId("asdf");// String
-
-        // Tim Type properties
-        tum.setTimTypeName("timType");// String
-        tum.setTimTypeDescription("descrip");// String
-
-        // Region properties
-        tum.setRegionId(-1);// Integer
-        tum.setRegionName("name");// String
-        tum.setRegionDescription("descrip");// String
-        tum.setLaneWidth(BigDecimal.valueOf(50l));// BigDecimal
-        tum.setAnchorLat(BigDecimal.valueOf(-1l));// BigDecimal
-        tum.setAnchorLong(BigDecimal.valueOf(-2l));// BigDecimal
-        tum.setRegionDirection("I");// String
-
-        tum.setClosedPath(false);
-
-        doReturn(tum).when(mockActiveTimService).getUpdateModelFromActiveTimId(any());
-    }
-
-    private void setupMilepostReturn() {
-        List<Milepost> allMps = new ArrayList<>();
-        var latitude = BigDecimal.valueOf(-1l);
-        var longitude = BigDecimal.valueOf(-2l);
-        var mp = new Milepost();
-        mp.setCommonName("I 80");
-        mp.setDirection("I");
-        mp.setLatitude(latitude);
-        mp.setLongitude(longitude);
-        allMps.add(mp);
-
-        var mp2= new Milepost();
-        mp.setCommonName("I 80");
-        mp.setDirection("D");
-        mp.setLatitude(latitude);
-        mp.setLongitude(longitude);
-        allMps.add(mp2);
-
-        doReturn(allMps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-    }
-
     @Test
     public void resubmitToOde_NoMileposts() {
         // Arrange
@@ -187,8 +141,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
-                activeTimId);
+                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService, mockSdwService);
@@ -645,4 +598,440 @@ public class TimGenerationHelperTest {
                 mockOdeService, mockActiveTimHoldingService);
     }
 
+    @Test
+    public void updateAndResubmitToOde_nullValidationResults() {
+        // Arrange
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(null);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService, mockSdwService, mockMilepostService, mockMilepostReduction,
+                mockActiveTimService);
+    }
+
+    @Test
+    public void updateAndResubmitToOde_emptyValidationResults() {
+        // Arrange
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(new ArrayList<>());
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService, mockSdwService, mockMilepostService, mockMilepostReduction,
+                mockActiveTimService);
+    }
+
+    @Test
+    public void updateAndResubmitToOde_nullTum() {
+        // Arrange
+        doReturn(null).when(mockActiveTimService).getUpdateModelFromActiveTimId(any());
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(getValidationResults());
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        String exMsg = "Failed to get Update Model from active tim";
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
+        verify(mockActiveTimService).getUpdateModelFromActiveTimId(any());
+        verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService, mockSdwService, mockMilepostService,
+                mockMilepostReduction);
+
+    }
+
+    @Test
+    public void updateAndResubmitToOde_noMileposts() {
+        // Arrange
+        setupActiveTimModel();
+        List<Milepost> mps = new ArrayList<Milepost>();
+        doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(getValidationResults());
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        String exMsg = String.format(
+                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
+        verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService, mockSdwService);
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction);
+
+    }
+
+    @Test
+    public void updateAndResubmitToOde_RsuNewTimFail_EndPointMps() {
+        // Arrange
+        setupActiveTimModel();
+        setupMilepostReturnSecondFail();
+        tum.setRoute("I 80");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        var validationResults = getValidationResults();
+        var errors = new ArrayList<ActiveTimError>();
+        Coordinate c = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+        var gson = new Gson();
+        errors.add(new ActiveTimError(ActiveTimErrorType.endPoint, "timValue", gson.toJson(c)));
+        validationResults.get(0).setErrors(errors);
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(validationResults);
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        String exMsg = String.format(
+                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
+        verify(mockDataFrameService).getItisCodesForDataFrameId(any());
+        verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService);
+        verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService, mockOdeService,
+                mockActiveTimHoldingService, mockRsuService);
+    }
+
+    @Test
+    public void updateAndResubmitToOde_RsuNewTimFail_EndTimeParse() {
+        // Arrange
+        setupActiveTimModel();
+        setupMilepostReturnSecondFail();
+        tum.setRoute("I 80");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        var validationResults = getValidationResults();
+        var errors = new ArrayList<ActiveTimError>();
+        errors.add(new ActiveTimError(ActiveTimErrorType.endTime, "timValue", "badTimeValue"));
+        validationResults.get(0).setErrors(errors);
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(validationResults);
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        String exMsg = String.format("Failed to parse associated FEU date: badTimeValue");
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
+        verify(mockDataFrameService).getItisCodesForDataFrameId(any());
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService);
+        verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService, mockOdeService,
+                mockActiveTimHoldingService, mockRsuService);
+
+    }
+
+    @Test
+    public void updateAndResubmitToOde_RsuNewTimFail_StartPointMps() {
+        // Arrange
+        setupActiveTimModel();
+        setupMilepostReturnSecondFail();
+        tum.setRoute("I 80");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        var validationResults = getValidationResults();
+        var errors = new ArrayList<ActiveTimError>();
+        Coordinate c = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+        var gson = new Gson();
+        errors.add(new ActiveTimError(ActiveTimErrorType.startPoint, "timValue", gson.toJson(c)));
+        validationResults.get(0).setErrors(errors);
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(validationResults);
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        String exMsg = String.format(
+                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
+        verify(mockDataFrameService).getItisCodesForDataFrameId(any());
+        verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService);
+        verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService, mockOdeService,
+                mockActiveTimHoldingService, mockRsuService);
+    }
+
+    @Test
+    public void updateAndResubmitToOde_RsuNewTimSuccess_StartPoint() {
+        // Arrange
+        setupActiveTimModel();
+        setupMilepostReturn();
+        tum.setRoute("I 80");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 80" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        var validationResults = getValidationResults();
+        var errors = new ArrayList<ActiveTimError>();
+        Coordinate c = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+        var gson = new Gson();
+        errors.add(new ActiveTimError(ActiveTimErrorType.startPoint, "timValue", gson.toJson(c)));
+        validationResults.get(0).setErrors(errors);
+
+        List<WydotRsu> dbRsus = new ArrayList<>();
+        var rsu = new WydotRsu();
+        rsu.setRsuTarget("10.10.10.10");
+        dbRsus.add(rsu);
+        doReturn(dbRsus).when(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
+        when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(validationResults);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verify(mockRsuService).getFullRsusTimIsOn(any());
+        verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockDataFrameService, times(2)).getItisCodesForDataFrameId(any());
+        verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
+        verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
+        verify(mockOdeService).sendNewTimToRsu(any());
+        verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
+
+        verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction, times(2)).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+    }
+
+    @Test
+    public void updateAndResubmitToOde_RsuNewTimSuccess_EndPoint() {
+        // Arrange
+        setupActiveTimModel();
+        setupMilepostReturn();
+        tum.setRoute("I 80");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 80" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        var validationResults = getValidationResults();
+        var errors = new ArrayList<ActiveTimError>();
+        Coordinate c = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+        var gson = new Gson();
+        errors.add(new ActiveTimError(ActiveTimErrorType.endPoint, "timValue", gson.toJson(c)));
+        validationResults.get(0).setErrors(errors);
+
+        List<WydotRsu> dbRsus = new ArrayList<>();
+        var rsu = new WydotRsu();
+        rsu.setRsuTarget("10.10.10.10");
+        dbRsus.add(rsu);
+        doReturn(dbRsus).when(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
+        when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(validationResults);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verify(mockRsuService).getFullRsusTimIsOn(any());
+        verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockDataFrameService, times(2)).getItisCodesForDataFrameId(any());
+        verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
+        verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
+        verify(mockOdeService).sendNewTimToRsu(any());
+        verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
+
+        verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction, times(2)).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+    }
+
+    @Test
+    public void updateAndResubmitToOde_RsuNewTimSuccess_EndTime() {
+        // Arrange
+        setupActiveTimModel();
+        setupMilepostReturn();
+        tum.setRoute("I 80");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 80" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        var validationResults = getValidationResults();
+        var errors = new ArrayList<ActiveTimError>();
+        errors.add(new ActiveTimError(ActiveTimErrorType.endTime, "timValue", "2020-12-08 09:31:00"));
+        validationResults.get(0).setErrors(errors);
+
+        List<WydotRsu> dbRsus = new ArrayList<>();
+        var rsu = new WydotRsu();
+        rsu.setRsuTarget("10.10.10.10");
+        dbRsus.add(rsu);
+        doReturn(dbRsus).when(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
+        when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(validationResults);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verify(mockRsuService).getFullRsusTimIsOn(any());
+        verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockDataFrameService).getItisCodesForDataFrameId(any());
+        verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
+        verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
+        verify(mockOdeService).sendNewTimToRsu(any());
+        verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
+
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+    }
+
+    @Test
+    public void updateAndResubmitToOde_RsuUpdateTimSuccess_ItisCodes() {
+        // Arrange
+        setupActiveTimModel();
+        setupMilepostReturn();
+        tum.setRoute("I 80");
+
+        List<Milepost> mps = new ArrayList<Milepost>();
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        String[] rsuRoutes = new String[] { "I 80" };
+        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        var validationResults = getValidationResults();
+        var errors = new ArrayList<ActiveTimError>();
+        errors.add(new ActiveTimError(ActiveTimErrorType.itisCodes, "timValue", "{1234,4321}"));
+        validationResults.get(0).setErrors(errors);
+
+        List<WydotRsuTim> wydotRsus = new ArrayList<>();
+        var wydotRsuTim = new WydotRsuTim();
+        wydotRsuTim.setIndex(-1);
+        wydotRsus.add(wydotRsuTim);
+        doReturn(wydotRsus).when(mockRsuService).getFullRsusTimIsOn(any());
+
+        // Act
+        var exceptions = uut.updateAndResubmitToOde(validationResults);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verify(mockRsuService).getFullRsusTimIsOn(any());
+        verify(mockDataFrameService).getItisCodesForDataFrameId(any());
+        verify(mockOdeService).updateTimOnRsu(any());
+        verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
+
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
+                mockOdeService, mockActiveTimHoldingService);
+    }
+
+    private void setupActiveTimModel() {
+        tum = new TimUpdateModel();
+        tum.setActiveTimId(activeTimId);
+        tum.setStartPoint(new Coordinate(BigDecimal.valueOf(-1l), BigDecimal.valueOf(-2l)));
+        tum.setEndPoint(new Coordinate(BigDecimal.valueOf(-3l), BigDecimal.valueOf(-4l)));
+
+        // TIM Props
+        tum.setMsgCnt(1);// int
+        tum.setUrlB("urlb");// String
+        tum.setStartDate_Timestamp(Timestamp.from(Instant.now()));// Timestamp
+        tum.setEndDate_Timestamp(Timestamp.from(Instant.now()));// Timestamp
+        tum.setPacketId("asdf");// String
+
+        // Tim Type properties
+        tum.setTimTypeName("timType");// String
+        tum.setTimTypeDescription("descrip");// String
+
+        // Region properties
+        tum.setRegionId(-1);// Integer
+        tum.setRegionName("name");// String
+        tum.setRegionDescription("descrip");// String
+        tum.setLaneWidth(BigDecimal.valueOf(50l));// BigDecimal
+        tum.setAnchorLat(BigDecimal.valueOf(-1l));// BigDecimal
+        tum.setAnchorLong(BigDecimal.valueOf(-2l));// BigDecimal
+        tum.setRegionDirection("I");// String
+
+        tum.setClosedPath(false);
+
+        doReturn(tum).when(mockActiveTimService).getUpdateModelFromActiveTimId(any());
+    }
+
+    private List<Milepost> getAllMps() {
+        List<Milepost> allMps = new ArrayList<>();
+        var latitude = BigDecimal.valueOf(-1l);
+        var longitude = BigDecimal.valueOf(-2l);
+        var mp = new Milepost();
+        mp.setCommonName("I 80");
+        mp.setDirection("I");
+        mp.setLatitude(latitude);
+        mp.setLongitude(longitude);
+        allMps.add(mp);
+
+        var mp2 = new Milepost();
+        mp.setCommonName("I 80");
+        mp.setDirection("D");
+        mp.setLatitude(latitude);
+        mp.setLongitude(longitude);
+        allMps.add(mp2);
+
+        return allMps;
+    }
+
+    private void setupMilepostReturn() {
+        doReturn(getAllMps()).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+    }
+
+    private void setupMilepostReturnSecondFail() {
+        when(mockMilepostService.getMilepostsByStartEndPointDirection(any())).thenReturn(getAllMps())
+                .thenReturn(new ArrayList<>());
+    }
+
+    private List<ActiveTimValidationResult> getValidationResults() {
+        ActiveTimValidationResult validationResult = new ActiveTimValidationResult();
+        validationResult.setActiveTim(getActiveTim());
+
+        return Collections.singletonList(validationResult);
+    }
+
+    private ActiveTim getActiveTim() {
+        var tim = new ActiveTim();
+        tim.setActiveTimId(-1l);
+        return tim;
+    }
 }

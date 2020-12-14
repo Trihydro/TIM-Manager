@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ActiveTimError;
+import com.trihydro.library.model.ActiveTimValidationResult;
 import com.trihydro.library.model.RsuIndexInfo;
-import com.trihydro.tasks.models.ActiveTimError;
 import com.trihydro.tasks.models.ActiveTimMapping;
-import com.trihydro.tasks.models.ActiveTimValidationResult;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
@@ -150,7 +150,7 @@ public class EmailFormatter {
     }
 
     public String generateTmddSummaryEmail(List<ActiveTim> unableToVerify,
-            List<ActiveTimValidationResult> validationResults) {
+            List<ActiveTimValidationResult> validationResults, String exceptions) {
         String body = formatTmddMain;
 
         // List Active TIMs that couldn't be verified
@@ -167,6 +167,9 @@ public class EmailFormatter {
             inconsistencies += getTmddResult(result);
         }
         body = body.replaceAll("\\{content\\}", inconsistencies);
+
+        // Add in any exceptions
+        body = body.replaceAll("\\{exception-summary\\}", exceptions);
 
         // Remove unnecessary whitespace
         body = body.replaceAll("\\s*\n\\s*", "");
@@ -288,7 +291,7 @@ public class EmailFormatter {
 
         String rows = "";
         for (ActiveTimError error : result.getErrors()) {
-            rows += getRow(error.getName(), error.getTimValue(), error.getTmddValue());
+            rows += getRow(error.getName().getStringValue(), error.getTimValue(), error.getTmddValue());
         }
         section = section.replaceAll("\\{rows\\}", rows);
 

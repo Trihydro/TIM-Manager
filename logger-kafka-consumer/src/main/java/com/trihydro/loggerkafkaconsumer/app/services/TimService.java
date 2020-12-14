@@ -254,7 +254,8 @@ public class TimService extends BaseService {
         var stDate = metaData.getOdeTimStartDateTime();
         if (StringUtils.isEmpty(stDate)) {
             stDate = dframes[0].getStartDateTime();
-            utility.logWithDate(String.format("addActiveTimToOracleDB did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
+            utility.logWithDate(String.format(
+                    "addActiveTimToOracleDB did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
         }
         activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);
@@ -657,10 +658,15 @@ public class TimService extends BaseService {
 
         String itisCodeId = null;
 
-        ItisCode itisCode = itisCodeService.selectAllItisCodes().stream()
-                .filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst().orElse(null);
-        if (itisCode != null)
-            itisCodeId = itisCode.getItisCodeId().toString();
+        try {
+            ItisCode itisCode = itisCodeService.selectAllItisCodes().stream()
+                    .filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst().orElse(null);
+            if (itisCode != null)
+                itisCodeId = itisCode.getItisCodeId().toString();
+        } catch (Exception ex) {
+            // on rare occasions we see an unparsable Integer
+            utility.logWithDate("Failed to parse ITIS integer(" + item + "): " + ex.getMessage());
+        }
 
         return itisCodeId;
     }

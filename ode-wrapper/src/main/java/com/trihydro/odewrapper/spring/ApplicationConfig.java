@@ -18,7 +18,7 @@ import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.library.service.TimTypeService;
-import com.trihydro.odewrapper.service.WydotTimService;
+import com.trihydro.library.service.WydotTimService;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

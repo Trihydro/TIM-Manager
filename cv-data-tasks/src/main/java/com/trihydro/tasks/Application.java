@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.GsonFactory;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
@@ -29,9 +30,12 @@ import com.trihydro.library.service.RsuDataService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.StatusLogService;
+import com.trihydro.library.service.TimRsuService;
 import com.trihydro.library.service.TimService;
+import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.TmddService;
 import com.trihydro.library.service.UtilityService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
 import com.trihydro.tasks.actions.CleanupBsms;
 import com.trihydro.tasks.actions.RemoveExpiredActiveTims;
@@ -49,11 +53,12 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
-        DataFrameService.class, BsmService.class, ItisCodeService.class, RsuService.class, RsuDataService.class,
-        OdeService.class, RestTemplateProvider.class, TmddService.class, GsonFactory.class, DriverAlertService.class,
-        HmiLogService.class, PathNodeLLService.class, MilepostService.class, StatusLogService.class, TimService.class,
-        UtilityService.class, TimGenerationHelper.class, MilepostReduction.class, RegionService.class,
-        ActiveTimHoldingService.class })
+        BsmService.class, ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class, TmddService.class,
+        GsonFactory.class, DriverAlertService.class, HmiLogService.class, StatusLogService.class, TimService.class,
+        UtilityService.class, DataFrameService.class, TimGenerationHelper.class, PathNodeLLService.class,
+        MilepostService.class, MilepostReduction.class, RegionService.class, RsuService.class, OdeService.class,
+        ActiveTimHoldingService.class, WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class,
+        TimRsuService.class })
 
 public class Application {
     protected static DataTasksConfiguration config;

@@ -160,11 +160,17 @@ public class DriverAlertService extends BaseService {
             if (driverAlertId != null && alert.split(",").length > 1) {
                 for (String code : alert.split(",")) {
                     if (code.chars().allMatch(Character::isDigit)) {
-                        var foundItisCode = itisCodes.stream().filter(x -> x.getItisCode() == Integer.parseInt(code))
-                                .findFirst();
-                        if (!foundItisCode.isEmpty()) {
-                            driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
-                                    foundItisCode.get().getItisCodeId());
+                        try {
+                            var foundItisCode = itisCodes.stream()
+                                    .filter(x -> x.getItisCode() == Integer.parseInt(code)).findFirst();
+                            if (!foundItisCode.isEmpty()) {
+                                driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
+                                        foundItisCode.get().getItisCodeId());
+                            }
+                        } catch (Exception ex) {
+                            // Potentially the driver alert has a huge int ("2216472429100300968259" for
+                            // instance) and this fails to parse. Log it and move on
+                            utility.logWithDate("Failed to parse integer from driver alert: " + ex.getMessage());
                         }
                     } else {
                         // look up by text

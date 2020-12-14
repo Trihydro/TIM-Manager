@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.service.ActiveTimService;
@@ -17,10 +18,9 @@ import com.trihydro.library.service.TimTypeService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.controller.WydotTimVslController;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
-import com.trihydro.odewrapper.service.WydotTimService;
+import com.trihydro.library.service.WydotTimService;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

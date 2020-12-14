@@ -18,7 +18,7 @@ import com.trihydro.odewrapper.controller.WydotTimIncidentController;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
-import com.trihydro.odewrapper.service.WydotTimService;
+import com.trihydro.library.service.WydotTimService;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

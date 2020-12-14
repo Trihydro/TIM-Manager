@@ -91,7 +91,7 @@ public class LoggerKafkaConsumer {
             while (true) {
                 ConsumerRecords<String, String> records = stringConsumer.poll(100);
                 recordCount = records.count();
-                if(recordCount > 0){
+                if (recordCount > 0) {
                     utility.logWithDate(String.format("Found %d records to parse", recordCount));
                 }
                 for (ConsumerRecord<String, String> record : records) {
@@ -106,12 +106,16 @@ public class LoggerKafkaConsumer {
                         utility.logWithDate(String.format("Found data for topic: %s", tdw.getTopic()));
                         switch (tdw.getTopic()) {
                             case "topic.OdeTimJson":
+                                utility.logWithDate("Before processing JSON: " + tdw.getData());
                                 odeData = timDataConverter.processTimJson(tdw.getData());
                                 utility.logWithDate(String.format("Parsed TIM: %s", gson.toJson(odeData)));
                                 if (odeData != null) {
                                     if (odeData.getMetadata()
                                             .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
                                         timService.addActiveTimToOracleDB(odeData);
+                                    } else if (odeData.getMetadata().getRecordGeneratedBy() == null) {
+                                        // we shouldn't get here...log it
+                                        utility.logWithDate("Failed to get recordGeneratedBy, continuing...");
                                     } else {
                                         timService.addTimToOracleDB(odeData);
                                     }

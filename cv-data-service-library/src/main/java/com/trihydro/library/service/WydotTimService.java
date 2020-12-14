@@ -277,6 +277,8 @@ public class WydotTimService {
                 rsu.setRsuIndex(nextRsuIndex);
                 rsuArr[0] = rsu;
                 timToSend.getRequest().setRsus(rsuArr);
+                var df = timToSend.getTim().getDataframes()[0];
+                timToSend.getRequest().setSnmp(snmpHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
                 // set msgCnt to 1
                 timToSend.getTim().setMsgCnt(1);
@@ -477,10 +479,10 @@ public class WydotTimService {
         WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);
 
         // set rsu index here
-        DataFrame df = timToSend.getTim().getDataframes()[0];
+        DataFrame df = updatedTim.getTim().getDataframes()[0];
         TimRsu timRsu = timRsuService.getTimRsu(timId, rsuId);
-        timToSend.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
-        timToSend.getRequest().setSnmp(snmpHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
+        updatedTim.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
+        updatedTim.getRequest().setSnmp(snmpHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
         String timToSendJson = gson.toJson(updatedTim);
 

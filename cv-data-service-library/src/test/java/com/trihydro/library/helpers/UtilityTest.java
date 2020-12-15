@@ -1,5 +1,8 @@
 package com.trihydro.library.helpers;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,5 +68,47 @@ public class UtilityTest {
         // Assert
         Assertions.assertNotNull(convertedDate);
         Assertions.assertEquals(1581354000000l, convertedDate.getTime());
+    }
+
+    @Test
+    public void getMinutesDurationBetweenTwoDates_SUCCESS_simpleDate() {
+        // Arrange
+        // "dd-MMM-yy HH.MM.SS"
+        String startDateTime = "15-DEC-20 09.10.00";
+        String endDateTime = "15-DEC-20 09.20.00";
+
+        // Act
+        var duration = uut.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+
+        // Assert
+        Assertions.assertEquals(10, duration);
+    }
+
+    @Test
+    public void getMinutesDurationBetweenTwoDates_SUCCESS_zonedDate() {
+        // Arrange
+        // "dd-MMM-yy HH.MM.SS"
+        String startDateTime = ZonedDateTime.now(ZoneId.of("UTC")).toString();
+        String endDateTime = ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(10l).toString();
+
+        // Act
+        var duration = uut.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+
+        // Assert
+        Assertions.assertEquals(10, duration);
+    }
+
+    @Test
+    public void getMinutesDurationBetweenTwoDates_SUCCESS_YyMmDdDate() {
+        // Arrange
+        // "yyyy-MM-dd HH:mm:ss"
+        String startDateTime = "2020-12-15 09:10:00";
+        String endDateTime = "2020-12-15 09:20:00";
+
+        // Act
+        var duration = uut.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+
+        // Assert
+        Assertions.assertEquals(10, duration);
     }
 }

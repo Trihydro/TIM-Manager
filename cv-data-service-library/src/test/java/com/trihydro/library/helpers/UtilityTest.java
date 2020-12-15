@@ -73,7 +73,7 @@ public class UtilityTest {
     @Test
     public void getMinutesDurationBetweenTwoDates_SUCCESS_simpleDate() {
         // Arrange
-        // "dd-MMM-yy HH.MM.SS"
+        // "dd-MMM-yy HH.mm.ss"
         String startDateTime = "15-DEC-20 09.10.00";
         String endDateTime = "15-DEC-20 09.20.00";
 

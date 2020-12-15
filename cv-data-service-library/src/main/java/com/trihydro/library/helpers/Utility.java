@@ -63,6 +63,9 @@ public class Utility {
 			duration = getMinutesDurationWithZonedDateTime(startDateTime, endDateTime);
 		}
 		if (duration == -1) {
+			duration = getMinutesDurationWithYyMmDdFormat(startDateTime, endDateTime);
+		}
+		if (duration == -1) {
 			System.out.println(
 					"Failed to parse dates when getting minutes between: " + startDateTime + " and " + endDateTime);
 
@@ -95,7 +98,7 @@ public class Utility {
 
 	/**
 	 * Attempt to get duration in minutes between two dates parsed in
-	 * SimpleDateFormat("dd-MMM-yy HH.MM.SS"). If parsing fails, returns -1
+	 * SimpleDateFormat("dd-MMM-yy HH.mm.ss"). If parsing fails, returns -1
 	 * 
 	 * @param startDateTime
 	 * @param endDateTime
@@ -104,7 +107,29 @@ public class Utility {
 	 */
 	private int getMinutesDurationWithSimpleDateFormat(String startDateTime, String endDateTime) {
 		try {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yy HH.MM.SS");
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss");
+			Date startDate = simpleDateFormat.parse(startDateTime);
+			Date endDate = simpleDateFormat.parse(endDateTime);
+
+			long duration = (endDate.getTime() - startDate.getTime()) / 60000; // milliseconds to minutes is 1/60000
+			return toIntExact(duration);
+		} catch (Exception ex) {
+			return -1;
+		}
+	}
+
+	/**
+	 * Attempt to get duration in minutes between two dates parsed in
+	 * SimpleDateFormat("yyyy-MM-dd HH:mm:ss"). If parsing fails, returns -1
+	 * 
+	 * @param startDateTime
+	 * @param endDateTime
+	 * @return The duration in minutes between the two given dates. If parsing
+	 *         fails, returns -1
+	 */
+	private int getMinutesDurationWithYyMmDdFormat(String startDateTime, String endDateTime) {
+		try {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date startDate = simpleDateFormat.parse(startDateTime);
 			Date endDate = simpleDateFormat.parse(endDateTime);
 

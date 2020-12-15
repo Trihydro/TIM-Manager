@@ -58,7 +58,7 @@ public class TimRefreshController {
             // the rest can call out to TimGenerationHelper to finish
 
             // Validation
-            if (!isValidTim(aTim)) {
+            if (!timGenerationHelper.isValidTim(aTim)) {
                 invalidTims.add(new Logging_TimUpdateModel(aTim));
             } else {
                 timsToRefresh.add(aTim);
@@ -104,23 +104,4 @@ public class TimRefreshController {
             }
         }
     }
-
-    private boolean isValidTim(TimUpdateModel tum) {
-
-        // start point
-        var stPt = tum.getStartPoint();
-        if (stPt == null || stPt.getLatitude() == null || stPt.getLongitude() == null)
-            return false;
-
-        // direction
-        if (tum.getDirection() == null || tum.getDirection().isEmpty())
-            return false;
-
-        // route
-        if (tum.getRoute() == null || tum.getRoute().isEmpty())
-            return false;
-
-        return true;
-    }
-
 }

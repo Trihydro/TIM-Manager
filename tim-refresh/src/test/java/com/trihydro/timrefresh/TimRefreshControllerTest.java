@@ -76,7 +76,7 @@ public class TimRefreshControllerTest {
     }
 
     @Test
-    public void TestPerformTaskUsingCron_InvalidData_Milepost() throws MailException, MessagingException {
+    public void TestPerformTaskUsingCron_InvalidData() throws MailException, MessagingException {
         // Arrange
         ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
         TimUpdateModel tum = getRsuTim();
@@ -84,6 +84,7 @@ public class TimRefreshControllerTest {
         arrLst.add(tum);
 
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockTimGenerationHelper.isValidTim(any())).thenReturn(false);
 
         // Act
         controllerUnderTest.performTaskUsingCron();
@@ -95,59 +96,10 @@ public class TimRefreshControllerTest {
         body += "The associated ActiveTim records are: <br/>";
         body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
+        verify(mockTimGenerationHelper).isValidTim(any());
         verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
                 mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
-        verifyNoInteractions(mockTimGenerationHelper);
-    }
-
-    @Test
-    public void TestPerformTaskUsingCron_InvalidData_Direction() throws MailException, MessagingException {
-        // Arrange
-        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
-        TimUpdateModel tum = getRsuTim();
-        tum.setDirection("");
-        arrLst.add(tum);
-
-        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-
-        // Act
-        controllerUnderTest.performTaskUsingCron();
-
-        // Assert
-        Gson gson = new Gson();
-        String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
-        body += "<br/>";
-        body += "The associated ActiveTim records are: <br/>";
-        body += gson.toJson(new Logging_TimUpdateModel(tum));
-        body += "<br/><br/>";
-        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
-                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
-        verifyNoInteractions(mockTimGenerationHelper);
-    }
-
-    @Test
-    public void TestPerformTaskUsingCron_InvalidData_Route() throws MailException, MessagingException {
-        // Arrange
-        ArrayList<TimUpdateModel> arrLst = new ArrayList<TimUpdateModel>();
-        TimUpdateModel tum = getRsuTim();
-        tum.setRoute("");
-        arrLst.add(tum);
-
-        when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
-
-        // Act
-        controllerUnderTest.performTaskUsingCron();
-
-        // Assert
-        Gson gson = new Gson();
-        String body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
-        body += "<br/>";
-        body += "The associated ActiveTim records are: <br/>";
-        body += gson.toJson(new Logging_TimUpdateModel(tum));
-        body += "<br/><br/>";
-        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
-                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
-        verifyNoInteractions(mockTimGenerationHelper);
+        verifyNoMoreInteractions(mockTimGenerationHelper);
     }
 
     @Test
@@ -161,6 +113,7 @@ public class TimRefreshControllerTest {
         resubExceptions.add(new ResubmitTimException(-1l, "exception message"));
 
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockTimGenerationHelper.isValidTim(any())).thenReturn(true);
         when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExceptions);
 
         // call the function to test
@@ -187,6 +140,7 @@ public class TimRefreshControllerTest {
         List<ResubmitTimException> resubExceptions = new ArrayList<>();
 
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockTimGenerationHelper.isValidTim(any())).thenReturn(true);
         when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExceptions);
 
         // call the function to test

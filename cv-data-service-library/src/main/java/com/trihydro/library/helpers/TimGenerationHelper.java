@@ -114,6 +114,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
                     continue;
                 }
+                if (!isValidTim(tum)) {
+                    exceptions.add(new ResubmitTimException(activeTimId,
+                            "Failed to generate valid Update Model from active tim"));
+                    continue;
+                }
 
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
@@ -309,6 +314,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
                     continue;
                 }
+                if (!isValidTim(tum)) {
+                    exceptions.add(new ResubmitTimException(activeTimId,
+                            "Failed to generate valid Update Model from active tim"));
+                    continue;
+                }
 
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
@@ -352,6 +362,24 @@ public class TimGenerationHelper {
             }
         }
         return exceptions;
+    }
+
+    public boolean isValidTim(TimUpdateModel tum) {
+
+        // start point
+        var stPt = tum.getStartPoint();
+        if (stPt == null || stPt.getLatitude() == null || stPt.getLongitude() == null)
+            return false;
+
+        // direction
+        if (tum.getDirection() == null || tum.getDirection().isEmpty())
+            return false;
+
+        // route
+        if (tum.getRoute() == null || tum.getRoute().isEmpty())
+            return false;
+
+        return true;
     }
 
     private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,

@@ -963,6 +963,63 @@ public class TimGenerationHelperTest {
                 mockOdeService, mockActiveTimHoldingService);
     }
 
+    @Test
+    public void isValidTim_TRUE() {
+        // Arrange
+        var tum = new TimUpdateModel();
+        tum.setStartPoint(new Coordinate(BigDecimal.valueOf(1l), BigDecimal.valueOf(2l)));
+        tum.setDirection("I");
+        tum.setRoute("I 80");
+
+        // Act
+        var success = uut.isValidTim(tum);
+
+        // Assert
+        Assertions.assertTrue(success);
+    }
+
+    @Test
+    public void isValidTim_FALSE_StartPoint() {
+        // Arrange
+        var tum = new TimUpdateModel();
+        tum.setDirection("I");
+        tum.setRoute("I 80");
+
+        // Act
+        var success = uut.isValidTim(tum);
+
+        // Assert
+        Assertions.assertFalse(success);
+    }
+
+    @Test
+    public void isValidTim_FALSE_Direction() {
+        // Arrange
+        var tum = new TimUpdateModel();
+        tum.setStartPoint(new Coordinate(BigDecimal.valueOf(1l), BigDecimal.valueOf(2l)));
+        tum.setRoute("I 80");
+
+        // Act
+        var success = uut.isValidTim(tum);
+
+        // Assert
+        Assertions.assertFalse(success);
+    }
+
+    @Test
+    public void isValidTim_FALSE_Route() {
+        // Arrange
+        var tum = new TimUpdateModel();
+        tum.setStartPoint(new Coordinate(BigDecimal.valueOf(1l), BigDecimal.valueOf(2l)));
+        tum.setDirection("I");
+
+        // Act
+        var success = uut.isValidTim(tum);
+
+        // Assert
+        Assertions.assertFalse(success);
+    }
+
     private void setupActiveTimModel() {
         tum = new TimUpdateModel();
         tum.setActiveTimId(activeTimId);
@@ -990,6 +1047,8 @@ public class TimGenerationHelperTest {
         tum.setRegionDirection("I");// String
 
         tum.setClosedPath(false);
+        tum.setRoute("I 80");
+        tum.setDirection("I");
 
         doReturn(tum).when(mockActiveTimService).getUpdateModelFromActiveTimId(any());
     }

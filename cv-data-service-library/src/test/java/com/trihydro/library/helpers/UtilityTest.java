@@ -87,7 +87,7 @@ public class UtilityTest {
     @Test
     public void getMinutesDurationBetweenTwoDates_SUCCESS_zonedDate() {
         // Arrange
-        // "dd-MMM-yy HH.MM.SS"
+        // "dd-MMM-yy HH.mm.ss"
         String startDateTime = ZonedDateTime.now(ZoneId.of("UTC")).toString();
         String endDateTime = ZonedDateTime.now(ZoneId.of("UTC")).plusMinutes(10l).toString();
 

@@ -1,51 +1,46 @@
 {
     "metadata": {
+        "maxDurationTime": 32000,
+        "odePacketID": "257559968DC2308890",
+        "odeReceivedAt": "2020-12-14T23:36:41.490Z",
+        "odeTimStartDateTime": "2020-12-14T23:36:40.718Z",
+        "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
+        "recordGeneratedAt": "2020-12-14T23:36:40.965947Z",
+        "recordGeneratedBy": "TMC",
         "request": {
             "ode": {
                 "verb": "PUT",
                 "version": 3
             },
             "rsus": {
-                "rsus": [
-                    {
-                        "rsuTarget": "10.145.244.43",
-                        "rsuUsername": "ADMIN",
-                        "rsuRetries": 2,
-                        "rsuTimeout": 5000,
-                        "rsuIndex": 2
-                    },
-                    "",
-                    ""
-                ]
+                "rsus": {
+                    "rsuIndex": 53,
+                    "rsuRetries": 3,
+                    "rsuTarget": "10.145.12.27",
+                    "rsuTimeout": 5000
+                }
             },
             "snmp": {
-                "mode": 1,
-                "deliverystop": "2020-06-07T02:08Z",
-                "rsuid": 83,
-                "deliverystart": "2020-05-15T20:48:00Z",
-                "enable": 1,
                 "channel": 178,
-                "msgid": 31,
+                "deliverystart": "2020-12-14T23:36:40.718Z",
+                "deliverystop": "2021-01-06T04:56Z",
+                "enable": 1,
                 "interval": 2,
+                "mode": 1,
+                "msgid": 31,
+                "rsuid": 83,
                 "status": 4
             }
         },
-        "recordGeneratedBy": "TMC",
-        "schemaVersion": 6,
-        "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
-        "odePacketID": "9D5EB02A34D3E6B342",
-        "serialId": {
-            "recordId": 0,
-            "serialNumber": 2066,
-            "streamId": "78804150-9fa0-4f73-b490-54c507ebc52b",
-            "bundleSize": 1,
-            "bundleId": 2066
-        },
         "sanitized": false,
-        "recordGeneratedAt": "2020-12-14T20:01:15.617360Z",
-        "maxDurationTime": 32000,
-        "odeTimStartDateTime": "2020-12-14T20:11:32.360Z",
-        "odeReceivedAt": "2020-12-14T20:01:15.655Z"
+        "schemaVersion": 6,
+        "serialId": {
+            "bundleId": 2965,
+            "bundleSize": 1,
+            "recordId": 0,
+            "serialNumber": 2965,
+            "streamId": "78804150-9fa0-4f73-b490-54c507ebc52b"
+        }
     },
     "payload": {
         "data": {
@@ -53,23 +48,42 @@
                 "messageId": 31,
                 "value": {
                     "TravelerInformation": {
-                        "timeStamp": 502321,
-                        "packetID": "9D5EB02A34D3E6B342",
                         "dataFrames": {
                             "TravelerDataFrame": {
+                                "content": {
+                                    "advisory": {
+                                        "SEQUENCE": {
+                                            "item": {
+                                                "itis": 4871
+                                            }
+                                        }
+                                    }
+                                },
+                                "duratonTime": 32000,
+                                "frameType": {
+                                    "advisory": ""
+                                },
+                                "msgId": {
+                                    "roadSignID": {
+                                        "mutcdCode": {
+                                            "warning": ""
+                                        },
+                                        "position": {
+                                            "lat": 412696444,
+                                            "long": -1054796709
+                                        },
+                                        "viewAngle": 1111111111111111
+                                    }
+                                },
+                                "priority": 5,
                                 "regions": {
                                     "GeographicalPath": {
+                                        "anchor": {
+                                            "lat": 412696444,
+                                            "long": -1054796709
+                                        },
                                         "closedPath": {
                                             "false": ""
-                                        },
-                                        "anchor": {
-                                            "lat": 412589946,
-                                            "long": -1109598342
-                                        },
-                                        "name": "i_I 80_RSU-10.145.244.43_I_IN669196",
-                                        "laneWidth": 5000,
-                                        "directionality": {
-                                            "both": ""
                                         },
                                         "description": {
                                             "path": {
@@ -80,184 +94,112 @@
                                                                 {
                                                                     "delta": {
                                                                         "node-LL3": {
-                                                                            "lon": 17653,
-                                                                            "lat": 5963
+                                                                            "lat": -10830,
+                                                                            "lon": 12710
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL3": {
-                                                                            "lon": 29902,
-                                                                            "lat": 18352
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 30257,
-                                                                            "lat": 36717
+                                                                            "lat": -20785,
+                                                                            "lon": 26578
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL3": {
-                                                                            "lon": 29667,
-                                                                            "lat": 17504
+                                                                            "lat": -6698,
+                                                                            "lon": 16897
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL4": {
-                                                                            "lon": 94176,
-                                                                            "lat": 10038
+                                                                            "lat": -5448,
+                                                                            "lon": 56865
+                                                                        }
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "delta": {
+                                                                        "node-LL3": {
+                                                                            "lat": -14806,
+                                                                            "lon": 32584
+                                                                        }
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "delta": {
+                                                                        "node-LL3": {
+                                                                            "lat": -15537,
+                                                                            "lon": 32086
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL4": {
-                                                                            "lon": 114523,
-                                                                            "lat": -6983
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL5": {
-                                                                            "lon": 131804,
-                                                                            "lat": -19225
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL5": {
-                                                                            "lon": 168126,
-                                                                            "lat": -29699
+                                                                            "lat": -18878,
+                                                                            "lon": 51470
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL4": {
-                                                                            "lon": 95668,
-                                                                            "lat": -1937
+                                                                            "lat": -55342,
+                                                                            "lon": 88538
+                                                                        }
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "delta": {
+                                                                        "node-LL3": {
+                                                                            "lat": -23750,
+                                                                            "lon": 21609
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL4": {
-                                                                            "lon": 93682,
-                                                                            "lat": 14949
+                                                                            "lat": -117938,
+                                                                            "lon": 73050
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL4": {
-                                                                            "lon": 86703,
-                                                                            "lat": 30684
+                                                                            "lat": -56861,
+                                                                            "lon": 14308
+                                                                        }
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "delta": {
+                                                                        "node-LL3": {
+                                                                            "lat": -28664,
+                                                                            "lon": -2927
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
                                                                         "node-LL4": {
-                                                                            "lon": 95002,
-                                                                            "lat": 49087
+                                                                            "lat": -41129,
+                                                                            "lon": -17876
                                                                         }
                                                                     }
                                                                 },
                                                                 {
                                                                     "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 36367,
-                                                                            "lat": 8797
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 38186,
-                                                                            "lat": -1273
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 121836,
-                                                                            "lat": -42505
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 56865,
-                                                                            "lat": -4867
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 54699,
-                                                                            "lat": 12688
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 83237,
-                                                                            "lat": 36059
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 56368,
-                                                                            "lat": 7585
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 76472,
-                                                                            "lat": -3816
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 36456,
-                                                                            "lat": 8704
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL4": {
-                                                                            "lon": 57438,
-                                                                            "lat": 38009
-                                                                        }
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "delta": {
-                                                                        "node-LL5": {
-                                                                            "lon": 134226,
-                                                                            "lat": 103036
+                                                                        "node-LL3": {
+                                                                            "lat": -14462,
+                                                                            "lon": 667
                                                                         }
                                                                     }
                                                                 }
@@ -268,55 +210,31 @@
                                                 "scale": 0
                                             }
                                         },
+                                        "direction": "0000111110000000",
+                                        "directionality": {
+                                            "both": ""
+                                        },
                                         "id": {
                                             "id": 0,
                                             "region": 0
                                         },
-                                        "direction": "0111110000000000"
+                                        "laneWidth": 5000,
+                                        "name": "I_I 80_RSU-10.145.12.27_RC_test-t-12"
                                     }
                                 },
-                                "duratonTime": 32000,
-                                "sspMsgRights1": 0,
-                                "sspMsgRights2": 0,
-                                "sspTimRights": 1,
-                                "startYear": 2020,
                                 "sspLocationRights": 1,
-                                "frameType": {
-                                    "advisory": ""
-                                },
-                                "msgId": {
-                                    "roadSignID": {
-                                        "viewAngle": 1111111111111111,
-                                        "mutcdCode": {
-                                            "warning": ""
-                                        },
-                                        "position": {
-                                            "lat": 412589946,
-                                            "long": -1109598342
-                                        }
-                                    }
-                                },
-                                "startTime": 502321,
-                                "priority": 5,
-                                "content": {
-                                    "advisory": {
-                                        "SEQUENCE": [
-                                            {
-                                                "item": {
-                                                    "itis": 7170
-                                                }
-                                            },
-                                            {
-                                                "item": {
-                                                    "itis": 1308
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
+                                "sspMsgRights1": 1,
+                                "sspMsgRights2": 1,
+                                "sspTimRights": 1,
+                                "startTime": 502536,
+                                "startYear": 2020,
+                                "url": null
                             }
                         },
-                        "msgCnt": 1
+                        "msgCnt": 2,
+                        "packetID": "257559968DC2308890",
+                        "timeStamp": 502536,
+                        "urlB": null
                     }
                 }
             }

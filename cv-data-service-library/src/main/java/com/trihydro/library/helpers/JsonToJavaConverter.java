@@ -192,9 +192,8 @@ public class JsonToJavaConverter {
                     timStartDateTime = metaDataNode.get("odeTimStartDateTime").asText();
                 }
                 RSU rsuTemp = new RSU();
-                var rsuSubNode = rsusNode.get("rsus");
-                if (rsuSubNode != null) {
-                    var rsu = rsuSubNode.get(0);
+                var rsu = rsusNode.get("rsus");
+                if (rsu != null) {
                     rsuTarget = rsu.get("rsuTarget").asText();
                     rsuIndex = rsu.get("rsuIndex").asInt();
                     rsuTemp.setRsuIndex(rsuIndex);

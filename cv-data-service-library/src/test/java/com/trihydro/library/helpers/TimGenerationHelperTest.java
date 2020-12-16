@@ -454,7 +454,7 @@ public class TimGenerationHelperTest {
         setupActiveTimModel();
         setupMilepostReturn();
         tum.setRoute("I 80");
-        tum.setSatRecordId("satRecordId");
+        tum.setSatRecordId("AA123456");
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
@@ -463,8 +463,7 @@ public class TimGenerationHelperTest {
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
-        doReturn("exception").when(mockOdeService).sendNewTimToSdw(any(), any(), any());
-        doReturn("recId").when(mockSdwService).getNewRecordId();
+        doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -474,12 +473,8 @@ public class TimGenerationHelperTest {
         var ex = exceptions.get(0);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, "exception"), ex);
 
-        verify(mockRegionService).updateRegionName(any(), any());
-        verify(mockActiveTimService).updateActiveTim_SatRecordId(any(), any());
         verify(mockSdwService).getSdwDataByRecordId(any());
-        verify(mockSdwService).getNewRecordId();
         verifyNoInteractions(mockPathNodeXYService);
-
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
@@ -503,19 +498,16 @@ public class TimGenerationHelperTest {
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
-        doReturn("").when(mockOdeService).sendNewTimToSdw(any(), any(), any());
-        doReturn("recId").when(mockSdwService).getNewRecordId();
+        doReturn("").when(mockOdeService).updateTimOnSdw(any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(0, exceptions.size());
-        verify(mockRegionService).updateRegionName(any(), any());
-        verify(mockActiveTimService).updateActiveTim_SatRecordId(any(), any());
         verify(mockSdwService).getSdwDataByRecordId(any());
-        verify(mockSdwService).getNewRecordId();
         verifyNoInteractions(mockPathNodeXYService);
+        verify(mockOdeService).updateTimOnSdw(any());
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
@@ -1039,7 +1031,6 @@ public class TimGenerationHelperTest {
 
         // Region properties
         tum.setRegionId(-1);// Integer
-        tum.setRegionName("name");// String
         tum.setRegionDescription("descrip");// String
         tum.setLaneWidth(BigDecimal.valueOf(50l));// BigDecimal
         tum.setAnchorLat(BigDecimal.valueOf(-1l));// BigDecimal

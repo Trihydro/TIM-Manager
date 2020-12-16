@@ -772,8 +772,8 @@ public class TimGenerationHelper {
         sdw.setServiceRegion(serviceRegion);
 
         // set sdw block in TIM
-        utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         timToSend.getRequest().setSdw(sdw);
+        utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         return odeService.updateTimOnSdw(timToSend);
     }
 
@@ -803,7 +803,7 @@ public class TimGenerationHelper {
 
         // set sdw block in TIM
         timToSend.getRequest().setSdw(sdw);
-
+        utility.logWithDate("Sending new TIM to SDW: " + gson.toJson(timToSend));
         return odeService.sendNewTimToSdw(timToSend, recordId, mps);
     }
 

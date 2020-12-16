@@ -161,7 +161,6 @@ public class TimGenerationHelper {
                     continue;
                 }
                 WydotTravelerInputData timToSend = new WydotTravelerInputData();
-                timToSend.setRequest(new ServiceRequest());
                 timToSend.setTim(tim);
                 var extraEx = sendTim(timToSend, tum, activeTimId, mps);
                 if (extraEx.size() > 0) {
@@ -351,7 +350,6 @@ public class TimGenerationHelper {
                     continue;
                 }
                 WydotTravelerInputData timToSend = new WydotTravelerInputData();
-                timToSend.setRequest(new ServiceRequest());
                 timToSend.setTim(tim);
                 var extraEx = sendTim(timToSend, tum, activeTimId, mps);
                 if (extraEx.size() > 0) {
@@ -385,7 +383,7 @@ public class TimGenerationHelper {
     private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,
             Milepost anchor) {
         String nowAsISO = Instant.now().toString();
-        DataFrame df = getDataFrame(aTim, nowAsISO, anchor);
+        DataFrame df = getDataFrame(aTim, anchor);
         // check to see if we have any itis codes
         // if not, just continue on
         if (df.getItems() == null || df.getItems().length == 0) {
@@ -491,7 +489,7 @@ public class TimGenerationHelper {
         return dirTest; // heading slice
     }
 
-    private DataFrame getDataFrame(TimUpdateModel aTim, String nowAsISO, Milepost anchor) {
+    private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor) {
         // RoadSignID
         RoadSignID rsid = new RoadSignID();
         rsid.setMutcdCode(MutcdCodeEnum.warning);
@@ -504,7 +502,7 @@ public class TimGenerationHelper {
 
         // DataFrame
         DataFrame df = new DataFrame();
-        df.setStartDateTime(nowAsISO);
+        df.setStartDateTime(aTim.getStartDateTime());
         df.setSspTimRights(aTim.getSspTimRights());
         df.setFrameType(TravelerInfoType.advisory);
         df.setMsgId(msgId);
@@ -660,6 +658,7 @@ public class TimGenerationHelper {
         String endTimeString = aTim.getEndDate_Timestamp() != null ? aTim.getEndDate_Timestamp().toInstant().toString()
                 : "";
         SNMP snmp = snmpHelper.getSnmp(startTimeString, endTimeString, timToSend);
+        timToSend.setRequest(new ServiceRequest());
         timToSend.getRequest().setSnmp(snmp);
 
         RSU[] rsus = new RSU[1];
@@ -752,7 +751,7 @@ public class TimGenerationHelper {
 
     private String updateAndSendSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
         // remove rsus from TIM
-        timToSend.getRequest().setRsus(null);
+        timToSend.setRequest(new ServiceRequest());
         SDW sdw = new SDW();
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
@@ -770,6 +769,9 @@ public class TimGenerationHelper {
         sdw.setTtl(ttl);
         sdw.setRecordId(aTim.getSatRecordId());
         sdw.setServiceRegion(serviceRegion);
+
+        String regionName = getSATRegionName(aTim, aTim.getSatRecordId());
+        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
         // set sdw block in TIM
         timToSend.getRequest().setSdw(sdw);

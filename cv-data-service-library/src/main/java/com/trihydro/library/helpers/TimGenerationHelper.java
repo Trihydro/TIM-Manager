@@ -502,7 +502,10 @@ public class TimGenerationHelper {
 
         // DataFrame
         DataFrame df = new DataFrame();
-        df.setStartDateTime(aTim.getStartDateTime());
+        // ODE wants a different format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        // but we have it stored as "2020-05-15 16:09:00"
+        SimpleDateFormat odeDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        df.setStartDateTime(odeDateFormat.format(aTim.getStartDate_Timestamp()));
         df.setSspTimRights(aTim.getSspTimRights());
         df.setFrameType(TravelerInfoType.advisory);
         df.setMsgId(msgId);

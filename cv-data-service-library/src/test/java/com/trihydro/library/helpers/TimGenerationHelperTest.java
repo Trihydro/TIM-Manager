@@ -477,7 +477,6 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService);
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -512,7 +511,6 @@ public class TimGenerationHelperTest {
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
 
@@ -553,7 +551,6 @@ public class TimGenerationHelperTest {
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -591,7 +588,6 @@ public class TimGenerationHelperTest {
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }

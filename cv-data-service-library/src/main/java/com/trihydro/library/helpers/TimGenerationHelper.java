@@ -770,10 +770,6 @@ public class TimGenerationHelper {
         // set sdw block in TIM
         timToSend.getRequest().setSdw(sdw);
 
-        // Create active_tim_holding record so the active_tim metadata won't be cleared
-        // after the TIM is re-submitted through the ODE
-        activeTimHoldingService.insertActiveTimHolding(new ActiveTimHolding(aTim));
-
         utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         return odeService.updateTimOnSdw(timToSend);
     }

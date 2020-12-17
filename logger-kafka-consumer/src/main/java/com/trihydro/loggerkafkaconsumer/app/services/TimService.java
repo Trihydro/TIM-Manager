@@ -318,6 +318,13 @@ public class TimService extends BaseService {
             if (activeTimDb == null) {
                 activeTimService.insertActiveTim(activeTim);
             } else { // else update active TIM
+                // If we couldn't find an Active TIM Holding record, we should persist the existing values
+                // for startPoint, endPoint, and projectKey 
+                if (ath == null) {
+                    activeTim.setStartPoint(activeTimDb.getStartPoint());
+                    activeTim.setEndPoint(activeTimDb.getEndPoint());
+                    activeTim.setProjectKey(activeTimDb.getProjectKey());
+                }
                 activeTim.setActiveTimId(activeTimDb.getActiveTimId());
                 activeTimService.updateActiveTim(activeTim);
             }

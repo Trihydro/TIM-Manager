@@ -21,78 +21,75 @@ import org.springframework.stereotype.Component;
 @Component
 public class MongoLogger {
 
-        private String serverAddress;
-        private String username;
-        private String password;
-        private String databaseName;
-        private MongoCredential credential;
-        private Utility utility;
-        private EmailHelper emailHelper;
-        private MongoLoggerConfiguration config;
+    private String serverAddress;
+    private String username;
+    private String password;
+    private String databaseName;
+    private MongoCredential credential;
+    private Utility utility;
+    private EmailHelper emailHelper;
+    private MongoLoggerConfiguration config;
 
-        @Autowired
-        public void InjectDependencies(MongoLoggerConfiguration _config, Utility _utility, EmailHelper _emailHelper) {
-                config = _config;
-                username = config.getMongoUsername(); // the user name
-                databaseName = config.getMongoDatabase(); // the name of the database in which the user is defined
-                password = config.getMongoPassword(); // the password as a character array
-                serverAddress = config.getMongoHost();
-                credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
-                utility = _utility;
-                emailHelper = _emailHelper;
+    @Autowired
+    public void InjectDependencies(MongoLoggerConfiguration _config, Utility _utility, EmailHelper _emailHelper) {
+        config = _config;
+        username = config.getMongoUsername(); // the user name
+        databaseName = config.getMongoDatabase(); // the name of the database in which the user is defined
+        password = config.getMongoPassword(); // the password as a character array
+        serverAddress = config.getMongoHost();
+        credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
+        utility = _utility;
+        emailHelper = _emailHelper;
+    }
+
+    public void logTim(String[] timRecord) {
+        logMultipleToCollection(timRecord, "tim");
+    }
+
+    public void logBsm(String[] bsmRecord) {
+        logMultipleToCollection(bsmRecord, "bsm");
+    }
+
+    public void logDriverAlert(String[] driverAlertRecord) {
+        logMultipleToCollection(driverAlertRecord, "driverAlert");
+    }
+
+    public void logMultipleToCollection(String[] records, String collectionName) {
+        ArrayList<Document> docs = new ArrayList<Document>();
+
+        for (String rec : records) {
+            docs.add(Document.parse(rec));
         }
 
-        public void logTim(String[] timRecord) {
-                logMultipleToCollection(timRecord, "tim");
-        }
+        if (docs.size() > 0) {
+            MongoClient mongoClient = null;
+            try {
+                mongoClient = MongoClients.create(MongoClientSettings.builder()
+                        .applyToClusterSettings(
+                                builder -> builder.hosts(Arrays.asList(new ServerAddress(serverAddress, 27017))))
+                        .credential(credential).build());
 
-        public void logBsm(String[] bsmRecord) {
-                logMultipleToCollection(bsmRecord, "bsm");
-        }
+                MongoDatabase database = mongoClient.getDatabase(databaseName);
+                MongoCollection<Document> collection = database.getCollection(collectionName);
+                collection.insertMany(docs);
+            } catch (Exception ex) {
+                utility.logWithDate("Error logging to mongo collection: " + ex.getMessage());
 
-        public void logDriverAlert(String[] driverAlertRecord) {
-                logMultipleToCollection(driverAlertRecord, "driverAlert");
-        }
-
-        public void logMultipleToCollection(String[] records, String collectionName) {
-                ArrayList<Document> docs = new ArrayList<Document>();
-
-                for (String rec : records) {
-                        docs.add(Document.parse(rec));
+                String body = "The MongoLogger failed attempting to insert a record to ";
+                body += collectionName;
+                body += "<br/><br/>";
+                body += "Exception: <br/>";
+                body += ex.getMessage();
+                try {
+                    emailHelper.SendEmail(config.getAlertAddresses(), "MongoLogger Failed to Connect to MongoDB", body);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                if (docs.size() > 0) {
-                        MongoClient mongoClient = null;
-                        try {
-                                mongoClient = MongoClients.create(MongoClientSettings.builder()
-                                                .applyToClusterSettings(builder -> builder.hosts(
-                                                                Arrays.asList(new ServerAddress(serverAddress, 27017))))
-                                                .credential(credential).build());
-
-                                MongoDatabase database = mongoClient.getDatabase(databaseName);
-                                MongoCollection<Document> collection = database.getCollection(collectionName);
-                                collection.insertMany(docs);
-                        } catch (Exception ex) {
-                                utility.logWithDate("Error logging to mongo collection: " + ex.getMessage());
-
-                                String body = "The MongoLogger failed attempting to insert a record to ";
-                                body += collectionName;
-                                body += "<br/><br/>";
-                                body += "Exception: <br/>";
-                                body += ex.getMessage();
-                                try {
-                                        emailHelper.SendEmail(config.getAlertAddresses(), null,
-                                                        "MongoLogger Failed to Connect to MongoDB", body,
-                                                        config.getMailPort(), config.getMailHost(),
-                                                        config.getFromEmail());
-                                } catch (Exception e) {
-                                        e.printStackTrace();
-                                }
-                        } finally {
-                                if (mongoClient != null) {
-                                        mongoClient.close();
-                                }
-                        }
+            } finally {
+                if (mongoClient != null) {
+                    mongoClient.close();
                 }
+            }
         }
+    }
 }

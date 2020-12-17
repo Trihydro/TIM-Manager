@@ -106,7 +106,7 @@ public class ValidateTmddTest {
         verify(mockActiveTimService).getActiveTimsWithItisCodes(true);
 
         // Assert (no email sent)
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class ValidateTmddTest {
         verify(mockItisCodeService).selectAllTmddItisCodes();
 
         // No email sent
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -197,7 +197,7 @@ public class ValidateTmddTest {
         Assertions.assertEquals("{ 6011 }", errors.get(3).getTmddValue());
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -256,7 +256,7 @@ public class ValidateTmddTest {
         Assertions.assertEquals(errSummary, exMessage);
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -270,7 +270,7 @@ public class ValidateTmddTest {
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
         Assertions.assertEquals("Error fetching Active Tims:", logMessageCaptor.getValue());
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -284,7 +284,7 @@ public class ValidateTmddTest {
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
         Assertions.assertEquals("Error fetching FEUs from TMDD:", logMessageCaptor.getValue());
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -298,7 +298,7 @@ public class ValidateTmddTest {
         // Assert
         verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
         Assertions.assertEquals("Unable to initialize TMDD ITIS Code cache:", logMessageCaptor.getValue());
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -316,8 +316,7 @@ public class ValidateTmddTest {
         when(mockItisCodeService.selectAllTmddItisCodes()).thenReturn(Arrays.asList(itisCodes));
 
         // Throw exception when sending email
-        doThrow(new MailSendException("unable to send")).when(mockEmailHelper).SendEmail(any(), any(), any(), any(),
-                any(), any(), any());
+        doThrow(new MailSendException("unable to send")).when(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Act
         uut.run();

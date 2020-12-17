@@ -16,6 +16,7 @@ public class MongoLoggerConfiguration implements EmailProps {
 
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
 
     private String depositTopic;
     private String depositGroup;
@@ -112,4 +113,11 @@ public class MongoLoggerConfiguration implements EmailProps {
         this.fromEmail = fromEmail;
     }
 
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
 }

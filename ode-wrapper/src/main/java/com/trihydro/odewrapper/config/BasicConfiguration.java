@@ -30,6 +30,7 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     private int mailPort;
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
     private String rsuDataServiceUrl;
     private String tmddUrl;
     private String tmddUser;
@@ -65,6 +66,14 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String getSdwApiKey() {

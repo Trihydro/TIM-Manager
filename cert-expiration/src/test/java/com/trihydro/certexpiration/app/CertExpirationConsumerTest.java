@@ -145,9 +145,8 @@ public class CertExpirationConsumerTest {
         body += "<br/>";
         body += "The associated expiration topic record is: <br/>";
         body += EXPRECORD;
-        verify(mockEmailHelper).SendEmail(mockConfigProperties.getAlertAddresses(), null,
-                "CertExpirationConsumer Failed To Update ActiveTim", body, mockConfigProperties.getMailPort(),
-                mockConfigProperties.getMailHost(), mockConfigProperties.getFromEmail());
+        verify(mockEmailHelper).SendEmail(mockConfigProperties.getAlertAddresses(),
+                "CertExpirationConsumer Failed To Update ActiveTim", body);
 
         verify(mockUtility).logWithDate(
                 String.format("CertExpiration consumer commit callback, offset: %s, exception %s%n", offset, null));
@@ -179,9 +178,8 @@ public class CertExpirationConsumerTest {
         body += ex.getMessage();
         body += "<br/>Stacktrace: ";
         body += ExceptionUtils.getStackTrace(ex);
-        verify(mockEmailHelper).SendEmail(mockConfigProperties.getAlertAddresses(), null,
-                "CertExpirationConsumer Failed", body, mockConfigProperties.getMailPort(),
-                mockConfigProperties.getMailHost(), mockConfigProperties.getFromEmail());
+        verify(mockEmailHelper).SendEmail(mockConfigProperties.getAlertAddresses(), "CertExpirationConsumer Failed",
+                body);
 
         verifyNoMoreInteractions(mockUtility);
         verifyNoMoreInteractions(mockAts);
@@ -193,8 +191,7 @@ public class CertExpirationConsumerTest {
         // Arrange
         String exMessage = "Big error";
         doThrow(new NullPointerException(exMessage)).when(mockAts).updateActiveTimExpiration(any(), any(), any());
-        doThrow(new MessagingException("Mail Exception")).when(mockEmailHelper).SendEmail(any(), any(), any(), any(),
-                any(), any(), any());
+        doThrow(new MessagingException("Mail Exception")).when(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Act
         Exception ex = assertThrows(Exception.class, () -> uut.startKafkaConsumer());
@@ -209,9 +206,8 @@ public class CertExpirationConsumerTest {
         body += ex.getMessage();
         body += "<br/>Stacktrace: ";
         body += ExceptionUtils.getStackTrace(ex);
-        verify(mockEmailHelper).SendEmail(mockConfigProperties.getAlertAddresses(), null,
-                "CertExpirationConsumer Failed", body, mockConfigProperties.getMailPort(),
-                mockConfigProperties.getMailHost(), mockConfigProperties.getFromEmail());
+        verify(mockEmailHelper).SendEmail(mockConfigProperties.getAlertAddresses(), "CertExpirationConsumer Failed",
+                body);
 
         verify(mockUtility).logWithDate("CertExpirationConsumer failed, then failed to send email");
         verifyNoMoreInteractions(mockUtility);

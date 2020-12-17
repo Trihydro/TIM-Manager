@@ -154,8 +154,7 @@ public class ValidateSdx implements Runnable {
                     numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords, exceptionText);
 
             try {
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "SDX Validation Results", email,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "SDX Validation Results", email);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

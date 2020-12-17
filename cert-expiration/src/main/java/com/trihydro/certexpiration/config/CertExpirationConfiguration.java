@@ -1,11 +1,12 @@
 package com.trihydro.certexpiration.config;
 
 import com.trihydro.library.model.CVRestServiceProps;
+import com.trihydro.library.model.EmailProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class CertExpirationConfiguration implements CVRestServiceProps {
+public class CertExpirationConfiguration implements CVRestServiceProps, EmailProps {
     private String kafkaHostServer;
 
     private String mailHost;
@@ -13,6 +14,7 @@ public class CertExpirationConfiguration implements CVRestServiceProps {
 
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
 
     private String depositTopic;
     private String depositGroup;
@@ -27,6 +29,14 @@ public class CertExpirationConfiguration implements CVRestServiceProps {
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String[] getAlertAddresses() {

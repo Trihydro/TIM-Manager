@@ -97,8 +97,7 @@ public class TimRefreshControllerTest {
         body += gson.toJson(new Logging_TimUpdateModel(tum));
         body += "<br/><br/>";
         verify(mockTimGenerationHelper).isValidTim(any());
-        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
-                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), "TIM Refresh Exceptions", body);
         verifyNoMoreInteractions(mockTimGenerationHelper);
     }
 
@@ -126,8 +125,7 @@ public class TimRefreshControllerTest {
         body += "<br/>";
         body += gson.toJson(resubExceptions.get(0));
         body += "<br/>";
-        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
-                mockConfiguration.getMailPort(), mockConfiguration.getMailHost(), mockConfiguration.getFromEmail());
+        verify(mockEmailHelper).SendEmail(mockConfiguration.getAlertAddresses(), "TIM Refresh Exceptions", body);
     }
 
     @Test

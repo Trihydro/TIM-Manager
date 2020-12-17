@@ -91,10 +91,8 @@ public class CertExpirationConsumer {
 						body += "<br/>";
 						body += "The associated expiration topic record is: <br/>";
 						body += record.value();
-						emailHelper.SendEmail(configProperties.getAlertAddresses(), null,
-								"CertExpirationConsumer Failed To Update ActiveTim", body,
-								configProperties.getMailPort(), configProperties.getMailHost(),
-								configProperties.getFromEmail());
+						emailHelper.SendEmail(configProperties.getAlertAddresses(),
+								"CertExpirationConsumer Failed To Update ActiveTim", body);
 					}
 
 					var offsets = Collections.singletonMap(
@@ -115,9 +113,7 @@ public class CertExpirationConsumer {
 			body += "<br/>Stacktrace: ";
 			body += ExceptionUtils.getStackTrace(ex);
 			try {
-				emailHelper.SendEmail(configProperties.getAlertAddresses(), null, "CertExpirationConsumer Failed", body,
-						configProperties.getMailPort(), configProperties.getMailHost(),
-						configProperties.getFromEmail());
+				emailHelper.SendEmail(configProperties.getAlertAddresses(), "CertExpirationConsumer Failed", body);
 			} catch (Exception exception) {
 				utility.logWithDate("CertExpirationConsumer failed, then failed to send email");
 				exception.printStackTrace();

@@ -19,6 +19,7 @@ public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
     private String dbDriver;
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
     private String mailHost;
     private int mailPort;
     private int poolSize;
@@ -57,6 +58,14 @@ public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String[] getAlertAddresses() {

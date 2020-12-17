@@ -91,8 +91,7 @@ public class ValidateTmdd implements Runnable {
                 String email = "Error(s) occurred durring Oracle-TMDD message validation:<br>"
                         + String.join("<br><br>", errors);
 
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Error(s)", email,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Error(s)", email);
             } catch (Exception ex) {
                 utility.logWithDate("Failed to send error summary email:", this.getClass());
                 ex.printStackTrace();
@@ -230,8 +229,7 @@ public class ValidateTmdd implements Runnable {
             String email = emailFormatter.generateTmddSummaryEmail(unableToVerify, validationResults, exceptions);
 
             try {
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Results", email,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Results", email);
             } catch (Exception ex) {
                 utility.logWithDate("Error sending summary email:", this.getClass());
                 ex.printStackTrace();

@@ -131,6 +131,7 @@ You may configure these values in `ode-mongo-logger/src/main/resources/applicati
 | mongoPassword                     | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
 | alertAddresses                    | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |
 | fromEmail                         | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
+| environmentName                   | MONGO_ENVIRONMENT_NAME           | Name of environment (for email subject)   | DEV                                                            |
 | mailHost                          | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |
 | mailPort                          | MAIL_PORT                        | Port for mail host                        | 25                                                             |
 | depositTopic                      | (only set in docker-compose.yml) | Kafka topic for logger to subscribe to    | topic.OdeDNMsgJson                                             |

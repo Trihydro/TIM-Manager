@@ -96,8 +96,7 @@ public class TimRefreshController {
             try {
                 utility.logWithDate(
                         "Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
-                emailHelper.SendEmail(configuration.getAlertAddresses(), null, "TIM Refresh Exceptions", body,
-                        configuration.getMailPort(), configuration.getMailHost(), configuration.getFromEmail());
+                emailHelper.SendEmail(configuration.getAlertAddresses(), "TIM Refresh Exceptions", body);
             } catch (Exception e) {
                 utility.logWithDate("Exception attempting to send email for invalid TIM:");
                 e.printStackTrace();

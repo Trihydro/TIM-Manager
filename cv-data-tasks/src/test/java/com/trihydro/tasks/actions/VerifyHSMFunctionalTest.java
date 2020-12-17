@@ -83,8 +83,7 @@ public class VerifyHSMFunctionalTest {
                 verify(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
                                 Mockito.<HttpEntity<SignTimModel>>any(), Mockito.<Class<HsmResponse>>any());
                 String email = "HSM Functional Tester was successful in attempting to sign a TIM";
-                verify(mockEmailHelper).SendEmail(mockConfig.getAlertAddresses(), null, "HSM Back Up", email,
-                                mockConfig.getMailPort(), mockConfig.getMailHost(), mockConfig.getFromEmail());
+                verify(mockEmailHelper).SendEmail(mockConfig.getAlertAddresses(), "HSM Back Up", email);
         }
 
         @Test
@@ -106,8 +105,7 @@ public class VerifyHSMFunctionalTest {
                 email += "<br/><br/>";
                 email += mockResponseEntity.getBody();
 
-                verify(mockEmailHelper).SendEmail(mockConfig.getAlertAddresses(), null, "HSM Error", email,
-                                mockConfig.getMailPort(), mockConfig.getMailHost(), mockConfig.getFromEmail());
+                verify(mockEmailHelper).SendEmail(mockConfig.getAlertAddresses(), "HSM Error", email);
         }
 
         @Test
@@ -155,7 +153,6 @@ public class VerifyHSMFunctionalTest {
                 email += "<br/><br/>";
                 email += mockResponseEntity.getBody();
 
-                verify(mockEmailHelper).SendEmail(mockConfig.getAlertAddresses(), null, "HSM Error", email,
-                                mockConfig.getMailPort(), mockConfig.getMailHost(), mockConfig.getFromEmail());
+                verify(mockEmailHelper).SendEmail(mockConfig.getAlertAddresses(), "HSM Error", email);
         }
 }

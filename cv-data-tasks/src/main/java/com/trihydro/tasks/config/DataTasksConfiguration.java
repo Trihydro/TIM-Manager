@@ -33,6 +33,7 @@ public class DataTasksConfiguration
     private String tmddPassword;
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
     private String mailHost;
     private int mailPort;
     private int bsmRetentionPeriodDays;
@@ -186,6 +187,14 @@ public class DataTasksConfiguration
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String getMailHost() {

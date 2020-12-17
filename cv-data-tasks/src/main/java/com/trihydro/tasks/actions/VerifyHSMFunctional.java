@@ -64,8 +64,7 @@ public class VerifyHSMFunctional implements Runnable {
                 if (errorLastSent != null) {
                     // send an email telling us its back up
                     String email = "HSM Functional Tester was successful in attempting to sign a TIM";
-                    mailHelper.SendEmail(config.getAlertAddresses(), null, "HSM Back Up", email, config.getMailPort(),
-                            config.getMailHost(), config.getFromEmail());
+                    mailHelper.SendEmail(config.getAlertAddresses(), "HSM Back Up", email);
                     utility.logWithDate("HSM is back up! Email sent.");
                 } else {
                     utility.logWithDate("HSM is up!");
@@ -81,8 +80,7 @@ public class VerifyHSMFunctional implements Runnable {
                 email += "<br/><br/>";
                 email += response.getBody();
 
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "HSM Error", email, config.getMailPort(),
-                        config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "HSM Error", email);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,8 +92,7 @@ public class VerifyHSMFunctional implements Runnable {
                 String email = "HSM Functional Tester encountered an exception while attempting to sign a TIM:";
                 email += "<br/><br/>";
                 email += e.getMessage();
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "HSM Error", email, config.getMailPort(),
-                        config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "HSM Error", email);
             } catch (Exception subEx) {
                 e.printStackTrace();
             }

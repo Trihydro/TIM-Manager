@@ -71,8 +71,7 @@ public class ValidateRsus implements Runnable {
             utility.logWithDate(msg, this.getClass());
 
             try {
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Error", msg,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Error", msg);
             } catch (Exception mailException) {
                 mailException.printStackTrace();
             }
@@ -115,8 +114,7 @@ public class ValidateRsus implements Runnable {
             utility.logWithDate(msg, this.getClass());
 
             try {
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Error", msg,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Error", msg);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -219,8 +217,7 @@ public class ValidateRsus implements Runnable {
             String email = emailFormatter.generateRsuSummaryEmail(validationRecords, unexpectedErrors);
 
             try {
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "RSU Validation Results", email,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Results", email);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

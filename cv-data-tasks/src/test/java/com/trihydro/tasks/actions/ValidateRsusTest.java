@@ -133,7 +133,7 @@ public class ValidateRsusTest {
         // Assert
         // If we're unable to find any RSUs to validate, we'll send an email to let us know
         // that there was a validation error.
-        verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockMailHelper).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -166,7 +166,7 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockMailHelper, never()).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockMailHelper, never()).SendEmail(any(), any(), any());
         verify(mockExecutorService).invokeAll(rsuValidationTasks.capture(), any(Long.class), any(TimeUnit.class));
         Assertions.assertEquals(2, rsuValidationTasks.getValue().size());
         Assertions.assertEquals("0.0.0.0", rsuValidationTasks.getValue().get(0).getIpv4Address());
@@ -200,7 +200,7 @@ public class ValidateRsusTest {
 
         // Assert
         verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
-        verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockMailHelper).SendEmail(any(), any(), any());
 
         // The first RSU was unresponsive. Not an auto-correctable error so we only
         // tried validating it once.
@@ -241,7 +241,7 @@ public class ValidateRsusTest {
 
         // Assert
         verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
-        verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockMailHelper).SendEmail(any(), any(), any());
 
         Assertions.assertEquals(0, unexpectedErrors.getValue().size());
         Assertions.assertNotNull(rsuValidationRecords.getValue().get(1).getError());
@@ -273,7 +273,7 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockMailHelper, never()).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockMailHelper, never()).SendEmail(any(), any(), any());
         verify(mockRsuService).selectAll();
 
         verify(mockExecutorService).invokeAll(rsuValidationTasks.capture(), any(Long.class), any(TimeUnit.class));
@@ -308,7 +308,7 @@ public class ValidateRsusTest {
 
         // Assert
         verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
-        verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockMailHelper).SendEmail(any(), any(), any());
 
         var lastRsuResult = rsuValidationRecords.getValue().get(2);
         Assertions.assertEquals(2, lastRsuResult.getValidationResults().size());
@@ -346,7 +346,7 @@ public class ValidateRsusTest {
 
         // Assert
         verify(mockEmailFormatter).generateRsuSummaryEmail(rsuValidationRecords.capture(), unexpectedErrors.capture());
-        verify(mockMailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockMailHelper).SendEmail(any(), any(), any());
 
         // 2 validation tasks were still performed. 2 RSUs (0.0.0.0 and 0.0.0.1) had
         // Active TIMs, and were found

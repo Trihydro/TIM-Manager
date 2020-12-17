@@ -1,5 +1,6 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,6 +33,7 @@ import com.trihydro.library.tables.TimOracleTables;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
@@ -156,9 +158,10 @@ public class TimServiceTest extends TestBase<TimService> {
         OdeData odeData = getOdeData_requestMsgData();
         ActiveTim aTim = getActiveTim();
 
+        var ath = getActiveTimHolding();
         doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
         doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
-        doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
+        doReturn(ath).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
                 anyString(), anyString());
 
         // Act
@@ -171,8 +174,15 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(uut, never()).addDataFrameItis(any(), any());
         verify(mockActiveTimHoldingService).getRsuActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
                 aTim.getRsuTarget());
-        verify(mockActiveTimService).insertActiveTim(any());
         verify(mockActiveTimHoldingService).deleteActiveTimHolding(-1l);
+
+        var captor = ArgumentCaptor.forClass(ActiveTim.class);
+        verify(mockActiveTimService).insertActiveTim(captor.capture());
+
+        var insertedRecord = captor.getValue();
+        assertEquals(ath.getStartPoint(), insertedRecord.getStartPoint());
+        assertEquals(ath.getEndPoint(), insertedRecord.getEndPoint());
+        assertEquals(ath.getProjectKey(), insertedRecord.getProjectKey());
     }
 
     @Test
@@ -223,10 +233,12 @@ public class TimServiceTest extends TestBase<TimService> {
         aTim.setRsuTarget(null);
         ((OdeRequestMsgMetadata) odeData.getMetadata()).getRequest().setRsus(new RSU[0]);
 
+        var ath = getActiveTimHolding();
+
         doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
         doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
         doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
-        doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
+        doReturn(ath).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
                 anyString(), anyString());
 
         // Act
@@ -239,8 +251,97 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(uut, never()).addDataFrameItis(any(), any());
         verify(mockActiveTimHoldingService).getSdxActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
                 aTim.getSatRecordId());
-        verify(mockActiveTimService).insertActiveTim(any());
         verify(mockActiveTimHoldingService).deleteActiveTimHolding(-1l);
+
+        var captor = ArgumentCaptor.forClass(ActiveTim.class);
+        verify(mockActiveTimService).insertActiveTim(captor.capture());
+
+        var insertedRecord = captor.getValue();
+        assertEquals(ath.getStartPoint(), insertedRecord.getStartPoint());
+        assertEquals(ath.getEndPoint(), insertedRecord.getEndPoint());
+        assertEquals(ath.getProjectKey(), insertedRecord.getProjectKey());
+    }
+
+    @Test
+    public void addActiveTimToOracleDB_existingRsuTimNoATH() {
+        // Arrange
+        OdeData odeData = getOdeData_requestMsgData();
+        ActiveTim aTim = getActiveTim();
+
+        ActiveTim activeTimDb = new ActiveTim();
+        var start = new Coordinate(BigDecimal.valueOf(0), BigDecimal.valueOf(0));
+        var end = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(1));
+        activeTimDb.setStartPoint(start);
+        activeTimDb.setEndPoint(end);
+        activeTimDb.setProjectKey(1234);
+
+        doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
+        doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
+        doReturn(null).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
+                anyString(), anyString());
+        doReturn(activeTimDb).when(mockActiveTimService).getActiveRsuTim(any(), any(), any());
+
+        // Act
+        uut.addActiveTimToOracleDB(odeData);
+
+        // Assert
+        verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(mockDataFrameService, never()).AddDataFrame(any(), any());
+        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addDataFrameItis(any(), any());
+
+        var captor = ArgumentCaptor.forClass(ActiveTim.class);
+        verify(mockActiveTimService).updateActiveTim(captor.capture());
+
+        var insertedRecord = captor.getValue();
+        assertEquals(start, insertedRecord.getStartPoint());
+        assertEquals(end, insertedRecord.getEndPoint());
+        assertEquals(1234, (int)insertedRecord.getProjectKey());
+    }
+
+    @Test
+    public void addActiveTimToOracleDB_existingSDXTimNoATH() {
+        // Arrange
+        OdeData odeData = getOdeData_requestMsgData();
+        ActiveTim aTim = getActiveTim();
+        aTim.setSatRecordId("satRecordId");
+        aTim.setRsuTarget(null);
+        ((OdeRequestMsgMetadata) odeData.getMetadata()).getRequest().setRsus(new RSU[0]);
+
+        ActiveTim activeTimDb = new ActiveTim();
+        var start = new Coordinate(BigDecimal.valueOf(0), BigDecimal.valueOf(0));
+        var end = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(1));
+        activeTimDb.setStartPoint(start);
+        activeTimDb.setEndPoint(end);
+        activeTimDb.setProjectKey(1234);
+
+        doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
+        doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
+        doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
+        // No ActiveTimHolding record
+        doReturn(null).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
+                anyString(), anyString());
+        // But there is an existing ActiveTIm
+        doReturn(activeTimDb).when(mockActiveTimService).getActiveSatTim(any(), any());
+
+        // Act
+        uut.addActiveTimToOracleDB(odeData);
+
+        // Assert
+        verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(mockDataFrameService, never()).AddDataFrame(any(), any());
+        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addDataFrameItis(any(), any());
+        verify(mockActiveTimHoldingService).getSdxActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
+                aTim.getSatRecordId());
+
+        var captor = ArgumentCaptor.forClass(ActiveTim.class);
+        verify(mockActiveTimService).updateActiveTim(captor.capture());
+
+        var insertedRecord = captor.getValue();
+        assertEquals(start, insertedRecord.getStartPoint());
+        assertEquals(end, insertedRecord.getEndPoint());
+        assertEquals(1234, (int)insertedRecord.getProjectKey());
     }
 
     @Test

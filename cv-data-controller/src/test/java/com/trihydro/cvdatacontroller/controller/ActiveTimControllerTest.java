@@ -57,7 +57,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
         selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
         selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
-        selectStatement += ", r.region_id, r.name as region_name, r.anchor_lat, r.anchor_long, r.lane_width";
+        selectStatement += ", r.region_id, r.anchor_lat, r.anchor_long, r.lane_width";
         selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
         selectStatement += ", r.directionality, r.direction AS region_direction";
         selectStatement += " FROM active_tim atim";

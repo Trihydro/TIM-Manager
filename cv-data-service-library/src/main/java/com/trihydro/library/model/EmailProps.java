@@ -9,4 +9,6 @@ public interface EmailProps {
     public String getMailHost();
 
     public String getFromEmail();
+
+    public String getEnvironmentName();
 }

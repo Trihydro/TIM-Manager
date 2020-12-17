@@ -17,7 +17,6 @@ public class TimUpdateModel extends ActiveTim {
 
     // Region properties
     private Integer regionId;
-    private String regionName;
     private String regionDescription;
     private BigDecimal laneWidth;
     private BigDecimal anchorLat;
@@ -65,14 +64,6 @@ public class TimUpdateModel extends ActiveTim {
 
     public void setPacketId(String packetId) {
         this.packetId = packetId;
-    }
-
-    public String getRegionName() {
-        return this.regionName;
-    }
-
-    public void setRegionName(String regionName) {
-        this.regionName = regionName;
     }
 
     public Integer getRegionId() {

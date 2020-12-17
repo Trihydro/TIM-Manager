@@ -556,7 +556,6 @@ public class TimGenerationHelper {
     private Region getRegion(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps, Milepost anchor) {
         // Set region information
         Region region = new Region();
-        region.setName(aTim.getRegionName());
         region.setAnchorPosition(getAnchorPosition(aTim, anchor));
         region.setLaneWidth(aTim.getLaneWidth());
         String regionDirection = aTim.getRegionDirection();
@@ -600,6 +599,10 @@ public class TimGenerationHelper {
         return getBaseRegionName(aTim, "_RSU-" + rsu.getRsuTarget());
     }
 
+    private String getSATRegionName(TimUpdateModel aTim, String recordId) {
+        return getBaseRegionName(aTim, "_SAT-" + recordId);
+    }
+
     private String getBaseRegionName(TimUpdateModel aTim, String middle) {
         String regionName = aTim.getDirection();
         regionName += "_" + aTim.getRoute();
@@ -622,19 +625,6 @@ public class TimGenerationHelper {
             }
         }
         return regionName;
-    }
-
-    private String getSATRegionName(TimUpdateModel aTim, String recordId) {
-
-        // name is direction_route_startMP_endMP_SAT-satRecordId_TIMType_ClientId_pk
-        String oldName = aTim.getRegionName();
-        if (oldName != null && oldName.length() > 0) {
-            // just replace existing satRecordId with new
-            return oldName.replace(aTim.getSatRecordId(), recordId);
-        } else {
-            // generating from scratch...
-            return getBaseRegionName(aTim, "_SAT-" + recordId);
-        }
     }
 
     private String updateAndSendRSU(WydotTravelerInputData timToSend, TimUpdateModel aTim) {
@@ -666,7 +656,6 @@ public class TimGenerationHelper {
 
         RSU[] rsus = new RSU[1];
         if (wydotRsus.size() > 0) {
-            rsus = new RSU[wydotRsus.size()];
             RSU rsu = null;
             for (int i = 0; i < wydotRsus.size(); i++) {
                 // set RSUS
@@ -753,24 +742,26 @@ public class TimGenerationHelper {
     }
 
     private String updateAndSendSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
-        // remove rsus from TIM
+        // Ensure request is empty
         timToSend.setRequest(new ServiceRequest());
+
         SDW sdw = new SDW();
+
         AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId(aTim.getSatRecordId());
         if (asdd == null) {
-            utility.logWithDate("SAT record not found for id " + aTim.getSatRecordId());
-            return updateAndSendNewSDX(timToSend, aTim, mps);
+            utility.logWithDate("SAT record not found for id " + aTim.getSatRecordId() + ". Using default TTL.");
+            sdw.setTtl(config.getSdwTtl());
+        } else {
+            // we are saving our ttl unencoded at the root level of the object as an int
+            // representing the enum
+            // the DOT sdw ttl goes by string, so we need to do a bit of translation here
+            sdw.setTtl(TimeToLive.valueOf(asdd.getTimeToLive().getStringValue()));
         }
+
+        sdw.setRecordId(aTim.getSatRecordId());
 
         // fetch all mileposts, get service region by bounding box
         OdeGeoRegion serviceRegion = getServiceRegion(mps);
-
-        // we are saving our ttl unencoded at the root level of the object as an int
-        // representing the enum
-        // the DOT sdw ttl goes by string, so we need to do a bit of translation here
-        TimeToLive ttl = TimeToLive.valueOf(asdd.getTimeToLive().getStringValue());
-        sdw.setTtl(ttl);
-        sdw.setRecordId(aTim.getSatRecordId());
         sdw.setServiceRegion(serviceRegion);
 
         String regionName = getSATRegionName(aTim, aTim.getSatRecordId());
@@ -778,38 +769,9 @@ public class TimGenerationHelper {
 
         // set sdw block in TIM
         timToSend.getRequest().setSdw(sdw);
+
         utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         return odeService.updateTimOnSdw(timToSend);
-    }
-
-    private String updateAndSendNewSDX(WydotTravelerInputData timToSend, TimUpdateModel aTim, List<Milepost> mps) {
-        String recordId = sdwService.getNewRecordId();
-        utility.logWithDate("Generating new SAT id and TIM: " + recordId);
-        String regionName = getSATRegionName(aTim, recordId);
-
-        // Update region.name in database
-        regionService.updateRegionName(Long.valueOf(aTim.getRegionId()), regionName);
-        // Update active_tim.
-        activeTimService.updateActiveTim_SatRecordId(aTim.getActiveTimId(), recordId);
-        timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
-
-        // set msgCnt to 1 and create new packetId
-        timToSend.getTim().setMsgCnt(1);
-
-        SDW sdw = new SDW();
-
-        // calculate service region
-        sdw.setServiceRegion(getServiceRegion(mps));
-
-        // set time to live
-        sdw.setTtl(config.getSdwTtl());
-        // set new record id
-        sdw.setRecordId(recordId);
-
-        // set sdw block in TIM
-        timToSend.getRequest().setSdw(sdw);
-        utility.logWithDate("Sending new TIM to SDW: " + gson.toJson(timToSend));
-        return odeService.sendNewTimToSdw(timToSend, recordId, mps);
     }
 
     private OdeGeoRegion getServiceRegion(List<Milepost> mileposts) {

@@ -157,8 +157,7 @@ public class WydotTimServiceTest {
         var result = uut.deleteTimsFromRsusAndSdx(activeTims);
 
         // Assert
-        verify(mockEmailHelper).SendEmail(mockEmailProps.getAlertAddresses(), null, subject, body,
-                mockEmailProps.getMailPort(), mockEmailProps.getMailHost(), mockEmailProps.getFromEmail());
+        verify(mockEmailHelper).SendEmail(mockEmailProps.getAlertAddresses(), subject, body);
         List<Long> delIds = new ArrayList<Long>();
         delIds.add(-2l);
         verify(mockActiveTimService).deleteActiveTimsById(delIds);

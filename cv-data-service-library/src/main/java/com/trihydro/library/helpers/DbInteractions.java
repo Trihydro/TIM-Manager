@@ -61,8 +61,7 @@ public class DbInteractions {
             body += "<br/>Stacktrace: ";
             body += ExceptionUtils.getStackTrace(ex);
             try {
-                emailHelper.SendEmail(dbConfig.getAlertAddresses(), null, "ODE Wrapper Failed To Get Connection", body,
-                        dbConfig.getMailPort(), dbConfig.getMailHost(), dbConfig.getFromEmail());
+                emailHelper.SendEmail(dbConfig.getAlertAddresses(), "ODE Wrapper Failed To Get Connection", body);
             } catch (Exception exception) {
                 utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");

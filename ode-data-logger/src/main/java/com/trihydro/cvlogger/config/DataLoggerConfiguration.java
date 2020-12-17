@@ -15,6 +15,7 @@ public class DataLoggerConfiguration implements CVRestServiceProps, EmailProps {
 
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
 
     private String depositTopic;
     private String depositGroup;
@@ -40,6 +41,14 @@ public class DataLoggerConfiguration implements CVRestServiceProps, EmailProps {
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String[] getAlertAddresses() {

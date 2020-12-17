@@ -81,7 +81,7 @@ public class ValidateSdxTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // No email was sent
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class ValidateSdxTest {
         verify(mockSdwService, times(2)).getItisCodesFromAdvisoryMessage(any());
 
         // No email was sent
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
 
     }
 
@@ -137,7 +137,7 @@ public class ValidateSdxTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(0), eq(0), eq(2), toResendCaptor.capture(),
@@ -186,7 +186,7 @@ public class ValidateSdxTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
@@ -245,7 +245,7 @@ public class ValidateSdxTest {
         verify(mockSdwService, times(3)).getItisCodesFromAdvisoryMessage(any());
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),

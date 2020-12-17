@@ -53,6 +53,7 @@ public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, Em
 
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
 
     /**
      * Returns the defaultLaneWidth / 2
@@ -69,6 +70,14 @@ public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, Em
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String[] getAlertAddresses() {

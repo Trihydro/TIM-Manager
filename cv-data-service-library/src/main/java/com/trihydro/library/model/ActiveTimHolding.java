@@ -24,6 +24,19 @@ public class ActiveTimHolding {
         this.dateCreated = Instant.now().toString();
     }
 
+    public ActiveTimHolding(TimUpdateModel tum) {
+        this.direction = tum.getDirection();
+        this.clientId = tum.getClientId();
+        this.satRecordId = tum.getSatRecordId();
+        this.rsuTarget = tum.getRsuTarget();
+        this.rsuIndex = tum.getRsuIndex();
+        this.startPoint = tum.getStartPoint();
+        this.endPoint = tum.getEndPoint();
+        this.projectKey = tum.getProjectKey();
+
+        this.dateCreated = Instant.now().toString();
+    }
+
     public String getDirection() {
         return this.direction;
     }

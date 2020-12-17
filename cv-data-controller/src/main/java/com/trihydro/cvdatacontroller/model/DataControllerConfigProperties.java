@@ -6,6 +6,7 @@ import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.DbInteractionsProps;
+import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.tables.LoggingTables;
 import com.trihydro.library.tables.TimOracleTables;
 
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("config")
 @Import({ TimOracleTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
         JavaMailSenderImplProvider.class, LoggingTables.class, DbInteractions.class })
-public class DataControllerConfigProperties implements DbInteractionsProps {
+public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps {
     private String dbDriver;
     private String dbUrl;
     private String dbUsername;
@@ -25,6 +26,7 @@ public class DataControllerConfigProperties implements DbInteractionsProps {
 
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
 
     private String mailHost;
     private int mailPort;
@@ -65,6 +67,14 @@ public class DataControllerConfigProperties implements DbInteractionsProps {
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String[] getAlertAddresses() {

@@ -412,8 +412,9 @@ public class TimGenerationHelper {
     private List<ResubmitTimException> sendTim(WydotTravelerInputData timToSend, TimUpdateModel tum, Long activeTimId,
             List<Milepost> mps) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
-        // try to send to RSU if along route with RSUs
-        if (Arrays.asList(config.getRsuRoutes()).contains(tum.getRoute())) {
+        // try to send to RSU if not a sat TIM and along route with RSUs
+        if (StringUtils.isBlank(tum.getSatRecordId())
+                && Arrays.asList(config.getRsuRoutes()).contains(tum.getRoute())) {
             var exMsg = updateAndSendRSU(timToSend, tum);
             if (StringUtils.isNotBlank(exMsg)) {
                 exceptions.add(new ResubmitTimException(activeTimId, exMsg));

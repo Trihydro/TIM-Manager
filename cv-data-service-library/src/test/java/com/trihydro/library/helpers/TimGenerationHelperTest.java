@@ -459,8 +459,6 @@ public class TimGenerationHelperTest {
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
         doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        String[] rsuRoutes = new String[] { "I 25" };
-        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
@@ -494,8 +492,6 @@ public class TimGenerationHelperTest {
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
         doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        String[] rsuRoutes = new String[] { "I 25" };
-        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
@@ -529,8 +525,6 @@ public class TimGenerationHelperTest {
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
         doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        String[] rsuRoutes = new String[] { "I 25" };
-        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
@@ -568,8 +562,6 @@ public class TimGenerationHelperTest {
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
         doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-        String[] rsuRoutes = new String[] { "I 25" };
-        doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());

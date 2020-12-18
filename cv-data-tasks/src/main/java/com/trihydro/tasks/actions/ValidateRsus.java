@@ -43,6 +43,8 @@ public class ValidateRsus implements Runnable {
     private EmailHelper mailHelper;
     private Utility utility;
 
+    private boolean delaySecondValidation = true;
+
     @Autowired
     public void InjectDependencies(DataTasksConfiguration _config, ActiveTimService _activeTimService,
             RsuService _rsuService, RsuDataService _rsuDataService, OdeService _odeService,
@@ -58,6 +60,10 @@ public class ValidateRsus implements Runnable {
         emailFormatter = _emailFormatter;
         mailHelper = _mailHelper;
         utility = _utility;
+    }
+
+    public void setDelaySecondValidation(boolean shouldDelay) {
+        this.delaySecondValidation = shouldDelay;
     }
 
     public void run() {
@@ -207,6 +213,12 @@ public class ValidateRsus implements Runnable {
         // Now that we've attempted to cleanup the RSU, perform second validation pass
         // Note that we only need to re-validate RSUs we attempted to correct
         if (rsusWithResolvableIssues.size() > 0) {
+            // Wait a period of time to allow any corrective actions to propagate before
+            // we perform the second validation attempt.
+            if (delaySecondValidation) {
+                Thread.sleep(config.getRsuValidationDelaySeconds() * 1000);
+            }
+
             validateRsus(rsusWithResolvableIssues);
         }
 

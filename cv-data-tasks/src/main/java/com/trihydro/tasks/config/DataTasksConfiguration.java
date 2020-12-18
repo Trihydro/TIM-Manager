@@ -39,6 +39,7 @@ public class DataTasksConfiguration
     private int bsmRetentionPeriodDays;
     private boolean runTmddValidation;
     private boolean runRsuValidation;
+    private int rsuValidationDelaySeconds = 60;
     private int rsuValThreadPoolSize = 1;
     private int rsuValTimeoutSeconds = 300; // 76 RSUs, 20s timeout each... Could still finish processing with up to 20%
                                             // of RSUs down in a pool w/ single thread
@@ -235,6 +236,14 @@ public class DataTasksConfiguration
 
     public void setRunRsuValidation(boolean runRsuValidation) {
         this.runRsuValidation = runRsuValidation;
+    }
+
+    public int getRsuValidationDelaySeconds() {
+        return rsuValidationDelaySeconds;
+    }
+
+    public void setRsuValidationDelaySeconds(int rsuValidationDelaySeconds) {
+        this.rsuValidationDelaySeconds = rsuValidationDelaySeconds;
     }
 
     public int getRsuValThreadPoolSize() {

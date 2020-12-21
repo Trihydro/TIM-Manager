@@ -20,8 +20,6 @@ import com.trihydro.library.service.RsuService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.ExecutorFactory;
-import com.trihydro.tasks.models.EnvActiveTim;
-import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
@@ -90,7 +88,7 @@ public class ValidateRsus implements Runnable {
         List<String> unexpectedErrors = new ArrayList<>();
         List<RsuValidationRecord> validationRecords = new ArrayList<>();
 
-        List<EnvActiveTim> activeTims = getActiveRsuTims();
+        List<ActiveTim> activeTims = getActiveRsuTims();
 
         // Organize ActiveTim records by RSU
         List<RsuInformation> rsusToValidate = getRsusFromActiveTims(activeTims);
@@ -141,7 +139,7 @@ public class ValidateRsus implements Runnable {
 
         // Some TIMs may be live on multiple RSUs. By using a TreeSet, we ensure that
         // TIMs meant for multiple RSUs won't be re-submitted multiple times.
-        TreeSet<EnvActiveTim> timsToResend = new TreeSet<>();
+        TreeSet<ActiveTim> timsToResend = new TreeSet<>();
 
         boolean unresolvableIssueFound = false;
         for (var rsuRecord : validationRecords) {
@@ -167,16 +165,12 @@ public class ValidateRsus implements Runnable {
 
             // Resend Production TIMs that should be on this RSU but aren't
             for (var tim : result.getMissingFromRsu()) {
-                if (tim.getEnvironment() == Environment.PROD) {
                     timsToResend.add(tim);
-                }
             }
 
             // Resend Production TIMs that haven't been updated on this RSU
             for (var staleIndex : result.getStaleIndexes()) {
-                if (staleIndex.getEnvTim().getEnvironment() == Environment.PROD) {
-                    timsToResend.add(staleIndex.getEnvTim());
-                }
+                    timsToResend.add(staleIndex.getActiveTim());
             }
 
             // If this RSU has any indices that are unaccounted for, clear them
@@ -196,7 +190,7 @@ public class ValidateRsus implements Runnable {
         }
 
         // Resubmit stale TIMs
-        List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTim().getActiveTimId())
+        List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTimId())
                 .collect(Collectors.toList());
 
         if (activeTimIds.size() > 0) {
@@ -300,30 +294,12 @@ public class ValidateRsus implements Runnable {
         }
     }
 
-    private List<EnvActiveTim> getActiveRsuTims() {
-        // The data structure being used here is temporary. Since we have RSUs shared
-        // between our dev and prod environment, we need to fetch Active Tims from both
-        // the dev and prod Oracle db. THEN we need to merge those records into the
-        // same set while maintaining ordering before proceeding.
-        TreeSet<EnvActiveTim> activeTims = new TreeSet<>();
-
-        try {
-            // Fetch records for dev
-            for (ActiveTim activeTim : activeTimService.getActiveRsuTims(config.getCvRestServiceDev())) {
-                activeTims.add(new EnvActiveTim(activeTim, Environment.DEV));
-            }
-        } catch (Exception ex) {
-            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from DEV:",
-                    this.getClass());
-            ex.printStackTrace();
-            return null;
-        }
+    private List<ActiveTim> getActiveRsuTims() {
+        List<ActiveTim> activeTims = new ArrayList<>();
 
         try {
             // Fetch records for prod
-            for (ActiveTim activeTim : activeTimService.getActiveRsuTims(config.getCvRestServiceProd())) {
-                activeTims.add(new EnvActiveTim(activeTim, Environment.PROD));
-            }
+            activeTims = activeTimService.getActiveRsuTims(config.getCvRestService());
         } catch (Exception ex) {
             utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from PROD:",
                     this.getClass());
@@ -331,26 +307,26 @@ public class ValidateRsus implements Runnable {
             return null;
         }
 
-        return new ArrayList<EnvActiveTim>(activeTims);
+        return activeTims;
     }
 
     // This method groups activeTim records by RSU (specifically, the RSU's ipv4
     // address)
-    private List<RsuInformation> getRsusFromActiveTims(List<EnvActiveTim> activeTims) {
+    private List<RsuInformation> getRsusFromActiveTims(List<ActiveTim> activeTims) {
         List<RsuInformation> rsusWithRecords = new ArrayList<>();
         RsuInformation rsu = null;
 
         // Due to the TreeSet, the records in activeTims are sorted by rsuTarget.
-        for (EnvActiveTim record : activeTims) {
+        for (ActiveTim record : activeTims) {
             // If we don't have an RSU yet, or this record is the first one for the next
             // RSU...
-            if (rsu == null || !rsu.getIpv4Address().equals(record.getActiveTim().getRsuTarget())) {
+            if (rsu == null || !rsu.getIpv4Address().equals(record.getRsuTarget())) {
                 if (rsu != null) {
                     rsusWithRecords.add(rsu);
                 }
 
                 // Create new PopulatedRsu record
-                rsu = new RsuInformation(record.getActiveTim().getRsuTarget());
+                rsu = new RsuInformation(record.getRsuTarget());
             }
             rsu.getRsuActiveTims().add(record);
         }

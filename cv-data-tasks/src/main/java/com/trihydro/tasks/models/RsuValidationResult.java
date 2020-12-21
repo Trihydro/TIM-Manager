@@ -3,11 +3,13 @@ package com.trihydro.tasks.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.model.ActiveTim;
+
 public class RsuValidationResult {
     private boolean rsuUnresponsive;
     private List<Collision> collisions = new ArrayList<>();
     private List<ActiveTimMapping> staleIndexes = new ArrayList<>();
-    private List<EnvActiveTim> missingFromRsu = new ArrayList<>();
+    private List<ActiveTim> missingFromRsu = new ArrayList<>();
     private List<Integer> unaccountedForIndices = new ArrayList<>();
 
     public boolean getRsuUnresponsive() {
@@ -34,11 +36,11 @@ public class RsuValidationResult {
         this.staleIndexes = staleIndexes;
     }
 
-    public List<EnvActiveTim> getMissingFromRsu() {
+    public List<ActiveTim> getMissingFromRsu() {
         return missingFromRsu;
     }
 
-    public void setMissingFromRsu(List<EnvActiveTim> missingFromRsu) {
+    public void setMissingFromRsu(List<ActiveTim> missingFromRsu) {
         this.missingFromRsu = missingFromRsu;
     }
 

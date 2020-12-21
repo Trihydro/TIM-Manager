@@ -14,7 +14,6 @@ import com.trihydro.library.model.RsuIndexInfo;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.Collision;
-import com.trihydro.tasks.models.EnvActiveTim;
 import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationResult;
 
@@ -22,7 +21,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
     private RsuDataService rsuDataService;
 
     private String ipv4Address;
-    private List<EnvActiveTim> activeTims;
+    private List<ActiveTim> activeTims;
     private List<RsuIndexInfo> rsuIndices;
     private RsuValidationResult result;
 
@@ -65,14 +64,13 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         calculateCollisions();
 
         // Verify Active TIMs
-        for (EnvActiveTim record : activeTims) {
-            ActiveTim tim = record.getActiveTim();
+        for (ActiveTim tim : activeTims) {
 
             // Check if index claimed by ActiveTim is populated on RSU
             int pos = Collections.binarySearch(rsuIndices, new RsuIndexInfo(tim.getRsuIndex(), null), findByIndex);
 
             if (pos < 0) {
-                result.getMissingFromRsu().add(record);
+                result.getMissingFromRsu().add(tim);
             } else {
                 // We've mapped an ActiveTim to the RSU index. Remove this RSU index
                 // from the list of indexes, since we've accounted for it
@@ -80,7 +78,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
 
                 if (!tim.getStartDateTime().equals(rsuInfo.getDeliveryStartTime())) {
                     // The message at this index on the RSU is stale.
-                    result.getStaleIndexes().add(new ActiveTimMapping(record, rsuInfo));
+                    result.getStaleIndexes().add(new ActiveTimMapping(tim, rsuInfo));
                 }
 
                 rsuIndices.remove(pos);
@@ -98,11 +96,11 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
     }
 
     private void calculateCollisions() {
-        Map<Integer, List<EnvActiveTim>> indexAssignments = new HashMap<>();
+        Map<Integer, List<ActiveTim>> indexAssignments = new HashMap<>();
 
         // Iterate over the Active Tims on this rsu. Group by assigned rsu index
-        for (EnvActiveTim record : activeTims) {
-            int currentIndex = record.getActiveTim().getRsuIndex();
+        for (ActiveTim tim : activeTims) {
+            int currentIndex = tim.getRsuIndex();
             // If this RSU index isn't present in the map, initialize value
             // to be an empty list of ActiveTims.
             if (!indexAssignments.containsKey(currentIndex)) {
@@ -110,7 +108,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
             }
 
             // Push Active Tim onto map at that index
-            indexAssignments.get(currentIndex).add(record);
+            indexAssignments.get(currentIndex).add(tim);
         }
 
         // Iterate over indexes and find any that have > 1 Active Tim assigned
@@ -134,6 +132,6 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
             rsuIndices.remove(pos);
         }
 
-        activeTims.removeIf((t) -> t.getActiveTim().getRsuIndex().equals(index));
+        activeTims.removeIf((t) -> t.getRsuIndex().equals(index));
     }
 }

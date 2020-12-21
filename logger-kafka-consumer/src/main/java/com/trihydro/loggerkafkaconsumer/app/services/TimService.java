@@ -200,6 +200,9 @@ public class TimService extends BaseService {
         String name = regions[0].getName();
         if (StringUtils.isEmpty(name) || StringUtils.isBlank(name))
             return;
+        OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
+        if(metaData == null)
+            return;
 
         // get information from the region name, first check splitname length
         activeTim = setActiveTimByRegionName(name);
@@ -217,7 +220,7 @@ public class TimService extends BaseService {
 
         if (timId == null) {
             // TIM doesn't currently exist. Add it.
-            timId = AddTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null, satRecordId,
+            timId = AddTim(metaData, null, tim, null, null, null, satRecordId,
                     name);
 
             if (timId != null) {
@@ -225,6 +228,23 @@ public class TimService extends BaseService {
                 Long dataFrameId = dataFrameService.AddDataFrame(dframes[0], timId);
                 addRegion(dframes[0], dataFrameId);
                 addDataFrameItis(dframes[0], dataFrameId);
+
+                // TODO : Change to loop through RSU array - doing one rsu for now
+                RSU firstRsu = null;
+                if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
+                        && metaData.getRequest().getRsus().length > 0) {
+                    firstRsu = metaData.getRequest().getRsus()[0];
+                    activeTim.setRsuTarget(firstRsu.getRsuTarget());
+                }
+
+                if (activeTim.getRsuTarget() != null && firstRsu != null) {
+                    // save TIM RSU in DB
+                    WydotRsu rsu = rsuService.getRsus().stream()
+                            .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst().orElse(null);
+                    if (rsu != null) {
+                        timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
+                    }
+                }
             } else {
                 // failed to insert new tim and failed to fetch existing, log and return
                 utility.logWithDate(
@@ -240,16 +260,6 @@ public class TimService extends BaseService {
         if (satRecordId != null && satRecordId != "") {
             updateTimSatRecordId(timId, satRecordId);
             utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
-        }
-
-        OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
-
-        // TODO : Change to loop through RSU array - doing one rsu for now
-        RSU firstRsu = null;
-        if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
-                && metaData.getRequest().getRsus().length > 0) {
-            firstRsu = metaData.getRequest().getRsus()[0];
-            activeTim.setRsuTarget(firstRsu.getRsuTarget());
         }
 
         if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null)
@@ -271,13 +281,7 @@ public class TimService extends BaseService {
         ActiveTimHolding ath = null;
 
         // if this is an RSU TIM
-        if (activeTim.getRsuTarget() != null && firstRsu != null) {
-            // save TIM RSU in DB
-            WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
-                    .findFirst().orElse(null);
-            if (rsu != null) {
-                timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
-            }
+        if (activeTim.getRsuTarget() != null) {
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getRsuTarget());
 

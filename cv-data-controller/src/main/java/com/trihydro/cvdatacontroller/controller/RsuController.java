@@ -141,7 +141,10 @@ public class RsuController extends BaseController {
 				rsu.setIndex(rs.getInt("RSU_INDEX"));
 				rsu.setRsuUsername(rs.getString("UPDATE_USERNAME"));
 				rsu.setRsuPassword(rs.getString("UPDATE_PASSWORD"));
-				rsus.add(rsu);
+				// only add unique values in
+				if (!rsus.contains(rsu)) {
+					rsus.add(rsu);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -50,7 +50,7 @@ public class TimRsuServiceTest extends TestBase<TimRsuService> {
         Long timId = -1l;
         int rsuId = -2;
         int rsuIndex = 0;
-        doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);
+        doThrow(new SQLException("UNIQUENESS CONSTRAINT VIOLATION")).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);
 
         // Act
         Long data = uut.AddTimRsu(timId, rsuId, rsuIndex);

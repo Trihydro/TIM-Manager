@@ -94,6 +94,9 @@ public class ValidateRsusTest {
     public void setup() {
         lenient().when(mockConfig.getCvRestServiceDev()).thenReturn("devUrl");
         lenient().when(mockConfig.getCvRestServiceProd()).thenReturn("prodUrl");
+
+        // Prevent delay before second validation attempt to keep unit tests performant
+        uut.setDelaySecondValidation(false);
     }
 
     private void setupThreadpool() throws InterruptedException {

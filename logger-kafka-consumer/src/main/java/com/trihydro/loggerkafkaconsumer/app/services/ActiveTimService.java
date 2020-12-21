@@ -263,12 +263,17 @@ public class ActiveTimService extends BaseService {
         try {
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
-            String query = "select * from active_tim";
-            query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
+            //
+            String query = "select distinct atim.ACTIVE_TIM_ID, atim.TIM_ID, atim.SAT_RECORD_ID,";
+            query += " atim.CLIENT_ID, atim.DIRECTION, atim.TIM_END, atim.TIM_START,";
+            query += " atim.EXPIRATION_DATE, atim.ROUTE, atim.PK,";
+            query += " atim.START_LATITUDE, atim.START_LONGITUDE, atim.END_LATITUDE, atim.END_LONGITUDE";
+            query += " from active_tim atim";
+            query += " inner join tim_rsu on atim.tim_id = tim_rsu.tim_id";
             query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
             query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
             query += " where sat_record_id is null and ipv4_address = '" + ipv4Address + "' and client_id = '"
-                    + clientId + "' and active_tim.direction = '" + direction + "'";
+                    + clientId + "' and atim.direction = '" + direction + "'";
 
             rs = statement.executeQuery(query);
 

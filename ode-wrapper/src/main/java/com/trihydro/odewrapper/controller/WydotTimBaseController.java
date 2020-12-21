@@ -459,12 +459,12 @@ public abstract class WydotTimBaseController {
             ContentEnum content, TravelerInfoType frameType) {
 
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
-            // i
+            // I
             createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk, content, frameType);
-            // d
+            // D
             createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk, content, frameType);
         } else {
-            createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk, content,
+            createSendTims(wydotTim, wydotTim.getDirection().toUpperCase(), timType, startDateTime, endDateTime, pk, content,
                     frameType);
         }
     }

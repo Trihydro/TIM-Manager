@@ -280,10 +280,22 @@ public class TimService extends BaseService {
             }
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getRsuTarget());
+
+            if (ath == null) {
+                utility.logWithDate(String.format(
+                        "Could not find active_tim_holding for client_id '%s', direction '%s', rsu_target '%s'",
+                        activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget()));
+            }
         } else {
             // SDX tim, fetch holding
             ath = activeTimHoldingService.getSdxActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getSatRecordId());
+
+            if (ath == null) {
+                utility.logWithDate(String.format(
+                        "Could not find active_tim_holding for client_id '%s', direction '%s', sat_record_id '%s'",
+                        activeTim.getClientId(), activeTim.getDirection(), activeTim.getSatRecordId()));
+            }
         }
 
         // set end time if duration is not indefinite
@@ -318,8 +330,9 @@ public class TimService extends BaseService {
             if (activeTimDb == null) {
                 activeTimService.insertActiveTim(activeTim);
             } else { // else update active TIM
-                // If we couldn't find an Active TIM Holding record, we should persist the existing values
-                // for startPoint, endPoint, and projectKey 
+                // If we couldn't find an Active TIM Holding record, we should persist the
+                // existing values
+                // for startPoint, endPoint, and projectKey
                 if (ath == null) {
                     activeTim.setStartPoint(activeTimDb.getStartPoint());
                     activeTim.setEndPoint(activeTimDb.getEndPoint());
@@ -332,7 +345,7 @@ public class TimService extends BaseService {
         } else {
             // not from WYDOT application
             // just log for now
-            System.out.println("Inserting new active_tim, no TimType found - not from WYDOT application");
+            utility.logWithDate("Inserting new active_tim, no TimType found - not from WYDOT application");
             activeTimService.insertActiveTim(activeTim);
         }
 

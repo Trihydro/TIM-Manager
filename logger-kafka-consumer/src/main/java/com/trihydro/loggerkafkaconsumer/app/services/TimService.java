@@ -228,23 +228,6 @@ public class TimService extends BaseService {
                 Long dataFrameId = dataFrameService.AddDataFrame(dframes[0], timId);
                 addRegion(dframes[0], dataFrameId);
                 addDataFrameItis(dframes[0], dataFrameId);
-
-                // TODO : Change to loop through RSU array - doing one rsu for now
-                RSU firstRsu = null;
-                if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
-                        && metaData.getRequest().getRsus().length > 0) {
-                    firstRsu = metaData.getRequest().getRsus()[0];
-                    activeTim.setRsuTarget(firstRsu.getRsuTarget());
-                }
-
-                if (activeTim.getRsuTarget() != null && firstRsu != null) {
-                    // save TIM RSU in DB
-                    WydotRsu rsu = rsuService.getRsus().stream()
-                            .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst().orElse(null);
-                    if (rsu != null) {
-                        timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
-                    }
-                }
             } else {
                 // failed to insert new tim and failed to fetch existing, log and return
                 utility.logWithDate(
@@ -260,6 +243,14 @@ public class TimService extends BaseService {
         if (satRecordId != null && satRecordId != "") {
             updateTimSatRecordId(timId, satRecordId);
             utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
+        }
+
+        // TODO : Change to loop through RSU array - doing one rsu for now
+        RSU firstRsu = null;
+        if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
+                && metaData.getRequest().getRsus().length > 0) {
+            firstRsu = metaData.getRequest().getRsus()[0];
+            activeTim.setRsuTarget(firstRsu.getRsuTarget());
         }
 
         if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null)
@@ -281,7 +272,13 @@ public class TimService extends BaseService {
         ActiveTimHolding ath = null;
 
         // if this is an RSU TIM
-        if (activeTim.getRsuTarget() != null) {
+        if (activeTim.getRsuTarget() != null && firstRsu != null) {
+            // save TIM RSU in DB
+            WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
+                    .findFirst().orElse(null);
+            if (rsu != null) {
+                timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
+            }
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getRsuTarget());
 

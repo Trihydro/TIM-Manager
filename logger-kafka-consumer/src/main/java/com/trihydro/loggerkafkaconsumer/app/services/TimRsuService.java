@@ -46,7 +46,9 @@ public class TimRsuService extends BaseService {
             Long timRsuId = dbInteractions.executeAndLog(preparedStatement, "tim rsu");
             return timRsuId;
         } catch (SQLException e) {
-            e.printStackTrace();
+            if(!e.getMessage().toLowerCase().contains("uniqueness constraint")) {
+                e.printStackTrace();
+            }
             return Long.valueOf(0);
         } finally {
             try {

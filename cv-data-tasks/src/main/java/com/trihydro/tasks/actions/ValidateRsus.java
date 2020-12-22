@@ -1,6 +1,7 @@
 package com.trihydro.tasks.actions;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
@@ -139,7 +140,7 @@ public class ValidateRsus implements Runnable {
 
         // Some TIMs may be live on multiple RSUs. By using a TreeSet, we ensure that
         // TIMs meant for multiple RSUs won't be re-submitted multiple times.
-        TreeSet<ActiveTim> timsToResend = new TreeSet<>();
+        TreeSet<ActiveTim> timsToResend = new TreeSet<>(new Rsu_ActiveTim_Comparator());
 
         boolean unresolvableIssueFound = false;
         for (var rsuRecord : validationRecords) {
@@ -165,12 +166,12 @@ public class ValidateRsus implements Runnable {
 
             // Resend Production TIMs that should be on this RSU but aren't
             for (var tim : result.getMissingFromRsu()) {
-                    timsToResend.add(tim);
+                timsToResend.add(tim);
             }
 
             // Resend Production TIMs that haven't been updated on this RSU
             for (var staleIndex : result.getStaleIndexes()) {
-                    timsToResend.add(staleIndex.getActiveTim());
+                timsToResend.add(staleIndex.getActiveTim());
             }
 
             // If this RSU has any indices that are unaccounted for, clear them
@@ -190,8 +191,7 @@ public class ValidateRsus implements Runnable {
         }
 
         // Resubmit stale TIMs
-        List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTimId())
-                .collect(Collectors.toList());
+        List<Long> activeTimIds = timsToResend.stream().map(x -> x.getActiveTimId()).collect(Collectors.toList());
 
         if (activeTimIds.size() > 0) {
             var resubmitErrors = timGenerationHelper.resubmitToOde(activeTimIds);
@@ -316,7 +316,8 @@ public class ValidateRsus implements Runnable {
         List<RsuInformation> rsusWithRecords = new ArrayList<>();
         RsuInformation rsu = null;
 
-        // Due to the TreeSet, the records in activeTims are sorted by rsuTarget.
+        // Due to the ORDER BY in our fetch from Oracle, the records in activeTims are
+        // sorted by rsuTarget.
         for (ActiveTim record : activeTims) {
             // If we don't have an RSU yet, or this record is the first one for the next
             // RSU...
@@ -336,5 +337,46 @@ public class ValidateRsus implements Runnable {
         }
 
         return rsusWithRecords;
+    }
+
+    class Rsu_ActiveTim_Comparator implements Comparator<ActiveTim> {
+        public int compare(ActiveTim o1, ActiveTim o2) {
+            if (o1 == null || o2 == null) {
+                if (o1 == null && o2 == null)
+                    return 0;
+                else if (o1 == null)
+                    return -1;
+                else
+                    return 1;
+            }
+
+            int result = 0;
+
+            // Compare rsuTarget
+            if (o1.getRsuTarget() == null)
+                result = o2.getRsuTarget() == null ? 0 : -1;
+            else
+                result = o1.getRsuTarget().compareTo(o2.getRsuTarget());
+
+            if (result != 0)
+                return result;
+
+            // Compare index
+            if (o1.getRsuIndex() == null)
+                result = o2.getRsuIndex() == null ? 0 : -1;
+            else
+                result = o1.getRsuIndex().compareTo(o2.getRsuIndex());
+
+            if (result != 0)
+                return result;
+
+            // Compare activeTimId
+            if (o1.getActiveTimId() == null)
+                result = o2.getActiveTimId() == null ? 0 : -1;
+            else
+                result = o1.getActiveTimId().compareTo(o2.getActiveTimId());
+
+            return result;
+        }
     }
 }

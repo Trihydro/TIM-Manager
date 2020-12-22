@@ -1065,7 +1065,7 @@ public class ActiveTimController extends BaseController {
 			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
 			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
 			query += " where sat_record_id is null";
-			query += " order by rsu_vw.ipv4_address, tim_rsu.rsu_index";
+			query += " order by rsu_vw.ipv4_address, tim_rsu.rsu_index"; // Required by ValidateRsus
 
 			rs = statement.executeQuery(query);
 

@@ -1,8 +1,11 @@
 package com.trihydro.tasks.actions;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,8 @@ import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 public class ValidateRsu implements Callable<RsuValidationResult> {
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat dateFormatWithMs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private RsuDataService rsuDataService;
 
     private String ipv4Address;
@@ -28,7 +33,6 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
     public ValidateRsu(RsuInformation rsu, RsuDataService rsuDataService) {
         this.ipv4Address = rsu.getIpv4Address();
         this.rsuDataService = rsuDataService;
-
         // We need to copy this list since we'll be manipulating the list contents
         activeTims = new ArrayList<>(rsu.getRsuActiveTims());
     }
@@ -76,8 +80,15 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
                 // from the list of indexes, since we've accounted for it
                 RsuIndexInfo rsuInfo = rsuIndices.get(pos);
 
-                if (!tim.getStartDateTime().equals(rsuInfo.getDeliveryStartTime())) {
-                    // The message at this index on the RSU is stale.
+                try {
+                    if (!datesEqual(tim.getStartDateTime(), rsuInfo.getDeliveryStartTime())) {
+                        // The message at this index on the RSU is stale.
+                        result.getStaleIndexes().add(new ActiveTimMapping(tim, rsuInfo));
+                    }
+                } catch(ParseException ex) {
+                    // Assume the index is stale if we can't verify the start dates.
+                    // Resubmitting this TIM should hopefully fix any issue in the DateTime
+                    // format on either the RSU or in Oracle.
                     result.getStaleIndexes().add(new ActiveTimMapping(tim, rsuInfo));
                 }
 
@@ -133,5 +144,23 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         }
 
         activeTims.removeIf((t) -> t.getRsuIndex().equals(index));
+    }
+
+    // Checks if the dates are roughly equivalent (within 1 minute of eachother)
+    private boolean datesEqual(String first, String second) throws ParseException {
+        Date firstDate = getDate(first);
+        Date secondDate = getDate(second);
+
+        long diff = Math.abs(firstDate.getTime() - secondDate.getTime());
+
+        return diff < 60000; // 60,000 ms in 1 minute
+    }
+
+    private Date getDate(String toParse) throws ParseException {
+        if (toParse.contains(".")) {
+            return dateFormatWithMs.parse(toParse);
+        } else {
+            return dateFormat.parse(toParse);
+        }
     }
 }

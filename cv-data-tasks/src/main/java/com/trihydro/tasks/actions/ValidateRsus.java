@@ -352,6 +352,15 @@ public class ValidateRsus implements Runnable {
 
             int result = 0;
 
+            // Compare activeTimId
+            if (o1.getActiveTimId() == null)
+                result = o2.getActiveTimId() == null ? 0 : -1;
+            else
+                result = o1.getActiveTimId().compareTo(o2.getActiveTimId());
+
+            if (result != 0)
+                return result;
+
             // Compare rsuTarget
             if (o1.getRsuTarget() == null)
                 result = o2.getRsuTarget() == null ? 0 : -1;
@@ -366,15 +375,6 @@ public class ValidateRsus implements Runnable {
                 result = o2.getRsuIndex() == null ? 0 : -1;
             else
                 result = o1.getRsuIndex().compareTo(o2.getRsuIndex());
-
-            if (result != 0)
-                return result;
-
-            // Compare activeTimId
-            if (o1.getActiveTimId() == null)
-                result = o2.getActiveTimId() == null ? 0 : -1;
-            else
-                result = o1.getActiveTimId().compareTo(o2.getActiveTimId());
 
             return result;
         }

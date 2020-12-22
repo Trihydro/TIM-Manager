@@ -3,6 +3,7 @@ package com.trihydro.loggerkafkaconsumer.app.services;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimOracleTables;
@@ -46,9 +47,11 @@ public class TimRsuService extends BaseService {
             Long timRsuId = dbInteractions.executeAndLog(preparedStatement, "tim rsu");
             return timRsuId;
         } catch (SQLException e) {
-            if(e.getMessage() == null || !e.getMessage().toLowerCase().contains("uniqueness constraint")) {
+            // java.sql.SQLIntegrityConstraintViolationException: ORA-00001: unique constraint (CVCOMMS.TIM_RSU_U) violated 
+            if(!(e instanceof SQLIntegrityConstraintViolationException)) {
                 e.printStackTrace();
             }
+
             return Long.valueOf(0);
         } finally {
             try {

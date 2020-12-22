@@ -101,15 +101,15 @@ public class ValidateRsuTest {
         Collision c = result.getCollisions().get(0);
         Assertions.assertEquals(1, (int) c.getIndex());
         Assertions.assertEquals(2, c.getTims().size());
-        Assertions.assertEquals(10l, (long) c.getTims().get(0).getActiveTim().getActiveTimId());
-        Assertions.assertEquals(11l, (long) c.getTims().get(1).getActiveTim().getActiveTimId());
+        Assertions.assertEquals(10l, (long) c.getTims().get(0).getActiveTimId());
+        Assertions.assertEquals(11l, (long) c.getTims().get(1).getActiveTimId());
 
         // Verify that Active Tims 12, 13 are colliding at index 2
         c = result.getCollisions().get(1);
         Assertions.assertEquals(2, (int) c.getIndex());
         Assertions.assertEquals(2, c.getTims().size());
-        Assertions.assertEquals(12l, (long) c.getTims().get(0).getActiveTim().getActiveTimId());
-        Assertions.assertEquals(13l, (long) c.getTims().get(1).getActiveTim().getActiveTimId());
+        Assertions.assertEquals(12l, (long) c.getTims().get(0).getActiveTimId());
+        Assertions.assertEquals(13l, (long) c.getTims().get(1).getActiveTimId());
     }
 
     @Test
@@ -139,8 +139,8 @@ public class ValidateRsuTest {
         // Verify the details of the stale Active Tim
         ActiveTimMapping staleSet = result.getStaleIndexes().get(0);
         Assertions.assertEquals("2020-01-01 00:00:00", staleSet.getRsuIndexInfo().getDeliveryStartTime());
-        Assertions.assertEquals("2020-01-01 01:00:00", staleSet.getEnvTim().getActiveTim().getStartDateTime());
-        Assertions.assertEquals(10l, (long) staleSet.getEnvTim().getActiveTim().getActiveTimId());
+        Assertions.assertEquals("2020-01-01 01:00:00", staleSet.getActiveTim().getStartDateTime());
+        Assertions.assertEquals(10l, (long) staleSet.getActiveTim().getActiveTimId());
     }
 
     @Test

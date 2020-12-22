@@ -3,11 +3,12 @@ package com.trihydro.tasks.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.WydotRsu;
 
 public class RsuInformation {
     private String ipv4Address;
-    private List<EnvActiveTim> rsuActiveTims = new ArrayList<>();
+    private List<ActiveTim> rsuActiveTims = new ArrayList<>();
 
     public RsuInformation(String ipv4Address) {
         this.ipv4Address = ipv4Address;
@@ -25,11 +26,11 @@ public class RsuInformation {
         this.ipv4Address = ipv4Address;
     }
 
-    public List<EnvActiveTim> getRsuActiveTims() {
+    public List<ActiveTim> getRsuActiveTims() {
         return rsuActiveTims;
     }
 
-    public void setRsuActiveTims(List<EnvActiveTim> rsuActiveTims) {
+    public void setRsuActiveTims(List<ActiveTim> rsuActiveTims) {
         this.rsuActiveTims = rsuActiveTims;
     }
 

@@ -21,8 +21,6 @@ public class DataTasksConfiguration
         implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps, TimGenerationProps, OdeProps {
 
     private String cvRestService;
-    private String cvRestServiceDev; // Temporary
-    private String cvRestServiceProd; // Temporary
     private String rsuDataServiceUrl;
     private String wrapperUrl;
     private String sdwRestUrl;
@@ -116,22 +114,6 @@ public class DataTasksConfiguration
 
     public void setCvRestService(String cvRestService) {
         this.cvRestService = cvRestService;
-    }
-
-    public String getCvRestServiceDev() {
-        return cvRestServiceDev;
-    }
-
-    public void setCvRestServiceDev(String cvRestServiceDev) {
-        this.cvRestServiceDev = cvRestServiceDev;
-    }
-
-    public String getCvRestServiceProd() {
-        return cvRestServiceProd;
-    }
-
-    public void setCvRestServiceProd(String cvRestServiceProd) {
-        this.cvRestServiceProd = cvRestServiceProd;
     }
 
     public String getRsuDataServiceUrl() {

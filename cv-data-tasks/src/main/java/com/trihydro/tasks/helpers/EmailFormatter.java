@@ -15,8 +15,6 @@ import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
-import com.trihydro.tasks.models.EnvActiveTim;
-import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
@@ -248,9 +246,8 @@ public class EmailFormatter {
 
         // List Active TIMs missing from RSU
         subSection = "";
-        for (EnvActiveTim record : valResult.getMissingFromRsu()) {
-            ActiveTim tim = record.getActiveTim();
-            subSection += getRow(record.getEnvironment().toString(), tim.getActiveTimId().toString(),
+        for (ActiveTim tim : valResult.getMissingFromRsu()) {
+            subSection += getRow(tim.getActiveTimId().toString(),
                     tim.getRsuIndex().toString());
         }
         section = section.replaceAll("\\{rowsMissingTims\\}", subSection);
@@ -258,10 +255,9 @@ public class EmailFormatter {
         // List Stale TIMs on RSU
         subSection = "";
         for (ActiveTimMapping staleTim : valResult.getStaleIndexes()) {
-            Environment env = staleTim.getEnvTim().getEnvironment();
-            ActiveTim tim = staleTim.getEnvTim().getActiveTim();
+            ActiveTim tim = staleTim.getActiveTim();
             RsuIndexInfo rsuIndex = staleTim.getRsuIndexInfo();
-            subSection += getRow(env.toString(), tim.getActiveTimId().toString(), rsuIndex.getIndex().toString(),
+            subSection += getRow(tim.getActiveTimId().toString(), rsuIndex.getIndex().toString(),
                     tim.getStartDateTime(), rsuIndex.getDeliveryStartTime());
         }
         section = section.replaceAll("\\{rowsStaleTims\\}", subSection);
@@ -270,12 +266,11 @@ public class EmailFormatter {
         subSection = "";
         for (Collision collision : valResult.getCollisions()) {
             String activeTimIds = "";
-            for (EnvActiveTim record : collision.getTims()) {
+            for (ActiveTim tim : collision.getTims()) {
                 if (!activeTimIds.equals("")) {
                     activeTimIds += ", ";
                 }
-                activeTimIds += record.getActiveTim().getActiveTimId().toString();
-                activeTimIds += " (" + record.getEnvironment().toString() + ")";
+                activeTimIds += tim.getActiveTimId().toString();
             }
 
             subSection += getRow(collision.getIndex().toString(), activeTimIds);

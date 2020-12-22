@@ -16,8 +16,6 @@ import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 import com.trihydro.tasks.models.Collision;
-import com.trihydro.tasks.models.EnvActiveTim;
-import com.trihydro.tasks.models.Environment;
 import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
@@ -221,16 +219,16 @@ public class EmailFormatterTest {
 
         List<RsuValidationRecord> valRecords = new ArrayList<>();
         List<String> unexpectedErrors = new ArrayList<>();
-        
+
         RsuValidationRecord record = new RsuValidationRecord(testRsuInfo);
         RsuValidationResult firstPass = resultWithInconsistencies(true);
         record.addValidationResult(firstPass);
-        
+
         // An error occurred during the second call to validateRsu.
         record.setError("Error while validating RSU");
 
         valRecords.add(record);
-        
+
         // Act
         String emailBody = uut.generateRsuSummaryEmail(valRecords, unexpectedErrors);
 
@@ -322,38 +320,38 @@ public class EmailFormatterTest {
         RsuValidationResult result = new RsuValidationResult();
 
         // 2 ActiveTims, collided at index 2 on RSU
-        EnvActiveTim coll1 = new EnvActiveTim(new ActiveTim() {
+        ActiveTim coll1 = new ActiveTim() {
             {
                 setActiveTimId(2l);
             }
-        }, Environment.DEV);
+        };
 
-        EnvActiveTim coll2 = new EnvActiveTim(new ActiveTim() {
+        ActiveTim coll2 = new ActiveTim() {
             {
                 setActiveTimId(3l);
             }
-        }, Environment.PROD);
+        };
         Collision c = new Collision(2, Arrays.asList(coll1, coll2));
         result.setCollisions(Arrays.asList(c));
 
         if (beforeAutocorrect) {
             // ActiveTim missing from RSU
-            EnvActiveTim missing = new EnvActiveTim(new ActiveTim() {
+            ActiveTim missing = new ActiveTim() {
                 {
                     setActiveTimId(1l);
                     setRsuIndex(1);
                 }
-            }, Environment.DEV);
+            };
             result.setMissingFromRsu(Arrays.asList(missing));
 
             // ActiveTim stale on index 3
-            EnvActiveTim staleTim = new EnvActiveTim(new ActiveTim() {
+            ActiveTim staleTim = new ActiveTim() {
                 {
                     setActiveTimId(4l);
                     setStartDateTime("2020-01-01");
                     setRsuIndex(3);
                 }
-            }, Environment.DEV);
+            };
             RsuIndexInfo indexInfo = new RsuIndexInfo(3, "2020-02-02");
 
             ActiveTimMapping staleMapping = new ActiveTimMapping(staleTim, indexInfo);

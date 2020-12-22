@@ -92,8 +92,7 @@ public class ValidateRsusTest {
 
     @BeforeEach
     public void setup() {
-        lenient().when(mockConfig.getCvRestServiceDev()).thenReturn("devUrl");
-        lenient().when(mockConfig.getCvRestServiceProd()).thenReturn("prodUrl");
+        lenient().when(mockConfig.getCvRestService()).thenReturn("cvRestServiceUrl");
 
         // Prevent delay before second validation attempt to keep unit tests performant
         uut.setDelaySecondValidation(false);
@@ -107,11 +106,8 @@ public class ValidateRsusTest {
     }
 
     private void configureServiceReturns() {
-        // Split up the active tims so it seems like we have 2 coming from dev and 2
-        // from prod
         ActiveTim[] activeTims = importJsonArray("/activeTims_3.json", ActiveTim[].class);
-        when(mockActiveTimService.getActiveRsuTims("devUrl")).thenReturn(Arrays.asList(activeTims[0], activeTims[1]));
-        when(mockActiveTimService.getActiveRsuTims("prodUrl")).thenReturn(Arrays.asList(activeTims[2], activeTims[3]));
+        when(mockActiveTimService.getActiveRsuTims("cvRestServiceUrl")).thenReturn(Arrays.asList(activeTims));
     }
 
     private void configureRsuServiceReturns() {
@@ -149,7 +145,7 @@ public class ValidateRsusTest {
 
         // Assert
         verify(mockUtility).logWithDate(
-                "Unable to validate RSUs - error occurred while fetching Oracle records from DEV:", ValidateRsus.class);
+                "Unable to validate RSUs - error occurred while fetching Oracle records from PROD:", ValidateRsus.class);
     }
 
     @Test

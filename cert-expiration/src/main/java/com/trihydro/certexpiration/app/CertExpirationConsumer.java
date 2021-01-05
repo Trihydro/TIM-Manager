@@ -25,7 +25,7 @@ public class CertExpirationConsumer {
 	private KafkaFactory kafkaFactory;
 
 	@Autowired
-	public CertExpirationConsumer(CertExpirationConfiguration configProperties, Utility _utility, 
+	public CertExpirationConsumer(CertExpirationConfiguration configProperties, Utility _utility,
 			EmailHelper _emailHelper, LoopController _loopController, KafkaFactory _kafkaFactory)
 			throws IOException, Exception {
 		this.configProperties = configProperties;
@@ -69,6 +69,7 @@ public class CertExpirationConsumer {
 		} finally {
 			try {
 				stringConsumer.close();
+				stringProducer.close();
 			} catch (Exception consumerEx) {
 				consumerEx.printStackTrace();
 			}

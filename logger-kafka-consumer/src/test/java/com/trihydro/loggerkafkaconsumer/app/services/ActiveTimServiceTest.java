@@ -1,6 +1,7 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -8,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -245,6 +248,85 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         Assertions.assertNull(data.getTimId(), "TimID returned when expected null");
         verify(mockStatement).close();
         verify(mockRs).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void getMinExpiration_SUCCESS() throws Exception {
+        // Arrange
+        Timestamp dbValue = Timestamp.valueOf("2021-01-01 00:00:00");
+        String startDate = "2021-01-01T00:00:00.000Z";
+        String expDate = "2021-01-03T00:00:00.000Z"; // Later than dbValue
+        when(mockRs.getTimestamp(eq("MINSTART"), any())).thenReturn(dbValue);
+        mockUtility.timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL), "
+                + "(COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID "
+                + "WHERE TIM.PACKET_ID = '0000' AND atim.TIM_START = '01-Jan-21 12.00.00.000 AM'),"
+                + "(SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
+
+        // Act
+        String minExp = uut.getMinExpiration("0000", startDate, expDate);
+
+        // Assert
+        verify(mockStatement).executeQuery(query);
+        Assertions.assertEquals("01-Jan-21 12.00.00.000 AM", minExp);
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void getMinExpiration_FAIL() throws Exception {
+        // Arrange
+        String startDate = "2021-01-01T00:00:00.000Z";
+        String expDate = "2021-01-03T00:00:00.000Z";
+        doThrow(new SQLException()).when(mockRs).getTimestamp(eq("MINSTART"), any());
+
+        // Act
+        String minExp = uut.getMinExpiration("0000", startDate, expDate);
+
+        // Assert
+        Assertions.assertNull(minExp);
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void updateActiveTimExpiration_SUCCESS() throws SQLException {
+        // Arrange
+        doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+        String startDate = "2021-01-01T00:00:00.000Z";
+        String expDate = "2021-01-03T00:00:00.000Z";
+        String query = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? "
+                + "WHERE ACTIVE_TIM_ID IN (SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim "
+                + "INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?)";
+        // Act
+        var result = uut.updateActiveTimExpiration("0000", startDate, expDate);
+
+        // Assert
+        Assertions.assertTrue(result);
+        verify(mockConnection).prepareStatement(query);
+        verify(mockPreparedStatement).setObject(1, expDate);
+        verify(mockPreparedStatement).setObject(2, "0000");
+        verify(mockPreparedStatement).setObject(3, "01-Jan-21 12.00.00.000 AM");
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void updateActiveTimExpiration_FAIL() throws SQLException {
+        // Arrange
+        doThrow(new SQLException()).when(mockConnection).prepareStatement(any());
+        String startDate = "2021-01-01T00:00:00.000Z";
+        String expDate = "2021-01-03T00:00:00.000Z";
+
+        // Act
+        var result = uut.updateActiveTimExpiration("0000", startDate, expDate);
+
+        // Assert
+        Assertions.assertFalse(result);
         verify(mockConnection).close();
     }
 }

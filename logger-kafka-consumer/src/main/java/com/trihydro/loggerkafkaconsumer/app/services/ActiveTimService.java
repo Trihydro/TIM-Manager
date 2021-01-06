@@ -6,6 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
@@ -20,6 +26,7 @@ public class ActiveTimService extends BaseService {
 
     private TimOracleTables timOracleTables;
     private SQLNullHandler sqlNullHandler;
+    private Calendar UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     @Autowired
     public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
@@ -326,5 +333,112 @@ public class ActiveTimService extends BaseService {
         }
 
         return activeTim;
+    }
+
+    public boolean updateActiveTimExpiration(String packetID, String startDate, String expDate) {
+        Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		boolean success = false;
+
+		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
+		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+		query += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
+
+		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+		updateStatement += query;
+		updateStatement += ")";
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			preparedStatement = connection.prepareStatement(updateStatement);
+			preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
+													// (GetMinExpiration)
+			preparedStatement.setObject(2, packetID);
+			preparedStatement.setObject(3, translateIso8601ToTimestampFormat(startDate));
+
+			// execute update statement
+			success = dbInteractions.updateOrDelete(preparedStatement);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		utility.logWithDate(
+				String.format("Called UpdateExpiration with packetID: %s, startDate: %s, expDate: %s. Successful: %s",
+						packetID, startDate, expDate, success));
+		return success;
+    }
+
+    public String getMinExpiration(String packetID, String startDate, String expDate) throws ParseException {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+        String minStart = "";
+
+        try {
+            // Fetch the minimum of passed in expDate and database held
+            // active_tim.expiration_date. To compare like values we convert the expDate
+            // TO_TIMESTAMP. Without this it compares string length.
+            // Also, there are some null values in the db. To get around these, we use the
+            // coalesce function with the expDate passed in value.
+            connection = dbInteractions.getConnectionPool();
+            statement = connection.createStatement();
+            String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL",
+                    translateIso8601ToTimestampFormat(expDate));
+
+            String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
+            minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+            minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+            minExpDate += " AND atim.TIM_START = '" + translateIso8601ToTimestampFormat(startDate) + "'";
+
+            String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
+                    selectTimestamp, minExpDate, selectTimestamp);
+            rs = statement.executeQuery(query);
+            while (rs.next()) {
+                var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);
+                minStart = utility.timestampFormat.format(tmpTs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        utility.logWithDate(String.format(
+                "Called GetMinExpiration with packetID: %s, startDate: %s, expDate: %s. Min start date: %s", packetID,
+                startDate, expDate, minStart));
+        return minStart;
+    }
+
+    private String translateIso8601ToTimestampFormat(String date) throws ParseException {
+        DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+        // TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+        // sdf.setTimeZone(toTimeZone);
+        DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        Date dte = m_ISO8601Local.parse(date);
+        return sdf.format(dte.getTime());
     }
 }

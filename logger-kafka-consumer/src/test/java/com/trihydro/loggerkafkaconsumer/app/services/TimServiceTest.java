@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.CertExpirationModel;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TimType;
@@ -666,6 +668,32 @@ public class TimServiceTest extends TestBase<TimService> {
 
         // Assert
         Assertions.assertEquals("-1", data);
+    }
+
+    @Test
+    public void updateActiveTimExpiration_SUCCESS() throws ParseException {
+        // Arrange
+        var data = new CertExpirationModel();
+        doReturn(true).when(mockActiveTimService).updateActiveTimExpiration(any(), any(), any());
+
+        // Act
+        var result = uut.updateActiveTimExpiration(data);
+
+        // Assert
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void updateActiveTimExpiration_FAIL() throws ParseException {
+         // Arrange
+         var data = new CertExpirationModel();
+         doReturn(false).when(mockActiveTimService).updateActiveTimExpiration(any(), any(), any());
+ 
+         // Act
+         var result = uut.updateActiveTimExpiration(data);
+ 
+         // Assert
+         Assertions.assertFalse(result);
     }
 
     private ActiveTimHolding getActiveTimHolding() {

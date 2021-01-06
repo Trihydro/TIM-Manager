@@ -1,4 +1,4 @@
-package com.trihydro.certexpiration.model;
+package com.trihydro.library.model;
 
 public class CertExpirationModel {
     private String expirationDate;

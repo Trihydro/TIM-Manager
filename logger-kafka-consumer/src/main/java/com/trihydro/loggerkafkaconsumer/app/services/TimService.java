@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +16,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.CertExpirationModel;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimType;
@@ -201,7 +203,7 @@ public class TimService extends BaseService {
         if (StringUtils.isEmpty(name) || StringUtils.isBlank(name))
             return;
         OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
-        if(metaData == null)
+        if (metaData == null)
             return;
 
         // get information from the region name, first check splitname length
@@ -220,8 +222,7 @@ public class TimService extends BaseService {
 
         if (timId == null) {
             // TIM doesn't currently exist. Add it.
-            timId = AddTim(metaData, null, tim, null, null, null, satRecordId,
-                    name);
+            timId = AddTim(metaData, null, tim, null, null, null, satRecordId, name);
 
             if (timId != null) {
                 // we inserted a new TIM, add additional data
@@ -698,5 +699,12 @@ public class TimService extends BaseService {
         }
 
         return itisCodeId;
+    }
+
+    public boolean updateActiveTimExpiration(CertExpirationModel cem) throws ParseException {
+        var minExp = activeTimService.getMinExpiration(cem.getPacketID(), cem.getStartDateTime(),
+                cem.getExpirationDate());
+
+        return activeTimService.updateActiveTimExpiration(cem.getPacketID(), cem.getStartDateTime(), minExp);
     }
 }

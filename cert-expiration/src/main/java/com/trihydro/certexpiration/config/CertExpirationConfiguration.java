@@ -16,12 +16,11 @@ public class CertExpirationConfiguration implements CVRestServiceProps, EmailPro
     private String fromEmail;
     private String environmentName;
 
-    private String depositTopic;
     private String depositGroup;
-    private String cvRestService;
+    private String depositTopic;
+    private String producerTopic;
 
-    private int maxQueueSize;
-    private long processWaitTime;
+    private String cvRestService;
 
     public String getFromEmail() {
         return fromEmail;
@@ -95,19 +94,11 @@ public class CertExpirationConfiguration implements CVRestServiceProps, EmailPro
         this.depositTopic = depositTopic;
     }
 
-    public int getMaxQueueSize() {
-        return maxQueueSize;
+    public String getProducerTopic() {
+        return producerTopic;
     }
 
-    public void setMaxQueueSize(int maxQueueSize) {
-        this.maxQueueSize = maxQueueSize;
-    }
-
-    public long getProcessWaitTime() {
-        return processWaitTime;
-    }
-
-    public void setProcessWaitTime(long processWaitTime) {
-        this.processWaitTime = processWaitTime;
+    public void setProducerTopic(String producerTopic) {
+        this.producerTopic = producerTopic;
     }
 }

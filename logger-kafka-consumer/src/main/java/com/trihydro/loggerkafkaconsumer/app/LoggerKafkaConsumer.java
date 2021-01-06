@@ -1,14 +1,14 @@
 package com.trihydro.loggerkafkaconsumer.app;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Properties;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.trihydro.library.factory.KafkaFactory;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.CertExpirationModel;
 import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.BsmDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.DriverAlertDataConverter;
@@ -20,7 +20,6 @@ import com.trihydro.loggerkafkaconsumer.config.LoggerConfiguration;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +30,7 @@ public class LoggerKafkaConsumer {
 
     private ObjectMapper mapper;
     private LoggerConfiguration loggerConfig;
+    private KafkaFactory kafkaFactory;
     private BsmService bsmService;
     private TimService timService;
     private DriverAlertService driverAlertService;
@@ -41,11 +41,12 @@ public class LoggerKafkaConsumer {
     private EmailHelper emailHelper;
 
     @Autowired
-    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, BsmService _bsmService, TimService _timService,
-            DriverAlertService _driverAlertService, TimDataConverter _timDataConverter,
+    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, KafkaFactory _kafkaFactory, BsmService _bsmService,
+            TimService _timService, DriverAlertService _driverAlertService, TimDataConverter _timDataConverter,
             BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter, Utility _utility,
             EmailHelper _emailHelper) throws IOException, Exception {
         loggerConfig = _loggerConfig;
+        kafkaFactory = _kafkaFactory;
         bsmService = _bsmService;
         timService = _timService;
         driverAlertService = _driverAlertService;
@@ -65,28 +66,16 @@ public class LoggerKafkaConsumer {
     public void startKafkaConsumer() throws Exception {
 
         String endpoint = loggerConfig.getKafkaHostServer() + ":9092";
-
-        // Properties for the kafka topic
-        Properties props = new Properties();
-        props.put("bootstrap.servers", endpoint);
-        props.put("group.id", loggerConfig.getDepositGroup());
-        props.put("auto.commit.interval.ms", "1000");
-        props.put("session.timeout.ms", "30000");
-        props.put("max.poll.interval.ms", loggerConfig.getMaxPollIntervalMs());
-        props.put("max.poll.records", loggerConfig.getMaxPollRecords());
-        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
-
-        String topic = loggerConfig.getDepositTopic();
-
-        stringConsumer.subscribe(Arrays.asList(topic));
-        System.out.println("Subscribed to topic " + topic);
+        var stringConsumer = kafkaFactory.createStringConsumer(endpoint, loggerConfig.getDepositGroup(),
+                loggerConfig.getDepositTopic(), Integer.valueOf(loggerConfig.getMaxPollIntervalMs()),
+                Integer.valueOf(loggerConfig.getMaxPollRecords()));
 
         Gson gson = new Gson();
 
         try {
-            OdeData odeData = new OdeData();
+            OdeData odeData;
+            CertExpirationModel certExpirationModel;
+
             var recordCount = 0;
             while (true) {
                 ConsumerRecords<String, String> records = stringConsumer.poll(100);
@@ -141,6 +130,28 @@ public class LoggerKafkaConsumer {
                                     utility.logWithDate("Failed to parse topic.OdeDriverAlertJson, insert fails");
                                 }
                                 break;
+
+                            case "topic.OdeTIMCertExpirationTimeJson":
+                                try {
+                                    certExpirationModel = gson.fromJson(tdw.getData(), CertExpirationModel.class);
+                                    var success = timService.updateActiveTimExpiration(certExpirationModel);
+                                    if (success) {
+                                        utility.logWithDate("Successfully updated expiration date");
+                                    } else {
+                                        utility.logWithDate(String.format("Failed to update expiration for data: %s",
+                                                tdw.getData()));
+
+                                        String body = "The CertExpirationConsumer failed attempting to update an ActiveTim record";
+                                        body += "<br/>";
+                                        body += "The associated expiration topic record is: <br/>";
+                                        body += tdw.getData();
+                                        emailHelper.SendEmail(loggerConfig.getAlertAddresses(),
+                                                "CertExpirationConsumer Failed To Update ActiveTim", body);
+                                    }
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                break;
                         }
                     } else {
                         utility.logWithDate("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
@@ -154,7 +165,7 @@ public class LoggerKafkaConsumer {
             utility.logWithDate(ex.getMessage());
             emailHelper.ContainerRestarted(loggerConfig.getAlertAddresses(), loggerConfig.getMailPort(),
                     loggerConfig.getMailHost(), loggerConfig.getFromEmail(), "Logger Kafka Consumer");
-            throw (ex);
+            throw ex;
         } finally {
             try {
                 stringConsumer.close();

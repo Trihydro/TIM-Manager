@@ -67,7 +67,8 @@ public class LoggerKafkaConsumer {
 
         String endpoint = loggerConfig.getKafkaHostServer() + ":9092";
         var stringConsumer = kafkaFactory.createStringConsumer(endpoint, loggerConfig.getDepositGroup(),
-                loggerConfig.getDepositTopic());
+                loggerConfig.getDepositTopic(), Integer.valueOf(loggerConfig.getMaxPollIntervalMs()),
+                Integer.valueOf(loggerConfig.getMaxPollRecords()));
 
         Gson gson = new Gson();
 

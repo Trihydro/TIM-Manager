@@ -65,6 +65,7 @@ public class CertExpirationConsumer {
 			utility.logWithDate(ex.getMessage());
 			emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
 					configProperties.getMailHost(), configProperties.getFromEmail(), "Logger Kafka Consumer");
+			// Re-throw exception to cause container to exit and restart
 			throw ex;
 		} finally {
 			try {

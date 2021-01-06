@@ -39,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class CertExpirationConsumerTest {
     private static final String TOPIC = "topic";
-    private static final String PROCUDERTOPIC = "producerTopic";
+    private static final String PRODUCERTOPIC = "producerTopic";
     private static final int PARTITION = 0;
     private static final String EXPRECORD = "{\"expirationDate\":\"2020-10-20T16:26:07.000Z\",\"packetID\":\"3C8E8DF2470B1A772E\",\"requiredExpirationDate\":\"2020-11-05T20:57:26.037Z\",\"startDateTime\":\"2020-10-14T15:37:26.037Z\"}";
     private static final long TIMESTAMP = System.currentTimeMillis() - 5000;// 5 seconds ago
@@ -69,7 +69,7 @@ public class CertExpirationConsumerTest {
     @BeforeEach
     public void setUp() throws Exception {
         doReturn(CERTTOPIC).when(mockConfigProperties).getDepositTopic();
-        doReturn(PROCUDERTOPIC).when(mockConfigProperties).getProducerTopic();
+        doReturn(PRODUCERTOPIC).when(mockConfigProperties).getProducerTopic();
 
         // init mockConsumer, setup a poll
         var record = new ConsumerRecord<>(TOPIC, PARTITION, OFFSET, TIMESTAMP, TimestampType.NO_TIMESTAMP_TYPE,

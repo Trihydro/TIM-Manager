@@ -1,5 +1,6 @@
 package com.trihydro.loggerkafkaconsumer;
 
+import com.trihydro.library.factory.KafkaFactory;
 import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
@@ -17,7 +18,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Import;
 
 @Import({ Utility.class, DbInteractions.class, JsonToJavaConverter.class, TimOracleTables.class, BsmOracleTables.class,
-		SQLNullHandler.class, DriverAlertOracleTables.class, EmailHelper.class, JavaMailSenderImplProvider.class })
+		SQLNullHandler.class, DriverAlertOracleTables.class, EmailHelper.class, JavaMailSenderImplProvider.class,
+		KafkaFactory.class })
 @SpringBootApplication
 @EnableConfigurationProperties(LoggerConfiguration.class)
 public class Application {

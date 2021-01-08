@@ -344,8 +344,8 @@ public class ActiveTimService extends BaseService {
         try {
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
-            String query = "SELECT ACTIVE_TIM.* FROM ACTIVE_TIM JOIN TIM ON ACTIVE_TIM.TIM_ID = TIM.TIM_ID"
-                    + "WHERE TIM.PACKET_ID = '" + packetID + "'";
+            String query = "SELECT ACTIVE_TIM.* FROM ACTIVE_TIM JOIN TIM ON ACTIVE_TIM.TIM_ID = TIM.TIM_ID "
+                    + "WHERE TIM.PACKET_ID = '" + packetID + "';";
 
             rs = statement.executeQuery(query);
 

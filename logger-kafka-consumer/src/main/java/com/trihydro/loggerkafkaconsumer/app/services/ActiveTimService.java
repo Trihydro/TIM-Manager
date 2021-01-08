@@ -345,7 +345,7 @@ public class ActiveTimService extends BaseService {
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             String query = "SELECT ACTIVE_TIM.* FROM ACTIVE_TIM JOIN TIM ON ACTIVE_TIM.TIM_ID = TIM.TIM_ID "
-                    + "WHERE TIM.PACKET_ID = '" + packetID + "';";
+                    + "WHERE TIM.PACKET_ID = '" + packetID + "'";
 
             rs = statement.executeQuery(query);
 
@@ -358,7 +358,7 @@ public class ActiveTimService extends BaseService {
                 activeTim.setClientId(rs.getString("CLIENT_ID"));
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
-                activeTim.setStartDateTime(rs.getString("TIM_START"));
+                activeTim.setStartTimestamp(rs.getTimestamp("TIM_START"));
                 activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));

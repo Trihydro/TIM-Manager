@@ -196,16 +196,15 @@ public class LoggerKafkaConsumer {
     private boolean messageSuperseded(String startTime, ActiveTim dbRecord) {
         try {
             Date expectedStart = utility.convertDate(startTime);
-            Date dbStart = utility.convertDate(dbRecord.getStartDateTime());
 
-            if(expectedStart == null || dbStart == null) {
+            if(expectedStart == null || dbRecord.getStartTimestamp() == null) {
                 return false;
             }
 
             // If db record bas a start time that's later than the cert expiration model's start time,
             // then the TIM in question must have been updated, and the cert expiration model we're
             // currently processing has been superseded.
-            return expectedStart.getTime() < dbStart.getTime();
+            return expectedStart.getTime() < dbRecord.getStartTimestamp().getTime();
         } catch (Exception ex) {
             utility.logWithDate("Error while checking if message was superceded: " + ex.getMessage());
             return false;

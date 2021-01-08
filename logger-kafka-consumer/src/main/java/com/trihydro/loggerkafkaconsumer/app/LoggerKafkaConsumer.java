@@ -1,6 +1,7 @@
 package com.trihydro.loggerkafkaconsumer.app;
 
 import java.io.IOException;
+import java.util.Date;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,11 +9,13 @@ import com.google.gson.Gson;
 import com.trihydro.library.factory.KafkaFactory;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.CertExpirationModel;
 import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.BsmDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.DriverAlertDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.TimDataConverter;
+import com.trihydro.loggerkafkaconsumer.app.services.ActiveTimService;
 import com.trihydro.loggerkafkaconsumer.app.services.BsmService;
 import com.trihydro.loggerkafkaconsumer.app.services.DriverAlertService;
 import com.trihydro.loggerkafkaconsumer.app.services.TimService;
@@ -32,6 +35,7 @@ public class LoggerKafkaConsumer {
     private LoggerConfiguration loggerConfig;
     private KafkaFactory kafkaFactory;
     private BsmService bsmService;
+    private ActiveTimService activeTimService;
     private TimService timService;
     private DriverAlertService driverAlertService;
     private TimDataConverter timDataConverter;
@@ -42,12 +46,14 @@ public class LoggerKafkaConsumer {
 
     @Autowired
     public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, KafkaFactory _kafkaFactory, BsmService _bsmService,
-            TimService _timService, DriverAlertService _driverAlertService, TimDataConverter _timDataConverter,
-            BsmDataConverter _bsmDataConverter, DriverAlertDataConverter _daConverter, Utility _utility,
-            EmailHelper _emailHelper) throws IOException, Exception {
+            ActiveTimService _activeTimService, TimService _timService, DriverAlertService _driverAlertService,
+            TimDataConverter _timDataConverter, BsmDataConverter _bsmDataConverter,
+            DriverAlertDataConverter _daConverter, Utility _utility, EmailHelper _emailHelper)
+            throws IOException, Exception {
         loggerConfig = _loggerConfig;
         kafkaFactory = _kafkaFactory;
         bsmService = _bsmService;
+        activeTimService = _activeTimService;
         timService = _timService;
         driverAlertService = _driverAlertService;
         timDataConverter = _timDataConverter;
@@ -140,15 +146,27 @@ public class LoggerKafkaConsumer {
                                     if (success) {
                                         utility.logWithDate("Successfully updated expiration date");
                                     } else {
-                                        utility.logWithDate(String.format("Failed to update expiration for data: %s",
-                                                tdw.getData()));
+                                        // Check if message was superseded
+                                        var activeTim = activeTimService
+                                                .getActiveTimByPacketId(certExpirationModel.getPacketID());
 
-                                        String body = "The CertExpirationConsumer failed attempting to update an ActiveTim record";
-                                        body += "<br/>";
-                                        body += "The associated expiration topic record is: <br/>";
-                                        body += tdw.getData();
-                                        emailHelper.SendEmail(loggerConfig.getAlertAddresses(),
-                                                "CertExpirationConsumer Failed To Update ActiveTim", body);
+                                        if (activeTim == null
+                                                || !messageSuperseded(certExpirationModel.getStartDateTime(),
+                                                        activeTim)) {
+                                            utility.logWithDate(String
+                                                    .format("Failed to update expiration for data: %s", tdw.getData()));
+
+                                            String body = "The CertExpirationConsumer failed attempting to update an ActiveTim record";
+                                            body += "<br/>";
+                                            body += "The associated expiration topic record is: <br/>";
+                                            body += tdw.getData();
+                                            emailHelper.SendEmail(loggerConfig.getAlertAddresses(),
+                                                    "CertExpirationConsumer Failed To Update ActiveTim", body);
+                                        } else {
+                                            utility.logWithDate(String.format(
+                                                    "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
+                                                    activeTim.getActiveTimId(), certExpirationModel.getPacketID()));
+                                        }
                                     }
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
@@ -174,6 +192,24 @@ public class LoggerKafkaConsumer {
             } catch (Exception consumerEx) {
                 consumerEx.printStackTrace();
             }
+        }
+    }
+
+    private boolean messageSuperseded(String startTime, ActiveTim dbRecord) {
+        try {
+            Date expectedStart = utility.convertDate(startTime);
+
+            if(expectedStart == null || dbRecord.getStartTimestamp() == null) {
+                return false;
+            }
+
+            // If db record bas a start time that's later than the cert expiration model's start time,
+            // then the TIM in question must have been updated, and the cert expiration model we're
+            // currently processing has been superseded.
+            return expectedStart.getTime() < dbRecord.getStartTimestamp().getTime();
+        } catch (Exception ex) {
+            utility.logWithDate("Error while checking if message was superceded: " + ex.getMessage());
+            return false;
         }
     }
 }

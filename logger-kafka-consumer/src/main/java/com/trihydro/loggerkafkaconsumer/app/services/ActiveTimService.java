@@ -335,48 +335,113 @@ public class ActiveTimService extends BaseService {
         return activeTim;
     }
 
+    public ActiveTim getActiveTimByPacketId(String packetID) {
+        ActiveTim activeTim = null;
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = dbInteractions.getConnectionPool();
+            statement = connection.createStatement();
+            String query = "SELECT ACTIVE_TIM.* FROM ACTIVE_TIM JOIN TIM ON ACTIVE_TIM.TIM_ID = TIM.TIM_ID "
+                    + "WHERE TIM.PACKET_ID = '" + packetID + "'";
+
+            rs = statement.executeQuery(query);
+
+            // convert to ActiveTim object
+            while (rs.next()) {
+                activeTim = new ActiveTim();
+                activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+                activeTim.setTimId(rs.getLong("TIM_ID"));
+                activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+                activeTim.setClientId(rs.getString("CLIENT_ID"));
+                activeTim.setDirection(rs.getString("DIRECTION"));
+                activeTim.setEndDateTime(rs.getString("TIM_END"));
+                activeTim.setStartTimestamp(rs.getTimestamp("TIM_START", UTCCalendar));
+                activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+                activeTim.setRoute(rs.getString("ROUTE"));
+                activeTim.setPk(rs.getInt("PK"));
+
+                Coordinate startPoint = null;
+                Coordinate endPoint = null;
+                BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+                BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
+                if (!rs.wasNull()) {
+                    startPoint = new Coordinate(startLat, startLon);
+                }
+                activeTim.setStartPoint(startPoint);
+
+                BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+                BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
+                if (!rs.wasNull()) {
+                    endPoint = new Coordinate(endLat, endLon);
+                }
+                activeTim.setEndPoint(endPoint);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return activeTim;
+    }
+
     public boolean updateActiveTimExpiration(String packetID, String startDate, String expDate) {
         Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		boolean success = false;
+        PreparedStatement preparedStatement = null;
+        boolean success = false;
 
-		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
-		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-		query += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
+        String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
+        query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+        query += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
 
-		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
-		updateStatement += query;
-		updateStatement += ")";
+        String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+        updateStatement += query;
+        updateStatement += ")";
 
-		try {
-			connection = dbInteractions.getConnectionPool();
-			preparedStatement = connection.prepareStatement(updateStatement);
-			preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
-													// (GetMinExpiration)
-			preparedStatement.setObject(2, packetID);
-			preparedStatement.setObject(3, translateIso8601ToTimestampFormat(startDate));
+        try {
+            connection = dbInteractions.getConnectionPool();
+            preparedStatement = connection.prepareStatement(updateStatement);
+            preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
+                                                    // (GetMinExpiration)
+            preparedStatement.setObject(2, packetID);
+            preparedStatement.setObject(3, translateIso8601ToTimestampFormat(startDate));
 
-			// execute update statement
-			success = dbInteractions.updateOrDelete(preparedStatement);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		} finally {
-			try {
-				// close prepared statement
-				if (preparedStatement != null)
-					preparedStatement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		utility.logWithDate(
-				String.format("Called UpdateExpiration with packetID: %s, startDate: %s, expDate: %s. Successful: %s",
-						packetID, startDate, expDate, success));
-		return success;
+            // execute update statement
+            success = dbInteractions.updateOrDelete(preparedStatement);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        utility.logWithDate(
+                String.format("Called UpdateExpiration with packetID: %s, startDate: %s, expDate: %s. Successful: %s",
+                        packetID, startDate, expDate, success));
+        return success;
     }
 
     public String getMinExpiration(String packetID, String startDate, String expDate) throws ParseException {

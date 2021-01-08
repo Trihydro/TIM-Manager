@@ -125,12 +125,14 @@ public class LoggerKafkaConsumer {
                                 break;
 
                             case "topic.OdeBsmJson":
-                                odeData = bsmDataConverter.processBsmJson(tdw.getData());
-                                if (odeData != null) {
-                                    bsmService.addBSMToOracleDB(odeData, tdw.getData());
-                                } else {
-                                    utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
-                                }
+                                // commenting for now to prevent calling. this may be updated in the future so
+                                // logic has been left in
+                                // odeData = bsmDataConverter.processBsmJson(tdw.getData());
+                                // if (odeData != null) {
+                                // bsmService.addBSMToOracleDB(odeData, tdw.getData());
+                                // } else {
+                                // utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
+                                // }
                                 break;
 
                             case "topic.OdeDriverAlertJson":

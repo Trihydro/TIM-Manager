@@ -358,7 +358,7 @@ public class ActiveTimService extends BaseService {
                 activeTim.setClientId(rs.getString("CLIENT_ID"));
                 activeTim.setDirection(rs.getString("DIRECTION"));
                 activeTim.setEndDateTime(rs.getString("TIM_END"));
-                activeTim.setStartTimestamp(rs.getTimestamp("TIM_START"));
+                activeTim.setStartTimestamp(rs.getTimestamp("TIM_START", UTCCalendar));
                 activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
                 activeTim.setRoute(rs.getString("ROUTE"));
                 activeTim.setPk(rs.getInt("PK"));

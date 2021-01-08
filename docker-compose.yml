@@ -203,47 +203,26 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  bsm_logger:
-    build: ode-data-logger
-    restart: always
-    environment:
-      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-      TRAC_URL: ${LOGGER_TRAC_URL}
-      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${BSM_TOPIC}
-      DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
-      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-      ENV: ${LOGGER_ENV}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  bsm_logger_2:
-    build: ode-data-logger
-    restart: always
-    environment:
-      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-      TRAC_URL: ${LOGGER_TRAC_URL}
-      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${BSM_TOPIC}
-      DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
-      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-      ENV: ${LOGGER_ENV}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
+  # bsm_logger:
+  #   build: ode-data-logger
+  #   restart: always
+  #   environment:
+  #     KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
+  #     TRAC_URL: ${LOGGER_TRAC_URL}
+  #     ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+  #     FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+  #     ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
+  #     MAIL_HOST: ${MAIL_HOST}
+  #     MAIL_PORT: ${MAIL_PORT}
+  #     DEPOSIT_TOPIC: ${BSM_TOPIC}
+  #     DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
+  #     CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+  #     PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
+  #     ENV: ${LOGGER_ENV}
+  #   logging:
+  #     options:
+  #       max-size: "20m"
+  #       max-file: "3"
 
   tim_logger_mongo:
     build: ode-mongo-logger

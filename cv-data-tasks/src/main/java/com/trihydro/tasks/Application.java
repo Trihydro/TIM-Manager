@@ -38,7 +38,6 @@ import com.trihydro.library.service.TmddService;
 import com.trihydro.library.service.UtilityService;
 import com.trihydro.library.service.WydotTimService;
 import com.trihydro.tasks.actions.CleanupActiveTims;
-import com.trihydro.tasks.actions.CleanupBsms;
 import com.trihydro.tasks.actions.RemoveExpiredActiveTims;
 import com.trihydro.tasks.actions.RetentionPolicyEnforcement;
 import com.trihydro.tasks.actions.ValidateRsus;
@@ -67,7 +66,7 @@ public class Application {
 
         private RemoveExpiredActiveTims removeExpiredActiveTims;
         private CleanupActiveTims cleanupActiveTims;
-        private CleanupBsms cleanupBsms;
+        //private CleanupBsms cleanupBsms;
         private ValidateSdx sdxValidator;
         private ValidateRsus rsuValidator;
         private ValidateTmdd tmddValidator;
@@ -77,14 +76,13 @@ public class Application {
 
         @Autowired
         public void InjectDependencies(DataTasksConfiguration _config, RemoveExpiredActiveTims _removeExpiredActiveTims,
-                        CleanupActiveTims _cleanupActiveTims, CleanupBsms _cleanupBsms, ValidateSdx _sdxValidator,
+                        CleanupActiveTims _cleanupActiveTims, ValidateSdx _sdxValidator,
                         ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
                         RetentionPolicyEnforcement _retentionEnforcement, VerifyHSMFunctional _hsmFunctional,
                         Utility _utility) {
                 config = _config;
                 removeExpiredActiveTims = _removeExpiredActiveTims;
                 cleanupActiveTims = _cleanupActiveTims;
-                cleanupBsms = _cleanupBsms;
                 sdxValidator = _sdxValidator;
                 rsuValidator = _rsuValidator;
                 tmddValidator = _tmddValidator;
@@ -110,8 +108,8 @@ public class Application {
                                 TimeUnit.MINUTES);
 
                 // Cleanup BSMs
-                scheduledExecutorService.scheduleAtFixedRate(cleanupBsms, 10, config.getBsmCleanupPeriodMinutes(),
-                                TimeUnit.MINUTES);
+                // scheduledExecutorService.scheduleAtFixedRate(cleanupBsms, 10, config.getBsmCleanupPeriodMinutes(),
+                //                 TimeUnit.MINUTES);
 
                 // SDX Validator
                 scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 15, config.getSdxValidationPeriodMinutes(),

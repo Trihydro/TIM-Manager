@@ -149,6 +149,9 @@ public class ValidateTmddTest {
         when(mockActiveTimService.getActiveTimsWithItisCodes(true)).thenReturn(Arrays.asList(activeTims));
         when(mockItisCodeService.selectAllTmddItisCodes()).thenReturn(Arrays.asList(itisCodes));
 
+        TimDeleteSummary tds = new TimDeleteSummary();
+        when(mockWydotTimService.deleteTimsFromRsusAndSdx(any())).thenReturn(tds);
+
         // Act
         uut.run();
 

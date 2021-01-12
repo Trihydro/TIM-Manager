@@ -223,7 +223,7 @@ public class TimGenerationHelper {
                     codes = codes.replace("{", "");
                     codes = codes.replace("}", "");
 
-                    // codes not looks like: 1234,5678,0987
+                    // codes now looks like: 1234,5678,0987
                     String[] itisCodes = codes.split(",");
                     DataFrame df = tim.getDataframes()[0];
                     df.setItems(itisCodes);

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
@@ -40,9 +41,9 @@ public class WydotTimCcController extends WydotTimBaseController {
     @Autowired
     public WydotTimCcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider) {
+            RestTemplateProvider _restTemplateProvider, Utility _utility) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider);
+                _restTemplateProvider, _utility);
     }
 
     @RequestMapping(value = "/cc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -51,10 +52,10 @@ public class WydotTimCcController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - CHAIN CONTROL TIM");
+        utility.logWithDate(dateFormat.format(date) + " - CHAIN CONTROL TIM", this.getClass());
 
         String post = gson.toJson(timRcList);
-        System.out.println(post.toString());
+        utility.logWithDate(post.toString(), this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;

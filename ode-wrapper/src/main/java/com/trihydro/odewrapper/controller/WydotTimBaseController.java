@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Buffer;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
@@ -45,6 +46,7 @@ public abstract class WydotTimBaseController {
     private SetItisCodes setItisCodes;
     protected ActiveTimService activeTimService;
     protected RestTemplateProvider restTemplateProvider;
+    protected Utility utility;
 
     private List<String> routes = new ArrayList<>();
     protected static Gson gson = new Gson();
@@ -52,13 +54,14 @@ public abstract class WydotTimBaseController {
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider) {
+            RestTemplateProvider _restTemplateProvider, Utility _utility) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
         setItisCodes = _setItisCodes;
         activeTimService = _activeTimService;
         restTemplateProvider = _restTemplateProvider;
+        utility = _utility;
     }
 
     protected String getStartTime() {
@@ -277,8 +280,8 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
-                && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i")
+                && !tim.getDirection().equalsIgnoreCase("d") && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -464,8 +467,8 @@ public abstract class WydotTimBaseController {
             // D
             createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk, content, frameType);
         } else {
-            createSendTims(wydotTim, wydotTim.getDirection().toUpperCase(), timType, startDateTime, endDateTime, pk, content,
-                    frameType);
+            createSendTims(wydotTim, wydotTim.getDirection().toUpperCase(), timType, startDateTime, endDateTime, pk,
+                    content, frameType);
         }
     }
 

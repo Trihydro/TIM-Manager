@@ -591,6 +591,43 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     }
 
     @Test
+    public void GetActiveTimsByWydotTim_BothDirections() throws SQLException {
+        // Arrange
+        List<WydotTim> wydotTims = new ArrayList<>();
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setClientId("clientId");
+        wydotTim.setDirection("B");
+        wydotTims.add(wydotTim);
+        Long timTypeId = -1l;
+        String query = "select * from active_tim where TIM_TYPE_ID = ? and ((CLIENT_ID like ?))";
+
+        // Act
+        ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByWydotTim(wydotTims, timTypeId);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
+        verify(mockConnection).prepareStatement(query);
+        verify(mockPreparedStatement).setLong(1, timTypeId);
+        verify(mockPreparedStatement).setString(2, wydotTim.getClientId() + "%");
+        verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockRs).getLong("TIM_ID");
+        verify(mockRs).getString("SAT_RECORD_ID");
+        verify(mockRs).getString("CLIENT_ID");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getString("TIM_END");
+        verify(mockRs).getString("TIM_START");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getInt("PK");
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
     public void GetActiveTimsByWydotTim_FAIL() throws SQLException {
         // Arrange
         List<WydotTim> wydotTims = new ArrayList<>();

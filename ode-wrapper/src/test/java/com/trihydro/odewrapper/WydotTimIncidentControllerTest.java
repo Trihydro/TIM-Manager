@@ -10,15 +10,16 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.controller.WydotTimIncidentController;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
-import com.trihydro.library.service.WydotTimService;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +43,8 @@ public class WydotTimIncidentControllerTest {
 	TimTypeService mockTimTypeService;
 	@Mock
 	SetItisCodes setItisCodes;
+	@Mock
+	Utility utility;
 
 	@InjectMocks
 	@Spy

@@ -3,6 +3,7 @@ package com.trihydro.odewrapper.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CustomItisEnum;
 import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.library.model.ItisCode;
@@ -25,13 +26,16 @@ public class SetItisCodes {
     private List<IncidentChoice> incidentActions;
     private IncidentChoicesService incidentChoicesService;
     private ItisCodeService itisCodeService;
+    private Utility utility;
 
     private List<ItisCode> itisCodes;
 
     @Autowired
-    public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService) {
+    public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService,
+            Utility _utility) {
         itisCodeService = _itisCodeService;
         incidentChoicesService = _incidentChoicesService;
+        utility = _utility;
     }
 
     public List<ItisCode> getItisCodes() {
@@ -61,6 +65,10 @@ public class SetItisCodes {
     public List<String> setItisCodesRc(WydotTimRc wydotTim) {
 
         List<String> items = new ArrayList<String>();
+
+        if (wydotTim.getAdvisory() == null) {
+            return items;
+        }
 
         ItisCode code = null;
 
@@ -126,8 +134,8 @@ public class SetItisCodes {
         ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
                 .findFirst().orElse(null);
 
-        System.out.println("Availablity : " + wydotTim.getAvailability());
-        System.out.println("Exit : " + wydotTim.getExit());
+        utility.logWithDate("Availablity : " + wydotTim.getAvailability(), this.getClass());
+        utility.logWithDate("Exit : " + wydotTim.getExit(), this.getClass());
 
         if (code != null)
             items.add(wydotTim.getAvailability().toString());
@@ -149,7 +157,7 @@ public class SetItisCodes {
             }
         } else {
             items.add("7986");// Rest Area
-            System.out.println("rest area");
+            utility.logWithDate("rest area", this.getClass());
         }
 
         return items;
@@ -180,7 +188,7 @@ public class SetItisCodes {
         // check to see if code exists
         List<String> items = new ArrayList<String>();
 
-        System.out.println("availability:" + wydotTim.getAvailability());
+        utility.logWithDate("availability:" + wydotTim.getAvailability(), this.getClass());
 
         ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
                 .findFirst().orElse(null);

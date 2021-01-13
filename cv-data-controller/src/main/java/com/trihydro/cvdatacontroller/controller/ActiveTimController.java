@@ -310,7 +310,7 @@ public class ActiveTimController extends BaseController {
 
 		return ResponseEntity.ok(activeTim);
 	}
-	
+
 	@RequestMapping(value = "/update-sat-record-id/{activeTimId}/{satRecordId}", method = RequestMethod.PUT)
 	public ResponseEntity<Boolean> updateActiveTim_SatRecordId(@PathVariable Long activeTimId,
 			@PathVariable String satRecordId) {
@@ -781,7 +781,7 @@ public class ActiveTimController extends BaseController {
 				}
 				query += "(CLIENT_ID like ?";
 				wydotTim = wydotTims.get(i);
-				if (wydotTim.getDirection() != null) {
+				if (wydotTim.getDirection() != null && !wydotTim.getDirection().equalsIgnoreCase("B")) {
 					query += " and DIRECTION = ?";
 				}
 				query += ")";
@@ -804,7 +804,7 @@ public class ActiveTimController extends BaseController {
 				index++;
 
 				// set direction
-				if (wydotTim.getDirection() != null) {
+				if (wydotTim.getDirection() != null && !wydotTim.getDirection().equalsIgnoreCase("B")) {
 					ps.setString(index, wydotTim.getDirection());
 					index++;
 				}

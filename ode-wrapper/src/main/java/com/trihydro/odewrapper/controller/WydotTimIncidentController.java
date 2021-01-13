@@ -7,17 +7,18 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
-import com.trihydro.library.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,9 +43,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     @Autowired
     public WydotTimIncidentController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider) {
+            RestTemplateProvider _restTemplateProvider, Utility _utility) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider);
+                _restTemplateProvider, _utility);
     }
 
     @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -53,9 +54,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - Create Incident TIM");
+        utility.logWithDate(dateFormat.format(date) + " - Create Incident TIM", this.getClass());
         String post = gson.toJson(timIncidentList);
-        System.out.println(post.toString());
+        utility.logWithDate(post.toString(), this.getClass());
 
         List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
 
@@ -91,9 +92,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - Update Incident TIM");
+        utility.logWithDate(dateFormat.format(date) + " - Update Incident TIM", this.getClass());
         String post = gson.toJson(timIncidentList);
-        System.out.println(post.toString());
+        utility.logWithDate(post.toString(), this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -147,7 +148,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - Delete Incident TIM");
+        utility.logWithDate(dateFormat.format(date) + " - Delete Incident TIM", this.getClass());
 
         // clear TIM
         wydotTimService.clearTimsById("I", incidentId, null);

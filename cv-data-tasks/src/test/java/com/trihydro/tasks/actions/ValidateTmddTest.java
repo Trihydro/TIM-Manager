@@ -149,6 +149,9 @@ public class ValidateTmddTest {
         when(mockActiveTimService.getActiveTimsWithItisCodes(true)).thenReturn(Arrays.asList(activeTims));
         when(mockItisCodeService.selectAllTmddItisCodes()).thenReturn(Arrays.asList(itisCodes));
 
+        TimDeleteSummary tds = new TimDeleteSummary();
+        when(mockWydotTimService.deleteTimsFromRsusAndSdx(any())).thenReturn(tds);
+
         // Act
         uut.run();
 
@@ -157,6 +160,7 @@ public class ValidateTmddTest {
         verify(mockTmddService).getTmddEvents();
         verify(mockActiveTimService).getActiveTimsWithItisCodes(true);
         verify(mockItisCodeService).selectAllTmddItisCodes();
+        verify(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
 
         // Validation summary email generated
         verify(mockEmailFormatter).generateTmddSummaryEmail(unableToVerifyCaptor.capture(),
@@ -314,6 +318,9 @@ public class ValidateTmddTest {
         when(mockTmddService.getTmddEvents()).thenReturn(Arrays.asList(feus));
         when(mockActiveTimService.getActiveTimsWithItisCodes(true)).thenReturn(Arrays.asList(activeTims));
         when(mockItisCodeService.selectAllTmddItisCodes()).thenReturn(Arrays.asList(itisCodes));
+
+        TimDeleteSummary tds = new TimDeleteSummary();
+        when(mockWydotTimService.deleteTimsFromRsusAndSdx(any())).thenReturn(tds);
 
         // Throw exception when sending email
         doThrow(new MailSendException("unable to send")).when(mockEmailHelper).SendEmail(any(), any(), any());

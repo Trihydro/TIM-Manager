@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
@@ -14,9 +15,9 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.library.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,9 +54,9 @@ public class UtilityController extends WydotTimBaseController {
     @Autowired
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            OdeService _odeService, RestTemplateProvider _restTemplateProvider) {
+            OdeService _odeService, RestTemplateProvider _restTemplateProvider, Utility _utility) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider);
+                _restTemplateProvider, _utility);
         this.odeService = _odeService;
     }
 
@@ -63,7 +64,7 @@ public class UtilityController extends WydotTimBaseController {
     public ResponseEntity<String> allRsusTimCheck() {
 
         // String url = configuration.getOdeUrl();
-        System.out.println("RSU TIM Check");
+        utility.logWithDate("RSU TIM Check", this.getClass());
 
         List<RsuCheckResults> rsuCheckResultsList = new ArrayList<RsuCheckResults>();
 
@@ -98,7 +99,7 @@ public class UtilityController extends WydotTimBaseController {
     @RequestMapping(value = "/rsu-tim-check/{address:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<String> rsuTimCheck(@PathVariable String address) {
 
-        System.out.println("RSU TIM Check");
+        utility.logWithDate("RSU TIM Check", this.getClass());
 
         List<RsuCheckResults> rsuCheckResultsList = new ArrayList<RsuCheckResults>();
 
@@ -112,7 +113,7 @@ public class UtilityController extends WydotTimBaseController {
         rsuCheckResults.rsuIndexList = new ArrayList<Integer>();
         rsuCheckResults.activeTimIndicesList = new ArrayList<Integer>();
 
-        System.out.println(rsu.getRsuTarget());
+        utility.logWithDate(rsu.getRsuTarget(), this.getClass());
         rsuCheckResults.rsuTarget = rsu.getRsuTarget();
 
         com.trihydro.library.model.TimQuery timQuery = odeService.submitTimQuery(rsu, 0);

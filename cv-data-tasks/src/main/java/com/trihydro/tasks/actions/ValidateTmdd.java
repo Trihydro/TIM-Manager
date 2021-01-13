@@ -412,17 +412,48 @@ public class ValidateTmdd implements Runnable {
     }
 
     private String updateAndResend(List<ActiveTimValidationResult> validationResults) {
-        var exceptions = timGenerationHelper.updateAndResubmitToOde(validationResults);
+        List<ActiveTim> toClear = new ArrayList<>();
+        List<ActiveTimValidationResult> toResend = new ArrayList<>();
 
-        String exMsg = "";
-        if (exceptions.size() > 0) {
-            exMsg += "The Validate TMDD application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
-            exMsg += "<br/>";
-            for (ResubmitTimException rte : exceptions) {
-                exMsg += gson.toJson(rte);
-                exMsg += "<br/>";
+        for (var result : validationResults) {
+            var itisCodeError = result.getErrors().stream().filter(err -> err.getName() == ActiveTimErrorType.itisCodes)
+                    .findAny();
+            if (itisCodeError.isPresent()) {
+
+                if (itisCodeError.get().getTmddValue().replaceAll("\\{|\\s|\\}", "").equals("6011")) {
+                    // If it should be dry roads, submit an All Clear. This will delete the active
+                    // tim, rendering any other errors, if present, irrelevant.
+                    toClear.add(result.getActiveTim());
+
+                    // All Clear queued, no need to proceed with re-submitting the TIM (it will just
+                    // get cleared). So we won't add it to toResend.
+                } else {
+                    toResend.add(result);
+                }
+            } else {
+                toResend.add(result);
             }
         }
+
+        String exMsg = "";
+
+        if (toResend.size() > 0) {
+            var exceptions = timGenerationHelper.updateAndResubmitToOde(toResend);
+
+            if (exceptions.size() > 0 ) {
+                exMsg += "The Validate TMDD application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
+                exMsg += "<br/>";
+                for (ResubmitTimException rte : exceptions) {
+                    exMsg += gson.toJson(rte);
+                    exMsg += "<br/>";
+                }
+            }
+        }
+
+        if (toClear.size() > 0) {
+            exMsg += deleteActiveTims(toClear);
+        }
+
         return exMsg;
     }
 
@@ -449,7 +480,5 @@ public class ValidateTmdd implements Runnable {
         }
 
         return errSummary;
-
     }
-
 }

@@ -663,9 +663,8 @@ public class TimGenerationHelper {
                 rsu = new RSU();
                 rsu.setRsuIndex(wydotRsus.get(i).getIndex());
                 rsu.setRsuTarget(wydotRsus.get(i).getRsuTarget());
-                rsu.setRsuUsername(wydotRsus.get(i).getRsuUsername());
-                rsu.setRsuPassword(wydotRsus.get(i).getRsuPassword());
-                rsu.setRsuRetries(2);
+                // rsuUsername, rsuPassword will take ODE defaults. 
+                rsu.setRsuRetries(3);
                 rsu.setRsuTimeout(5000);
                 rsus[0] = rsu;
                 timToSend.getRequest().setRsus(rsus);

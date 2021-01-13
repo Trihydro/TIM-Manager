@@ -89,6 +89,8 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYSDATE + INTERVAL '2' HOUR)";
 			// check that end time isn't within 2hrs
 			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYSDATE + INTERVAL '2' HOUR)";
+			// check that this TIM is capable of being refreshed (direction = I or D)
+			selectStatement += " AND atim.direction IN ('I', 'D')";
 
 			rs = statement.executeQuery(selectStatement);
 

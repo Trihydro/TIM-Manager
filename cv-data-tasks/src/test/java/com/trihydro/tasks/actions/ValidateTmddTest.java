@@ -160,6 +160,7 @@ public class ValidateTmddTest {
         verify(mockTmddService).getTmddEvents();
         verify(mockActiveTimService).getActiveTimsWithItisCodes(true);
         verify(mockItisCodeService).selectAllTmddItisCodes();
+        verify(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
 
         // Validation summary email generated
         verify(mockEmailFormatter).generateTmddSummaryEmail(unableToVerifyCaptor.capture(),

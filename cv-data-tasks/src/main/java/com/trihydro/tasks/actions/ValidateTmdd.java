@@ -419,7 +419,8 @@ public class ValidateTmdd implements Runnable {
             var itisCodeError = result.getErrors().stream().filter(err -> err.getName() == ActiveTimErrorType.itisCodes)
                     .findAny();
             if (itisCodeError.isPresent()) {
-                if (itisCodeError.get().getTmddValue().equals("{ 6011 }")) {
+
+                if (itisCodeError.get().getTmddValue().replaceAll("\\{|\\s|\\}", "").equals("6011")) {
                     // If it should be dry roads, submit an All Clear. This will delete the active
                     // tim, rendering any other errors, if present, irrelevant.
                     toClear.add(result.getActiveTim());

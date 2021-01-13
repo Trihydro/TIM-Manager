@@ -42,12 +42,12 @@ public class TimRefreshController {
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
     public void performTaskUsingCron() {
-        System.out.println("Regular task performed using Cron at " + dateFormat.format(new Date()));
+        utility.logWithDate("Regular task performed using Cron at " + dateFormat.format(new Date()));
 
         // fetch Active_TIM that are expiring within 24 hrs
         List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
-        System.out.println(expiringTims.size() + " expiring TIMs found");
+        utility.logWithDate(expiringTims.size() + " expiring TIMs found");
         List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
         List<ResubmitTimException> exceptionTims = new ArrayList<>();
         List<TimUpdateModel> timsToRefresh = new ArrayList<TimUpdateModel>();

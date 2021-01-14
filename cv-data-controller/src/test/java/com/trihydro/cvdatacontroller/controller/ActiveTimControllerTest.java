@@ -252,9 +252,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetExpiredActiveTims_SUCCESS() throws SQLException {
         // Arrange
-        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE, TIM_END, TIM_START, EXPIRATION_DATE, PK, ACTIVE_TIM.TIM_TYPE_ID from active_tim";
-        statementStr += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
-        statementStr += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+        String statementStr = "select * from ACTIVE_TIM";
+        statementStr += " WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 
         // Act
         ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
@@ -269,7 +268,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getBigDecimal("START_LONGITUDE");
         verify(mockRs).getBigDecimal("END_LATITUDE");
         verify(mockRs).getBigDecimal("END_LONGITUDE");
-        verify(mockRs).getString("TYPE");
         verify(mockRs).getString("CLIENT_ID");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getString("DIRECTION");
@@ -281,9 +279,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetExpiredActiveTims_FAIL() throws SQLException {
         // Arrange
-        String statementStr = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE, TIM_END, TIM_START, EXPIRATION_DATE, PK, ACTIVE_TIM.TIM_TYPE_ID from active_tim";
-        statementStr += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
-        statementStr += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+        String statementStr = "select * from ACTIVE_TIM";
+        statementStr += " WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
         when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException());
 
         // Act

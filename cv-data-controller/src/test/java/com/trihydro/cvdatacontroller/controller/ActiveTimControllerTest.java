@@ -1044,4 +1044,39 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
 
     }
 
+    @Test
+    public void ResetExpirationDate_SUCCESS() throws SQLException {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<>();
+        activeTimIds.add(Long.valueOf(-1));
+
+        // Act
+        ResponseEntity<Boolean> data = uut.ResetExpirationDate(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertTrue(data.getBody(), "Fail return on success");
+        verify(mockConnection).prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
+        verify(mockPreparedStatement).setLong(1, -1l);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void ResetExpirationDate_FAIL() throws SQLException {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<>();
+        activeTimIds.add(Long.valueOf(-1));
+        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1l);
+
+        // Act
+        ResponseEntity<Boolean> data = uut.ResetExpirationDate(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertFalse(data.getBody(), "Success return on error");
+        verify(mockConnection).prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
 }

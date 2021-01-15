@@ -182,7 +182,7 @@ public class ValidateRsus implements Runnable {
                 rsu.setRsuTimeout(3000);
 
                 for (var index : result.getUnaccountedForIndices()) {
-                    var exMsg = odeService.deleteTimFromRsu(rsu, index, config.getOdeUrl());
+                    var exMsg = odeService.deleteTimFromRsu(rsu, index);
                     if (StringUtils.isNotBlank(exMsg)) {
                         unexpectedErrors.add(exMsg);
                     }

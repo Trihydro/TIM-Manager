@@ -53,11 +53,15 @@ public class OdeService {
     }
 
     /**
-     * 
      * @param timToSend The TIM to submit to the ODE
      * @return String representing any errors. If string is empty, no errors
      *         occured.
+     * 
+     * @deprecated to update a message, first clear the target RSU index using
+     *             {@link #deleteTimFromRsu(WydotRsu, Integer)} then submit a new
+     *             TIM using {@link #sendNewTimToRsu(WydotTravelerInputData)}
      */
+    @Deprecated
     public String updateTimOnRsu(WydotTravelerInputData timToSend) {
         String exMsg = "";
         HttpHeaders headers = new HttpHeaders();
@@ -159,7 +163,7 @@ public class OdeService {
         return timQuery;
     }
 
-    public String deleteTimFromRsu(WydotRsu rsu, Integer index, String odeUrl) {
+    public String deleteTimFromRsu(WydotRsu rsu, Integer index) {
         String exMsg = "";
         String rsuJson = gson.toJson(rsu);
 
@@ -167,14 +171,19 @@ public class OdeService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
-        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
-                .exchange(odeUrl + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
+        utility.logWithDate("Deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
 
-        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
-            exMsg = "Failed to delete message from RSU: " + response.getBody();
+        try {
+            // ODE response is misleading due to poor interpretation of SNMP results. If we
+            // establish a connection with the ODE to execute this request, we'll assume
+            // the deletion has at least been attempted.
+            restTemplateProvider.GetRestTemplate_NoErrors().exchange(
+                    odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
+        } catch (RestClientException ex) {
+            exMsg = "Failed to contact ODE to delete message from index " + index + " on RSU " + rsu.getRsuTarget();
             utility.logWithDate(exMsg);
         }
+
         return exMsg;
     }
 }

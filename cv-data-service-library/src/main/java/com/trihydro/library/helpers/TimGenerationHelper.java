@@ -34,7 +34,6 @@ import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.PathNodeLLService;
-import com.trihydro.library.service.RegionService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimGenerationProps;
@@ -69,7 +68,6 @@ public class TimGenerationHelper {
     private MilepostService milepostService;
     private Gson gson;
     private MilepostReduction milepostReduction;
-    private RegionService regionService;
     private RsuService rsuService;
     private TimGenerationProps config;
     private OdeService odeService;
@@ -80,9 +78,9 @@ public class TimGenerationHelper {
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
-            MilepostReduction _milepostReduction, TimGenerationProps _config, RegionService _regionService,
-            RsuService _rsuService, OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService,
-            SdwService _sdwService, SnmpHelper _snmpHelper) {
+            MilepostReduction _milepostReduction, TimGenerationProps _config, RsuService _rsuService,
+            OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService, SdwService _sdwService,
+            SnmpHelper _snmpHelper) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -91,7 +89,6 @@ public class TimGenerationHelper {
         milepostService = _milepostService;
         milepostReduction = _milepostReduction;
         config = _config;
-        regionService = _regionService;
         rsuService = _rsuService;
         odeService = _odeService;
         activeTimHoldingService = _activeTimHoldingService;
@@ -659,11 +656,12 @@ public class TimGenerationHelper {
         if (wydotRsus.size() > 0) {
             RSU rsu = null;
             for (int i = 0; i < wydotRsus.size(); i++) {
+                var wydotRsu = wydotRsus.get(i);
                 // set RSUS
                 rsu = new RSU();
-                rsu.setRsuIndex(wydotRsus.get(i).getIndex());
-                rsu.setRsuTarget(wydotRsus.get(i).getRsuTarget());
-                // rsuUsername, rsuPassword will take ODE defaults. 
+                rsu.setRsuIndex(wydotRsu.getIndex());
+                rsu.setRsuTarget(wydotRsu.getRsuTarget());
+                // rsuUsername, rsuPassword will take ODE defaults.
                 rsu.setRsuRetries(3);
                 rsu.setRsuTimeout(5000);
                 rsus[0] = rsu;
@@ -671,7 +669,13 @@ public class TimGenerationHelper {
 
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
                 utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
-                var rsuExMsg = odeService.updateTimOnRsu(timToSend);
+
+                var rsuClearExMsg = odeService.deleteTimFromRsu(wydotRsu, Integer.valueOf(wydotRsu.getIndex()));
+                var rsuExMsg = odeService.sendNewTimToRsu(timToSend);
+
+                if (!StringUtils.isEmpty(rsuClearExMsg)) {
+                    exMsg += rsuClearExMsg + "\n";
+                }
 
                 if (!StringUtils.isEmpty(rsuExMsg)) {
                     exMsg += rsuExMsg + "\n";
@@ -686,9 +690,6 @@ public class TimGenerationHelper {
                 timToSend.getRequest().setRsus(rsus);
 
                 // get next index
-                // first fetch existing active_tim_holding records
-                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
-                        .getActiveTimHoldingForRsu(dbRsus.get(i).getRsuTarget());
                 TimQuery timQuery = odeService.submitTimQuery(dbRsus.get(i), 0);
 
                 // query failed, don't send TIM
@@ -701,8 +702,18 @@ public class TimGenerationHelper {
                     utility.logWithDate(tmpErrMsg);
                     continue;
                 }
-
+                // Fetch existing active_tim_holding records. If other TIMs are en route to this
+                // RSU, make sure we don't overwrite their claimed indexes
+                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
+                        .getActiveTimHoldingForRsu(dbRsus.get(i).getRsuTarget());
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
+
+                // Finally, fetch all active_tims that are supposed to be on this RSU. Some may
+                // not be there, due to network or RSU issues. Make sure we don't claim an index
+                // that's already been claimed.
+                List<Integer> claimedIndexes = rsuService.getRsuClaimedIndexes(dbRsus.get(i).getRsuId());
+                claimedIndexes.forEach(x -> timQuery.appendIndex(x));
+
                 Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
 
                 // unable to find next available index

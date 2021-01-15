@@ -50,6 +50,12 @@ public class RsuService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
+	public List<Integer> getRsuClaimedIndexes(Integer rsuId) {
+		String url = String.format("%s/rsu-claimed-indexes/%d", config.getCvRestService(), rsuId);
+		ResponseEntity<Integer[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url, Integer[].class);
+		return Arrays.asList(response.getBody());
+	}
+
 	public List<WydotRsu> getRsusByLatLong(String direction, Coordinate startPoint, Coordinate endPoint, String route) {
 		List<WydotRsu> rsus = new ArrayList<>();
 		Comparator<WydotRsu> compLat = (l1, l2) -> l1.getLatitude().compareTo(l2.getLatitude());

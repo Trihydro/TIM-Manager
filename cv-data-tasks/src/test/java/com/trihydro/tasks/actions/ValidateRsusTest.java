@@ -209,7 +209,7 @@ public class ValidateRsusTest {
         Assertions.assertEquals(2, rsuValidationRecords.getValue().get(1).getValidationResults().size());
 
         // We tried to fix the unaccounted for index error
-        verify(mockOdeService).deleteTimFromRsu(any(), eq(5), any());
+        verify(mockOdeService).deleteTimFromRsu(any(), eq(5));
 
         Assertions
                 .assertTrue(rsuValidationRecords.getValue().get(0).getValidationResults().get(0).getRsuUnresponsive());
@@ -315,7 +315,7 @@ public class ValidateRsusTest {
         Assertions.assertEquals(2, lastRsuResult.getValidationResults().get(0).getUnaccountedForIndices().get(0));
 
         // We attempted to clear 0.0.0.2's unaccounted for indices
-        verify(mockOdeService).deleteTimFromRsu(any(), eq(2), any());
+        verify(mockOdeService).deleteTimFromRsu(any(), eq(2));
 
         Assertions.assertEquals(0, unexpectedErrors.getValue().size());
 

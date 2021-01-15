@@ -248,7 +248,8 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).updateTimOnRsu(any());
+        verify(mockOdeService).deleteTimFromRsu(any(), any());
+        verify(mockOdeService).sendNewTimToRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockActiveTimHoldingService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
@@ -938,7 +939,8 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).updateTimOnRsu(any());
+        verify(mockOdeService).deleteTimFromRsu(any(), any());
+        verify(mockOdeService).sendNewTimToRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());

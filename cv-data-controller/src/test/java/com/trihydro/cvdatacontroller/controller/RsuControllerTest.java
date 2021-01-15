@@ -2,6 +2,7 @@ package com.trihydro.cvdatacontroller.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -174,5 +175,48 @@ public class RsuControllerTest extends TestBase<RsuController> {
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
+    }
+
+    @Test
+    public void GetRsuClaimedIndexes_SUCCESS() throws SQLException {
+        // Arrange
+        when(mockRs.getInt("RSU_INDEX")).thenReturn(-1);
+        var statement = "select rsu_index from active_tim inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id"
+                + " where sat_record_id is null and rsu_id = ?";
+
+        // Act
+        var result = uut.GetRsuClaimedIndexes(123);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertEquals(1, result.getBody().size());
+        Assertions.assertEquals(-1, result.getBody().get(0));
+
+        verify(mockConnection).prepareStatement(statement);
+        verify(mockPreparedStatement).setLong(1, 123);
+        verify(mockPreparedStatement).executeQuery();
+        verify(mockRs).getInt("RSU_INDEX");
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void GetRsuClaimedIndexes_FAIL() throws SQLException {
+        // Arrange
+        var statement = "select rsu_index from active_tim inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id"
+                + " where sat_record_id is null and rsu_id = ?";
+        when(mockPreparedStatement.executeQuery()).thenThrow(new SQLException());
+
+        // Act
+        var result = uut.GetRsuClaimedIndexes(123);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+        verify(mockConnection).prepareStatement(statement);
+        verify(mockPreparedStatement).setLong(1, 123);
+        verify(mockPreparedStatement).executeQuery();
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
     }
 }

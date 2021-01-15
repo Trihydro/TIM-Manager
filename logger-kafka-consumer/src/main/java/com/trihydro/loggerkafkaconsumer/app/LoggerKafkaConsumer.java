@@ -57,6 +57,7 @@ public class LoggerKafkaConsumer {
         timService = _timService;
         driverAlertService = _driverAlertService;
         timDataConverter = _timDataConverter;
+        timDataConverter = _timDataConverter;
         bsmDataConverter = _bsmDataConverter;
         daConverter = _daConverter;
         utility = _utility;

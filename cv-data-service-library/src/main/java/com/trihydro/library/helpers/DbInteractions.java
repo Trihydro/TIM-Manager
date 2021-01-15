@@ -54,16 +54,16 @@ public class DbInteractions {
         try {
             return hds.getConnection();
         } catch (SQLException ex) {
-            String body = "The ODE Wrapper failed attempting to open a connection to ";
+            String body = "Failed attempting to open a connection to ";
             body += dbConfig.getDbUrl();
             body += ". <br/>Exception message: ";
             body += ex.getMessage();
             body += "<br/>Stacktrace: ";
             body += ExceptionUtils.getStackTrace(ex);
             try {
-                emailHelper.SendEmail(dbConfig.getAlertAddresses(), "ODE Wrapper Failed To Get Connection", body);
+                emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
             } catch (Exception exception) {
-                utility.logWithDate("ODE Wrapper failed to open connection to " + dbConfig.getDbUrl()
+                utility.logWithDate("Failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");
                 exception.printStackTrace();
             }

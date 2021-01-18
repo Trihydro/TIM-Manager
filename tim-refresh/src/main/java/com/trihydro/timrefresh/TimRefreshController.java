@@ -65,17 +65,27 @@ public class TimRefreshController {
             }
         }
 
+        var resetSuccessful = true;
+
         // attempt to refresh TIMs and collect any exceptions
         if (timsToRefresh.size() > 0) {
             var activeTimIds = timsToRefresh.stream().map(x -> x.getActiveTimId()).collect(Collectors.toList());
+            // Reset expiration dates so they'll be updated after messages are processed.
+            // Success isn't critical to proceed. We'll just end up with redundant resubmissions later on.
+            resetSuccessful = activeTimService.resetActiveTimsExpirationDate(activeTimIds);
             exceptionTims = timGenerationHelper.resubmitToOde(activeTimIds);
         }
 
-        if (invalidTims.size() > 0 || exceptionTims.size() > 0) {
+        if (invalidTims.size() > 0 || exceptionTims.size() > 0 || !resetSuccessful) {
             String body = "";
 
+            if(!resetSuccessful) {
+                body += "An error occurred while resetting the expiration date(s) for the Active TIM(s)";
+                body += "<br/><br/>";
+            }
+
             if (invalidTims.size() > 0) {
-                body = "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
+                body += "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
                 body += "<br/>";
                 body += "The associated ActiveTim records are: <br/>";
                 for (Logging_TimUpdateModel timUpdateModel : invalidTims) {

@@ -52,26 +52,6 @@ public class OdeService {
         return exMsg;
     }
 
-    /**
-     * 
-     * @param timToSend The TIM to submit to the ODE
-     * @return String representing any errors. If string is empty, no errors
-     *         occured.
-     */
-    public String updateTimOnRsu(WydotTravelerInputData timToSend) {
-        String exMsg = "";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<WydotTravelerInputData> entity = new HttpEntity<WydotTravelerInputData>(timToSend, headers);
-        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
-                .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.PUT, entity, String.class);
-        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
-            exMsg = "Failed to update TIM on RSU: " + response.getBody();
-            utility.logWithDate(exMsg);
-        }
-        return exMsg;
-    }
-
     public String sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps) {
         String exMsg = "";
 
@@ -159,7 +139,7 @@ public class OdeService {
         return timQuery;
     }
 
-    public String deleteTimFromRsu(WydotRsu rsu, Integer index, String odeUrl) {
+    public String deleteTimFromRsu(WydotRsu rsu, Integer index) {
         String exMsg = "";
         String rsuJson = gson.toJson(rsu);
 
@@ -167,14 +147,19 @@ public class OdeService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
-        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
-                .exchange(odeUrl + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
+        utility.logWithDate("Deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
 
-        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
-            exMsg = "Failed to delete message from RSU: " + response.getBody();
+        try {
+            // ODE response is misleading due to poor interpretation of SNMP results. If we
+            // establish a connection with the ODE to execute this request, we'll assume
+            // the deletion has at least been attempted.
+            restTemplateProvider.GetRestTemplate_NoErrors().exchange(
+                    odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
+        } catch (RestClientException ex) {
+            exMsg = "Failed to contact ODE to delete message from index " + index + " on RSU " + rsu.getRsuTarget();
             utility.logWithDate(exMsg);
         }
+
         return exMsg;
     }
 }

@@ -1,6 +1,7 @@
 package com.trihydro.cvdatacontroller.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -212,5 +213,48 @@ public class RsuController extends BaseController {
 			}
 		}
 		return ResponseEntity.ok(rsus);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/active-rsu-tim-indexes/{rsuId}")
+	public ResponseEntity<List<Integer>> GetActiveRsuTimIndexes(@PathVariable Integer rsuId) {
+		List<Integer> indexes = new ArrayList<Integer>();
+
+		Connection connection = null;
+		ResultSet rs = null;
+		PreparedStatement statement = null;
+
+		try {
+			// select all RSUs from RSU table
+			var sql = "select rsu_index from active_tim inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id"
+					+ " where sat_record_id is null and rsu_id = ?";
+
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.prepareStatement(sql);
+			statement.setLong(1, rsuId);
+			
+			rs = statement.executeQuery();
+
+			while (rs.next()) {
+				indexes.add(rs.getInt("RSU_INDEX"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(indexes);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return ResponseEntity.ok(indexes);
 	}
 }

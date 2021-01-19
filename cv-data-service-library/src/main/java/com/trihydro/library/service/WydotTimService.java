@@ -41,7 +41,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
@@ -256,10 +255,7 @@ public class WydotTimService {
                 updateTimOnRsu(timToSend, activeTim.getTimId(), tim, rsu.getRsuId(), endDateTime);
             } else {
                 // send new tim to rsu
-                // first fetch existing active_tim_holding records
-                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
-                        .getActiveTimHoldingForRsu(rsu.getRsuTarget());
-
+                // first, determine which indices are currently populated on the RSU
                 TimQuery timQuery = odeService.submitTimQuery(rsu, 0);
 
                 // if query failed, don't send TIM,
@@ -270,7 +266,18 @@ public class WydotTimService {
                     continue;
                 }
 
+                // Fetch existing active_tim_holding records. If other TIMs are en route to this
+                // RSU, make sure we don't overwrite their claimed indexes
+                List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
+                        .getActiveTimHoldingForRsu(rsu.getRsuTarget());
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
+
+                // Finally, fetch all active_tims that are supposed to be on this RSU. Some may
+                // not be there, due to network or RSU issues. Make sure we don't claim an index
+                // that's already been claimed.
+                List<Integer> claimedIndexes = rsuService.getActiveRsuTimIndexes(rsu.getRsuId());
+                claimedIndexes.forEach(x -> timQuery.appendIndex(x));
+
                 Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());
 
                 // if unable to find next available index,
@@ -493,13 +500,17 @@ public class WydotTimService {
         updatedTim.getRequest().getRsus()[0].setRsuIndex(timRsu.getRsuIndex());
         updatedTim.getRequest().setSnmp(snmpHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
-        String timToSendJson = gson.toJson(updatedTim);
-
         try {
-            utility.logWithDate("Updating TIM on RSU. tim_id: " + timId);
-            restTemplateProvider.GetRestTemplate().put(odeProps.getOdeUrl() + "/tim", timToSendJson, String.class);
-        } catch (RestClientException ex) {
-            utility.logWithDate("Failed to send update to RSU");
+            var rsu = getRsu(timRsu.getRsuId());
+            utility.logWithDate("Preparing to submit updated TIM. Clearing index " + timRsu.getRsuIndex() + "on RSU "
+                    + timRsu.getRsuId());
+            // The ODE response code is misleading. If there is a failure in this step or
+            // the next, the issue should get addressed when the RSU Validation task is
+            // ran.
+            deleteTimFromRsu(rsu, timRsu.getRsuIndex());
+            odeService.sendNewTimToRsu(updatedTim);
+        } catch (Exception ex) {
+            utility.logWithDate("Failed to send update to RSU.");
         }
     }
 
@@ -559,7 +570,7 @@ public class WydotTimService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        utility.logWithDate("deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+        utility.logWithDate("Deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
         var response = restTemplateProvider.GetRestTemplate_NoErrors().exchange(
                 odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
 

@@ -248,7 +248,8 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).updateTimOnRsu(any());
+        verify(mockOdeService).deleteTimFromRsu(any(), any());
+        verify(mockOdeService).sendNewTimToRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockActiveTimHoldingService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
@@ -295,7 +296,6 @@ public class TimGenerationHelperTest {
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
-        verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
@@ -341,6 +341,7 @@ public class TimGenerationHelperTest {
 
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockRsuService).getActiveRsuTimIndexes(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
@@ -389,6 +390,7 @@ public class TimGenerationHelperTest {
 
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockRsuService).getActiveRsuTimIndexes(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
@@ -433,6 +435,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockRsuService).getActiveRsuTimIndexes(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
@@ -797,6 +800,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockRsuService).getActiveRsuTimIndexes(any());
         verify(mockDataFrameService, times(2)).getItisCodesForDataFrameId(any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
@@ -846,6 +850,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockRsuService).getActiveRsuTimIndexes(any());
         verify(mockDataFrameService, times(2)).getItisCodesForDataFrameId(any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
@@ -893,6 +898,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockRsuService).getRsusByLatLong(any(), any(), any(), any());
+        verify(mockRsuService).getActiveRsuTimIndexes(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockOdeService).submitTimQuery(isA(WydotRsu.class), isA(Integer.class));
         verify(mockActiveTimHoldingService).getActiveTimHoldingForRsu(any());
@@ -938,7 +944,8 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verify(mockRsuService).getFullRsusTimIsOn(any());
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
-        verify(mockOdeService).updateTimOnRsu(any());
+        verify(mockOdeService).deleteTimFromRsu(any(), any());
+        verify(mockOdeService).sendNewTimToRsu(any());
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());

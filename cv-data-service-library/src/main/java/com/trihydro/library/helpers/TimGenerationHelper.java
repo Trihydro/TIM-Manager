@@ -711,7 +711,7 @@ public class TimGenerationHelper {
                 // Finally, fetch all active_tims that are supposed to be on this RSU. Some may
                 // not be there, due to network or RSU issues. Make sure we don't claim an index
                 // that's already been claimed.
-                List<Integer> claimedIndexes = rsuService.getRsuClaimedIndexes(dbRsus.get(i).getRsuId());
+                List<Integer> claimedIndexes = rsuService.getActiveRsuTimIndexes(dbRsus.get(i).getRsuId());
                 claimedIndexes.forEach(x -> timQuery.appendIndex(x));
 
                 Integer nextRsuIndex = odeService.findFirstAvailableIndexWithRsuIndex(timQuery.getIndicies_set());

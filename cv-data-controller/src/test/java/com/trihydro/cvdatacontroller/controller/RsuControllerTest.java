@@ -185,7 +185,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
                 + " where sat_record_id is null and rsu_id = ?";
 
         // Act
-        var result = uut.GetRsuClaimedIndexes(123);
+        var result = uut.GetActiveRsuTimIndexes(123);
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -209,7 +209,7 @@ public class RsuControllerTest extends TestBase<RsuController> {
         when(mockPreparedStatement.executeQuery()).thenThrow(new SQLException());
 
         // Act
-        var result = uut.GetRsuClaimedIndexes(123);
+        var result = uut.GetActiveRsuTimIndexes(123);
 
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());

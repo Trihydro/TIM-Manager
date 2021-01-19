@@ -50,8 +50,8 @@ public class RsuService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
-	public List<Integer> getRsuClaimedIndexes(Integer rsuId) {
-		String url = String.format("%s/rsu-claimed-indexes/%d", config.getCvRestService(), rsuId);
+	public List<Integer> getActiveRsuTimIndexes(Integer rsuId) {
+		String url = String.format("%s/active-rsu-tim-indexes/%d", config.getCvRestService(), rsuId);
 		ResponseEntity<Integer[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url, Integer[].class);
 		return Arrays.asList(response.getBody());
 	}

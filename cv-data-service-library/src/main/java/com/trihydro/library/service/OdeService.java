@@ -52,30 +52,6 @@ public class OdeService {
         return exMsg;
     }
 
-    /**
-     * @param timToSend The TIM to submit to the ODE
-     * @return String representing any errors. If string is empty, no errors
-     *         occured.
-     * 
-     * @deprecated to update a message, first clear the target RSU index using
-     *             {@link #deleteTimFromRsu(WydotRsu, Integer)} then submit a new
-     *             TIM using {@link #sendNewTimToRsu(WydotTravelerInputData)}
-     */
-    @Deprecated
-    public String updateTimOnRsu(WydotTravelerInputData timToSend) {
-        String exMsg = "";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<WydotTravelerInputData> entity = new HttpEntity<WydotTravelerInputData>(timToSend, headers);
-        ResponseEntity<String> response = restTemplateProvider.GetRestTemplate_NoErrors()
-                .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.PUT, entity, String.class);
-        if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
-            exMsg = "Failed to update TIM on RSU: " + response.getBody();
-            utility.logWithDate(exMsg);
-        }
-        return exMsg;
-    }
-
     public String sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> mps) {
         String exMsg = "";
 

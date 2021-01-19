@@ -215,8 +215,8 @@ public class RsuController extends BaseController {
 		return ResponseEntity.ok(rsus);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/rsu-claimed-indexes/{rsuId}")
-	public ResponseEntity<List<Integer>> GetRsuClaimedIndexes(@PathVariable Integer rsuId) {
+	@RequestMapping(method = RequestMethod.GET, value = "/active-rsu-tim-indexes/{rsuId}")
+	public ResponseEntity<List<Integer>> GetActiveRsuTimIndexes(@PathVariable Integer rsuId) {
 		List<Integer> indexes = new ArrayList<Integer>();
 
 		Connection connection = null;

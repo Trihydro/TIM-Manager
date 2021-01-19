@@ -200,4 +200,14 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				TimUpdateModel.class);
 		return response.getBody();
 	}
+
+	public boolean resetActiveTimsExpirationDate(List<Long> activeTimIds) {
+		String url = String.format("%s/active-tim/reset-expiration-date", config.getCvRestService());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<List<Long>> entity = new HttpEntity<List<Long>>(activeTimIds, headers);
+		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT,
+				entity, Boolean.class);
+		return response.getBody();
+	}
 }

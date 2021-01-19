@@ -111,6 +111,7 @@ public class TimRefreshControllerTest {
         List<ResubmitTimException> resubExceptions = new ArrayList<>();
         resubExceptions.add(new ResubmitTimException(-1l, "exception message"));
 
+        when(mockActiveTimService.resetActiveTimsExpirationDate(any())).thenReturn(false);
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockTimGenerationHelper.isValidTim(any())).thenReturn(true);
         when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExceptions);
@@ -121,7 +122,8 @@ public class TimRefreshControllerTest {
         // verify static functions were called
         verify(mockTimGenerationHelper).resubmitToOde(Collections.singletonList(tum.getActiveTimId()));
         var gson = new Gson();
-        String body = "The TIM Refresh application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
+        String body = "An error occurred while resetting the expiration date(s) for the Active TIM(s)<br/><br/>";
+        body += "The TIM Refresh application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
         body += "<br/>";
         body += gson.toJson(resubExceptions.get(0));
         body += "<br/>";
@@ -138,6 +140,7 @@ public class TimRefreshControllerTest {
         List<ResubmitTimException> resubExceptions = new ArrayList<>();
 
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
+        when(mockActiveTimService.resetActiveTimsExpirationDate(any())).thenReturn(true);
         when(mockTimGenerationHelper.isValidTim(any())).thenReturn(true);
         when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExceptions);
 

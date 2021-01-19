@@ -2,6 +2,7 @@ package com.trihydro.library.service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -170,6 +171,12 @@ public class WydotTimService {
 
         activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
+        // If there is a corresponding Active TIM, reset the expiration date
+        if(activeSatTims.size() > 0) {
+            var activeTimId = activeSatTims.get(0).getActiveTimId();
+            activeTimService.resetActiveTimsExpirationDate(Arrays.asList(activeTimId));
+        }
+
         String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
         if (wydotTim.getClientId() != null)
             regionNameTemp += "_" + wydotTim.getClientId();
@@ -237,6 +244,9 @@ public class WydotTimService {
             if (activeTim != null) {
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
                 WydotOdeTravelerInformationMessage tim = timService.getTim(activeTim.getTimId());
+
+                // Reset the expiration date
+                activeTimService.resetActiveTimsExpirationDate(Arrays.asList(activeTim.getActiveTimId()));
 
                 // update TIM rsu
                 // add rsu to tim

@@ -1319,6 +1319,57 @@ public class ActiveTimController extends BaseController {
 		return sdf.format(dte.getTime());
 	}
 
+	@RequestMapping(value = "/reset-expiration-date", method = RequestMethod.PUT, headers = "Accept=application/json")
+	public ResponseEntity<Boolean> ResetExpirationDate(@RequestBody List<Long> activeTimIds) {
+		if (activeTimIds == null || activeTimIds.size() == 0) {
+			return ResponseEntity.ok(true);
+		}
+
+		boolean result = false;
+		String updateSql = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (";
+
+		for (int i = 0; i < activeTimIds.size(); i++) {
+			updateSql += "?,";
+		}
+		updateSql = updateSql.substring(0, updateSql.length() - 1);
+		updateSql += ")";
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
+		try {
+
+			connection = dbInteractions.getConnectionPool();
+			preparedStatement = connection.prepareStatement(updateSql);
+			for (int i = 0; i < activeTimIds.size(); i++) {
+				preparedStatement.setLong(i + 1, activeTimIds.get(i));
+			}
+
+			// execute delete SQL stetement
+			result = dbInteractions.updateOrDelete(preparedStatement);
+
+			System.out.println("Reset expiration date for Active Tims (active_tim_ids "
+					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(result);
+	}
+
 	@RequestMapping(value = "/update-expiration/{packetID}/{startDate}/{expDate}", method = RequestMethod.PUT)
 	public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID, @PathVariable String startDate,
 			@PathVariable String expDate) {

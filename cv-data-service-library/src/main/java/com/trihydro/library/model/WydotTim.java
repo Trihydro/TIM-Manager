@@ -5,7 +5,7 @@ import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class WydotTim implements Cloneable {
+public class WydotTim {
 
 	@ApiModelProperty(value = "Expected values are I, D, B", required = true)
 	private String direction;
@@ -38,16 +38,6 @@ public class WydotTim implements Cloneable {
 
 	public WydotTim copy() {
 		return new WydotTim(this);
-	}
-
-	@Override
-	public WydotTim clone() throws CloneNotSupportedException {
-		// Strings are immutable, so we don't need to clone them
-		var clone = (WydotTim) super.clone();
-		clone.startPoint = new Coordinate(this.startPoint.getLatitude(), this.startPoint.getLongitude());
-		clone.endPoint = new Coordinate(this.endPoint.getLatitude(), this.endPoint.getLongitude());
-		clone.itisCodes = new ArrayList<>(itisCodes);
-		return clone;
 	}
 
 	public String getClientId() {

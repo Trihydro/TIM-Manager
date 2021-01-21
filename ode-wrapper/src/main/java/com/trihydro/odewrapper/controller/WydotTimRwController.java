@@ -116,19 +116,13 @@ public class WydotTimRwController extends WydotTimBaseController {
     public void makeIncreasingTims(WydotTimRw wydotTim) {
 
         // i - add buffer for point TIMs
-        WydotTimRw timOneWay = null;
-
-        try {
-            timOneWay = wydotTim.clone();
-            if (StringUtils.isBlank(timOneWay.getSchedStart())) {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-                timOneWay.setSchedStart(startTime);
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        WydotTimRw timOneWay = wydotTim.copy();
+        if (StringUtils.isBlank(timOneWay.getSchedStart())) {
+            String startTime = java.time.Clock.systemUTC().instant().toString();
+            timOneWay.setSchedStart(startTime);
         }
 
-        timOneWay.setDirection("i");
+        timOneWay.setDirection("I");
         timsToSend.add(timOneWay);
 
         if (timOneWay.getBuffers() != null)
@@ -139,19 +133,13 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         // d - add buffer for point TIMs
 
-        WydotTimRw timOneWay = null;
-
-        try {
-            timOneWay = wydotTim.clone();
-            if (StringUtils.isBlank(timOneWay.getSchedStart())) {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-                timOneWay.setSchedStart(startTime);
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        WydotTimRw timOneWay = wydotTim.copy();
+        if (StringUtils.isBlank(timOneWay.getSchedStart())) {
+            String startTime = java.time.Clock.systemUTC().instant().toString();
+            timOneWay.setSchedStart(startTime);
         }
 
-        timOneWay.setDirection("d");
+        timOneWay.setDirection("D");
         timsToSend.add(timOneWay);
         if (timOneWay.getBuffers() != null)
             makeDecreasingBufferTim(timOneWay);
@@ -195,17 +183,12 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTim.getBuffers().get(i).getDistanceMeters());
 
             // update start and stopping points
-            WydotTimRw wydotTimBuffer = null;
-
-            try {
-                wydotTimBuffer = wydotTim.clone();
-                if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                    String startTime = java.time.Clock.systemUTC().instant().toString();
-                    wydotTimBuffer.setSchedStart(startTime);
-                }
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
+            WydotTimRw wydotTimBuffer = wydotTim.copy();
+            if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
+                wydotTimBuffer.setSchedStart(startTime);
             }
+
             wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),
                     BigDecimal.valueOf(nextCoordinates.getLongitude())));
             wydotTimBuffer.setEndPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
@@ -248,16 +231,12 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTim.getBuffers().get(i).getDistanceMeters());
 
             // update start and stopping mileposts
-            WydotTimRw wydotTimBuffer = null;
-            try {
-                wydotTimBuffer = wydotTim.clone();
-                if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                    String startTime = java.time.Clock.systemUTC().instant().toString();
-                    wydotTimBuffer.setSchedStart(startTime);
-                }
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
+            WydotTimRw wydotTimBuffer = wydotTim.copy();
+            if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
+                String startTime = java.time.Clock.systemUTC().instant().toString();
+                wydotTimBuffer.setSchedStart(startTime);
             }
+
             wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
                     BigDecimal.valueOf(startCoordinates.getLongitude())));
             wydotTimBuffer.setEndPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),

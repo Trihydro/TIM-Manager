@@ -43,12 +43,6 @@ public class WydotTimRw extends WydotTim {
         return new WydotTimRw(this);
     }
 
-    // TODO: replace
-    @Override
-    public WydotTimRw clone() throws CloneNotSupportedException {
-        return (WydotTimRw) super.clone();
-    }
-
     public Integer[] getAdvisory() {
         return this.advisory;
     }

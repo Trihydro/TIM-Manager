@@ -8,6 +8,21 @@ public class WydotTimVsl extends WydotTim {
 
     private String deviceId;
 
+    public WydotTimVsl() {
+
+    }
+
+    public WydotTimVsl(WydotTimVsl o) {
+        super(o);
+        this.speed = o.speed;
+        this.deviceId = o.deviceId;
+    }
+
+    @Override
+    public WydotTimVsl copy() {
+        return new WydotTimVsl(this);
+    }
+
     public Integer getSpeed() {
         return this.speed;
     }

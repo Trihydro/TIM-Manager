@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.model.Coordinate;
@@ -30,7 +31,37 @@ public class WydotTimIncident extends WydotTim {
     private transient List<String> itisCodes;
 
     @ApiModelProperty(required = false)
-	private transient Coordinate endPoint;
+    private transient Coordinate endPoint;
+
+    public WydotTimIncident() {
+
+    }
+
+    public WydotTimIncident(WydotTimIncident o) {
+        super(o);
+        this.impact = o.impact;
+        this.problem = o.problem;
+        this.effect = o.effect;
+        this.action = o.action;
+        this.incidentId = o.incidentId;
+        this.highway = o.highway;
+        this.schedStart = o.schedStart;
+        this.schedEnd = o.schedEnd;
+        this.pk = o.pk;
+        this.problemOtherText = o.problemOtherText;
+        this.clientId = o.clientId;
+        this.route = o.route;
+
+        if (o.itisCodes != null)
+            this.itisCodes = new ArrayList<>(o.itisCodes);
+        if (o.endPoint != null)
+            this.endPoint = new Coordinate(o.endPoint.getLatitude(), o.endPoint.getLongitude());
+    }
+
+    @Override
+    public WydotTimIncident copy() {
+        return new WydotTimIncident(this);
+    }
 
     public String getSchedStart() {
         return this.schedStart;
@@ -111,5 +142,4 @@ public class WydotTimIncident extends WydotTim {
     public void setImpact(String impact) {
         this.impact = impact;
     }
-    
 }

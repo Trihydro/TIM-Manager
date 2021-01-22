@@ -38,29 +38,7 @@ public class CreateBaseTimUtil {
 
     public WydotTravelerInputData buildTim(WydotTim wydotTim, TimGenerationProps genProps, ContentEnum content,
             TravelerInfoType frameType, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
-
-        // // assume the given start/stop points are correct and send them on to calculate
-        // // mileposts
-        // List<Milepost> mileposts = new ArrayList<>();
-        // List<Milepost> milepostsAll = new ArrayList<>();
-        // if (wydotTim.getEndPoint() != null && wydotTim.getEndPoint().getLatitude() != null
-        //         && wydotTim.getEndPoint().getLongitude() != null) {
-        //     milepostsAll = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
-        // } else {
-        //     // point incident
-        //     MilepostBuffer mpb = new MilepostBuffer();
-        //     mpb.setBufferMiles(genProps.getPointIncidentBufferMiles());
-        //     mpb.setCommonName(wydotTim.getRoute());
-        //     mpb.setPoint(wydotTim.getStartPoint());
-        //     milepostsAll = milepostService.getMilepostsByPointWithBuffer(mpb);
-        // }
-
-        // // don't continue if we have no mileposts
-        // if (milepostsAll.size() == 0) {
-        //     utility.logWithDate("Found 0 mileposts, unable to generate TIM");
-        //     return null;
-        // }
-
+                
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
         OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();

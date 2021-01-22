@@ -10,10 +10,8 @@ import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Milepost;
-import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
-import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.TimGenerationProps;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,44 +30,36 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class CreateBaseTimUtil {
 
     private Utility utility;
-    private MilepostService milepostService;
-    MilepostReduction milepostReduction;
 
     @Autowired
-    public void InjectDependencies(Utility _utility, MilepostService _milepostService,
-            MilepostReduction _milepostReduction) {
+    public void InjectDependencies(Utility _utility) {
         utility = _utility;
-        milepostService = _milepostService;
-        milepostReduction = _milepostReduction;
     }
 
-    public WydotTravelerInputData buildTim(WydotTim wydotTim, String direction, TimGenerationProps genProps,
-            ContentEnum content, TravelerInfoType frameType) {
+    public WydotTravelerInputData buildTim(WydotTim wydotTim, TimGenerationProps genProps, ContentEnum content,
+            TravelerInfoType frameType, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
 
-        // assume the given start/stop points are correct and send them on to calculate
-        // mileposts
-        List<Milepost> mileposts = new ArrayList<>();
-        List<Milepost> milepostsAll = new ArrayList<>();
-        if (wydotTim.getEndPoint() != null && wydotTim.getEndPoint().getLatitude() != null
-                && wydotTim.getEndPoint().getLongitude() != null) {
-            // make sure we carry through correct direction here
-            wydotTim.setDirection(direction);
-            milepostsAll = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
-        } else {
-            // point incident
-            MilepostBuffer mpb = new MilepostBuffer();
-            mpb.setBufferMiles(genProps.getPointIncidentBufferMiles());
-            mpb.setCommonName(wydotTim.getRoute());
-            mpb.setDirection(direction);
-            mpb.setPoint(wydotTim.getStartPoint());
-            milepostsAll = milepostService.getMilepostsByPointWithBuffer(mpb);
-        }
+        // // assume the given start/stop points are correct and send them on to calculate
+        // // mileposts
+        // List<Milepost> mileposts = new ArrayList<>();
+        // List<Milepost> milepostsAll = new ArrayList<>();
+        // if (wydotTim.getEndPoint() != null && wydotTim.getEndPoint().getLatitude() != null
+        //         && wydotTim.getEndPoint().getLongitude() != null) {
+        //     milepostsAll = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+        // } else {
+        //     // point incident
+        //     MilepostBuffer mpb = new MilepostBuffer();
+        //     mpb.setBufferMiles(genProps.getPointIncidentBufferMiles());
+        //     mpb.setCommonName(wydotTim.getRoute());
+        //     mpb.setPoint(wydotTim.getStartPoint());
+        //     milepostsAll = milepostService.getMilepostsByPointWithBuffer(mpb);
+        // }
 
-        // don't continue if we have no mileposts
-        if (milepostsAll.size() == 0) {
-            utility.logWithDate("Found 0 mileposts, unable to generate TIM");
-            return null;
-        }
+        // // don't continue if we have no mileposts
+        // if (milepostsAll.size() == 0) {
+        //     utility.logWithDate("Found 0 mileposts, unable to generate TIM");
+        //     return null;
+        // }
 
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
@@ -115,13 +105,13 @@ public class CreateBaseTimUtil {
         path.setType("ll");
 
         // reduce the mileposts by removing straight away posts
-        Milepost anchorMp = milepostsAll.remove(0);
-        mileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll, genProps.getPathDistanceLimit());
-        timToSend.setMileposts(mileposts);
+        // Milepost anchorMp = milepostsAll.remove(0);
+        // mileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll, genProps.getPathDistanceLimit());
+        timToSend.setMileposts(reducedMileposts);
 
         OdePosition3D anchorPosition = new OdePosition3D();
-        anchorPosition.setLatitude(anchorMp.getLatitude());
-        anchorPosition.setLongitude(anchorMp.getLongitude());
+        anchorPosition.setLatitude(anchor.getLatitude());
+        anchorPosition.setLongitude(anchor.getLongitude());
         region.setAnchorPosition(anchorPosition);
 
         MsgId msgId = new MsgId();
@@ -140,12 +130,12 @@ public class CreateBaseTimUtil {
 
         int timDirection = 0;
         // path list - change later
-        if (milepostsAll != null && milepostsAll.size() > 0) {
-            double startLat = anchorMp.getLatitude().doubleValue();
-            double startLon = anchorMp.getLongitude().doubleValue();
-            for (int j = 0; j < milepostsAll.size(); j++) {
-                double lat = milepostsAll.get(j).getLatitude().doubleValue();
-                double lon = milepostsAll.get(j).getLongitude().doubleValue();
+        if (allMileposts != null && allMileposts.size() > 0) {
+            double startLat = anchor.getLatitude().doubleValue();
+            double startLon = anchor.getLongitude().doubleValue();
+            for (int j = 0; j < allMileposts.size(); j++) {
+                double lat = allMileposts.get(j).getLatitude().doubleValue();
+                double lon = allMileposts.get(j).getLongitude().doubleValue();
 
                 Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
                 Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
@@ -164,20 +154,20 @@ public class CreateBaseTimUtil {
         region.setDirection(dirTest); // heading slice
 
         // set path nodes
-        if (mileposts != null && mileposts.size() > 0) {
+        if (reducedMileposts != null && reducedMileposts.size() > 0) {
             ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-            var startMp = anchorMp;
-            for (int i = 0; i < mileposts.size(); i++) {
+            var startMp = anchor;
+            for (int i = 0; i < reducedMileposts.size(); i++) {
                 // note that even though we are setting node-LL type here, the ODE only has a
                 // NodeXY object, as the structure is the same.
                 OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-                BigDecimal lat = mileposts.get(i).getLatitude().subtract(startMp.getLatitude());
-                BigDecimal lon = mileposts.get(i).getLongitude().subtract(startMp.getLongitude());
+                BigDecimal lat = reducedMileposts.get(i).getLatitude().subtract(startMp.getLatitude());
+                BigDecimal lon = reducedMileposts.get(i).getLongitude().subtract(startMp.getLongitude());
                 node.setNodeLat(lat);
                 node.setNodeLong(lon);
                 node.setDelta("node-LL");
                 nodes.add(node);
-                startMp = mileposts.get(i);
+                startMp = reducedMileposts.get(i);
             }
             path.setNodes(nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]));
             region.setPath(path);

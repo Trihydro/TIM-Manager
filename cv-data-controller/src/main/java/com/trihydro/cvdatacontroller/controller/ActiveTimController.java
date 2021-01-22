@@ -552,7 +552,8 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String query = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
+			// There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1, CLIENTID_2
+			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "%' and TIM_TYPE_ID = "
 					+ timTypeId;
 
 			if (direction != null) {

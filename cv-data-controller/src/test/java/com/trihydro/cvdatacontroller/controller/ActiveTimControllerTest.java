@@ -346,7 +346,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String clientId = "clientId";
         Long timTypeId = -1l;
         String direction = "eastward";
-        String selectStatement = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
+        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "%' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
 
@@ -380,7 +380,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String clientId = "clientId";
         Long timTypeId = -1l;
         String direction = "eastward";
-        String selectStatement = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
+        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "%' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");

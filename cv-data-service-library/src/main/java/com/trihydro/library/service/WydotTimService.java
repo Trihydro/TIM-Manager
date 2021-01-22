@@ -23,6 +23,7 @@ import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
@@ -67,6 +68,7 @@ public class WydotTimService {
     private RsuService rsuService;
     private TimService timService;
     private SnmpHelper snmpHelper;
+    private MilepostService milepostService;
 
     @Autowired
     public void InjectDependencies(EmailProps _emailProps, OdeProps _odeProps, TimGenerationProps _genProps,
@@ -74,7 +76,7 @@ public class WydotTimService {
             OdeService _odeService, CreateBaseTimUtil _createBaseTimUtil,
             ActiveTimHoldingService _activeTimHoldingService, ActiveTimService _activeTimService,
             TimRsuService _timRsuService, RestTemplateProvider _restTemplateProvider, RsuService _rsuService,
-            TimService _timService, SnmpHelper _snmpHelper) {
+            TimService _timService, SnmpHelper _snmpHelper, MilepostService _milepostService) {
         emailProps = _emailProps;
         odeProps = _odeProps;
         genProps = _genProps;
@@ -91,6 +93,7 @@ public class WydotTimService {
         rsuService = _rsuService;
         timService = _timService;
         snmpHelper = _snmpHelper;
+        milepostService = _milepostService;
     }
 
     private RestTemplateProvider restTemplateProvider;
@@ -100,12 +103,13 @@ public class WydotTimService {
     WydotRsu[] rsuArr = new WydotRsu[1];
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-    public WydotTravelerInputData createTim(WydotTim wydotTim, String direction, String timTypeStr,
-            String startDateTime, String endDateTime, ContentEnum content, TravelerInfoType frameType) {
+    public WydotTravelerInputData createTim(WydotTim wydotTim, String timTypeStr, String startDateTime,
+            String endDateTime, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
+            List<Milepost> reducedMileposts, Milepost anchor) {
 
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, direction, genProps, content,
-                frameType);
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps, content, frameType,
+                allMileposts, reducedMileposts, anchor);
 
         if (timToSend == null) {
             return null;
@@ -145,14 +149,33 @@ public class WydotTimService {
         return timToSend;
     }
 
+    public List<Milepost> getAllMilepostsForTim(WydotTim wydotTim) {
+        List<Milepost> milepostsAll = new ArrayList<>();
+
+        if (wydotTim.getEndPoint() != null && wydotTim.getEndPoint().getLatitude() != null
+                && wydotTim.getEndPoint().getLongitude() != null) {
+            milepostsAll = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+        } else {
+            // point incident
+            MilepostBuffer mpb = new MilepostBuffer();
+            mpb.setBufferMiles(genProps.getPointIncidentBufferMiles());
+            mpb.setCommonName(wydotTim.getRoute());
+            mpb.setDirection(wydotTim.getDirection());
+            mpb.setPoint(wydotTim.getStartPoint());
+            milepostsAll = milepostService.getMilepostsByPointWithBuffer(mpb);
+        }
+
+        return milepostsAll;
+    }
+
     public void sendTimToSDW(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev,
-            String direction, TimType timType, Integer pk, Coordinate endPoint) {
+            TimType timType, Integer pk, Coordinate endPoint) {
 
         List<ActiveTim> activeSatTims = null;
 
         // find active TIMs by client Id and direction
         activeSatTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
-                timType.getTimTypeId(), direction);
+                timType.getTimTypeId(), wydotTim.getDirection());
 
         // filter by SAT TIMs
         activeSatTims = activeSatTims.stream().filter(x -> x.getSatRecordId() != null).collect(Collectors.toList());
@@ -162,7 +185,6 @@ public class WydotTimService {
 
         // save new active_tim_holding record
         ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId, endPoint);
-        activeTimHolding.setDirection(direction);// we are overriding the direction from the tim here
 
         // Set projectKey, if this is a RW TIM
         if (wydotTim instanceof WydotTimRw) {
@@ -172,7 +194,7 @@ public class WydotTimService {
         activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
         // If there is a corresponding Active TIM, reset the expiration date
-        if(activeSatTims.size() > 0) {
+        if (activeSatTims.size() > 0) {
             var activeTimId = activeSatTims.get(0).getActiveTimId();
             activeTimService.resetActiveTimsExpirationDate(Arrays.asList(activeTimId));
         }
@@ -197,10 +219,10 @@ public class WydotTimService {
     }
 
     public void sendTimToRsus(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev,
-            String direction, TimType timType, Integer pk, String endDateTime, Coordinate endPoint) {
+            TimType timType, Integer pk, String endDateTime, Coordinate endPoint) {
         // FIND ALL RSUS TO SEND TO
         // TODO: should this query a graph db instead to follow with milepost?
-        List<WydotRsu> rsus = rsuService.getRsusByLatLong(direction, wydotTim.getStartPoint(), endPoint,
+        List<WydotRsu> rsus = rsuService.getRsusByLatLong(wydotTim.getDirection(), wydotTim.getStartPoint(), endPoint,
                 wydotTim.getRoute());
 
         // if no RSUs found
@@ -227,13 +249,13 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
+            // TODO: remove
             ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(wydotTim.getDirection(), wydotTim.getClientId(),
                     rsu.getRsuTarget());
             ActiveTim activeTim = activeTimService.getActiveRsuTim(artqm);
 
             // create new active_tim_holding record
             ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null, endPoint);
-            activeTimHolding.setDirection(direction);
 
             // Set projectKey, if this is a RW TIM
             if (wydotTim instanceof WydotTimRw) {

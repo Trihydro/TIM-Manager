@@ -82,9 +82,7 @@ public class CreateBaseTimUtil {
         path.setScale(0);
         path.setType("ll");
 
-        // reduce the mileposts by removing straight away posts
-        // Milepost anchorMp = milepostsAll.remove(0);
-        // mileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll, genProps.getPathDistanceLimit());
+        // set mileposts to reduced path
         timToSend.setMileposts(reducedMileposts);
 
         OdePosition3D anchorPosition = new OdePosition3D();

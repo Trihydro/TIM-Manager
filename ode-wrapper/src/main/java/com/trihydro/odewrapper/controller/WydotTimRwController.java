@@ -178,10 +178,6 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // update start and stopping points
             WydotTimRw wydotTimBuffer = wydotTim.copy();
-            if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                String startTime = getStartTime();
-                wydotTimBuffer.setSchedStart(startTime);
-            }
 
             wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),
                     BigDecimal.valueOf(nextCoordinates.getLongitude())));
@@ -226,10 +222,6 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // update start and stopping mileposts
             WydotTimRw wydotTimBuffer = wydotTim.copy();
-            if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                String startTime = getStartTime();
-                wydotTimBuffer.setSchedStart(startTime);
-            }
 
             wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
                     BigDecimal.valueOf(startCoordinates.getLongitude())));

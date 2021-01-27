@@ -1,10 +1,11 @@
 package com.trihydro.library.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class WydotTim implements Cloneable {
+public class WydotTim {
 
 	@ApiModelProperty(value = "Expected values are I, D, B", required = true)
 	private String direction;
@@ -19,9 +20,24 @@ public class WydotTim implements Cloneable {
 	@ApiModelProperty(required = true)
 	private String clientId;
 
-	@Override
-	public WydotTim clone() throws CloneNotSupportedException {
-		return (WydotTim) super.clone();
+	public WydotTim() {
+
+	}
+
+	public WydotTim(WydotTim o) {
+		this.direction = o.direction;
+		if (o.startPoint != null)
+			this.startPoint = new Coordinate(o.startPoint.getLatitude(), o.startPoint.getLongitude());
+		if (o.endPoint != null)
+			this.endPoint = new Coordinate(o.endPoint.getLatitude(), o.endPoint.getLongitude());
+		this.route = o.route;
+		if (o.itisCodes != null)
+			this.itisCodes = new ArrayList<>(o.itisCodes);
+		this.clientId = o.clientId;
+	}
+
+	public WydotTim copy() {
+		return new WydotTim(this);
 	}
 
 	public String getClientId() {

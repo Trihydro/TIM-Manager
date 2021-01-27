@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Buffer;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTimRw;
@@ -25,6 +27,7 @@ import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.IdGenerator;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
@@ -46,6 +49,7 @@ public abstract class WydotTimBaseController {
     private SetItisCodes setItisCodes;
     protected ActiveTimService activeTimService;
     protected RestTemplateProvider restTemplateProvider;
+    MilepostReduction milepostReduction;
     protected Utility utility;
 
     private List<String> routes = new ArrayList<>();
@@ -54,13 +58,14 @@ public abstract class WydotTimBaseController {
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider, Utility _utility) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
         setItisCodes = _setItisCodes;
         activeTimService = _activeTimService;
         restTemplateProvider = _restTemplateProvider;
+        milepostReduction = _milepostReduction;
         utility = _utility;
     }
 
@@ -462,13 +467,16 @@ public abstract class WydotTimBaseController {
             ContentEnum content, TravelerInfoType frameType) {
 
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
+            var iTim = wydotTim.copy();
+            var dTim = wydotTim.copy();
+            iTim.setDirection("I");
+            dTim.setDirection("D");
             // I
-            createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk, content, frameType);
+            createSendTims(iTim, timType, startDateTime, endDateTime, pk, content, frameType);
             // D
-            createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk, content, frameType);
+            createSendTims(dTim, timType, startDateTime, endDateTime, pk, content, frameType);
         } else {
-            createSendTims(wydotTim, wydotTim.getDirection().toUpperCase(), timType, startDateTime, endDateTime, pk,
-                    content, frameType);
+            createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
         }
     }
 
@@ -493,18 +501,82 @@ public abstract class WydotTimBaseController {
         }
     }
 
+    protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
+            Integer pk, ContentEnum content, TravelerInfoType frameType) {
+        // Clear any existing TIMs with the same client id
+        Long timTypeId = timType != null ? timType.getTimTypeId() : null;
+        var existingTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
+                wydotTim.getDirection());
+        wydotTimService.deleteTimsFromRsusAndSdx(existingTims);
+
+        // Get mileposts that will define the TIM's region
+        var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);
+        var reducedMileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll,
+                configuration.getPathDistanceLimit());
+
+        // don't continue if we have no mileposts
+        if (milepostsAll.size() == 0) {
+            utility.logWithDate("Found 0 mileposts, unable to generate TIM");
+            return;
+        }
+
+        var anchor = milepostsAll.remove(0);
+
+        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,
+                reducedMileposts, anchor, new IdGenerator());
+    }
+
     // creates a TIM and sends it to RSUs and Satellite
-    protected void createSendTims(WydotTim wydotTim, String direction, TimType timType, String startDateTime,
-            String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType) {
+    protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
+            Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
+            List<Milepost> reducedMileposts, Milepost anchor, IdGenerator idGenerator) {
+
+        if (reducedMileposts.size() > 63) {
+            // Even after reducing the mileposts, this TIM requires more nodes than J2735
+            // allows. Split this TIM into half. The first TIM will cover the first half of
+            // reduced nodes, the second TIM will cover the second.
+            var firstTim = wydotTim.copy();
+            var secondTim = wydotTim.copy();
+
+            // Note that the last milepost for firstTim is the same as the first milepost
+            // for secondTim. This ensures the first ends where the second begins, without
+            // any gap in coverage.
+            var firstStartMp = reducedMileposts.get(0);
+            var firstEndMp = reducedMileposts.get((reducedMileposts.size() / 2));
+            var secondStartMp = reducedMileposts.get(reducedMileposts.size() / 2);
+            var secondEndMp = reducedMileposts.get(reducedMileposts.size() - 1);
+
+            firstTim.setStartPoint(new Coordinate(firstStartMp.getLatitude(), firstStartMp.getLongitude()));
+            firstTim.setEndPoint(new Coordinate(firstEndMp.getLatitude(), firstEndMp.getLongitude()));
+            secondTim.setStartPoint(new Coordinate(secondStartMp.getLatitude(), secondStartMp.getLongitude()));
+            secondTim.setEndPoint(new Coordinate(secondEndMp.getLatitude(), secondEndMp.getLongitude()));
+
+            // The anchor point for the second TIM should be the milepost immediately before
+            // the start point. If we were to pull the anchor point from the reducedMilepost
+            // set, it may be much further down the road, which isn't what we want.
+            var secondStartIndex = allMileposts.indexOf(secondStartMp);
+            var secondAnchor = allMileposts.get(secondStartIndex - 1);
+
+            createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, allMileposts,
+                    reducedMileposts.subList(0, (reducedMileposts.size() / 2) + 1), anchor, idGenerator);
+            createSendTims(secondTim, timType, startDateTime, endDateTime, pk, content, frameType, allMileposts,
+                    reducedMileposts.subList(reducedMileposts.size() / 2, reducedMileposts.size()), secondAnchor,
+                    idGenerator);
+
+            return;
+        }
+
+        wydotTim.setClientId(wydotTim.getClientId() + "-" + idGenerator.getNextId());
+
         // create TIM
-        WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
-                startDateTime, endDateTime, content, frameType);
+        WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, timType.getType(), startDateTime,
+                endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
 
         if (timToSend == null) {
             return;
         }
 
-        String regionNamePrev = direction + "_" + wydotTim.getRoute();
+        String regionNamePrev = wydotTim.getDirection() + "_" + wydotTim.getRoute();
 
         var endPoint = new Coordinate();
         if (wydotTim.getEndPoint() != null) {
@@ -516,12 +588,11 @@ public abstract class WydotTimBaseController {
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs
-            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endDateTime,
-                    endPoint);
+            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, pk, endDateTime, endPoint);
         }
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endPoint);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint);
     }
 }

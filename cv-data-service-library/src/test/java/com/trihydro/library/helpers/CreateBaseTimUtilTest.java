@@ -1,9 +1,5 @@
 package com.trihydro.library.helpers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +39,6 @@ public class CreateBaseTimUtilTest {
     private Milepost anchor;
 
     public void setupSuccessfulTest() {
-        doReturn(BigDecimal.valueOf(50)).when(genProps).getDefaultLaneWidth();
-        doReturn(.4 * 50).when(genProps).getPathDistanceLimit();
         setupMileposts();
     }
 
@@ -56,7 +50,6 @@ public class CreateBaseTimUtilTest {
         anchor.setCommonName("80");
         anchor.setLatitude(BigDecimal.valueOf(100));
         anchor.setLongitude(BigDecimal.valueOf(100));
-        allMileposts.add(anchor);
 
         var mp = new Milepost();
         mp = new Milepost();
@@ -81,26 +74,6 @@ public class CreateBaseTimUtilTest {
         mp.setLongitude(BigDecimal.valueOf(500));
         allMileposts.add(mp);
         milepostsReduced.add(mp);
-
-        doReturn(milepostsReduced).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
-    }
-
-    @Test
-    public void buildTim_MilepostFAIL() {
-        // Arrange
-        var wydotTim = new WydotTim();
-        wydotTim.setStartPoint(new Coordinate());
-        wydotTim.setEndPoint(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2)));
-        String direction = "I";
-        var content = ContentEnum.advisory;
-        var frameType = TravelerInfoType.advisory;
-
-        // Act
-        var data = uut.buildTim(wydotTim, direction, genProps, content, frameType);
-
-        // Assert
-        Assertions.assertNull(data);
-        verify(mockUtility).logWithDate("Found 0 mileposts, unable to generate TIM");
     }
 
     @Test
@@ -115,14 +88,11 @@ public class CreateBaseTimUtilTest {
         itisCodes.add("8888");
         wydotTim.setItisCodes(itisCodes);
 
-        String direction = "I";
         var content = ContentEnum.advisory;
         var frameType = TravelerInfoType.advisory;
 
-        doReturn(allMileposts).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-
         // Act
-        var data = uut.buildTim(wydotTim, direction, genProps, content, frameType);
+        var data = uut.buildTim(wydotTim, genProps, content, frameType, allMileposts, milepostsReduced, anchor);
 
         // Assert
         // validate dataFrame
@@ -158,7 +128,6 @@ public class CreateBaseTimUtilTest {
     public void buildTim_singlePointSUCCESS() {
         // Arrange
         setupSuccessfulTest();
-        doReturn(1d).when(genProps).getPointIncidentBufferMiles();
         var wydotTim = new WydotTim();
         wydotTim.setRoute("80");
         wydotTim.setStartPoint(new Coordinate());
@@ -167,14 +136,11 @@ public class CreateBaseTimUtilTest {
         itisCodes.add("8888");
         wydotTim.setItisCodes(itisCodes);
 
-        String direction = "I";
         var content = ContentEnum.advisory;
         var frameType = TravelerInfoType.advisory;
 
-        doReturn(allMileposts).when(mockMilepostService).getMilepostsByPointWithBuffer(any());
-
         // Act
-        var data = uut.buildTim(wydotTim, direction, genProps, content, frameType);
+        var data = uut.buildTim(wydotTim, genProps, content, frameType, allMileposts, milepostsReduced, anchor);
 
         // Assert
         // validate dataFrame

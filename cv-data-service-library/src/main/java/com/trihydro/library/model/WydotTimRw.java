@@ -1,5 +1,6 @@
 package com.trihydro.library.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WydotTimRw extends WydotTim {
@@ -14,9 +15,32 @@ public class WydotTimRw extends WydotTim {
     private List<Buffer> buffers;
     private Integer[] advisory;
 
+    public WydotTimRw() {
+
+    }
+
+    public WydotTimRw(WydotTimRw o) {
+        super(o);
+        this.id = o.id;
+        this.action = o.action;
+        this.schedStart = o.schedStart;
+        this.schedEnd = o.schedEnd;
+        this.highway = o.highway;
+        this.surface = o.surface;
+        this.projectKey = o.projectKey;
+        if (o.buffers != null) {
+            this.buffers = new ArrayList<>(o.buffers.size());
+            for(var obj : o.buffers) {
+                this.buffers.add(new Buffer(obj));
+            }
+        }
+        if (o.advisory != null)
+            this.advisory = o.advisory.clone();
+    }
+
     @Override
-    public WydotTimRw clone() throws CloneNotSupportedException {
-        return (WydotTimRw) super.clone();
+    public WydotTimRw copy() {
+        return new WydotTimRw(this);
     }
 
     public Integer[] getAdvisory() {

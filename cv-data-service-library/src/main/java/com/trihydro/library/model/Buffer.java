@@ -4,6 +4,15 @@ public class Buffer {
 	private Double distance;
 	private String action;
 
+	public Buffer() {
+
+	}
+
+	public Buffer(Buffer o) {
+		this.distance = o.distance;
+		this.action = o.action;
+	}
+
 	public Double getDistance() {
 		return this.distance;
 	}

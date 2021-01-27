@@ -174,7 +174,7 @@ public class ValidateTmddTest {
         Assertions.assertTrue(StringUtils.isBlank(exceptionMessageCaptor.getValue()));
         Assertions.assertEquals(1, validationResults.size());
         Assertions.assertEquals(1l, (long) validationResults.get(0).getActiveTim().getActiveTimId());
-        Assertions.assertEquals(4, validationResults.get(0).getErrors().size());
+        Assertions.assertEquals(2, validationResults.get(0).getErrors().size());
 
         // Check errors individually
         List<ActiveTimError> errors = validationResults.get(0).getErrors();
@@ -183,22 +183,22 @@ public class ValidateTmddTest {
         Assertions.assertEquals("2020-04-27 11:00:00", errors.get(0).getTimValue());
         Assertions.assertEquals(null, errors.get(0).getTmddValue());
 
-        var gson = new Gson();
-        Assertions.assertEquals("Start Point", errors.get(1).getName().getStringValue());
-        var c1 = new Coordinate(BigDecimal.valueOf(42.75), BigDecimal.valueOf(-110.94));
-        var c2 = new Coordinate(BigDecimal.valueOf(42.739996), BigDecimal.valueOf(-110.933278));
-        Assertions.assertEquals(gson.toJson(c1), errors.get(1).getTimValue());
-        Assertions.assertEquals(gson.toJson(c2), errors.get(1).getTmddValue());
+        //var gson = new Gson();
+        // Assertions.assertEquals("Start Point", errors.get(1).getName().getStringValue());
+        // var c1 = new Coordinate(BigDecimal.valueOf(42.75), BigDecimal.valueOf(-110.94));
+        // var c2 = new Coordinate(BigDecimal.valueOf(42.739996), BigDecimal.valueOf(-110.933278));
+        // Assertions.assertEquals(gson.toJson(c1), errors.get(1).getTimValue());
+        // Assertions.assertEquals(gson.toJson(c2), errors.get(1).getTmddValue());
 
-        var c3 = new Coordinate(BigDecimal.valueOf(43.18), BigDecimal.valueOf(-111.01));
-        var c4 = new Coordinate(BigDecimal.valueOf(43.175668), BigDecimal.valueOf(-111.001784));
-        Assertions.assertEquals("End Point", errors.get(2).getName().getStringValue());
-        Assertions.assertEquals(gson.toJson(c3), errors.get(2).getTimValue());
-        Assertions.assertEquals(gson.toJson(c4), errors.get(2).getTmddValue());
+        // var c3 = new Coordinate(BigDecimal.valueOf(43.18), BigDecimal.valueOf(-111.01));
+        // var c4 = new Coordinate(BigDecimal.valueOf(43.175668), BigDecimal.valueOf(-111.001784));
+        // Assertions.assertEquals("End Point", errors.get(2).getName().getStringValue());
+        // Assertions.assertEquals(gson.toJson(c3), errors.get(2).getTimValue());
+        // Assertions.assertEquals(gson.toJson(c4), errors.get(2).getTmddValue());
 
-        Assertions.assertEquals("ITIS Codes", errors.get(3).getName().getStringValue());
-        Assertions.assertEquals("{ 5906 }", errors.get(3).getTimValue());
-        Assertions.assertEquals("{ 6011 }", errors.get(3).getTmddValue());
+        Assertions.assertEquals("ITIS Codes", errors.get(1).getName().getStringValue());
+        Assertions.assertEquals("{ 5906 }", errors.get(1).getTimValue());
+        Assertions.assertEquals("{ 6011 }", errors.get(1).getTmddValue());
 
         // Email was sent
         verify(mockEmailHelper).SendEmail(any(), any(), any());

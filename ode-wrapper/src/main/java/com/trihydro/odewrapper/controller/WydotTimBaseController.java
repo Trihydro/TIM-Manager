@@ -516,6 +516,8 @@ public abstract class WydotTimBaseController {
 
         // Get mileposts that will define the TIM's region
         var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);
+        var reducedMileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll,
+                configuration.getPathDistanceLimit());
 
         // don't continue if we have no mileposts
         if (milepostsAll.size() == 0) {
@@ -525,43 +527,46 @@ public abstract class WydotTimBaseController {
 
         var anchor = milepostsAll.remove(0);
 
-        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll, anchor,
-                new IdGenerator());
+        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,
+                reducedMileposts, anchor, new IdGenerator());
     }
 
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
-            Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> mileposts, Milepost anchor,
-            IdGenerator idGenerator) {
-        var reducedMileposts = milepostReduction.applyMilepostReductionAlorithm(mileposts,
-                configuration.getPathDistanceLimit());
+            Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
+            List<Milepost> reducedMileposts, Milepost anchor, IdGenerator idGenerator) {
 
         if (reducedMileposts.size() > 63) {
             // Even after reducing the mileposts, this TIM requires more nodes than J2735
             // allows. Split this TIM into half. The first TIM will cover the first half of
-            // nodes, the second TIM will cover the second half of nodes.
+            // reduced nodes, the second TIM will cover the second.
             var firstTim = wydotTim.copy();
             var secondTim = wydotTim.copy();
 
             // Note that the last milepost for firstTim is the same as the first milepost
             // for secondTim. This ensures the first ends where the second begins, without
             // any gap in coverage.
-            var firstStartMp = mileposts.get(0);
-            var firstEndMp = mileposts.get((mileposts.size() / 2));
-            var secondStartMp = mileposts.get(mileposts.size() / 2);
-            var secondEndMp = mileposts.get(mileposts.size() - 1);
+            var firstStartMp = reducedMileposts.get(0);
+            var firstEndMp = reducedMileposts.get((reducedMileposts.size() / 2));
+            var secondStartMp = reducedMileposts.get(reducedMileposts.size() / 2);
+            var secondEndMp = reducedMileposts.get(reducedMileposts.size() - 1);
 
             firstTim.setStartPoint(new Coordinate(firstStartMp.getLatitude(), firstStartMp.getLongitude()));
             firstTim.setEndPoint(new Coordinate(firstEndMp.getLatitude(), firstEndMp.getLongitude()));
             secondTim.setStartPoint(new Coordinate(secondStartMp.getLatitude(), secondStartMp.getLongitude()));
             secondTim.setEndPoint(new Coordinate(secondEndMp.getLatitude(), secondEndMp.getLongitude()));
 
-            var secondAnchor = mileposts.get((mileposts.size() / 2) - 1);
+            // The anchor point for the second TIM should be the milepost immediately before
+            // the start point. If we were to pull the anchor point from the reducedMilepost
+            // set, it may be much further down the road, which isn't what we want.
+            var secondStartIndex = allMileposts.indexOf(secondStartMp);
+            var secondAnchor = allMileposts.get(secondStartIndex - 1);
 
-            createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType,
-                    mileposts.subList(0, (mileposts.size() / 2) + 1), anchor, idGenerator);
-            createSendTims(secondTim, timType, startDateTime, endDateTime, pk, content, frameType,
-                    mileposts.subList(mileposts.size() / 2, mileposts.size()), secondAnchor, idGenerator);
+            createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, allMileposts,
+                    reducedMileposts.subList(0, (reducedMileposts.size() / 2) + 1), anchor, idGenerator);
+            createSendTims(secondTim, timType, startDateTime, endDateTime, pk, content, frameType, allMileposts,
+                    reducedMileposts.subList(reducedMileposts.size() / 2, reducedMileposts.size()), secondAnchor,
+                    idGenerator);
 
             return;
         }
@@ -570,7 +575,7 @@ public abstract class WydotTimBaseController {
 
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, timType.getType(), startDateTime,
-                endDateTime, content, frameType, mileposts, reducedMileposts, anchor);
+                endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
 
         if (timToSend == null) {
             return;

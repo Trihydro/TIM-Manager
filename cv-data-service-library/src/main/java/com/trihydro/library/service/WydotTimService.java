@@ -249,7 +249,6 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
-            // TODO: remove?
             ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(wydotTim.getDirection(), wydotTim.getClientId(),
                     rsu.getRsuTarget());
             ActiveTim activeTim = activeTimService.getActiveRsuTim(artqm);

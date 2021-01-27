@@ -1,12 +1,9 @@
 package com.trihydro.odewrapper.controller;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.MilepostReduction;
@@ -60,11 +57,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-
-        utility.logWithDate(dateFormat.format(date) + " - Create/Update RW TIM", this.getClass());
+        utility.logWithDate("Create/Update RW TIM", this.getClass());
         String post = gson.toJson(timRwList);
         utility.logWithDate(post.toString(), this.getClass());
 
@@ -119,7 +112,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         // i - add buffer for point TIMs
         WydotTimRw timOneWay = wydotTim.copy();
         if (StringUtils.isBlank(timOneWay.getSchedStart())) {
-            String startTime = java.time.Clock.systemUTC().instant().toString();
+            String startTime = getStartTime();
             timOneWay.setSchedStart(startTime);
         }
 
@@ -136,7 +129,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         WydotTimRw timOneWay = wydotTim.copy();
         if (StringUtils.isBlank(timOneWay.getSchedStart())) {
-            String startTime = java.time.Clock.systemUTC().instant().toString();
+            String startTime = getStartTime();
             timOneWay.setSchedStart(startTime);
         }
 
@@ -185,10 +178,6 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // update start and stopping points
             WydotTimRw wydotTimBuffer = wydotTim.copy();
-            if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-                wydotTimBuffer.setSchedStart(startTime);
-            }
 
             wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),
                     BigDecimal.valueOf(nextCoordinates.getLongitude())));
@@ -233,10 +222,6 @@ public class WydotTimRwController extends WydotTimBaseController {
 
             // update start and stopping mileposts
             WydotTimRw wydotTimBuffer = wydotTim.copy();
-            if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-                wydotTimBuffer.setSchedStart(startTime);
-            }
 
             wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
                     BigDecimal.valueOf(startCoordinates.getLongitude())));
@@ -287,11 +272,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-
-        utility.logWithDate(dateFormat.format(date) + " - Delete RW TIM", this.getClass());
+        utility.logWithDate("Delete RW TIM", this.getClass());
         // clear TIM
         wydotTimService.clearTimsById(type, id, null);
 

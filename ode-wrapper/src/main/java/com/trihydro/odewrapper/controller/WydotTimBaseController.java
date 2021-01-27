@@ -71,10 +71,13 @@ public abstract class WydotTimBaseController {
 
     protected String getStartTime() {
         Date date = new Date();
+        return getIsoDateTimeString(date);
+    }
+
+    protected String getIsoDateTimeString(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String startTime = sdf.format(date);
-        return startTime;
+        return sdf.format(date);
     }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {
@@ -212,8 +215,9 @@ public abstract class WydotTimBaseController {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
                 Date convertedDate = dateFormat.parse(tim.getSchedStart());
-                tim.setSchedStart(convertedDate.toInstant().toString());
+                tim.setSchedStart(getIsoDateTimeString(convertedDate));
             } catch (ParseException e) {
+                resultMessages.add("Bad value supplied for schedStart. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
         }
@@ -221,8 +225,9 @@ public abstract class WydotTimBaseController {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
                 Date convertedDate = dateFormat.parse(tim.getSchedEnd());
-                tim.setSchedEnd(convertedDate.toInstant().toString());
+                tim.setSchedEnd(getIsoDateTimeString(convertedDate));
             } catch (ParseException e) {
+                resultMessages.add("Bad value supplied for schedEnd. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
         }

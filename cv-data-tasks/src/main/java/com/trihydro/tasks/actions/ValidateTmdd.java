@@ -1,6 +1,6 @@
 package com.trihydro.tasks.actions;
 
-import java.math.BigDecimal;
+//import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,14 +14,14 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimError;
 import com.trihydro.library.model.ActiveTimErrorType;
 import com.trihydro.library.model.ActiveTimValidationResult;
-import com.trihydro.library.model.Coordinate;
+//import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TmddItisCode;
 import com.trihydro.library.model.tmdd.EventDescription;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
-import com.trihydro.library.model.tmdd.LinkLocation;
-import com.trihydro.library.model.tmdd.PointOnLink;
+//import com.trihydro.library.model.tmdd.LinkLocation;
+//import com.trihydro.library.model.tmdd.PointOnLink;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.library.service.TmddService;
@@ -31,10 +31,10 @@ import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.gavaghan.geodesy.Ellipsoid;
-import org.gavaghan.geodesy.GeodeticCalculator;
-import org.gavaghan.geodesy.GeodeticCurve;
-import org.gavaghan.geodesy.GlobalCoordinates;
+//import org.gavaghan.geodesy.Ellipsoid;
+//import org.gavaghan.geodesy.GeodeticCalculator;
+//import org.gavaghan.geodesy.GeodeticCurve;
+//import org.gavaghan.geodesy.GlobalCoordinates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -184,28 +184,30 @@ public class ValidateTmdd implements Runnable {
                 }
             }
 
-            LinkLocation feuLocation = getLocation(feu);
-            if (feuLocation != null) {
-                // Check Start Point
-                if (!pointsInRange(feuLocation.getPrimaryLocation(), tim.getStartPoint())) {
-                    inconsistencies.add(
-                            new ActiveTimError(ActiveTimErrorType.startPoint, formatCoordinate(tim.getStartPoint()),
-                                    formatPointOnLink(feuLocation.getPrimaryLocation())));
-                }
+            // Turning off start/endpoint validation for now, to compensate for TIM splitting in the ode-wrapper when TIMs have
+            // >63 nodes
+            // LinkLocation feuLocation = getLocation(feu);
+            // if (feuLocation != null) {
+            //     // Check Start Point
+            //     if (!pointsInRange(feuLocation.getPrimaryLocation(), tim.getStartPoint())) {
+            //         inconsistencies.add(
+            //                 new ActiveTimError(ActiveTimErrorType.startPoint, formatCoordinate(tim.getStartPoint()),
+            //                         formatPointOnLink(feuLocation.getPrimaryLocation())));
+            //     }
 
-                // Check End Point
-                if (!pointsInRange(feuLocation.getSecondaryLocation(), tim.getEndPoint())) {
-                    inconsistencies
-                            .add(new ActiveTimError(ActiveTimErrorType.endPoint, formatCoordinate(tim.getEndPoint()),
-                                    formatPointOnLink(feuLocation.getSecondaryLocation())));
-                }
-            } else {
-                // FEU doesn't have a start or end point...
-                inconsistencies.add(
-                        new ActiveTimError(ActiveTimErrorType.startPoint, formatCoordinate(tim.getStartPoint()), null));
-                inconsistencies.add(
-                        new ActiveTimError(ActiveTimErrorType.endPoint, formatCoordinate(tim.getEndPoint()), null));
-            }
+            //     // Check End Point
+            //     if (!pointsInRange(feuLocation.getSecondaryLocation(), tim.getEndPoint())) {
+            //         inconsistencies
+            //                 .add(new ActiveTimError(ActiveTimErrorType.endPoint, formatCoordinate(tim.getEndPoint()),
+            //                         formatPointOnLink(feuLocation.getSecondaryLocation())));
+            //     }
+            // } else {
+            //     // FEU doesn't have a start or end point...
+            //     inconsistencies.add(
+            //             new ActiveTimError(ActiveTimErrorType.startPoint, formatCoordinate(tim.getStartPoint()), null));
+            //     inconsistencies.add(
+            //             new ActiveTimError(ActiveTimErrorType.endPoint, formatCoordinate(tim.getEndPoint()), null));
+            // }
 
             // Check ITIS Codes
             List<EventDescription> feuEds = getEventDescriptions(feu);
@@ -260,20 +262,20 @@ public class ValidateTmdd implements Runnable {
         return sTime;
     }
 
-    private LinkLocation getLocation(FullEventUpdate feu) {
-        LinkLocation location = null;
+    // private LinkLocation getLocation(FullEventUpdate feu) {
+    //     LinkLocation location = null;
 
-        if (feu != null && feu.getEventElementDetails() != null && feu.getEventElementDetails().size() > 0
-                && feu.getEventElementDetails().get(0) != null
-                && feu.getEventElementDetails().get(0).getEventLocations() != null
-                && feu.getEventElementDetails().get(0).getEventLocations().size() > 0
-                && feu.getEventElementDetails().get(0).getEventLocations().get(0) != null) {
+    //     if (feu != null && feu.getEventElementDetails() != null && feu.getEventElementDetails().size() > 0
+    //             && feu.getEventElementDetails().get(0) != null
+    //             && feu.getEventElementDetails().get(0).getEventLocations() != null
+    //             && feu.getEventElementDetails().get(0).getEventLocations().size() > 0
+    //             && feu.getEventElementDetails().get(0).getEventLocations().get(0) != null) {
 
-            location = feu.getEventElementDetails().get(0).getEventLocations().get(0).getLocationOnLink();
-        }
+    //         location = feu.getEventElementDetails().get(0).getEventLocations().get(0).getLocationOnLink();
+    //     }
 
-        return location;
-    }
+    //     return location;
+    // }
 
     private List<EventDescription> getEventDescriptions(FullEventUpdate feu) {
         List<EventDescription> eventDescriptions = null;
@@ -342,45 +344,45 @@ public class ValidateTmdd implements Runnable {
         return result;
     }
 
-    private boolean pointsInRange(PointOnLink tmddPoint, Coordinate timPoint) {
-        if (tmddPoint == null || tmddPoint.getGeoLocation() == null || timPoint == null) {
-            return false;
-        }
+    // private boolean pointsInRange(PointOnLink tmddPoint, Coordinate timPoint) {
+    //     if (tmddPoint == null || tmddPoint.getGeoLocation() == null || timPoint == null) {
+    //         return false;
+    //     }
 
-        double tmddLat = tmddPoint.getGeoLocation().getLatitude() / 1000000.0;
-        double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000.0;
+    //     double tmddLat = tmddPoint.getGeoLocation().getLatitude() / 1000000.0;
+    //     double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000.0;
 
-        GlobalCoordinates tmdd = new GlobalCoordinates(tmddLat, tmddLon);
-        GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude().doubleValue(),
-                timPoint.getLongitude().doubleValue());
+    //     GlobalCoordinates tmdd = new GlobalCoordinates(tmddLat, tmddLon);
+    //     GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude().doubleValue(),
+    //             timPoint.getLongitude().doubleValue());
 
-        GeodeticCalculator geoCalc = new GeodeticCalculator();
-        GeodeticCurve curve = geoCalc.calculateGeodeticCurve(Ellipsoid.WGS84, tmdd, tim);
-        double miles = 0.000621371 * curve.getEllipsoidalDistance();
+    //     GeodeticCalculator geoCalc = new GeodeticCalculator();
+    //     GeodeticCurve curve = geoCalc.calculateGeodeticCurve(Ellipsoid.WGS84, tmdd, tim);
+    //     double miles = 0.000621371 * curve.getEllipsoidalDistance();
 
-        // Are they within 1/5th of a mile?
-        return miles < 0.2;
-    }
+    //     // Are they within 1/5th of a mile?
+    //     return miles < 0.2;
+    // }
 
-    private String formatPointOnLink(PointOnLink point) {
-        if (point == null || point.getGeoLocation() == null) {
-            return null;
-        }
+    // private String formatPointOnLink(PointOnLink point) {
+    //     if (point == null || point.getGeoLocation() == null) {
+    //         return null;
+    //     }
 
-        double lat = point.getGeoLocation().getLatitude() / 1000000.0;
-        double lon = point.getGeoLocation().getLongitude() / 1000000.0;
+    //     double lat = point.getGeoLocation().getLatitude() / 1000000.0;
+    //     double lon = point.getGeoLocation().getLongitude() / 1000000.0;
 
-        var coord = new Coordinate(BigDecimal.valueOf(lat), BigDecimal.valueOf(lon));
-        return gson.toJson(coord);
-    }
+    //     var coord = new Coordinate(BigDecimal.valueOf(lat), BigDecimal.valueOf(lon));
+    //     return gson.toJson(coord);
+    // }
 
-    private String formatCoordinate(Coordinate point) {
-        if (point == null) {
-            return null;
-        }
+    // private String formatCoordinate(Coordinate point) {
+    //     if (point == null) {
+    //         return null;
+    //     }
 
-        return gson.toJson(point);
-    }
+    //     return gson.toJson(point);
+    // }
 
     private String formatItisCodes(List<Integer> itisCodes) {
         // { }

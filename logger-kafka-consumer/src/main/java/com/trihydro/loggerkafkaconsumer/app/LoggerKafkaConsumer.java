@@ -155,13 +155,13 @@ public class LoggerKafkaConsumer {
                                                         activeTim)) {
                                             utility.logWithDate(String
                                                     .format("Failed to update expiration for data: %s", tdw.getData()));
-
-                                            String body = "The CertExpirationConsumer failed attempting to update an ActiveTim record";
+                                                     
+                                            String body = "logger-kafka-consumer failed attempting to update the expiration for an ActiveTim record";
                                             body += "<br/>";
                                             body += "The associated expiration topic record is: <br/>";
                                             body += tdw.getData();
                                             emailHelper.SendEmail(loggerConfig.getAlertAddresses(),
-                                                    "CertExpirationConsumer Failed To Update ActiveTim", body);
+                                                    "Failed To Update ActiveTim Expiration", body);
                                         } else {
                                             utility.logWithDate(String.format(
                                                     "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
@@ -208,7 +208,7 @@ public class LoggerKafkaConsumer {
             // currently processing has been superseded.
             return expectedStart.getTime() < dbRecord.getStartTimestamp().getTime();
         } catch (Exception ex) {
-            utility.logWithDate("Error while checking if message was superceded: " + ex.getMessage());
+            utility.logWithDate("Error while checking if message was superseded: " + ex.getMessage());
             return false;
         }
     }

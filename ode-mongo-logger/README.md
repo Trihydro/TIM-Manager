@@ -123,16 +123,15 @@ You may configure these values in `ode-mongo-logger/src/main/resources/applicati
 
 | Value in `application.properties` | Value as env var (in sample.env) | Description                               | Example Value                                                  |
 | --------------------------------- | -------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| hostname                          | MONGO_HOSTNAME                   | IP address of the host machine            | 0.0.0.0                                                        |
-| env                               | MONGO_ENV                        | Configuration environment                 | dev                                                            |
-| mongoHost                         | MONGO_HOST                       | IP address hosting Mongo server           | 0.0.0.0                                                        |
-| mongoDatabase                     | MONGO_DATABASE                   | Name of Mongo database                    | cvtest                                                         |
-| mongoUsername                     | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
-| mongoPassword                     | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
-| alertAddresses                    | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |
-| fromEmail                         | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
-| environmentName                   | MONGO_ENVIRONMENT_NAME           | Name of environment (for email subject)   | DEV                                                            |
-| mailHost                          | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |
-| mailPort                          | MAIL_PORT                        | Port for mail host                        | 25                                                             |
-| depositTopic                      | (only set in docker-compose.yml) | Kafka topic for logger to subscribe to    | topic.OdeDNMsgJson                                             |
-| depositGroup                      | (only set in docker-compose.yml) | Kafka group name for subscriptions        | logger_group_tim_dev                                           |
+| mongologger.hostname              | MONGO_HOSTNAME                   | IP address of the kafka host              | 0.0.0.0                                                        |
+| mongologger.mongoHost             | MONGO_HOST                       | Mongo server (IP or DNS)                  | 0.0.0.0                                                        |
+| mongologger.mongoDatabase         | MONGO_DATABASE                   | Name of Mongo database                    | cvtest                                                         |
+| mongologger.mongoUsername         | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
+| mongologger.mongoPassword         | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
+| mongologger.alertAddresses        | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |
+| mongologger.fromEmail             | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
+| mongologger.environmentName       | ENVIRONMENT_NAME                 | Name of environment (for email subject)   | DEV                                                            |
+| mongologger.mailHost              | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |
+| mongologger.mailPort              | MAIL_PORT                        | Port for mail host                        | 25                                                             |
+| mongologger.depositTopic          | (only set in docker-compose.yml) | Kafka topic for logger to subscribe to    | topic.OdeDNMsgJson                                             |
+| mongologger.depositGroup          | (only set in docker-compose.yml) | Kafka group name for subscriptions        | logger_group_tim_dev                                           |

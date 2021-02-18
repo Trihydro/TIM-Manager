@@ -4,7 +4,7 @@ import com.trihydro.library.model.EmailProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties
+@ConfigurationProperties(prefix = "mongologger")
 public class MongoLoggerConfiguration implements EmailProps {
     private String mongoDatabase;
     private String mongoUsername;

@@ -314,6 +314,11 @@ public class TimService extends BaseService {
 
             // set projectKey
             activeTim.setProjectKey(ath.getProjectKey());
+
+            // set expiration time if found
+            if (StringUtils.isNotBlank(ath.getExpirationDateTime())) {
+                activeTim.setExpirationDateTime(ath.getExpirationDateTime());
+            }
         }
 
         // if true, TIM came from WYDOT

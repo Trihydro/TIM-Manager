@@ -185,6 +185,7 @@ public class WydotTimService {
 
         // save new active_tim_holding record
         ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId, endPoint);
+        activeTimHolding.setPacketId(timToSend.getTim().getPacketID());
 
         // Set projectKey, if this is a RW TIM
         if (wydotTim instanceof WydotTimRw) {
@@ -255,6 +256,7 @@ public class WydotTimService {
 
             // create new active_tim_holding record
             ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null, endPoint);
+            activeTimHolding.setPacketId(timToSend.getTim().getPacketID());
 
             // Set projectKey, if this is a RW TIM
             if (wydotTim instanceof WydotTimRw) {

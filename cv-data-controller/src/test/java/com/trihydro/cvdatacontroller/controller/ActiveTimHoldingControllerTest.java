@@ -56,10 +56,11 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
                 activeTimHolding.setStartPoint(startCoord);
                 activeTimHolding.setEndPoint(endCoord);
+                activeTimHolding.setExpirationDateTime("2021-MAR-16'T'09:22'Z'");
 
                 var now = Instant.parse(activeTimHolding.getDateCreated());
                 java.util.Date date_created = java.util.Date.from(now);
-                doReturn(date_created).when(mockUtility).convertDate(activeTimHolding.getDateCreated());
+                doReturn(date_created).when(mockUtility).convertDate(any());
                 mockUtility.timestampFormat = timestampFormat;
 
                 // Act
@@ -80,7 +81,13 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11, timestampFormat.format(date_created));// DATE_CREATED
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
+                                timestampFormat.format(date_created));// DATE_CREATED
+                verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
+                                activeTimHolding.getProjectKey());// PROJECT_KEY
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 13,
+                                timestampFormat.format(date_created));// EXPIRATION_DATE
+                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 14, activeTimHolding.getPacketId());// PACKET_ID
         }
 
         @Test

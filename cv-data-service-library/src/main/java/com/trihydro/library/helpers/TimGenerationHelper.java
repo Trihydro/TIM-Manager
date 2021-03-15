@@ -735,6 +735,7 @@ public class TimGenerationHelper {
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, dbRsus.get(i).getRsuTarget(), null,
                         aTim.getEndPoint());
                 activeTimHolding.setRsuIndex(nextRsuIndex);
+                activeTimHolding.setPacketId(timToSend.getTim().getPacketID());
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
                 // set msgCnt to 1 and create new packetId

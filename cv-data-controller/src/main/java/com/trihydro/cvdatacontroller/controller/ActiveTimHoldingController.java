@@ -95,6 +95,16 @@ public class ActiveTimHoldingController extends BaseController {
                             utility.timestampFormat.format(dateCreated));
                 } else if (col.equals("PROJECT_KEY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
+                } else if (col.equals("EXPIRATION_DATE")) {
+                    if (activeTimHolding.getExpirationDateTime() != null) {
+                        java.util.Date tim_exp_date = utility.convertDate(activeTimHolding.getExpirationDateTime());
+                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                                utility.timestampFormat.format(tim_exp_date));
+                    } else {
+                        preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
+                    }
+                } else if (col.equals("PACKET_ID")) {
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getPacketId());
                 }
 
                 fieldNum++;
@@ -189,6 +199,8 @@ public class ActiveTimHoldingController extends BaseController {
                 if (!rs.wasNull()) {
                     activeTimHolding.setRsuIndex(rsu_index);
                 }
+                activeTimHolding.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+                activeTimHolding.setPacketId(rs.getString("PACKET_ID"));
                 holdings.add(activeTimHolding);
             }
             return ResponseEntity.ok(holdings);

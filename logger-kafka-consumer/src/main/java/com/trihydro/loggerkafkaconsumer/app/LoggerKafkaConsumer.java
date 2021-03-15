@@ -15,6 +15,7 @@ import com.trihydro.library.model.TopicDataWrapper;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.BsmDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.DriverAlertDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.TimDataConverter;
+import com.trihydro.loggerkafkaconsumer.app.services.ActiveTimHoldingService;
 import com.trihydro.loggerkafkaconsumer.app.services.ActiveTimService;
 import com.trihydro.loggerkafkaconsumer.app.services.BsmService;
 import com.trihydro.loggerkafkaconsumer.app.services.DriverAlertService;
@@ -36,6 +37,7 @@ public class LoggerKafkaConsumer {
     private KafkaFactory kafkaFactory;
     private BsmService bsmService;
     private ActiveTimService activeTimService;
+    private ActiveTimHoldingService activeTimHoldingService;
     private TimService timService;
     private DriverAlertService driverAlertService;
     private TimDataConverter timDataConverter;
@@ -48,8 +50,8 @@ public class LoggerKafkaConsumer {
     public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, KafkaFactory _kafkaFactory, BsmService _bsmService,
             ActiveTimService _activeTimService, TimService _timService, DriverAlertService _driverAlertService,
             TimDataConverter _timDataConverter, BsmDataConverter _bsmDataConverter,
-            DriverAlertDataConverter _daConverter, Utility _utility, EmailHelper _emailHelper)
-            throws IOException, Exception {
+            DriverAlertDataConverter _daConverter, Utility _utility, EmailHelper _emailHelper,
+            ActiveTimHoldingService _activeTimHoldingService) throws IOException, Exception {
         loggerConfig = _loggerConfig;
         kafkaFactory = _kafkaFactory;
         bsmService = _bsmService;
@@ -61,6 +63,7 @@ public class LoggerKafkaConsumer {
         daConverter = _daConverter;
         utility = _utility;
         emailHelper = _emailHelper;
+        activeTimHoldingService = _activeTimHoldingService;
 
         System.out.println("starting..............");
 
@@ -80,8 +83,6 @@ public class LoggerKafkaConsumer {
 
         try {
             OdeData odeData;
-            CertExpirationModel certExpirationModel;
-
             var recordCount = 0;
             while (true) {
                 ConsumerRecords<String, String> records = stringConsumer.poll(100);
@@ -100,78 +101,93 @@ public class LoggerKafkaConsumer {
                     if (tdw != null && tdw.getData() != null) {
                         utility.logWithDate(String.format("Found data for topic: %s", tdw.getTopic()));
                         switch (tdw.getTopic()) {
-                            case "topic.OdeTimJson":
-                                utility.logWithDate("Before processing JSON: " + tdw.getData());
-                                odeData = timDataConverter.processTimJson(tdw.getData());
-                                utility.logWithDate(String.format("Parsed TIM: %s", gson.toJson(odeData)));
-                                if (odeData != null) {
-                                    if (odeData.getMetadata()
-                                            .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
-                                        timService.addActiveTimToOracleDB(odeData);
-                                    } else if (odeData.getMetadata().getRecordGeneratedBy() == null) {
-                                        // we shouldn't get here...log it
-                                        utility.logWithDate("Failed to get recordGeneratedBy, continuing...");
-                                    } else {
-                                        timService.addTimToOracleDB(odeData);
-                                    }
+                        case "topic.OdeTimJson":
+                            utility.logWithDate("Before processing JSON: " + tdw.getData());
+                            odeData = timDataConverter.processTimJson(tdw.getData());
+                            utility.logWithDate(String.format("Parsed TIM: %s", gson.toJson(odeData)));
+                            if (odeData != null) {
+                                if (odeData.getMetadata()
+                                        .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
+                                    timService.addActiveTimToOracleDB(odeData);
+                                } else if (odeData.getMetadata().getRecordGeneratedBy() == null) {
+                                    // we shouldn't get here...log it
+                                    utility.logWithDate("Failed to get recordGeneratedBy, continuing...");
                                 } else {
-                                    utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
+                                    timService.addTimToOracleDB(odeData);
                                 }
-                                break;
+                            } else {
+                                utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
+                            }
+                            break;
 
-                            case "topic.OdeBsmJson":
-                                // commenting for now to prevent calling. this may be updated in the future so
-                                // logic has been left in
-                                // odeData = bsmDataConverter.processBsmJson(tdw.getData());
-                                // if (odeData != null) {
-                                // bsmService.addBSMToOracleDB(odeData, tdw.getData());
-                                // } else {
-                                // utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
-                                // }
-                                break;
+                        case "topic.OdeBsmJson":
+                            // commenting for now to prevent calling. this may be updated in the future so
+                            // logic has been left in
+                            // odeData = bsmDataConverter.processBsmJson(tdw.getData());
+                            // if (odeData != null) {
+                            // bsmService.addBSMToOracleDB(odeData, tdw.getData());
+                            // } else {
+                            // utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
+                            // }
+                            break;
 
-                            case "topic.OdeDriverAlertJson":
-                                odeData = daConverter.processDriverAlertJson(tdw.getData());
-                                if (odeData != null) {
-                                    driverAlertService.addDriverAlertToOracleDB(odeData);
+                        case "topic.OdeDriverAlertJson":
+                            odeData = daConverter.processDriverAlertJson(tdw.getData());
+                            if (odeData != null) {
+                                driverAlertService.addDriverAlertToOracleDB(odeData);
+                            } else {
+                                utility.logWithDate("Failed to parse topic.OdeDriverAlertJson, insert fails");
+                            }
+                            break;
+
+                        case "topic.OdeTIMCertExpirationTimeJson":
+                            try {
+                                CertExpirationModel certExpirationModel = gson.fromJson(tdw.getData(),
+                                        CertExpirationModel.class);
+                                var success = timService.updateActiveTimExpiration(certExpirationModel);
+                                if (success) {
+                                    utility.logWithDate("Successfully updated expiration date");
                                 } else {
-                                    utility.logWithDate("Failed to parse topic.OdeDriverAlertJson, insert fails");
-                                }
-                                break;
+                                    // Check for issues
+                                    var activeTim = activeTimService
+                                            .getActiveTimByPacketId(certExpirationModel.getPacketID());
 
-                            case "topic.OdeTIMCertExpirationTimeJson":
-                                try {
-                                    certExpirationModel = gson.fromJson(tdw.getData(), CertExpirationModel.class);
-                                    var success = timService.updateActiveTimExpiration(certExpirationModel);
-                                    if (success) {
-                                        utility.logWithDate("Successfully updated expiration date");
-                                    } else {
-                                        // Check if message was superseded
-                                        var activeTim = activeTimService
-                                                .getActiveTimByPacketId(certExpirationModel.getPacketID());
+                                    // Check if activeTim exists
+                                    if (activeTim == null) {
+                                        // active_tim not created yet, check active_tim_holding
+                                        var ath = activeTimHoldingService
+                                                .getActiveTimHoldingByPacketId(certExpirationModel.getPacketID());
 
-                                        if (activeTim == null
-                                                || !messageSuperseded(certExpirationModel.getStartDateTime(),
-                                                        activeTim)) {
-                                            utility.logWithDate(String
-                                                    .format("Failed to update expiration for data: %s", tdw.getData()));
-                                                     
-                                            String body = "logger-kafka-consumer failed attempting to update the expiration for an ActiveTim record";
-                                            body += "<br/>";
-                                            body += "The associated expiration topic record is: <br/>";
-                                            body += tdw.getData();
-                                            emailHelper.SendEmail(loggerConfig.getAlertAddresses(),
-                                                    "Failed To Update ActiveTim Expiration", body);
-                                        } else {
-                                            utility.logWithDate(String.format(
-                                                    "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
-                                                    activeTim.getActiveTimId(), certExpirationModel.getPacketID()));
+                                        if (ath != null) {
+                                            // update ath expiration
+                                            success = activeTimHoldingService.updateTimExpiration(
+                                                    certExpirationModel.getPacketID(),
+                                                    certExpirationModel.getExpirationDate());
                                         }
+                                    } else if (messageSuperseded(certExpirationModel.getStartDateTime(), activeTim)) {
+                                        // Message superseded
+                                        utility.logWithDate(String.format(
+                                                "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
+                                                activeTim.getActiveTimId(), certExpirationModel.getPacketID()));
                                     }
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
+
+                                    if (!success) {
+                                        // Message either not superseded, or not found in active_tim nor holding tables. error case
+                                        utility.logWithDate(String.format("Failed to update expiration for data: %s",
+                                                tdw.getData()));
+
+                                        String body = "logger-kafka-consumer failed attempting to update the expiration for an ActiveTim record";
+                                        body += "<br/>";
+                                        body += "The associated expiration topic record is: <br/>";
+                                        body += tdw.getData();
+                                        emailHelper.SendEmail(loggerConfig.getAlertAddresses(),
+                                                "Failed To Update ActiveTim Expiration", body);
+                                    }
                                 }
-                                break;
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                            break;
                         }
                     } else {
                         utility.logWithDate("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
@@ -199,12 +215,14 @@ public class LoggerKafkaConsumer {
         try {
             Date expectedStart = utility.convertDate(startTime);
 
-            if(expectedStart == null || dbRecord.getStartTimestamp() == null) {
+            if (expectedStart == null || dbRecord.getStartTimestamp() == null) {
                 return false;
             }
 
-            // If db record bas a start time that's later than the cert expiration model's start time,
-            // then the TIM in question must have been updated, and the cert expiration model we're
+            // If db record bas a start time that's later than the cert expiration model's
+            // start time,
+            // then the TIM in question must have been updated, and the cert expiration
+            // model we're
             // currently processing has been superseded.
             return expectedStart.getTime() < dbRecord.getStartTimestamp().getTime();
         } catch (Exception ex) {

@@ -44,8 +44,7 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         ActiveTimHolding data = uut.getRsuActiveTimHolding("clientId", "direction", "ipv4Address");
 
         // Assert
-        Assertions.assertNull(data.getActiveTimHoldingId(),
-                "getActiveTimHolding returned object when should have returned empty");
+        Assertions.assertNull(data, "getActiveTimHolding returned object when should have returned empty");
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();
@@ -83,8 +82,45 @@ public class ActiveTimHoldingServiceTest extends TestBase<ActiveTimHoldingServic
         ActiveTimHolding data = uut.getSdxActiveTimHolding("clientId", "direction", "satRecordId");
 
         // Assert
-        Assertions.assertNull(data.getActiveTimHoldingId(),
-                "getActiveTimHolding returned object when should have returned empty");
+        Assertions.assertNull(data, "getActiveTimHolding returned object when should have returned empty");
+        verify(mockStatement).executeQuery(query);
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void getActiveTimHoldingByPacketId_SUCCESS() throws SQLException {
+        // Arrange
+        Long athId = 99l;
+        when(mockRs.getLong("ACTIVE_TIM_HOLDING_ID")).thenReturn(athId);
+        String query = "select * from active_tim_holding";
+        query += " where packet_id = 'packetId'";
+
+        // Act
+        ActiveTimHolding data = uut.getActiveTimHoldingByPacketId("packetId");
+
+        // Assert
+        Assertions.assertNotNull(data, "Null ActiveTimHolding returned");
+        Assertions.assertEquals(athId, data.getActiveTimHoldingId());
+        verify(mockStatement).executeQuery(query);
+        verify(mockStatement).close();
+        verify(mockRs).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void getActiveTimHoldingByPacketId_FAIL() throws SQLException {
+        // Arrange
+        String query = "select * from active_tim_holding";
+        query += " where packet_id = 'packetId'";
+        doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+
+        // Act
+        ActiveTimHolding data = uut.getActiveTimHoldingByPacketId("packetId");
+
+        // Assert
+        Assertions.assertNull(data, "getActiveTimHoldingByPacketId returned object when should have returned empty");
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockRs).close();

@@ -232,6 +232,8 @@ public class TimOracleTables extends OracleTables {
             activeTimHoldingTable.add("RSU_INDEX");
             activeTimHoldingTable.add("DATE_CREATED");
             activeTimHoldingTable.add("PROJECT_KEY");
+            activeTimHoldingTable.add("EXPIRATION_DATE");
+            activeTimHoldingTable.add("PACKET_ID");
             return activeTimHoldingTable;
         }
     }

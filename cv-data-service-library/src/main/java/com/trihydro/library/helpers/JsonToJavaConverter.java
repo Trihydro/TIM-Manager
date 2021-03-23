@@ -337,14 +337,19 @@ public class JsonToJavaConverter {
             JsonNode contentNode = travelerDataFrame.get("content");
             if (contentNode.has(ContentEnum.advisory.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.advisory.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
             } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.speedLimit.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
             } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.exitService.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.exitService.getStringValue());
             } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.genericSign.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.genericSign.getStringValue());
             } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.workZone.getStringValue());
             }
 
             LocalDate now = LocalDate.now();
@@ -515,33 +520,46 @@ public class JsonToJavaConverter {
             JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
             JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
 
+            JsonNode sequenceArrNode = null;
+            JsonNode contentNode = travelerDataFrame.get("content");
+            if (contentNode.has(ContentEnum.advisory.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.advisory.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
+            } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.speedLimit.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
+            } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.exitService.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.exitService.getStringValue());
+            } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.genericSign.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.genericSign.getStringValue());
+            } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.workZone.getStringValue());
+            }
+
             List<String> itemsList = new ArrayList<String>();
-            JsonNode advisoryNode = travelerDataFrame.get("content").get("advisory");// content is a CHOICE
-            if (advisoryNode != null) {
-                JsonNode sequenceArrNode = advisoryNode.get("SEQUENCE");
-
-                // if ITIS codes are in an array
-                String item = null;
-                if (sequenceArrNode.isArray()) {
-                    for (final JsonNode objNode : sequenceArrNode) {
-                        if (objNode.get("item").get("itis") != null)
-                            item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
-                        else if (objNode.get("item").get("text") != null)
-                            item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
-
-                        itemsList.add(item);
-                    }
-                }
-
-                // ADD NON ARRAY ELEMENT
-                if (!sequenceArrNode.isArray()) {
-                    if (sequenceArrNode.get("item").get("itis") != null)
-                        item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
-                    else if (sequenceArrNode.get("item").get("text") != null)
-                        item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+            String item = null;
+            if (sequenceArrNode != null && sequenceArrNode.isArray()) {
+                for (final JsonNode objNode : sequenceArrNode) {
+                    if (objNode.get("item").get("itis") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
+                    else if (objNode.get("item").get("text") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
 
                     itemsList.add(item);
                 }
+            }
+
+            // ADD NON ARRAY ELEMENT
+            if (sequenceArrNode != null && !sequenceArrNode.isArray()) {
+                if (sequenceArrNode.get("item").get("itis") != null)
+                    item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
+                else if (sequenceArrNode.get("item").get("text") != null)
+                    item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+
+                itemsList.add(item);
             }
 
             // TravelerInfoType.valueOf();
@@ -559,7 +577,6 @@ public class JsonToJavaConverter {
             JsonNode durationNode = travelerDataFrame.get("duratonTime");
             JsonNode priorityNode = travelerDataFrame.get("priority");
             JsonNode sspLocationRightsNode = travelerDataFrame.get("sspLocationRights");
-            JsonNode contentNode = travelerDataFrame.get("content");
             JsonNode sspTimRightsNode = travelerDataFrame.get("sspTimRights");
 
             LocalDate now = LocalDate.now();
@@ -580,7 +597,6 @@ public class JsonToJavaConverter {
             dataFrame.setPriority(priorityNode.asInt());
             dataFrame.setSspLocationRights((short) sspLocationRightsNode.asInt());
             dataFrame.setSspTimRights((short) sspTimRightsNode.asInt());
-            dataFrame.setContent(contentNode.asText());
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 

@@ -182,6 +182,9 @@ public class JsonToJavaConverterTest {
         // Assert
         Assertions.assertNotNull(odeTimPayloadTest);
         Assertions.assertTrue(odeTimPayloadTest.getTim().getDataframes()[0].getItems().length > 0);
+        Assertions.assertEquals("speedLimit", odeTimPayloadTest.getTim().getDataframes()[0].getContent());
+        Assertions.assertArrayEquals(new String[] { "13609", "268", "12554", "8720" },
+                odeTimPayloadTest.getTim().getDataframes()[0].getItems());
     }
 
     @Test

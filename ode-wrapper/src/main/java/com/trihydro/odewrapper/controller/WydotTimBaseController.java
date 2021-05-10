@@ -1,8 +1,14 @@
 package com.trihydro.odewrapper.controller;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -78,6 +84,16 @@ public abstract class WydotTimBaseController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         return sdf.format(date);
+    }
+
+    protected String getIsoDateTimeString(ZonedDateTime date) {
+        if (date == null) {
+            return null;
+        }
+        
+        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        var utcDate = date.withZoneSameInstant(ZoneOffset.UTC);
+        return utcDate.format(formatter);
     }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {
@@ -212,21 +228,23 @@ public abstract class WydotTimBaseController {
         if (tim.getSchedStart() == null) {
             resultMessages.add("Null value for schedStart");
         } else {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
-                Date convertedDate = dateFormat.parse(tim.getSchedStart());
-                tim.setSchedStart(getIsoDateTimeString(convertedDate));
-            } catch (ParseException e) {
+                var convertedDate = LocalDate.parse(tim.getSchedStart(), DateTimeFormatter.ISO_LOCAL_DATE);
+                var startOfDay = convertedDate.atStartOfDay(ZoneId.systemDefault());
+                tim.setSchedStart(getIsoDateTimeString(startOfDay));
+            } catch (DateTimeParseException e) {
                 resultMessages.add("Bad value supplied for schedStart. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
         }
         if (tim.getSchedEnd() != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
-                Date convertedDate = dateFormat.parse(tim.getSchedEnd());
-                tim.setSchedEnd(getIsoDateTimeString(convertedDate));
-            } catch (ParseException e) {
+                var convertedDate = LocalDate.parse(tim.getSchedEnd(), DateTimeFormatter.ISO_LOCAL_DATE);
+                // LocalTime.MAX sets the time to 11:59 PM. This is especially important when
+                // construction is only scheduled for a day (ex. 5-12 to 5-12)
+                var endOfDay = ZonedDateTime.of(LocalDateTime.of(convertedDate, LocalTime.MAX), ZoneId.systemDefault());
+                tim.setSchedEnd(getIsoDateTimeString(endOfDay));
+            } catch (DateTimeParseException e) {
                 resultMessages.add("Bad value supplied for schedEnd. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
@@ -516,16 +534,17 @@ public abstract class WydotTimBaseController {
 
         // Get mileposts that will define the TIM's region
         var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);
-        var reducedMileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll,
-                configuration.getPathDistanceLimit());
 
-        // don't continue if we have no mileposts
-        if (milepostsAll.size() == 0) {
+        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode
+        // TIM if we supply less than 2.
+        if (milepostsAll.size() < 2) {
             utility.logWithDate("Found 0 mileposts, unable to generate TIM");
             return;
         }
 
         var anchor = milepostsAll.remove(0);
+        var reducedMileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll,
+                configuration.getPathDistanceLimit());
 
         createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,
                 reducedMileposts, anchor, new IdGenerator());

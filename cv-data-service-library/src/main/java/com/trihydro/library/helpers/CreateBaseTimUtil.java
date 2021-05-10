@@ -38,7 +38,7 @@ public class CreateBaseTimUtil {
 
     public WydotTravelerInputData buildTim(WydotTim wydotTim, TimGenerationProps genProps, ContentEnum content,
             TravelerInfoType frameType, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
-                
+
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
         OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
@@ -133,6 +133,19 @@ public class CreateBaseTimUtil {
         if (reducedMileposts != null && reducedMileposts.size() > 0) {
             ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
             var startMp = anchor;
+
+            // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
+            // PER-encode TIM if we supply less than 2. If we only have 1 node for the path,
+            // include a node with an offset of (0, 0) which is effectively a point that's
+            // right on top of the anchor point.
+            if (reducedMileposts.size() == 1) {
+                OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
+                node.setNodeLat(BigDecimal.valueOf(0));
+                node.setNodeLong(BigDecimal.valueOf(0));
+                node.setDelta("node-LL");
+                nodes.add(node);
+            }
+
             for (int i = 0; i < reducedMileposts.size(); i++) {
                 // note that even though we are setting node-LL type here, the ODE only has a
                 // NodeXY object, as the structure is the same.

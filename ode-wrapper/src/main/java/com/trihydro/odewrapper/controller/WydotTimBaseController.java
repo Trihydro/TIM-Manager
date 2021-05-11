@@ -547,7 +547,7 @@ public abstract class WydotTimBaseController {
             // for secondTim. This ensures the first ends where the second begins, without
             // any gap in coverage.
             var firstStartMp = reducedMileposts.get(0);
-            var firstEndMp = reducedMileposts.get((reducedMileposts.size() / 2));
+            var firstEndMp = reducedMileposts.get(reducedMileposts.size() / 2);
             var secondStartMp = reducedMileposts.get(reducedMileposts.size() / 2);
             var secondEndMp = reducedMileposts.get(reducedMileposts.size() - 1);
 

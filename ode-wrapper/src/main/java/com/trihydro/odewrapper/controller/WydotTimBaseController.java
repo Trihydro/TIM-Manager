@@ -563,7 +563,7 @@ public abstract class WydotTimBaseController {
             var secondAnchorIndex = secondStartIndex - 1;
 
             // Get the subset of "all mileposts" that pertains to our new TIM
-            // If we use the full set of mileposts we wouldn't get an accurate
+            // If we use the full set of mileposts we wouldn't get an accurate direction/heading slice.
             var firstTimAllMileposts = new ArrayList<Milepost>(allMileposts.subList(0, secondAnchorIndex));
             var secondTimAllMileposts = new ArrayList<Milepost>(
                     allMileposts.subList(secondAnchorIndex, allMileposts.size()));

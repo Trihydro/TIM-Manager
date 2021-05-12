@@ -125,22 +125,16 @@ public class SdwService {
         }
 
         // Process request (convert decodedMessage into an array of ITIS codes)
-        Pattern p = Pattern.compile("(<advisory>)(.*)(</advisory>)");
+        Pattern p = Pattern.compile("(<itis>)([0-9]*)(</itis>)");
         Matcher m = p.matcher(decodeResponse.getDecodedMessage());
 
-        if (m.find()) {
-            String advisory = m.group(2);
-            p = Pattern.compile("(<itis>)([0-9]*)(</itis>)");
-            m = p.matcher(advisory);
+        while (m.find()) {
+            String itisCode = m.group(2);
 
-            while (m.find()) {
-                String itisCode = m.group(2);
-
-                try {
-                    results.add(Integer.parseInt(itisCode));
-                } catch (NumberFormatException ex) {
-                    ex.printStackTrace();
-                }
+            try {
+                results.add(Integer.parseInt(itisCode));
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
             }
         }
 

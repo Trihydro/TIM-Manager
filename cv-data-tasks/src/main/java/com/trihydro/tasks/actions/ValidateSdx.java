@@ -127,7 +127,8 @@ public class ValidateSdx implements Runnable {
             }
 
             if (oracleRecordId.equals(sdxRecordId)) {
-                // make sure the messages are the same
+                // Make sure the numeric ITIS Codes are the same.
+                // TODO: we should also check the TIM's ITISText values, if any are present
                 if (!sameItisCodes(oracleRecord.getItisCodes(), sdxRecord.getItisCodes())) {
                     numOutdatedSdxRecords++;
                     toResend.add(oracleRecord);

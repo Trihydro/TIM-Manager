@@ -559,14 +559,16 @@ public abstract class WydotTimBaseController {
             // The anchor point for the second TIM should be the milepost immediately before
             // the start point. If we were to pull the anchor point from the reducedMilepost
             // set, it may be much further down the road, which isn't what we want.
+            var firstEndIndex = allMileposts.indexOf(firstEndMp);
             var secondStartIndex = allMileposts.indexOf(secondStartMp);
-            var secondAnchorIndex = secondStartIndex - 1;
 
             // Get the subset of "all mileposts" that pertains to our new TIM
-            // If we use the full set of mileposts we wouldn't get an accurate direction/heading slice.
-            var firstTimAllMileposts = new ArrayList<Milepost>(allMileposts.subList(0, secondAnchorIndex));
+            // If we use the full set of mileposts we wouldn't get an accurate
+            // direction/heading slice.
+            // Note that .subList is inclusive of fromIndex, but exclusive of toIndex
+            var firstTimAllMileposts = allMileposts.subList(0, firstEndIndex + 1);
             var secondTimAllMileposts = new ArrayList<Milepost>(
-                    allMileposts.subList(secondAnchorIndex, allMileposts.size()));
+                    allMileposts.subList(secondStartIndex, allMileposts.size()));
             var secondAnchor = secondTimAllMileposts.remove(0);
 
             createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, firstTimAllMileposts,

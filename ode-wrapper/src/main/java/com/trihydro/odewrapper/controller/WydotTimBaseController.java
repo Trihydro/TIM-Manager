@@ -568,7 +568,7 @@ public abstract class WydotTimBaseController {
             // Note that .subList is inclusive of fromIndex, but exclusive of toIndex
             var firstTimAllMileposts = allMileposts.subList(0, firstEndIndex + 1);
             var secondTimAllMileposts = new ArrayList<Milepost>(
-                    allMileposts.subList(secondStartIndex, allMileposts.size()));
+                    allMileposts.subList(secondStartIndex - 1, allMileposts.size()));
             var secondAnchor = secondTimAllMileposts.remove(0);
 
             createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, firstTimAllMileposts,

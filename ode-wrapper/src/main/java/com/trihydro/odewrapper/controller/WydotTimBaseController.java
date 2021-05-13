@@ -566,7 +566,7 @@ public abstract class WydotTimBaseController {
             // for secondTim. This ensures the first ends where the second begins, without
             // any gap in coverage.
             var firstStartMp = reducedMileposts.get(0);
-            var firstEndMp = reducedMileposts.get((reducedMileposts.size() / 2));
+            var firstEndMp = reducedMileposts.get(reducedMileposts.size() / 2);
             var secondStartMp = reducedMileposts.get(reducedMileposts.size() / 2);
             var secondEndMp = reducedMileposts.get(reducedMileposts.size() - 1);
 
@@ -578,12 +578,22 @@ public abstract class WydotTimBaseController {
             // The anchor point for the second TIM should be the milepost immediately before
             // the start point. If we were to pull the anchor point from the reducedMilepost
             // set, it may be much further down the road, which isn't what we want.
+            var firstEndIndex = allMileposts.indexOf(firstEndMp);
             var secondStartIndex = allMileposts.indexOf(secondStartMp);
-            var secondAnchor = allMileposts.get(secondStartIndex - 1);
 
-            createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, allMileposts,
+            // Get the subset of "all mileposts" that pertains to our new TIM
+            // If we use the full set of mileposts we wouldn't get an accurate
+            // direction/heading slice.
+            // Note that .subList is inclusive of fromIndex, but exclusive of toIndex
+            var firstTimAllMileposts = allMileposts.subList(0, firstEndIndex + 1);
+            var secondTimAllMileposts = new ArrayList<Milepost>(
+                    allMileposts.subList(secondStartIndex - 1, allMileposts.size()));
+            var secondAnchor = secondTimAllMileposts.remove(0);
+
+            createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, firstTimAllMileposts,
                     reducedMileposts.subList(0, (reducedMileposts.size() / 2) + 1), anchor, idGenerator);
-            createSendTims(secondTim, timType, startDateTime, endDateTime, pk, content, frameType, allMileposts,
+            createSendTims(secondTim, timType, startDateTime, endDateTime, pk, content, frameType,
+                    secondTimAllMileposts,
                     reducedMileposts.subList(reducedMileposts.size() / 2, reducedMileposts.size()), secondAnchor,
                     idGenerator);
 

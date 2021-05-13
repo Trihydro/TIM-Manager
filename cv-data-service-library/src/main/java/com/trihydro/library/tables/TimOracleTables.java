@@ -258,6 +258,7 @@ public class TimOracleTables extends OracleTables {
             dataFrameItisCodeTable.add("ITIS_CODE_ID");
             dataFrameItisCodeTable.add("DATA_FRAME_ID");
             dataFrameItisCodeTable.add("TEXT");
+            dataFrameItisCodeTable.add("POSITION");
             return dataFrameItisCodeTable;
         }
     }

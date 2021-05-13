@@ -37,13 +37,14 @@ public class DataFrameItisCodeServiceTest
         // Arrange
 
         // Act
-        Long data = uut.insertDataFrameItisCode(dataFrameId, itis);
+        Long data = uut.insertDataFrameItisCode(dataFrameId, itis, 0);
 
         // Assert
         Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, Long.parseLong(itis));// ITIS_CODE_ID
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 2, dataFrameId);// DATA_FRAME_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, null);// TEXT
+        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 4, 0);// POSITION
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -54,7 +55,7 @@ public class DataFrameItisCodeServiceTest
         doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1,
                 Long.parseLong(itis));
         // Act
-        Long data = uut.insertDataFrameItisCode(dataFrameId, itis);
+        Long data = uut.insertDataFrameItisCode(dataFrameId, itis, 0);
 
         // Assert
         Assertions.assertEquals(Long.valueOf(0), data);

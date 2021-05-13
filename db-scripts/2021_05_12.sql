@@ -1,0 +1,2 @@
+ALTER TABLE DATA_FRAME_ITIS_CODE
+ADD POSITION NUMBER(2); -- [0, 99] Per J2735, ITIScodesAndText can have up to 100 elements

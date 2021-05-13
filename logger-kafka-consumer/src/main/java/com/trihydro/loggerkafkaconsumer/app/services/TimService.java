@@ -165,14 +165,15 @@ public class TimService extends BaseService {
                     }
                 }
 
-                // save DataFrame ITIS codes
-                for (String timItisCodeId : dFrames[0].getItems()) {
-                    if (StringUtils.isNumeric(timItisCodeId)) {
-                        String itisCodeId = getItisCodeId(timItisCodeId);
+                var items = dFrames[0].getItems();
+                for (var i = 0; i < items.length; i++) {
+                    String timItisCode = items[i];
+                    if (StringUtils.isNumeric(timItisCode)) {
+                        String itisCodeId = getItisCodeId(timItisCode);
                         if (itisCodeId != null)
-                            dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+                            dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
                     } else
-                        dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+                        dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
                 }
             }
         } catch (NullPointerException e) {
@@ -586,15 +587,17 @@ public class TimService extends BaseService {
             System.out.println("No itis codes found to associate with data_frame " + dataFrameId);
             return;
         }
-        for (String timItisCodeId : items) {
-            if (StringUtils.isNumeric(timItisCodeId)) {
-                String itisCodeId = getItisCodeId(timItisCodeId);
+        for (var i = 0; i < items.length; i++) {
+            var timItisCode = items[i];
+
+            if (StringUtils.isNumeric(timItisCode)) {
+                String itisCodeId = getItisCodeId(timItisCode);
                 if (itisCodeId != null)
-                    dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+                    dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
                 else
-                    utility.logWithDate("Could not find corresponding itis code it for " + timItisCodeId);
+                    utility.logWithDate("Could not find corresponding itis code it for " + timItisCode);
             } else
-                dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+                dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
         }
     }
 

@@ -400,7 +400,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(mockPathService).InsertPath();
         verify(mockRegionService).AddRegion(dataFrameId, pathId, dFrames[0].getRegions()[0]);
         verify(mockTimRsuService).AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
-        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, dFrames[0].getItems()[0]);
+        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, dFrames[0].getItems()[0], 0);
     }
 
     @Test
@@ -491,7 +491,7 @@ public class TimServiceTest extends TestBase<TimService> {
         uut.addDataFrameItis(dataFrame, dataFrameId);
 
         // Assert
-        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, dataFrame.getItems()[0]);
+        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, dataFrame.getItems()[0], 0);
     }
 
     @Test
@@ -507,7 +507,7 @@ public class TimServiceTest extends TestBase<TimService> {
 
         // Assert
         verify(uut).getItisCodeId("1234");
-        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, "test");
+        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, "test" ,0);
     }
 
     @Test

@@ -23,7 +23,7 @@ public class DataFrameItisCodeService extends BaseService {
         sqlNullHandler = _sqlNullHandler;
     }
 
-    public Long insertDataFrameItisCode(Long dataFrameId, String itis) {
+    public Long insertDataFrameItisCode(Long dataFrameId, String itis, Integer position) {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -48,8 +48,11 @@ public class DataFrameItisCodeService extends BaseService {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, itis);
                     else
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, null);
-                } else if (col.equals("DATA_FRAME_ID"))
+                } else if (col.equals("DATA_FRAME_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, dataFrameId);
+                } else if (col.equals("POSITION")) {
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, position);
+                }
                 fieldNum++;
             }
 

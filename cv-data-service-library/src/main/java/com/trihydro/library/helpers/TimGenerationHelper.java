@@ -326,9 +326,9 @@ public class TimGenerationHelper {
                 WydotTim wydotTim = getWydotTimFromTum(tum);
                 List<Milepost> mps = new ArrayList<>();
                 List<Milepost> allMps = getAllMps(wydotTim);
-                if (allMps.size() == 0) {
+                if (allMps.size() < 2) {
                     String exMsg = String.format(
-                            "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                            "Unable to resubmit TIM, less than 2 mileposts found for Active_Tim %d",
                             tum.getActiveTimId());
                     utility.logWithDate(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
@@ -443,6 +443,19 @@ public class TimGenerationHelper {
     private NodeXY[] buildNodePathFromMileposts(List<Milepost> mps, Milepost anchor) {
         ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
         var startMp = anchor;
+
+        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
+        // PER-encode TIM if we supply less than 2. If we only have 1 node for the path,
+        // include a node with an offset of (0, 0) which is effectively a point that's
+        // right on top of the anchor point.
+        if (mps.size() == 1) {
+            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
+            node.setNodeLat(BigDecimal.valueOf(0));
+            node.setNodeLong(BigDecimal.valueOf(0));
+            node.setDelta("node-LL");
+            nodes.add(node);
+        }
+
         for (int i = 0; i < mps.size(); i++) {
             // note that even though we are setting node-LL type here, the ODE only has a
             // NodeXY object, as the structure is the same.

@@ -416,10 +416,10 @@ public class ActiveTimService extends BaseService {
         try {
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(updateStatement);
-            preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
+            preparedStatement.setString(1, expDate);// expDate comes in as MST from previously called function
                                                     // (GetMinExpiration)
-            preparedStatement.setObject(2, packetID);
-            preparedStatement.setObject(3, translateIso8601ToTimestampFormat(startDate));
+            preparedStatement.setString(2, packetID);
+            preparedStatement.setString(3, translateIso8601ToTimestampFormat(startDate));
 
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
@@ -504,6 +504,6 @@ public class ActiveTimService extends BaseService {
         // sdf.setTimeZone(toTimeZone);
         DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Date dte = m_ISO8601Local.parse(date);
-        return sdf.format(dte.getTime());
+        return sdf.format(dte);
     }
 }

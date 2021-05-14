@@ -938,7 +938,6 @@ public class ActiveTimController extends BaseController {
 			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
-			query += " order by data_frame_itis_code.position asc";
 
 			if (sdxOnly) {
 				query += " where sat_record_id is not null";
@@ -952,7 +951,7 @@ public class ActiveTimController extends BaseController {
 				}
 			}
 
-			query += " order by active_tim.active_tim_id";
+			query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
 
 			rs = statement.executeQuery(query);
 

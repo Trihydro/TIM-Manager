@@ -308,9 +308,9 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         // Assert
         Assertions.assertTrue(result);
         verify(mockConnection).prepareStatement(query);
-        verify(mockPreparedStatement).setObject(1, expDate);
-        verify(mockPreparedStatement).setObject(2, "0000");
-        verify(mockPreparedStatement).setObject(3, "01-Jan-21 12.00.00.000 AM");
+        verify(mockPreparedStatement).setString(1, expDate);
+        verify(mockPreparedStatement).setString(2, "0000");
+        verify(mockPreparedStatement).setString(3, "01-Jan-21 12.00.00.000 AM");
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

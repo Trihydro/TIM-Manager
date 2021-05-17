@@ -538,7 +538,7 @@ public abstract class WydotTimBaseController {
         // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode
         // TIM if we supply less than 2.
         if (milepostsAll.size() < 2) {
-            utility.logWithDate("Found 0 mileposts, unable to generate TIM");
+            utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
             return;
         }
 

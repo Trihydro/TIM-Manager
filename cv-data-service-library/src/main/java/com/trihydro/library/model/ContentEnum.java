@@ -30,6 +30,23 @@ public enum ContentEnum {
         return value;
     }
 
+    public static ContentEnum fromString(String value) {
+        switch (value) {
+            case "advisory":
+                return ContentEnum.advisory;
+            case "workZone":
+                return ContentEnum.workZone;
+            case "genericSign":
+                return ContentEnum.genericSign;
+            case "speedLimit":
+                return ContentEnum.speedLimit;
+            case "exitService":
+                return ContentEnum.exitService;
+            default:
+                return ContentEnum.advisory;
+        }
+    }
+
     public String getStringValue() {
         switch (value) {
             case 0:

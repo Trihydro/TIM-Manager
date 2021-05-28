@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import springfox.documentation.annotations.ApiIgnore;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -151,21 +153,24 @@ public class ActiveTimController extends BaseController {
 
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
-				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
+				activeTim.setFrameType(TravelerInfoType.values()[rs.getInt("FRAME_TYPE")]);
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
 				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
 				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
 				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
 				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setUrl(rs.getString("URL"));
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
-				String dfContent = rs.getString("DF_CONTENT");
-				if (dfContent == null || dfContent.isEmpty()) {
-					dfContent = "advisory";
+				String serializedContent = rs.getString("DF_CONTENT");
+				ContentEnum contentType;
+				if (serializedContent == null || serializedContent.isEmpty()) {
+					contentType = ContentEnum.advisory;
+				} else {
+					contentType = ContentEnum.fromString(serializedContent);
 				}
-				activeTim.setDfContent(dfContent);
-				activeTim.setUrl(rs.getString("URL"));
+				activeTim.setDfContent(contentType);
 
 				activeTims.add(activeTim);
 			}
@@ -275,21 +280,24 @@ public class ActiveTimController extends BaseController {
 
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
-				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
+				activeTim.setFrameType(TravelerInfoType.values()[rs.getInt("FRAME_TYPE")]);
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
 				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
 				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
 				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
 				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setUrl(rs.getString("URL"));
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
-				String dfContent = rs.getString("DF_CONTENT");
-				if (dfContent == null || dfContent.isEmpty()) {
-					dfContent = "advisory";
+				String serializedContent = rs.getString("DF_CONTENT");
+				ContentEnum contentType;
+				if (serializedContent == null || serializedContent.isEmpty()) {
+					contentType = ContentEnum.advisory;
+				} else {
+					contentType = ContentEnum.fromString(serializedContent);
 				}
-				activeTim.setDfContent(dfContent);
-				activeTim.setUrl(rs.getString("URL"));
+				activeTim.setDfContent(contentType);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -552,7 +560,8 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			// There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1, CLIENTID_2
+			// There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1,
+			// CLIENTID_2
 			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
 					+ timTypeId;
 

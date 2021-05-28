@@ -532,7 +532,8 @@ public class TimGenerationHelper {
         df.setSspLocationRights(aTim.getSspLocationRights());
         df.setSspMsgTypes(aTim.getSspMsgTypes());
         df.setSspMsgContent(aTim.getSspMsgContent());
-        df.setContent(aTim.getDfContent().getStringValue());
+        if (aTim.getDfContent() != null)
+            df.setContent(aTim.getDfContent().getStringValue());
         df.setUrl(aTim.getUrl());
 
         // set durationTime

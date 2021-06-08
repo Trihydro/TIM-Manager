@@ -18,6 +18,7 @@ import com.trihydro.library.model.ActiveTimError;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.ActiveTimValidationResult;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
@@ -503,9 +504,16 @@ public class TimGenerationHelper {
     private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor) {
         // RoadSignID
         RoadSignID rsid = new RoadSignID();
-        rsid.setMutcdCode(MutcdCodeEnum.warning);
-        rsid.setViewAngle("1111111111111111");
         rsid.setPosition(getAnchorPosition(aTim, anchor));
+        rsid.setViewAngle("1111111111111111");
+
+        // if we are coming in with content=speedLimit and frameType=roadSignage,
+        // we need to set the mutcdCode to regulatory to display the regulatory signage
+        if (aTim.getDfContent() == ContentEnum.speedLimit && aTim.getFrameType() == TravelerInfoType.roadSignage) {
+            rsid.setMutcdCode(MutcdCodeEnum.regulatory);
+        } else {
+            rsid.setMutcdCode(MutcdCodeEnum.warning);
+        }
 
         // MsgId
         MsgId msgId = new MsgId();
@@ -518,13 +526,14 @@ public class TimGenerationHelper {
         SimpleDateFormat odeDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         df.setStartDateTime(odeDateFormat.format(aTim.getStartDate_Timestamp()));
         df.setSspTimRights(aTim.getSspTimRights());
-        df.setFrameType(TravelerInfoType.advisory);
+        df.setFrameType(aTim.getFrameType());
         df.setMsgId(msgId);
         df.setPriority(5);// 0-7, 0 being least important, 7 being most
         df.setSspLocationRights(aTim.getSspLocationRights());
         df.setSspMsgTypes(aTim.getSspMsgTypes());
         df.setSspMsgContent(aTim.getSspMsgContent());
-        df.setContent(aTim.getDfContent());
+        if (aTim.getDfContent() != null)
+            df.setContent(aTim.getDfContent().getStringValue());
         df.setUrl(aTim.getUrl());
 
         // set durationTime

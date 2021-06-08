@@ -19,6 +19,7 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -31,6 +32,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType;
 
 public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Spy
@@ -53,6 +56,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Arrange
         // we only set one property to verify its returned
         when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        when(mockRs.getInt(any())).thenReturn(0);
+        when(mockRs.getInt("FRAME_TYPE")).thenReturn(FrameType.TravelerInfoType.advisory.ordinal());
         String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
         selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
         selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
@@ -77,6 +82,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(HttpStatus.OK, tums.getStatusCode());
         Assertions.assertEquals(1, tums.getBody().size());
         Assertions.assertEquals(Long.valueOf(999), tums.getBody().get(0).getActiveTimId());
+        Assertions.assertEquals(FrameType.TravelerInfoType.advisory, tums.getBody().get(0).getFrameType());
         verify(mockStatement).executeQuery(selectStatement);
     }
 
@@ -95,7 +101,86 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).close();
         verify(mockStatement).close();
         verify(mockConnection).close();
+    }
 
+    @Test
+    public void GetExpiringActiveTims_CorrectContentType() throws SQLException {
+        // Arrange
+        when(mockRs.getString(any())).thenReturn("");
+        when(mockRs.getString("DF_CONTENT")).thenReturn("workZone");
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+
+        // Act
+        ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, tums.getStatusCode());
+        Assertions.assertEquals(1, tums.getBody().size());
+        Assertions.assertEquals(ContentEnum.workZone, tums.getBody().get(0).getDfContent());
+    }
+
+    @Test
+    public void GetUpdateModelFromActiveTimId_SUCCESS() throws SQLException {
+        // Arrange
+        // we only set one property to verify its returned
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        when(mockRs.getInt(any())).thenReturn(0);
+        when(mockRs.getInt("FRAME_TYPE")).thenReturn(FrameType.TravelerInfoType.advisory.ordinal());
+
+        String selectStatement = "SELECT atim.*, tt.type AS tim_type_name, tt.description AS tim_type_description";
+        selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
+        selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
+        selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
+        selectStatement += ", r.region_id, r.anchor_lat, r.anchor_long, r.lane_width";
+        selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
+        selectStatement += ", r.directionality, r.direction AS region_direction";
+        selectStatement += " FROM active_tim atim";
+        selectStatement += " INNER JOIN tim t ON atim.tim_id = t.tim_id";
+        selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
+        selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
+        selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
+        selectStatement += " WHERE atim.active_tim_id = " + 999l;
+
+        // Act
+        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999l);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, tum.getStatusCode());
+        Assertions.assertNotNull(tum.getBody());
+        Assertions.assertEquals(Long.valueOf(999), tum.getBody().getActiveTimId());
+        Assertions.assertEquals(FrameType.TravelerInfoType.advisory, tum.getBody().getFrameType());
+        verify(mockStatement).executeQuery(selectStatement);
+    }
+
+    @Test
+    public void GetUpdateModelFromActiveTimId_FAIL() throws SQLException {
+        // Arrange
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenThrow(new SQLException());
+
+        // Act
+        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999l);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, tum.getStatusCode());
+        verify(mockRs).close();
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void GetUpdateModelFromActiveTimId_CorrectContentType() throws SQLException {
+        // Arrange
+        when(mockRs.getString(any())).thenReturn("");
+        when(mockRs.getString("DF_CONTENT")).thenReturn("workZone");
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+
+        // Act
+        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999l);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, tum.getStatusCode());
+        Assertions.assertNotNull(tum.getBody());
+        Assertions.assertEquals(ContentEnum.workZone, tum.getBody().getDfContent());
     }
 
     @Test
@@ -1057,7 +1142,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         Assertions.assertTrue(data.getBody(), "Fail return on success");
-        verify(mockConnection).prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
+        verify(mockConnection)
+                .prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
         verify(mockPreparedStatement).setLong(1, -1l);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
@@ -1076,7 +1162,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         Assertions.assertFalse(data.getBody(), "Success return on error");
-        verify(mockConnection).prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
+        verify(mockConnection)
+                .prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

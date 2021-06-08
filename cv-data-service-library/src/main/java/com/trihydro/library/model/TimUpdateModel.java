@@ -3,6 +3,8 @@ package com.trihydro.library.model;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
+
 public class TimUpdateModel extends ActiveTim {
     // Tim properties
     private int msgCnt;
@@ -28,13 +30,13 @@ public class TimUpdateModel extends ActiveTim {
 
     // DataFrame properties
     private int dataFrameId;
-    private int frameType;
+    private TravelerInfoType frameType;
     private int durationTime;
     private short sspLocationRights;
     private short sspTimRights;
     private short sspMsgTypes;
     private short sspMsgContent;
-    private String dfContent;
+    private ContentEnum dfContent;
     private String url;
 
     public BigDecimal getLaneWidth() {
@@ -162,11 +164,11 @@ public class TimUpdateModel extends ActiveTim {
         this.dataFrameId = dataFrameId;
     }
 
-    public int getFrameType() {
+    public TravelerInfoType getFrameType() {
         return frameType;
     }
 
-    public void setFrameType(int frameType) {
+    public void setFrameType(TravelerInfoType frameType) {
         this.frameType = frameType;
     }
 
@@ -178,11 +180,11 @@ public class TimUpdateModel extends ActiveTim {
         this.sspTimRights = sspTimRights;
     }
 
-    public String getDfContent() {
+    public ContentEnum getDfContent() {
         return dfContent;
     }
 
-    public void setDfContent(String dfContent) {
+    public void setDfContent(ContentEnum dfContent) {
         this.dfContent = dfContent;
     }
 

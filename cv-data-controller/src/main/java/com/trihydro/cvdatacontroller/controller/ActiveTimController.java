@@ -153,13 +153,17 @@ public class ActiveTimController extends BaseController {
 
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
-				activeTim.setFrameType(TravelerInfoType.values()[rs.getInt("FRAME_TYPE")]);
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
 				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
 				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
 				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
 				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
 				activeTim.setUrl(rs.getString("URL"));
+
+				int frameTypeValue = rs.getInt("FRAME_TYPE");
+				if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
+					activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
+				}
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
@@ -280,13 +284,17 @@ public class ActiveTimController extends BaseController {
 
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
-				activeTim.setFrameType(TravelerInfoType.values()[rs.getInt("FRAME_TYPE")]);
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
 				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
 				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
 				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
 				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
 				activeTim.setUrl(rs.getString("URL"));
+
+				int frameTypeValue = rs.getInt("FRAME_TYPE");
+				if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
+					activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
+				}
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory

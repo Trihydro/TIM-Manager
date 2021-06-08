@@ -19,6 +19,7 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
@@ -115,7 +116,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(HttpStatus.OK, tums.getStatusCode());
         Assertions.assertEquals(1, tums.getBody().size());
-        Assertions.assertEquals("workZone", tums.getBody().get(0).getDfContent());
+        Assertions.assertEquals(ContentEnum.workZone, tums.getBody().get(0).getDfContent());
     }
 
     @Test
@@ -179,7 +180,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(HttpStatus.OK, tum.getStatusCode());
         Assertions.assertNotNull(tum.getBody());
-        Assertions.assertEquals("workZone", tum.getBody().getDfContent());
+        Assertions.assertEquals(ContentEnum.workZone, tum.getBody().getDfContent());
     }
 
     @Test

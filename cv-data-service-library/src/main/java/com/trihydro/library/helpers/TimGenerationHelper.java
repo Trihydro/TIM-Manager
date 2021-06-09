@@ -1,10 +1,14 @@
 package com.trihydro.library.helpers;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -97,6 +101,25 @@ public class TimGenerationHelper {
         snmpHelper = _snmpHelper;
     }
 
+    private String getIsoDateTimeString(ZonedDateTime date) {
+        if (date == null) {
+            return null;
+        }
+
+        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        var utcDate = date.withZoneSameInstant(ZoneOffset.UTC);
+        return utcDate.format(formatter);
+    }
+
+    private String getIsoDateTimeString(Timestamp time) {
+        if (time == null) {
+            return null;
+        }
+
+        var formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        return formatter.format(time);
+    }
+
     public List<ResubmitTimException> updateAndResubmitToOde(List<ActiveTimValidationResult> validationResults) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (validationResults == null || validationResults.size() == 0) {
@@ -140,7 +163,7 @@ public class TimGenerationHelper {
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
                 mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-                OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
+                OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp, false);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                             tum.getActiveTimId());
@@ -257,7 +280,7 @@ public class TimGenerationHelper {
             // reduce the mileposts by removing straight away posts
             var anchorMp = allMps.remove(0);
             mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-            tim = getTim(tum, mps, allMps, anchorMp);
+            tim = getTim(tum, mps, allMps, anchorMp, false);
             if (tim == null) {
                 String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d", tum.getActiveTimId());
                 utility.logWithDate(exMsg);
@@ -297,7 +320,26 @@ public class TimGenerationHelper {
         return allMps;
     }
 
+    /**
+     * Rebuilds and resubmits TIMs to the ODE
+     * 
+     * @param activeTimIds TIMs to resubmit
+     * @return Errors that occurred while processing the request
+     */
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
+        return resubmitToOde(activeTimIds, false);
+    }
+
+    /**
+     * Rebuilds and resubmits TIMs to the ODE
+     * 
+     * @param activeTimIds    TIMs to resubmit
+     * @param resetStartTimes Whether or not TIMs with an indefinite durationTime
+     *                        should have their startTime updated to the current
+     *                        time
+     * @return Errors that occurred while processing the request
+     */
+    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds, boolean resetStartTimes) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
             return exceptions;
@@ -339,7 +381,7 @@ public class TimGenerationHelper {
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
                 mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-                OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp);
+                OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp, resetStartTimes);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                             tum.getActiveTimId());
@@ -379,9 +421,9 @@ public class TimGenerationHelper {
     }
 
     private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,
-            Milepost anchor) {
+            Milepost anchor, boolean resetStartTimes) {
         String nowAsISO = Instant.now().toString();
-        DataFrame df = getDataFrame(aTim, anchor);
+        DataFrame df = getDataFrame(aTim, anchor, resetStartTimes);
         // check to see if we have any itis codes
         // if not, just continue on
         if (df.getItems() == null || df.getItems().length == 0) {
@@ -501,7 +543,7 @@ public class TimGenerationHelper {
         return dirTest; // heading slice
     }
 
-    private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor) {
+    private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes) {
         // RoadSignID
         RoadSignID rsid = new RoadSignID();
         rsid.setPosition(getAnchorPosition(aTim, anchor));
@@ -521,10 +563,6 @@ public class TimGenerationHelper {
 
         // DataFrame
         DataFrame df = new DataFrame();
-        // ODE wants a different format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        // but we have it stored as "2020-05-15 16:09:00"
-        SimpleDateFormat odeDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        df.setStartDateTime(odeDateFormat.format(aTim.getStartDate_Timestamp()));
         df.setSspTimRights(aTim.getSspTimRights());
         df.setFrameType(aTim.getFrameType());
         df.setMsgId(msgId);
@@ -536,9 +574,19 @@ public class TimGenerationHelper {
             df.setContent(aTim.getDfContent().getStringValue());
         df.setUrl(aTim.getUrl());
 
+        // set startTime
+        // ODE wants a different format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        // but we have it stored as "2020-05-15 16:09:00"
+        if (resetStartTimes && aTim.getDurationTime() == 32000) {
+            var newStart = ZonedDateTime.now();
+            df.setStartDateTime(getIsoDateTimeString(newStart));
+        } else {
+            df.setStartDateTime(getIsoDateTimeString(aTim.getStartDate_Timestamp()));
+        }
+
         // set durationTime
         if (aTim.getEndDateTime() != null) {
-            int durationTime = utility.getMinutesDurationBetweenTwoDates(aTim.getStartDateTime(),
+            int durationTime = utility.getMinutesDurationBetweenTwoDates(df.getStartDateTime(),
                     aTim.getEndDateTime());
             // J2735 has duration time of 0-32000
             // the ODE fails if we have greater than 32000

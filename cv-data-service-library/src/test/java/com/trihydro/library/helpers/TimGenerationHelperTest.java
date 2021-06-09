@@ -30,6 +30,7 @@ import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.TimeToLive;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
+import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
@@ -44,6 +45,8 @@ import com.trihydro.library.service.TimGenerationProps;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -82,6 +85,9 @@ public class TimGenerationHelperTest {
 
     @InjectMocks
     private TimGenerationHelper uut;
+
+    @Captor
+    private ArgumentCaptor<WydotTravelerInputData> timCaptor;
 
     @Test
     public void resubmitToOde_EmptyList() {
@@ -513,6 +519,79 @@ public class TimGenerationHelperTest {
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
 
+    }
+
+    @Test
+    public void resubmitToOde_updatesStartTime() {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<Long>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+        setupMilepostReturn();
+        tum.setRoute("I 80");
+        tum.setSatRecordId("satRecordId");
+        tum.setStartDateTime("");
+
+        // Given a TIM with a durationTime of 32000 and a startTime 1 second ago
+        tum.setDurationTime(32000);
+        var oldStartTime = Instant.now().minusSeconds(1);
+        tum.setStartDate_Timestamp(new Timestamp(oldStartTime.toEpochMilli()));
+
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+        doReturn("").when(mockOdeService).updateTimOnSdw(any());
+
+        // Act
+        uut.resubmitToOde(activeTimIds, true);
+
+        // Assert
+        verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
+        var timSent = timCaptor.getValue();
+        var dataFrame = timSent.getTim().getDataframes()[0];
+
+        Assertions.assertNotNull(dataFrame.getStartDateTime());
+        var newStartTime = Instant.parse(dataFrame.getStartDateTime());
+
+        // A newer startTime (now) should have been used
+        Assertions.assertTrue(newStartTime.getEpochSecond() > oldStartTime.getEpochSecond());
+        // Duration Time should still be 32000 since no end was specified
+        Assertions.assertEquals(32000, dataFrame.getDurationTime());
+    }
+
+    @Test
+    public void resubmitToOde_usesOldStartTime() {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<Long>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+        setupMilepostReturn();
+        tum.setRoute("I 80");
+        tum.setSatRecordId("satRecordId");
+        tum.setStartDateTime("");
+
+        // Given a TIM with a durationTime of an hour
+        var originalStartTime = Instant.parse("2021-01-01T00:00:00.000Z");
+        tum.setDurationTime(60);
+        tum.setEndDateTime("2021-01-01T01:00:00.000Z");
+        tum.setStartDate_Timestamp(new Timestamp(originalStartTime.toEpochMilli()));
+
+        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+        doReturn("").when(mockOdeService).updateTimOnSdw(any());
+        doReturn(60).when(mockUtility).getMinutesDurationBetweenTwoDates("2021-01-01T00:00:00.000Z", "2021-01-01T01:00:00.000Z");
+
+        // Act
+        uut.resubmitToOde(activeTimIds, true);
+
+        // Assert
+        verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
+        var timSent = timCaptor.getValue();
+        var dataFrame = timSent.getTim().getDataframes()[0];
+
+        Assertions.assertNotNull(dataFrame.getStartDateTime());
+        var newStartTime = Instant.parse(dataFrame.getStartDateTime());
+
+        // The original startTime was used, and the TIM still has a duration of 60 minutes
+        Assertions.assertEquals(originalStartTime.getEpochSecond(), newStartTime.getEpochSecond());
+        Assertions.assertEquals(60, dataFrame.getDurationTime());
     }
 
     @Test

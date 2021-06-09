@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -112,6 +113,31 @@ public class WydotTimVslControllerTest {
 		Assertions.assertEquals(1, resultArr.length);
 		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
 		Assertions.assertEquals("i", resultArr[0].direction);
+	}
+
+	@Test
+	public void CreateVSLTim_Remove() {
+		
+		// Arrange
+		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\", \"isOffline\":\"true\" }]}";
+		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
+
+		List<ActiveTim> aTims = new ArrayList<ActiveTim>();
+		var aTim = new ActiveTim();
+		aTims.add(aTim);
+
+		var clientId = "V004608";
+		Long timTypeId = null;
+		var direction = "i";
+		doReturn(aTims).when(mockActiveTimService).getActiveTimsByClientIdDirection(clientId, timTypeId, direction);
+
+		// Act
+		ResponseEntity<String> data = uut.createUpdateVslTim(timVslList);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		verify(mockWydotTimService).deleteTimsFromRsusAndSdx(aTims);
+
 	}
 
 	@Test

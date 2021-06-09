@@ -8,8 +8,18 @@ public class WydotTimVsl extends WydotTim {
 
     private String deviceId;
 
+    private boolean isOffline;
+
     public WydotTimVsl() {
 
+    }
+
+    public boolean getIsOffline() {
+        return isOffline;
+    }
+
+    public void setIsOffline(boolean isOffline) {
+        this.isOffline = isOffline;
     }
 
     public WydotTimVsl(WydotTimVsl o) {

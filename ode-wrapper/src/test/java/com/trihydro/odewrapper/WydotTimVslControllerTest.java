@@ -119,7 +119,7 @@ public class WydotTimVslControllerTest {
 	public void CreateVSLTim_Remove() {
 		
 		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\", \"isOffline\":\"true\" }]}";
+		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\", \"offline\":\"true\" }]}";
 		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
 
 		List<ActiveTim> aTims = new ArrayList<ActiveTim>();

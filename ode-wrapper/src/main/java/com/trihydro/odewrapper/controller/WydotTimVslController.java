@@ -73,7 +73,7 @@ public class WydotTimVslController extends WydotTimBaseController {
                 continue;
             }
 
-            if (wydotTim.getIsOffline() == true) {
+            if (wydotTim.getOffline() == true) {
                 timsToRemove.add(wydotTim);
                 continue;
             }

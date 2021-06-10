@@ -62,6 +62,7 @@ public class WydotTimVslController extends WydotTimBaseController {
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
         List<WydotTim> timsToSend = new ArrayList<WydotTim>();
+        List<WydotTim> timsToRemove = new ArrayList<WydotTim>();
 
         // build TIM
         for (WydotTimVsl wydotTim : timVslList.getTimVslList()) {
@@ -72,6 +73,11 @@ public class WydotTimVslController extends WydotTimBaseController {
                 continue;
             }
 
+            if (wydotTim.getOffline() == true) {
+                timsToRemove.add(wydotTim);
+                continue;
+            }
+
             // add TIM to list for processing later
             timsToSend.add(wydotTim);
 
@@ -79,9 +85,22 @@ public class WydotTimVslController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
 
+        deleteVslTims(timsToRemove);
         processRequestAsync(timsToSend);
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    private void deleteVslTims(List<WydotTim> wydotTims) {
+
+        var timType = getTimType(type);
+        Long timTypeId = timType != null ? timType.getTimTypeId() : null;
+
+        for (WydotTim wydotTim : wydotTims) {
+            var existingTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
+                    wydotTim.getDirection());
+            wydotTimService.deleteTimsFromRsusAndSdx(existingTims);
+        }
     }
 
     public void processRequestAsync(List<WydotTim> wydotTims) {

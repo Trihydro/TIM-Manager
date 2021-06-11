@@ -1389,16 +1389,15 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(result);
 	}
 
-	@RequestMapping(value = "/update-expiration/{packetID}/{startDate}/{expDate}", method = RequestMethod.PUT)
-	public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID, @PathVariable String startDate,
-			@PathVariable String expDate) {
+	@RequestMapping(value = "/update-expiration/{packetID}/{expDate}", method = RequestMethod.PUT)
+	public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID, @PathVariable String expDate) {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		boolean success = false;
 
 		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
 		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-		query += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
+		query += " WHERE TIM.PACKET_ID = ?";
 
 		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
 		updateStatement += query;
@@ -1410,7 +1409,6 @@ public class ActiveTimController extends BaseController {
 			preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
 													// (GetMinExpiration)
 			preparedStatement.setObject(2, packetID);
-			preparedStatement.setObject(3, translateIso8601ToTimestampFormat(startDate));
 
 			// execute update statement
 			success = dbInteractions.updateOrDelete(preparedStatement);
@@ -1429,15 +1427,14 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		utility.logWithDate(
-				String.format("Called UpdateExpiration with packetID: %s, startDate: %s, expDate: %s. Successful: %s",
-						packetID, startDate, expDate, success));
+		utility.logWithDate(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
+				packetID, expDate, success));
 		return ResponseEntity.ok(success);
 	}
 
-	@RequestMapping(value = "/get-min-expiration/{packetID}/{startDate}/{expDate}")
-	public ResponseEntity<String> GetMinExpiration(@PathVariable String packetID, @PathVariable String startDate,
-			@PathVariable String expDate) throws ParseException {
+	@RequestMapping(value = "/get-min-expiration/{packetID}/{expDate}")
+	public ResponseEntity<String> GetMinExpiration(@PathVariable String packetID, @PathVariable String expDate)
+			throws ParseException {
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet rs = null;
@@ -1457,7 +1454,6 @@ public class ActiveTimController extends BaseController {
 			String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
 			minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
 			minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-			minExpDate += " AND atim.TIM_START = '" + translateIso8601ToTimestampFormat(startDate) + "'";
 
 			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
 					selectTimestamp, minExpDate, selectTimestamp);
@@ -1484,9 +1480,8 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		utility.logWithDate(String.format(
-				"Called GetMinExpiration with packetID: %s, startDate: %s, expDate: %s. Min start date: %s", packetID,
-				startDate, expDate, minStart));
+		utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
+				packetID, expDate, minStart));
 		return ResponseEntity.ok(minStart);
 	}
 }

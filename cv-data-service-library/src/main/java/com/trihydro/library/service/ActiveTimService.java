@@ -175,9 +175,9 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
-	public Boolean updateActiveTimExpiration(String packetID, String startDate, String expDate) {
-		String url = String.format("%s/active-tim/update-expiration/%s/%s/%s", config.getCvRestService(), packetID,
-				startDate, expDate);
+	public Boolean updateActiveTimExpiration(String packetID, String expDate) {
+		String url = String.format("%s/active-tim/update-expiration/%s/%s", config.getCvRestService(), packetID,
+				expDate);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
@@ -186,10 +186,10 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return response.getBody();
 	}
 
-	public String getMinExpiration(String packetID, String startDate, String expDate) {
+	public String getMinExpiration(String packetID, String expDate) {
 		/// get-min-expiration/{packetID}/{startDate}/{expDate}
-		String url = String.format("%s/active-tim/get-min-expiration/%s/%s/%s", config.getCvRestService(), packetID,
-				startDate, expDate);
+		String url = String.format("%s/active-tim/get-min-expiration/%s/%s", config.getCvRestService(), packetID,
+				expDate);
 		ResponseEntity<String> response = restTemplateProvider.GetRestTemplate().getForEntity(url, String.class);
 		return response.getBody();
 	}
@@ -206,8 +206,8 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<List<Long>> entity = new HttpEntity<List<Long>>(activeTimIds, headers);
-		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT,
-				entity, Boolean.class);
+		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+				Boolean.class);
 		return response.getBody();
 	}
 }

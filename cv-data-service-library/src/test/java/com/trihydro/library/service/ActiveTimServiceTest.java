@@ -430,15 +430,14 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         setupBooleanReturn();
         String packetID = "3C8E8DF2470B1A772E";
-        String startDate = "2020-10-14T15:37:26.037Z";
         String expDate = "2020-10-20T16:26:07.000Z";
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("%s/active-tim/update-expiration/%s/%s/%s", baseUrl, packetID, startDate, expDate);
+        String url = String.format("%s/active-tim/update-expiration/%s/%s", baseUrl, packetID, expDate);
         when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
                 .thenReturn(mockResponseEntityBoolean);
 
         // Act
-        Boolean data = uut.updateActiveTimExpiration(packetID, startDate, expDate);
+        Boolean data = uut.updateActiveTimExpiration(packetID, expDate);
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
@@ -450,15 +449,14 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         doReturn(false).when(mockResponseEntityBoolean).getBody();
         String packetID = "3C8E8DF2470B1A772E";
-        String startDate = "2020-10-14T15:37:26.037Z";
         String expDate = "2020-10-20T16:26:07.000Z";
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("%s/active-tim/update-expiration/%s/%s/%s", baseUrl, packetID, startDate, expDate);
+        String url = String.format("%s/active-tim/update-expiration/%s/%s", baseUrl, packetID, expDate);
         when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
                 .thenReturn(mockResponseEntityBoolean);
 
         // Act
-        Boolean data = uut.updateActiveTimExpiration(packetID, startDate, expDate);
+        Boolean data = uut.updateActiveTimExpiration(packetID, expDate);
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.PUT, entity, Boolean.class);
@@ -469,16 +467,14 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void getMinExpiration_SUCCESS() {
         // Arrange
         String packetID = "3C8E8DF2470B1A772E";
-        String startDate = "2020-10-14T15:37:26.037Z";
         String expDate = "2020-10-20T16:26:07.000Z";
         String minDate = "27-OCT-20 06.21.00.000 PM";
-        String url = String.format("%s/active-tim/get-min-expiration/%s/%s/%s", baseUrl, packetID,
-                startDate, expDate);
-                doReturn(minDate).when(mockResponseEntityString).getBody();
+        String url = String.format("%s/active-tim/get-min-expiration/%s/%s", baseUrl, packetID, expDate);
+        doReturn(minDate).when(mockResponseEntityString).getBody();
         when(mockRestTemplate.getForEntity(url, String.class)).thenReturn(mockResponseEntityString);
 
         // Act
-        String data = uut.getMinExpiration(packetID, startDate, expDate);
+        String data = uut.getMinExpiration(packetID, expDate);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, String.class);

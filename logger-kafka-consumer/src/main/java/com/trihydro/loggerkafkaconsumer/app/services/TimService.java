@@ -710,9 +710,8 @@ public class TimService extends BaseService {
     }
 
     public boolean updateActiveTimExpiration(CertExpirationModel cem) throws ParseException {
-        var minExp = activeTimService.getMinExpiration(cem.getPacketID(), cem.getStartDateTime(),
-                cem.getExpirationDate());
+        var minExp = activeTimService.getMinExpiration(cem.getPacketID(), cem.getExpirationDate());
 
-        return activeTimService.updateActiveTimExpiration(cem.getPacketID(), cem.getStartDateTime(), minExp);
+        return activeTimService.updateActiveTimExpiration(cem.getPacketID(), minExp);
     }
 }

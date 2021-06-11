@@ -936,7 +936,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetMinExpiration_SUCCESS() throws ParseException, SQLException {
         // Arrange
         var packetID = "3C8E8DF2470B1A772E";
-        var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
         var minVal = "27-Oct-20 06.21.00.000 PM";
         var ts = Timestamp.valueOf("2020-10-27 18:21:00");
@@ -944,7 +943,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         mockUtility.timestampFormat = timestampFormat;
 
         // Act
-        ResponseEntity<String> response = uut.GetMinExpiration(packetID, startDate, expDate);
+        ResponseEntity<String> response = uut.GetMinExpiration(packetID, expDate);
 
         // Assert
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
@@ -953,7 +952,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += " AND atim.TIM_START = '14-Oct-20 03.37.26.037 PM'";
         query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
@@ -965,12 +963,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetMinExpiration_EXCEPTION() throws ParseException, SQLException {
         // Arrange
         var packetID = "3C8E8DF2470B1A772E";
-        var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
         doThrow(new SQLException("sql err")).when(mockRs).getTimestamp("MINSTART", uut.UTCCalendar);
 
         // Act
-        ResponseEntity<String> response = uut.GetMinExpiration(packetID, startDate, expDate);
+        ResponseEntity<String> response = uut.GetMinExpiration(packetID, expDate);
 
         // Assert
         Assertions.assertEquals(response.getBody(), "");
@@ -979,7 +976,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += " AND atim.TIM_START = '14-Oct-20 03.37.26.037 PM'";
         query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
@@ -994,7 +990,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Iso8601 format
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
-        var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
         doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
@@ -1002,18 +997,17 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
         updateStatement += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-        updateStatement += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
+        updateStatement += " WHERE TIM.PACKET_ID = ?";
         updateStatement += ")";
 
         // Act
-        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, startDate, expDate);
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, expDate);
 
         // Assert
         Assertions.assertTrue(success.getBody(), "UpdateExpiration failed when it should have succeeded");
         verify(mockConnection).prepareStatement(updateStatement);
         verify(mockPreparedStatement).setObject(1, expDate);
         verify(mockPreparedStatement).setObject(2, packetID);
-        verify(mockPreparedStatement).setObject(3, "14-Oct-20 03.37.26.037 PM");
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -1025,7 +1019,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Iso8601 format
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
-        var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
         doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
         doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
@@ -1033,11 +1026,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
         updateStatement += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-        updateStatement += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
+        updateStatement += " WHERE TIM.PACKET_ID = ?";
         updateStatement += ")";
 
         // Act
-        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, startDate, expDate);
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, expDate);
 
         // Assert
         Assertions.assertFalse(success.getBody(), "UpdateExpiration succeeded when it should have failed");
@@ -1053,12 +1046,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Iso8601 format
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
-        var startDate = "2020-10-14T15:37:26.037Z";
         var expDate = "2020-10-20T16:26:07.000Z";
         doThrow(new SQLException()).when(mockDbInteractions).getConnectionPool();
 
         // Act
-        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, startDate, expDate);
+        ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, expDate);
 
         // Assert
         Assertions.assertFalse(success.getBody(), "UpdateExpiration succeeded when it should have thrown an error");

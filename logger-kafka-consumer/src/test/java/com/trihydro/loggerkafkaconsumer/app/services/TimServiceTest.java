@@ -163,8 +163,7 @@ public class TimServiceTest extends TestBase<TimService> {
         var ath = getActiveTimHolding();
         doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
         doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
-        doReturn(ath).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
-                anyString(), anyString());
+        doReturn(ath).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(), anyString(), anyString());
 
         // Act
         uut.addActiveTimToOracleDB(odeData);
@@ -240,8 +239,7 @@ public class TimServiceTest extends TestBase<TimService> {
         doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
         doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
         doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
-        doReturn(ath).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
-                anyString(), anyString());
+        doReturn(ath).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(), anyString(), anyString());
 
         // Act
         uut.addActiveTimToOracleDB(odeData);
@@ -279,8 +277,7 @@ public class TimServiceTest extends TestBase<TimService> {
 
         doReturn(aTim).when(uut).setActiveTimByRegionName(anyString());
         doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
-        doReturn(null).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
-                anyString(), anyString());
+        doReturn(null).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(), anyString(), anyString());
         doReturn(activeTimDb).when(mockActiveTimService).getActiveRsuTim(any(), any(), any());
 
         // Act
@@ -298,7 +295,7 @@ public class TimServiceTest extends TestBase<TimService> {
         var insertedRecord = captor.getValue();
         assertEquals(start, insertedRecord.getStartPoint());
         assertEquals(end, insertedRecord.getEndPoint());
-        assertEquals(1234, (int)insertedRecord.getProjectKey());
+        assertEquals(1234, (int) insertedRecord.getProjectKey());
     }
 
     @Test
@@ -321,8 +318,7 @@ public class TimServiceTest extends TestBase<TimService> {
         doReturn(-1l).when(uut).getTimId(nullable(String.class), any());
         doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
         // No ActiveTimHolding record
-        doReturn(null).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
-                anyString(), anyString());
+        doReturn(null).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(), anyString(), anyString());
         // But there is an existing ActiveTIm
         doReturn(activeTimDb).when(mockActiveTimService).getActiveSatTim(any(), any());
 
@@ -343,7 +339,7 @@ public class TimServiceTest extends TestBase<TimService> {
         var insertedRecord = captor.getValue();
         assertEquals(start, insertedRecord.getStartPoint());
         assertEquals(end, insertedRecord.getEndPoint());
-        assertEquals(1234, (int)insertedRecord.getProjectKey());
+        assertEquals(1234, (int) insertedRecord.getProjectKey());
     }
 
     @Test
@@ -507,7 +503,7 @@ public class TimServiceTest extends TestBase<TimService> {
 
         // Assert
         verify(uut).getItisCodeId("1234");
-        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, "test" ,0);
+        verify(mockDataFrameItisCodeService).insertDataFrameItisCode(dataFrameId, "test", 0);
     }
 
     @Test
@@ -674,7 +670,7 @@ public class TimServiceTest extends TestBase<TimService> {
     public void updateActiveTimExpiration_SUCCESS() throws ParseException {
         // Arrange
         var data = new CertExpirationModel();
-        doReturn(true).when(mockActiveTimService).updateActiveTimExpiration(any(), any(), any());
+        doReturn(true).when(mockActiveTimService).updateActiveTimExpiration(any(), any());
 
         // Act
         var result = uut.updateActiveTimExpiration(data);
@@ -685,15 +681,15 @@ public class TimServiceTest extends TestBase<TimService> {
 
     @Test
     public void updateActiveTimExpiration_FAIL() throws ParseException {
-         // Arrange
-         var data = new CertExpirationModel();
-         doReturn(false).when(mockActiveTimService).updateActiveTimExpiration(any(), any(), any());
- 
-         // Act
-         var result = uut.updateActiveTimExpiration(data);
- 
-         // Assert
-         Assertions.assertFalse(result);
+        // Arrange
+        var data = new CertExpirationModel();
+        doReturn(false).when(mockActiveTimService).updateActiveTimExpiration(any(), any());
+
+        // Act
+        var result = uut.updateActiveTimExpiration(data);
+
+        // Assert
+        Assertions.assertFalse(result);
     }
 
     private ActiveTimHolding getActiveTimHolding() {

@@ -400,14 +400,14 @@ public class ActiveTimService extends BaseService {
         return activeTim;
     }
 
-    public boolean updateActiveTimExpiration(String packetID, String startDate, String expDate) {
+    public boolean updateActiveTimExpiration(String packetID, String expDate) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean success = false;
 
         String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-        query += " WHERE TIM.PACKET_ID = ? AND atim.TIM_START = ?";
+        query += " WHERE TIM.PACKET_ID = ?";
 
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += query;
@@ -419,7 +419,6 @@ public class ActiveTimService extends BaseService {
             preparedStatement.setString(1, expDate);// expDate comes in as MST from previously called function
                                                     // (GetMinExpiration)
             preparedStatement.setString(2, packetID);
-            preparedStatement.setString(3, translateIso8601ToTimestampFormat(startDate));
 
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
@@ -438,13 +437,12 @@ public class ActiveTimService extends BaseService {
                 e.printStackTrace();
             }
         }
-        utility.logWithDate(
-                String.format("Called UpdateExpiration with packetID: %s, startDate: %s, expDate: %s. Successful: %s",
-                        packetID, startDate, expDate, success));
+        utility.logWithDate(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
+                packetID, expDate, success));
         return success;
     }
 
-    public String getMinExpiration(String packetID, String startDate, String expDate) throws ParseException {
+    public String getMinExpiration(String packetID, String expDate) throws ParseException {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
@@ -465,7 +463,6 @@ public class ActiveTimService extends BaseService {
             String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
             minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
             minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-            minExpDate += " AND atim.TIM_START = '" + translateIso8601ToTimestampFormat(startDate) + "'";
 
             String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
                     selectTimestamp, minExpDate, selectTimestamp);
@@ -492,9 +489,8 @@ public class ActiveTimService extends BaseService {
                 e.printStackTrace();
             }
         }
-        utility.logWithDate(String.format(
-                "Called GetMinExpiration with packetID: %s, startDate: %s, expDate: %s. Min start date: %s", packetID,
-                startDate, expDate, minStart));
+        utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
+                packetID, expDate, minStart));
         return minStart;
     }
 

@@ -341,6 +341,28 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
+    protected ControllerResult validateRcAc(WydotTimRc allClear) {
+        ControllerResult result = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // All Clear must have a valid CLIENT_ID and DIRECTION
+        if (StringUtils.isBlank(allClear.getRoadCode())) {
+            resultMessages.add("Road Code must be supplied");
+        } else {
+            allClear.setClientId(allClear.getRoadCode());
+        }
+
+        if (allClear.getDirection() == null) {
+            resultMessages.add("Null value for direction");
+        } else if (!allClear.getDirection().equalsIgnoreCase("i")
+        && !allClear.getDirection().equalsIgnoreCase("d") && !allClear.getDirection().equalsIgnoreCase("b")) {
+            resultMessages.add("direction not supported");
+        }
+
+        result.setResultMessages(resultMessages);
+        return result;
+    }
+
     protected ControllerResult validateInputVsl(WydotTimVsl tim) {
 
         ControllerResult result = new ControllerResult();
@@ -622,7 +644,7 @@ public abstract class WydotTimBaseController {
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs
-            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, pk, endDateTime, endPoint);
+           // wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, pk, endDateTime, endPoint);
         }
         // send TIM to SDW
         // remove rsus from TIM

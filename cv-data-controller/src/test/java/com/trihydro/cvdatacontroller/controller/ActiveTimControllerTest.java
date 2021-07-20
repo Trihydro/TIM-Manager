@@ -482,6 +482,58 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     }
 
     @Test
+    public void GetBufferTimsByClientId_SUCCESS() throws SQLException {
+        // Arrange
+        String clientId = "clientId";
+        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId
+					+ "\\%BUFF_-%' ESCAPE '\\'"; 
+
+        // Act
+        ResponseEntity<List<ActiveTim>> data = uut.GetBufferTimsByClientId(clientId);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        verify(mockStatement).executeQuery(selectStatement);
+        verify(mockRs).getLong("ACTIVE_TIM_ID");
+        verify(mockRs).getLong("TIM_ID");
+        verify(mockRs).getString("SAT_RECORD_ID");
+        verify(mockRs).getString("CLIENT_ID");
+        verify(mockRs).getString("DIRECTION");
+        verify(mockRs).getString("TIM_END");
+        verify(mockRs).getString("TIM_START");
+        verify(mockRs).getBigDecimal("START_LATITUDE");
+        verify(mockRs).getBigDecimal("START_LONGITUDE");
+        verify(mockRs).getBigDecimal("END_LATITUDE");
+        verify(mockRs).getBigDecimal("END_LONGITUDE");
+        verify(mockRs).getString("ROUTE");
+        verify(mockRs).getInt("PK");
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void GetBufferTimsByClientId_FAIL() throws SQLException {
+        
+        // Arrange
+        String clientId = "clientId";
+        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId
+                + "\\%BUFF_-%' ESCAPE '\\'";
+        
+        doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
+
+        // Act
+        ResponseEntity<List<ActiveTim>> data = uut.GetBufferTimsByClientId(clientId);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        verify(mockStatement).executeQuery(selectStatement);
+        verify(mockStatement).close();
+        verify(mockConnection).close();
+        verify(mockRs).close();
+    }
+
+    @Test
     public void GetItisCodesForActiveTim_SUCCESS() throws SQLException {
         // Arrange
         Long activeTimId = -1l;

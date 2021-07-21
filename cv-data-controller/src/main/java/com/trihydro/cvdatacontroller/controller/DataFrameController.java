@@ -57,8 +57,8 @@ public class DataFrameController extends BaseController {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "select ic.itis_code";
-			selectStatement += " from data_frame_itis_code dfic inner join itis_code ic on dfic.itis_code_id = ic.itis_code_id";
+			String selectStatement = "select ic.itis_code, dfic.text";
+			selectStatement += " from data_frame_itis_code dfic left join itis_code ic on dfic.itis_code_id = ic.itis_code_id";
 			selectStatement += " where data_frame_id = ";
 			selectStatement += dataFrameId;
 			selectStatement += " order by dfic.position asc";
@@ -67,7 +67,11 @@ public class DataFrameController extends BaseController {
 
 			// convert to ActiveTim object
 			while (rs.next()) {
-				itisCodes.add(rs.getString("ITIS_CODE"));
+				var code = rs.getString("ITIS_CODE");
+				if (code == null) {
+					code = rs.getString("TEXT");
+				}
+				itisCodes.add(code);
 			}
 			return ResponseEntity.ok(itisCodes.toArray(new String[itisCodes.size()]));
 		} catch (Exception e) {

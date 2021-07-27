@@ -410,14 +410,14 @@ public class WydotTimService {
         return clearTimsById(timTypeStr, clientId, direction, false);
     }
 
-    public boolean clearTimsById(String timTypeStr, String clientId, String direction, boolean isRwTim) {
+    public boolean clearTimsById(String timTypeStr, String clientId, String direction, boolean hasBuffers) {
 
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
         activeTims
                 .addAll(activeTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction));
 
-        if (isRwTim) {
+        if (hasBuffers) {
             activeTims.addAll(activeTimService.getBufferTimsByClientId(clientId));
         }
 

@@ -238,6 +238,22 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void getBufferTimsByClientId() {
+        // Arrange
+        setupActiveTimArrayReturn();
+        String clientId = "clientId";
+        String url = String.format("%s/active-tim/buffer-tims/%s", baseUrl, clientId);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+
+        // Act
+        List<ActiveTim> data = uut.getBufferTimsByClientId(clientId);
+
+        // Assert
+        verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);
+        Assertions.assertEquals(Arrays.asList(aTims), data);
+    }
+
+    @Test
     public void getExpiredActiveTims() {
         // Arrange
         setupActiveTimArrayReturn();

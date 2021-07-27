@@ -601,6 +601,43 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(activeTims);
 	}
 
+	@RequestMapping(value = { "/buffer-tims/{clientId}" }, method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetBufferTimsByClientId(@PathVariable String clientId) {
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+			String query = "select * from active_tim where CLIENT_ID like '" + clientId
+					+ "\\%BUFF_-%' ESCAPE '\\'"; 
+
+			rs = statement.executeQuery(query);
+			activeTims = getActiveTimFromRS(rs, false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
 	@RequestMapping(value = "/itis-codes/{activeTimId}", method = RequestMethod.GET)
 	public ResponseEntity<List<Integer>> GetItisCodesForActiveTim(@PathVariable Long activeTimId) {
 		List<Integer> itisCodes = new ArrayList<>();

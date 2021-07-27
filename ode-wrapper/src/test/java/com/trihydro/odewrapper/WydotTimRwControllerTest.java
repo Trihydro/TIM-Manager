@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -142,7 +143,9 @@ public class WydotTimRwControllerTest {
 
 		// Act
 		ResponseEntity<String> data = uut.deleteRoadContructionTim(id);
+
 		// Assert
+		verify(mockWydotTimService).clearTimsById("RW", "15917", null, true);
 		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		Assertions.assertEquals("success", data.getBody());
 	}

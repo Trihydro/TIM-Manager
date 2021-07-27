@@ -407,10 +407,20 @@ public class WydotTimService {
     }
 
     public boolean clearTimsById(String timTypeStr, String clientId, String direction) {
+        return clearTimsById(timTypeStr, clientId, direction, false);
+    }
+
+    public boolean clearTimsById(String timTypeStr, String clientId, String direction, boolean hasBuffers) {
 
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
         TimType timType = getTimType(timTypeStr);
-        activeTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction);
+        activeTims
+                .addAll(activeTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction));
+
+        if (hasBuffers) {
+            activeTims.addAll(activeTimService.getBufferTimsByClientId(clientId));
+        }
+
         utility.logWithDate(activeTims.size() + " active_tim found for deletion");
 
         deleteTimsFromRsusAndSdx(activeTims);

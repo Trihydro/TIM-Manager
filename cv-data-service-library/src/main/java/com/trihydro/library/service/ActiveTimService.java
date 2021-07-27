@@ -94,6 +94,14 @@ public class ActiveTimService extends CvDataServiceLibrary {
 		return Arrays.asList(response.getBody());
 	}
 
+	// get buffers for RW TIMs
+	public List<ActiveTim> getBufferTimsByClientId(String clientId) {
+		String url = String.format("%s/active-tim/buffer-tims/%s", config.getCvRestService(), clientId);
+		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
+				ActiveTim[].class);
+		return Arrays.asList(response.getBody());
+	}
+
 	public List<ActiveTim> getExpiredActiveTims() {
 		ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate()
 				.getForEntity(config.getCvRestService() + "/active-tim/expired", ActiveTim[].class);

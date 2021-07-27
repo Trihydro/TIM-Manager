@@ -274,7 +274,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
         utility.logWithDate("Delete RW TIM", this.getClass());
         // clear TIM
-        wydotTimService.clearTimsById(type, id, null);
+        wydotTimService.clearTimsById(type, id, null, true);
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);

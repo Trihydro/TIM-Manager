@@ -90,7 +90,7 @@ public abstract class WydotTimBaseController {
         if (date == null) {
             return null;
         }
-        
+
         var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         var utcDate = date.withZoneSameInstant(ZoneOffset.UTC);
         return utcDate.format(formatter);
@@ -341,6 +341,31 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
+    protected ControllerResult validateRcAc(WydotTimRc allClear) {
+        ControllerResult result = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // All Clear must have a valid CLIENT_ID and DIRECTION
+        if (StringUtils.isBlank(allClear.getRoadCode())) {
+            resultMessages.add("Road Code must be supplied");
+        } else {
+            result.setClientId(allClear.getRoadCode());
+            allClear.setClientId(allClear.getRoadCode());
+        }
+
+        if (allClear.getDirection() == null) {
+            resultMessages.add("Null value for direction");
+        } else if (!allClear.getDirection().equalsIgnoreCase("i") && !allClear.getDirection().equalsIgnoreCase("d")
+                && !allClear.getDirection().equalsIgnoreCase("b")) {
+            resultMessages.add("direction not supported");
+        } else {
+            result.setDirection(allClear.getDirection());
+        }
+
+        result.setResultMessages(resultMessages);
+        return result;
+    }
+
     protected ControllerResult validateInputVsl(WydotTimVsl tim) {
 
         ControllerResult result = new ControllerResult();
@@ -535,8 +560,8 @@ public abstract class WydotTimBaseController {
         // Get mileposts that will define the TIM's region
         var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);
 
-        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode
-        // TIM if we supply less than 2.
+        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
+        // PER-encode TIM if we supply less than 2.
         if (milepostsAll.size() < 2) {
             utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
             return;

@@ -105,7 +105,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         List<WydotTim> timsToDelete = new ArrayList<WydotTim>();
 
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
-            resultTim = validateInputRc(wydotTim);
+            resultTim = validateRcAc(wydotTim);
             if (resultTim.getResultMessages().size() > 0) {
                 resultList.add(resultTim);
                 errList.add(resultTim);

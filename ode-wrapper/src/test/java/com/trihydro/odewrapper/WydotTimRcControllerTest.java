@@ -206,7 +206,12 @@ public class WydotTimRcControllerTest {
 		Assertions.assertNotNull(resultArr);
 		Assertions.assertEquals(1, resultArr.length);
 		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+
+		// Parameters required for AC
 		Assertions.assertEquals("d", resultArr[0].direction);
-		Assertions.assertEquals("I80", resultArr[0].route);
+		Assertions.assertEquals("LARI80WQDHLD", resultArr[0].clientId);
+
+		// Route isn't required for an AC, so it isn't set in the response.
+		Assertions.assertEquals(null, resultArr[0].route);
 	}
 }

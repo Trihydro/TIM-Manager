@@ -160,7 +160,6 @@ public class CopyConstructorTest {
         first.setSchedStart("schedStart");
         first.setSchedEnd("schedEnd");
         first.setHighway("highway");
-        first.setSurface("surface");
         first.setProjectKey(Integer.valueOf(3));
 
         var buffer = new Buffer();

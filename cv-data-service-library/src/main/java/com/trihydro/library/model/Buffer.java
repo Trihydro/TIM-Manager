@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class Buffer {
 	private Double distance;
 	
-	@ApiModelProperty(value = "Expected values are leftClosed, rightClosed, workers, surfaceGravel, surfaceMilled, surfaceDirt, delay, prepareStop")
+	@ApiModelProperty(value = "Expected values are leftClosed, rightClosed, workers, surfaceGravel, surfaceMilled, surfaceDirt, delay_MINUTES, prepareStop, reduceSpeed_MPH")
 	private String action;
 
 	public Buffer() {

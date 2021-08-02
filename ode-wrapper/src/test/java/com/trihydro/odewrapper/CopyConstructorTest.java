@@ -74,16 +74,12 @@ public class CopyConstructorTest {
         // Arrange
         var first = new WydotTimIncident();
         setBaseClassProps(first);
-        first.setImpact("impact");
         first.setProblem("problem");
         first.setEffect("effect");
         first.setAction("action");
         first.setIncidentId("incidentId");
         first.setHighway("highway");
-        first.setSchedStart("schedStart");
-        first.setSchedEnd("schedEnd");
         first.setPk(Integer.valueOf(1));
-        first.setProblemOtherText("otherText");
         // clientId, route, itisCodes, endPoint set with base props
 
         // Act

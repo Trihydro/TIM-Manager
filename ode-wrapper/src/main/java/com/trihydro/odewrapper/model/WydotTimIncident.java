@@ -10,13 +10,11 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class WydotTimIncident extends WydotTim {
 
-    @ApiModelProperty(value = "Expected values are mudslide, crashes, crash, hazMat, trainDerail, livestock, local, stall, stallSemi, slow, slowOver, stop, flood, avalanche, avalancheControl, landslide, rockslide, wildfire, downPowerline, signInstall, roadDamage, pilotCar, maintenance, mowing, cops, emerVeh")
+    @ApiModelProperty(value = "Expected values are mudslide, livestock, avalanche, avalancheControl, landslide, wildfire, signInstall, mowing")
     private String problem;
-
-    @ApiModelProperty(value = "Expected values are leftClosed, centerClosed, rightClosed, allClosed, shoulderClosed, travelBlocked")
     private String effect;
 
-    @ApiModelProperty(value = "Expected values are caution, slow, delays, stop, toRamp, toShoulder, toHighway, useAlt")
+    @ApiModelProperty(value = "Expected values are caution, delays, stop")
     private String action;
     @ApiModelProperty(required = true)
     private String incidentId;

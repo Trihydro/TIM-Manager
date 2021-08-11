@@ -11,7 +11,7 @@ public class WydotTimRc extends WydotTim {
 
     @ApiModelProperty(value = "This parameter is only required for road condition TIMs", required = true)
     private String roadCode; // for road condition TIMs
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(required = true, value = "Supported ITIS codes can be found in the Wyoming CV Pilot System Design Document, Appendix A")
     private Integer[] advisory;
     @ApiModelProperty(value = "This parameter is only required for chain law TIMs", required = true)
     private String segment; // for chain law TIMs

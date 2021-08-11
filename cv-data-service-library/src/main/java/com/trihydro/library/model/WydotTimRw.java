@@ -3,17 +3,28 @@ package com.trihydro.library.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class WydotTimRw extends WydotTim {
 
-    private String id;
+    @ApiModelProperty(hidden = true)
     private String action;
+    @ApiModelProperty(hidden = true)
+    private Integer[] advisory;
+    @ApiModelProperty(value = "The scheduled start time for the generated TIM. Should follow the format: yyyy-MM-dd")
     private String schedStart;
+    @ApiModelProperty(value = "The scheduled end time for the generated TIM. Should follow the format: yyyy-MM-dd")
     private String schedEnd;
+    @ApiModelProperty(value = "The highway to associate with the generated TIM", required = true)
     private String highway;
-    private String surface;
+    @ApiModelProperty(value = "Used as the client id", required = true)
+    private String id;
+    @ApiModelProperty(required = true)
     private Integer projectKey;
     private List<Buffer> buffers;
-    private Integer[] advisory;
+
+    @ApiModelProperty(hidden = true)
+    private transient String route;
 
     public WydotTimRw() {
 
@@ -26,7 +37,6 @@ public class WydotTimRw extends WydotTim {
         this.schedStart = o.schedStart;
         this.schedEnd = o.schedEnd;
         this.highway = o.highway;
-        this.surface = o.surface;
         this.projectKey = o.projectKey;
         if (o.buffers != null) {
             this.buffers = new ArrayList<>(o.buffers.size());
@@ -89,14 +99,6 @@ public class WydotTimRw extends WydotTim {
 
     public void setHighway(String highway) {
         this.highway = highway;
-    }
-
-    public String getSurface() {
-        return this.surface;
-    }
-
-    public void setSurface(String surface) {
-        this.surface = surface;
     }
 
     public List<Buffer> getBuffers() {

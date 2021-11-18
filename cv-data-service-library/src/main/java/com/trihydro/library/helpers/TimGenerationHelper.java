@@ -205,60 +205,60 @@ public class TimGenerationHelper {
         var rebuildTim = false;
         for (ActiveTimError ate : validationResult.getErrors()) {
             switch (ate.getName()) {
-                case endPoint:
-                    // FEU is Coordinate
-                    var endPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
-                    tum.setEndPoint(endPt);
-                    rebuildTim = true;
-                    break;
+            case endPoint:
+                // FEU is Coordinate
+                var endPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
+                tum.setEndPoint(endPt);
+                rebuildTim = true;
+                break;
 
-                case endTime:
-                    // change the end time on our TIM
-                    // note that we are only interested in changing the DataFrame.durationTime here,
-                    // as the endDateTime is calculated later based on startDateTime and this
-                    // duration
-                    // FEU is text formatted as 2020-12-08 09:31:00
-                    try {
-                        Date endDateTime = dFormat.parse(ate.getTmddValue());
-                        int durationTime = utility.getMinutesDurationBetweenTwoDates(tum.getStartDateTime(),
-                                simpleDateFormat.format(endDateTime));
-                        // J2735 has duration time of 0-32000
-                        // the ODE fails if we have greater than 32000
-                        if (durationTime > 32000) {
-                            durationTime = 32000;
-                        }
-                        tim.getDataframes()[0].setDurationTime(durationTime);
-                    } catch (ParseException e) {
-                        String exMsg = String.format("Failed to parse associated FEU date: %s", ate.getTmddValue());
-                        utility.logWithDate(exMsg);
-                        exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+            case endTime:
+                // change the end time on our TIM
+                // note that we are only interested in changing the DataFrame.durationTime here,
+                // as the endDateTime is calculated later based on startDateTime and this
+                // duration
+                // FEU is text formatted as 2020-12-08 09:31:00
+                try {
+                    Date endDateTime = dFormat.parse(ate.getTmddValue());
+                    int durationTime = utility.getMinutesDurationBetweenTwoDates(tum.getStartDateTime(),
+                            simpleDateFormat.format(endDateTime));
+                    // J2735 has duration time of 0-32000
+                    // the ODE fails if we have greater than 32000
+                    if (durationTime > 32000) {
+                        durationTime = 32000;
                     }
-                    break;
+                    tim.getDataframes()[0].setDurationTime(durationTime);
+                } catch (ParseException e) {
+                    String exMsg = String.format("Failed to parse associated FEU date: %s", ate.getTmddValue());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                }
+                break;
 
-                case itisCodes:
-                    // FEU is { ### }
-                    // since we will set codes to those in FEU all we need to do is deserialize them
-                    // and set
-                    var codes = ate.getTmddValue();
-                    // remove end brackets
-                    codes = codes.replace("{", "");
-                    codes = codes.replace("}", "");
+            case itisCodes:
+                // FEU is { ### }
+                // since we will set codes to those in FEU all we need to do is deserialize them
+                // and set
+                var codes = ate.getTmddValue();
+                // remove end brackets
+                codes = codes.replace("{", "");
+                codes = codes.replace("}", "");
 
-                    // codes now looks like: 1234,5678,0987
-                    String[] itisCodes = codes.split(",");
-                    DataFrame df = tim.getDataframes()[0];
-                    df.setItems(itisCodes);
-                    break;
+                // codes now looks like: 1234,5678,0987
+                String[] itisCodes = codes.split(",");
+                DataFrame df = tim.getDataframes()[0];
+                df.setItems(itisCodes);
+                break;
 
-                case startPoint:
-                    var startPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
-                    tum.setStartPoint(startPt);
-                    rebuildTim = true;
-                    break;
+            case startPoint:
+                var startPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
+                tum.setStartPoint(startPt);
+                rebuildTim = true;
+                break;
 
-                case other:
-                default:
-                    break;
+            case other:
+            default:
+                break;
             }
         }
 
@@ -586,8 +586,7 @@ public class TimGenerationHelper {
 
         // set durationTime
         if (aTim.getEndDateTime() != null) {
-            int durationTime = utility.getMinutesDurationBetweenTwoDates(df.getStartDateTime(),
-                    aTim.getEndDateTime());
+            int durationTime = utility.getMinutesDurationBetweenTwoDates(df.getStartDateTime(), aTim.getEndDateTime());
             // J2735 has duration time of 0-32000
             // the ODE fails if we have greater than 32000
             if (durationTime > 32000) {
@@ -650,6 +649,12 @@ public class TimGenerationHelper {
 
         if (aTim.getPathId() != null) {
             NodeXY[] nodes = pathNodeLLService.getNodeLLForPath(aTim.getPathId());
+            // periodically we see a missmatch in our node-LL# from the database and what
+            // the ODE thinks it should use. As a result, this errs out if we specify the
+            // wrong number. To combat this, just reset to node-LL
+            for (NodeXY node : nodes) {
+                node.setDelta("node-LL");
+            }
             if (nodes == null || nodes.length == 0) {
                 nodes = buildNodePathFromMileposts(mps, anchor);
             }

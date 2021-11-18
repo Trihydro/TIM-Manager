@@ -649,7 +649,7 @@ public class TimGenerationHelper {
 
         if (aTim.getPathId() != null) {
             NodeXY[] nodes = pathNodeLLService.getNodeLLForPath(aTim.getPathId());
-            // periodically we see a missmatch in our node-LL# from the database and what
+            // Periodically we see a mismatch in our node-LL# from the database and what
             // the ODE thinks it should use. As a result, this errs out if we specify the
             // wrong number. To combat this, just reset to node-LL
             for (NodeXY node : nodes) {

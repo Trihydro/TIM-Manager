@@ -17,8 +17,8 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration
-        implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps, TimGenerationProps, OdeProps {
+public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps,
+        TimGenerationProps, OdeProps {
 
     private String cvRestService;
     private String rsuDataServiceUrl;
@@ -43,6 +43,10 @@ public class DataTasksConfiguration
                                             // of RSUs down in a pool w/ single thread
 
     private int removeExpiredPeriodMinutes = 1440;
+    private boolean retention_removeTims = true;
+    private boolean retention_removeDa = true;
+    private boolean retention_removeHmi = true;
+    private boolean retention_removeStatusLogs = true;
     private int cleanupPeriodMinutes = 1440;
     private int sdxValidationPeriodMinutes = 1440;
     private int rsuValidationPeriodMinutes = 1440;
@@ -66,6 +70,38 @@ public class DataTasksConfiguration
      */
     public Double getPathDistanceLimit() {
         return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
+
+    public boolean getRetention_removeStatusLogs() {
+        return retention_removeStatusLogs;
+    }
+
+    public void setRetention_removeStatusLogs(boolean retention_removeStatusLogs) {
+        this.retention_removeStatusLogs = retention_removeStatusLogs;
+    }
+
+    public boolean getRetention_removeHmi() {
+        return retention_removeHmi;
+    }
+
+    public void setRetention_removeHmi(boolean retention_removeHmi) {
+        this.retention_removeHmi = retention_removeHmi;
+    }
+
+    public boolean getRetention_removeDa() {
+        return retention_removeDa;
+    }
+
+    public void setRetention_removeDa(boolean retention_removeDa) {
+        this.retention_removeDa = retention_removeDa;
+    }
+
+    public boolean getRetention_removeTims() {
+        return retention_removeTims;
+    }
+
+    public void setRetention_removeTims(boolean retention_removeTims) {
+        this.retention_removeTims = retention_removeTims;
     }
 
     public String getCvRestService() {

@@ -82,9 +82,6 @@ public class CreateBaseTimUtil {
         path.setScale(0);
         path.setType("ll");
 
-        // set mileposts to reduced path
-        timToSend.setMileposts(reducedMileposts);
-
         OdePosition3D anchorPosition = new OdePosition3D();
         anchorPosition.setLatitude(anchor.getLatitude());
         anchorPosition.setLongitude(anchor.getLongitude());

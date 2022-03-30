@@ -169,7 +169,7 @@ public class WydotTimService {
     }
 
     public void sendTimToSDW(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev,
-            TimType timType, Integer pk, Coordinate endPoint) {
+            TimType timType, Integer pk, Coordinate endPoint, List<Milepost> reducedMileposts) {
 
         List<ActiveTim> activeSatTims = null;
 
@@ -213,9 +213,9 @@ public class WydotTimService {
         if (activeSatTims != null && activeSatTims.size() > 0) {
 
             WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTims.get(0).getTimId());
-            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim);
+            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim, reducedMileposts);
         } else {
-            sendNewTimToSdw(timToSend, recordId);
+            sendNewTimToSdw(timToSend, recordId, reducedMileposts);
         }
     }
 
@@ -490,7 +490,7 @@ public class WydotTimService {
         return wydotRsu;
     }
 
-    public void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId) {
+    public void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> reducedMileposts) {
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
@@ -498,7 +498,7 @@ public class WydotTimService {
         SDW sdw = new SDW();
 
         // calculate service region
-        sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
+        sdw.setServiceRegion(getServiceRegion(reducedMileposts));
 
         // set time to live
         sdw.setTtl(getTimeToLive(timToSend.getTim().getDataframes()[0].getDurationTime()));
@@ -548,14 +548,14 @@ public class WydotTimService {
     }
 
     public void updateTimOnSdw(WydotTravelerInputData timToSend, Long timId, String recordId,
-            WydotOdeTravelerInformationMessage tim) {
+            WydotOdeTravelerInformationMessage tim, List<Milepost> reducedMileposts) {
 
         WydotTravelerInputData updatedTim = updateTim(timToSend, timId, tim);
 
         SDW sdw = new SDW();
 
         // calculate service region
-        sdw.setServiceRegion(getServiceRegion(timToSend.getMileposts()));
+        sdw.setServiceRegion(getServiceRegion(reducedMileposts));
 
         // set time to live
         sdw.setTtl(getTimeToLive(timToSend.getTim().getDataframes()[0].getDurationTime()));

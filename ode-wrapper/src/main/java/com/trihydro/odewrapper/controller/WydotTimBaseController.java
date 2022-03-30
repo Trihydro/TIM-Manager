@@ -643,7 +643,7 @@ public abstract class WydotTimBaseController {
         if (wydotTim.getEndPoint() != null) {
             endPoint = wydotTim.getEndPoint();
         } else {
-            var endMp = timToSend.getMileposts().get(timToSend.getMileposts().size() - 1);
+            var endMp = reducedMileposts.get(reducedMileposts.size() - 1);
             endPoint = new Coordinate(endMp.getLatitude(), endMp.getLongitude());
         }
 
@@ -654,6 +654,6 @@ public abstract class WydotTimBaseController {
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint, reducedMileposts);
     }
 }

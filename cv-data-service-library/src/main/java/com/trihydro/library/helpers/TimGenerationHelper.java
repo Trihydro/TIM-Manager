@@ -745,7 +745,7 @@ public class TimGenerationHelper {
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
                 utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
 
-                var rsuClearExMsg = odeService.deleteTimFromRsu(wydotRsu, Integer.valueOf(wydotRsu.getIndex()));
+                var rsuClearExMsg = odeService.deleteTimFromRsu(rsu, Integer.valueOf(wydotRsu.getIndex()));
                 var rsuExMsg = odeService.sendNewTimToRsu(timToSend);
 
                 if (!StringUtils.isEmpty(rsuClearExMsg)) {

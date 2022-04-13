@@ -13,7 +13,6 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuDataService;
@@ -28,6 +27,8 @@ import com.trihydro.tasks.models.RsuValidationResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 
 @Component
 public class ValidateRsus implements Runnable {
@@ -176,7 +177,7 @@ public class ValidateRsus implements Runnable {
 
             // If this RSU has any indices that are unaccounted for, clear them
             if (result.getUnaccountedForIndices().size() > 0) {
-                var rsu = new WydotRsu();
+                var rsu = new RSU();
                 rsu.setRsuTarget(rsuRecord.getRsuInformation().getIpv4Address());
                 rsu.setRsuRetries(2);
                 rsu.setRsuTimeout(3000);

@@ -12,6 +12,8 @@ import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
 
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -96,7 +98,7 @@ public class OdeService {
         return null;
     }
 
-    public TimQuery submitTimQuery(WydotRsu rsu, int counter) {
+    public TimQuery submitTimQuery(RSU rsu, int counter) {
 
         // stop if this fails twice
         if (counter == 2)
@@ -139,8 +141,9 @@ public class OdeService {
         return timQuery;
     }
 
-    public String deleteTimFromRsu(WydotRsu rsu, Integer index) {
+    public String deleteTimFromRsu(RSU rsu, Integer index) {
         String exMsg = "";
+
         String rsuJson = gson.toJson(rsu);
 
         HttpHeaders headers = new HttpHeaders();

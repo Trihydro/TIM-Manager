@@ -98,14 +98,19 @@ public class OdeService {
         return null;
     }
 
-    public TimQuery submitTimQuery(RSU rsu, int counter) {
+    public TimQuery submitTimQuery(WydotRsu rsu, int counter) {
 
         // stop if this fails twice
         if (counter == 2)
             return null;
 
         // tim query to ODE
-        String rsuJson = gson.toJson(rsu);
+        var tmpRsu = new RSU();
+        tmpRsu.setRsuTarget(rsu.getRsuTarget());
+        // rsuUsername, rsuPassword will take ODE defaults.
+        tmpRsu.setRsuRetries(3);
+        tmpRsu.setRsuTimeout(5000);
+        String rsuJson = gson.toJson(tmpRsu);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

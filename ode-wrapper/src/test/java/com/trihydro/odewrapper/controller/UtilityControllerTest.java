@@ -35,8 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
-
 @ExtendWith(MockitoExtension.class)
 public class UtilityControllerTest {
     @Mock

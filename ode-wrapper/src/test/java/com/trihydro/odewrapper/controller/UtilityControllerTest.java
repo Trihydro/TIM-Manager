@@ -35,8 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
-
 @ExtendWith(MockitoExtension.class)
 public class UtilityControllerTest {
     @Mock
@@ -130,7 +128,7 @@ public class UtilityControllerTest {
         String[] addresses = new String[1];
         addresses[0] = rsuTarget;
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(mockOdeService.submitTimQuery(isA(RSU.class), isA(Integer.class))).thenReturn(null);
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(null);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -154,7 +152,7 @@ public class UtilityControllerTest {
         addresses[0] = rsuTarget;
 
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(mockOdeService.submitTimQuery(isA(RSU.class), isA(Integer.class))).thenReturn(mockTimQuery);
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(mockTimQuery);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);
@@ -179,7 +177,7 @@ public class UtilityControllerTest {
         addresses[1] = rsuTarget2;
 
         when(mockWydotTimService.getRsus()).thenReturn(wydotRsus);
-        when(mockOdeService.submitTimQuery(isA(RSU.class), isA(Integer.class))).thenReturn(mockTimQuery);
+        when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(mockTimQuery);
 
         // Act
         ResponseEntity<String> result = uut.clearRsu(addresses);

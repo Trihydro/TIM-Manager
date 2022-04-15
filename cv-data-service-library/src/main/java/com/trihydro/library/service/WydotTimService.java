@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -100,7 +101,7 @@ public class WydotTimService {
     private Gson gson = new Gson();
     private List<WydotRsu> rsus;
     private List<TimType> timTypes;
-    WydotRsu[] rsuArr = new WydotRsu[1];
+    RSU[] rsuArr = new RSU[1];
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public WydotTravelerInputData createTim(WydotTim wydotTim, String timTypeStr, String startDateTime,
@@ -213,7 +214,8 @@ public class WydotTimService {
         if (activeSatTims != null && activeSatTims.size() > 0) {
 
             WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTims.get(0).getTimId());
-            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim, reducedMileposts);
+            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim,
+                    reducedMileposts);
         } else {
             sendNewTimToSdw(timToSend, recordId, reducedMileposts);
         }
@@ -235,8 +237,16 @@ public class WydotTimService {
         // for each rsu in range
         for (WydotRsu rsu : rsus) {
 
+            var odeRsu = new RSU();
+
+            odeRsu.setRsuIndex(rsu.getRsuIndex());
+            odeRsu.setRsuTarget(rsu.getRsuTarget());
+            // rsuUsername, rsuPassword will take ODE defaults.
+            odeRsu.setRsuRetries(rsu.getRsuRetries());
+            odeRsu.setRsuTimeout(rsu.getRsuTimeout());
+
             // update region name for active tim logger
-            String regionNameTemp = regionNamePrev + "_RSU-" + rsu.getRsuTarget() + "_" + timType.getType();
+            String regionNameTemp = regionNamePrev + "_RSU-" + odeRsu.getRsuTarget() + "_" + timType.getType();
 
             // add clientId to region name
             if (wydotTim.getClientId() != null)
@@ -251,11 +261,11 @@ public class WydotTimService {
 
             // look for active tim on this rsu
             ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(wydotTim.getDirection(), wydotTim.getClientId(),
-                    rsu.getRsuTarget());
+                    odeRsu.getRsuTarget());
             ActiveTim activeTim = activeTimService.getActiveRsuTim(artqm);
 
             // create new active_tim_holding record
-            ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, rsu.getRsuTarget(), null, endPoint);
+            ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, odeRsu.getRsuTarget(), null, endPoint);
             activeTimHolding.setPacketId(timToSend.getTim().getPacketID());
 
             // Set projectKey, if this is a RW TIM
@@ -273,7 +283,7 @@ public class WydotTimService {
 
                 // update TIM rsu
                 // add rsu to tim
-                rsuArr[0] = rsu;
+                rsuArr[0] = odeRsu;
                 timToSend.getRequest().setRsus(rsuArr);
                 updateTimOnRsu(timToSend, activeTim.getTimId(), tim, rsu.getRsuId(), endDateTime);
             } else {
@@ -292,7 +302,7 @@ public class WydotTimService {
                 // Fetch existing active_tim_holding records. If other TIMs are en route to this
                 // RSU, make sure we don't overwrite their claimed indexes
                 List<ActiveTimHolding> existingHoldingRecords = activeTimHoldingService
-                        .getActiveTimHoldingForRsu(rsu.getRsuTarget());
+                        .getActiveTimHoldingForRsu(odeRsu.getRsuTarget());
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
 
                 // Finally, fetch all active_tims that are supposed to be on this RSU. Some may
@@ -314,8 +324,8 @@ public class WydotTimService {
                 activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
                 // add rsu to tim
-                rsu.setRsuIndex(nextRsuIndex);
-                rsuArr[0] = rsu;
+                odeRsu.setRsuIndex(nextRsuIndex);
+                rsuArr[0] = odeRsu;
                 timToSend.getRequest().setRsus(rsuArr);
                 var df = timToSend.getTim().getDataframes()[0];
                 timToSend.getRequest().setSnmp(snmpHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
@@ -597,13 +607,19 @@ public class WydotTimService {
 
     public Boolean deleteTimFromRsu(WydotRsu rsu, Integer index) {
 
-        String rsuJson = gson.toJson(rsu);
+        var odeRsu = new RSU();
+        odeRsu.setRsuIndex(rsu.getRsuIndex());
+        odeRsu.setRsuTarget(rsu.getRsuTarget());
+        // rsuUsername, rsuPassword will take ODE defaults.
+        odeRsu.setRsuRetries(3);
+        odeRsu.setRsuTimeout(5000);
+        String rsuJson = gson.toJson(odeRsu);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        utility.logWithDate("Deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+        utility.logWithDate("Deleting TIM on index " + index.toString() + " from rsu " + odeRsu.getRsuTarget());
         var response = restTemplateProvider.GetRestTemplate_NoErrors().exchange(
                 odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
 

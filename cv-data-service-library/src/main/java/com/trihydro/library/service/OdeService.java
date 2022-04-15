@@ -105,12 +105,12 @@ public class OdeService {
             return null;
 
         // tim query to ODE
-        var tmpRsu = new RSU();
-        tmpRsu.setRsuTarget(rsu.getRsuTarget());
+        var odeRsu = new RSU();
+        odeRsu.setRsuTarget(rsu.getRsuTarget());
         // rsuUsername, rsuPassword will take ODE defaults.
-        tmpRsu.setRsuRetries(3);
-        tmpRsu.setRsuTimeout(5000);
-        String rsuJson = gson.toJson(tmpRsu);
+        odeRsu.setRsuRetries(3);
+        odeRsu.setRsuTimeout(5000);
+        String rsuJson = gson.toJson(odeRsu);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

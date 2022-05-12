@@ -337,6 +337,85 @@ public class WydotTimService {
         }
     }
 
+    public TimDeleteSummary expireTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
+
+        var returnValue = new TimDeleteSummary();
+        if (activeTims == null || activeTims.isEmpty()) {
+            return returnValue;
+        }
+        WydotRsu rsu = null;
+
+        // split activeTims into sat and rsu for processing
+        List<ActiveTim> satTims = activeTims.stream().filter(x -> StringUtils.isNotBlank(x.getSatRecordId()))
+                .collect(Collectors.toList());
+        List<ActiveTim> rsuTims = activeTims.stream().filter(x -> StringUtils.isBlank(x.getSatRecordId()))
+                .collect(Collectors.toList());
+
+        for (ActiveTim activeTim : rsuTims) {
+            // get RSU TIM is on
+            List<TimRsu> timRsus = timRsuService.getTimRsusByTimId(activeTim.getTimId());
+            // get full RSU
+
+            if (timRsus.size() > 0) {
+                for (TimRsu timRsu : timRsus) {
+                    rsu = getRsu(timRsu.getRsuId());
+                    // delete tim off rsu -- don't want to delete tim from RSU
+                    utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
+                    if (!deleteTimFromRsu(rsu, timRsu.getRsuIndex())) {
+                        returnValue.addfailedRsuTimJson(gson.toJson(timRsu));
+                    }
+                }
+            }
+            // delete active tim
+            if (activeTimService.deleteActiveTim(activeTim.getActiveTimId())) {
+                returnValue.addSuccessfulRsuDeletions(activeTim.getActiveTimId());
+            } else {
+                returnValue.addFailedActiveTimDeletions(activeTim.getActiveTimId());
+            }
+        }
+
+        if (satTims != null && satTims.size() > 0) {
+            // Get the sat_record_id values and active_tim_id values
+            List<String> satRecordIds = satTims.stream().map(ActiveTim::getSatRecordId).collect(Collectors.toList());
+            List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
+
+            // Issue one delete call to the REST service, encompassing all sat_record_ids
+            HashMap<Integer, Boolean> sdxDelResults = sdwService.deleteSdxDataBySatRecordId(satRecordIds);
+
+            // Determine if anything failed
+            Boolean errorsOccurred = sdxDelResults.entrySet().stream()
+                    .anyMatch(x -> x.getValue() != null && x.getValue() == false);
+            if (errorsOccurred) {
+                // pull out failed deletions for corresponding active_tim records so we don't
+                // orphan them
+                Stream<Entry<Integer, Boolean>> failedStream = sdxDelResults.entrySet().stream()
+                        .filter(x -> x.getValue() == false);
+                List<Integer> failedSatRecords = failedStream.map(x -> x.getKey()).collect(Collectors.toList());
+
+                activeSatTimIds = satTims.stream()
+                        .filter(x -> !failedSatRecords.contains(Integer.parseUnsignedInt(x.getSatRecordId(), 16)))
+                        .map(ActiveTim::getActiveTimId).collect(Collectors.toList());
+                String failedResultsText = sdxDelResults.entrySet().stream().filter(x -> x.getValue() == false)
+                        .map(x -> x.getKey().toString()).collect(Collectors.joining(","));
+                if (StringUtils.isNotBlank(failedResultsText)) {
+                    String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
+                    returnValue.setSatelliteErrorSummary(body);
+                    try {
+                        emailHelper.SendEmail(emailProps.getAlertAddresses(), "SDX Delete Fail", body);
+                    } catch (Exception ex) {
+                        utility.logWithDate(body + ", and the email failed to send to support");
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            if (activeTimService.deleteActiveTimsById(activeSatTimIds)) {
+                returnValue.setSuccessfulSatelliteDeletions(activeSatTimIds);
+            }
+        }
+        return returnValue;
+    }
+
     public TimDeleteSummary deleteTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
 
         var returnValue = new TimDeleteSummary();

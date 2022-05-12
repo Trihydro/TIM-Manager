@@ -115,13 +115,13 @@ public class TimRefreshControllerTest {
         when(mockActiveTimService.resetActiveTimsExpirationDate(any())).thenReturn(false);
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockTimGenerationHelper.isValidTim(any())).thenReturn(true);
-        when(mockTimGenerationHelper.resubmitToOde(any(), eq(true))).thenReturn(resubExceptions);
+        when(mockTimGenerationHelper.resubmitToOde(eq(true), any())).thenReturn(resubExceptions);
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        verify(mockTimGenerationHelper).resubmitToOde(Collections.singletonList(tum.getActiveTimId()), true);
+        verify(mockTimGenerationHelper).resubmitToOde(true, Collections.singletonList(tum.getActiveTimId()));
         var gson = new Gson();
         String body = "An error occurred while resetting the expiration date(s) for the Active TIM(s)<br/><br/>";
         body += "The TIM Refresh application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
@@ -143,13 +143,13 @@ public class TimRefreshControllerTest {
         when(mockActiveTimService.getExpiringActiveTims()).thenReturn(arrLst);
         when(mockActiveTimService.resetActiveTimsExpirationDate(any())).thenReturn(true);
         when(mockTimGenerationHelper.isValidTim(any())).thenReturn(true);
-        when(mockTimGenerationHelper.resubmitToOde(any(), eq(true))).thenReturn(resubExceptions);
+        when(mockTimGenerationHelper.resubmitToOde(eq(true), any())).thenReturn(resubExceptions);
 
         // call the function to test
         controllerUnderTest.performTaskUsingCron();
 
         // verify static functions were called
-        verify(mockTimGenerationHelper).resubmitToOde(Collections.singletonList(tum.getActiveTimId()), true);
+        verify(mockTimGenerationHelper).resubmitToOde(true, Collections.singletonList(tum.getActiveTimId()));
         // verify no emails sent
         verifyNoInteractions(mockEmailHelper);
     }

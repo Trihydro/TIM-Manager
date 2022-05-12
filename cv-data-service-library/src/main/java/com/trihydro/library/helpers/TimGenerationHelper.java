@@ -327,7 +327,33 @@ public class TimGenerationHelper {
      * @return Errors that occurred while processing the request
      */
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
-        return resubmitToOde(activeTimIds, false);
+        return resubmitToOde(activeTimIds, false, false);
+    }
+
+    /**
+     * Rebuilds and resubmits TIMs to the ODE
+     * 
+     * @param activeTimIds TIMs to resubmit
+     * @param resetStartTimes Whether or not TIMs with an indefinite durationTime
+     *                        should have their startTime updated to the current
+     *                        time
+     * @return Errors that occurred while processing the request
+     */
+    public List<ResubmitTimException> resubmitToOde(boolean resetStartTimes, List<Long> activeTimIds) {
+        return resubmitToOde(activeTimIds, resetStartTimes, false);
+    }
+
+    /**
+     * Rebuilds and resubmits TIMs to the ODE
+     * 
+     * @param activeTimIds TIMs to resubmit
+     * @param resetExpirationTime Whether or not TIMs should have their expirationTime 
+     *                            updated to the current
+     *                            time
+     * @return Errors that occurred while processing the request
+     */
+    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds, boolean resetExpirationTime) {
+        return resubmitToOde(activeTimIds, false, resetExpirationTime);
     }
 
     /**
@@ -337,9 +363,12 @@ public class TimGenerationHelper {
      * @param resetStartTimes Whether or not TIMs with an indefinite durationTime
      *                        should have their startTime updated to the current
      *                        time
+     * @param resetExpirationTime Whether or not TIMs should have their expirationTime 
+     *                            updated to the current
+     *                            time
      * @return Errors that occurred while processing the request
      */
-    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds, boolean resetStartTimes) {
+    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds, boolean resetStartTimes, boolean resetExpirationTime) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
             return exceptions;
@@ -381,7 +410,7 @@ public class TimGenerationHelper {
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
                 reduced_mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-                OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, resetStartTimes);
+                OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, resetStartTimes, resetExpirationTime);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                             tum.getActiveTimId());
@@ -422,8 +451,13 @@ public class TimGenerationHelper {
 
     private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,
             Milepost anchor, boolean resetStartTimes) {
+        return getTim(aTim, mps, allMps, anchor, resetStartTimes, false);
+    }
+
+    private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,
+            Milepost anchor, boolean resetStartTimes, boolean resetExpirationTime) {
         String nowAsISO = Instant.now().toString();
-        DataFrame df = getDataFrame(aTim, anchor, resetStartTimes);
+        DataFrame df = getDataFrame(aTim, anchor, resetStartTimes, resetExpirationTime);
         // check to see if we have any itis codes
         // if not, just continue on
         if (df.getItems() == null || df.getItems().length == 0) {
@@ -543,7 +577,7 @@ public class TimGenerationHelper {
         return dirTest; // heading slice
     }
 
-    private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes) {
+    private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes, boolean resetExpirationTime) {
         // RoadSignID
         RoadSignID rsid = new RoadSignID();
         rsid.setPosition(getAnchorPosition(aTim, anchor));
@@ -585,7 +619,9 @@ public class TimGenerationHelper {
         }
 
         // set durationTime
-        if (aTim.getEndDateTime() != null) {
+        if (resetExpirationTime) {
+            df.setDurationTime(0);
+        } else if (aTim.getEndDateTime() != null) {
             int durationTime = utility.getMinutesDurationBetweenTwoDates(df.getStartDateTime(), aTim.getEndDateTime());
             // J2735 has duration time of 0-32000
             // the ODE fails if we have greater than 32000

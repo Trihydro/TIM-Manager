@@ -555,7 +555,8 @@ public abstract class WydotTimBaseController {
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
         var existingTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
                 wydotTim.getDirection());
-        wydotTimService.deleteTimsFromRsusAndSdx(existingTims);
+        // Set expiration time to now on existing TIMs and resubmitToOde
+        wydotTimService.expireTimsFromRsusAndSdx(existingTims);
 
         // Get mileposts that will define the TIM's region
         var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);

@@ -541,7 +541,7 @@ public class TimGenerationHelperTest {
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
 
         // Act
-        uut.resubmitToOde(activeTimIds, true);
+        uut.resubmitToOde(true, activeTimIds);
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
@@ -579,7 +579,7 @@ public class TimGenerationHelperTest {
         doReturn(60).when(mockUtility).getMinutesDurationBetweenTwoDates("2021-01-01T00:00:00.000Z", "2021-01-01T01:00:00.000Z");
 
         // Act
-        uut.resubmitToOde(activeTimIds, true);
+        uut.resubmitToOde(true, activeTimIds);
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());

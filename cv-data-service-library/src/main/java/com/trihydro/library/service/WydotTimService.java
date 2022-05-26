@@ -1,6 +1,8 @@
 package com.trihydro.library.service;
 
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -29,6 +31,7 @@ import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.TimUpdateSummary;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTim;
@@ -337,13 +340,13 @@ public class WydotTimService {
         }
     }
 
-    public TimDeleteSummary expireTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
-
-        var returnValue = new TimDeleteSummary();
+    public TimUpdateSummary expireTimsFromRsusAndSdx(List<ActiveTim> activeTims, WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
+            Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
+            List<Milepost> reducedMileposts, Milepost anchor) {
+        var returnValue = new TimUpdateSummary();
         if (activeTims == null || activeTims.isEmpty()) {
             return returnValue;
         }
-        WydotRsu rsu = null;
 
         // split activeTims into sat and rsu for processing
         List<ActiveTim> satTims = activeTims.stream().filter(x -> StringUtils.isNotBlank(x.getSatRecordId()))
@@ -358,59 +361,41 @@ public class WydotTimService {
 
             if (timRsus.size() > 0) {
                 for (TimRsu timRsu : timRsus) {
-                    rsu = getRsu(timRsu.getRsuId());
-                    // delete tim off rsu -- don't want to delete tim from RSU
-                    utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
-                    if (!deleteTimFromRsu(rsu, timRsu.getRsuIndex())) {
-                        returnValue.addfailedRsuTimJson(gson.toJson(timRsu));
-                    }
+                    // get tim
+                    WydotOdeTravelerInformationMessage tim = timService.getTim(activeTim.getTimId());
+                    // create timToSend to update tim with new expiration time
+                    String nowAsISO = Instant.now().plus(1, ChronoUnit.MINUTES).toString();
+                    WydotTravelerInputData timToSend = createTim(wydotTim, timType.toString(), startDateTime, nowAsISO, content, frameType, allMileposts, reducedMileposts, anchor);
+                    // update tim on RSU
+                    updateTimOnRsu(timToSend, activeTim.getTimId(), tim, timRsu.getRsuId().intValue(), nowAsISO);
+                    utility.logWithDate("Expiring TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
                 }
             }
-            // delete active tim
+            // delete active tim -- not sure if we need this still
             if (activeTimService.deleteActiveTim(activeTim.getActiveTimId())) {
-                returnValue.addSuccessfulRsuDeletions(activeTim.getActiveTimId());
+                returnValue.addSuccessfulRsuUpdates(activeTim.getActiveTimId());
             } else {
                 returnValue.addFailedActiveTimDeletions(activeTim.getActiveTimId());
             }
         }
 
         if (satTims != null && satTims.size() > 0) {
-            // Get the sat_record_id values and active_tim_id values
-            List<String> satRecordIds = satTims.stream().map(ActiveTim::getSatRecordId).collect(Collectors.toList());
+            // Get the active_tim_id values
             List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
 
-            // Issue one delete call to the REST service, encompassing all sat_record_ids
-            HashMap<Integer, Boolean> sdxDelResults = sdwService.deleteSdxDataBySatRecordId(satRecordIds);
-
-            // Determine if anything failed
-            Boolean errorsOccurred = sdxDelResults.entrySet().stream()
-                    .anyMatch(x -> x.getValue() != null && x.getValue() == false);
-            if (errorsOccurred) {
-                // pull out failed deletions for corresponding active_tim records so we don't
-                // orphan them
-                Stream<Entry<Integer, Boolean>> failedStream = sdxDelResults.entrySet().stream()
-                        .filter(x -> x.getValue() == false);
-                List<Integer> failedSatRecords = failedStream.map(x -> x.getKey()).collect(Collectors.toList());
-
-                activeSatTimIds = satTims.stream()
-                        .filter(x -> !failedSatRecords.contains(Integer.parseUnsignedInt(x.getSatRecordId(), 16)))
-                        .map(ActiveTim::getActiveTimId).collect(Collectors.toList());
-                String failedResultsText = sdxDelResults.entrySet().stream().filter(x -> x.getValue() == false)
-                        .map(x -> x.getKey().toString()).collect(Collectors.joining(","));
-                if (StringUtils.isNotBlank(failedResultsText)) {
-                    String body = "The following recordIds failed to delete from the SDX: " + failedResultsText;
-                    returnValue.setSatelliteErrorSummary(body);
-                    try {
-                        emailHelper.SendEmail(emailProps.getAlertAddresses(), "SDX Delete Fail", body);
-                    } catch (Exception ex) {
-                        utility.logWithDate(body + ", and the email failed to send to support");
-                        ex.printStackTrace();
-                    }
-                }
+            for (ActiveTim activeSatTim : satTims) {
+                WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTim.getActiveTimId());
+                // create timToSend to update tim with new expiration time
+                String nowAsISO = Instant.now().plus(1, ChronoUnit.MINUTES).toString();
+                WydotTravelerInputData timToSend = createTim(wydotTim, timType.toString(), startDateTime, nowAsISO, content, frameType, allMileposts, reducedMileposts, anchor);
+                // update tim on SDX
+                updateTimOnSdw(timToSend, activeSatTim.getActiveTimId(), activeSatTim.getSatRecordId(), tim, reducedMileposts);
+                utility.logWithDate("Expiring TIM from SDW. Corresponding tim_id: " + activeSatTim.getActiveTimId());
             }
-
+            
+            // delete active tims -- not sure if we need this either
             if (activeTimService.deleteActiveTimsById(activeSatTimIds)) {
-                returnValue.setSuccessfulSatelliteDeletions(activeSatTimIds);
+                returnValue.setSuccessfulSatelliteUpdates(activeSatTimIds);
             }
         }
         return returnValue;

@@ -4,45 +4,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TimUpdateSummary {
-    private List<Long> successfulSatelliteUpdates;
-    private List<Long> successfulRsuUpdates;
-    private List<Long> failedActiveTimDeletions;
+    private List<Long> successfulTimUpdates;
+    private List<Long> failedActiveTimUpdates;
 
     public TimUpdateSummary() {
-        this.successfulSatelliteUpdates = new ArrayList<Long>();
-        this.successfulRsuUpdates = new ArrayList<Long>();
-        this.failedActiveTimDeletions = new ArrayList<Long>();
+        this.successfulTimUpdates = new ArrayList<Long>();
+        this.failedActiveTimUpdates = new ArrayList<Long>();
     }
 
-    public List<Long> getFailedActiveTimDeletions() {
-        return failedActiveTimDeletions;
+    public List<Long> getFailedActiveTimUpdates() {
+        return failedActiveTimUpdates;
     }
 
-    public void setFailedActiveTimDeletions(List<Long> failedActiveTimDeletions) {
-        this.failedActiveTimDeletions = failedActiveTimDeletions;
+    public void setFailedActiveTimUpdates(List<Long> failedActiveTimUpdates) {
+        this.failedActiveTimUpdates = failedActiveTimUpdates;
     }
 
-    public void addFailedActiveTimDeletions(Long aTimDelFail) {
-        this.failedActiveTimDeletions.add(aTimDelFail);
+    public void addFailedActiveTimUpdates(Long aTimUpdateFail) {
+        this.failedActiveTimUpdates.add(aTimUpdateFail);
     }
 
-    public List<Long> getSuccessfulRsuUpdataes() {
-        return successfulRsuUpdates;
+    public List<Long> getSuccessfulTimUpdataes() {
+        return successfulTimUpdates;
     }
 
-    public void setSuccessfulRsuUpdates(List<Long> rsuDelSuccess) {
-        this.successfulRsuUpdates = rsuDelSuccess;
+    public void setSuccessfulTimUpdates(List<Long> rsuUpdateSuccess) {
+        this.successfulTimUpdates = rsuUpdateSuccess;
     }
 
-    public void addSuccessfulRsuUpdates(Long rsuDelSuccess) {
-        this.successfulRsuUpdates.add(rsuDelSuccess);
-    }
-
-    public List<Long> getSuccessfulSatelliteUpdates() {
-        return successfulSatelliteUpdates;
-    }
-
-    public void setSuccessfulSatelliteUpdates(List<Long> satDelSuccess) {
-        this.successfulSatelliteUpdates = satDelSuccess;
+    public void addSuccessfulTimUpdates(Long rsuUpdateSuccess) {
+        this.successfulTimUpdates.add(rsuUpdateSuccess);
     }
 }

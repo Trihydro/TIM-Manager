@@ -556,6 +556,9 @@ public abstract class WydotTimBaseController {
         var existingTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
                 wydotTim.getDirection());
 
+        // Update existingTims expirationDateTime to current time
+        wydotTimService.expireExistingActiveTims(existingTims);
+
         // Get mileposts that will define the TIM's region
         var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);
 
@@ -569,9 +572,6 @@ public abstract class WydotTimBaseController {
         var anchor = milepostsAll.remove(0);
         var reducedMileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll,
                 configuration.getPathDistanceLimit());
-
-        // Update existing tims to expire -- moved down here to use the mileposts
-        wydotTimService.expireTimsFromRsusAndSdx(existingTims, wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll, reducedMileposts, anchor);
 
         createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,
                 reducedMileposts, anchor, new IdGenerator());

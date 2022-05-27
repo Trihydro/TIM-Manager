@@ -102,7 +102,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
-        List<WydotTim> timsToDelete = new ArrayList<WydotTim>();
+        List<WydotTim> timsToExpire = new ArrayList<WydotTim>();
 
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
             resultTim = validateRcAc(wydotTim);
@@ -112,13 +112,13 @@ public class WydotTimRcController extends WydotTimBaseController {
                 continue;
             }
 
-            timsToDelete.add(wydotTim);
+            timsToExpire.add(wydotTim);
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
 
-        if (timsToDelete.size() > 0) {
-            wydotTimService.deleteWydotTimsByType(timsToDelete, type);
+        if (timsToExpire.size() > 0) {
+            wydotTimService.expireExistingWydotTims(timsToExpire, getTimType(type));
         }
 
         String responseMessage = gson.toJson(resultList);

@@ -340,64 +340,43 @@ public class WydotTimService {
         }
     }
 
-    public TimUpdateSummary expireTimsFromRsusAndSdx(List<ActiveTim> activeTims, WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
-            Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
-            List<Milepost> reducedMileposts, Milepost anchor) {
+    public TimUpdateSummary expireExistingWydotTims(List<WydotTim> existingTims, TimType timType) {
         var returnValue = new TimUpdateSummary();
-        if (activeTims == null || activeTims.isEmpty()) {
+        if (existingTims == null || existingTims.isEmpty()) {
             return returnValue;
         }
 
-        // split activeTims into sat and rsu for processing
-        List<ActiveTim> satTims = activeTims.stream().filter(x -> StringUtils.isNotBlank(x.getSatRecordId()))
-                .collect(Collectors.toList());
-        List<ActiveTim> rsuTims = activeTims.stream().filter(x -> StringUtils.isBlank(x.getSatRecordId()))
-                .collect(Collectors.toList());
+        var allExistingActiveTims = new ArrayList<ActiveTim>();
+        for (WydotTim wydotTim : existingTims) {
+            Long timTypeId = timType != null ? timType.getTimTypeId() : null;
+            var existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
+                    wydotTim.getDirection());
+            allExistingActiveTims.addAll(existingActiveTims);
+        }
+        
+        return expireExistingActiveTims(allExistingActiveTims);
+    }
 
-        for (ActiveTim activeTim : rsuTims) {
-            // get RSU TIM is on
-            List<TimRsu> timRsus = timRsuService.getTimRsusByTimId(activeTim.getTimId());
-            // get full RSU
+    public TimUpdateSummary expireExistingActiveTims(List<ActiveTim> existingTims) {
+        var returnValue = new TimUpdateSummary();
+        if (existingTims == null || existingTims.isEmpty()) {
+            return returnValue;
+        }
 
-            if (timRsus.size() > 0) {
-                for (TimRsu timRsu : timRsus) {
-                    // get tim
-                    WydotOdeTravelerInformationMessage tim = timService.getTim(activeTim.getTimId());
-                    // create timToSend to update tim with new expiration time
-                    String nowAsISO = Instant.now().plus(1, ChronoUnit.MINUTES).toString();
-                    WydotTravelerInputData timToSend = createTim(wydotTim, timType.toString(), startDateTime, nowAsISO, content, frameType, allMileposts, reducedMileposts, anchor);
-                    // update tim on RSU
-                    updateTimOnRsu(timToSend, activeTim.getTimId(), tim, timRsu.getRsuId().intValue(), nowAsISO);
-                    utility.logWithDate("Expiring TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
-                }
-            }
-            // delete active tim -- not sure if we need this still
-            if (activeTimService.deleteActiveTim(activeTim.getActiveTimId())) {
-                returnValue.addSuccessfulRsuUpdates(activeTim.getActiveTimId());
+        for (ActiveTim activeTim : existingTims) {
+            // get tim
+            WydotOdeTravelerInformationMessage tim = timService.getTim(activeTim.getTimId());
+            var packetId = tim.getPacketID();
+            String nowAsISO = Instant.now().plus(1, ChronoUnit.MINUTES).toString();
+
+            // update active tim's expiration date
+            if (activeTimService.updateActiveTimExpiration(packetId, nowAsISO)) {
+                returnValue.addSuccessfulTimUpdates(activeTim.getActiveTimId());
             } else {
-                returnValue.addFailedActiveTimDeletions(activeTim.getActiveTimId());
+                returnValue.addFailedActiveTimUpdates(activeTim.getActiveTimId());
             }
         }
 
-        if (satTims != null && satTims.size() > 0) {
-            // Get the active_tim_id values
-            List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
-
-            for (ActiveTim activeSatTim : satTims) {
-                WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTim.getActiveTimId());
-                // create timToSend to update tim with new expiration time
-                String nowAsISO = Instant.now().plus(1, ChronoUnit.MINUTES).toString();
-                WydotTravelerInputData timToSend = createTim(wydotTim, timType.toString(), startDateTime, nowAsISO, content, frameType, allMileposts, reducedMileposts, anchor);
-                // update tim on SDX
-                updateTimOnSdw(timToSend, activeSatTim.getActiveTimId(), activeSatTim.getSatRecordId(), tim, reducedMileposts);
-                utility.logWithDate("Expiring TIM from SDW. Corresponding tim_id: " + activeSatTim.getActiveTimId());
-            }
-            
-            // delete active tims -- not sure if we need this either
-            if (activeTimService.deleteActiveTimsById(activeSatTimIds)) {
-                returnValue.setSuccessfulSatelliteUpdates(activeSatTimIds);
-            }
-        }
         return returnValue;
     }
 

@@ -24,7 +24,7 @@ public class TimUpdateSummary {
         this.failedActiveTimUpdates.add(aTimUpdateFail);
     }
 
-    public List<Long> getSuccessfulTimUpdataes() {
+    public List<Long> getSuccessfulTimUpdates() {
         return successfulTimUpdates;
     }
 

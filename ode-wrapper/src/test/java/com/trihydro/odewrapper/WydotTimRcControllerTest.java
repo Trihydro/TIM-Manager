@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -213,5 +214,19 @@ public class WydotTimRcControllerTest {
 
 		// Route isn't required for an AC, so it isn't set in the response.
 		Assertions.assertEquals(null, resultArr[0].route);
+	}
+
+	@Test
+	public void testAllClearExpiresExistingWydotTims() throws Exception {
+		// Arrange
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
+		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+
+		// Act
+		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
+
+		// Assert
+		verify(mockWydotTimService).expireExistingWydotTims(any(), any());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 	}
 }

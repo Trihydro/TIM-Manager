@@ -2,6 +2,7 @@ package com.trihydro.library.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -23,7 +24,10 @@ import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.TimRsu;
+import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.model.WydotTim;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -103,6 +107,16 @@ public class WydotTimServiceTest {
         activeTims.add(aTim2);
 
         return activeTims;
+    }
+
+    private List<WydotTim> getWydotTims() {
+        List<WydotTim> wydotTims = new ArrayList<>();
+        WydotTim tim = new WydotTim();
+        tim.setClientId("clientId");
+        tim.setDirection("westward");
+        wydotTims.add(tim);
+
+        return wydotTims;
     }
 
     public void setupRestTemplate() {
@@ -219,5 +233,113 @@ public class WydotTimServiceTest {
         }
         String jsonVal = String.join(",", timRsuJson);
         Assertions.assertEquals(jsonVal, result.getRsuErrorSummary());
+    }
+
+    @Test
+    public void expireExistingActiveTims_Success() {
+        // Arrange
+        List<ActiveTim> activeTims = getActiveTims(false);
+        WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();
+        tim.setPacketID("3C8E8DF2470B1A72E");
+        WydotOdeTravelerInformationMessage tim2 = new WydotOdeTravelerInformationMessage();
+        tim2.setPacketID("3C8E8DF2470B1A62E");
+
+        when(mockTimService.getTim(-10l)).thenReturn(tim);
+        when(mockTimService.getTim(-20l)).thenReturn(tim2);
+        doReturn(true).when(mockActiveTimService).updateActiveTimExpiration(any(), any());
+
+        // Act
+        var result = uut.expireExistingActiveTims(activeTims);
+
+        // Assert
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A72E"), any());
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A62E"), any());
+        Assertions.assertEquals(result.getSuccessfulTimUpdates().size(), 2);
+    }
+
+    @Test
+    public void expireExistingActiveTims_FailsOnUpdatingExpiration() {
+        // Arrange
+        List<ActiveTim> activeTims = getActiveTims(false);
+        WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();
+        tim.setPacketID("3C8E8DF2470B1A72E");
+        WydotOdeTravelerInformationMessage tim2 = new WydotOdeTravelerInformationMessage();
+        tim2.setPacketID("3C8E8DF2470B1A62E");
+
+        when(mockTimService.getTim(-10l)).thenReturn(tim);
+        when(mockTimService.getTim(-20l)).thenReturn(tim2);
+        doReturn(false).when(mockActiveTimService).updateActiveTimExpiration(any(), any());
+
+        // Act
+        var result = uut.expireExistingActiveTims(activeTims);
+
+        // Assert
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A72E"), any());
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A62E"), any());
+        Assertions.assertEquals(result.getFailedActiveTimUpdates().size(), 2);
+    }
+
+    @Test
+    public void expireExistingActiveTims_SeparateTimsSucceedAndFail() {
+        // Arrange
+        List<ActiveTim> activeTims = getActiveTims(false);
+        WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();
+        tim.setPacketID("3C8E8DF2470B1A72E");
+        WydotOdeTravelerInformationMessage tim2 = new WydotOdeTravelerInformationMessage();
+        tim2.setPacketID("3C8E8DF2470B1A62E");
+
+        when(mockTimService.getTim(-10l)).thenReturn(tim);
+        when(mockTimService.getTim(-20l)).thenReturn(tim2);
+        doReturn(false).doReturn(true).when(mockActiveTimService).updateActiveTimExpiration(any(), any());
+
+        // Act
+        var result = uut.expireExistingActiveTims(activeTims);
+
+        // Assert
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A72E"), any());
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A62E"), any());
+        Assertions.assertEquals(result.getFailedActiveTimUpdates().size(), 1);
+        Assertions.assertEquals(result.getSuccessfulTimUpdates().size(), 1);
+    }
+
+    @Test
+    public void expireExistingWydotTims_Success() {
+        // Arrange
+        List<WydotTim> wydotTims = getWydotTims();
+        List<ActiveTim> activeTims = getActiveTims(false);
+        WydotOdeTravelerInformationMessage tim = new WydotOdeTravelerInformationMessage();
+        tim.setPacketID("3C8E8DF2470B1A72E");
+        WydotOdeTravelerInformationMessage tim2 = new WydotOdeTravelerInformationMessage();
+        tim2.setPacketID("3C8E8DF2470B1A62E");
+        TimType timType = new TimType();
+        timType.setTimTypeId(-1l);
+
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(any(),any(), any())).thenReturn(activeTims);
+        when(mockTimService.getTim(-10l)).thenReturn(tim);
+        when(mockTimService.getTim(-20l)).thenReturn(tim2);
+        doReturn(true).doReturn(true).when(mockActiveTimService).updateActiveTimExpiration(any(), any());
+
+        // Act
+        var result = uut.expireExistingWydotTims(wydotTims, timType);
+
+        // Assert
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A72E"), any());
+        verify(mockActiveTimService).updateActiveTimExpiration(eq("3C8E8DF2470B1A62E"), any());
+        Assertions.assertEquals(result.getSuccessfulTimUpdates().size(), 2);
+    }
+
+    @Test
+    public void expireExistingWydotTims_EmptyListOfExistingTims() {
+        // Arrange
+        List<WydotTim> wydotTims = new ArrayList<WydotTim>();
+        TimType timType = new TimType();
+        timType.setTimTypeId(-1l);
+
+        // Act
+        var result = uut.expireExistingWydotTims(wydotTims, timType);
+
+        // Assert
+        Assertions.assertEquals(result.getSuccessfulTimUpdates().size(), 0);
+        Assertions.assertEquals(result.getFailedActiveTimUpdates().size(), 0);
     }
 }

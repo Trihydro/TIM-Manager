@@ -17,7 +17,9 @@ import java.util.TimeZone;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Buffer;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
@@ -57,6 +59,7 @@ public abstract class WydotTimBaseController {
     protected RestTemplateProvider restTemplateProvider;
     MilepostReduction milepostReduction;
     protected Utility utility;
+    protected TimGenerationHelper timGenerationHelper;
 
     private List<String> routes = new ArrayList<>();
     protected static Gson gson = new Gson();
@@ -64,7 +67,7 @@ public abstract class WydotTimBaseController {
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
@@ -73,6 +76,7 @@ public abstract class WydotTimBaseController {
         restTemplateProvider = _restTemplateProvider;
         milepostReduction = _milepostReduction;
         utility = _utility;
+        timGenerationHelper = _timGenerationHelper;
     }
 
     protected String getStartTime() {
@@ -556,9 +560,13 @@ public abstract class WydotTimBaseController {
         var existingTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
                 wydotTim.getDirection());
 
-        // Update existingTims expirationDateTime to current time
-        wydotTimService.expireExistingActiveTims(existingTims);
-
+        // Expire existing tims
+        List<Long> existingTimIds = new ArrayList<Long>();
+        for (ActiveTim existingTim : existingTims) {
+            existingTimIds.add(existingTim.getActiveTimId());
+        }
+        timGenerationHelper.resubmitToOde(existingTimIds, true);
+        
         // Get mileposts that will define the TIM's region
         var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);
 

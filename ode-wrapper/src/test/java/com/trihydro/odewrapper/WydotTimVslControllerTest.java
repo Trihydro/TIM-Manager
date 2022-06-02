@@ -116,31 +116,6 @@ public class WydotTimVslControllerTest {
 	}
 
 	@Test
-	public void CreateVSLTim_Remove() {
-		
-		// Arrange
-		String incidentJson = "{\"timVslList\": [{ \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"route\": \"I-80\", \"direction\": \"i\", \"speed\": 45, \"deviceId\":\"V004608\", \"offline\":\"true\" }]}";
-		TimVslList timVslList = gson.fromJson(incidentJson, TimVslList.class);
-
-		List<ActiveTim> aTims = new ArrayList<ActiveTim>();
-		var aTim = new ActiveTim();
-		aTims.add(aTim);
-
-		var clientId = "V004608";
-		Long timTypeId = null;
-		var direction = "i";
-		doReturn(aTims).when(mockActiveTimService).getActiveTimsByClientIdDirection(clientId, timTypeId, direction);
-
-		// Act
-		ResponseEntity<String> data = uut.createUpdateVslTim(timVslList);
-
-		// Assert
-		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-		verify(mockWydotTimService).deleteTimsFromRsusAndSdx(aTims);
-
-	}
-
-	@Test
 	public void getVslTims_SUCCESS() {
 		// Arrange
 		List<ActiveTim> ats = new ArrayList<>();

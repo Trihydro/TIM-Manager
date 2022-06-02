@@ -1,8 +1,6 @@
 package com.trihydro.library.service;
 
-import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -12,6 +10,14 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.CreateBaseTimUtil;
@@ -31,24 +37,15 @@ import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
-import com.trihydro.library.model.TimUpdateSummary;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTimRw;
 import com.trihydro.library.model.WydotTravelerInputData;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-
+import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
-import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -340,45 +337,6 @@ public class WydotTimService {
         }
     }
 
-    public TimUpdateSummary expireExistingWydotTims(List<WydotTim> existingTims, TimType timType) {
-        var returnValue = new TimUpdateSummary();
-        if (existingTims == null || existingTims.isEmpty()) {
-            return returnValue;
-        }
-
-        var allExistingActiveTims = new ArrayList<ActiveTim>();
-        for (WydotTim wydotTim : existingTims) {
-            Long timTypeId = timType != null ? timType.getTimTypeId() : null;
-            var existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
-                    wydotTim.getDirection());
-            allExistingActiveTims.addAll(existingActiveTims);
-        }
-        
-        return expireExistingActiveTims(allExistingActiveTims);
-    }
-
-    public TimUpdateSummary expireExistingActiveTims(List<ActiveTim> existingTims) {
-        var returnValue = new TimUpdateSummary();
-        if (existingTims == null || existingTims.isEmpty()) {
-            return returnValue;
-        }
-
-        for (ActiveTim activeTim : existingTims) {
-            // get tim
-            WydotOdeTravelerInformationMessage tim = timService.getTim(activeTim.getTimId());
-            var packetId = tim.getPacketID();
-            String nowAsISO = Instant.now().plus(1, ChronoUnit.MINUTES).toString();
-
-            // update active tim's expiration date
-            if (activeTimService.updateActiveTimExpiration(packetId, nowAsISO)) {
-                returnValue.addSuccessfulTimUpdates(activeTim.getActiveTimId());
-            } else {
-                returnValue.addFailedActiveTimUpdates(activeTim.getActiveTimId());
-            }
-        }
-
-        return returnValue;
-    }
 
     public TimDeleteSummary deleteTimsFromRsusAndSdx(List<ActiveTim> activeTims) {
 

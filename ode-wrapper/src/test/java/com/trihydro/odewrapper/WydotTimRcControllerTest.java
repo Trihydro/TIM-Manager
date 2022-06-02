@@ -1,20 +1,26 @@
 package com.trihydro.odewrapper;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.CreateBaseTimUtil;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.TimTypeService;
-import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.controller.WydotTimRcController;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
@@ -40,13 +46,15 @@ public class WydotTimRcControllerTest {
 	@Mock
 	TimTypeService mockTimTypeService;
 	@Mock
-	WydotTimService mockWydotTimService;
+	TimGenerationHelper mockTimGenerationHelper;
 	@Mock
 	CreateBaseTimUtil mockCreateBaseTimUtil;
 	@Mock
 	SetItisCodes setItisCodes;
 	@Mock
 	Utility utility;
+	@Mock
+	ActiveTimService mockActiveTimService;
 
 	@InjectMocks
 	@Spy
@@ -70,6 +78,29 @@ public class WydotTimRcControllerTest {
 
 		lenient().doReturn(true).when(uut).routeSupported(isA(String.class));
 	}
+
+	private List<ActiveTim> getActiveTims(boolean isSat) {
+        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+        ActiveTim aTim = new ActiveTim();
+        ActiveTim aTim2 = new ActiveTim();
+        aTim.setActiveTimId(-1l);
+        aTim2.setActiveTimId(-2l);
+        if (isSat) {
+            aTim.setSatRecordId("C27CBB9F");
+            aTim2.setSatRecordId("86E03786");
+        } else {
+            aTim.setStartPoint(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2)));
+            aTim.setEndPoint(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(4)));
+            aTim.setTimId(-10l);
+            aTim2.setStartPoint(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(6)));
+            aTim2.setEndPoint(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(8)));
+            aTim2.setTimId(-20l);
+        }
+        activeTims.add(aTim);
+        activeTims.add(aTim2);
+
+        return activeTims;
+    }
 
 	@Test
 	public void testCreateRcTim_bothDirections_success() throws Exception {
@@ -217,16 +248,18 @@ public class WydotTimRcControllerTest {
 	}
 
 	@Test
-	public void testAllClearExpiresExistingWydotTims() throws Exception {
+	public void testAllClear_CallsResubmitToOde_ExpiresExistingTims() throws Exception {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		List<ActiveTim> activeTims = getActiveTims(false);
+		when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeTims);
 
 		// Act
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
 
 		// Assert
-		verify(mockWydotTimService).expireExistingWydotTims(any(), any());
+		verify(mockTimGenerationHelper).resubmitToOde(any(), eq(true));
 		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 	}
 }

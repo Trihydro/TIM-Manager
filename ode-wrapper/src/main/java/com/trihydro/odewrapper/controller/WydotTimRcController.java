@@ -7,7 +7,9 @@ import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
@@ -42,9 +44,9 @@ public class WydotTimRcController extends WydotTimBaseController {
     @Autowired
     public WydotTimRcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider, _milepostReduction, _utility);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
     }
 
     @RequestMapping(value = "/create-update-rc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -102,7 +104,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
-        List<WydotTim> timsToExpire = new ArrayList<WydotTim>();
+        List<Long> existingTimIds = new ArrayList<Long>();
 
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
             resultTim = validateRcAc(wydotTim);
@@ -112,13 +114,23 @@ public class WydotTimRcController extends WydotTimBaseController {
                 continue;
             }
 
-            timsToExpire.add(wydotTim);
+            // get existing active tims from wydotTim
+            var timType = getTimType(type);
+            Long timTypeId = timType != null ? timType.getTimTypeId() : null;
+            var existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
+                    wydotTim.getDirection());
+
+            // get ids from existingActiveTims
+            for (ActiveTim existingActiveTim : existingActiveTims) {
+                existingTimIds.add(existingActiveTim.getActiveTimId());
+            }
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
-
-        if (timsToExpire.size() > 0) {
-            wydotTimService.expireExistingWydotTims(timsToExpire, getTimType(type));
+        
+        // Expire existing tims
+        if (existingTimIds.size() > 0) {
+            timGenerationHelper.resubmitToOde(existingTimIds, true);
         }
 
         String responseMessage = gson.toJson(resultList);

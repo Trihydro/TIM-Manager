@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.TimDeleteSummary;
@@ -56,9 +57,9 @@ public class UtilityController extends WydotTimBaseController {
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             OdeService _odeService, RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction,
-            Utility _utility) {
+            Utility _utility, TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider, _milepostReduction, _utility);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
         this.odeService = _odeService;
     }
 

@@ -323,52 +323,10 @@ public class TimGenerationHelper {
     /**
      * Rebuilds and resubmits TIMs to the ODE
      * 
-     * @param activeTimIds TIMs to resubmit
+     * @param activeTimIds    TIMs to resubmit
      * @return Errors that occurred while processing the request
      */
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
-        return resubmitToOde(activeTimIds, false, false);
-    }
-
-    /**
-     * Rebuilds and resubmits TIMs to the ODE
-     * 
-     * @param activeTimIds TIMs to resubmit
-     * @param resetStartTimes Whether or not TIMs with an indefinite durationTime
-     *                        should have their startTime updated to the current
-     *                        time
-     * @return Errors that occurred while processing the request
-     */
-    public List<ResubmitTimException> resubmitToOde(boolean resetStartTimes, List<Long> activeTimIds) {
-        return resubmitToOde(activeTimIds, resetStartTimes, false);
-    }
-
-    /**
-     * Rebuilds and resubmits TIMs to the ODE
-     * 
-     * @param activeTimIds TIMs to resubmit
-     * @param resetExpirationTime Whether or not TIMs should have their expirationTime 
-     *                            updated to the current
-     *                            time
-     * @return Errors that occurred while processing the request
-     */
-    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds, boolean resetExpirationTime) {
-        return resubmitToOde(activeTimIds, false, resetExpirationTime);
-    }
-
-    /**
-     * Rebuilds and resubmits TIMs to the ODE
-     * 
-     * @param activeTimIds    TIMs to resubmit
-     * @param resetStartTimes Whether or not TIMs with an indefinite durationTime
-     *                        should have their startTime updated to the current
-     *                        time
-     * @param resetExpirationTime Whether or not TIMs should have their expirationTime 
-     *                            updated to the current
-     *                            time
-     * @return Errors that occurred while processing the request
-     */
-    public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds, boolean resetStartTimes, boolean resetExpirationTime) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
             return exceptions;
@@ -410,7 +368,145 @@ public class TimGenerationHelper {
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
                 reduced_mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
-                OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, resetStartTimes, resetExpirationTime);
+                OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, false);
+                if (tim == null) {
+                    String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
+                WydotTravelerInputData timToSend = new WydotTravelerInputData();
+                timToSend.setTim(tim);
+                var extraEx = sendTim(timToSend, tum, activeTimId, reduced_mps);
+                if (extraEx.size() > 0) {
+                    exceptions.addAll(extraEx);
+                }
+            } catch (Exception ex) {
+                exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
+            }
+        }
+        return exceptions;
+    }
+
+    /**
+     * Resets TIMs starting time and resubmits TIMs to the ODE
+     * 
+     * @param activeTimIds    TIMs to resubmit
+     * @return Errors that occurred while processing the request
+     */
+    public List<ResubmitTimException> resetTimStartTimeAndResubmitToOde(List<Long> activeTimIds) {
+        List<ResubmitTimException> exceptions = new ArrayList<>();
+        if (activeTimIds == null) {
+            return exceptions;
+        }
+        // iterate over tims, fetch, and push out
+        for (Long activeTimId : activeTimIds) {
+            try {
+                var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
+
+                if (tum == null) {
+                    exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
+                    continue;
+                }
+                if (!isValidTim(tum)) {
+                    exceptions.add(new ResubmitTimException(activeTimId,
+                            "Failed to generate valid Update Model from active tim"));
+                    continue;
+                }
+
+                if (tum.getLaneWidth() == null) {
+                    tum.setLaneWidth(config.getDefaultLaneWidth());
+                } else {
+                    // Oracle has lane width as cm, but ODE takes m
+                    tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
+                }
+
+                WydotTim wydotTim = getWydotTimFromTum(tum);
+                List<Milepost> reduced_mps = new ArrayList<>();
+                List<Milepost> allMps = getAllMps(wydotTim);
+                if (allMps.size() < 2) {
+                    String exMsg = String.format(
+                            "Unable to resubmit TIM, less than 2 mileposts found for Active_Tim %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
+
+                // reduce the mileposts by removing straight away posts
+                var anchorMp = allMps.remove(0);
+                reduced_mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, true, false);
+                if (tim == null) {
+                    String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
+                WydotTravelerInputData timToSend = new WydotTravelerInputData();
+                timToSend.setTim(tim);
+                var extraEx = sendTim(timToSend, tum, activeTimId, reduced_mps);
+                if (extraEx.size() > 0) {
+                    exceptions.addAll(extraEx);
+                }
+            } catch (Exception ex) {
+                exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
+            }
+        }
+        return exceptions;
+    }
+
+    /**
+     * Expires existing TIMs and resubmits TIMs to the ODE
+     * 
+     * @param activeTimIds    TIMs to resubmit
+     * @return Errors that occurred while processing the request
+     */
+    public List<ResubmitTimException> expireTimAndResubmitToOde(List<Long> activeTimIds) {
+        List<ResubmitTimException> exceptions = new ArrayList<>();
+        if (activeTimIds == null) {
+            return exceptions;
+        }
+        // iterate over tims, fetch, and push out
+        for (Long activeTimId : activeTimIds) {
+            try {
+                var tum = activeTimService.getUpdateModelFromActiveTimId(activeTimId);
+
+                if (tum == null) {
+                    exceptions.add(new ResubmitTimException(activeTimId, "Failed to get Update Model from active tim"));
+                    continue;
+                }
+                if (!isValidTim(tum)) {
+                    exceptions.add(new ResubmitTimException(activeTimId,
+                            "Failed to generate valid Update Model from active tim"));
+                    continue;
+                }
+
+                if (tum.getLaneWidth() == null) {
+                    tum.setLaneWidth(config.getDefaultLaneWidth());
+                } else {
+                    // Oracle has lane width as cm, but ODE takes m
+                    tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
+                }
+
+                WydotTim wydotTim = getWydotTimFromTum(tum);
+                List<Milepost> reduced_mps = new ArrayList<>();
+                List<Milepost> allMps = getAllMps(wydotTim);
+                if (allMps.size() < 2) {
+                    String exMsg = String.format(
+                            "Unable to resubmit TIM, less than 2 mileposts found for Active_Tim %d",
+                            tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
+                }
+
+                // reduce the mileposts by removing straight away posts
+                var anchorMp = allMps.remove(0);
+                reduced_mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                             tum.getActiveTimId());

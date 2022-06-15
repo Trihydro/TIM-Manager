@@ -1,7 +1,6 @@
 package com.trihydro.odewrapper;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -259,7 +258,7 @@ public class WydotTimRcControllerTest {
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
 
 		// Assert
-		verify(mockTimGenerationHelper).resubmitToOde(any(), eq(true));
+		verify(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
 		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 	}
 }

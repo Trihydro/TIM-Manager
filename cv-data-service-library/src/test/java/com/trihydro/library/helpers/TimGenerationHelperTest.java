@@ -120,7 +120,7 @@ public class TimGenerationHelperTest {
         doReturn(null).when(mockActiveTimService).getUpdateModelFromActiveTimId(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockMilepostService, mockMilepostReduction,
@@ -143,7 +143,7 @@ public class TimGenerationHelperTest {
         doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(1, exceptions.size());
@@ -171,7 +171,7 @@ public class TimGenerationHelperTest {
         doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(1, exceptions.size());
@@ -206,7 +206,7 @@ public class TimGenerationHelperTest {
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(1, exceptions.size());
@@ -248,7 +248,7 @@ public class TimGenerationHelperTest {
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(0, exceptions.size());
@@ -288,7 +288,7 @@ public class TimGenerationHelperTest {
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(null);
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Gson gson = new Gson();
@@ -335,7 +335,7 @@ public class TimGenerationHelperTest {
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(null);
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Gson gson = new Gson();
@@ -385,7 +385,7 @@ public class TimGenerationHelperTest {
         doReturn("exception").when(mockOdeService).sendNewTimToRsu(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(1, exceptions.size());
@@ -435,7 +435,7 @@ public class TimGenerationHelperTest {
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(0, exceptions.size());
@@ -473,7 +473,7 @@ public class TimGenerationHelperTest {
         doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(1, exceptions.size());
@@ -506,7 +506,7 @@ public class TimGenerationHelperTest {
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(0, exceptions.size());
@@ -522,7 +522,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void resubmitToOde_updatesStartTime() {
+    public void resetTimStartTimAndResubmitToOde_updatesStartTime() {
         // Arrange
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
@@ -541,7 +541,7 @@ public class TimGenerationHelperTest {
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
 
         // Act
-        uut.resubmitToOde(true, activeTimIds);
+        uut.resetTimStartTimeAndResubmitToOde(activeTimIds);
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
@@ -579,7 +579,7 @@ public class TimGenerationHelperTest {
         doReturn(60).when(mockUtility).getMinutesDurationBetweenTwoDates("2021-01-01T00:00:00.000Z", "2021-01-01T01:00:00.000Z");
 
         // Act
-        uut.resubmitToOde(true, activeTimIds);
+        uut.resubmitToOde(activeTimIds);
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
@@ -595,7 +595,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void resubmitToOde_updatesDurationTimeToZero() {
+    public void c_updatesDurationTimeToZero() {
         // Arrange
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
@@ -615,7 +615,7 @@ public class TimGenerationHelperTest {
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
 
         // Act
-        uut.resubmitToOde(activeTimIds, true);
+        uut.expireTimAndResubmitToOde(activeTimIds);
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
@@ -626,41 +626,6 @@ public class TimGenerationHelperTest {
 
         // Duration Time should still be 0 since resetExpirationTime is set to True
         Assertions.assertEquals(0, dataFrame.getDurationTime());
-    }
-
-    @Test
-    public void resubmitToOde_usesOldDurationTime() {
-        // Arrange
-        List<Long> activeTimIds = new ArrayList<Long>();
-        activeTimIds.add(-1L);
-        setupActiveTimModel();
-        setupMilepostReturn();
-        tum.setRoute("I 80");
-        tum.setSatRecordId("satRecordId");
-        tum.setStartDateTime("");
-
-        // Given a TIM with a durationTime of an hour
-        var originalStartTime = Instant.parse("2021-01-01T00:00:00.000Z");
-        tum.setDurationTime(60);
-        tum.setEndDateTime("2021-01-01T01:00:00.000Z");
-        tum.setStartDate_Timestamp(new Timestamp(originalStartTime.toEpochMilli()));
-
-        doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
-        doReturn("").when(mockOdeService).updateTimOnSdw(any());
-        doReturn(60).when(mockUtility).getMinutesDurationBetweenTwoDates("2021-01-01T00:00:00.000Z", "2021-01-01T01:00:00.000Z");
-
-        // Act
-        uut.resubmitToOde(activeTimIds);
-
-        // Assert
-        verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
-        var timSent = timCaptor.getValue();
-        var dataFrame = timSent.getTim().getDataframes()[0];
-
-        Assertions.assertNotNull(dataFrame.getDurationTime());
-
-        // TIM still has a duration of 60 minutes
-        Assertions.assertEquals(60, dataFrame.getDurationTime());
     }
 
     @Test
@@ -685,7 +650,7 @@ public class TimGenerationHelperTest {
         doReturn(asdd).when(mockSdwService).getSdwDataByRecordId(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(1, exceptions.size());
@@ -722,7 +687,7 @@ public class TimGenerationHelperTest {
         doReturn(asdd).when(mockSdwService).getSdwDataByRecordId(any());
 
         // Act
-        var exceptions = uut.resubmitToOde(activeTimIds, true);
+        var exceptions = uut.resubmitToOde(activeTimIds);
 
         // Assert
         Assertions.assertEquals(0, exceptions.size());

@@ -565,7 +565,7 @@ public abstract class WydotTimBaseController {
         for (ActiveTim existingTim : existingTims) {
             existingTimIds.add(existingTim.getActiveTimId());
         }
-        timGenerationHelper.resubmitToOde(existingTimIds, true);
+        timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
         
         // Get mileposts that will define the TIM's region
         var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);

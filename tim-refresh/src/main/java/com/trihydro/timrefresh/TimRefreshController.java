@@ -73,7 +73,7 @@ public class TimRefreshController {
             // Reset expiration dates so they'll be updated after messages are processed.
             // Success isn't critical to proceed. We'll just end up with redundant resubmissions later on.
             resetSuccessful = activeTimService.resetActiveTimsExpirationDate(activeTimIds);
-            exceptionTims = timGenerationHelper.resubmitToOde(true, activeTimIds);
+            exceptionTims = timGenerationHelper.resetTimStartTimeAndResubmitToOde(activeTimIds);
         }
 
         if (invalidTims.size() > 0 || exceptionTims.size() > 0 || !resetSuccessful) {

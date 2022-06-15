@@ -130,7 +130,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         
         // Expire existing tims
         if (existingTimIds.size() > 0) {
-            timGenerationHelper.resubmitToOde(existingTimIds, true);
+            timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
         }
 
         String responseMessage = gson.toJson(resultList);

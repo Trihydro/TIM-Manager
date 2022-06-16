@@ -126,7 +126,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
         Date date = new Date();
 
         utility.logWithDate(dateFormat.format(date) + " - Delete Parking TIM", this.getClass());
-        // clear TIM
+        // expire and clear TIM
         wydotTimService.clearTimsById("P", id, null);
 
         String responseMessage = "success";

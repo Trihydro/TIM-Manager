@@ -274,7 +274,7 @@ public class WydotTimRwController extends WydotTimBaseController {
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
         utility.logWithDate("Delete RW TIM", this.getClass());
-        // clear TIM
+        // expire and clear TIM
         wydotTimService.clearTimsById(type, id, null, true);
 
         String responseMessage = "success";

@@ -14,6 +14,8 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.trihydro.library.helpers.TimGenerationHelper;
+import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
@@ -49,6 +51,8 @@ public class UtilityControllerTest {
     OdeService mockOdeService;
     @Mock
     ActiveTimService mockActiveTimService;
+    @Mock
+    TimGenerationHelper mockTimGenerationHelper;
 
     @InjectMocks
     private UtilityController uut;
@@ -197,8 +201,8 @@ public class UtilityControllerTest {
     @Test
     public void deleteTims_Success() {
         // Arrange
-        var summary = new TimDeleteSummary();
-        doReturn(summary).when(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
+        List<ResubmitTimException> exceptions = new ArrayList<>();
+        doReturn(exceptions).when(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
         var aTimIds = new ArrayList<Long>();
 
         // Act
@@ -206,8 +210,7 @@ public class UtilityControllerTest {
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
-        MatcherAssert.assertThat(result.getBody(), instanceOf(TimDeleteSummary.class));
-        Assertions.assertNotNull((TimDeleteSummary) result.getBody());
-        verify(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
+        MatcherAssert.assertThat(result.getBody(), instanceOf(String.class));
+        verify(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
     }
 }

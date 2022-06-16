@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.SnmpHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
@@ -70,6 +71,7 @@ public class WydotTimService {
     private TimService timService;
     private SnmpHelper snmpHelper;
     private MilepostService milepostService;
+    private TimGenerationHelper timGenerationHelper;
 
     @Autowired
     public void InjectDependencies(EmailProps _emailProps, OdeProps _odeProps, TimGenerationProps _genProps,
@@ -77,7 +79,7 @@ public class WydotTimService {
             OdeService _odeService, CreateBaseTimUtil _createBaseTimUtil,
             ActiveTimHoldingService _activeTimHoldingService, ActiveTimService _activeTimService,
             TimRsuService _timRsuService, RestTemplateProvider _restTemplateProvider, RsuService _rsuService,
-            TimService _timService, SnmpHelper _snmpHelper, MilepostService _milepostService) {
+            TimService _timService, SnmpHelper _snmpHelper, MilepostService _milepostService, TimGenerationHelper _timGenerationHelper) {
         emailProps = _emailProps;
         odeProps = _odeProps;
         genProps = _genProps;
@@ -95,6 +97,7 @@ public class WydotTimService {
         timService = _timService;
         snmpHelper = _snmpHelper;
         milepostService = _milepostService;
+        timGenerationHelper = _timGenerationHelper;
     }
 
     private RestTemplateProvider restTemplateProvider;
@@ -434,7 +437,11 @@ public class WydotTimService {
 
         utility.logWithDate(activeTims.size() + " active_tim found for deletion");
 
-        deleteTimsFromRsusAndSdx(activeTims);
+        List<Long> activeTimIds = activeTims.stream()
+            .map(ActiveTim::getActiveTimId)
+            .collect(Collectors.toList());
+
+        timGenerationHelper.expireTimAndResubmitToOde(activeTimIds);
 
         return true;
     }

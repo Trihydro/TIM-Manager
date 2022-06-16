@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
@@ -119,9 +118,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             resultList.add(resultTim);
         }
         if (timsToSend.size() > 0) {
-            wydotTimService.deleteWydotTimsByType(timsToSend, type);
-
-            // make tims and send them
+            // make tims, expire existing ones, and send them
             makeTimsAsync(timsToSend);
         }
 
@@ -152,7 +149,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         utility.logWithDate(dateFormat.format(date) + " - Delete Incident TIM", this.getClass());
 
-        // clear TIM
+        // expire and clear TIM
         wydotTimService.clearTimsById("I", incidentId, null);
 
         String responseMessage = "success";

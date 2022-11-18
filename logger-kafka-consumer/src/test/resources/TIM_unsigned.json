@@ -1,0 +1,213 @@
+{
+    "metadata": {
+        "request": {
+            "ode": {
+                "verb": "POST",
+                "version": "3"
+            },
+            "sdw": {
+                "recordId": "60F53BDF",
+                "serviceRegion": {
+                    "nwCorner": {
+                        "latitude": "44.09328877",
+                        "longitude": "-107.96034055"
+                    },
+                    "seCorner": {
+                        "latitude": "44.07225981",
+                        "longitude": "-107.95401624"
+                    }
+                },
+                "ttl": "oneyear"
+            }
+        },
+        "recordGeneratedBy": "TMC",
+        "schemaVersion": "6",
+        "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
+        "odePacketID": "20F6CCABC034423CB3",
+        "serialId": {
+            "recordId": "0",
+            "serialNumber": "76194",
+            "streamId": "662dd7d9-72d8-4b8a-a25a-4efa45b48936",
+            "bundleSize": "1",
+            "bundleId": "76194"
+        },
+        "sanitized": "false",
+        "recordGeneratedAt": "2022-11-18T17:12:40.652239Z",
+        "maxDurationTime": "32000",
+        "odeTimStartDateTime": "2022-09-12T00:00:00.000Z",
+        "odeReceivedAt": "2022-11-18T17:12:40.682413Z"
+    },
+    "payload": {
+        "data": {
+            "AdvisorySituationData": {
+                "recordID": "60F53BDF",
+                "timeToLive": "5",
+                "serviceRegion": {
+                    "nwCorner": {
+                        "lat": "440932888",
+                        "long": "-1079603406"
+                    },
+                    "seCorner": {
+                        "lat": "440722598",
+                        "long": "-1079540162"
+                    }
+                },
+                "asdmDetails": {
+                    "advisoryMessage": {
+                        "Ieee1609Dot2Data": {
+                            "protocolVersion": "3",
+                            "content": {
+                                "unsecuredData": {
+                                    "MessageFrame": {
+                                        "messageId": "31",
+                                        "value": {
+                                            "TravelerInformation": {
+                                                "timeStamp": "463272",
+                                                "packetID": "20F6CCABC034423CB3",
+                                                "urlB": "null",
+                                                "dataFrames": {
+                                                    "TravelerDataFrame": {
+                                                        "regions": {
+                                                            "GeographicalPath": {
+                                                                "closedPath": {
+                                                                    "false": ""
+                                                                },
+                                                                "anchor": {
+                                                                    "lat": "440947086",
+                                                                    "long": "-1079550305"
+                                                                },
+                                                                "name": "D_WY 433_SAT-60F53BDF_RW_39683-0",
+                                                                "laneWidth": "5000",
+                                                                "directionality": {
+                                                                    "both": ""
+                                                                },
+                                                                "description": {
+                                                                    "path": {
+                                                                        "offset": {
+                                                                            "ll": {
+                                                                                "nodes": {
+                                                                                    "NodeLL": [
+                                                                                        {
+                                                                                            "delta": {
+                                                                                                "node-LL3": {
+                                                                                                    "lon": "3768",
+                                                                                                    "lat": "-14198"
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "delta": {
+                                                                                                "node-LL3": {
+                                                                                                    "lon": "6374",
+                                                                                                    "lat": "-28466"
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "delta": {
+                                                                                                "node-LL3": {
+                                                                                                    "lon": "-5520",
+                                                                                                    "lat": "-28521"
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "delta": {
+                                                                                                "node-LL4": {
+                                                                                                    "lon": "-52848",
+                                                                                                    "lat": "-124572"
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "delta": {
+                                                                                                "node-LL3": {
+                                                                                                    "lon": "-4875",
+                                                                                                    "lat": "-28730"
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        "scale": "0"
+                                                                    }
+                                                                },
+                                                                "id": {
+                                                                    "id": "0",
+                                                                    "region": "0"
+                                                                },
+                                                                "direction": "0000000110000000"
+                                                            }
+                                                        },
+                                                        "duratonTime": "32000",
+                                                        "sspMsgRights1": "1",
+                                                        "sspMsgRights2": "1",
+                                                        "startYear": "2022",
+                                                        "msgId": {
+                                                            "roadSignID": {
+                                                                "viewAngle": "1111111111111111",
+                                                                "mutcdCode": {
+                                                                    "warning": ""
+                                                                },
+                                                                "position": {
+                                                                    "lat": "440947086",
+                                                                    "long": "-1079550305"
+                                                                }
+                                                            }
+                                                        },
+                                                        "priority": "5",
+                                                        "content": {
+                                                            "workZone": {
+                                                                "SEQUENCE": {
+                                                                    "item": {
+                                                                        "itis": "1025"
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        "url": "null",
+                                                        "sspTimRights": "1",
+                                                        "sspLocationRights": "1",
+                                                        "frameType": {
+                                                            "advisory": ""
+                                                        },
+                                                        "startTime": "365760"
+                                                    }
+                                                },
+                                                "msgCnt": "1"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "startTime": {
+                        "month": "0",
+                        "hour": "31",
+                        "year": "0",
+                        "day": "0",
+                        "minute": "60"
+                    },
+                    "stopTime": {
+                        "month": "0",
+                        "hour": "31",
+                        "year": "0",
+                        "day": "0",
+                        "minute": "60"
+                    },
+                    "distType": "02",
+                    "asdmType": "2",
+                    "asdmID": "427DA360"
+                },
+                "requestID": "427DA360",
+                "groupID": "00000000",
+                "dialogID": "156",
+                "seqID": "5"
+            }
+        },
+        "dataType": "TravelerInformation"
+    }
+}

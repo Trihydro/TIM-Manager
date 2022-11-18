@@ -515,10 +515,11 @@ public class JsonToJavaConverter {
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
             OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
 
-            JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
-                    .get("TravelerInformation");
-            JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
-            JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
+            // JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
+            //         .get("TravelerInformation");
+            JsonNode timNode = JsonUtils.getJsonNode(value, "payload").findValue("TravelerInformation");
+            JsonNode travelerDataFrame = timNode.findValue("TravelerDataFrame");
+            JsonNode geoPath = travelerDataFrame.findValue("GeographicalPath");
 
             JsonNode sequenceArrNode = null;
             JsonNode contentNode = travelerDataFrame.get("content");

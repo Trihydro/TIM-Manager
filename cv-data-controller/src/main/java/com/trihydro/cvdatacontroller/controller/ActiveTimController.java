@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -612,7 +613,7 @@ public class ActiveTimController extends BaseController {
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 			String query = "select * from active_tim where CLIENT_ID like '" + clientId
-					+ "\\%BUFF_-%' ESCAPE '\\'"; 
+					+ "\\%BUFF_-%' ESCAPE '\\'";
 
 			rs = statement.executeQuery(query);
 			activeTims = getActiveTimFromRS(rs, false);
@@ -1375,41 +1376,61 @@ public class ActiveTimController extends BaseController {
 		return sdf.format(dte.getTime());
 	}
 
+	private List<List<Long>> SplitMaxList(List<Long> activeTimIds, int maxListSize) {
+		Long[] elements = activeTimIds.toArray(new Long[0]);
+		int maxChunks = (int) Math.ceil(elements.length / (double) maxListSize);
+		List<List<Long>> returnValues = new ArrayList<List<Long>>(maxChunks);
+
+		for (int i = 0; i < maxChunks; i++) {
+			int from = i * maxListSize;
+			int to = Math.min(from + maxListSize, elements.length);
+			Long[] range = Arrays.copyOfRange(elements, from, to);
+			returnValues.add(Arrays.asList(range));
+		}
+		return returnValues;
+	}
+
 	@RequestMapping(value = "/reset-expiration-date", method = RequestMethod.PUT, headers = "Accept=application/json")
 	public ResponseEntity<Boolean> ResetExpirationDate(@RequestBody List<Long> activeTimIds) {
 		if (activeTimIds == null || activeTimIds.size() == 0) {
 			return ResponseEntity.ok(true);
 		}
 
-		boolean result = false;
-		String updateSql = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (";
-
-		for (int i = 0; i < activeTimIds.size(); i++) {
-			updateSql += "?,";
-		}
-		updateSql = updateSql.substring(0, updateSql.length() - 1);
-		updateSql += ")";
-
+		boolean result = true;
+		// on occasion we have over 1000 active tim ids, resulting in error
+		// split this out by 500 records at a time to avoid issues
+		List<List<Long>> splitActiveTims = SplitMaxList(activeTimIds, 500);
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 
 		try {
-
 			connection = dbInteractions.getConnectionPool();
-			preparedStatement = connection.prepareStatement(updateSql);
-			for (int i = 0; i < activeTimIds.size(); i++) {
-				preparedStatement.setLong(i + 1, activeTimIds.get(i));
-			}
 
-			// execute delete SQL stetement
-			result = dbInteractions.updateOrDelete(preparedStatement);
+			for (int splitTimsIndex = 0; splitTimsIndex < splitActiveTims.size(); splitTimsIndex++) {
+				List<Long> splitTims = splitActiveTims.get(splitTimsIndex);
+				String updateSql = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (";
+
+				for (int i = 0; i < splitTims.size(); i++) {
+					updateSql += "?,";
+				}
+				updateSql = updateSql.substring(0, updateSql.length() - 1);
+				updateSql += ")";
+
+				preparedStatement = connection.prepareStatement(updateSql);
+				for (int i = 0; i < splitTims.size(); i++) {
+					preparedStatement.setLong(i + 1, splitTims.get(i));
+				}
+
+				// execute delete SQL stetement
+				result &= dbInteractions.updateOrDelete(preparedStatement);
+			}
 
 			System.out.println("Reset expiration date for Active Tims (active_tim_ids "
 					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
 		} finally {
 			try {
 				// close prepared statement

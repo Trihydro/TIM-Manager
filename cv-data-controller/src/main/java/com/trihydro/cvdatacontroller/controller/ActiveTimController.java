@@ -1421,7 +1421,7 @@ public class ActiveTimController extends BaseController {
 					preparedStatement.setLong(i + 1, splitTims.get(i));
 				}
 
-				// execute delete SQL stetement
+				// execute delete SQL statement
 				result &= dbInteractions.updateOrDelete(preparedStatement);
 			}
 

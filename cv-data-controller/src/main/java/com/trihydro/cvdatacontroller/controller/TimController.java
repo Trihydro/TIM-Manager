@@ -399,7 +399,7 @@ public class TimController extends BaseController {
     }
 
     private boolean deleteOldPaths(String strDate) {
-        boolean deleteResult = deleteOldPathNodeXY(strDate);
+        boolean deleteResult = deleteOldPathNodeLL(strDate);
         if (!deleteResult) {
             return false;
         }
@@ -437,8 +437,8 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldPathNodeXY(String strDate) {
-        boolean deleteResult = deleteOldNodeXY(strDate);
+    private boolean deleteOldPathNodeLL(String strDate) {
+        boolean deleteResult = deleteOldNodeLL(strDate);
         if (!deleteResult) {
             return false;
         }
@@ -446,7 +446,7 @@ public class TimController extends BaseController {
         PreparedStatement preparedStatement = null;
 
         try {
-            String deleteSQL = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+            String deleteSQL = "DELETE FROM path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
             connection = dbInteractions.getConnectionPool();
@@ -476,14 +476,14 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldNodeXY(String strDate) {
+    private boolean deleteOldNodeLL(String strDate) {
         boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
         try {
-            String deleteSQL = "DELETE FROM node_xy WHERE node_xy_id IN";
-            deleteSQL += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+            String deleteSQL = "DELETE FROM node_ll WHERE node_ll_id IN";
+            deleteSQL += " (SELECT node_ll_id from path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))))";
             connection = dbInteractions.getConnectionPool();
@@ -508,7 +508,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete node_xy");
+            utility.logWithDate("Failed to delete node_ll");
         }
         return deleteResult;
     }

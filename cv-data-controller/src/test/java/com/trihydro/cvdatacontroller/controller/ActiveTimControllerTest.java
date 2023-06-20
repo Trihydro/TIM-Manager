@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -486,7 +487,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Arrange
         String clientId = "clientId";
         String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId
-					+ "\\%BUFF_-%' ESCAPE '\\'"; 
+                + "\\%BUFF_-%' ESCAPE '\\'";
 
         // Act
         ResponseEntity<List<ActiveTim>> data = uut.GetBufferTimsByClientId(clientId);
@@ -514,12 +515,12 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
 
     @Test
     public void GetBufferTimsByClientId_FAIL() throws SQLException {
-        
+
         // Arrange
         String clientId = "clientId";
         String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId
                 + "\\%BUFF_-%' ESCAPE '\\'";
-        
+
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
 
         // Act
@@ -1189,6 +1190,48 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockConnection)
                 .prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
         verify(mockPreparedStatement).setLong(1, -1l);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void ResetExpirationDate_SUCCESS_Over_500_Records() throws SQLException {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<>();
+        for (int i = 0; i < 600; i++) {
+            activeTimIds.add(Long.valueOf(i));
+        }
+
+        // Act
+        ResponseEntity<Boolean> data = uut.ResetExpirationDate(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertTrue(data.getBody(), "Fail return on success");
+        String updateOne = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (";
+        for (int i = 0; i < 500; i++) {
+            updateOne += "?,";
+        }
+        updateOne = updateOne.substring(0, updateOne.length() - 1);
+        updateOne += ")";
+
+        String updateTwo = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (";
+        for (int i = 500; i < 600; i++) {
+            updateTwo += "?,";
+        }
+        updateTwo = updateOne.substring(0, updateOne.length() - 1);
+        updateTwo += ")";
+        verify(mockConnection)
+                .prepareStatement(updateOne);
+        verify(mockConnection)
+                .prepareStatement(updateTwo);
+
+        for (int i = 0; i < 500; i++) {
+            verify(mockPreparedStatement).setLong(i + 1, (Long.valueOf(i)));
+        }
+        for(int i = 500; i < 600; i++){
+            verify(mockPreparedStatement).setLong(i - 499, (Long.valueOf(i)));
+        }
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

@@ -239,12 +239,12 @@ public class TimControllerTest extends TestBase<TimController> {
                 String deleteDfItis = "DELETE FROM DATA_FRAME_ITIS_CODE where data_frame_id in";
                 deleteDfItis += " (select data_frame_id from data_frame WHERE tim_id IN";
 
-                String deleteNodeXy = "DELETE FROM node_xy WHERE node_xy_id IN";
-                deleteNodeXy += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
-                deleteNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+                String deleteNodeLL = "DELETE FROM node_ll WHERE node_ll_id IN";
+                deleteNodeLL += " (SELECT node_ll_id from path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deleteNodeLL += " (select data_frame_id from data_frame WHERE tim_id IN";
 
-                String deletePathNodeXy = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
-                deletePathNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+                String deletePathNodeLL = "DELETE FROM path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deletePathNodeLL += " (select data_frame_id from data_frame WHERE tim_id IN";
 
                 String deletePath = "DELETE FROM path WHERE path_id in (SELECT path_id from region where data_frame_id in";
                 deletePath += " (select data_frame_id from data_frame WHERE tim_id IN";
@@ -259,16 +259,16 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 deleteTimRsuSQL += deleteSQL;
                 deleteDfItis += deleteSQL + ")";
-                deleteNodeXy += deleteSQL + ")))";
-                deletePathNodeXy += deleteSQL + "))";
+                deleteNodeLL += deleteSQL + ")))";
+                deletePathNodeLL += deleteSQL + "))";
                 deletePath += deleteSQL + "))";
                 deleteRegion += deleteSQL + ")";
                 deleteDataFrame += deleteSQL;
 
                 verify(mockConnection).prepareStatement(deleteTimRsuSQL);
                 verify(mockConnection).prepareStatement(deleteDfItis);
-                verify(mockConnection).prepareStatement(deleteNodeXy);
-                verify(mockConnection).prepareStatement(deletePathNodeXy);
+                verify(mockConnection).prepareStatement(deleteNodeLL);
+                verify(mockConnection).prepareStatement(deletePathNodeLL);
                 verify(mockConnection).prepareStatement(deletePath);
                 verify(mockConnection).prepareStatement(deleteRegion);
                 verify(mockConnection).prepareStatement(deleteDataFrame);

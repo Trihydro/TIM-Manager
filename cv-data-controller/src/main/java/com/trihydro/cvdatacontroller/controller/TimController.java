@@ -471,7 +471,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete path_node_xy");
+            utility.logWithDate("Failed to delete path_node_ll");
         }
         return deleteResult;
     }

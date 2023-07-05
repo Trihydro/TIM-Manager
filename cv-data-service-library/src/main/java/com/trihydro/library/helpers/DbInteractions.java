@@ -28,11 +28,20 @@ public class DbInteractions {
         dbConfig = props;
         utility = _utility;
         emailHelper = _emailHelper;
+
+        utility.logWithDate("DbInteractions: Injecting dependencies");
     }
 
     public Connection getConnectionPool() throws SQLException {
         // create pool if not already done
         if (hds == null) {
+
+            // log the creation of the connection pool and properties
+            utility.logWithDate("DbInteractions: Creating connection pool");
+            utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
+            utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
+            utility.logWithDate("DbInteractions: dbDriver: " + dbConfig.getDbDriver());
+            utility.logWithDate("DbInteractions: poolSize: " + dbConfig.getPoolSize()); 
 
             TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
             TimeZone.setDefault(timeZone);

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DbInteractions {
-    private HikariDataSource hds;
+    private static HikariDataSource hds;
     private HikariConfig config;
 
     protected DbInteractionsProps dbConfig;
@@ -25,15 +25,14 @@ public class DbInteractions {
 
     @Autowired
     public void InjectDependencies(DbInteractionsProps props, Utility _utility, EmailHelper _emailHelper) {
+        utility.logWithDate("DbInteractions: Injecting dependencies");
         dbConfig = props;
         utility = _utility;
         emailHelper = _emailHelper;
-
-        utility.logWithDate("DbInteractions: Injecting dependencies");
+        initHDS();
     }
 
-    public Connection getConnectionPool() throws SQLException {
-        // create pool if not already done
+    private void initHDS() {
         if (hds == null) {
 
             // log the creation of the connection pool and properties
@@ -41,7 +40,7 @@ public class DbInteractions {
             utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
             utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
             utility.logWithDate("DbInteractions: dbDriver: " + dbConfig.getDbDriver());
-            utility.logWithDate("DbInteractions: poolSize: " + dbConfig.getPoolSize()); 
+            utility.logWithDate("DbInteractions: poolSize: " + dbConfig.getPoolSize());
 
             TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
             TimeZone.setDefault(timeZone);
@@ -59,6 +58,12 @@ public class DbInteractions {
 
             hds = new HikariDataSource(config);
         }
+    }
+
+    public Connection getConnectionPool() throws SQLException {
+        // create pool if not already done
+        initHDS();
+
         // return a connection
         try {
             return hds.getConnection();

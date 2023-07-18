@@ -25,10 +25,10 @@ public class DbInteractions {
 
     @Autowired
     public void InjectDependencies(DbInteractionsProps props, Utility _utility, EmailHelper _emailHelper) {
-        utility.logWithDate("DbInteractions: Injecting dependencies");
         dbConfig = props;
         utility = _utility;
         emailHelper = _emailHelper;
+        utility.logWithDate("DbInteractions: Injecting dependencies");
         initHDS();
     }
 

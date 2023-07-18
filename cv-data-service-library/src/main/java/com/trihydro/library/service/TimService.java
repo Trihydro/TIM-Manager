@@ -20,7 +20,7 @@ public class TimService extends CvDataServiceLibrary {
 
 	/**
 	 * Remove all old tim, tim_rsu, data_frame, data_frame_itis_code, region, path,
-	 * path_node_xy, node_xy records
+	 * path_node_ll, node_ll records
 	 * 
 	 * @return
 	 */

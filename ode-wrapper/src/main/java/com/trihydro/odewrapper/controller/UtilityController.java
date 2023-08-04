@@ -141,16 +141,16 @@ public class UtilityController extends WydotTimBaseController {
 
     @RequestMapping(value = "/delete-tim", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteTim(@RequestBody ActiveTim activeTim) {
-        timGenerationHelper.expireTimAndResubmitToOde(Stream.of(activeTim.getActiveTimId()).collect(Collectors.toList()));
+        wydotTimService.deleteTimsFromRsusAndSdx(Stream.of(activeTim).collect(Collectors.toList()));
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
     @RequestMapping(value = "/delete-tims", method = RequestMethod.DELETE, headers = "Accept=application/json")
-    public ResponseEntity<String> deleteTims(@RequestBody List<Long> aTimIds) {
-        timGenerationHelper.expireTimAndResubmitToOde(aTimIds);
-        String responseMessage = "success";
-        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    public ResponseEntity<TimDeleteSummary> deleteTims(@RequestBody List<Long> aTimIds) {
+        var aTims = activeTimService.getActiveTimsById(aTimIds);
+        var summary = wydotTimService.deleteTimsFromRsusAndSdx(aTims);
+        return ResponseEntity.status(HttpStatus.OK).body(summary);
     }
 
     @RequestMapping(value = "/clear-rsu", method = RequestMethod.DELETE, headers = "Accept=application/json")

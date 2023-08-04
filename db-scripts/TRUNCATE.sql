@@ -19,7 +19,7 @@ TRUNCATE TABLE region;
 ALTER TABLE path_node_ll disable constraint FK_PATH_NODE_LL_PATH;
 ALTER TABLE REGION disable constraint FK_PATH;
 TRUNCATE TABLE path;
-ALTER TABLE path_node_ll disable constraint FK_PATH_NODE_LL_PATH;
+ALTER TABLE path_node_ll enable constraint FK_PATH_NODE_LL_PATH;
 ALTER TABLE REGION enable constraint FK_PATH;
 
 ALTER TABLE REGION disable constraint FK_DATA_FRAME;

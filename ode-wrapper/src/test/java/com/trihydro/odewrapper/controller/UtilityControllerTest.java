@@ -201,8 +201,8 @@ public class UtilityControllerTest {
     @Test
     public void deleteTims_Success() {
         // Arrange
-        List<ResubmitTimException> exceptions = new ArrayList<>();
-        doReturn(exceptions).when(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
+        var summary = new TimDeleteSummary();
+        doReturn(summary).when(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
         var aTimIds = new ArrayList<Long>();
 
         // Act
@@ -210,7 +210,8 @@ public class UtilityControllerTest {
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
-        MatcherAssert.assertThat(result.getBody(), instanceOf(String.class));
-        verify(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
+        MatcherAssert.assertThat(result.getBody(), instanceOf(TimDeleteSummary.class));
+        Assertions.assertNotNull((TimDeleteSummary) result.getBody());
+        verify(mockWydotTimService).deleteTimsFromRsusAndSdx(any());
     }
 }

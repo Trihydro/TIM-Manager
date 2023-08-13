@@ -16,7 +16,7 @@ import java.time.Instant;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ import org.mockito.Spy;
 public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
@@ -36,7 +36,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
         startPoint = new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2));
         endPoint = new Coordinate(BigDecimal.valueOf(-3), BigDecimal.valueOf(-4));
     }
@@ -49,7 +49,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         activeTim.setEndPoint(endPoint);
         activeTim.setStartDateTime("2020-02-03T16:22:23.000Z");
         activeTim.setEndDateTime("2020-02-04T16:00:00.000Z");
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
         doReturn(-1l).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim");
         var startTimeConverted = "03-Feb-20 04.22.23.000 PM";
         var endTimeConverted = "04-Feb-20 04.00.00.000 PM";

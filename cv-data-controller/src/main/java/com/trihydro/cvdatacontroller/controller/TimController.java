@@ -12,7 +12,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +33,14 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 @RestController
 public class TimController extends BaseController {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
     private SecurityResultCodeTypeController securityResultCodeTypeController;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler,
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler,
             SecurityResultCodeTypeController _securityResultCodeTypeController) {
-        timOracleTables = _timOracleTables;
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
         securityResultCodeTypeController = _securityResultCodeTypeController;
     }
@@ -97,8 +97,8 @@ public class TimController extends BaseController {
 
         try {
 
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim",
-                    timOracleTables.getTimTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim",
+                    timDbTables.getTimTable());
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
             int fieldNum = 1;
@@ -106,7 +106,7 @@ public class TimController extends BaseController {
             OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
             ReceivedMessageDetails receivedMessageDetails = tim.getReceivedMessageDetails();
 
-            for (String col : timOracleTables.getTimTable()) {
+            for (String col : timDbTables.getTimTable()) {
                 // default to null
                 preparedStatement.setString(fieldNum, null);
                 if (j2735 != null) {

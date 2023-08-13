@@ -21,7 +21,7 @@ import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class TimService extends BaseService {
 
     public Gson gson = new Gson();
     private ActiveTimService activeTimService;
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
     private PathService pathService;
     private RegionService regionService;
@@ -65,7 +65,7 @@ public class TimService extends BaseService {
     private NodeLLService nodeLLService;
 
     @Autowired
-    public void InjectDependencies(ActiveTimService _ats, TimOracleTables _timOracleTables,
+    public void InjectDependencies(ActiveTimService _ats, TimDbTables _timDbTables,
             SQLNullHandler _sqlNullHandler, PathService _pathService, RegionService _regionService,
             DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
             ItisCodeService _itisCodesService, TimRsuService _timRsuService,
@@ -73,7 +73,7 @@ public class TimService extends BaseService {
             NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService,
             PathNodeLLService _pathNodeLLService, NodeLLService _nodeLLService) {
         activeTimService = _ats;
-        timOracleTables = _timOracleTables;
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
         pathService = _pathService;
         regionService = _regionService;
@@ -91,11 +91,11 @@ public class TimService extends BaseService {
         nodeLLService = _nodeLLService;
     }
 
-    public void addTimToOracleDB(OdeData odeData) {
+    public void addTimToDatabase(OdeData odeData) {
 
         try {
 
-            utility.logWithDate("Called addTimToOracleDB");
+            utility.logWithDate("Called addTimToDatabase");
 
             ReceivedMessageDetails rxMsgDet = null;
             RecordType recType = null;
@@ -144,7 +144,7 @@ public class TimService extends BaseService {
                 regionService.AddRegion(dataFrameId, null, region);
             } else {
                 utility.logWithDate(
-                        "addTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+                        "addTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
                                 + dataFrameId + ")");
             }
 
@@ -182,9 +182,9 @@ public class TimService extends BaseService {
     }
 
     // only does one TIM at a time ***
-    public void addActiveTimToOracleDB(OdeData odeData) {
+    public void addActiveTimToDatabase(OdeData odeData) {
 
-        utility.logWithDate("Called addActiveTimToOracleDB");
+        utility.logWithDate("Called addActiveTimToDatabase");
         // variables
         ActiveTim activeTim;
 
@@ -266,7 +266,7 @@ public class TimService extends BaseService {
         if (StringUtils.isEmpty(stDate)) {
             stDate = dframes[0].getStartDateTime();
             utility.logWithDate(String.format(
-                    "addActiveTimToOracleDB did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
+                    "addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
         }
         activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);
@@ -405,13 +405,13 @@ public class TimService extends BaseService {
 
         try {
 
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim",
-                    timOracleTables.getTimTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim",
+                    timDbTables.getTimTable());
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getTimTable()) {
+            for (String col : timDbTables.getTimTable()) {
                 // default to null
                 preparedStatement.setString(fieldNum, null);
                 if (j2735TravelerInformationMessage != null) {
@@ -575,7 +575,7 @@ public class TimService extends BaseService {
             regionService.AddRegion(dataFrameId, null, region);
         } else {
             utility.logWithDate(
-                    "addActiveTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+                    "addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
                             + dataFrameId + ")");
         }
     }

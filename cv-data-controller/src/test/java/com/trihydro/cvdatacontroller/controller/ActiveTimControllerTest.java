@@ -24,7 +24,7 @@ import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,17 +38,17 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType;
 
 public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     private void setupPreparedStatement() {
-        doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
+        doReturn(mockPreparedStatement).when(mockTimDbTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
     }
 

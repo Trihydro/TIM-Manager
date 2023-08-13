@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +17,7 @@ import org.mockito.Spy;
 public class DriverAlertItisCodeServiceTest extends TestBase<DriverAlertItisCodeService> {
 
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
@@ -26,7 +26,7 @@ public class DriverAlertItisCodeServiceTest extends TestBase<DriverAlertItisCode
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
         driverAlertId = Long.valueOf(-1);
         itisCodeId = -2;
     }

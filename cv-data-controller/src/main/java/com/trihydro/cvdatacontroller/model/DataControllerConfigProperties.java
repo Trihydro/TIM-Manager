@@ -8,7 +8,7 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.DbInteractionsProps;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.tables.LoggingTables;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Import;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-@Import({ TimOracleTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
+@Import({ TimDbTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
         JavaMailSenderImplProvider.class, LoggingTables.class, DbInteractions.class })
 public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps {
     private String dbDriver;

@@ -13,7 +13,7 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ import org.springframework.http.ResponseEntity;
 
 public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingController> {
         @Spy
-        private TimOracleTables mockTimOracleTables = new TimOracleTables();
+        private TimDbTables mockTimDbTables = new TimDbTables();
         @Mock
         private SQLNullHandler mockSqlNullHandler;
 
@@ -34,13 +34,13 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
 
         @BeforeEach
         public void setupSubTest() {
-                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+                uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
                 startCoord = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
                 endCoord = new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(6));
         }
 
         private void setupInsertQueryStatement() {
-                doReturn("insert query statement").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+                doReturn("insert query statement").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
         }
 
         private void setupPreparedStatement() throws SQLException {

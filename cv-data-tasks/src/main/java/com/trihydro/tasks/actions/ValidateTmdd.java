@@ -78,7 +78,7 @@ public class ValidateTmdd implements Runnable {
         try {
             validateTmdd();
         } catch (Exception ex) {
-            utility.logWithDate("Error while validating Oracle with TMDD:", this.getClass());
+            utility.logWithDate("Error while validating Database with TMDD:", this.getClass());
             ex.printStackTrace();
             errors.add(ex.getMessage());
 
@@ -88,7 +88,7 @@ public class ValidateTmdd implements Runnable {
 
         if (errors.size() > 0) {
             try {
-                String email = "Error(s) occurred durring Oracle-TMDD message validation:<br>"
+                String email = "Error(s) occurred durring Database-TMDD message validation:<br>"
                         + String.join("<br><br>", errors);
 
                 mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Error(s)", email);

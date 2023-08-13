@@ -12,7 +12,7 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
-import com.trihydro.library.tables.DriverAlertOracleTables;
+import com.trihydro.library.tables.DriverAlertDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ import us.dot.its.jpo.ode.model.SerialId;
 public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
 
         @Spy
-        private DriverAlertOracleTables mockDriverAlertOracleTables = new DriverAlertOracleTables();
+        private DriverAlertDbTables mockDriverAlertDbTables = new DriverAlertDbTables();
         @Mock
         private SQLNullHandler mockSqlNullHandler;
         @Mock
@@ -47,7 +47,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
 
         @BeforeEach
         public void setupSubTest() {
-                uut.InjectDependencies(mockDriverAlertOracleTables, mockSqlNullHandler, mockItisCodeService,
+                uut.InjectDependencies(mockDriverAlertDbTables, mockSqlNullHandler, mockItisCodeService,
                                 mockDriverAlertTypeService, mockDriverAlertItisCodeService);
 
                 List<DriverAlertType> dats = new ArrayList<DriverAlertType>();
@@ -59,7 +59,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         }
 
         @Test
-        public void addDriverAlertToOracleDB_SUCCESS() throws SQLException {
+        public void addDriverAlertToDatabase_SUCCESS() throws SQLException {
                 // Arrange
                 OdeData odeData = getOdeData();
                 OdeLogMetadata odeDriverAlertMetadata = (OdeLogMetadata) odeData.getMetadata();
@@ -75,7 +75,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
                 mockUtility.timestampFormat = timestampFormat;
 
                 // Act
-                Long data = uut.addDriverAlertToOracleDB(odeData);
+                Long data = uut.addDriverAlertToDatabase(odeData);
 
                 // Assert
                 Assertions.assertEquals(Long.valueOf(-1), data);
@@ -118,7 +118,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         }
 
         @Test
-        public void addDriverAlertToOracleDB_SUCCESS_Custom() throws SQLException {
+        public void addDriverAlertToDatabase_SUCCESS_Custom() throws SQLException {
                 // Arrange
                 OdeData odeData = getOdeData();
                 String alert = "770,Closed due to law enforcement request";
@@ -135,7 +135,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
                 mockUtility.timestampFormat = timestampFormat;
 
                 // Act
-                uut.addDriverAlertToOracleDB(odeData);
+                uut.addDriverAlertToDatabase(odeData);
 
                 // Assert
                 verify(mockDriverAlertItisCodeService).insertDriverAlertItisCode(-1l, -1);
@@ -145,12 +145,12 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         }
 
         @Test
-        public void addDriverAlertToOracleDB_FAIL() throws SQLException {
+        public void addDriverAlertToDatabase_FAIL() throws SQLException {
                 // Arrange
                 doThrow(new SQLException()).when(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1, "-1");
 
                 // Act
-                Long data = uut.addDriverAlertToOracleDB(getOdeData());
+                Long data = uut.addDriverAlertToDatabase(getOdeData());
 
                 // Assert
                 Assertions.assertEquals(Long.valueOf(0), data);

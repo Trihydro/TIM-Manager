@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class PathNodeLLService extends BaseService {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -29,12 +29,12 @@ public class PathNodeLLService extends BaseService {
         try {
 
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path_node_ll",
-                    timOracleTables.getPathNodeLLTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("path_node_ll",
+                    timDbTables.getPathNodeLLTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_node_ll_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getPathNodeLLTable()) {
+            for (String col : timDbTables.getPathNodeLLTable()) {
                 if (col.equals("NODE_LL_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, nodeLLId);
                 else if (col.equals("PATH_ID"))

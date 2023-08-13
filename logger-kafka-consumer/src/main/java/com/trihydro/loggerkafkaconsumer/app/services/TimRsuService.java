@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimRsuService extends BaseService {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -30,12 +30,12 @@ public class TimRsuService extends BaseService {
 
         try {
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("TIM_RSU",
-                    timOracleTables.getTimRsuTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("TIM_RSU",
+                    timDbTables.getTimRsuTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "TIM_RSU_ID" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getTimRsuTable()) {
+            for (String col : timDbTables.getTimRsuTable()) {
                 if (col.equals("TIM_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
                 else if (col.equals("RSU_ID"))

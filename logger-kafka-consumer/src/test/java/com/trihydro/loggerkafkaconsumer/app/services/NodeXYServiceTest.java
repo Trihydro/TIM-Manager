@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +20,13 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.Attributes;
 public class NodeXYServiceTest extends TestBase<NodeXYService> {
 
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     @Test

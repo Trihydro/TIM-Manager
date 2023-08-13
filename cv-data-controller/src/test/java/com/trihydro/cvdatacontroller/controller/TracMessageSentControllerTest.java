@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.tables.TracMessageOracleTables;
+import com.trihydro.cvdatacontroller.tables.TracMessageDbTables;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TracMessageSent;
 
@@ -21,13 +21,13 @@ import org.springframework.http.ResponseEntity;
 public class TracMessageSentControllerTest extends TestBase<TracMessageSentController> {
 
     @Spy
-    private TracMessageOracleTables mockTracMessageOracleTables = new TracMessageOracleTables();
+    private TracMessageDbTables mockTracMessageDbTables = new TracMessageDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTracMessageOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTracMessageDbTables, mockSqlNullHandler);
     }
 
     @Test

@@ -64,7 +64,7 @@ public class ValidateSdxTest {
     @Captor
     private ArgumentCaptor<List<CAdvisorySituationDataDeposit>> deleteFromSdxCaptor;
     @Captor
-    private ArgumentCaptor<List<CActiveTim>> invOracleRecordsCaptor;
+    private ArgumentCaptor<List<CActiveTim>> invDbRecordsCaptor;
     @Captor
     private ArgumentCaptor<String> exceptionMessageCaptor;
 
@@ -129,7 +129,7 @@ public class ValidateSdxTest {
 
         // Assert
         // 2 Active TIMs, with 0 records in the SDX. We're expecting:
-        // - Number of Oracle records without corresponding message in SDX: 2
+        // - Number of Database records without corresponding message in SDX: 2
         // - toResend to contain 2 records
 
         // Services were called
@@ -141,11 +141,11 @@ public class ValidateSdxTest {
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(0), eq(0), eq(2), toResendCaptor.capture(),
-                deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture(), exceptionMessageCaptor.capture());
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
         Assertions.assertEquals(2, toResendCaptor.getValue().size());
         Assertions.assertEquals(0, deleteFromSdxCaptor.getValue().size());
-        Assertions.assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
 
         Gson gson = new Gson();
         String exceptionText = "The following exceptions were found while attempting to resubmit TIMs: ";
@@ -158,7 +158,7 @@ public class ValidateSdxTest {
     }
 
     @Test
-    public void validateSDX_noOracle() throws MailException, MessagingException {
+    public void validateSDX_noDatabase() throws MailException, MessagingException {
         // Arrange
         // 0 Active TIMS, 2 SDX.
         ActiveTim[] activeTims = new ActiveTim[0];
@@ -178,7 +178,7 @@ public class ValidateSdxTest {
 
         // Assert
         // 0 Active TIMs, with 2 records in the SDX. We're expecting:
-        // - Number of messages on SDX without corresponding Oracle record: 2
+        // - Number of messages on SDX without corresponding Database record: 2
         // - deleteFromSdx to contain 2 records
 
         // Services were called
@@ -190,11 +190,11 @@ public class ValidateSdxTest {
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
-                deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture(), exceptionMessageCaptor.capture());
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
         Assertions.assertEquals(0, toResendCaptor.getValue().size());
         Assertions.assertEquals(2, deleteFromSdxCaptor.getValue().size());
-        Assertions.assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
 
         String exText = "The following recordIds failed to delete from the SDX: 1<br>";
         Assertions.assertEquals(exText, exceptionMessageCaptor.getValue());
@@ -233,11 +233,11 @@ public class ValidateSdxTest {
         // Assert
         // We're expecting:
         // - Number of stale records on SDX (different ITIS codes than ActiveTim): 1
-        // - Number of messages on SDX without corresponding Oracle record: 1
-        // - Number of Oracle records without corresponding message in SDX: 1
+        // - Number of messages on SDX without corresponding Database record: 1
+        // - Number of Database records without corresponding message in SDX: 1
         // - toResend count: 1
         // - deleteFromSdx count: 1
-        // - invOracleRecords count: 0
+        // - invDbRecords count: 0
 
         // Services were called
         verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
@@ -249,11 +249,11 @@ public class ValidateSdxTest {
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),
-                deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture(), exceptionMessageCaptor.capture());
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
         Assertions.assertEquals(2, toResendCaptor.getValue().size());
         Assertions.assertEquals(1, deleteFromSdxCaptor.getValue().size());
-        Assertions.assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
 
         Gson gson = new Gson();
         String exceptionText = "The following recordIds failed to delete from the SDX: 1<br>";

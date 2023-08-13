@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +25,13 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 public class DataFrameServiceTest extends TestBase<DataFrameService> {
 
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     @Test

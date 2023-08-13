@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,15 +30,15 @@ public class RegionControllerTest extends TestBase<RegionController> {
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
-    private TimOracleTables mockTimOracleTables;
+    private TimDbTables mockTimDbTables;
 
     @BeforeEach
     public void setupSubTest() throws SQLException {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     private void setupInsertQueryStatement() {
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
     }
 
     @Test

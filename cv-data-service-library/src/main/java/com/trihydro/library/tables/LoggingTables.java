@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LoggingTables extends OracleTables {
+public class LoggingTables extends DbTables {
     private List<String> httpLoggingTable;
 
     public List<String> getHttpLoggingTable() {

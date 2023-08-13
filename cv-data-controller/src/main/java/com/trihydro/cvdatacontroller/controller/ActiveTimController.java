@@ -24,7 +24,7 @@ import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,7 +48,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @ApiIgnore
 public class ActiveTimController extends BaseController {
 
-	private TimOracleTables timOracleTables;
+	private TimDbTables timDbTables;
 	private SQLNullHandler sqlNullHandler;
 	protected Calendar UTCCalendar;
 
@@ -57,8 +57,8 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-		timOracleTables = _timOracleTables;
+	public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+		timDbTables = _timDbTables;
 		sqlNullHandler = _sqlNullHandler;
 	}
 
@@ -341,7 +341,7 @@ public class ActiveTimController extends BaseController {
 
 		try {
 			connection = dbInteractions.getConnectionPool();
-			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
+			preparedStatement = timDbTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
 					connection);
 
 			// execute update statement
@@ -1235,8 +1235,8 @@ public class ActiveTimController extends BaseController {
 		PreparedStatement preparedStatement = null;
 		Long activeTimId = 0l;
 		try {
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim",
-					timOracleTables.getActiveTimTable());
+			String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
+					timDbTables.getActiveTimTable());
 
 			// get connection
 			connection = dbInteractions.getConnectionPool();
@@ -1244,7 +1244,7 @@ public class ActiveTimController extends BaseController {
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
 			int fieldNum = 1;
 
-			for (String col : timOracleTables.getActiveTimTable()) {
+			for (String col : timDbTables.getActiveTimTable()) {
 				if (col.equals("TIM_ID"))
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
 				else if (col.equals("DIRECTION"))

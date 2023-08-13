@@ -8,7 +8,7 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
-import com.trihydro.library.tables.DriverAlertOracleTables;
+import com.trihydro.library.tables.DriverAlertDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,24 +20,24 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata;
 @Component
 public class DriverAlertService extends BaseService {
 
-    private DriverAlertOracleTables driverAlertOracleTables;
+    private DriverAlertDbTables driverAlertDbTables;
     private SQLNullHandler sqlNullHandler;
     private ItisCodeService itisCodeService;
     private DriverAlertTypeService driverAlertTypeService;
     private DriverAlertItisCodeService driverAlertItisCodeService;
 
     @Autowired
-    public void InjectDependencies(DriverAlertOracleTables _driverAlertOracleTables, SQLNullHandler _sqlNullHandler,
+    public void InjectDependencies(DriverAlertDbTables _driverAlertDbTables, SQLNullHandler _sqlNullHandler,
             ItisCodeService _itisCodeService, DriverAlertTypeService _driverAlertTypeService,
             DriverAlertItisCodeService _driverAlertItisCodeService) {
-        driverAlertOracleTables = _driverAlertOracleTables;
+        driverAlertDbTables = _driverAlertDbTables;
         sqlNullHandler = _sqlNullHandler;
         itisCodeService = _itisCodeService;
         driverAlertTypeService = _driverAlertTypeService;
         driverAlertItisCodeService = _driverAlertItisCodeService;
     }
 
-    public Long addDriverAlertToOracleDB(OdeData odeData) {
+    public Long addDriverAlertToDatabase(OdeData odeData) {
 
         System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
 
@@ -51,12 +51,12 @@ public class DriverAlertService extends BaseService {
         try {
 
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = driverAlertOracleTables.buildInsertQueryStatement("driver_alert",
-                    driverAlertOracleTables.getDriverAlertTable());
+            String insertQueryStatement = driverAlertDbTables.buildInsertQueryStatement("driver_alert",
+                    driverAlertDbTables.getDriverAlertTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "driver_alert_id" });
             int fieldNum = 1;
 
-            for (String col : driverAlertOracleTables.getDriverAlertTable()) {
+            for (String col : driverAlertDbTables.getDriverAlertTable()) {
                 if (col.equals("RECORD_GENERATED_BY"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
                             odeDriverAlertMetadata.getRecordGeneratedBy().toString());

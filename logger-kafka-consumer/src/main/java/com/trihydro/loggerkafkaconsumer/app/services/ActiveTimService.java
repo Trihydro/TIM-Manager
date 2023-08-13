@@ -16,7 +16,7 @@ import java.util.TimeZone;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,13 +24,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ActiveTimService extends BaseService {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
     private Calendar UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -40,8 +40,8 @@ public class ActiveTimService extends BaseService {
         PreparedStatement preparedStatement = null;
 
         try {
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim",
-                    timOracleTables.getActiveTimTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
+                    timDbTables.getActiveTimTable());
 
             // get connection
             connection = dbInteractions.getConnectionPool();
@@ -49,7 +49,7 @@ public class ActiveTimService extends BaseService {
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getActiveTimTable()) {
+            for (String col : timDbTables.getActiveTimTable()) {
                 if (col.equals("TIM_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
                 else if (col.equals("DIRECTION"))

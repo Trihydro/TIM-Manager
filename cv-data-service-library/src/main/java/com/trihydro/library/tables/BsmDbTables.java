@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BsmOracleTables extends OracleTables {
+public class BsmDbTables extends DbTables {
 
     private List<String> bsmCoreDataTable;
     private List<String> bsmPart2SuveTable;

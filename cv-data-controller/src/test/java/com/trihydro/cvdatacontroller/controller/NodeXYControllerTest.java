@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,15 +25,15 @@ public class NodeXYControllerTest extends TestBase<NodeXYController> {
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
-    private TimOracleTables mockTimOracleTables;
+    private TimDbTables mockTimDbTables;
 
     @BeforeEach
     public void setupSubTest() throws SQLException {
-        lenient().doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(),
+        lenient().doReturn(mockPreparedStatement).when(mockTimDbTables).buildUpdateStatement(any(), any(), any(),
                 any(), any());
-        lenient().doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        lenient().doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
 
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     @Test

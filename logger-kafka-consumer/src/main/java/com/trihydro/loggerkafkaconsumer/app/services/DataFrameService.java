@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,12 +21,12 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 @Component
 public class DataFrameService extends BaseService {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -37,12 +37,12 @@ public class DataFrameService extends BaseService {
         try {
 
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("data_frame",
-                    timOracleTables.getDataFrameTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("data_frame",
+                    timDbTables.getDataFrameTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "data_frame_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getDataFrameTable()) {
+            for (String col : timDbTables.getDataFrameTable()) {
                 if (col.equals("TIM_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
                 } else if (col.equals("SSP_TIM_RIGHTS")) {

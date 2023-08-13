@@ -16,7 +16,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ public class TimControllerTest extends TestBase<TimController> {
         @Mock
         private SQLNullHandler mockSqlNullHandler;
         @Spy
-        private TimOracleTables mockTimOracleTables;
+        private TimDbTables mockTimDbTables;
         @Mock
         private SecurityResultCodeTypeController mockSecurityResultCodeTypeController;
         @Mock
@@ -48,11 +48,11 @@ public class TimControllerTest extends TestBase<TimController> {
 
         @BeforeEach
         public void setupSubTest() {
-                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
+                uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
         private void setupInsertQueryStatement() {
-                doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+                doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
         }
 
         private void setupSecurityResultTypes() {
@@ -120,7 +120,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 // Assert
                 // j2735 fields are skipped, we start at index 5 after those
-                // See timOracleTables.getTimTable() for ordering
+                // See timDbTables.getTimTable() for ordering
                 Assertions.assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5,
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
@@ -161,7 +161,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 Long timId = uut.AddTim(tim);
 
                 // Assert
-                // See timOracleTables.getTimTable() for ordering
+                // See timDbTables.getTimTable() for ordering
                 Assertions.assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6,
                                 receivedMessageDetails.getLocationData().getElevation());// RMD_LD_ELEVATION

@@ -144,7 +144,7 @@ public class TimGenerationHelper {
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
                 } else {
-                    // Oracle has lane width as cm, but ODE takes m
+                    // Database has lane width as cm, but ODE takes m
                     tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
                 }
 
@@ -349,7 +349,7 @@ public class TimGenerationHelper {
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
                 } else {
-                    // Oracle has lane width as cm, but ODE takes m
+                    // Database has lane width as cm, but ODE takes m
                     tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
                 }
 
@@ -418,7 +418,7 @@ public class TimGenerationHelper {
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
                 } else {
-                    // Oracle has lane width as cm, but ODE takes m
+                    // Database has lane width as cm, but ODE takes m
                     tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
                 }
 
@@ -487,7 +487,7 @@ public class TimGenerationHelper {
                 if (tum.getLaneWidth() == null) {
                     tum.setLaneWidth(config.getDefaultLaneWidth());
                 } else {
-                    // Oracle has lane width as cm, but ODE takes m
+                    // Database has lane width as cm, but ODE takes m
                     tum.setLaneWidth(tum.getLaneWidth().divide(BigDecimal.valueOf(100)));
                 }
 

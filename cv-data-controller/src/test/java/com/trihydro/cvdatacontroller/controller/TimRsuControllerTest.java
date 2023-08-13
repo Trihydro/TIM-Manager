@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TimRsu;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,15 +25,15 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
-    private TimOracleTables mockTimOracleTables;
+    private TimDbTables mockTimDbTables;
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     private void setupInsertQueryStatement() {
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
     }
 
     @Test

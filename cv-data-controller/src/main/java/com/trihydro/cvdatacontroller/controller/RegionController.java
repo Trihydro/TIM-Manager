@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,12 +32,12 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 @ApiIgnore
 public class RegionController extends BaseController {
 
-	private TimOracleTables timOracleTables;
+	private TimDbTables timDbTables;
 	private SQLNullHandler sqlNullHandler;
 
 	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-		timOracleTables = _timOracleTables;
+	public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+		timDbTables = _timDbTables;
 		sqlNullHandler = _sqlNullHandler;
 	}
 
@@ -50,7 +50,7 @@ public class RegionController extends BaseController {
 
 		try {
 			connection = dbInteractions.getConnectionPool();
-			preparedStatement = timOracleTables.buildUpdateStatement(regionId, "REGION", "REGION_ID", cols, connection);
+			preparedStatement = timDbTables.buildUpdateStatement(regionId, "REGION", "REGION_ID", cols, connection);
 
 			// execute update statement
 			Boolean success = dbInteractions.updateOrDelete(preparedStatement);
@@ -81,8 +81,8 @@ public class RegionController extends BaseController {
 
 		try {
 			connection = dbInteractions.getConnectionPool();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("region",
-					timOracleTables.getRegionTable());
+			String insertQueryStatement = timDbTables.buildInsertQueryStatement("region",
+					timDbTables.getRegionTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "region_id" });
 
 			OdePosition3D anchor = null;
@@ -93,7 +93,7 @@ public class RegionController extends BaseController {
 
 			Region.Geometry geometry = region.getGeometry();
 
-			for (String col : timOracleTables.getRegionTable()) {
+			for (String col : timDbTables.getRegionTable()) {
 				if (col.equals("DATA_FRAME_ID"))
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, dataFrameId);
 				else if (col.equals("NAME"))

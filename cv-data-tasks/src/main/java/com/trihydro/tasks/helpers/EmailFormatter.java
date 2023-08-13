@@ -51,23 +51,23 @@ public class EmailFormatter {
 
     public String generateSdxSummaryEmail(int numSdxOrphaned, int numOutdatedSdx, int numNotOnSdx,
             List<CActiveTim> toResend, List<CAdvisorySituationDataDeposit> deleteFromSdx,
-            List<CActiveTim> invOracleRecords, String exceptions) {
+            List<CActiveTim> invDbRecords, String exceptions) {
         // Create summary
         String body = formatSdxMain.replaceAll("\\{num-stale\\}", Integer.toString(numOutdatedSdx));
         body = body.replaceAll("\\{num-sdx-orphaned\\}", Integer.toString(numSdxOrphaned));
         body = body.replaceAll("\\{num-not-present-sdx\\}", Integer.toString(numNotOnSdx));
-        body = body.replaceAll("\\{num-inv-oracle\\}", Integer.toString(invOracleRecords.size()));
+        body = body.replaceAll("\\{num-inv-database\\}", Integer.toString(invDbRecords.size()));
 
         // Add tables w/ detailed info, if available
         String content = "";
 
-        // Invalid Oracle records
-        if (invOracleRecords.size() > 0) {
-            String section = formatSection.replaceAll("\\{title\\}", "Invalid Oracle records");
+        // Invalid Database records
+        if (invDbRecords.size() > 0) {
+            String section = formatSection.replaceAll("\\{title\\}", "Invalid Database records");
             section = section.replaceAll("\\{headers\\}", getHeader("ACTIVE_TIM_ID", "SAT_RECORD_ID"));
 
             String rows = "";
-            for (CActiveTim record : invOracleRecords) {
+            for (CActiveTim record : invDbRecords) {
                 rows += getRow(Long.toString(record.getActiveTim().getActiveTimId()),
                         record.getActiveTim().getSatRecordId());
             }

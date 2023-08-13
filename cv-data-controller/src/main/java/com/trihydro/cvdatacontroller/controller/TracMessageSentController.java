@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.tables.TracMessageOracleTables;
+import com.trihydro.cvdatacontroller.tables.TracMessageDbTables;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TracMessageSent;
 
@@ -26,12 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("trac-message")
 public class TracMessageSentController extends BaseController {
 
-	private TracMessageOracleTables tracMessageOracleTables;
+	private TracMessageDbTables tracMessageDbTables;
 	private SQLNullHandler sqlNullHandler;
 
 	@Autowired
-	public void InjectDependencies(TracMessageOracleTables _tracMessageOracleTables, SQLNullHandler _sqlNullHandler) {
-		tracMessageOracleTables = _tracMessageOracleTables;
+	public void InjectDependencies(TracMessageDbTables _tracMessageDbTables, SQLNullHandler _sqlNullHandler) {
+		tracMessageDbTables = _tracMessageDbTables;
 		sqlNullHandler = _sqlNullHandler;
 	}
 
@@ -81,13 +81,13 @@ public class TracMessageSentController extends BaseController {
 
 		try {
 			connection = dbInteractions.getConnectionPool();
-			String insertQueryStatement = tracMessageOracleTables.buildInsertQueryStatement("TRAC_MESSAGE_SENT",
-					tracMessageOracleTables.getTracMessageSentTable());
+			String insertQueryStatement = tracMessageDbTables.buildInsertQueryStatement("TRAC_MESSAGE_SENT",
+					tracMessageDbTables.getTracMessageSentTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement,
 					new String[] { "trac_message_sent_id" });
 			int fieldNum = 1;
 
-			for (String col : tracMessageOracleTables.getTracMessageSentTable()) {
+			for (String col : tracMessageDbTables.getTracMessageSentTable()) {
 				if (col.equals("TRAC_MESSAGE_TYPE_ID"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
 							tracMessageSent.getTracMessageTypeId());

@@ -108,12 +108,12 @@ public class LoggerKafkaConsumer {
                             if (odeData != null) {
                                 if (odeData.getMetadata()
                                         .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
-                                    timService.addActiveTimToOracleDB(odeData);
+                                    timService.addActiveTimToDatabase(odeData);
                                 } else if (odeData.getMetadata().getRecordGeneratedBy() == null) {
                                     // we shouldn't get here...log it
                                     utility.logWithDate("Failed to get recordGeneratedBy, continuing...");
                                 } else {
-                                    timService.addTimToOracleDB(odeData);
+                                    timService.addTimToDatabase(odeData);
                                 }
                             } else {
                                 utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
@@ -125,7 +125,7 @@ public class LoggerKafkaConsumer {
                             // logic has been left in
                             // odeData = bsmDataConverter.processBsmJson(tdw.getData());
                             // if (odeData != null) {
-                            // bsmService.addBSMToOracleDB(odeData, tdw.getData());
+                            // bsmService.addBSMToDatabase(odeData, tdw.getData());
                             // } else {
                             // utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
                             // }
@@ -134,7 +134,7 @@ public class LoggerKafkaConsumer {
                         case "topic.OdeDriverAlertJson":
                             odeData = daConverter.processDriverAlertJson(tdw.getData());
                             if (odeData != null) {
-                                driverAlertService.addDriverAlertToOracleDB(odeData);
+                                driverAlertService.addDriverAlertToDatabase(odeData);
                             } else {
                                 utility.logWithDate("Failed to parse topic.OdeDriverAlertJson, insert fails");
                             }

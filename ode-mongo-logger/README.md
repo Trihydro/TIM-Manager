@@ -11,7 +11,7 @@ This project inserts BSMs from the ODE into a database running on WYDOT's server
 
 To use a running version of the ODE Data Logger, upload any .uper or .hex into the ODE through the web interface. Alternatively files can be dropped into /jpo-ode-svcs/target/uploads/bsm. Data will then be decoded by the ODE and then inserted into the CVCOMMS tables via the ODE Data Logger.
 
-### Oracle Schema Access
+### Oracle Schema Access (deprecated)
 
 **Step 1**: Log onto WYDOT server 10.145.9.204
 
@@ -41,7 +41,7 @@ git clone https://<username>@bitbucket.org/szumpf/ode-data-logger.git
 **Step 2**: Change into the repository directory
 
 ```bash
-$ cd oracle-data-logger
+$ cd ode-data-logger
 ```
 
 **Step 3**: Add the Oracle JDBC driver to your local Maven repository
@@ -54,7 +54,7 @@ $ mvn install:install-file -Dfile=oracle/ojdbc6.jar
 **Step 4**: Change into the project directory
 
 ```bash
-$ cd oracle-data-logger
+$ cd ode-data-logger
 ```
 
 **Step 5**: Compile the project
@@ -72,8 +72,6 @@ $ java -jar target/cv-logger-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 WINDOWS COMMANDS
 
 Desktop
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\oracle\\ojdbc6.jar" -DgroupId="com.oracle" -DartifactId=ojdbc6 -Dversion="11.2.0.4" -Dpackaging=jar
 
 mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-0.0.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="0.0.1-SNAPSHOT" -Dpackaging=jar
 
@@ -108,10 +106,6 @@ mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-co
 mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-svcs-0.0.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="0.0.1-SNAPSHOT" -Dpackaging=jar
 
 mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\cv-data-service-library\\target\\cv-data-service-library-0.0.1-SNAPSHOT.jar" -DgroupId="com.wyocv" -DartifactId=cv-data-service-library -Dversion="0.0.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\ode-data-logger\\resources\\ojdbc6.jar" -DgroupId="com.oracle" -DartifactId=ojdbc6 -Dversion="11.2.0.4" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\cv-data-service-library\\src\\main\\resources\\ojdbc8.jar" -DgroupId="com.oracle" -DartifactId=ojdbc8 -Dversion="12.2.0.1.0" -Dpackaging=jar
 
 # Configuration Reference
 

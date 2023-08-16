@@ -19,7 +19,7 @@ public class BsmControllerTest extends TestBase<BsmController> {
         Integer maxBsmCoreDataId = 799;
         doReturn(maxBsmCoreDataId).when(mockRs).getInt("maxId");
         String selectStatement = "select max(bsm_core_data_id) maxId from bsm_core_data where record_generated_at";
-        selectStatement += " < SYSDATE - INTERVAL '";
+        selectStatement += " < Statement_timestamp() - INTERVAL '";
         selectStatement += retentionDays + "' DAY";
 
         // Act

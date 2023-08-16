@@ -259,10 +259,10 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         when(mockRs.getTimestamp(eq("MINSTART"), any())).thenReturn(dbValue);
         mockUtility.timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL), "
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM')), "
                 + "(COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID "
                 + "WHERE TIM.PACKET_ID = '0000'),"
-                + "(SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
+                + "(SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM'))))) minStart";
 
         // Act
         String minExp = uut.getMinExpiration("0000", expDate);

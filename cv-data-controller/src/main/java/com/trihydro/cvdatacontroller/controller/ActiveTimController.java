@@ -1506,14 +1506,14 @@ public class ActiveTimController extends BaseController {
 			// coalesce function with the expDate passed in value.
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL",
+			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM')",
 					translateIso8601ToTimestampFormat(expDate));
 
 			String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
 			minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
 			minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
 
-			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
+			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
 					selectTimestamp, minExpDate, selectTimestamp);
 			rs = statement.executeQuery(query);
 			while (rs.next()) {

@@ -1001,11 +1001,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(minVal, response.getBody());
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL),";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM')),";
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
+        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))))) minStart";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -1025,11 +1025,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getBody(), "");
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL),";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM')),";
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
+        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))))) minStart";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();

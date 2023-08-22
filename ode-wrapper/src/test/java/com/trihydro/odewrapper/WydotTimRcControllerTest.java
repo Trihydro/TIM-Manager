@@ -261,4 +261,29 @@ public class WydotTimRcControllerTest {
 		verify(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
 		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 	}
+
+	@Test
+	public void testAllClear_Bidirectional() throws Exception {
+		// Arrange
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"b\",\"advisory\": [5378]} ]}";
+		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+
+		// Act
+		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+
+		// Parameters required for AC
+		Assertions.assertEquals("b", resultArr[0].direction);
+		Assertions.assertEquals("LARI80WQDHLD", resultArr[0].clientId);
+
+		// Route isn't required for an AC, so it isn't set in the response.
+		Assertions.assertEquals(null, resultArr[0].route);
+		verify(mockActiveTimService).getActiveTimsByClientIdDirection("LARI80WQDHLD", null, null);
+	}
 }

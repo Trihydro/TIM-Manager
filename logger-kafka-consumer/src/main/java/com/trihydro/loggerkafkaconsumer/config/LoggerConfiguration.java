@@ -15,8 +15,10 @@ public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
     private int maxPollRecords = 50;
     private String dbUsername;
     private String dbPassword;
-    private String dbUrl;
-    private String dbDriver;
+    private String dbName;
+    private String dataSourceClassName;
+    private int dbPort;
+    private String dbServer;
     private String[] alertAddresses;
     private String fromEmail;
     private String environmentName;
@@ -84,28 +86,44 @@ public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
         this.dbUsername = dbUsername;
     }
 
-    public String getDbDriver() {
-        return dbDriver;
-    }
-
-    public void setDbDriver(String dbDriver) {
-        this.dbDriver = dbDriver;
-    }
-
-    public String getDbUrl() {
-        return dbUrl;
-    }
-
-    public void setDbUrl(String dbUrl) {
-        this.dbUrl = dbUrl;
-    }
-
     public String getDbPassword() {
         return dbPassword;
     }
 
     public void setDbPassword(String dbPassword) {
         this.dbPassword = dbPassword;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    public String getDataSourceClassName() {
+        return dataSourceClassName;
+    }
+
+    public void setDataSourceClassName(String dataSourceClassName) {
+        this.dataSourceClassName = dataSourceClassName;
+    }
+
+    public int getDbPort() {
+        return dbPort;
+    }
+
+    public void setDbPort(int dbPort) {
+        this.dbPort = dbPort;
+    }
+
+    public String getDbServer() {
+        return dbServer;
+    }
+
+    public void setDbServer(String dbServer) {
+        this.dbServer = dbServer;
     }
 
     public String getKafkaHostServer() {

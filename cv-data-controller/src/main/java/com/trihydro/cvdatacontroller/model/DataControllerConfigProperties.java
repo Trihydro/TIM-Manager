@@ -19,10 +19,12 @@ import org.springframework.stereotype.Component;
 @Import({ TimDbTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
         JavaMailSenderImplProvider.class, LoggingTables.class, DbInteractions.class })
 public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps {
-    private String dbDriver;
-    private String dbUrl;
+    private String dataSourceClassName;    
     private String dbUsername;
     private String dbPassword;
+    private String dbName;
+    private int dbPort;
+    private String dbServer;
 
     private String[] alertAddresses;
     private String fromEmail;
@@ -32,10 +34,6 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     private int mailPort;
 
     private int poolSize;
-
-    public String getDbDriver() {
-        return dbDriver;
-    }
 
     public int getPoolSize() {
         return poolSize;
@@ -85,6 +83,14 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
         this.alertAddresses = alertAddresses;
     }
 
+    public String getDataSourceClassName() {
+        return dataSourceClassName;
+    }
+
+    public void setDataSourceClassName(String dataSourceClassName) {
+        this.dataSourceClassName = dataSourceClassName;
+    }
+
     public String getDbPassword() {
         return dbPassword;
     }
@@ -101,15 +107,27 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
         this.dbUsername = dbUsername;
     }
 
-    public String getDbUrl() {
-        return dbUrl;
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
     }
 
-    public void setDbUrl(String dbUrl) {
-        this.dbUrl = dbUrl;
+    public String getDbName() {
+        return dbName;
     }
 
-    public void setDbDriver(String dbDriver) {
-        this.dbDriver = dbDriver;
+    public int getDbPort() {
+        return dbPort;
+    }
+
+    public void setDbPort(int dbPort) {
+        this.dbPort = dbPort;
+    }
+
+    public void setDbServer(String dbServer) {
+        this.dbServer = dbServer;
+    }
+
+    public String getDbServer() {
+        return dbServer;
     }
 }

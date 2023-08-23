@@ -5,11 +5,13 @@ public interface DbInteractionsProps {
 
     String getDbPassword();
 
-    String getDbUrl();
+    String getDbName();
 
-    String getDbDriver();
+    String getDataSourceClassName();
 
-    int getPoolSize();
+    int getDbPort();
+
+    String getDbServer();
 
     String[] getAlertAddresses();
 

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import com.trihydro.library.model.DbInteractionsProps;
@@ -34,27 +35,27 @@ public class DbInteractions {
 
     private void initHDS() {
         if (hds == null) {
-
-            // log the creation of the connection pool and properties
-            utility.logWithDate("DbInteractions: Creating connection pool");
-            utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
-            utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
-            utility.logWithDate("DbInteractions: dbDriver: " + dbConfig.getDbDriver());
-            utility.logWithDate("DbInteractions: poolSize: " + dbConfig.getPoolSize());
-
             TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
             TimeZone.setDefault(timeZone);
-            config = new HikariConfig();
 
-            config.addDataSourceProperty("cachePrepStmts", "true");
-            config.setUsername(dbConfig.getDbUsername());
-            config.setPassword(dbConfig.getDbPassword());
-            config.setJdbcUrl(dbConfig.getDbUrl());
-            config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(dbConfig.getPoolSize());
-            // Pool Size formula: connections = ((core_count*2) + effective_spindle_count)
-            // https://stackoverflow.com/questions/28987540/why-does-hikaricp-recommend-fixed-size-pool-for-better-performance
-            config.setMaxLifetime(600000);// setting to 10 minutes (defaults to 30), to help avoid connection issues
+            Properties props = new Properties();
+            props.setProperty("dataSourceClassName", dbConfig.getDataSourceClassName());
+            props.setProperty("dataSource.user", dbConfig.getDbUsername());
+            props.setProperty("dataSource.password", dbConfig.getDbPassword());
+            props.setProperty("dataSource.databaseName", dbConfig.getDbName());
+            props.setProperty("dataSource.portNumber", String.valueOf(dbConfig.getDbPort()));
+            props.setProperty("dataSource.serverName", dbConfig.getDbServer());
+            props.put("dataSource.logWriter", new java.io.PrintWriter(System.out));
+            config = new HikariConfig(props);
+
+            // log the creation of the connection pool and properties
+            utility.logWithDate("DbInteractions: Creating connection pool with the following config:");
+            utility.logWithDate("                - dataSourceClassName: " + config.getDataSourceClassName());
+            utility.logWithDate("                - dataSource.user: " + config.getDataSourceProperties().getProperty("user"));
+            utility.logWithDate("                - dataSource.password: " + "******");
+            utility.logWithDate("                - dataSource.databaseName: " + config.getDataSourceProperties().getProperty("databaseName"));
+            utility.logWithDate("                - dataSource.portNumber: " + config.getDataSourceProperties().getProperty("portNumber"));
+            utility.logWithDate("                - dataSource.serverName: " + config.getDataSourceProperties().getProperty("serverName"));
 
             hds = new HikariDataSource(config);
         }
@@ -69,7 +70,7 @@ public class DbInteractions {
             return hds.getConnection();
         } catch (SQLException ex) {
             String body = "Failed attempting to open a connection to ";
-            body += dbConfig.getDbUrl();
+            body += dbConfig.getDbServer();
             body += ". <br/>Exception message: ";
             body += ex.getMessage();
             body += "<br/>Stacktrace: ";
@@ -77,7 +78,7 @@ public class DbInteractions {
             try {
                 emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
             } catch (Exception exception) {
-                utility.logWithDate("Failed to open connection to " + dbConfig.getDbUrl()
+                utility.logWithDate("Failed to open connection to " + dbConfig.getDbServer()
                         + ", then failed to send email");
                 exception.printStackTrace();
             }

@@ -1,17 +1,11 @@
 package com.trihydro.library.model;
 
 public interface DbInteractionsProps {
+    String getDbUrl();
+    
     String getDbUsername();
 
     String getDbPassword();
-
-    String getDbName();
-
-    String getDataSourceClassName();
-
-    int getDbPort();
-
-    String getDbServer();
 
     String[] getAlertAddresses();
 

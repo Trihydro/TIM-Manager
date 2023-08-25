@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import com.trihydro.library.model.DbInteractionsProps;
@@ -17,8 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DbInteractions {
-    private static HikariDataSource hds;
-    private HikariConfig config;
+    private static HikariDataSource dataSource;
 
     protected DbInteractionsProps dbConfig;
     protected Utility utility;
@@ -30,47 +28,49 @@ public class DbInteractions {
         utility = _utility;
         emailHelper = _emailHelper;
         utility.logWithDate("DbInteractions: Injecting dependencies");
-        initHDS();
-    }
+        initDataSource();
+    }   
 
-    private void initHDS() {
-        if (hds == null) {
+    private void initDataSource() {
+        if (dataSource == null) {
             TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
             TimeZone.setDefault(timeZone);
 
-            Properties props = new Properties();
-            props.setProperty("dataSourceClassName", dbConfig.getDataSourceClassName());
-            props.setProperty("dataSource.user", dbConfig.getDbUsername());
-            props.setProperty("dataSource.password", dbConfig.getDbPassword());
-            props.setProperty("dataSource.databaseName", dbConfig.getDbName());
-            props.setProperty("dataSource.portNumber", String.valueOf(dbConfig.getDbPort()));
-            props.setProperty("dataSource.serverName", dbConfig.getDbServer());
-            props.put("dataSource.logWriter", new java.io.PrintWriter(System.out));
-            config = new HikariConfig(props);
+            // check dbconfig for null values
+            if (dbConfig.getDbUrl() == null || dbConfig.getDbUsername() == null || dbConfig.getDbPassword() == null) {
+                utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
+                System.exit(1);
+            }
 
-            // log the creation of the connection pool and properties
-            utility.logWithDate("DbInteractions: Creating connection pool with the following config:");
-            utility.logWithDate("                - dataSourceClassName: " + config.getDataSourceClassName());
-            utility.logWithDate("                - dataSource.user: " + config.getDataSourceProperties().getProperty("user"));
-            utility.logWithDate("                - dataSource.password: " + "******");
-            utility.logWithDate("                - dataSource.databaseName: " + config.getDataSourceProperties().getProperty("databaseName"));
-            utility.logWithDate("                - dataSource.portNumber: " + config.getDataSourceProperties().getProperty("portNumber"));
-            utility.logWithDate("                - dataSource.serverName: " + config.getDataSourceProperties().getProperty("serverName"));
-
-            hds = new HikariDataSource(config);
+            // initialize connection pool
+            try {
+                HikariConfig config = new HikariConfig();
+                config.setDriverClassName("org.postgresql.Driver");
+                config.setJdbcUrl(dbConfig.getDbUrl());
+                config.setUsername(dbConfig.getDbUsername());
+                config.setPassword(dbConfig.getDbPassword());
+                config.setConnectionTimeout(30000);
+                config.setMaximumPoolSize(7);
+                dataSource = new HikariDataSource(config);
+                utility.logWithDate("DbInteractions: Successfully initialized connection pool");
+            } catch (Exception e) {
+                utility.logWithDate("DbInteractions: Failed to initialize connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
+                // e.printStackTrace();
+                System.exit(1);
+            }
         }
     }
 
     public Connection getConnectionPool() throws SQLException {
         // create pool if not already done
-        initHDS();
+        initDataSource();
 
         // return a connection
         try {
-            return hds.getConnection();
+            return dataSource.getConnection();
         } catch (SQLException ex) {
             String body = "Failed attempting to open a connection to ";
-            body += dbConfig.getDbServer();
+            body += dbConfig.getDbUrl();
             body += ". <br/>Exception message: ";
             body += ex.getMessage();
             body += "<br/>Stacktrace: ";
@@ -78,7 +78,7 @@ public class DbInteractions {
             try {
                 emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
             } catch (Exception exception) {
-                utility.logWithDate("Failed to open connection to " + dbConfig.getDbServer()
+                utility.logWithDate("Failed to open connection to " + dbConfig.getDbUrl()
                         + ", then failed to send email");
                 exception.printStackTrace();
             }

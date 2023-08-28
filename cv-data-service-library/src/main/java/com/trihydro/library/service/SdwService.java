@@ -43,22 +43,6 @@ public class SdwService {
         restTemplateProvider = _restTemplateProvider;
     }
 
-    public AdvisorySituationDataDeposit getSdwDataByRecordId(String recordId) {
-        if (recordId == null || configProperties.getSdwApiKey() == null) {
-            return null;
-        }
-
-        String url = getBaseUrlString("api/GetDataByRecordId?recordId=" + recordId);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("apikey", configProperties.getSdwApiKey());
-        HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-        ResponseEntity<AdvisorySituationDataDeposit> response = restTemplateProvider.GetRestTemplate().exchange(url,
-                HttpMethod.GET, entity, AdvisorySituationDataDeposit.class);
-        return response.getBody();
-
-    }
-
     /**
      * Fetches messages deposited into the SDX, by the ODE User (identified by
      * apikey).

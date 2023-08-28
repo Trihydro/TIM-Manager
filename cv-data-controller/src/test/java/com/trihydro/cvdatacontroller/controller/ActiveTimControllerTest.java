@@ -71,9 +71,9 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
         selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
         selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
-        selectStatement += " WHERE atim.tim_start <= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR";
-        selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR)";
-        selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR)";
+        selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR";
+        selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
+        selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
         selectStatement += " AND UPPER(atim.direction) IN ('I', 'D')";
 
         // Act
@@ -339,7 +339,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetExpiredActiveTims_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from ACTIVE_TIM";
-        statementStr += " WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
 
         // Act
         ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
@@ -366,7 +366,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetExpiredActiveTims_FAIL() throws SQLException {
         // Arrange
         String statementStr = "select * from ACTIVE_TIM";
-        statementStr += " WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
         when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException());
 
         // Act

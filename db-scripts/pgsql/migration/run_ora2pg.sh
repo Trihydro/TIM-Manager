@@ -1,10 +1,10 @@
 # !/bin/bash
 
-# if WORKING_DIR is not set, exit
+# if WORKING_DIR is not set, use current directory
 if [ -z "$WORKING_DIR" ]
 then
-    echo "WORKING_DIR is not set. Exiting..."
-    exit 1
+    WORKING_DIR=$(pwd)
+    echo "WORKING_DIR is not set. Using default working directory: $WORKING_DIR"
 fi
 
 # static variables

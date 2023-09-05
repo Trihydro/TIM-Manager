@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1251,20 +1252,20 @@ public class ActiveTimController extends BaseController {
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
 				else if (col.equals("TIM_START")) {
 					java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
-					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-							utility.timestampFormat.format(tim_start_date));
+					Timestamp tim_start_timestamp = new Timestamp(tim_start_date.getTime());
+					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_start_timestamp);
 				} else if (col.equals("TIM_END")) {
 					if (activeTim.getEndDateTime() != null) {
 						java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
-						sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								utility.timestampFormat.format(tim_end_date));
+						Timestamp tim_end_timestamp = new Timestamp(tim_end_date.getTime());
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_end_timestamp);
 					} else
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 				} else if (col.equals("EXPIRATION_DATE")) {
 					if (activeTim.getExpirationDateTime() != null) {
 						java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
-						sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								utility.timestampFormat.format(tim_exp_date));
+						Timestamp tim_exp_timestamp = new Timestamp(tim_exp_date.getTime());
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_exp_timestamp);
 					} else {
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 					}
@@ -1298,6 +1299,8 @@ public class ActiveTimController extends BaseController {
 					if (activeTim.getEndPoint() != null)
 						end_lon = activeTim.getEndPoint().getLongitude();
 					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lon);
+				} else if (col.equals("PROJECT_KEY")) {
+					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getProjectKey());
 				}
 
 				fieldNum++;
@@ -1464,7 +1467,8 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			preparedStatement = connection.prepareStatement(updateStatement);
-			preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
+			Timestamp expDateTimestamp = new Timestamp(utility.convertDate(expDate).getTime());
+			preparedStatement.setTimestamp(1, expDateTimestamp);// expDate comes in as MST from previously called function
 													// (GetMinExpiration)
 			preparedStatement.setObject(2, packetID);
 
@@ -1506,8 +1510,10 @@ public class ActiveTimController extends BaseController {
 			// coalesce function with the expDate passed in value.
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM')",
-					translateIso8601ToTimestampFormat(expDate));
+			String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
+					translateIso8601ToTimestampFormat(expDate), targetFormat);
+
 
 			String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
 			minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";

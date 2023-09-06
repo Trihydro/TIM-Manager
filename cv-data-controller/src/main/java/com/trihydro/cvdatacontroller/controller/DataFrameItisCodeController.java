@@ -60,8 +60,11 @@ public class DataFrameItisCodeController extends BaseController {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, itis);
                     else
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, null);
-                } else if (col.equals("DATA_FRAME_ID"))
+                } else if (col.equals("DATA_FRAME_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, dataFrameId);
+                } else if (col.equals("POSITION")) {
+                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, null); // should this be null?
+                }
                 fieldNum++;
             }
 

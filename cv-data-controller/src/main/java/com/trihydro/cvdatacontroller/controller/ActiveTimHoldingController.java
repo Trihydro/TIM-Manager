@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,8 +92,8 @@ public class ActiveTimHoldingController extends BaseController {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
                 } else if (col.equals("DATE_CREATED")) {
                     java.util.Date dateCreated = utility.convertDate(activeTimHolding.getDateCreated());
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            utility.timestampFormat.format(dateCreated));
+                    Timestamp timestamp = new Timestamp(dateCreated.getTime());
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, timestamp);
                 } else if (col.equals("PROJECT_KEY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
                 } else if (col.equals("EXPIRATION_DATE")) {

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Utility {
-	private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
 	public DateFormat timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");

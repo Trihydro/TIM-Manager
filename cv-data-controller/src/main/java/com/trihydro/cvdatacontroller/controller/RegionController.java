@@ -105,7 +105,7 @@ public class RegionController extends BaseController {
 				else if (col.equals("DIRECTION"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, region.getDirection());
 				else if (col.equals("CLOSED_PATH"))
-					preparedStatement.setBoolean(fieldNum, region.isClosedPath());
+					sqlNullHandler.setIntegerFromBool(preparedStatement, fieldNum, region.isClosedPath());
 				else if (col.equals("ANCHOR_LAT") && anchor != null)
 					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLatitude());
 				else if (col.equals("ANCHOR_LONG") && anchor != null)
@@ -151,7 +151,12 @@ public class RegionController extends BaseController {
 					String units = (pathId == null && geometry != null && geometry.getCircle() != null)
 							? geometry.getCircle().getUnits()
 							: null;
-					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, units);
+					if (units != null) {
+						sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, Integer.parseInt(units));
+					}
+					else {
+						sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, null);
+					}
 				}
 				fieldNum++;
 			}

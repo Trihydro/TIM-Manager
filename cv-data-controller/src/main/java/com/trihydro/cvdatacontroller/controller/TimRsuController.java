@@ -46,7 +46,7 @@ public class TimRsuController extends BaseController {
             connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timDbTables.buildInsertQueryStatement("TIM_RSU",
                     timDbTables.getTimRsuTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "TIM_RSU_ID" });
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_rsu_id" });
             int fieldNum = 1;
 
             for (String col : timDbTables.getTimRsuTable()) {

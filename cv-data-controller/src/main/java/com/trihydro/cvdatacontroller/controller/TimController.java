@@ -5,8 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
@@ -248,10 +252,19 @@ public class TimController extends BaseController {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         String strDate = getOneMonthPrior();
+        Timestamp timestamp = null;
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+            Date parsedDate = dateFormat.parse(strDate);
+            timestamp = new java.sql.Timestamp(parsedDate.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
 
         try {
-            deleteResult = deleteOldTimRsus(strDate);
-            deleteResult &= deleteOldDataFrames(strDate);
+            deleteResult = deleteOldTimRsus(timestamp);
+            deleteResult &= deleteOldDataFrames(timestamp);
 
             if (!deleteResult) {
                 utility.logWithDate("Failed to cleanup old tim_rsus");
@@ -261,9 +274,9 @@ public class TimController extends BaseController {
             String deleteSQL = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
-            // execute delete SQL stetement
+            // execute delete SQL statement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -284,9 +297,9 @@ public class TimController extends BaseController {
         return ResponseEntity.ok(deleteResult);
     }
 
-    private boolean deleteOldDataFrames(String strDate) {
-        boolean deleteResult = deleteOldDataFrameItisCodes(strDate);
-        deleteResult &= deleteOldRegions(strDate);
+    private boolean deleteOldDataFrames(Timestamp timestamp) {
+        boolean deleteResult = deleteOldDataFrameItisCodes(timestamp);
+        deleteResult &= deleteOldRegions(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -298,7 +311,7 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
@@ -323,7 +336,7 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldDataFrameItisCodes(String strDate) {
+    private boolean deleteOldDataFrameItisCodes(Timestamp timestamp) {
         boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -334,7 +347,7 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
@@ -359,8 +372,8 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldRegions(String strDate) {
-        boolean deleteResult = deleteOldPaths(strDate);
+    private boolean deleteOldRegions(Timestamp timestamp) {
+        boolean deleteResult = deleteOldPaths(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -373,7 +386,7 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
@@ -398,8 +411,8 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldPaths(String strDate) {
-        boolean deleteResult = deleteOldPathNodeLL(strDate);
+    private boolean deleteOldPaths(Timestamp timestamp) {
+        boolean deleteResult = deleteOldPathNodeLL(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -412,7 +425,7 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
@@ -437,8 +450,8 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldPathNodeLL(String strDate) {
-        boolean deleteResult = deleteOldNodeLL(strDate);
+    private boolean deleteOldPathNodeLL(Timestamp timestamp) {
+        boolean deleteResult = deleteOldNodeLL(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -451,7 +464,7 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
@@ -476,7 +489,7 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldNodeLL(String strDate) {
+    private boolean deleteOldNodeLL(Timestamp timestamp) {
         boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -488,7 +501,7 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
@@ -513,7 +526,7 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldTimRsus(String strDate) {
+    private boolean deleteOldTimRsus(Timestamp timestamp) {
         boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -523,7 +536,7 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);

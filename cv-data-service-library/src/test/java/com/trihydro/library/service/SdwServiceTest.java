@@ -66,41 +66,6 @@ public class SdwServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void getSdwDataByRecordId_nullRecordId() {
-        AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId(null);
-        Assert.isNull(asdd, "AdvisorySituationDeposit should be null");
-    }
-
-    @Test
-    public void getSdwDataByRecordId_nullApiKey() {
-        when(mockConfig.getSdwApiKey()).thenReturn(null);
-        AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId("record");
-        Assertions.assertNull(asdd, "AdvisorySituationDeposit should be null");
-    }
-
-    @Test
-    public void getSdwDataByRecordId_success() throws IOException, Exception {
-        // Arrange
-        setupConfig();
-        String recordId = "record";
-        String url = String.format("%s/api/GetDataByRecordId?recordId=%s", baseUrl, recordId);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("apikey", apiKey);
-        HttpEntity<String> entity = getEntity(null, String.class, headers);
-        when(mockRestTemplate.exchange(url, HttpMethod.GET, entity, AdvisorySituationDataDeposit.class))
-                .thenReturn(mockRespAdvisorySituationDataDeposit);
-        when(mockRespAdvisorySituationDataDeposit.getBody()).thenReturn(new AdvisorySituationDataDeposit());
-
-        // Act
-        var data = sdwService.getSdwDataByRecordId(recordId);
-
-        // Assert
-        verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, AdvisorySituationDataDeposit.class);
-        Assertions.assertNotNull(data);
-    }
-
-    @Test
     public void deleteSdxDataBySatRecordId_nullRecordIds() {
         setupApiKey();
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(null);

@@ -35,7 +35,7 @@ fi
 port="5432"
 if [ -z "$DATABASE" ]
 then
-    database="intproddb"
+    database="devdb"
     echo "DATABASE environment variable not set. Using default database: $database"
 else
     database=$DATABASE

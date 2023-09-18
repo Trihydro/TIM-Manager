@@ -4,7 +4,6 @@
 
 SET client_encoding TO 'UTF8';
 
--- \set ON_ERROR_STOP ON
 
 DROP TRIGGER IF EXISTS active_tim_holding_trigger ON active_tim_holding CASCADE;
 CREATE OR REPLACE FUNCTION trigger_fct_active_tim_holding_trigger() RETURNS trigger AS $BODY$

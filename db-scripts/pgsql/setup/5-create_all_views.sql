@@ -4,7 +4,6 @@
 
 SET client_encoding TO 'UTF8';
 
--- \set ON_ERROR_STOP ON
 
 -- CREATE OR REPLACE VIEW milepost_vw (route, milepost, direction, latitude, longitude, elevation_ft, bearing) AS SELECT ROUTE,
 -- MILEPOST,

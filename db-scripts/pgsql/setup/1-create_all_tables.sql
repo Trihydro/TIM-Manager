@@ -1,7 +1,6 @@
 SET client_encoding TO 'UTF8';
 
 
--- \set ON_ERROR_STOP ON
 
 -- not part of a dependency relationship --
 CREATE TABLE active_tim_holding (

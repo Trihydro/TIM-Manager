@@ -4,7 +4,6 @@
 
 SET client_encoding TO 'UTF8';
 
--- \set ON_ERROR_STOP ON
 
 
 

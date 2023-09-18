@@ -53,6 +53,9 @@ The user should not have to execute this script directly. It is called by the `m
 The script requires the following to be installed:
 * Docker
 
+## print_progress.sh
+This script is used to print the progress of the migration process when executing SQL scripts one at a time. It is designed to be executed from the /db-scripts/pgsql/migration directory by the `migrate_data.sh` script. The user should not have to execute this script directly.
+
 ## sample.env
 A sample.env file is provided in this directory. Rename this file to .env and update the values to match your environment.
 

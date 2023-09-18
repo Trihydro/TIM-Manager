@@ -1,3 +1,4 @@
 data/*
 logs/*
 sql/insert_data-*.sql
+.env

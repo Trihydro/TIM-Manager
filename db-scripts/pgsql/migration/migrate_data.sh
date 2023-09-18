@@ -1,21 +1,28 @@
 # !/bin/bash
 
-# if WORKING_DIR is not set, use current directory
-if [ -z "$WORKING_DIR" ]
+#  use current directory
+working_dir=$(pwd)
+echo "Working directory: $working_dir"
+
+# if .env file exists, load it
+if [ -f "$working_dir/.env" ]
 then
-    WORKING_DIR=$(pwd)
-    echo "WORKING_DIR is not set. Using default working directory: $WORKING_DIR"
+    # if carriage returns are present, remove them
+    sed -i 's/\r//g' $working_dir/.env
+
+    echo "Loading environment variables from $working_dir/.env"
+    export $(cat $working_dir/.env | sed 's/#.*//g' | xargs)
 fi
 
 # if dependent scripts do not exist, exit
-if [ ! -f "$WORKING_DIR/run_ora2pg.sh" ]
+if [ ! -f "$working_dir/run_ora2pg.sh" ]
 then
-    echo "File $WORKING_DIR/run_ora2pg.sh does not exist. Exiting..."
+    echo "File $working_dir/run_ora2pg.sh does not exist. Exiting..."
     exit 1
 fi
-if [ ! -f "$WORKING_DIR/print_progress.sh" ]
+if [ ! -f "$working_dir/print_progress.sh" ]
 then
-    echo "File $WORKING_DIR/print_progress.sh does not exist. Exiting..."
+    echo "File $working_dir/print_progress.sh does not exist. Exiting..."
     exit 1
 fi
 
@@ -24,29 +31,42 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 timestamp=$(date +%Y%m%d%H%M%S)
 targetFilename="insert_data-$timestamp.sql"
-truncateTablesFilepath="$WORKING_DIR/sql/truncate_tables.sql"
-if [ -z "$HOST" ]
+truncateTablesFilepath="$working_dir/sql/truncate_tables.sql"
+if [ -z "$PGSQL_DB_HOST" ]
 then
-    host="10.145.9.64"
-    echo "HOST environment variable not set. Using default host: $host"
+    echo "PGSQL_DB_HOST environment variable not set. Exiting..."
+    exit 1
 else
-    host=$HOST
+    pgsql_db_host=$PGSQL_DB_HOST
 fi
-port="5432"
-if [ -z "$DATABASE" ]
+if [ -z "$PGSQL_DB_PORT" ]
 then
-    database="devdb"
-    echo "DATABASE environment variable not set. Using default database: $database"
+    pgsql_db_port="5432"
 else
-    database=$DATABASE
+    pgsql_db_port=$PGSQL_DB_PORT
+fi
+if [ -z "$PGSQL_DB_NAME" ]
+then
+    echo "PGSQL_DB_NAME environment variable not set. Exiting..."
+    exit 1
+else
+    pgsql_db_name=$PGSQL_DB_NAME
 fi
 
-if [ -z "$USERNAME" ]
+if [ -z "$PGSQL_DB_USERNAME" ]
 then
-    username="cvcomms"
-    echo "USERNAME environment variable not set. Using default username: $username"
+    echo "PGSQL_DB_USERNAME environment variable not set. Exiting..."
+    exit 1
 else
-    username=$USERNAME
+    pgsql_db_username=$PGSQL_DB_USERNAME
+fi
+
+if [ -z "$PGSQL_DB_PASSWORD" ]
+then
+    echo "PGSQL_DB_PASSWORD environment variable not set. Exiting..."
+    exit 1
+else
+    pgsql_db_password=$PGSQL_DB_PASSWORD
 fi
 
 generateSQL() {
@@ -55,9 +75,9 @@ generateSQL() {
     echo ""
 
     echo "Clearing data directory..."
-    rm -rf $WORKING_DIR/data/*
+    rm -rf $working_dir/data/*
 
-    for filename in $WORKING_DIR/config/*.conf; do
+    for filename in $working_dir/config/*.conf; do
         baseFilename=$(basename $filename)
         echo -e $CYAN"Exporting data with config: $baseFilename"$NC
         ./run_ora2pg.sh $baseFilename
@@ -74,9 +94,6 @@ executeSQLFiles() {
     echo -e $YELLOW"=== Executing SQL Files ==="$NC
     echo ""
 
-    echo "Enter password for user $username:"
-    read -s password
-
     # ask user if they want to truncate tables
     echo ""
     echo "Do you want to truncate tables? (y/n)"
@@ -85,26 +102,26 @@ executeSQLFiles() {
     then
         echo -e $CYAN"Executing SQL file: $truncateTablesFilepath"$NC
         sleep 1
-        PGPASSWORD=$password psql -h $host -p $port -d $database -U $username -f $truncateTablesFilepath
+        PGPASSWORD=$pgsql_db_password psql -h $pgsql_db_host -p $pgsql_db_port -d $pgsql_db_name -U $pgsql_db_username -f $truncateTablesFilepath
         echo -e $CYAN"Done executing SQL file: $truncateTablesFilepath"$NC
         sleep 1
     fi
     echo ""
 
-    sqlLogfile="$WORKING_DIR/logs/execute_sql-$timestamp.log"
+    sqlLogfile="$working_dir/logs/execute_sql-$timestamp.log"
 
     # find out how many INSERT statements are in the files
     totalInserts=0
-    for filename in $WORKING_DIR/data/*.sql; do
+    for filename in $working_dir/data/*.sql; do
         inserts=$(grep -c "INSERT" $filename)
         totalInserts=$(($totalInserts + $inserts))
     done
     echo "Total INSERT statements to execute: $totalInserts"
 
-    for filename in $WORKING_DIR/data/*.sql; do
+    for filename in $working_dir/data/*.sql; do
         echo -e $CYAN"Executing SQL file: $filename"$NC
         sleep 1
-        PGPASSWORD=$password psql -h $host -p $port -d $database -U $username -f $filename >> $sqlLogfile
+        PGPASSWORD=$pgsql_db_password psql -h $pgsql_db_host -p $pgsql_db_port -d $pgsql_db_name -U $pgsql_db_username -f $filename >> $sqlLogfile
         echo -e $CYAN"Done executing SQL file: $filename"$NC
 
         recordsInserted=$(grep -c "INSERT" $filename)
@@ -126,20 +143,31 @@ combineSQL() {
     echo -e $YELLOW"=== Combining SQL Files ==="$NC
     echo ""
     
-    if [ -f "$WORKING_DIR/sql/$targetFilename" ]
+    if [ -f "$working_dir/sql/$targetFilename" ]
     then
         echo "Removing existing file: $targetFilename"
-        rm "$WORKING_DIR/sql/$targetFilename"
+        rm "$working_dir/sql/$targetFilename"
     fi
-    outputFilepath="$WORKING_DIR/sql/$targetFilename"
+    outputFilepath="$working_dir/sql/$targetFilename"
     echo "Combining all data files into one file: $outputFilepath"
-    dataOutputDirpath="$WORKING_DIR/data"
+    dataOutputDirpath="$working_dir/data"
     if [ -z "$(ls -A $dataOutputDirpath)" ]; then
         echo "No data files to combine. Exiting..."
         exit 0
     fi
-    echo -e $CYAN"Adding truncate_tables contents to the beginning of the file: $outputFilepath"$NC
-    cat $truncateTablesFilepath > $outputFilepath
+
+    # ask user if they want to add truncate statements
+    echo ""
+    echo "Do you want to add truncate statements to the beginning of the file? (y/n)"
+    read truncateTablesResponse
+    if [ "$truncateTablesResponse" == "y" ]
+    then
+        echo -e $CYAN"Adding truncate_tables contents to the beginning of the file: $outputFilepath"$NC
+        cat $truncateTablesFilepath > $outputFilepath
+        sleep 1
+    fi
+    echo ""
+
     for filename in $dataOutputDirpath/*; do
         echo -e $CYAN"Appending file contents: $filename"$NC
         cat $filename >> $outputFilepath
@@ -155,14 +183,14 @@ executeCombinedSQL() {
     echo -e $YELLOW"=== Executing Combined SQL File ==="$NC
     echo ""
 
-    sqlFilepath="$WORKING_DIR/sql/$targetFilename"
+    sqlFilepath="$working_dir/sql/$targetFilename"
     echo "Executing SQL file: $sqlFilepath"
-    echo "Host: $host"
-    echo "Port: $port"
-    echo "Database: $database"
-    echo "Username: $username"
+    echo "Host: $pgsql_db_host"
+    echo "Port: $pgsql_db_port"
+    echo "Database: $pgsql_db_name"
+    echo "Username: $pgsql_db_username"
     echo ""
-    psql -h $host -p $port -d $database -U $username -f $sqlFilepath
+    PGPASSWORD=$pgsql_db_password psql -h $pgsql_db_host -p $pgsql_db_port -d $pgsql_db_name -U $pgsql_db_username -f $sqlFilepath
 
     echo ""
     echo -e $YELLOW"=== SQL File Execution Complete ==="$NC
@@ -171,18 +199,18 @@ executeCombinedSQL() {
 
 run() {
     # if cannot ping host, exit
-    ping -c 1 $host &> /dev/null
+    ping -c 1 $pgsql_db_host &> /dev/null
     if [ $? -ne 0 ]
     then
-        echo "Cannot ping host: $host. Exiting..."
+        echo "Cannot ping host: $pgsql_db_host. Exiting..."
         exit 1
     fi
 
     # generate directories if they don't exist
-    mkdir -p $WORKING_DIR/config
-    mkdir -p $WORKING_DIR/data
-    mkdir -p $WORKING_DIR/logs
-    mkdir -p $WORKING_DIR/sql
+    mkdir -p $working_dir/config
+    mkdir -p $working_dir/data
+    mkdir -p $working_dir/logs
+    mkdir -p $working_dir/sql
 
     # if truncate_tables.sql does not exist, exit
     if [ ! -f "$truncateTablesFilepath" ]
@@ -192,7 +220,7 @@ run() {
     fi
 
     # if config directory is empty, exit
-    if [ -z "$(ls -A $WORKING_DIR/config)" ]; then
+    if [ -z "$(ls -A $working_dir/config)" ]; then
         echo "Config directory is empty. Exiting..."
         exit 1
     fi

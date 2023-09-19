@@ -100,6 +100,7 @@ executeSQLFiles() {
     read truncateTablesResponse
     if [ "$truncateTablesResponse" == "y" ]
     then
+        generateTruncateScriptBasedOnConfigFileNames
         echo -e $CYAN"Executing SQL file: $truncateTablesFilepath"$NC
         sleep 1
         PGPASSWORD=$pgsql_db_password psql -h $pgsql_db_host -p $pgsql_db_port -d $pgsql_db_name -U $pgsql_db_username -f $truncateTablesFilepath
@@ -162,6 +163,7 @@ combineSQL() {
     read truncateTablesResponse
     if [ "$truncateTablesResponse" == "y" ]
     then
+        generateTruncateScriptBasedOnConfigFileNames
         echo -e $CYAN"Adding truncate_tables contents to the beginning of the file: $outputFilepath"$NC
         cat $truncateTablesFilepath > $outputFilepath
         sleep 1
@@ -197,6 +199,22 @@ executeCombinedSQL() {
     echo ""
 }
 
+generateTruncateScriptBasedOnConfigFileNames() {
+    truncateTablesFilepath="$working_dir/sql/truncate_tables.sql"
+    echo "Generating truncate tables script: $truncateTablesFilepath"
+    echo "" > $truncateTablesFilepath
+    for filename in $working_dir/config/*.conf; do
+        baseFilename=$(basename $filename)
+        # lose .conf and the ##- prefix
+        # example : 01-test.conf -> test
+        tableName=$(echo $baseFilename | sed 's/\.conf//g' | sed 's/^[0-9][0-9]-//g')
+        echo "TRUNCATE TABLE $tableName CASCADE;" >> $truncateTablesFilepath
+    done
+    # delete first line
+    sed -i '1d' $truncateTablesFilepath
+    echo "Done generating truncate tables script: $truncateTablesFilepath"
+}
+
 run() {
     # if cannot ping host, exit
     ping -c 1 $pgsql_db_host &> /dev/null
@@ -211,13 +229,6 @@ run() {
     mkdir -p $working_dir/data
     mkdir -p $working_dir/logs
     mkdir -p $working_dir/sql
-
-    # if truncate_tables.sql does not exist, exit
-    if [ ! -f "$truncateTablesFilepath" ]
-    then
-        echo "File $truncateTablesFilepath does not exist. Exiting..."
-        exit 1
-    fi
 
     # if config directory is empty, exit
     if [ -z "$(ls -A $working_dir/config)" ]; then

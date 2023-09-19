@@ -90,6 +90,13 @@ fi
 # replace .conf with $timestamp.sql
 sqlFileName=$(echo $configFileName | sed 's/.conf/-'$timestamp'.sql/g')
 
+# replace placeholders in conf file
+sed -i 's/{ORACLE_DB_HOST}/'$oracle_db_host'/g' $configDirLocation/$configFileName
+sed -i 's/{ORACLE_DB_PORT}/'$oracle_db_port'/g' $configDirLocation/$configFileName
+sed -i 's/{ORACLE_DB_NAME}/'$oracle_db_name'/g' $configDirLocation/$configFileName
+sed -i 's/{ORACLE_DB_USERNAME}/'$oracle_db_username'/g' $configDirLocation/$configFileName
+sed -i 's/{ORACLE_DB_PASSWORD}/'$oracle_db_password'/g' $configDirLocation/$configFileName
+
 # execute command in docker container
 options="-c /config/$configFileName --out /data/$sqlFileName"
 echo Executing the following command in docker container:
@@ -106,6 +113,14 @@ docker run  \
     -v $outputDirLocation:/data \
     georgmoser/ora2pg \
     ora2pg $options
+
+# return placeholders to conf file
+sed -i 's/'$oracle_db_host'/{ORACLE_DB_HOST}/g' $configDirLocation/$configFileName
+sed -i 's/'$oracle_db_port'/{ORACLE_DB_PORT}/g' $configDirLocation/$configFileName
+sed -i 's/'$oracle_db_name'/{ORACLE_DB_NAME}/g' $configDirLocation/$configFileName
+sed -i 's/'$oracle_db_username'/{ORACLE_DB_USERNAME}/g' $configDirLocation/$configFileName
+sed -i 's/'$oracle_db_password'/{ORACLE_DB_PASSWORD}/g' $configDirLocation/$configFileName
+
 echo "Outputted SQL can be found in $outputDirLocation/$sqlFileName"
 echo "----------------------------------------"
 echo ""

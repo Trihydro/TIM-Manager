@@ -172,27 +172,27 @@ FROM MILEPOSTS;
 --   LONGITUDE
 -- FROM GIS.ELRS_MILEPOST_10THS_WYAL_FC@GIS_ODA_DBLINK.GISITS.LOCAL;
 
-CREATE OR REPLACE VIEW rsu_vw (deviceid, sitename, devicename, devicetype, manufactname, modeldescription, modelnumber, status, latitude, longitude, category, idnumber, direction, route, milepost, powertype, commdesc, district, ipv4_address, ipv6_address) AS SELECT DEVICEID,
-SITENAME,
-DEVICENAME,
-DEVICETYPE,
-MANUFACTNAME,
-MODELDESCRIPTION,
-MODELNUMBER,
-STATUS,
-LATITUDE,
-LONGITUDE,
-CATEGORY,
-IDNUMBER,
-DIRECTION,
-RSU_ROUTE(CATEGORY || IDNUMBER || DIRECTION, round((MILEPOST)::numeric,1)) AS ROUTE,
-MILEPOST,
-POWERTYPE,
-COMMDESC,
-DISTRICT,
-IPV4_ADDRESS,
-IPV6_ADDRESS
-FROM ITS.RSU_VW@ITS_ODA_DBLINK.GISITS.LOCAL;
+-- CREATE OR REPLACE VIEW rsu_vw (deviceid, sitename, devicename, devicetype, manufactname, modeldescription, modelnumber, status, latitude, longitude, category, idnumber, direction, route, milepost, powertype, commdesc, district, ipv4_address, ipv6_address) AS SELECT DEVICEID,
+-- SITENAME,
+-- DEVICENAME,
+-- DEVICETYPE,
+-- MANUFACTNAME,
+-- MODELDESCRIPTION,
+-- MODELNUMBER,
+-- STATUS,
+-- LATITUDE,
+-- LONGITUDE,
+-- CATEGORY,
+-- IDNUMBER,
+-- DIRECTION,
+-- RSU_ROUTE(CATEGORY || IDNUMBER || DIRECTION, round((MILEPOST)::numeric,1)) AS ROUTE,
+-- MILEPOST,
+-- POWERTYPE,
+-- COMMDESC,
+-- DISTRICT,
+-- IPV4_ADDRESS,
+-- IPV6_ADDRESS
+-- FROM ITS.RSU_VW@ITS_ODA_DBLINK.GISITS.LOCAL;
 
 -- CREATE OR REPLACE VIEW milepost_vw_old (route, milepost, direction, latitude, longitude, elevation_ft, bearing) AS SELECT ROUTE,
 -- MILEPOST,

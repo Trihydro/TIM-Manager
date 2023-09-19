@@ -1,38 +1,60 @@
 # !/bin/bash
 
-# if WORKING_DIR is not set, use current directory
-if [ -z "$WORKING_DIR" ]
+#  use current directory
+working_dir=$(pwd)
+echo "Working directory: $working_dir"
+
+# if .env file exists, load it
+if [ -f "$working_dir/.env" ]
 then
-    WORKING_DIR=$(pwd)
-    echo "WORKING_DIR is not set. Using default working directory: $WORKING_DIR"
+    # if carriage returns are present, remove them
+    sed -i 's/\r//g' $working_dir/.env
+
+    echo "Loading environment variables from $working_dir/.env"
+    export $(cat $working_dir/.env | sed 's/#.*//g' | xargs)
 fi
 
 CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 timestamp=$(date +%Y%m%d%H%M%S)
-if [ -z "$HOST" ]
+if [ -z "$PGSQL_DB_HOST" ]
 then
-    host="10.145.9.64"
-    echo "HOST environment variable not set. Using default host: $host"
+    echo "PGSQL_DB_HOST environment variable not set. Exiting..."
+    exit 1
 else
-    host=$HOST
-fi
-port="5432"
-if [ -z "$DATABASE" ]
-then
-    database="devdb"
-    echo "DATABASE environment variable not set. Using default database: $database"
-else
-    database=$DATABASE
+    pgsql_db_host=$PGSQL_DB_HOST
 fi
 
-if [ -z "$USERNAME" ]
+if [ -z "$PGSQL_DB_PORT" ]
 then
-    username="cvcomms"
-    echo "USERNAME environment variable not set. Using default username: $username"
+    pgsql_db_port="5432"
 else
-    username=$USERNAME
+    pgsql_db_port=$PGSQL_DB_PORT
+fi
+
+if [ -z "$PGSQL_DB_NAME" ]
+then
+    echo "PGSQL_DB_NAME environment variable not set. Exiting..."
+    exit 1
+else
+    pgsql_db_name=$PGSQL_DB_NAME
+fi
+
+if [ -z "$PGSQL_DB_USERNAME" ]
+then
+    echo "PGSQL_DB_USERNAME environment variable not set. Exiting..."
+    exit 1
+else
+    pgsql_db_username=$PGSQL_DB_USERNAME
+fi
+
+if [ -z "$PGSQL_DB_PASSWORD" ]
+then
+    echo "PGSQL_DB_PASSWORD environment variable not set. Exiting..."
+    exit 1
+else
+    pgsql_db_password=$PGSQL_DB_PASSWORD
 fi
 
 executeSQLFiles() {
@@ -40,13 +62,10 @@ executeSQLFiles() {
     echo -e $YELLOW"=== Executing SQL Files ==="$NC
     echo ""
 
-    echo "Enter password for user $username:"
-    read -s password
-
-    for filename in $WORKING_DIR/*.sql; do
+    for filename in $working_dir/sql/*.sql; do
         echo -e $CYAN"Executing SQL file: $filename"$NC
         sleep 1
-        PGPASSWORD=$password psql -h $host -p $port -d $database -U $username -f $filename
+        PGPASSWORD=$pgsql_db_password psql -h $pgsql_db_host -p $pgsql_db_port -d $pgsql_db_name -U $pgsql_db_username -f $filename
         echo -e $CYAN"Done executing SQL file: $filename"$NC
         
         sleep 1

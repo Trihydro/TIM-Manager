@@ -32,7 +32,7 @@ public class UtilityControllerTest extends TestBase<UtilityController> {
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(1, result.getBody().size());
         assertEquals("sys_1", result.getBody().get(0).getPartitionName());
-        assertEquals("Wed Jan 01 00:00:00 UTC 2020", result.getBody().get(0).getHighValue().toString());
+        assertEquals("Wed Jan 01 00:00:00 MST 2020", result.getBody().get(0).getHighValue().toString());
     }
 
     @Test

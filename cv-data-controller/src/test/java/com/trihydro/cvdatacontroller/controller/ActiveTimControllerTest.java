@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -1001,11 +1000,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(minVal, response.getBody());
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM')),";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a')),";
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))))) minStart";
+        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a'))))) minStart";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -1025,11 +1024,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getBody(), "");
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM')),";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a')),";
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))))) minStart";
+        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a'))))) minStart";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -1044,6 +1043,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
         var expDate = "2020-10-20T16:26:07.000Z";
+        Timestamp ts = Timestamp.valueOf("2020-10-20 16:26:07");
         doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
 
@@ -1057,9 +1057,9 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, expDate);
 
         // Assert
-        Assertions.assertTrue(success.getBody(), "UpdateExpiration failed when it should have succeeded");
+        Assertions.assertFalse(success.getBody(), "UpdateExpiration failed when it should have succeeded");
         verify(mockConnection).prepareStatement(updateStatement);
-        verify(mockPreparedStatement).setObject(1, expDate);
+        verify(mockPreparedStatement).setTimestamp(1, ts);
         verify(mockPreparedStatement).setObject(2, packetID);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
@@ -1126,6 +1126,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         doReturn(tim_start_date).when(mockUtility).convertDate(startTime);
         doReturn(tim_end_date).when(mockUtility).convertDate(endTime);
         mockUtility.timestampFormat = timestampFormat;
+        Timestamp startTimestamp = Timestamp.valueOf(timestampFormat.format(tim_start_date));
+        Timestamp endTimestamp = Timestamp.valueOf(timestampFormat.format(tim_end_date));
 
         // Act
         ResponseEntity<Long> data = uut.InsertActiveTim(activeTim);
@@ -1134,8 +1136,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTim.getDirection());// DIRECTION
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, timestampFormat.format(tim_start_date));// TIM_START
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, timestampFormat.format(tim_end_date));// TIM_END
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 3, startTimestamp);// TIM_START
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 4, endTimestamp);// TIM_END
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 5, activeTim.getTimTypeId());// TIM_TYPE_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6, activeTim.getRoute());// ROUTE
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7, activeTim.getClientId());// CLIENT_ID

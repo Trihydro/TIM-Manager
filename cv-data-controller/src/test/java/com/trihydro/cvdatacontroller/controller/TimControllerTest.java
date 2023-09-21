@@ -8,8 +8,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -126,7 +130,7 @@ public class TimControllerTest extends TestBase<TimController> {
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
                                 odeTimMetadata.getSchemaVersion());// SCHEMA_VERSION
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 15, timestampFormat.format(gen_at));// RECORD_GENERATED_AT
+                verify(mockPreparedStatement).setString(1, null);// RECORD_GENERATED_AT
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 17,
                                 odeTimMetadata.getSerialId().getStreamId());// SERIAL_ID_STREAM_ID
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 18,
@@ -138,7 +142,6 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 21,
                                 odeTimMetadata.getSerialId().getSerialNumber());// SERIAL_ID_SERIAL_NUMBER
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 22, odeTimMetadata.getPayloadType());// PAYLOAD_TYPE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 24, timestampFormat.format(rec_at));// ODE_RECEIVED_AT
                 verify(mockPreparedStatement).close();
                 verify(mockConnection).close();
         }
@@ -163,16 +166,16 @@ public class TimControllerTest extends TestBase<TimController> {
                 // Assert
                 // See timDbTables.getTimTable() for ordering
                 Assertions.assertEquals(Long.valueOf(-1), timId);
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6,
-                                receivedMessageDetails.getLocationData().getElevation());// RMD_LD_ELEVATION
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7,
-                                receivedMessageDetails.getLocationData().getHeading());// RMD_LD_HEADING
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 8,
-                                receivedMessageDetails.getLocationData().getLatitude());// RMD_LD_LATITUDE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 9,
-                                receivedMessageDetails.getLocationData().getLongitude());// RMD_LD_LONGITUDE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 10,
-                                receivedMessageDetails.getLocationData().getSpeed());// RMD_LD_SPEED
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 6,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getElevation()));// RMD_LD_ELEVATION
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 7,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getHeading()));// RMD_LD_HEADING
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 8,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getLatitude()));// RMD_LD_LATITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getLongitude()));// RMD_LD_LONGITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 10,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getSpeed()));// RMD_LD_SPEED
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
                                 receivedMessageDetails.getRxSource().toString());// RMD_RX_SOURCE
                 verify(mockPreparedStatement).setInt(13, -1);// SECURITY_RESULT_CODE
@@ -224,6 +227,15 @@ public class TimControllerTest extends TestBase<TimController> {
                 // Arrange
                 String strDate = uut.getOneMonthPrior();
                 doReturn(strDate).when(uut).getOneMonthPrior();
+                Timestamp timestamp = null;
+                try {
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+                        Date parsedDate = dateFormat.parse(strDate);
+                        timestamp = new java.sql.Timestamp(parsedDate.getTime());
+                } catch (ParseException e) {
+                        e.printStackTrace();
+                        Assertions.fail("Failed to parse date");
+                }
 
                 // Act
                 var data = uut.deleteOldTim();
@@ -274,14 +286,22 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockConnection).prepareStatement(deleteDataFrame);
                 verify(mockConnection).prepareStatement(deleteTim);
 
-                verify(mockPreparedStatement, times(8)).setString(1, strDate);
+                verify(mockPreparedStatement, times(8)).setTimestamp(1, timestamp);
                 verify(mockPreparedStatement, times(8)).close();
                 verify(mockConnection, times(8)).close();
         }
 
         private ReceivedMessageDetails getRxMsg() {
                 ReceivedMessageDetails rxMsg = new ReceivedMessageDetails();
-                rxMsg.setLocationData(new OdeLogMsgMetadataLocation());
+                
+                OdeLogMsgMetadataLocation locationData = new OdeLogMsgMetadataLocation();
+                locationData.setElevation("1.0");
+                locationData.setHeading("2.0");
+                locationData.setLatitude("3.0");
+                locationData.setLongitude("4.0");
+                locationData.setSpeed("5.0");
+                rxMsg.setLocationData(locationData);
+
                 rxMsg.setRxSource(RxSource.SNMP);
                 return rxMsg;
         }

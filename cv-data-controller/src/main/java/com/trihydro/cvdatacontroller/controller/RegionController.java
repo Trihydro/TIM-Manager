@@ -105,7 +105,7 @@ public class RegionController extends BaseController {
 				else if (col.equals("DIRECTION"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, region.getDirection());
 				else if (col.equals("CLOSED_PATH"))
-					sqlNullHandler.setIntegerFromBool(preparedStatement, fieldNum, region.isClosedPath());
+					preparedStatement.setInt(fieldNum, region.isClosedPath() ? 1 : 0);
 				else if (col.equals("ANCHOR_LAT") && anchor != null)
 					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLatitude());
 				else if (col.equals("ANCHOR_LONG") && anchor != null)

@@ -205,60 +205,60 @@ public class TimGenerationHelper {
         var rebuildTim = false;
         for (ActiveTimError ate : validationResult.getErrors()) {
             switch (ate.getName()) {
-            case endPoint:
-                // FEU is Coordinate
-                var endPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
-                tum.setEndPoint(endPt);
-                rebuildTim = true;
-                break;
+                case endPoint:
+                    // FEU is Coordinate
+                    var endPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
+                    tum.setEndPoint(endPt);
+                    rebuildTim = true;
+                    break;
 
-            case endTime:
-                // change the end time on our TIM
-                // note that we are only interested in changing the DataFrame.durationTime here,
-                // as the endDateTime is calculated later based on startDateTime and this
-                // duration
-                // FEU is text formatted as 2020-12-08 09:31:00
-                try {
-                    Date endDateTime = dFormat.parse(ate.getTmddValue());
-                    int durationTime = utility.getMinutesDurationBetweenTwoDates(tum.getStartDateTime(),
-                            simpleDateFormat.format(endDateTime));
-                    // J2735 has duration time of 0-32000
-                    // the ODE fails if we have greater than 32000
-                    if (durationTime > 32000) {
-                        durationTime = 32000;
+                case endTime:
+                    // change the end time on our TIM
+                    // note that we are only interested in changing the DataFrame.durationTime here,
+                    // as the endDateTime is calculated later based on startDateTime and this
+                    // duration
+                    // FEU is text formatted as 2020-12-08 09:31:00
+                    try {
+                        Date endDateTime = dFormat.parse(ate.getTmddValue());
+                        int durationTime = utility.getMinutesDurationBetweenTwoDates(tum.getStartDateTime(),
+                                simpleDateFormat.format(endDateTime));
+                        // J2735 has duration time of 0-32000
+                        // the ODE fails if we have greater than 32000
+                        if (durationTime > 32000) {
+                            durationTime = 32000;
+                        }
+                        tim.getDataframes()[0].setDurationTime(durationTime);
+                    } catch (ParseException e) {
+                        String exMsg = String.format("Failed to parse associated FEU date: %s", ate.getTmddValue());
+                        utility.logWithDate(exMsg);
+                        exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     }
-                    tim.getDataframes()[0].setDurationTime(durationTime);
-                } catch (ParseException e) {
-                    String exMsg = String.format("Failed to parse associated FEU date: %s", ate.getTmddValue());
-                    utility.logWithDate(exMsg);
-                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
-                }
-                break;
+                    break;
 
-            case itisCodes:
-                // FEU is { ### }
-                // since we will set codes to those in FEU all we need to do is deserialize them
-                // and set
-                var codes = ate.getTmddValue();
-                // remove end brackets
-                codes = codes.replace("{", "");
-                codes = codes.replace("}", "");
+                case itisCodes:
+                    // FEU is { ### }
+                    // since we will set codes to those in FEU all we need to do is deserialize them
+                    // and set
+                    var codes = ate.getTmddValue();
+                    // remove end brackets
+                    codes = codes.replace("{", "");
+                    codes = codes.replace("}", "");
 
-                // codes now looks like: 1234,5678,0987
-                String[] itisCodes = codes.split(",");
-                DataFrame df = tim.getDataframes()[0];
-                df.setItems(itisCodes);
-                break;
+                    // codes now looks like: 1234,5678,0987
+                    String[] itisCodes = codes.split(",");
+                    DataFrame df = tim.getDataframes()[0];
+                    df.setItems(itisCodes);
+                    break;
 
-            case startPoint:
-                var startPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
-                tum.setStartPoint(startPt);
-                rebuildTim = true;
-                break;
+                case startPoint:
+                    var startPt = gson.fromJson(ate.getTmddValue(), Coordinate.class);
+                    tum.setStartPoint(startPt);
+                    rebuildTim = true;
+                    break;
 
-            case other:
-            default:
-                break;
+                case other:
+                default:
+                    break;
             }
         }
 
@@ -323,7 +323,7 @@ public class TimGenerationHelper {
     /**
      * Rebuilds and resubmits TIMs to the ODE
      * 
-     * @param activeTimIds    TIMs to resubmit
+     * @param activeTimIds TIMs to resubmit
      * @return Errors that occurred while processing the request
      */
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
@@ -392,7 +392,7 @@ public class TimGenerationHelper {
     /**
      * Resets TIMs starting time and resubmits TIMs to the ODE
      * 
-     * @param activeTimIds    TIMs to resubmit
+     * @param activeTimIds TIMs to resubmit
      * @return Errors that occurred while processing the request
      */
     public List<ResubmitTimException> resetTimStartTimeAndResubmitToOde(List<Long> activeTimIds) {
@@ -461,7 +461,7 @@ public class TimGenerationHelper {
     /**
      * Expires existing TIMs and resubmits TIMs to the ODE
      * 
-     * @param activeTimIds    TIMs to resubmit
+     * @param activeTimIds TIMs to resubmit
      * @return Errors that occurred while processing the request
      */
     public List<ResubmitTimException> expireTimAndResubmitToOde(List<Long> activeTimIds) {
@@ -673,7 +673,8 @@ public class TimGenerationHelper {
         return dirTest; // heading slice
     }
 
-    private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes, boolean resetExpirationTime) {
+    private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes,
+            boolean resetExpirationTime) {
         // RoadSignID
         RoadSignID rsid = new RoadSignID();
         rsid.setPosition(getAnchorPosition(aTim, anchor));
@@ -965,18 +966,7 @@ public class TimGenerationHelper {
         timToSend.setRequest(new ServiceRequest());
 
         SDW sdw = new SDW();
-
-        AdvisorySituationDataDeposit asdd = sdwService.getSdwDataByRecordId(aTim.getSatRecordId());
-        if (asdd == null) {
-            utility.logWithDate("SAT record not found for id " + aTim.getSatRecordId() + ". Using default TTL.");
-            sdw.setTtl(config.getSdwTtl());
-        } else {
-            // we are saving our ttl unencoded at the root level of the object as an int
-            // representing the enum
-            // the DOT sdw ttl goes by string, so we need to do a bit of translation here
-            sdw.setTtl(TimeToLive.valueOf(asdd.getTimeToLive().getStringValue()));
-        }
-
+        sdw.setTtl(config.getSdwTtl());
         sdw.setRecordId(aTim.getSatRecordId());
 
         // fetch all mileposts, get service region by bounding box

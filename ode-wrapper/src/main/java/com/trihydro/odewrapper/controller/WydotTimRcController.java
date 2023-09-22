@@ -44,7 +44,8 @@ public class WydotTimRcController extends WydotTimBaseController {
     @Autowired
     public WydotTimRcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility,
+            TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
                 _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
     }
@@ -117,8 +118,19 @@ public class WydotTimRcController extends WydotTimBaseController {
             // get existing active tims from wydotTim
             var timType = getTimType(type);
             Long timTypeId = timType != null ? timType.getTimTypeId() : null;
-            var existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
-                    wydotTim.getDirection());
+            List<ActiveTim> existingActiveTims = new ArrayList<>();
+            var direction = wydotTim.getDirection().toUpperCase();
+
+            // the database doesn't store the 'B' direction. rather we split it into 'I' and 'D'
+            // so if we are passed the 'B' direction when performing an all-clear, we should ignore it instead
+            if (!direction.equals("B")) {
+                existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
+                        timTypeId,
+                        wydotTim.getDirection());
+            } else {
+                existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
+                        timTypeId, null);
+            }
 
             // get ids from existingActiveTims
             for (ActiveTim existingActiveTim : existingActiveTims) {
@@ -127,7 +139,7 @@ public class WydotTimRcController extends WydotTimBaseController {
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
-        
+
         // Expire existing tims
         if (existingTimIds.size() > 0) {
             timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);

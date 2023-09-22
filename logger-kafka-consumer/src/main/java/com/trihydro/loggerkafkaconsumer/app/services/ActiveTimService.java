@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,20 +59,20 @@ public class ActiveTimService extends BaseService {
                     utility.logWithDate(
                             String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
                     java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            utility.timestampFormat.format(tim_start_date));
+                    Timestamp ts = new Timestamp(tim_start_date.getTime());
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                 } else if (col.equals("TIM_END")) {
                     if (activeTim.getEndDateTime() != null) {
                         java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                utility.timestampFormat.format(tim_end_date));
+                        Timestamp ts = new Timestamp(tim_end_date.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                     } else
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                 } else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTim.getExpirationDateTime() != null) {
                         java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                utility.timestampFormat.format(tim_exp_date));
+                        Timestamp ts = new Timestamp(tim_exp_date.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
@@ -162,13 +163,15 @@ public class ActiveTimService extends BaseService {
             sqlNullHandler.setBigDecimalOrNull(preparedStatement, 5, end_lon);
 
             java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
-            sqlNullHandler.setStringOrNull(preparedStatement, 6, utility.timestampFormat.format(tim_start_date));
+            Timestamp ts = new Timestamp(tim_start_date.getTime());
+            sqlNullHandler.setTimestampOrNull(preparedStatement, 6, ts);
 
             if (activeTim.getEndDateTime() == null)
-                preparedStatement.setString(7, null);
+                preparedStatement.setNull(7, java.sql.Types.TIMESTAMP);
             else {
                 java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
-                sqlNullHandler.setStringOrNull(preparedStatement, 7, utility.timestampFormat.format(tim_end_date));
+                Timestamp ts2 = new Timestamp(tim_end_date.getTime());
+                sqlNullHandler.setTimestampOrNull(preparedStatement, 7, ts2);
             }
 
             sqlNullHandler.setIntegerOrNull(preparedStatement, 8, activeTim.getPk());
@@ -416,7 +419,10 @@ public class ActiveTimService extends BaseService {
         try {
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(updateStatement);
-            preparedStatement.setString(1, expDate);// expDate comes in as MST from previously called function
+            DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+            Date dte = sdf.parse(expDate);
+            Timestamp ts = new Timestamp(dte.getTime());
+            preparedStatement.setTimestamp(1, ts);// expDate comes in as MST from previously called function
                                                     // (GetMinExpiration)
             preparedStatement.setString(2, packetID);
 
@@ -457,8 +463,9 @@ public class ActiveTimService extends BaseService {
             // coalesce function with the expDate passed in value.
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
-            String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM')",
-                    translateIso8601ToTimestampFormat(expDate));
+            String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+            String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
+                    translateIso8601ToTimestampFormat(expDate), targetFormat);
 
             String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
             minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
@@ -500,6 +507,6 @@ public class ActiveTimService extends BaseService {
         // sdf.setTimeZone(toTimeZone);
         DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Date dte = m_ISO8601Local.parse(date);
-        return sdf.format(dte);
+        return sdf.format(dte.getTime());
     }
 }

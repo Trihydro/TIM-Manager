@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,8 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
                 var recTime = Instant.parse(odeDriverAlertMetadata.getOdeReceivedAt().replace("[UTC]", ""));
                 java.util.Date recDate = java.util.Date.from(recTime);
                 java.util.Date genDate = java.util.Date.from(genTime);
+                Timestamp genTimestamp = new Timestamp(genDate.getTime());
+                Timestamp recTimestamp = new Timestamp(recDate.getTime());
                 doReturn(recDate).when(mockUtility).convertDate(odeDriverAlertMetadata.getOdeReceivedAt());
                 doReturn(genDate).when(mockUtility).convertDate(odeDriverAlertMetadata.getRecordGeneratedAt());
                 mockUtility.timestampFormat = timestampFormat;
@@ -79,16 +82,16 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
 
                 // Assert
                 Assertions.assertEquals(Long.valueOf(-1), data);
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1,
-                                odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLatitude());// LATITUDE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2,
-                                odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLongitude());// LONGITUDE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3,
-                                odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getHeading());// HEADING
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4,
-                                odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getElevation());// ELEVATION_M
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5,
-                                odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getSpeed());// SPEED
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 1,
+                                Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLatitude()));// LATITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 2,
+                                Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLongitude()));// LONGITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 3,
+                                Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getHeading()));// HEADING
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 4,
+                                Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getElevation()));// ELEVATION_M
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 5,
+                                Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getSpeed()));// SPEED
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 6, dat.getDriverAlertTypeId());//
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7,
                                 odeDriverAlertMetadata.getLogFileName());// LOG_FILE_NAME
@@ -106,13 +109,13 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
                                 odeDriverAlertMetadata.getSerialId().getRecordId());// SERIAL_ID_RECORD_ID
                 verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 14,
                                 odeDriverAlertMetadata.getSerialId().getSerialNumber());// SERIAL_ID_SERIAL_NUMBER
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 15, timestampFormat.format(recDate));// ODE_RECEIVED_AT
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 15, recTimestamp);// ODE_RECEIVED_AT
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 16,
                                 odeDriverAlertMetadata.getSchemaVersion());// SCHEMA_VERSION
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 17, timestampFormat.format(genDate));// RECORD_GENERATED_AT
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 17, genTimestamp);// RECORD_GENERATED_AT
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 18,
                                 odeDriverAlertMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
-                verify(mockPreparedStatement).setString(19, "0"); // SANITIZED
+                verify(mockPreparedStatement).setInt(19, 0); // SANITIZED
                 verify(mockPreparedStatement).close();
                 verify(mockConnection).close();
         }
@@ -147,7 +150,7 @@ public class DriverAlertServiceTest extends TestBase<DriverAlertService> {
         @Test
         public void addDriverAlertToDatabase_FAIL() throws SQLException {
                 // Arrange
-                doThrow(new SQLException()).when(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1, "-1");
+                doThrow(new SQLException()).when(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 1, -1.0);
 
                 // Act
                 Long data = uut.addDriverAlertToDatabase(getOdeData());

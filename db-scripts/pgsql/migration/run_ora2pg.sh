@@ -58,6 +58,14 @@ else
     oracle_db_password=$ORACLE_DB_PASSWORD
 fi
 
+if [ -z "$PG_VERSION" ]
+then
+    echo "PG_VERSION environment variable not set. Using default: 14.9"
+    pg_version="14.9"
+else
+    pg_version=$PG_VERSION
+fi
+
 timestamp=$(date +%Y%m%d%H%M%S)
 configFileName=$1
 
@@ -96,6 +104,7 @@ sed -i 's/{ORACLE_DB_PORT}/'$oracle_db_port'/g' $configDirLocation/$configFileNa
 sed -i 's/{ORACLE_DB_NAME}/'$oracle_db_name'/g' $configDirLocation/$configFileName
 sed -i 's/{ORACLE_DB_USERNAME}/'$oracle_db_username'/g' $configDirLocation/$configFileName
 sed -i 's/{ORACLE_DB_PASSWORD}/'$oracle_db_password'/g' $configDirLocation/$configFileName
+sed -i 's/{PG_VERSION}/'$pg_version'/g' $configDirLocation/$configFileName
 
 # execute command in docker container
 options="-c /config/$configFileName --out /data/$sqlFileName"
@@ -120,6 +129,7 @@ sed -i 's/'$oracle_db_port'/{ORACLE_DB_PORT}/g' $configDirLocation/$configFileNa
 sed -i 's/'$oracle_db_name'/{ORACLE_DB_NAME}/g' $configDirLocation/$configFileName
 sed -i 's/'$oracle_db_username'/{ORACLE_DB_USERNAME}/g' $configDirLocation/$configFileName
 sed -i 's/'$oracle_db_password'/{ORACLE_DB_PASSWORD}/g' $configDirLocation/$configFileName
+sed -i 's/'$pg_version'/{PG_VERSION}/g' $configDirLocation/$configFileName
 
 echo "Outputted SQL can be found in $outputDirLocation/$sqlFileName"
 echo "----------------------------------------"

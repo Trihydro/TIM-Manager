@@ -39,6 +39,7 @@ The following environment variables are used by the script:
 * **ORACLE_DB_NAME** - The name of the Oracle database.
 * **ORACLE_DB_USERNAME** - The username to use when connecting to the Oracle database.
 * **ORACLE_DB_PASSWORD** - The password to use when connecting to the Oracle database.
+* **PG_VERSION** - The version of PostgreSQL to use when generating the SQL files.
 
 See [sample.env](#sample.env) for an example of how to set these environment variables.
 

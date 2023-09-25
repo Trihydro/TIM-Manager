@@ -1467,7 +1467,8 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			preparedStatement = connection.prepareStatement(updateStatement);
-			Timestamp expDateTimestamp = new Timestamp(utility.convertDate(expDate).getTime());
+			Date date = utility.convertDate(expDate);
+			Timestamp expDateTimestamp = new Timestamp(date.getTime());
 			preparedStatement.setTimestamp(1, expDateTimestamp);// expDate comes in as MST from previously called function
 													// (GetMinExpiration)
 			preparedStatement.setObject(2, packetID);

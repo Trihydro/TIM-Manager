@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -1043,9 +1044,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
         var expDate = "2020-10-20T16:26:07.000Z";
-        Timestamp ts = Timestamp.valueOf("2020-10-20 16:26:07");
+        Date date = Date.from(Instant.parse(expDate));
+        Timestamp ts = new Timestamp(date.getTime());
         doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+        doReturn(date).when(mockUtility).convertDate(expDate);
 
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
@@ -1057,7 +1060,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         ResponseEntity<Boolean> success = uut.UpdateExpiration(packetID, expDate);
 
         // Assert
-        Assertions.assertFalse(success.getBody(), "UpdateExpiration failed when it should have succeeded");
+        Assertions.assertTrue(success.getBody(), "UpdateExpiration failed when it should have succeeded");
         verify(mockConnection).prepareStatement(updateStatement);
         verify(mockPreparedStatement).setTimestamp(1, ts);
         verify(mockPreparedStatement).setObject(2, packetID);
@@ -1073,8 +1076,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
         var expDate = "2020-10-20T16:26:07.000Z";
+        Date date = Date.from(Instant.parse(expDate));
         doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
         doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+        doReturn(date).when(mockUtility).convertDate(expDate);
 
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
@@ -1125,9 +1130,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         java.util.Date tim_start_date = java.util.Date.from(now);
         doReturn(tim_start_date).when(mockUtility).convertDate(startTime);
         doReturn(tim_end_date).when(mockUtility).convertDate(endTime);
-        mockUtility.timestampFormat = timestampFormat;
-        Timestamp startTimestamp = Timestamp.valueOf(timestampFormat.format(tim_start_date));
-        Timestamp endTimestamp = Timestamp.valueOf(timestampFormat.format(tim_end_date));
+        Timestamp startTimestamp = new Timestamp(tim_start_date.getTime());
+        Timestamp endTimestamp = new Timestamp(tim_end_date.getTime());
 
         // Act
         ResponseEntity<Long> data = uut.InsertActiveTim(activeTim);

@@ -51,6 +51,15 @@ public class DbInteractions {
                 config.setPassword(dbConfig.getDbPassword());
                 config.setConnectionTimeout(30000);
                 config.setMaximumPoolSize(7);
+
+                // log the configuration of the connection pool
+                utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
+                utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
+                utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
+                utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
+                utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
+                utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
+
                 dataSource = new HikariDataSource(config);
                 utility.logWithDate("DbInteractions: Successfully initialized connection pool");
             } catch (Exception e) {

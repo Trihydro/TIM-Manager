@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.controller;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -25,12 +26,17 @@ public class BaseController {
         utility = _utility;
     }
 
-    public String getOneMonthPrior() {
+    public String getOneMonthPriorString() {
         DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
         TimeZone toTimeZone = TimeZone.getTimeZone("UTC");
         sdf.setTimeZone(toTimeZone);
         Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
         String strDate = sdf.format(dte.getTime());
         return strDate;
+    }
+
+    public Timestamp getOneMonthPriorTimestamp() {
+        Timestamp ts = Timestamp.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS).atStartOfDay());
+        return ts;
     }
 }

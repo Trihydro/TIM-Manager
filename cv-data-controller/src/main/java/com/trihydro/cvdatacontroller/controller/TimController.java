@@ -6,11 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
@@ -251,16 +248,7 @@ public class TimController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String strDate = getOneMonthPrior();
-        Timestamp timestamp = null;
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-            Date parsedDate = dateFormat.parse(strDate);
-            timestamp = new java.sql.Timestamp(parsedDate.getTime());
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
-        }
+        Timestamp timestamp = getOneMonthPriorTimestamp();
 
         try {
             deleteResult = deleteOldTimRsus(timestamp);

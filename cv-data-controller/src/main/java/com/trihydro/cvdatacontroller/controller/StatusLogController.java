@@ -25,7 +25,7 @@ public class StatusLogController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String strDate = getOneMonthPrior();
+        String strDate = getOneMonthPriorString();
 
         try {
             String deleteSQL = "DELETE FROM status_log WHERE status_time < ?";

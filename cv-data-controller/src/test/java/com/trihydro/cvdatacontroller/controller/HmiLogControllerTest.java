@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,8 @@ public class HmiLogControllerTest extends TestBase<HmiLogController> {
     @Test
     public void DeleteOldHmiLogs() throws SQLException {
         // Arrange
-        String strDate = uut.getOneMonthPrior();
-        doReturn(strDate).when(uut).getOneMonthPrior();
+        Timestamp timestamp = uut.getOneMonthPriorTimestamp();
+        doReturn(timestamp).when(uut).getOneMonthPriorTimestamp();
 
         // Act
         var data = uut.DeleteOldHmiLogs();

@@ -225,17 +225,8 @@ public class TimControllerTest extends TestBase<TimController> {
         @Test
         public void deleteOldTim() throws SQLException {
                 // Arrange
-                String strDate = uut.getOneMonthPrior();
-                doReturn(strDate).when(uut).getOneMonthPrior();
-                Timestamp timestamp = null;
-                try {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-                        Date parsedDate = dateFormat.parse(strDate);
-                        timestamp = new java.sql.Timestamp(parsedDate.getTime());
-                } catch (ParseException e) {
-                        e.printStackTrace();
-                        Assertions.fail("Failed to parse date");
-                }
+                Timestamp timestamp = uut.getOneMonthPriorTimestamp();
+                doReturn(timestamp).when(uut).getOneMonthPriorTimestamp();
 
                 // Act
                 var data = uut.deleteOldTim();
@@ -244,7 +235,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
                 Assertions.assertTrue(data.getBody(), "Fail return on success");
 
-                verify(uut, times(2)).getOneMonthPrior();
+                verify(uut, times(2)).getOneMonthPriorTimestamp();
 
                 String deleteTimRsuSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
 

@@ -29,16 +29,7 @@ public class HmiLogController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String strDate = getOneMonthPrior();
-        Timestamp timestamp = null;
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-            Date parsedDate = dateFormat.parse(strDate);
-            timestamp = new java.sql.Timestamp(parsedDate.getTime());
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
-        }
+        Timestamp timestamp = getOneMonthPriorTimestamp();
 
         try {
             String deleteSQL = "DELETE FROM hmi_log WHERE received_at < ?";

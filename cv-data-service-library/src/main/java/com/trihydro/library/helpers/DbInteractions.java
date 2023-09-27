@@ -37,7 +37,11 @@ public class DbInteractions {
             TimeZone.setDefault(timeZone);
 
             // check dbconfig for null values
-            if (dbConfig.getDbUrl() == null || dbConfig.getDbUsername() == null || dbConfig.getDbPassword() == null) {
+            if (dbConfig.getDbUrl() == null ||
+                dbConfig.getDbUsername() == null ||
+                dbConfig.getDbPassword() == null ||
+                dbConfig.getMaximumPoolSize() == 0 ||
+                dbConfig.getConnectionTimeout() == 0) {
                 utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
                 System.exit(1);
             }
@@ -49,8 +53,8 @@ public class DbInteractions {
                 config.setJdbcUrl(dbConfig.getDbUrl());
                 config.setUsername(dbConfig.getDbUsername());
                 config.setPassword(dbConfig.getDbPassword());
-                config.setConnectionTimeout(30000);
-                config.setMaximumPoolSize(7);
+                config.setConnectionTimeout(dbConfig.getConnectionTimeout());
+                config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
 
                 // log the configuration of the connection pool
                 utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");

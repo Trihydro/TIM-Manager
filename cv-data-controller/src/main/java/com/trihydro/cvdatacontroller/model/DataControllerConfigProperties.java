@@ -22,38 +22,61 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     private String dbUrl;
     private String dbUsername;
     private String dbPassword;
+    private int maximumPoolSize;
+    private int connectionTimeout;
 
     private String[] alertAddresses;
     private String fromEmail;
     private String environmentName;
-
     private String mailHost;
     private int mailPort;
 
-    private int poolSize;
-
-    public int getPoolSize() {
-        return poolSize;
+    public String getDbUrl() {
+        return dbUrl;
     }
 
-    public void setPoolSize(int poolSize) {
-        this.poolSize = poolSize;
+    public void setDbUrl(String dbUrl) {
+        this.dbUrl = dbUrl;
     }
 
-    public int getMailPort() {
-        return mailPort;
+    public String getDbUsername() {
+        return dbUsername;
     }
 
-    public void setMailPort(int mailPort) {
-        this.mailPort = mailPort;
+    public void setDbUsername(String dbUsername) {
+        this.dbUsername = dbUsername;
     }
 
-    public String getMailHost() {
-        return mailHost;
+    public String getDbPassword() {
+        return dbPassword;
     }
 
-    public void setMailHost(String mailHost) {
-        this.mailHost = mailHost;
+    public void setDbPassword(String dbPassword) {
+        this.dbPassword = dbPassword;
+    }
+
+    public int getMaximumPoolSize() {
+        return maximumPoolSize;
+    }
+
+    public void setMaximumPoolSize(int maximumPoolSize) {
+        this.maximumPoolSize = maximumPoolSize;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public String[] getAlertAddresses() {
+        return alertAddresses;
+    }
+
+    public void setAlertAddresses(String[] alertAddresses) {
+        this.alertAddresses = alertAddresses;
     }
 
     public String getFromEmail() {
@@ -72,35 +95,19 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
         this.environmentName = environmentName;
     }
 
-    public String[] getAlertAddresses() {
-        return alertAddresses;
+    public String getMailHost() {
+        return mailHost;
     }
 
-    public void setAlertAddresses(String[] alertAddresses) {
-        this.alertAddresses = alertAddresses;
-    }
-    
-    public String getDbUrl() {
-        return dbUrl;
+    public void setMailHost(String mailHost) {
+        this.mailHost = mailHost;
     }
 
-    public void setDbUrl(String dbUrl) {
-        this.dbUrl = dbUrl;
+    public int getMailPort() {
+        return mailPort;
     }
 
-    public String getDbPassword() {
-        return dbPassword;
-    }
-
-    public void setDbPassword(String dbPassword) {
-        this.dbPassword = dbPassword;
-    }
-
-    public String getDbUsername() {
-        return dbUsername;
-    }
-
-    public void setDbUsername(String dbUsername) {
-        this.dbUsername = dbUsername;
+    public void setMailPort(int mailPort) {
+        this.mailPort = mailPort;
     }
 }

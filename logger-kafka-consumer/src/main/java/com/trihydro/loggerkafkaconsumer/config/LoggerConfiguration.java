@@ -7,72 +7,62 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
 public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
-
     private String depositGroup;
     private String depositTopic;
     private String kafkaHostServer;
     private int maxPollIntervalMs = 300000;
     private int maxPollRecords = 50;
+
     private String dbUrl;
     private String dbUsername;
     private String dbPassword;
+    private int maximumPoolSize;
+    private int connectionTimeout;
+
     private String[] alertAddresses;
     private String fromEmail;
     private String environmentName;
     private String mailHost;
     private int mailPort;
-    private int poolSize;
 
     public String getDepositGroup() {
         return depositGroup;
     }
 
-    public int getPoolSize() {
-        return poolSize;
+    public void setDepositGroup(String depositGroup) {
+        this.depositGroup = depositGroup;
     }
 
-    public void setPoolSize(int poolSize) {
-        this.poolSize = poolSize;
+    public String getDepositTopic() {
+        return depositTopic;
     }
 
-    public int getMailPort() {
-        return mailPort;
+    public void setDepositTopic(String depositTopic) {
+        this.depositTopic = depositTopic;
     }
 
-    public void setMailPort(int mailPort) {
-        this.mailPort = mailPort;
+    public String getKafkaHostServer() {
+        return kafkaHostServer;
     }
 
-    public String getMailHost() {
-        return mailHost;
+    public void setKafkaHostServer(String hostname) {
+        this.kafkaHostServer = hostname;
     }
 
-    public void setMailHost(String mailHost) {
-        this.mailHost = mailHost;
+    public int getMaxPollIntervalMs() {
+        return maxPollIntervalMs;
     }
 
-    public String getFromEmail() {
-        return fromEmail;
+    public void setMaxPollIntervalMs(int maxPollIntervalMs) {
+        this.maxPollIntervalMs = maxPollIntervalMs;
     }
 
-    public void setFromEmail(String fromEmail) {
-        this.fromEmail = fromEmail;
+    public int getMaxPollRecords() {
+        return maxPollRecords;
     }
 
-    public String getEnvironmentName() {
-        return environmentName;
-    }
-
-    public void setEnvironmentName(String environmentName) {
-        this.environmentName = environmentName;
-    }
-
-    public String[] getAlertAddresses() {
-        return alertAddresses;
-    }
-
-    public void setAlertAddresses(String[] alertAddresses) {
-        this.alertAddresses = alertAddresses;
+    public void setMaxPollRecords(int maxPollRecords) {
+        this.maxPollRecords = maxPollRecords;
     }
 
     public String getDbUrl() {
@@ -99,39 +89,59 @@ public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
         this.dbPassword = dbPassword;
     }
 
-    public String getKafkaHostServer() {
-        return kafkaHostServer;
+    public int getMaximumPoolSize() {
+        return maximumPoolSize;
     }
 
-    public void setKafkaHostServer(String hostname) {
-        this.kafkaHostServer = hostname;
+    public void setMaximumPoolSize(int maximumPoolSize) {
+        this.maximumPoolSize = maximumPoolSize;
     }
 
-    public String getDepositTopic() {
-        return depositTopic;
+    public int getConnectionTimeout() {
+        return connectionTimeout;
     }
 
-    public void setDepositTopic(String depositTopic) {
-        this.depositTopic = depositTopic;
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
     }
 
-    public void setDepositGroup(String depositGroup) {
-        this.depositGroup = depositGroup;
+    public String[] getAlertAddresses() {
+        return alertAddresses;
     }
 
-    public int getMaxPollIntervalMs() {
-        return maxPollIntervalMs;
+    public void setAlertAddresses(String[] alertAddresses) {
+        this.alertAddresses = alertAddresses;
     }
 
-    public void setMaxPollIntervalMs(int maxPollIntervalMs) {
-        this.maxPollIntervalMs = maxPollIntervalMs;
+    public String getFromEmail() {
+        return fromEmail;
     }
 
-    public int getMaxPollRecords() {
-        return maxPollRecords;
+    public void setFromEmail(String fromEmail) {
+        this.fromEmail = fromEmail;
     }
 
-    public void setMaxPollRecords(int maxPollRecords) {
-        this.maxPollRecords = maxPollRecords;
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
+
+    public String getMailHost() {
+        return mailHost;
+    }
+
+    public void setMailHost(String mailHost) {
+        this.mailHost = mailHost;
+    }
+
+    public int getMailPort() {
+        return mailPort;
+    }
+
+    public void setMailPort(int mailPort) {
+        this.mailPort = mailPort;
     }
 }

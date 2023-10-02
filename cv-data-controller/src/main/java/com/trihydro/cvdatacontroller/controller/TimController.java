@@ -248,11 +248,11 @@ public class TimController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        Timestamp timestamp = getOneMonthPriorTimestamp();
+        Timestamp oneMonthPriorTimestamp = getOneMonthPriorTimestamp();
 
         try {
-            deleteResult = deleteOldTimRsus(timestamp);
-            deleteResult &= deleteOldDataFrames(timestamp);
+            deleteResult = deleteOldTimRsus(oneMonthPriorTimestamp);
+            deleteResult &= deleteOldDataFrames(oneMonthPriorTimestamp);
 
             if (!deleteResult) {
                 utility.logWithDate("Failed to cleanup old tim_rsus");
@@ -262,7 +262,7 @@ public class TimController extends BaseController {
             String deleteSQL = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setTimestamp(1, timestamp);
+            preparedStatement.setTimestamp(1, oneMonthPriorTimestamp);
 
             // execute delete SQL statement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);

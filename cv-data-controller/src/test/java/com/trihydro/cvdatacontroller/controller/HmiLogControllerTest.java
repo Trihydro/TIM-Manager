@@ -14,8 +14,8 @@ public class HmiLogControllerTest extends TestBase<HmiLogController> {
     @Test
     public void DeleteOldHmiLogs() throws SQLException {
         // Arrange
-        Timestamp timestamp = uut.getOneMonthPriorTimestamp();
-        doReturn(timestamp).when(uut).getOneMonthPriorTimestamp();
+        Timestamp oneMonthPriorTimestamp = uut.getOneMonthPriorTimestamp();
+        doReturn(oneMonthPriorTimestamp).when(uut).getOneMonthPriorTimestamp();
 
         // Act
         var data = uut.DeleteOldHmiLogs();

@@ -92,8 +92,8 @@ public class ActiveTimHoldingController extends BaseController {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
                 } else if (col.equals("DATE_CREATED")) {
                     java.util.Date dateCreated = utility.convertDate(activeTimHolding.getDateCreated());
-                    Timestamp timestamp = new Timestamp(dateCreated.getTime());
-                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, timestamp);
+                    Timestamp dateCreatedTimestamp = new Timestamp(dateCreated.getTime());
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, dateCreatedTimestamp);
                 } else if (col.equals("PROJECT_KEY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
                 } else if (col.equals("EXPIRATION_DATE")) {

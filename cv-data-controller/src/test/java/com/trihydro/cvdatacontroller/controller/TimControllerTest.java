@@ -225,8 +225,8 @@ public class TimControllerTest extends TestBase<TimController> {
         @Test
         public void deleteOldTim() throws SQLException {
                 // Arrange
-                Timestamp timestamp = uut.getOneMonthPriorTimestamp();
-                doReturn(timestamp).when(uut).getOneMonthPriorTimestamp();
+                Timestamp oneMonthPriorTimestamp = uut.getOneMonthPriorTimestamp();
+                doReturn(oneMonthPriorTimestamp).when(uut).getOneMonthPriorTimestamp();
 
                 // Act
                 var data = uut.deleteOldTim();
@@ -277,7 +277,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockConnection).prepareStatement(deleteDataFrame);
                 verify(mockConnection).prepareStatement(deleteTim);
 
-                verify(mockPreparedStatement, times(8)).setTimestamp(1, timestamp);
+                verify(mockPreparedStatement, times(8)).setTimestamp(1, oneMonthPriorTimestamp);
                 verify(mockPreparedStatement, times(8)).close();
                 verify(mockConnection, times(8)).close();
         }

@@ -25,13 +25,13 @@ public class HmiLogController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        Timestamp timestamp = getOneMonthPriorTimestamp();
+        Timestamp oneMonthPriorTimestamp = getOneMonthPriorTimestamp();
 
         try {
             String deleteSQL = "DELETE FROM hmi_log WHERE received_at < ?";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setTimestamp(1, timestamp);
+            preparedStatement.setTimestamp(1, oneMonthPriorTimestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.updateOrDelete(preparedStatement);

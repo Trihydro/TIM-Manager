@@ -82,8 +82,8 @@ public class DriverAlertService extends BaseService {
                 else if (col.equals("RECORD_GENERATED_AT")) {
                     if (odeDriverAlertMetadata.getRecordGeneratedAt() != null) {
                         java.util.Date recordGeneratedAtDate = utility.convertDate(odeDriverAlertMetadata.getRecordGeneratedAt());
-                        Timestamp timestamp = new Timestamp(recordGeneratedAtDate.getTime());
-                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, timestamp);
+                        Timestamp recordGeneratedAtTimestamp = new Timestamp(recordGeneratedAtDate.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, recordGeneratedAtTimestamp);
                     } else
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                 } else if (col.equals("SANITIZED")) {
@@ -115,8 +115,8 @@ public class DriverAlertService extends BaseService {
                 else if (col.equals("ODE_RECEIVED_AT")) {
                     if (odeDriverAlertMetadata.getOdeReceivedAt() != null) {
                         java.util.Date odeReceivedAt = utility.convertDate(odeDriverAlertMetadata.getOdeReceivedAt());
-                        Timestamp timestamp = new Timestamp(odeReceivedAt.getTime());
-                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, timestamp);
+                        Timestamp odeReceivedAtTimestamp = new Timestamp(odeReceivedAt.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, odeReceivedAtTimestamp);
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }

@@ -88,7 +88,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
                 } catch(ParseException ex) {
                     // Assume the index is stale if we can't verify the start dates.
                     // Resubmitting this TIM should hopefully fix any issue in the DateTime
-                    // format on either the RSU or in Oracle.
+                    // format on either the RSU or in the Database.
                     result.getStaleIndexes().add(new ActiveTimMapping(tim, rsuInfo));
                 }
 

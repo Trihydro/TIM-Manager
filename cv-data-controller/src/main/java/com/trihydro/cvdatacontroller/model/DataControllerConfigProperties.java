@@ -8,7 +8,7 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.DbInteractionsProps;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.tables.LoggingTables;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Import;
@@ -16,49 +16,67 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("config")
-@Import({ TimOracleTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
+@Import({ TimDbTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
         JavaMailSenderImplProvider.class, LoggingTables.class, DbInteractions.class })
 public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps {
-    private String dbDriver;
     private String dbUrl;
     private String dbUsername;
     private String dbPassword;
+    private int maximumPoolSize;
+    private int connectionTimeout;
 
     private String[] alertAddresses;
     private String fromEmail;
     private String environmentName;
-
     private String mailHost;
     private int mailPort;
 
-    private int poolSize;
-
-    public String getDbDriver() {
-        return dbDriver;
+    public String getDbUrl() {
+        return dbUrl;
     }
 
-    public int getPoolSize() {
-        return poolSize;
+    public void setDbUrl(String dbUrl) {
+        this.dbUrl = dbUrl;
     }
 
-    public void setPoolSize(int poolSize) {
-        this.poolSize = poolSize;
+    public String getDbUsername() {
+        return dbUsername;
     }
 
-    public int getMailPort() {
-        return mailPort;
+    public void setDbUsername(String dbUsername) {
+        this.dbUsername = dbUsername;
     }
 
-    public void setMailPort(int mailPort) {
-        this.mailPort = mailPort;
+    public String getDbPassword() {
+        return dbPassword;
     }
 
-    public String getMailHost() {
-        return mailHost;
+    public void setDbPassword(String dbPassword) {
+        this.dbPassword = dbPassword;
     }
 
-    public void setMailHost(String mailHost) {
-        this.mailHost = mailHost;
+    public int getMaximumPoolSize() {
+        return maximumPoolSize;
+    }
+
+    public void setMaximumPoolSize(int maximumPoolSize) {
+        this.maximumPoolSize = maximumPoolSize;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public String[] getAlertAddresses() {
+        return alertAddresses;
+    }
+
+    public void setAlertAddresses(String[] alertAddresses) {
+        this.alertAddresses = alertAddresses;
     }
 
     public String getFromEmail() {
@@ -77,39 +95,19 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
         this.environmentName = environmentName;
     }
 
-    public String[] getAlertAddresses() {
-        return alertAddresses;
+    public String getMailHost() {
+        return mailHost;
     }
 
-    public void setAlertAddresses(String[] alertAddresses) {
-        this.alertAddresses = alertAddresses;
+    public void setMailHost(String mailHost) {
+        this.mailHost = mailHost;
     }
 
-    public String getDbPassword() {
-        return dbPassword;
+    public int getMailPort() {
+        return mailPort;
     }
 
-    public void setDbPassword(String dbPassword) {
-        this.dbPassword = dbPassword;
-    }
-
-    public String getDbUsername() {
-        return dbUsername;
-    }
-
-    public void setDbUsername(String dbUsername) {
-        this.dbUsername = dbUsername;
-    }
-
-    public String getDbUrl() {
-        return dbUrl;
-    }
-
-    public void setDbUrl(String dbUrl) {
-        this.dbUrl = dbUrl;
-    }
-
-    public void setDbDriver(String dbDriver) {
-        this.dbDriver = dbDriver;
+    public void setMailPort(int mailPort) {
+        this.mailPort = mailPort;
     }
 }

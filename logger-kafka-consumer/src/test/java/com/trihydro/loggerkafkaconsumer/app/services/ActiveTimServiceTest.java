@@ -16,7 +16,7 @@ import java.time.Instant;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ import org.mockito.Spy;
 public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
@@ -36,7 +36,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
         startPoint = new Coordinate(BigDecimal.valueOf(-1), BigDecimal.valueOf(-2));
         endPoint = new Coordinate(BigDecimal.valueOf(-3), BigDecimal.valueOf(-4));
     }
@@ -49,15 +49,15 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         activeTim.setEndPoint(endPoint);
         activeTim.setStartDateTime("2020-02-03T16:22:23.000Z");
         activeTim.setEndDateTime("2020-02-04T16:00:00.000Z");
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
         doReturn(-1l).when(mockDbInteractions).executeAndLog(mockPreparedStatement, "active tim");
-        var startTimeConverted = "03-Feb-20 04.22.23.000 PM";
-        var endTimeConverted = "04-Feb-20 04.00.00.000 PM";
 
         var stTime = Instant.parse(activeTim.getStartDateTime());
         var endTime = Instant.parse(activeTim.getEndDateTime());
         java.util.Date stDate = java.util.Date.from(stTime);
         java.util.Date endDate = java.util.Date.from(endTime);
+        Timestamp startDateTimestamp = Timestamp.from(stTime);
+        Timestamp endDateTimestamp = Timestamp.from(endTime);
         doReturn(stDate).when(mockUtility).convertDate(activeTim.getStartDateTime());
         doReturn(endDate).when(mockUtility).convertDate(activeTim.getEndDateTime());
         mockUtility.timestampFormat = timestampFormat;
@@ -68,10 +68,10 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         // Assert
         Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTim.getDirection());// DIRECTION
+        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, null);// DIRECTION
 
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, startTimeConverted);// TIM_START
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, endTimeConverted);// TIM_END
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 3, startDateTimestamp);// TIM_START
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 4, endDateTimestamp);// TIM_END
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 5, activeTim.getTimTypeId());// TIM_TYPE_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6, activeTim.getRoute());// ROUTE
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7, activeTim.getClientId());// CLIENT_ID
@@ -117,13 +117,13 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         activeTim.setActiveTimId(-1l);
         activeTim.setStartDateTime("2020-02-03T16:02:00.000Z");
         activeTim.setEndDateTime("2020-02-03T16:00:00.000Z");
-        var startTimeConverted = "03-Feb-20 04.02.00.000 PM";
-        var endTimeConverted = "03-Feb-20 04.00.00.000 PM";
 
         var stTime = Instant.parse(activeTim.getStartDateTime());
         var endTime = Instant.parse(activeTim.getEndDateTime());
         java.util.Date stDate = java.util.Date.from(stTime);
         java.util.Date endDate = java.util.Date.from(endTime);
+        Timestamp startDateTimestamp = Timestamp.from(stTime);
+        Timestamp endDateTimestamp = Timestamp.from(endTime);
         doReturn(stDate).when(mockUtility).convertDate(activeTim.getStartDateTime());
         doReturn(endDate).when(mockUtility).convertDate(activeTim.getEndDateTime());
         mockUtility.timestampFormat = timestampFormat;
@@ -141,8 +141,8 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, activeTim.getEndPoint().getLatitude());
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 5,
                 activeTim.getEndPoint().getLongitude());
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6, startTimeConverted);
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7, endTimeConverted);
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 6, startDateTimestamp);
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 7, endDateTimestamp);
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 8, activeTim.getPk());
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 9, null);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 10, activeTim.getActiveTimId());
@@ -259,10 +259,10 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         when(mockRs.getTimestamp(eq("MINSTART"), any())).thenReturn(dbValue);
         mockUtility.timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL), "
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-YYYY HH12.MI.SS.SSS a')), "
                 + "(COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID "
                 + "WHERE TIM.PACKET_ID = '0000'),"
-                + "(SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
+                + "(SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-YYYY HH12.MI.SS.SSS a'))))) minStart";
 
         // Act
         String minExp = uut.getMinExpiration("0000", expDate);
@@ -295,7 +295,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
     public void updateActiveTimExpiration_SUCCESS() throws SQLException {
         // Arrange
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
-        String expDate = "2021-01-03T00:00:00.000Z";
+        String expDate = "31-Dec-19 11.59.56.000 PM";
         String query = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? "
                 + "WHERE ACTIVE_TIM_ID IN (SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim "
                 + "INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID WHERE TIM.PACKET_ID = ?)";
@@ -305,7 +305,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         // Assert
         Assertions.assertTrue(result);
         verify(mockConnection).prepareStatement(query);
-        verify(mockPreparedStatement).setString(1, expDate);
+        verify(mockPreparedStatement).setTimestamp(1, Timestamp.valueOf("2019-12-31 23:59:56"));
         verify(mockPreparedStatement).setString(2, "0000");
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();

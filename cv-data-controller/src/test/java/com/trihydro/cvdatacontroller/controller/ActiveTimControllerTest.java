@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +14,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -24,7 +24,7 @@ import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,17 +38,17 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType;
 
 public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     private void setupPreparedStatement() {
-        doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
+        doReturn(mockPreparedStatement).when(mockTimDbTables).buildUpdateStatement(any(), any(), any(), any(),
                 any());
     }
 
@@ -71,9 +71,9 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
         selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
         selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
-        selectStatement += " WHERE atim.tim_start <= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR";
-        selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR)";
-        selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR)";
+        selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR";
+        selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
+        selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
         selectStatement += " AND UPPER(atim.direction) IN ('I', 'D')";
 
         // Act
@@ -339,7 +339,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetExpiredActiveTims_SUCCESS() throws SQLException {
         // Arrange
         String statementStr = "select * from ACTIVE_TIM";
-        statementStr += " WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
 
         // Act
         ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
@@ -366,7 +366,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetExpiredActiveTims_FAIL() throws SQLException {
         // Arrange
         String statementStr = "select * from ACTIVE_TIM";
-        statementStr += " WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
         when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException());
 
         // Act
@@ -1001,11 +1001,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(minVal, response.getBody());
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL),";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a')),";
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
+        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a'))))) minStart";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -1025,11 +1025,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(response.getBody(), "");
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL),";
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a')),";
         query += " (COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL)))) minStart FROM DUAL";
+        query += "),(SELECT TO_TIMESTAMP('20-Oct-20 04.26.07.000 PM', 'DD-MON-YYYY HH12.MI.SS.SSS a'))))) minStart";
         verify(mockStatement).executeQuery(query);
         verify(mockStatement).close();
         verify(mockConnection).close();
@@ -1044,8 +1044,11 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
         var expDate = "2020-10-20T16:26:07.000Z";
+        Date date = Date.from(Instant.parse(expDate));
+        Timestamp ts = new Timestamp(date.getTime());
         doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+        doReturn(date).when(mockUtility).convertDate(expDate);
 
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
@@ -1059,7 +1062,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertTrue(success.getBody(), "UpdateExpiration failed when it should have succeeded");
         verify(mockConnection).prepareStatement(updateStatement);
-        verify(mockPreparedStatement).setObject(1, expDate);
+        verify(mockPreparedStatement).setTimestamp(1, ts);
         verify(mockPreparedStatement).setObject(2, packetID);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
@@ -1073,8 +1076,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // so that's what we'll use here
         var packetID = "3C8E8DF2470B1A772E";
         var expDate = "2020-10-20T16:26:07.000Z";
+        Date date = Date.from(Instant.parse(expDate));
         doReturn(mockPreparedStatement).when(mockConnection).prepareStatement(any());
         doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
+        doReturn(date).when(mockUtility).convertDate(expDate);
 
         String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
@@ -1125,7 +1130,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         java.util.Date tim_start_date = java.util.Date.from(now);
         doReturn(tim_start_date).when(mockUtility).convertDate(startTime);
         doReturn(tim_end_date).when(mockUtility).convertDate(endTime);
-        mockUtility.timestampFormat = timestampFormat;
+        Timestamp startTimestamp = new Timestamp(tim_start_date.getTime());
+        Timestamp endTimestamp = new Timestamp(tim_end_date.getTime());
 
         // Act
         ResponseEntity<Long> data = uut.InsertActiveTim(activeTim);
@@ -1134,8 +1140,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, activeTim.getTimId());// TIM_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, activeTim.getDirection());// DIRECTION
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, timestampFormat.format(tim_start_date));// TIM_START
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 4, timestampFormat.format(tim_end_date));// TIM_END
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 3, startTimestamp);// TIM_START
+        verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 4, endTimestamp);// TIM_END
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 5, activeTim.getTimTypeId());// TIM_TYPE_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6, activeTim.getRoute());// ROUTE
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7, activeTim.getClientId());// CLIENT_ID

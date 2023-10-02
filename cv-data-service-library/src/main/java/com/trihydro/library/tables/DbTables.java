@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-public class OracleTables {
+public class DbTables {
 
     public String buildInsertQueryStatement(String tableName, List<String> table) {
 

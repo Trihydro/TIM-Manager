@@ -13,8 +13,8 @@ public class StatusLogControllerTest extends TestBase<StatusLogController> {
     @Test
     public void DeleteOldStatusLogs() throws SQLException {
         // Arrange
-        String strDate = uut.getOneMonthPrior();
-        doReturn(strDate).when(uut).getOneMonthPrior();
+        String strDate = uut.getOneMonthPriorString();
+        doReturn(strDate).when(uut).getOneMonthPriorString();
 
         // Act
         var data = uut.DeleteOldStatusLogs();

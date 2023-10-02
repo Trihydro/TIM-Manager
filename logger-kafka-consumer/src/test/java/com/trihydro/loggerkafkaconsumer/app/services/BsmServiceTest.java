@@ -16,7 +16,7 @@ import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 public class BsmServiceTest extends TestBase<BsmService> {
 
     @Spy
-    private BsmOracleTables mockBsmOracleTables = new BsmOracleTables();
+    private BsmDbTables mockBsmDbTables = new BsmDbTables();
     @Mock
     private JsonToJavaConverter mockJsonToJava;
     @Mock
@@ -70,7 +70,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
 
     @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockJsonToJava, mockBsmOracleTables, mockSqlNullHandler, mockBsmPart2SpveService,
+        uut.InjectDependencies(mockJsonToJava, mockBsmDbTables, mockSqlNullHandler, mockBsmPart2SpveService,
                 mockBsmPart2VseService, mockBsmPart2SuveService, mockUtility);
     }
 
@@ -90,7 +90,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
     }
 
     @Test
-    public void addBSMToOracleDB_VehicleSafetyExtensions_SUCCESS() {
+    public void addBSMToDatabase_VehicleSafetyExtensions_SUCCESS() {
         // Arrange
         setupSafetyExtensions();
         Long bsmCoreDataId = -1l;
@@ -98,7 +98,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         OdeData odeData = getOdeData("VehicleSafetyExtensions");
 
         // Act
-        uut.addBSMToOracleDB(odeData, "value");
+        uut.addBSMToDatabase(odeData, "value");
         List<J2735BsmPart2Content> partII = ((OdeBsmPayload) odeData.getPayload()).getBsm().getPartII();
 
         // Assert
@@ -110,7 +110,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
     }
 
     @Test
-    public void addBSMToOracleDB_SpecialVehicleExtensions_SUCCESS() {
+    public void addBSMToDatabase_SpecialVehicleExtensions_SUCCESS() {
         // Arrange
         setupSpecialExtensions();
         Long bsmCoreDataId = -1l;
@@ -118,7 +118,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         OdeData odeData = getOdeData("SpecialVehicleExtensions");
 
         // Act
-        uut.addBSMToOracleDB(odeData, "value");
+        uut.addBSMToDatabase(odeData, "value");
         List<J2735BsmPart2Content> partII = ((OdeBsmPayload) odeData.getPayload()).getBsm().getPartII();
 
         // Assert
@@ -130,7 +130,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
     }
 
     @Test
-    public void addBSMToOracleDB_SupplementalVehicleExtensions_SUCCESS() {
+    public void addBSMToDatabase_SupplementalVehicleExtensions_SUCCESS() {
         // Arrange
         setupSupplementalExtensions();
         Long bsmCoreDataId = -1l;
@@ -138,7 +138,7 @@ public class BsmServiceTest extends TestBase<BsmService> {
         OdeData odeData = getOdeData("SupplementalVehicleExtensions");
 
         // Act
-        uut.addBSMToOracleDB(odeData, "value");
+        uut.addBSMToDatabase(odeData, "value");
         List<J2735BsmPart2Content> partII = ((OdeBsmPayload) odeData.getPayload()).getBsm().getPartII();
 
         // Assert
@@ -150,13 +150,13 @@ public class BsmServiceTest extends TestBase<BsmService> {
     }
 
     @Test
-    public void addBSMToOracleDB_FailNullMetadata() {
+    public void addBSMToDatabase_FailNullMetadata() {
         // Arrange
         OdeData odeData = new OdeData();
         odeData.setPayload(new OdeBsmPayload());
 
         // Act
-        uut.addBSMToOracleDB(odeData, "value");
+        uut.addBSMToDatabase(odeData, "value");
 
         // Assert
         verify(uut, times(0)).addBSMCoreData((OdeBsmMetadata) odeData.getMetadata(),

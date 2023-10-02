@@ -25,7 +25,7 @@ public class DriverAlertController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String strDate = getOneMonthPrior();
+        String strDate = getOneMonthPriorString();
 
         try {
             deleteResult = deleteOldDriverAlertItisCode(strDate);

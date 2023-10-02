@@ -62,12 +62,12 @@ public class ValidateSdx implements Runnable {
     }
 
     private void validateSdx() {
-        List<CActiveTim> oracleRecords = new ArrayList<>();
+        List<CActiveTim> dbRecords = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> sdxRecords = new ArrayList<>();
 
-        // Fetch records from Oracle
+        // Fetch records from the Database
         for (ActiveTim activeTim : activeTimService.getActiveTimsForSDX()) {
-            oracleRecords.add(new CActiveTim(activeTim));
+            dbRecords.add(new CActiveTim(activeTim));
         }
 
         // Fetch records from SDX
@@ -78,7 +78,7 @@ public class ValidateSdx implements Runnable {
             sdxRecords.add(record);
         }
 
-        Collections.sort(oracleRecords);
+        Collections.sort(dbRecords);
         Collections.sort(sdxRecords);
 
         // Actions to perform
@@ -86,7 +86,7 @@ public class ValidateSdx implements Runnable {
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<CAdvisorySituationDataDeposit>();
 
         // Metrics to collect
-        List<CActiveTim> invOracleRecords = new ArrayList<CActiveTim>();
+        List<CActiveTim> invDbRecords = new ArrayList<CActiveTim>();
         int numSdxOrphanedRecords = 0;
         int numOutdatedSdxRecords = 0;
         int numRecordsNotOnSdx = 0;
@@ -94,65 +94,65 @@ public class ValidateSdx implements Runnable {
         int i = 0;
         int j = 0;
 
-        while (i < oracleRecords.size() || j < sdxRecords.size()) {
+        while (i < dbRecords.size() || j < sdxRecords.size()) {
 
             // If either list is at the end, push the remainder of the other list onto their
             // corresponding action
-            if (i == oracleRecords.size()) {
-                // Any remaining sdx records don't have a corresponding oracle record
+            if (i == dbRecords.size()) {
+                // Any remaining sdx records don't have a corresponding database record
                 deleteFromSdx.addAll(sdxRecords.subList(j, sdxRecords.size()));
                 numSdxOrphanedRecords += sdxRecords.size() - j;
                 j = sdxRecords.size();
                 continue;
             }
             if (j == sdxRecords.size()) {
-                // Any remaining oracle records don't have a corresponding sdx record
-                toResend.addAll(oracleRecords.subList(i, oracleRecords.size()));
-                numRecordsNotOnSdx += oracleRecords.size() - i;
-                i = oracleRecords.size();
+                // Any remaining database records don't have a corresponding sdx record
+                toResend.addAll(dbRecords.subList(i, dbRecords.size()));
+                numRecordsNotOnSdx += dbRecords.size() - i;
+                i = dbRecords.size();
                 continue;
             }
 
-            CActiveTim oracleRecord = oracleRecords.get(i);
+            CActiveTim dbRecord = dbRecords.get(i);
             CAdvisorySituationDataDeposit sdxRecord = sdxRecords.get(j);
             Integer sdxRecordId = sdxRecord.getRecordId();
-            Integer oracleRecordId = oracleRecord.getRecordId();
+            Integer dbRecordId = dbRecord.getRecordId();
 
             // If the SAT_RECORD_ID string isn't valid hex, the SDX will reject the record.
-            // Push onto invOracleRecords
-            if (oracleRecordId == null) {
-                invOracleRecords.add(oracleRecord);
+            // Push onto invDbRecords
+            if (dbRecordId == null) {
+                invDbRecords.add(dbRecord);
                 i++;
                 continue;
             }
 
-            if (oracleRecordId.equals(sdxRecordId)) {
+            if (dbRecordId.equals(sdxRecordId)) {
                 // Make sure the numeric ITIS Codes are the same.
                 // TODO: we should also check the TIM's ITISText values, if any are present
-                if (!sameItisCodes(oracleRecord.getItisCodes(), sdxRecord.getItisCodes())) {
+                if (!sameItisCodes(dbRecord.getItisCodes(), sdxRecord.getItisCodes())) {
                     numOutdatedSdxRecords++;
-                    toResend.add(oracleRecord);
+                    toResend.add(dbRecord);
                 }
                 i++;
                 j++;
-            } else if (oracleRecordId > sdxRecordId) {
-                // The current SDX record doesn't have a corresponding Oracle record...
+            } else if (dbRecordId > sdxRecordId) {
+                // The current SDX record doesn't have a corresponding Database record...
                 numSdxOrphanedRecords++;
                 deleteFromSdx.add(sdxRecord);
                 j++;
             } else {
-                // The current Oracle record doesn't have a corresponding SDX record...
+                // The current Database record doesn't have a corresponding SDX record...
                 numRecordsNotOnSdx++;
-                toResend.add(oracleRecord);
+                toResend.add(dbRecord);
                 i++;
             }
         }
 
-        if (toResend.size() > 0 || deleteFromSdx.size() > 0 || invOracleRecords.size() > 0) {
-            // For now, we'll just report on the invOracleRecords
+        if (toResend.size() > 0 || deleteFromSdx.size() > 0 || invDbRecords.size() > 0) {
+            // For now, we'll just report on the invDbRecords
             String exceptionText = cleanupData(toResend, deleteFromSdx);
             String email = emailFormatter.generateSdxSummaryEmail(numSdxOrphanedRecords, numOutdatedSdxRecords,
-                    numRecordsNotOnSdx, toResend, deleteFromSdx, invOracleRecords, exceptionText);
+                    numRecordsNotOnSdx, toResend, deleteFromSdx, invDbRecords, exceptionText);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "SDX Validation Results", email);

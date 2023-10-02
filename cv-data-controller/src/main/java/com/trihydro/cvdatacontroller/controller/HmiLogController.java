@@ -3,7 +3,7 @@ package com.trihydro.cvdatacontroller.controller;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
+import java.sql.Timestamp;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,13 +25,13 @@ public class HmiLogController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String strDate = getOneMonthPrior();
+        Timestamp oneMonthPriorTimestamp = getOneMonthPriorTimestamp();
 
         try {
             String deleteSQL = "DELETE FROM hmi_log WHERE received_at < ?";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, oneMonthPriorTimestamp);
 
             // execute delete SQL stetement
             deleteResult = dbInteractions.updateOrDelete(preparedStatement);

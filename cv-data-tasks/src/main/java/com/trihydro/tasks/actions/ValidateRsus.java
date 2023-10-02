@@ -302,7 +302,7 @@ public class ValidateRsus implements Runnable {
             // Fetch records for prod
             activeTims = activeTimService.getActiveRsuTims(config.getCvRestService());
         } catch (Exception ex) {
-            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Oracle records from PROD:",
+            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Database records from PROD:",
                     this.getClass());
             ex.printStackTrace();
             return null;
@@ -317,7 +317,7 @@ public class ValidateRsus implements Runnable {
         List<RsuInformation> rsusWithRecords = new ArrayList<>();
         RsuInformation rsu = null;
 
-        // Due to the ORDER BY in our fetch from Oracle, the records in activeTims are
+        // Due to the ORDER BY in our fetch from the Database, the records in activeTims are
         // sorted by rsuTarget.
         for (ActiveTim record : activeTims) {
             // If we don't have an RSU yet, or this record is the first one for the next

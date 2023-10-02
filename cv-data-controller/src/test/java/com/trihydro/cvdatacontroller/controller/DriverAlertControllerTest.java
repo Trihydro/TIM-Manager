@@ -25,7 +25,7 @@ public class DriverAlertControllerTest extends TestBase<DriverAlertController> {
         sdf.setTimeZone(toTimeZone);
         Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
         String strDate = sdf.format(dte.getTime());
-        doReturn(strDate).when(uut).getOneMonthPrior();
+        doReturn(strDate).when(uut).getOneMonthPriorString();
 
         // Act
         var data = uut.DeleteOldDriverAlert();

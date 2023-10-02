@@ -49,7 +49,7 @@ To view the database in browser navigate to http://localhost:6474/browser.
 
 The initial check-in includes the base set of data to avoid having to run the scripts. If you need to update the data in the Neo4j database the following steps may be taken.
 
-1. Export milepost_vw_new data as .csv from the Oracle database (include headers)
+1. Export milepost_vw_new data as .csv from the database (include headers)
    ```
    SELECT
        *

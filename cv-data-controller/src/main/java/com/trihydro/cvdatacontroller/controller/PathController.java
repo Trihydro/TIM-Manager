@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,12 +23,12 @@ import springfox.documentation.annotations.ApiIgnore;
 @ApiIgnore
 public class PathController extends BaseController {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -40,12 +40,12 @@ public class PathController extends BaseController {
 
         try {
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path",
-                    timOracleTables.getPathTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("path",
+                    timDbTables.getPathTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getPathTable()) {
+            for (String col : timDbTables.getPathTable()) {
                 if (col.equals("SCALE"))
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, 0);
                 fieldNum++;

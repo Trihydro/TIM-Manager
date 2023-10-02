@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,18 +15,18 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 @Component
 public class BsmPart2VseService extends BaseService {
 
-	private BsmOracleTables bsmOracleTables;
+	private BsmDbTables bsmDbTables;
 
 	@Autowired
-	public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
-		bsmOracleTables = _bsmOracleTables;
+	public void InjectDependencies(BsmDbTables _bsmDbTables) {
+		bsmDbTables = _bsmDbTables;
 	}
 
 	public Long insertBSMPart2VSE(J2735BsmPart2Content part2Content, J2735VehicleSafetyExtensions vse,
 			Long bsmCoreDataId) {
 
-		String bsmVseInsertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_part2_vse",
-				bsmOracleTables.getBsmPart2VseTable());
+		String bsmVseInsertQueryStatement = bsmDbTables.buildInsertQueryStatement("bsm_part2_vse",
+				bsmDbTables.getBsmPart2VseTable());
 		PreparedStatement bsmVsePreparedStatement = null;
 		Connection connection = null;
 
@@ -37,7 +37,7 @@ public class BsmPart2VseService extends BaseService {
 
 			int fieldNum = 1;
 
-			for (String col : bsmOracleTables.getBsmPart2VseTable()) {
+			for (String col : bsmDbTables.getBsmPart2VseTable()) {
 				if (col.equals("BSM_CORE_DATA_ID")) {
 					bsmVsePreparedStatement.setLong(fieldNum, bsmCoreDataId);
 				} else if (col.equals("ID")) {

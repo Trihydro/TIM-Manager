@@ -16,8 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DbInteractions {
-    private static HikariDataSource hds;
-    private HikariConfig config;
+    private static HikariDataSource dataSource;
 
     protected DbInteractionsProps dbConfig;
     protected Utility utility;
@@ -29,44 +28,59 @@ public class DbInteractions {
         utility = _utility;
         emailHelper = _emailHelper;
         utility.logWithDate("DbInteractions: Injecting dependencies");
-        initHDS();
-    }
+        initDataSource();
+    }   
 
-    private void initHDS() {
-        if (hds == null) {
-
-            // log the creation of the connection pool and properties
-            utility.logWithDate("DbInteractions: Creating connection pool");
-            utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
-            utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
-            utility.logWithDate("DbInteractions: dbDriver: " + dbConfig.getDbDriver());
-            utility.logWithDate("DbInteractions: poolSize: " + dbConfig.getPoolSize());
-
+    private void initDataSource() {
+        if (dataSource == null) {
             TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
             TimeZone.setDefault(timeZone);
-            config = new HikariConfig();
 
-            config.addDataSourceProperty("cachePrepStmts", "true");
-            config.setUsername(dbConfig.getDbUsername());
-            config.setPassword(dbConfig.getDbPassword());
-            config.setJdbcUrl(dbConfig.getDbUrl());
-            config.setDriverClassName(dbConfig.getDbDriver());
-            config.setMaximumPoolSize(dbConfig.getPoolSize());
-            // Pool Size formula: connections = ((core_count*2) + effective_spindle_count)
-            // https://stackoverflow.com/questions/28987540/why-does-hikaricp-recommend-fixed-size-pool-for-better-performance
-            config.setMaxLifetime(600000);// setting to 10 minutes (defaults to 30), to help avoid connection issues
+            // check dbconfig for null values
+            if (dbConfig.getDbUrl() == null ||
+                dbConfig.getDbUsername() == null ||
+                dbConfig.getDbPassword() == null ||
+                dbConfig.getMaximumPoolSize() == 0 ||
+                dbConfig.getConnectionTimeout() == 0) {
+                utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
+                System.exit(1);
+            }
 
-            hds = new HikariDataSource(config);
+            // initialize connection pool
+            try {
+                HikariConfig config = new HikariConfig();
+                config.setDriverClassName("org.postgresql.Driver");
+                config.setJdbcUrl(dbConfig.getDbUrl());
+                config.setUsername(dbConfig.getDbUsername());
+                config.setPassword(dbConfig.getDbPassword());
+                config.setConnectionTimeout(dbConfig.getConnectionTimeout());
+                config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
+
+                // log the configuration of the connection pool
+                utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
+                utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
+                utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
+                utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
+                utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
+                utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
+
+                dataSource = new HikariDataSource(config);
+                utility.logWithDate("DbInteractions: Successfully initialized connection pool");
+            } catch (Exception e) {
+                utility.logWithDate("DbInteractions: Failed to initialize connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
+                // e.printStackTrace();
+                System.exit(1);
+            }
         }
     }
 
     public Connection getConnectionPool() throws SQLException {
         // create pool if not already done
-        initHDS();
+        initDataSource();
 
         // return a connection
         try {
-            return hds.getConnection();
+            return dataSource.getConnection();
         } catch (SQLException ex) {
             String body = "Failed attempting to open a connection to ";
             body += dbConfig.getDbUrl();

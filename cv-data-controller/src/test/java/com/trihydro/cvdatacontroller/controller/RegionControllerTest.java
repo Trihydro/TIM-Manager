@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,15 +30,15 @@ public class RegionControllerTest extends TestBase<RegionController> {
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
-    private TimOracleTables mockTimOracleTables;
+    private TimDbTables mockTimDbTables;
 
     @BeforeEach
     public void setupSubTest() throws SQLException {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     private void setupInsertQueryStatement() {
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class RegionControllerTest extends TestBase<RegionController> {
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, region.getLaneWidth());// LANE_WIDTH
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, region.getDirectionality());// DIRECTIONALITY
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, region.getDirection());// DIRECTION
-        verify(mockPreparedStatement).setBoolean(6, region.isClosedPath());// CLOSED_PATH
+        verify(mockPreparedStatement).setInt(6, region.isClosedPath() ? 1 : 0);// CLOSED_PATH
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 7, position.getLatitude());// ANCHOR_LAT
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 8, position.getLongitude());// ANCHOR_LONG
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 9, -1l);// PATH_ID
@@ -111,7 +111,7 @@ public class RegionControllerTest extends TestBase<RegionController> {
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 14, (BigDecimal) null);// GEOMETRY_CIRCLE_POSITION_LONG
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 15, (BigDecimal) null);// GEOMETRY_CIRCLE_POSITION_ELEV
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 16, null);// GEOMETRY_CIRCLE_RADIUS
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 17, null);// GEOMETRY_CIRCLE_UNITS
+        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 17, null);// GEOMETRY_CIRCLE_UNITS
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,7 +17,7 @@ import java.util.TimeZone;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,13 +25,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ActiveTimService extends BaseService {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
     private Calendar UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -40,8 +41,8 @@ public class ActiveTimService extends BaseService {
         PreparedStatement preparedStatement = null;
 
         try {
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim",
-                    timOracleTables.getActiveTimTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
+                    timDbTables.getActiveTimTable());
 
             // get connection
             connection = dbInteractions.getConnectionPool();
@@ -49,7 +50,7 @@ public class ActiveTimService extends BaseService {
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getActiveTimTable()) {
+            for (String col : timDbTables.getActiveTimTable()) {
                 if (col.equals("TIM_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
                 else if (col.equals("DIRECTION"))
@@ -58,20 +59,20 @@ public class ActiveTimService extends BaseService {
                     utility.logWithDate(
                             String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
                     java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            utility.timestampFormat.format(tim_start_date));
+                    Timestamp ts = new Timestamp(tim_start_date.getTime());
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                 } else if (col.equals("TIM_END")) {
                     if (activeTim.getEndDateTime() != null) {
                         java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                utility.timestampFormat.format(tim_end_date));
+                        Timestamp ts = new Timestamp(tim_end_date.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                     } else
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                 } else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTim.getExpirationDateTime() != null) {
                         java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                utility.timestampFormat.format(tim_exp_date));
+                        Timestamp ts = new Timestamp(tim_exp_date.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
@@ -162,13 +163,15 @@ public class ActiveTimService extends BaseService {
             sqlNullHandler.setBigDecimalOrNull(preparedStatement, 5, end_lon);
 
             java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
-            sqlNullHandler.setStringOrNull(preparedStatement, 6, utility.timestampFormat.format(tim_start_date));
+            Timestamp ts = new Timestamp(tim_start_date.getTime());
+            sqlNullHandler.setTimestampOrNull(preparedStatement, 6, ts);
 
             if (activeTim.getEndDateTime() == null)
-                preparedStatement.setString(7, null);
+                preparedStatement.setNull(7, java.sql.Types.TIMESTAMP);
             else {
                 java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
-                sqlNullHandler.setStringOrNull(preparedStatement, 7, utility.timestampFormat.format(tim_end_date));
+                Timestamp ts2 = new Timestamp(tim_end_date.getTime());
+                sqlNullHandler.setTimestampOrNull(preparedStatement, 7, ts2);
             }
 
             sqlNullHandler.setIntegerOrNull(preparedStatement, 8, activeTim.getPk());
@@ -416,7 +419,10 @@ public class ActiveTimService extends BaseService {
         try {
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(updateStatement);
-            preparedStatement.setString(1, expDate);// expDate comes in as MST from previously called function
+            DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+            Date dte = sdf.parse(expDate);
+            Timestamp ts = new Timestamp(dte.getTime());
+            preparedStatement.setTimestamp(1, ts);// expDate comes in as MST from previously called function
                                                     // (GetMinExpiration)
             preparedStatement.setString(2, packetID);
 
@@ -457,14 +463,15 @@ public class ActiveTimService extends BaseService {
             // coalesce function with the expDate passed in value.
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
-            String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL",
-                    translateIso8601ToTimestampFormat(expDate));
+            String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+            String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
+                    translateIso8601ToTimestampFormat(expDate), targetFormat);
 
             String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
             minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
             minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
 
-            String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
+            String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
                     selectTimestamp, minExpDate, selectTimestamp);
             rs = statement.executeQuery(query);
             while (rs.next()) {
@@ -500,6 +507,6 @@ public class ActiveTimService extends BaseService {
         // sdf.setTimeZone(toTimeZone);
         DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Date dte = m_ISO8601Local.parse(date);
-        return sdf.format(dte);
+        return sdf.format(dte.getTime());
     }
 }

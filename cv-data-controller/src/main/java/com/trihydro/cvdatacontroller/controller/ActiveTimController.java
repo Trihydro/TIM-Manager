@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,7 +25,7 @@ import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,7 +49,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @ApiIgnore
 public class ActiveTimController extends BaseController {
 
-	private TimOracleTables timOracleTables;
+	private TimDbTables timDbTables;
 	private SQLNullHandler sqlNullHandler;
 	protected Calendar UTCCalendar;
 
@@ -57,8 +58,8 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-		timOracleTables = _timOracleTables;
+	public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+		timDbTables = _timDbTables;
 		sqlNullHandler = _sqlNullHandler;
 	}
 
@@ -87,11 +88,11 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
 			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
 			// where starting less than 2 hours away
-			selectStatement += " WHERE atim.tim_start <= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR";
+			selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR";
 			// and expiration_date within 2hrs
-			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR)";
+			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
 			// check that end time isn't within 2hrs
-			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= SYS_EXTRACT_UTC(SYSTIMESTAMP) + INTERVAL '2' HOUR)";
+			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
 			// check that this TIM is capable of being refreshed (direction = I or D)
 			selectStatement += " AND UPPER(atim.direction) IN ('I', 'D')";
 
@@ -341,7 +342,7 @@ public class ActiveTimController extends BaseController {
 
 		try {
 			connection = dbInteractions.getConnectionPool();
-			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
+			preparedStatement = timDbTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
 					connection);
 
 			// execute update statement
@@ -482,7 +483,7 @@ public class ActiveTimController extends BaseController {
 			statement = connection.createStatement();
 
 			String selectStatement = "select * from ACTIVE_TIM";
-			selectStatement += " WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+			selectStatement += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
 
 			rs = statement.executeQuery(selectStatement);
 			activeTims = getActiveTimFromRS(rs, false);
@@ -1235,8 +1236,8 @@ public class ActiveTimController extends BaseController {
 		PreparedStatement preparedStatement = null;
 		Long activeTimId = 0l;
 		try {
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim",
-					timOracleTables.getActiveTimTable());
+			String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
+					timDbTables.getActiveTimTable());
 
 			// get connection
 			connection = dbInteractions.getConnectionPool();
@@ -1244,27 +1245,27 @@ public class ActiveTimController extends BaseController {
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
 			int fieldNum = 1;
 
-			for (String col : timOracleTables.getActiveTimTable()) {
+			for (String col : timDbTables.getActiveTimTable()) {
 				if (col.equals("TIM_ID"))
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
 				else if (col.equals("DIRECTION"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
 				else if (col.equals("TIM_START")) {
 					java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
-					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-							utility.timestampFormat.format(tim_start_date));
+					Timestamp tim_start_timestamp = new Timestamp(tim_start_date.getTime());
+					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_start_timestamp);
 				} else if (col.equals("TIM_END")) {
 					if (activeTim.getEndDateTime() != null) {
 						java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
-						sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								utility.timestampFormat.format(tim_end_date));
+						Timestamp tim_end_timestamp = new Timestamp(tim_end_date.getTime());
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_end_timestamp);
 					} else
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 				} else if (col.equals("EXPIRATION_DATE")) {
 					if (activeTim.getExpirationDateTime() != null) {
 						java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
-						sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-								utility.timestampFormat.format(tim_exp_date));
+						Timestamp tim_exp_timestamp = new Timestamp(tim_exp_date.getTime());
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_exp_timestamp);
 					} else {
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 					}
@@ -1298,6 +1299,8 @@ public class ActiveTimController extends BaseController {
 					if (activeTim.getEndPoint() != null)
 						end_lon = activeTim.getEndPoint().getLongitude();
 					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lon);
+				} else if (col.equals("PROJECT_KEY")) {
+					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getProjectKey());
 				}
 
 				fieldNum++;
@@ -1464,7 +1467,9 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			preparedStatement = connection.prepareStatement(updateStatement);
-			preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
+			Date date = utility.convertDate(expDate);
+			Timestamp expDateTimestamp = new Timestamp(date.getTime());
+			preparedStatement.setTimestamp(1, expDateTimestamp);// expDate comes in as MST from previously called function
 													// (GetMinExpiration)
 			preparedStatement.setObject(2, packetID);
 
@@ -1506,14 +1511,16 @@ public class ActiveTimController extends BaseController {
 			// coalesce function with the expDate passed in value.
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', 'DD-MON-RR HH12.MI.SS.FF PM') FROM DUAL",
-					translateIso8601ToTimestampFormat(expDate));
+			String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
+					translateIso8601ToTimestampFormat(expDate), targetFormat);
+
 
 			String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
 			minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
 			minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
 
-			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart FROM DUAL",
+			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
 					selectTimestamp, minExpDate, selectTimestamp);
 			rs = statement.executeQuery(query);
 			while (rs.next()) {

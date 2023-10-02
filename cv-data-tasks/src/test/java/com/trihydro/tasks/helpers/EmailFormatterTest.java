@@ -34,10 +34,10 @@ public class EmailFormatterTest {
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
-        List<CActiveTim> invOracleRecords = new ArrayList<>();
+        List<CActiveTim> invDbRecords = new ArrayList<>();
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(1, 2, 3, toResend, deleteFromSdx, invOracleRecords, exText);
+        String emailBody = uut.generateSdxSummaryEmail(1, 2, 3, toResend, deleteFromSdx, invDbRecords, exText);
 
         // Assert
         Assertions.assertTrue(
@@ -45,38 +45,38 @@ public class EmailFormatterTest {
                         ".*Number of stale records on SDX \\(different ITIS codes than ActiveTim\\):</td>\\s*<td>2.*"),
                 "Number of stale records on SDX (different ITIS codes than ActiveTim): 2");
         Assertions.assertTrue(
-                emailBody.matches(".*Number of messages on SDX without corresponding Oracle record:</td>\\s*<td>1.*"),
-                "Number of messages on SDX without corresponding Oracle record: 1");
+                emailBody.matches(".*Number of messages on SDX without corresponding Database record:</td>\\s*<td>1.*"),
+                "Number of messages on SDX without corresponding Database record: 1");
         Assertions.assertTrue(
-                emailBody.matches(".*Number of Oracle records without corresponding message in SDX:</td>\\s*<td>3.*"),
-                "Number of Oracle records without corresponding message in SDX: 3");
-        Assertions.assertTrue(emailBody.matches(".*Number of invalid records in Oracle:</td>\\s*<td>0.*"),
-                "Number of invalid records in Oracle: 0");
+                emailBody.matches(".*Number of Database records without corresponding message in SDX:</td>\\s*<td>3.*"),
+                "Number of Database records without corresponding message in SDX: 3");
+        Assertions.assertTrue(emailBody.matches(".*Number of invalid records in Database:</td>\\s*<td>0.*"),
+                "Number of invalid records in Database: 0");
         Assertions.assertTrue(emailBody.matches(".*Exceptions while attempting automatic cleanup.*"));
         Assertions.assertTrue(emailBody.matches(".*" + exText + ".*"));
     }
 
     @Test
-    public void generateSdxSummaryEmail_withInvOracleRecordsSection() throws IOException {
+    public void generateSdxSummaryEmail_withInvDbRecordsSection() throws IOException {
         // Arrange
         EmailFormatter uut = new EmailFormatter();
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
-        List<CActiveTim> invOracleRecords = new ArrayList<>();
+        List<CActiveTim> invDbRecords = new ArrayList<>();
 
         ActiveTim invRecord = new ActiveTim();
         invRecord.setActiveTimId(100l);
         invRecord.setSatRecordId("invHex");
 
-        invOracleRecords.add(new CActiveTim(invRecord));
+        invDbRecords.add(new CActiveTim(invRecord));
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(0, 0, 0, toResend, deleteFromSdx, invOracleRecords, "");
+        String emailBody = uut.generateSdxSummaryEmail(0, 0, 0, toResend, deleteFromSdx, invDbRecords, "");
 
         // Assert
-        Assertions.assertTrue(emailBody.matches(".*<h3>Invalid Oracle records</h3>.*"),
-                "Contains section: Invalid Oracle records");
+        Assertions.assertTrue(emailBody.matches(".*<h3>Invalid Database records</h3>.*"),
+                "Contains section: Invalid Database records");
         Assertions.assertTrue(emailBody.matches(".*<tr><td>100</td><td>invHex</td></tr>.*"),
                 "<tr><td>100</td><td>invHex</td></tr>");
     }
@@ -88,7 +88,7 @@ public class EmailFormatterTest {
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
-        List<CActiveTim> invOracleRecords = new ArrayList<>();
+        List<CActiveTim> invDbRecords = new ArrayList<>();
 
         ActiveTim resend = new ActiveTim();
         resend.setActiveTimId(200l);
@@ -97,7 +97,7 @@ public class EmailFormatterTest {
         toResend.add(new CActiveTim(resend));
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(0, 1, 0, toResend, deleteFromSdx, invOracleRecords, "");
+        String emailBody = uut.generateSdxSummaryEmail(0, 1, 0, toResend, deleteFromSdx, invDbRecords, "");
 
         // Assert
         Assertions.assertTrue(emailBody.matches(".*<h3>ActiveTims to resend to SDX</h3>.*"),
@@ -113,14 +113,14 @@ public class EmailFormatterTest {
 
         List<CActiveTim> toResend = new ArrayList<>();
         List<CAdvisorySituationDataDeposit> deleteFromSdx = new ArrayList<>();
-        List<CActiveTim> invOracleRecords = new ArrayList<>();
+        List<CActiveTim> invDbRecords = new ArrayList<>();
 
         AdvisorySituationDataDeposit invAsdd = new AdvisorySituationDataDeposit();
         invAsdd.setRecordId(-200);
         deleteFromSdx.add(new CAdvisorySituationDataDeposit(invAsdd, null));
 
         // Act
-        String emailBody = uut.generateSdxSummaryEmail(1, 0, 0, toResend, deleteFromSdx, invOracleRecords, "");
+        String emailBody = uut.generateSdxSummaryEmail(1, 0, 0, toResend, deleteFromSdx, invDbRecords, "");
 
         // Assert
         Assertions.assertTrue(emailBody.matches(".*<h3>Orphaned records to delete from SDX</h3>.*"),

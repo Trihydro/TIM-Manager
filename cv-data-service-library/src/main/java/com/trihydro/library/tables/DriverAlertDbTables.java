@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DriverAlertOracleTables extends OracleTables {
+public class DriverAlertDbTables extends DbTables {
     
     private List<String> driverAlertTable;
 

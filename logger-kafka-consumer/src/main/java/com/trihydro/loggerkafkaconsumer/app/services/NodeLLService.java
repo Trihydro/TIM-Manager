@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,12 +15,12 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 @Component
 public class NodeLLService extends BaseService {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -32,12 +32,12 @@ public class NodeLLService extends BaseService {
         try {
 
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("node_ll",
-                    timOracleTables.getNodeLLTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("node_ll",
+                    timDbTables.getNodeLLTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "node_ll_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getNodeLLTable()) {
+            for (String col : timDbTables.getNodeLLTable()) {
                 if (col.equals("DELTA"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, nodeXY.getDelta());
                 else if (col.equals("NODE_LAT"))

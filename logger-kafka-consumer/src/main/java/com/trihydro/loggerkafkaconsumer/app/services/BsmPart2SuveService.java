@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,18 +15,18 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 @Component
 public class BsmPart2SuveService extends BaseService {
 
-	private BsmOracleTables bsmOracleTables;
+	private BsmDbTables bsmDbTables;
 
 	@Autowired
-	public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
-		bsmOracleTables = _bsmOracleTables;
+	public void InjectDependencies(BsmDbTables _bsmDbTables) {
+		bsmDbTables = _bsmDbTables;
 	}
 
 	public Long insertBSMPart2SUVE(J2735BsmPart2Content part2Content, J2735SupplementalVehicleExtensions suve,
 			Long bsmCoreDataId) {
 
-		String bsmSuveInsertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_part2_suve",
-				bsmOracleTables.getBsmPart2SuveTable());
+		String bsmSuveInsertQueryStatement = bsmDbTables.buildInsertQueryStatement("bsm_part2_suve",
+				bsmDbTables.getBsmPart2SuveTable());
 		PreparedStatement bsmSuvePreparedStatement = null;
 		Connection connection = null;
 

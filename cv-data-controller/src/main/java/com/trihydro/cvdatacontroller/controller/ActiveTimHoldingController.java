@@ -5,13 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,12 +31,12 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("active-tim-holding")
 @ApiIgnore
 public class ActiveTimHoldingController extends BaseController {
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -46,8 +47,8 @@ public class ActiveTimHoldingController extends BaseController {
         PreparedStatement preparedStatement = null;
         Long activeTimHoldingId = 0l;
         try {
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim_holding",
-                    timOracleTables.getActiveTimHoldingTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim_holding",
+                    timDbTables.getActiveTimHoldingTable());
 
             // get connection
             connection = dbInteractions.getConnectionPool();
@@ -56,7 +57,7 @@ public class ActiveTimHoldingController extends BaseController {
                     new String[] { "active_tim_holding_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getActiveTimHoldingTable()) {
+            for (String col : timDbTables.getActiveTimHoldingTable()) {
                 if (col.equals("ACTIVE_TIM_HOLDING_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTimHolding.getActiveTimHoldingId());
                 } else if (col.equals("CLIENT_ID")) {
@@ -91,8 +92,8 @@ public class ActiveTimHoldingController extends BaseController {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
                 } else if (col.equals("DATE_CREATED")) {
                     java.util.Date dateCreated = utility.convertDate(activeTimHolding.getDateCreated());
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            utility.timestampFormat.format(dateCreated));
+                    Timestamp dateCreatedTimestamp = new Timestamp(dateCreated.getTime());
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, dateCreatedTimestamp);
                 } else if (col.equals("PROJECT_KEY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
                 } else if (col.equals("EXPIRATION_DATE")) {

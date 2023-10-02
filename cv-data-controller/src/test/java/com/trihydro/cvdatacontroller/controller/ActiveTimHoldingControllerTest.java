@@ -7,13 +7,14 @@ import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 
 public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingController> {
         @Spy
-        private TimOracleTables mockTimOracleTables = new TimOracleTables();
+        private TimDbTables mockTimDbTables = new TimDbTables();
         @Mock
         private SQLNullHandler mockSqlNullHandler;
 
@@ -34,13 +35,13 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
 
         @BeforeEach
         public void setupSubTest() {
-                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+                uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
                 startCoord = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
                 endCoord = new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(6));
         }
 
         private void setupInsertQueryStatement() {
-                doReturn("insert query statement").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+                doReturn("insert query statement").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
         }
 
         private void setupPreparedStatement() throws SQLException {
@@ -62,6 +63,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 java.util.Date date_created = java.util.Date.from(now);
                 doReturn(date_created).when(mockUtility).convertDate(any());
                 mockUtility.timestampFormat = timestampFormat;
+                Timestamp timestampDateCreated = new Timestamp(date_created.getTime());
 
                 // Act
                 ResponseEntity<Long> data = uut.InsertActiveTimHolding(activeTimHolding);
@@ -81,8 +83,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
-                                timestampFormat.format(date_created));// DATE_CREATED
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11, timestampDateCreated);// DATE_CREATED
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
                                 activeTimHolding.getProjectKey());// PROJECT_KEY
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 13,
@@ -108,6 +109,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 java.util.Date date_created = java.util.Date.from(now);
                 doReturn(date_created).when(mockUtility).convertDate(activeTimHolding.getDateCreated());
                 mockUtility.timestampFormat = timestampFormat;
+                Timestamp timestampDateCreated = new Timestamp(date_created.getTime());
 
                 String query = "select active_tim_holding_id from active_tim_holding";
                 query += " where sat_record_id = '" + activeTimHolding.getSatRecordId();
@@ -133,8 +135,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
-                                timestampFormat.format(date_created));// DATE_CREATED
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11, timestampDateCreated);// DATE_CREATED
 
                 verify(mockStatement).executeQuery(query);
         }
@@ -157,6 +158,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 java.util.Date date_created = java.util.Date.from(now);
                 doReturn(date_created).when(mockUtility).convertDate(activeTimHolding.getDateCreated());
                 mockUtility.timestampFormat = timestampFormat;
+                Timestamp timestampDateCreated = new Timestamp(date_created.getTime());
 
                 String query = "select active_tim_holding_id from active_tim_holding";
                 query += " where rsu_target = '" + activeTimHolding.getRsuTarget();
@@ -182,8 +184,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 9,
                                 activeTimHolding.getEndPoint().getLongitude());// END_LONGITUDE
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 10, activeTimHolding.getRsuIndex());// RSU_INDEX
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
-                                timestampFormat.format(date_created));// DATE_CREATED
+                verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11, timestampDateCreated);// DATE_CREATED
 
                 verify(mockStatement).executeQuery(query);
         }

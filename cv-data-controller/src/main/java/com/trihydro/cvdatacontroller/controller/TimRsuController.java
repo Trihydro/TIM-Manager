@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TimRsu;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,12 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tim-rsu")
 public class TimRsuController extends BaseController {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -44,12 +44,12 @@ public class TimRsuController extends BaseController {
 
         try {
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("TIM_RSU",
-                    timOracleTables.getTimRsuTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "TIM_RSU_ID" });
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("TIM_RSU",
+                    timDbTables.getTimRsuTable());
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_rsu_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getTimRsuTable()) {
+            for (String col : timDbTables.getTimRsuTable()) {
                 if (col.equals("TIM_ID"))
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
                 else if (col.equals("RSU_ID"))

@@ -162,7 +162,7 @@ public class TimGenerationHelper {
 
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
-                mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp, false);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
@@ -279,7 +279,7 @@ public class TimGenerationHelper {
 
             // reduce the mileposts by removing straight away posts
             var anchorMp = allMps.remove(0);
-            mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+            mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
             tim = getTim(tum, mps, allMps, anchorMp, false);
             if (tim == null) {
                 String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d", tum.getActiveTimId());
@@ -367,7 +367,7 @@ public class TimGenerationHelper {
 
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
-                reduced_mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, false);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
@@ -436,7 +436,7 @@ public class TimGenerationHelper {
 
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
-                reduced_mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, true, false);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
@@ -505,7 +505,7 @@ public class TimGenerationHelper {
 
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = allMps.remove(0);
-                reduced_mps = milepostReduction.applyMilepostReductionAlorithm(allMps, config.getPathDistanceLimit());
+                reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",

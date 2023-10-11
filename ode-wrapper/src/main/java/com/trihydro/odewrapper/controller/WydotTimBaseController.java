@@ -578,7 +578,7 @@ public abstract class WydotTimBaseController {
         }
 
         var anchor = milepostsAll.remove(0);
-        var reducedMileposts = milepostReduction.applyMilepostReductionAlorithm(milepostsAll,
+        var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
                 configuration.getPathDistanceLimit());
 
         createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,

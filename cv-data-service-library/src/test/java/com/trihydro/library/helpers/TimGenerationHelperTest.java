@@ -168,7 +168,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -184,7 +184,7 @@ public class TimGenerationHelperTest {
                 mockSdwService, mockRsuService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService);
     }
 
@@ -199,7 +199,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
@@ -221,7 +221,7 @@ public class TimGenerationHelperTest {
                 mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService);
     }
 
@@ -236,7 +236,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
@@ -259,7 +259,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockActiveTimHoldingService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService);
     }
@@ -275,7 +275,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
@@ -305,7 +305,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -321,7 +321,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
@@ -354,7 +354,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -370,7 +370,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
@@ -405,7 +405,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -421,7 +421,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
@@ -450,7 +450,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -467,7 +467,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
@@ -482,7 +482,7 @@ public class TimGenerationHelperTest {
 
         verifyNoInteractions(mockPathNodeXYService);
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -499,7 +499,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
@@ -513,7 +513,7 @@ public class TimGenerationHelperTest {
         verify(mockOdeService).updateTimOnSdw(any());
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
 
@@ -638,7 +638,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
@@ -656,7 +656,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -673,7 +673,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
@@ -686,7 +686,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -771,7 +771,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
 
         var validationResults = getValidationResults();
@@ -792,7 +792,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService);
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService, mockOdeService,
                 mockActiveTimHoldingService, mockRsuService);
@@ -807,7 +807,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
 
         var validationResults = getValidationResults();
@@ -825,7 +825,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService);
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService, mockOdeService,
                 mockActiveTimHoldingService, mockRsuService);
@@ -841,7 +841,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
 
         var validationResults = getValidationResults();
@@ -862,7 +862,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService);
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService, mockOdeService,
                 mockActiveTimHoldingService, mockRsuService);
@@ -877,7 +877,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
@@ -913,7 +913,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction, times(2)).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction, times(2)).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -927,7 +927,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
@@ -963,7 +963,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction, times(2)).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction, times(2)).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -977,7 +977,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
@@ -1011,7 +1011,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }
@@ -1025,7 +1025,7 @@ public class TimGenerationHelperTest {
 
         List<Milepost> mps = new ArrayList<Milepost>();
         mps.add(new Milepost());
-        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
@@ -1053,7 +1053,7 @@ public class TimGenerationHelperTest {
         verifyNoInteractions(mockPathNodeXYService, mockRegionService, mockSdwService);
 
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockMilepostReduction).applyMilepostReductionAlorithm(any(), any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService);
     }

@@ -19,47 +19,47 @@ public class MilepostReductionTest {
     private int defaultLaneWidth = 50;
 
     @Test
-    public void applyMilepostReductionAlorithm_SUCCESS() {
+    public void applyMilepostReductionAlgorithm_SUCCESS() {
         // Arrange
         List<Milepost> mps = getMileposts();
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlgorithm(mps, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertTrue(mps.size() > reduced.size());
     }
 
     @Test
-    public void applyMilepostReductionAlorithm_SUCCESS_Vsl() {
+    public void applyMilepostReductionAlgorithm_SUCCESS_Vsl() {
         // Arrange
         List<Milepost> mps = getMpVsl();
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlgorithm(mps, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertTrue(mps.size() > reduced.size());
     }
 
     @Test
-    public void applyMilepostReductionAlorithm_NULL() {
+    public void applyMilepostReductionAlgorithm_NULL() {
         // Arrange
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(null, Double.valueOf(defaultLaneWidth / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlgorithm(null, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertNull(reduced);
     }
 
     @Test
-    public void applyMilepostReductionAlorithm_empty() {
+    public void applyMilepostReductionAlgorithm_empty() {
         // Arrange
         List<Milepost> mps = new ArrayList<>();
 
         // Act
-        List<Milepost> reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
+        List<Milepost> reduced = uut.applyMilepostReductionAlgorithm(mps, Double.valueOf(defaultLaneWidth / 2));
 
         // Assert
         Assertions.assertEquals(0, reduced.size());
@@ -71,7 +71,7 @@ public class MilepostReductionTest {
         var mps = getMilepostsFromFile();
     
         // Act
-        var reduced = uut.applyMilepostReductionAlorithm(mps, Double.valueOf(defaultLaneWidth / 2));
+        var reduced = uut.applyMilepostReductionAlgorithm(mps, Double.valueOf(defaultLaneWidth / 2));
     
         // Assert
         Assertions.assertEquals(18, reduced.size());

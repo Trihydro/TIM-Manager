@@ -41,4 +41,39 @@ public class TriggerRoadTest {
         // verify
         assertEquals(countyRoadSegments, countyRoadSegmentsFound);
     }
+
+    @Test
+    public void testGetCountyRoadSegmentIds() {
+        // prepare
+        String roadCode = "example road code";
+        List<CountyRoadSegment> countyRoadSegments = new ArrayList<>();
+        CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "example common name", 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, true, true, true, true);
+        countyRoadSegments.add(countyRoadSegment);
+        List<Integer> expectedCountyRoadSegmentIds = new ArrayList<>();
+        expectedCountyRoadSegmentIds.add(countyRoadSegment.getId());
+
+        // execute
+        TriggerRoad triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
+        List<Integer> countyRoadSegmentIds = triggerRoad.getCountyRoadSegmentIds();
+
+        // verify
+        assertEquals(1, countyRoadSegmentIds.size());
+        assertEquals(expectedCountyRoadSegmentIds, countyRoadSegmentIds);
+    }
+
+    @Test
+    public void testHasCountyRoadSegments() {
+        // prepare
+        String roadCode = "example road code";
+        List<CountyRoadSegment> countyRoadSegments = new ArrayList<>();
+        CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "example common name", 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, true, true, true, true);
+        countyRoadSegments.add(countyRoadSegment);
+
+        // execute
+        TriggerRoad triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
+        boolean hasCountyRoadSegments = triggerRoad.hasCountyRoadSegments();
+
+        // verify
+        assertEquals(true, hasCountyRoadSegments);
+    }
 }

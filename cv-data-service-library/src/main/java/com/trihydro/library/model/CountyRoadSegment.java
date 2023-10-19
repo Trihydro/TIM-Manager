@@ -1,7 +1,5 @@
 package com.trihydro.library.model;
 
-import java.util.List;
-
 /**
  * A county road segment is a segment of a county road that has a number of conditions associated with it.
  */
@@ -83,21 +81,7 @@ public class CountyRoadSegment {
         return ntt;
     }
 
-    public boolean hasCorrespondingCondition(List<String> conditions) {
-        if (conditions.contains("closed") && this.isClosed()) {
-            return true;
-        }
-        else if (conditions.contains("c2lhpv") && this.isC2lhpv()) {
-            return true;
-        }
-        else if (conditions.contains("loct") && this.isLoct()) {
-            return true;
-        }
-        else if (conditions.contains("ntt") && this.isNtt()) {
-            return true;
-        }
-        else {
-            return false;
-        }
+    public boolean hasOneOrMoreCondition() {
+        return closed || c2lhpv || loct || ntt;
     }
 }

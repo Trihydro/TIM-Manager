@@ -1,6 +1,7 @@
 package com.trihydro.library.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,6 +10,11 @@ import java.util.List;
 public class TriggerRoad implements Serializable {
     private String roadCode;
     private List<CountyRoadSegment> countyRoadSegments;
+
+    public TriggerRoad(String roadCode) {
+        this.roadCode = roadCode;
+        this.countyRoadSegments = new ArrayList<CountyRoadSegment>();
+    }
 
     public TriggerRoad(String roadCode, List<CountyRoadSegment> countyRoadSegments) {
         this.roadCode = roadCode;
@@ -21,5 +27,21 @@ public class TriggerRoad implements Serializable {
 
     public List<CountyRoadSegment> getCountyRoadSegments() {
         return countyRoadSegments;
+    }
+
+    public void addCountyRoadSegment(CountyRoadSegment countyRoadSegment) {
+        countyRoadSegments.add(countyRoadSegment);
+    }
+
+    public List<Integer> getCountyRoadSegmentIds() {
+        List<Integer> countyRoadSegmentIds = new ArrayList<Integer>();
+        for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
+            countyRoadSegmentIds.add(countyRoadSegment.getId());
+        }
+        return countyRoadSegmentIds;
+    }
+
+    public boolean hasCountyRoadSegments() {
+        return countyRoadSegments.size() > 0;
     }
 }

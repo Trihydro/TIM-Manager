@@ -1,6 +1,6 @@
 package com.trihydro.library.helpers.caches;
 
-import java.io.Serializable;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.jcs.JCS;
@@ -13,7 +13,7 @@ import com.trihydro.library.model.TriggerRoad;
 
 public class TriggerRoadCache {
     private Utility utility = new Utility();
-    private CacheAccess<String, Serializable> cache;
+    private CacheAccess<String, List<Integer>> cache;
 
     // cache attributes
     private static final String jcsDefault = "";
@@ -21,14 +21,14 @@ public class TriggerRoadCache {
     private static final String jcsDefaultCacheAttributesMaxObjects = "1000";
     private static final String jcsDefaultCacheAttributesMemoryCacheName = "org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache";
     private static final String jcsDefaultCacheAttributesUseMemoryShrinker = "true";
-    private static final String jcsDefaultCacheAttributesMaxMemoryIdleTimeSeconds = "60";
-    private static final String jcsDefaultCacheAttributesShrinkerIntervalSeconds = "60";
+    private static final String jcsDefaultCacheAttributesMaxMemoryIdleTimeSeconds = "3600"; // 1 hour
+    private static final String jcsDefaultCacheAttributesShrinkerIntervalSeconds = "3600"; // 1 hour
     private static final String jcsDefaultCacheAttributesMaxSpoolPerRun = "500";
 
     // element attributes
     private static final String jcsDefaultElementAttributes = "org.apache.commons.jcs.engine.ElementAttributes";
     private static final String jcsDefaultElementAttributesIsEternal = "false";
-    private static final String jcsDefaultElementAttributesMaxLife = "60";
+    private static final String jcsDefaultElementAttributesMaxLife = "3600"; // 1 hour
     private static final String jcsDefaultElementAttributesIsSpool = "true";
     private static final String jcsDefaultElementAttributesIsRemote = "false";
     private static final String jcsDefaultElementAttributesIsLateral = "false";
@@ -38,12 +38,16 @@ public class TriggerRoadCache {
         cache = createCache();
     }
 
-    public TriggerRoad getTriggerRoad(String roadCode) {
-        return (TriggerRoad) cache.get(roadCode);
+    public List<Integer> getSegmentIdsAssociatedWithTriggerRoad(String roadCode) throws NotCachedException {
+        List<Integer> segmentIds = cache.get(roadCode);
+        if (segmentIds == null) {
+            throw new NotCachedException("Trigger road " + roadCode + " not found in cache");
+        }
+        return segmentIds;
     }
 
     public void updateCache(String roadCode, TriggerRoad triggerRoad) {
-        cache.put(roadCode, triggerRoad);
+        cache.put(roadCode, triggerRoad.getCountyRoadSegmentIds());
     }
 
     public void clear() {
@@ -51,19 +55,19 @@ public class TriggerRoadCache {
     }
 
     public void shutdown() {
-        log("\n====================\nShutting down cache...\n====================\n");
+        utility.logWithDate("[TriggerCache] \n====================\nShutting down cache...\n====================\n");
         cache.getCacheControl().dispose();
-        log("\n====================\nCache shut down\n====================\n");
+        utility.logWithDate("[TriggerCache] \n====================\nCache shut down\n====================\n");
     }
 
-    private CacheAccess<String, Serializable> createCache() throws CacheException {
-        log("\n====================\nCreating cache...\n====================\n");
-        CacheAccess<String, Serializable> cache = createCacheSimple();
-        log("\n====================\nCache created\n====================\n");
+    private CacheAccess<String, List<Integer>> createCache() throws CacheException {
+        utility.logWithDate("[TriggerCache] \n====================\nCreating cache...\n====================\n");
+        CacheAccess<String, List<Integer>> cache = createCacheSimple();
+        utility.logWithDate("[TriggerCache] \n====================\nCache created\n====================\n");
         return cache;
     }
 
-    private CacheAccess<String, Serializable> createCacheSimple() throws CacheException {
+    private CacheAccess<String, List<Integer>> createCacheSimple() throws CacheException {
         CompositeCacheManager ccm = CompositeCacheManager.getUnconfiguredInstance();
         Properties props = new Properties();
         
@@ -83,28 +87,31 @@ public class TriggerRoadCache {
         props.put("jcs.default.elementattributes.IsRemote", jcsDefaultElementAttributesIsRemote);
         props.put("jcs.default.elementattributes.IsLateral", jcsDefaultElementAttributesIsLateral);
 
-        log("Cache Configuration:");
-        log("- jcs.default: " + props.getProperty("jcs.default"));
-        log("- jcs.default.cacheattributes: " + props.getProperty("jcs.default.cacheattributes"));
-        log("- jcs.default.cacheattributes.MaxObjects: " + props.getProperty("jcs.default.cacheattributes.MaxObjects"));
-        log("- jcs.default.cacheattributes.MemoryCacheName: " + props.getProperty("jcs.default.cacheattributes.MemoryCacheName"));
-        log("- jcs.default.cacheattributes.UseMemoryShrinker: " + props.getProperty("jcs.default.cacheattributes.UseMemoryShrinker"));
-        log("- jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds: " + props.getProperty("jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds"));
-        log("- jcs.default.cacheattributes.ShrinkerIntervalSeconds: " + props.getProperty("jcs.default.cacheattributes.ShrinkerIntervalSeconds"));
-        log("- jcs.default.cacheattributes.MaxSpoolPerRun: " + props.getProperty("jcs.default.cacheattributes.MaxSpoolPerRun"));
-        log("- jcs.default.elementattributes: " + props.getProperty("jcs.default.elementattributes"));
-        log("- jcs.default.elementattributes.IsEternal: " + props.getProperty("jcs.default.elementattributes.IsEternal"));
-        log("- jcs.default.elementattributes.MaxLife: " + props.getProperty("jcs.default.elementattributes.MaxLife"));
-        log("- jcs.default.elementattributes.IsSpool: " + props.getProperty("jcs.default.elementattributes.IsSpool"));
-        log("- jcs.default.elementattributes.IsRemote: " + props.getProperty("jcs.default.elementattributes.IsRemote"));
-        log("- jcs.default.elementattributes.IsLateral: " + props.getProperty("jcs.default.elementattributes.IsLateral"));
+        utility.logWithDate("[TriggerCache] Cache Configuration:");
+        utility.logWithDate("[TriggerCache] - jcs.default: " + props.getProperty("jcs.default"));
+        utility.logWithDate("[TriggerCache] - jcs.default.cacheattributes: " + props.getProperty("jcs.default.cacheattributes"));
+        utility.logWithDate("[TriggerCache] - jcs.default.cacheattributes.MaxObjects: " + props.getProperty("jcs.default.cacheattributes.MaxObjects"));
+        utility.logWithDate("[TriggerCache] - jcs.default.cacheattributes.MemoryCacheName: " + props.getProperty("jcs.default.cacheattributes.MemoryCacheName"));
+        utility.logWithDate("[TriggerCache] - jcs.default.cacheattributes.UseMemoryShrinker: " + props.getProperty("jcs.default.cacheattributes.UseMemoryShrinker"));
+        utility.logWithDate("[TriggerCache] - jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds: " + props.getProperty("jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds"));
+        utility.logWithDate("[TriggerCache] - jcs.default.cacheattributes.ShrinkerIntervalSeconds: " + props.getProperty("jcs.default.cacheattributes.ShrinkerIntervalSeconds"));
+        utility.logWithDate("[TriggerCache] - jcs.default.cacheattributes.MaxSpoolPerRun: " + props.getProperty("jcs.default.cacheattributes.MaxSpoolPerRun"));
+        utility.logWithDate("[TriggerCache] - jcs.default.elementattributes: " + props.getProperty("jcs.default.elementattributes"));
+        utility.logWithDate("[TriggerCache] - jcs.default.elementattributes.IsEternal: " + props.getProperty("jcs.default.elementattributes.IsEternal"));
+        utility.logWithDate("[TriggerCache] - jcs.default.elementattributes.MaxLife: " + props.getProperty("jcs.default.elementattributes.MaxLife"));
+        utility.logWithDate("[TriggerCache] - jcs.default.elementattributes.IsSpool: " + props.getProperty("jcs.default.elementattributes.IsSpool"));
+        utility.logWithDate("[TriggerCache] - jcs.default.elementattributes.IsRemote: " + props.getProperty("jcs.default.elementattributes.IsRemote"));
+        utility.logWithDate("[TriggerCache] - jcs.default.elementattributes.IsLateral: " + props.getProperty("jcs.default.elementattributes.IsLateral"));
         
         ccm.configure(props);
-        CacheAccess<String, Serializable> cache = JCS.getInstance("default");
+        CacheAccess<String, List<Integer>> cache = JCS.getInstance("default");
         return cache;
     }
 
-    private void log(String message) {
-        utility.logWithDate("[TriggerCache] " + message);
+    public class NotCachedException extends Exception {
+        private static final long serialVersionUID = 1L;
+        public NotCachedException(String message) {
+            super(message);
+        }
     }
 }

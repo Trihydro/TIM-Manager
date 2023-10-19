@@ -3,9 +3,6 @@ package com.trihydro.library.models;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
 
 import com.trihydro.library.model.CountyRoadSegment;
@@ -54,134 +51,92 @@ public class CountyRoadSegmentTest {
     }
 
     @Test
-    public void testHasCorrespondingCondition_Closed_True() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("closed");
-
+    public void testHasOneOrMoreCondition_Closed_True() {
         // execute
-        boolean hasCorrespondingCondition = closedCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = closedCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(true, hasCorrespondingCondition);
+        assertEquals(true, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_Closed_False() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("closed");
-
+    public void testHasOneOrMoreCondition_Closed_False() {
         // execute
-        boolean hasCorrespondingCondition = allFalseCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = allFalseCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(false, hasCorrespondingCondition);
+        assertEquals(false, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_C2lhpv_True() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("c2lhpv");
-
+    public void testHasOneOrMoreCondition_C2lhpv_True() {
         // execute
-        boolean hasCorrespondingCondition = c2lhpvCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = c2lhpvCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(true, hasCorrespondingCondition);
+        assertEquals(true, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_C2lhpv_False() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("c2lhpv");
-
+    public void testHasOneOrMoreCondition_C2lhpv_False() {
         // execute
-        boolean hasCorrespondingCondition = allFalseCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = allFalseCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(false, hasCorrespondingCondition);
+        assertEquals(false, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_Loct_True() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("loct");
-
+    public void testHasOneOrMoreCondition_Loct_True() {
         // execute
-        boolean hasCorrespondingCondition = loctCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = loctCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(true, hasCorrespondingCondition);
+        assertEquals(true, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_Loct_False() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("loct");
-
+    public void testHasOneOrMoreCondition_Loct_False() {
         // execute
-        boolean hasCorrespondingCondition = allFalseCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = allFalseCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(false, hasCorrespondingCondition);
+        assertEquals(false, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_Ntt_True() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("ntt");
-
+    public void testHasOneOrMoreCondition_Ntt_True() {
         // execute
-        boolean hasCorrespondingCondition = nttCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = nttCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(true, hasCorrespondingCondition);
+        assertEquals(true, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_Ntt_False() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("ntt");
-
+    public void testHasOneOrMoreCondition_Ntt_False() {
         // execute
-        boolean hasCorrespondingCondition = allFalseCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = allFalseCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(false, hasCorrespondingCondition);
+        assertEquals(false, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_LoctOrNtt_True() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("loct");
-        conditions.add("ntt");
-
+    public void testHasOneOrMoreCondition_LoctOrNtt_True() {
         // execute
-        boolean hasCorrespondingCondition = loctCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = loctCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(true, hasCorrespondingCondition);
+        assertEquals(true, hasOneOrMoreCondition);
     }
 
     @Test
-    public void testHasCorrespondingCondition_LoctOrNtt_False() {
-        // prepare
-        List<String> conditions = new ArrayList<String>();
-        conditions.add("loct");
-        conditions.add("ntt");
-
+    public void testHasOneOrMoreCondition_LoctOrNtt_False() {
         // execute
-        boolean hasCorrespondingCondition = allFalseCountyRoadSegment.hasCorrespondingCondition(conditions);
+        boolean hasOneOrMoreCondition = allFalseCountyRoadSegment.hasOneOrMoreCondition();
 
         // verify
-        assertEquals(false, hasCorrespondingCondition);
+        assertEquals(false, hasOneOrMoreCondition);
     }
 }

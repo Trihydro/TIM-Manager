@@ -65,51 +65,27 @@ public class CascadeController extends BaseController {
      */
     @RequestMapping(value = "/trigger-road/{roadCode}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<TriggerRoad> getTriggerRoad(@PathVariable String roadCode) {
-        TriggerRoad triggerRoad = triggerRoadCache.getTriggerRoad(roadCode);
-        if (triggerRoad == null) {
-            Connection connection = null;
-            Statement statement = null;
-            ResultSet rs = null;
+        TriggerRoad triggerRoad = null;
+        boolean cached = false;
 
-            try {
-                connection = dbInteractions.getConnectionPool();
-                statement = connection.createStatement();
-
-                // build SQL statement
-                String viewName = CountyRoadsTriggerView.countyRoadsTriggerViewName;
-                String query = "select * from " + viewName + " where road_code = '" + roadCode + "'";
-                rs = statement.executeQuery(query);
-
-                List<CountyRoadSegment> countyRoadSegments = new ArrayList<CountyRoadSegment>();
-                while (rs.next()) {
-                    CountyRoadSegment countyRoadSegment;
-                    try {
-                        countyRoadSegment = buildCountyRoadSegment(rs);
-                    } catch (RecordNotFoundException e) {
-                        continue;
-                    }
-                    countyRoadSegments.add(countyRoadSegment);
-                }
-                triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
-                addToCache(triggerRoad);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(triggerRoad);
-            } finally {
-                try {
-                    // close prepared statement
-                    if (statement != null)
-                        statement.close();
-                    // return connection back to pool
-                    if (connection != null)
-                        connection.close();
-                    // close result set
-                    if (rs != null)
-                        rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+        try {
+            List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
+            cached = true;
+            if (countyRoadIds.size() == 0) {
+                // avoid hitting the database if we know there are no segments associated with this road code
+                return new ResponseEntity<TriggerRoad>(new TriggerRoad(roadCode, new ArrayList<CountyRoadSegment>()), HttpStatus.OK);
             }
+        } catch (TriggerRoadCache.NotCachedException notCachedException) {
+            cached = false;
+        }
+        try {
+            triggerRoad = retrieveTriggerRoadFromDatabase(roadCode);
+            if (!cached) {
+                addToCache(triggerRoad);
+            }
+        } catch(SQLException sqlException) {
+            sqlException.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
         return new ResponseEntity<TriggerRoad>(triggerRoad, HttpStatus.OK);
     }
@@ -163,6 +139,53 @@ public class CascadeController extends BaseController {
             }
         }
         return new ResponseEntity<List<Milepost>>(mileposts, HttpStatus.OK);
+    }
+
+    private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) throws SQLException {
+        TriggerRoad triggerRoad = null;
+        
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = dbInteractions.getConnectionPool();
+            statement = connection.createStatement();
+
+            // build SQL statement
+            String viewName = CountyRoadsTriggerView.countyRoadsTriggerViewName;
+            String query = "select * from " + viewName + " where road_code = '" + roadCode + "'";
+            rs = statement.executeQuery(query);
+
+            List<CountyRoadSegment> countyRoadSegments = new ArrayList<CountyRoadSegment>();
+            while (rs.next()) {
+                CountyRoadSegment countyRoadSegment;
+                try {
+                    countyRoadSegment = buildCountyRoadSegment(rs);
+                } catch (RecordNotFoundException e) {
+                    continue;
+                }
+                countyRoadSegments.add(countyRoadSegment);
+            }
+            triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return triggerRoad;
     }
 
     /**

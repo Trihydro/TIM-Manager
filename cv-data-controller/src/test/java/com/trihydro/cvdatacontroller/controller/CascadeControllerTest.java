@@ -34,7 +34,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
     }
 
     @Test
-    public void testGetTriggerRoad_CacheHit_SegmentsFound_SUCCESS() {
+    public void testGetTriggerRoad_CacheHit_SegmentsFound_SUCCESS() throws SQLException {
         // prepare
         String roadCode = "test";
         CountyRoadSegment countyRoadSegment = createCountyRoadSegment();
@@ -42,6 +42,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         countyRoadSegments.add(countyRoadSegment);
         TriggerRoad triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
         uut.addToCache(triggerRoad); // add to cache to ensure cache hit
+        doReturn("test").when(mockRs).getString("common_name");
 
         // execute
         ResponseEntity<TriggerRoad> data = uut.getTriggerRoad(roadCode);
@@ -83,7 +84,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
 
         // verify
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        Assertions.assertEquals(1, data.getBody().getCountyRoadSegments().size()); // TODO: fix failing when run with other tests
+        Assertions.assertEquals(1, data.getBody().getCountyRoadSegments().size());
         Assertions.assertEquals(roadCode, data.getBody().getRoadCode());
     }
 

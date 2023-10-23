@@ -2,20 +2,26 @@ package com.trihydro.cvdatacontroller.controller;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.trihydro.cvdatacontroller.model.Milepost;
 import com.trihydro.library.model.CountyRoadSegment;
+import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 
 public class CascadeControllerTest extends TestBase<CascadeController> {
+
+    private JCSCacheProps mockJCSCacheProps;
 
     private CountyRoadSegment createCountyRoadSegment() {
         int countyRoadId = 1;
@@ -31,6 +37,26 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         boolean loct = false;
         boolean ntt = false;
         return new CountyRoadSegment(countyRoadId, commonName, mFrom, mTo, xFrom, yFrom, xTo, yTo, closed, c2lhpv, loct, ntt);
+    }
+
+    @BeforeEach
+    public void setupSubTest() throws SQLException {
+        mockJCSCacheProps = mock(JCSCacheProps.class);
+        doReturn("").when(mockJCSCacheProps).getJcsDefault();
+        doReturn("org.apache.jcs.engine.CompositeCacheAttributes").when(mockJCSCacheProps).getCacheAttributes();
+        doReturn("1000").when(mockJCSCacheProps).getMaxObjects();
+        doReturn("org.apache.jcs.engine.memory.lru.LRUMemoryCache").when(mockJCSCacheProps).getMemoryCacheName();
+        doReturn("true").when(mockJCSCacheProps).getUseMemoryShrinker();
+        doReturn("3600").when(mockJCSCacheProps).getMaxMemoryIdleTimeSeconds();
+        doReturn("60").when(mockJCSCacheProps).getShrinkerIntervalSeconds();
+        doReturn("500").when(mockJCSCacheProps).getMaxSpoolPerRun();
+        doReturn("org.apache.jcs.engine.ElementAttributes").when(mockJCSCacheProps).getElementAttributes();
+        doReturn("false").when(mockJCSCacheProps).getIsEternal();
+        doReturn("3600").when(mockJCSCacheProps).getMaxLife();
+        doReturn("true").when(mockJCSCacheProps).getIsSpool();
+        doReturn("false").when(mockJCSCacheProps).getIsRemote();
+        doReturn("false").when(mockJCSCacheProps).getIsLateral();
+        uut.InjectBaseDependencies(mockUtility, mockJCSCacheProps);
     }
 
     @Test

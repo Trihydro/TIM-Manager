@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,6 +20,7 @@ import com.trihydro.cvdatacontroller.model.Milepost;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.helpers.caches.TriggerRoadCache;
 import com.trihydro.library.model.CountyRoadSegment;
+import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.views.CountyRoadsGeometryView;
 import com.trihydro.library.views.CountyRoadsTriggerView;
@@ -31,16 +33,14 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("cascade")
 public class CascadeController extends BaseController {
     private Utility utility;
+    private JCSCacheProps jcsCacheProps;
     private TriggerRoadCache triggerRoadCache;
 
-    public CascadeController() {
-        this(new Utility());
-    }
-
-    public CascadeController(Utility _utility) {
-        super();
+    @Autowired
+    public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps) {
         utility = _utility;
-        triggerRoadCache = new TriggerRoadCache(utility);
+        jcsCacheProps = _jcsCacheProps;
+        triggerRoadCache = new TriggerRoadCache(utility, jcsCacheProps);
     }
 
     /**

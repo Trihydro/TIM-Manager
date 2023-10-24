@@ -26,7 +26,7 @@ public class RsuService extends BaseService {
 
 			// select all RSUs from RSU table
 			rs = statement.executeQuery(
-					"select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid order by milepost asc");
+					"select * from rsu inner join its.rsu_vw on rsu.deviceid = its.rsu_vw.deviceid order by milepost asc");
 
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();

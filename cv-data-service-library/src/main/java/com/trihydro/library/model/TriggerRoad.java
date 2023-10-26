@@ -11,6 +11,11 @@ public class TriggerRoad implements Serializable {
     private String roadCode;
     private List<CountyRoadSegment> countyRoadSegments;
 
+    public TriggerRoad() {
+        this.roadCode = "";
+        this.countyRoadSegments = new ArrayList<CountyRoadSegment>();
+    }
+
     public TriggerRoad(String roadCode) {
         this.roadCode = roadCode;
         this.countyRoadSegments = new ArrayList<CountyRoadSegment>();

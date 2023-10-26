@@ -17,6 +17,21 @@ public class CountyRoadSegment {
     private boolean loct;
     private boolean ntt;
 
+    public CountyRoadSegment() {
+        this.countyRoadId = 0;
+        this.commonName = "";
+        this.mFrom = 0.0;
+        this.mTo = 0.0;
+        this.xFrom = 0.0;
+        this.yFrom = 0.0;
+        this.xTo = 0.0;
+        this.yTo = 0.0;
+        this.closed = false;
+        this.c2lhpv = false;
+        this.loct = false;
+        this.ntt = false;
+    }
+
     public CountyRoadSegment(int countyRoadId, String commonName, Double mFrom, Double mTo, Double xFrom, 
                        Double yFrom, Double xTo, Double yTo, boolean closed, boolean c2lhpv, boolean loct, boolean ntt) {
         this.countyRoadId = countyRoadId;

@@ -587,7 +587,7 @@ public abstract class WydotTimBaseController {
             return;
         }
 
-        var anchor = milepostsAll.remove(0); // TODO: use position 20 feet away from first milepost for anchor instead
+        var anchor = getAnchorPoint(milepostsAll);
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
                 configuration.getPathDistanceLimit());
 
@@ -678,31 +678,41 @@ public abstract class WydotTimBaseController {
     }
 
     /**
-     * This method handles cascading conditions. It will:
-     *      1. check trigger cache to see if the road has any related segments
-     *      2. if so, ping the database to figure out what (if any) conditions should be set and what the related geometry is
-     *      3. create a new WydotTim for each segment that has conditions using the queried geometry
+     * This method retrieves the trigger road for the route and cascades conditions for each associated segment.
      */
     private void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType) {
         String roadCode = wydotTim.getRoute();
         TriggerRoad triggerRoad = cascadeService.getTriggerRoad(roadCode);
         List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
-
         for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
-            if (!countyRoadSegment.hasOneOrMoreCondition()) {
-                continue;
-            }
-
-            List<Milepost> cascadeMileposts = cascadeService.getMilepostsForSegment(countyRoadSegment);
-            if (cascadeMileposts.size() < 2) { // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode TIM if we supply less than 2.
-                utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
-                return;
-            }
-            var anchor = cascadeMileposts.remove(0); // TODO: use position 20 feet away from first milepost for anchor instead
-            var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
-            
-            WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, anchor, reducedMileposts.get(reducedMileposts.size() - 1), wydotTim.getClientId());
-            createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
+            cascadeConditionsForSegment(countyRoadSegment, timType, startDateTime, endDateTime, pk, content, frameType, wydotTim.getClientId());
         }
+    }
+
+    /**
+     * This method creates a new WydotTim for the given segment and sends it to RSUs and Satellite.
+     */
+    private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
+        if (!countyRoadSegment.hasOneOrMoreCondition()) {
+            return;
+        }
+        List<Milepost> cascadeMileposts = cascadeService.getMilepostsForSegment(countyRoadSegment);
+        if (cascadeMileposts.size() < 2) { // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode TIM if we supply less than 2.
+            utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
+            return;
+        }
+        var anchor = getAnchorPoint(cascadeMileposts);
+        var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
+        WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, anchor, reducedMileposts.get(reducedMileposts.size() - 1), clientId);
+        createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
+    }
+
+    /**
+     * This method returns the anchor point for the given mileposts. Currently, the anchor point is the first milepost in the list.
+     * @param mileposts The mileposts to find the anchor point for.
+     * @return The anchor point.
+     */
+    private Milepost getAnchorPoint(List<Milepost> mileposts) {
+        return mileposts.remove(0); // TODO: use position 20 feet away from first milepost for anchor instead
     }
 }

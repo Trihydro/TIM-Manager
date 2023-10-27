@@ -69,11 +69,6 @@ public abstract class WydotTimBaseController {
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
 
-    private static final String closedItisCode = "770";
-    private static final String c2lhpvItisCode = "Closed to light, high profile vehicles";
-    private static final String loctItisCode = "loct"; // TODO: replace with actual ITIS code
-    private static final String nttItisCode = "ntt"; // TODO: replace with actual ITIS code
-
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, 
@@ -542,7 +537,7 @@ public abstract class WydotTimBaseController {
             expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
         }
 
-        if (containsCascadingCondition(wydotTim)) {
+        if (cascadeService.containsCascadingCondition(wydotTim)) {
             handleCascadingConditions(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
         }
     }
@@ -683,18 +678,6 @@ public abstract class WydotTimBaseController {
     }
 
     /**
-     * This method checks if the TIM contains any cascading conditions. Returns true if it does, false otherwise.
-     */
-    private boolean containsCascadingCondition(WydotTim wydotTim) {
-        List<String> cascadingConditions = new ArrayList<String>();
-        cascadingConditions.add(closedItisCode);
-        cascadingConditions.add(c2lhpvItisCode);
-        cascadingConditions.add(loctItisCode);
-        cascadingConditions.add(nttItisCode);
-        return wydotTim.getItisCodes().stream().anyMatch(cascadingConditions::contains);
-    }
-
-    /**
      * This method handles cascading conditions. It will:
      *      1. check trigger cache to see if the road has any related segments
      *      2. if so, ping the database to figure out what (if any) conditions should be set and what the related geometry is
@@ -718,40 +701,8 @@ public abstract class WydotTimBaseController {
             var anchor = cascadeMileposts.remove(0); // TODO: use position 20 feet away from first milepost for anchor instead
             var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
             
-            WydotTim cascadeTim = buildCascadeTim(countyRoadSegment, anchor, reducedMileposts.get(reducedMileposts.size() - 1), wydotTim.getClientId());
+            WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, anchor, reducedMileposts.get(reducedMileposts.size() - 1), wydotTim.getClientId());
             createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
         }
-    }
-
-    /**
-     * This method builds a WydotTim for one or more cascading conditions associated with a segment.
-     * @param countyRoadSegment The segment that has the condition(s)
-     * @param anchor The first milepost in the segment
-     * @param lastMilepost The last milepost in the segment
-     * @param clientId The client ID of the original TIM
-     * @return A WydotTim that represents the cascading condition(s) for the segment
-     */
-    private WydotTim buildCascadeTim(CountyRoadSegment countyRoadSegment, Milepost anchor, Milepost lastMilepost, String clientId) {
-        WydotTim toReturn = new WydotTim();
-        toReturn.setDirection(anchor.getDirection()); // TODO: replace this, we shouldn't use the anchor's direction
-        toReturn.setStartPoint(new Coordinate(anchor.getLatitude(), anchor.getLongitude()));
-        toReturn.setEndPoint(new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude()));
-        toReturn.setRoute(countyRoadSegment.getCommonName());
-        List<String> itisCodes = new ArrayList<String>();
-        if (countyRoadSegment.isClosed()) {
-            itisCodes.add(closedItisCode);
-        }
-        if (countyRoadSegment.isC2lhpv()) {
-            itisCodes.add(c2lhpvItisCode);
-        }
-        if (countyRoadSegment.isLoct()) {
-            itisCodes.add(loctItisCode);
-        }
-        if (countyRoadSegment.isNtt()) {
-            itisCodes.add(nttItisCode);
-        }
-        toReturn.setItisCodes(itisCodes);
-        toReturn.setClientId(clientId + "_triggered_" + countyRoadSegment.getId());
-        return toReturn;
     }
 }

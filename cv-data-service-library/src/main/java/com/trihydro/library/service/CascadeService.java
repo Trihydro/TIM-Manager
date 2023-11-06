@@ -50,8 +50,17 @@ public class CascadeService extends CvDataServiceLibrary {
      * @return a list of mileposts for the given segment
      */
     public List<Milepost> getMilepostsForSegment(CountyRoadSegment countyRoadSegment) {
+        return getMilepostsForSegment(countyRoadSegment.getId());
+    }
+
+    /**
+     * This method sends a request to the CV Data Controller to get the mileposts for the given segment.
+     * @param segmentId the id of the segment to get mileposts for
+     * @return a list of mileposts for the given segment
+     */
+    public List<Milepost> getMilepostsForSegment(int segmentId) {
         String cvRestService = config.getCvRestService();
-        String url = String.format("%s/cascade/mileposts/%s", cvRestService, countyRoadSegment.getId());
+        String url = String.format("%s/cascade/mileposts/%s", cvRestService, segmentId);
         RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
         ResponseEntity<Milepost[]> response = restTemplate.exchange(url, HttpMethod.GET, null, Milepost[].class);
         return Arrays.asList(response.getBody());

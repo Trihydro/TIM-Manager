@@ -713,6 +713,6 @@ public abstract class WydotTimBaseController {
      * @return The anchor point.
      */
     private Milepost getAnchorPoint(List<Milepost> mileposts) {
-        return mileposts.remove(0); // TODO: use position 20 feet away from first milepost for anchor instead
+        return mileposts.get(0); // TODO: use position 20 feet away from first milepost for anchor instead
     }
 }

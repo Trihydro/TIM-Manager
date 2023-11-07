@@ -39,6 +39,7 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.IdGenerator;
+import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
@@ -681,7 +682,38 @@ public abstract class WydotTimBaseController {
      * This method retrieves the trigger road for the route and cascades conditions for each associated segment.
      */
     private void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType) {
-        String roadCode = wydotTim.getRoute();
+        // check for road_code by casting WydotTim and only check cascading conditions if road_code is present in the class
+        String roadCode = null;
+        if (wydotTim instanceof WydotTimCc) {
+            // Model `WydotTimCc` does not have a road_code field, return
+            return;
+        }
+        else if (wydotTim instanceof WydotTimIncident) {
+            // Model `WydotTimIncident` does not have a road_code field, return
+            return;
+        }
+        else if (wydotTim instanceof WydotTimParking) {
+            // Model `WydotTimParking` does not have a road_code field, return
+            return;
+        }
+        else if (wydotTim instanceof WydotTimRc) {
+            // retrieve road_code from WydotTimRc
+            roadCode = ((WydotTimRc) wydotTim).getRoadCode();
+        }
+        else if (wydotTim instanceof WydotTimRw) {
+            // Model `WydotTimRw` does not have a road_code field, return
+            return;
+        }
+        else if (wydotTim instanceof WydotTimVsl) {
+            // Model `WydotTimVsl` does not have a road_code field, return
+            return;
+        }
+        else {
+            utility.logWithDate("Unrecognized model type, unable to generate cascading conditions.");
+            return;
+        }
+        
+        // retrieve trigger road and cascade conditions for each segment
         TriggerRoad triggerRoad = cascadeService.getTriggerRoad(roadCode);
         List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
         for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
@@ -713,6 +745,7 @@ public abstract class WydotTimBaseController {
      * @return The anchor point.
      */
     private Milepost getAnchorPoint(List<Milepost> mileposts) {
+        // TODO: calculate a small distance away from first point and then calculate offsets from that
         return mileposts.get(0); // TODO: use position 20 feet away from first milepost for anchor instead
     }
 }

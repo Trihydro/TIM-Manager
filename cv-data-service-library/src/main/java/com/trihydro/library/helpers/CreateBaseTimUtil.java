@@ -102,22 +102,30 @@ public class CreateBaseTimUtil {
         dataFrame.setMsgId(msgId);
 
         int timDirection = 0;
-        // path list - change later
-        if (allMileposts != null && allMileposts.size() > 0) {
-            double startLat = anchor.getLatitude().doubleValue();
-            double startLon = anchor.getLongitude().doubleValue();
-            for (int j = 0; j < allMileposts.size(); j++) {
-                double lat = allMileposts.get(j).getLatitude().doubleValue();
-                double lon = allMileposts.get(j).getLongitude().doubleValue();
+        if (!wydotTim.getClientId().contains("_triggered_")) {
+            // this is a regular tim, so we need to set the direction normally
 
-                Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
-                Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
+            // path list - change later
+            if (allMileposts != null && allMileposts.size() > 0) {
+                double startLat = anchor.getLatitude().doubleValue();
+                double startLon = anchor.getLongitude().doubleValue();
+                for (int j = 0; j < allMileposts.size(); j++) {
+                    double lat = allMileposts.get(j).getLatitude().doubleValue();
+                    double lon = allMileposts.get(j).getLongitude().doubleValue();
 
-                timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
-                // reset for next round
-                startLat = lat;
-                startLon = lon;
+                    Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
+                    Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
+
+                    timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
+                    // reset for next round
+                    startLat = lat;
+                    startLon = lon;
+                }
             }
+        }
+        else {
+            // this is a triggered tim, so we need to set the direction to 0xFFFF
+            timDirection = 0xFFFF;
         }
 
         // set direction based on bearings

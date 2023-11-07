@@ -83,7 +83,7 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public WydotTim buildCascadeTim(CountyRoadSegment countyRoadSegment, Milepost anchor, Milepost lastMilepost, String clientId) {
         WydotTim toReturn = new WydotTim();
-        toReturn.setDirection(anchor.getDirection()); // TODO: replace this, we shouldn't use the anchor's direction
+        // note: direction not set because it's not applicable to cascading conditions
         toReturn.setStartPoint(new Coordinate(anchor.getLatitude(), anchor.getLongitude()));
         toReturn.setEndPoint(new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude()));
         toReturn.setRoute(countyRoadSegment.getCommonName());

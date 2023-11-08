@@ -19,8 +19,8 @@ import com.trihydro.library.model.WydotTim;
 public class CascadeService extends CvDataServiceLibrary {
     private static final String closedItisCode = "770";
     private static final String c2lhpvItisCode = "Closed to light, high profile vehicles";
-    private static final String loctItisCode = "loct"; // TODO: replace with actual ITIS code
-    private static final String nttItisCode = "ntt"; // TODO: replace with actual ITIS code
+    private static final String loctItisCode = "2567";
+    private static final String nttItisCode = "2568";
 
     private static final List<String> cascadingItisCodes = new ArrayList<String>() {
         {

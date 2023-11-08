@@ -3,6 +3,7 @@ package com.trihydro.library.helpers;
 import static java.lang.Math.toIntExact;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.ResultSet;
@@ -15,6 +16,8 @@ import java.time.format.DateTimeParseException;
 import java.util.Date;
 
 import com.google.gson.Gson;
+import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.Milepost;
 
 import org.springframework.stereotype.Component;
 
@@ -219,4 +222,44 @@ public class Utility {
 
 		return conn;
 	}
+
+    /**
+     * This method calculates the anchor coordinate for the given mileposts.
+     * @param firstPoint The first milepost.
+     * @param secondPoint The second milepost.
+     * @return The anchor coordinate.
+     */
+    public Coordinate calculateAnchorCoordinate(Milepost firstPoint, Milepost secondPoint) {
+		int precision = 9;
+
+        BigDecimal firstPointLat = firstPoint.getLatitude().round(new java.math.MathContext(precision));
+        BigDecimal firstPointLon = firstPoint.getLongitude().round(new java.math.MathContext(precision));
+        BigDecimal secondPointLat = secondPoint.getLatitude().round(new java.math.MathContext(precision));
+        BigDecimal secondPointLon = secondPoint.getLongitude().round(new java.math.MathContext(precision));
+
+		// dLat = firstPointLat - secondPointLat
+        BigDecimal dLat = firstPointLat.subtract(secondPointLat);
+
+        // dLon = firstPointLon - secondPointLon
+		BigDecimal dLon = firstPointLon.subtract(secondPointLon);
+
+		// d0Lat = 111195 * dLat
+        BigDecimal d0Lat = new BigDecimal(111195).multiply(dLat);
+        // d0Lon = 111195 * cos(firstPointLat) * dLon
+		BigDecimal firstPointLatInRadians = firstPointLat.multiply(new BigDecimal(Math.PI)).divide(new BigDecimal(180), new java.math.MathContext(precision));
+		BigDecimal d0Lon = new BigDecimal(111195).multiply(new BigDecimal(Math.cos(firstPointLatInRadians.doubleValue()))).multiply(dLon);
+
+		// d0 = sqrt(d0Lat^2 + d0Lon^2)
+        BigDecimal d0 = d0Lat.pow(2).add(d0Lon.pow(2)).sqrt(new java.math.MathContext(6));
+
+		// mD = 15 / d0
+        BigDecimal mD = new BigDecimal(15).divide(d0, new java.math.MathContext(6));
+
+		// anchorLat = firstPointLat + mD * dLat
+        BigDecimal anchorLat = firstPointLat.add(mD.multiply(dLat)).round(new java.math.MathContext(precision));
+        // anchorLon = firstPointLon + mD * dLon
+		BigDecimal anchorLon = firstPointLon.add(mD.multiply(dLon)).round(new java.math.MathContext(precision));
+
+        return new Coordinate(anchorLat, anchorLon);
+    }
 }

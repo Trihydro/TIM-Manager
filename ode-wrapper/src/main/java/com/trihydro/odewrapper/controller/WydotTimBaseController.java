@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -740,12 +741,21 @@ public abstract class WydotTimBaseController {
     }
 
     /**
-     * This method returns the anchor point for the given mileposts. Currently, the anchor point is the first milepost in the list.
+     * This method returns the anchor point for the given mileposts.
      * @param mileposts The mileposts to find the anchor point for.
      * @return The anchor point.
      */
     private Milepost getAnchorPoint(List<Milepost> mileposts) {
-        // TODO: calculate a small distance away from first point and then calculate offsets from that
-        return mileposts.get(0); // TODO: use position 20 feet away from first milepost for anchor instead
+        Milepost firstPoint = mileposts.get(0);
+        Milepost secondPoint = mileposts.get(1);
+
+        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+
+        Milepost anchor = new Milepost();
+        anchor.setLatitude(anchorCoordinate.getLatitude());
+        anchor.setLongitude(anchorCoordinate.getLongitude());
+        anchor.setMilepost(firstPoint.getMilepost());
+        anchor.setDirection(firstPoint.getDirection());
+        return anchor;
     }
 }

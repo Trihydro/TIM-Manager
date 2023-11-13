@@ -196,6 +196,32 @@ public class CascadeServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void testIsCascadeTim_TRUE() {
+        // prepare
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setClientId("test" + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadId);
+
+        // execute
+        boolean result = CascadeService.isCascadeTim(wydotTim);
+
+        // verify
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void testIsCascadeTim_FALSE() {
+        // prepare
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setClientId("test");
+
+        // execute
+        boolean result = CascadeService.isCascadeTim(wydotTim);
+
+        // verify
+        Assertions.assertFalse(result);
+    }
+
+    @Test
     public void testGetAllMilepostsFromCascadeTim_SUCCESS() {
         // prepare
         WydotTim wydotTim = new WydotTim();

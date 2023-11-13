@@ -103,7 +103,7 @@ public class CreateBaseTimUtil {
         dataFrame.setMsgId(msgId);
 
         int timDirection = 0;
-        if (!wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER)) {
+        if (!CascadeService.isCascadeTim(wydotTim)) {
             // this is a regular tim, so we need to set the direction normally
 
             // path list - change later

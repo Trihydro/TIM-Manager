@@ -304,7 +304,7 @@ public class TimGenerationHelper {
     private List<Milepost> getAllMps(WydotTim wydotTim) {
         List<Milepost> allMps = new ArrayList<>();
 
-        if (!wydotTim.getRoute().contains(CascadeService.CASCADE_TIM_ID_DELIMITER)) {
+        if (!CascadeService.isCascadeTim(wydotTim)) {
             if (wydotTim.getEndPoint() != null) {
                 allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
                 utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),

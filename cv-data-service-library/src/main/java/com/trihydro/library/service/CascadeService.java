@@ -112,6 +112,15 @@ public class CascadeService extends CvDataServiceLibrary {
     }
 
     /**
+     * This method checks if the given TIM is a cascade TIM.
+     * @param wydotTim The TIM to check
+     * @return true if the TIM is a cascade TIM, false otherwise
+     */
+    public static boolean isCascadeTim(WydotTim wydotTim) {
+        return wydotTim.getClientId().contains(CASCADE_TIM_ID_DELIMITER);
+    }
+
+    /**
      * This method gets all mileposts for a cascade TIM.
      * @param cascadeTim The cascade TIM to get mileposts for
      * @return A list of mileposts for the cascade TIM

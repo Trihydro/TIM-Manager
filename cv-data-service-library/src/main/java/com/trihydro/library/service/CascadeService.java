@@ -17,6 +17,12 @@ import com.trihydro.library.model.WydotTim;
 
 @Component
 public class CascadeService extends CvDataServiceLibrary {
+    /**
+     * This is the delimiter used to separate the original client ID
+     * from the segment ID in the client ID of a cascading TIM.
+     */
+    public static final String CASCADE_TIM_ID_DELIMITER = "_triggered_";
+
     private static final String closedItisCode = "770";
     private static final String c2lhpvItisCode = "Closed to light, high profile vehicles";
     private static final String loctItisCode = "2567";
@@ -101,7 +107,25 @@ public class CascadeService extends CvDataServiceLibrary {
             itisCodes.add(nttItisCode);
         }
         toReturn.setItisCodes(itisCodes);
-        toReturn.setClientId(clientId + "_triggered_" + countyRoadSegment.getId());
+        toReturn.setClientId(clientId + CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId());
         return toReturn;
+    }
+
+    /**
+     * This method gets all mileposts for a cascade TIM.
+     * @param cascadeTim The cascade TIM to get mileposts for
+     * @return A list of mileposts for the cascade TIM
+     * @throws ArrayIndexOutOfBoundsException if the client ID of the cascade TIM is not in the expected format
+     * @throws NumberFormatException if the segment ID in the client ID of the cascade TIM is not an integer
+     */
+    public List<Milepost> getAllMilepostsFromCascadeTim(WydotTim cascadeTim) throws ArrayIndexOutOfBoundsException, NumberFormatException {
+        List<Milepost> allMps = new ArrayList<>();
+        String countyRoadIdString = cascadeTim.getClientId().split(CASCADE_TIM_ID_DELIMITER)[1];
+        if (countyRoadIdString == null) {
+            return allMps;
+        }
+        int countyRoadId = Integer.parseInt(countyRoadIdString);
+        allMps = getMilepostsForSegment(countyRoadId);
+        return allMps;
     }
 }

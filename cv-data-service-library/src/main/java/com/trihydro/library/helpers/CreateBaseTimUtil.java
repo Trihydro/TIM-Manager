@@ -12,6 +12,7 @@ import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
+import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.TimGenerationProps;
 
 import org.apache.commons.lang3.StringUtils;
@@ -102,7 +103,7 @@ public class CreateBaseTimUtil {
         dataFrame.setMsgId(msgId);
 
         int timDirection = 0;
-        if (!wydotTim.getClientId().contains("_triggered_")) {
+        if (!wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER)) {
             // this is a regular tim, so we need to set the direction normally
 
             // path list - change later

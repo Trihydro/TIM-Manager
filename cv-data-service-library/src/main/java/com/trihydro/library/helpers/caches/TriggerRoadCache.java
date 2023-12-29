@@ -22,12 +22,12 @@ public class TriggerRoadCache {
         cache = createCache();
     }
 
-    public List<Integer> getSegmentIdsAssociatedWithTriggerRoad(String roadCode) throws NotCachedException {
-        List<Integer> segmentIds = cache.get(roadCode);
-        if (segmentIds == null) {
-            throw new NotCachedException("Trigger road " + roadCode + " not found in cache");
-        }
-        return segmentIds;
+    public List<Integer> getSegmentIdsAssociatedWithTriggerRoad(String roadCode) {
+        return cache.get(roadCode);
+    }
+
+    public boolean isCached(String roadCode) {
+        return cache.get(roadCode) != null;
     }
 
     public void updateCache(String roadCode, TriggerRoad triggerRoad) {
@@ -95,12 +95,5 @@ public class TriggerRoadCache {
         props.setProperty("jcs.default.elementattributes.IsRemote", config.getIsRemote());
         props.setProperty("jcs.default.elementattributes.IsLateral", config.getIsLateral());
         return props;
-    }
-
-    public class NotCachedException extends Exception {
-        private static final long serialVersionUID = 1L;
-        public NotCachedException(String message) {
-            super(message);
-        }
     }
 }

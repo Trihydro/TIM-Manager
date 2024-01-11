@@ -25,6 +25,7 @@ public class MongoLogger {
     private String username;
     private String password;
     private String databaseName;
+    private String authDbName;
     private MongoCredential credential;
     private Utility utility;
     private EmailHelper emailHelper;
@@ -34,10 +35,11 @@ public class MongoLogger {
     public void InjectDependencies(MongoLoggerConfiguration _config, Utility _utility, EmailHelper _emailHelper) {
         config = _config;
         username = config.getMongoUsername(); // the user name
-        databaseName = config.getMongoDatabase(); // the name of the database in which the user is defined
+        databaseName = config.getMongoDatabase(); // the name of the database to deposit records into
+        authDbName = config.getMongoAuthDatabase(); // the name of the database in which the user is defined
         password = config.getMongoPassword(); // the password as a character array
         serverAddress = config.getMongoHost();
-        credential = MongoCredential.createCredential(username, databaseName, password.toCharArray());
+        credential = MongoCredential.createCredential(username, authDbName, password.toCharArray());
         utility = _utility;
         emailHelper = _emailHelper;
     }

@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "mongologger")
 public class MongoLoggerConfiguration implements EmailProps {
     private String mongoDatabase;
+    private String mongoAuthDatabase;
     private String mongoUsername;
     private String mongoPassword;
     private String hostname;
@@ -119,5 +120,13 @@ public class MongoLoggerConfiguration implements EmailProps {
 
     public void setEnvironmentName(String environmentName) {
         this.environmentName = environmentName;
+    }
+
+    public String getMongoAuthDatabase() {
+        return mongoAuthDatabase;
+    }
+
+    public void setMongoAuthDatabase(String mongoAuthDatabase) {
+        this.mongoAuthDatabase = mongoAuthDatabase;
     }
 }

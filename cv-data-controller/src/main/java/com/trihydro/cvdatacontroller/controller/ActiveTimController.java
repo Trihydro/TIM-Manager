@@ -1511,7 +1511,7 @@ public class ActiveTimController extends BaseController {
 			// coalesce function with the expDate passed in value.
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+			String targetFormat = "DD-MON-YYYY HH12.MI.SS a";
 			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
 					translateIso8601ToTimestampFormat(expDate), targetFormat);
 
@@ -1522,6 +1522,7 @@ public class ActiveTimController extends BaseController {
 
 			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
 					selectTimestamp, minExpDate, selectTimestamp);
+			System.out.println("[DEBUG] Query: " + query);
 			rs = statement.executeQuery(query);
 			while (rs.next()) {
 				var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);

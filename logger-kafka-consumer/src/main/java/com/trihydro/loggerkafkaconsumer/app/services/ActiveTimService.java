@@ -473,7 +473,6 @@ public class ActiveTimService extends BaseService {
 
             String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
                     selectTimestamp, minExpDate, selectTimestamp);
-            System.out.println("[DEBUG] Query: " + query);
             rs = statement.executeQuery(query);
             while (rs.next()) {
                 var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);

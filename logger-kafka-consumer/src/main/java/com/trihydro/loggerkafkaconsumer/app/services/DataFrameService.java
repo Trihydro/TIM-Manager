@@ -68,20 +68,24 @@ public class DataFrameService extends BaseService {
                 } else if (col.equals("URL")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getUrl());
                 } else if (col.equals("START_DATE_TIME")) {
-                    Timestamp time = null;
-                    try {
-                        TimeZone tz = TimeZone.getTimeZone("UTC");
-                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no
-                                                                                       // timezone offset
-                        df.setTimeZone(tz);
-                        Date dt = df.parse(dFrame.getStartDateTime());
-                        time = new Timestamp(dt.getTime());
-                    } catch (ParseException ex) {
-                        System.out.println("Unable to parse startdate: " + dFrame.getStartDateTime());
+                    if (dFrame.getStartDateTime() == null) {
+                        preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
-                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, time);
+                    else {
+                        Timestamp time = null;
+                        try {
+                            TimeZone tz = TimeZone.getTimeZone("UTC");
+                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no
+                                                                                           // timezone offset
+                            df.setTimeZone(tz);
+                            Date dt = df.parse(dFrame.getStartDateTime());
+                            time = new Timestamp(dt.getTime());
+                        } catch (ParseException ex) {
+                            utility.logWithDate("Unable to parse startdate: " + dFrame.getStartDateTime());
+                        }
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, time);
+                    }
                 }
-
                 fieldNum++;
             }
 

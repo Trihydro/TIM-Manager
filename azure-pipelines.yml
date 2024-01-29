@@ -13,7 +13,7 @@ steps:
 
 - checkout: self
 
-- task: Maven@3
+- task: Maven@4
   name: 'Install_ODE_Plugins'
   inputs:
     mavenPomFile: 'pom.xml'
@@ -22,9 +22,9 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.2.0.jar -DgeneratePom=true'
 
-- task: Maven@3
+- task: Maven@4
   name: 'Install_ODE_Core'
   inputs:
     mavenPomFile: 'pom.xml'
@@ -33,9 +33,9 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.1.0.jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.2.0.jar -DgeneratePom=true'
 
-- task: Maven@3
+- task: Maven@4
   name: 'Install_ODE_Common'
   inputs:
     mavenPomFile: 'pom.xml'
@@ -44,9 +44,9 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.1.0.jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.2.0.jar -DgeneratePom=true'
 
-- task: Maven@3
+- task: Maven@4
   name: 'Install_ODE_svcs'
   inputs:
     mavenPomFile: 'pom.xml'
@@ -57,7 +57,7 @@ steps:
     publishJUnitResults: false
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar -DgeneratePom=true'
 
-- task: Maven@3
+- task: Maven@4
   name: 'Install_pgsql'
   inputs:
     mavenPomFile: 'pom.xml'
@@ -73,7 +73,7 @@ steps:
 #     targetType: 'inline'
 #     script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/usdot/jpo/ode/jpo-ode-core/1.0.10-SNAPSHOT)'
 
-- task: Maven@3
+- task: Maven@4
   name: 'Build'
   inputs:
     mavenPomFile: 'pom.xml'
@@ -84,3 +84,125 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
+
+
+
+- task: Maven@4
+  name: 'Build_cv-data-service-library'
+  inputs:
+    mavenPomFile: 'cv-data-service-library/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_cv-data-controller'
+  inputs:
+    mavenPomFile: 'cv-data-controller/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_rsu-data-controller'
+  inputs:
+    mavenPomFile: 'rsu-data-controller/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_ode-data-logger'
+  inputs:
+    mavenPomFile: 'ode-data-logger/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_ode-mongo-logger'
+  inputs:
+    mavenPomFile: 'ode-mongo-logger/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_ode-wrapper'
+  inputs:
+    mavenPomFile: 'ode-wrapper/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_cv-data-tasks'
+  inputs:
+    mavenPomFile: 'cv-data-tasks/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_tim-refresh'
+  inputs:
+    mavenPomFile: 'tim-refresh/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_logger-kafka-consumer'
+  inputs:
+    mavenPomFile: 'logger-kafka-consumer/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'
+
+- task: Maven@4
+  name: 'Build_cert-expiration'
+  inputs:
+    mavenPomFile: 'cert-expiration/pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeVersion: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    pulishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'build test'

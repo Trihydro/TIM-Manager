@@ -44,12 +44,12 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     }
 
     /**
-     * Returns the defaultLaneWidth * 0.4
+     * Returns the defaultLaneWidth * 0.2
      * 
      * @return
      */
     public Double getPathDistanceLimit() {
-        return defaultLaneWidth.multiply(new BigDecimal("0.4")).doubleValue();
+        return defaultLaneWidth.multiply(new BigDecimal("0.2")).doubleValue();
     }
 
     public Double getPointIncidentBufferMiles() {

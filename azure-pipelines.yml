@@ -22,7 +22,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.2.0.jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.2.0.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-plugins -Dversion="1.2.0" -Dpackaging=jar'
 
 - task: Maven@4
   name: 'Install_ODE_Core'
@@ -33,7 +33,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.2.0.jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.2.0.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-core -Dversion="1.2.0" -Dpackaging=jar'
 
 - task: Maven@4
   name: 'Install_ODE_Common'
@@ -44,7 +44,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.2.0.jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.2.0.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-common -Dversion="1.2.0" -Dpackaging=jar'
 
 - task: Maven@4
   name: 'Install_ODE_svcs'
@@ -55,8 +55,8 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar -DgeneratePom=true'
-
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-svcs -Dversion="1.2.0" -Dpackaging=jar'
+    
 - task: Maven@4
   name: 'Install_pgsql'
   inputs:
@@ -66,7 +66,7 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/postgresql-42.6.0.jar -DgroupId=org.postgresql -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/postgresql-42.6.0.jar -DgroupId=org.postgresql -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar'
 
 # - task: Bash@3
 #   inputs:

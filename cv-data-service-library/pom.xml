@@ -87,6 +87,11 @@
       <artifactId>geocalc</artifactId>
       <version>0.5.8</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-jcs-core</artifactId>
+      <version>2.2.1</version>
+    </dependency>
   </dependencies>
 
   <build>

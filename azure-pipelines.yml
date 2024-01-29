@@ -74,20 +74,6 @@ steps:
 #     script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/usdot/jpo/ode/jpo-ode-core/1.0.10-SNAPSHOT)'
 
 - task: Maven@4
-  name: 'Build'
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
-
-
-
-- task: Maven@4
   name: 'Build_cv_data_service_library'
   inputs:
     mavenPomFile: 'cv-data-service-library/pom.xml'

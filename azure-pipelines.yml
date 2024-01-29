@@ -88,7 +88,7 @@ steps:
 
 
 - task: Maven@4
-  name: 'Build_cv-data-service-library'
+  name: 'Build_cv_data_service_library'
   inputs:
     mavenPomFile: 'cv-data-service-library/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -100,7 +100,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_cv-data-controller'
+  name: 'Build_cv_data_controller'
   inputs:
     mavenPomFile: 'cv-data-controller/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -112,7 +112,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_rsu-data-controller'
+  name: 'Build_rsu_data_controller'
   inputs:
     mavenPomFile: 'rsu-data-controller/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -124,7 +124,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_ode-data-logger'
+  name: 'Build_ode_data_logger'
   inputs:
     mavenPomFile: 'ode-data-logger/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -136,7 +136,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_ode-mongo-logger'
+  name: 'Build_ode_mongo_logger'
   inputs:
     mavenPomFile: 'ode-mongo-logger/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -148,7 +148,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_ode-wrapper'
+  name: 'Build_ode_wrapper'
   inputs:
     mavenPomFile: 'ode-wrapper/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -160,7 +160,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_cv-data-tasks'
+  name: 'Build_cv_data_tasks'
   inputs:
     mavenPomFile: 'cv-data-tasks/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -172,7 +172,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_tim-refresh'
+  name: 'Build_tim_refresh'
   inputs:
     mavenPomFile: 'tim-refresh/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -184,7 +184,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_logger-kafka-consumer'
+  name: 'Build_logger_kafka_consumer'
   inputs:
     mavenPomFile: 'logger-kafka-consumer/pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -196,7 +196,7 @@ steps:
     goals: 'build test'
 
 - task: Maven@4
-  name: 'Build_cert-expiration'
+  name: 'Build_cert_expiration'
   inputs:
     mavenPomFile: 'cert-expiration/pom.xml'
     mavenOptions: '-Xmx3072m'

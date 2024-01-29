@@ -5,7 +5,10 @@ import java.math.BigDecimal;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
+import com.trihydro.library.model.EmailProps;
+import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.TmddProps;
+import com.trihydro.library.service.TimGenerationProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -14,10 +17,9 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 
 @Component
 @ConfigurationProperties("config")
-public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps {
-
-    private TimeToLive sdwTtl;
-    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(327);
+public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddProps, CVRestServiceProps, EmailProps,
+        OdeProps, TimGenerationProps {
+    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);
     private String cvRestService;
     private String[] rsuRoutes;
     private Integer httpLoggingMaxSize;
@@ -28,24 +30,26 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     private int mailPort;
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
     private String rsuDataServiceUrl;
     private String tmddUrl;
     private String tmddUser;
     private String tmddPassword;
 
     private Double pointIncidentBufferMiles;
+    private TimeToLive sdwTtl;
 
     public String getOdeUrl() {
         return odeUrl;
     }
 
     /**
-     * Returns the defaultLaneWidth / 2
+     * Returns the defaultLaneWidth * 0.2
      * 
      * @return
      */
     public Double getPathDistanceLimit() {
-        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+        return defaultLaneWidth.multiply(new BigDecimal("0.2")).doubleValue();
     }
 
     public Double getPointIncidentBufferMiles() {
@@ -62,6 +66,14 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String getSdwApiKey() {
@@ -144,10 +156,6 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
         this.tmddPassword = tmddPassword;
     }
 
-    public TimeToLive getSdwTtl() {
-        return sdwTtl;
-    }
-
     public Integer getHttpLoggingMaxSize() {
         return httpLoggingMaxSize;
     }
@@ -180,7 +188,11 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
         this.defaultLaneWidth = defaultLaneWidth;
     }
 
-    public void setSdwTtl(String sdwTtl) {
-        this.sdwTtl = TimeToLive.valueOf(sdwTtl);
+    public TimeToLive getSdwTtl() {
+        return sdwTtl;
+    }
+
+    public void setSdwTtl(TimeToLive sdwTtl) {
+        this.sdwTtl = sdwTtl;
     }
 }

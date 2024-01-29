@@ -1,36 +1,33 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
 import java.util.List;
 
-import com.trihydro.cvdatacontroller.tables.TracMessageOracleTables;
+import com.trihydro.cvdatacontroller.tables.TracMessageDbTables;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TracMessageSent;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class TracMessageSentControllerTest extends TestBase<TracMessageSentController> {
 
     @Spy
-    private TracMessageOracleTables mockTracMessageOracleTables = new TracMessageOracleTables();
+    private TracMessageDbTables mockTracMessageDbTables = new TracMessageDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTracMessageOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTracMessageDbTables, mockSqlNullHandler);
     }
 
     @Test
@@ -45,7 +42,7 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
         verify(mockRs).getString("PACKET_ID");
         verify(mockStatement).close();
         verify(mockConnection).close();
-        assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(1, data.getBody().size());
     }
 
     @Test
@@ -56,7 +53,7 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
         ResponseEntity<Long> key = uut.InsertTracMessageSent(mockTMS);
 
         // Assert
-        assertEquals(HttpStatus.OK, key.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, key.getStatusCode());
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, mockTMS.getTracMessageTypeId());
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 2, mockTMS.getDateTimeSent());
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, mockTMS.getMessageText());
@@ -65,6 +62,6 @@ public class TracMessageSentControllerTest extends TestBase<TracMessageSentContr
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6, mockTMS.getRestResponseMessage());
         verify(mockSqlNullHandler).setIntegerFromBool(mockPreparedStatement, 7, mockTMS.isMessageSent());
         verify(mockSqlNullHandler).setIntegerFromBool(mockPreparedStatement, 8, mockTMS.isEmailSent());
-        assertEquals(Long.valueOf(-1), key.getBody());
+        Assertions.assertEquals(Long.valueOf(-1), key.getBody());
     }
 }

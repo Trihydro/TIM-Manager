@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -9,11 +8,9 @@ import java.util.List;
 
 import com.trihydro.library.model.ItisCode;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-@RunWith(StrictStubs.class)
 public class ItisCodeServiceTest extends TestBase<ItisCodeService> {
 
     @Test
@@ -24,7 +21,7 @@ public class ItisCodeServiceTest extends TestBase<ItisCodeService> {
         List<ItisCode> data = uut.selectAllItisCodes();
 
         // Assert
-        assertEquals(1, data.size());
+        Assertions.assertEquals(1, data.size());
         verify(mockStatement).executeQuery("select * from itis_code");
         verify(mockRs).getInt("ITIS_CODE_ID");
         verify(mockRs).getInt("ITIS_CODE");
@@ -42,7 +39,7 @@ public class ItisCodeServiceTest extends TestBase<ItisCodeService> {
         List<ItisCode> data = uut.selectAllItisCodes();
 
         // Assert
-        assertEquals(0, data.size());
+        Assertions.assertEquals(0, data.size());
         verify(mockStatement).executeQuery("select * from itis_code");
         verify(mockStatement).close();
         verify(mockConnection).close();

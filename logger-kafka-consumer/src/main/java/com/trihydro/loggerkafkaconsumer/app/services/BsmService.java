@@ -10,7 +10,7 @@ import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 public class BsmService extends BaseService {
 
     private JsonToJavaConverter jsonToJava;
-    private BsmOracleTables bsmOracleTables;
+    private BsmDbTables bsmDbTables;
     private SQLNullHandler sqlNullHandler;
     private BsmPart2SpveService bsmPart2SpveService;
     private BsmPart2VseService bsmPart2VseService;
@@ -36,11 +36,11 @@ public class BsmService extends BaseService {
     private Utility utility;
 
     @Autowired
-    public void InjectDependencies(JsonToJavaConverter _jsonToJava, BsmOracleTables _bsmOracleTables,
+    public void InjectDependencies(JsonToJavaConverter _jsonToJava, BsmDbTables _bsmDbTables,
             SQLNullHandler _sqlNullHandler, BsmPart2SpveService _bsmPart2SpveService,
             BsmPart2VseService _bsmPart2VseService, BsmPart2SuveService _bsmPart2SuveService, Utility _utility) {
         jsonToJava = _jsonToJava;
-        bsmOracleTables = _bsmOracleTables;
+        bsmDbTables = _bsmDbTables;
         sqlNullHandler = _sqlNullHandler;
         bsmPart2SpveService = _bsmPart2SpveService;
         bsmPart2VseService = _bsmPart2VseService;
@@ -48,7 +48,7 @@ public class BsmService extends BaseService {
         utility = _utility;
     }
 
-    public void addBSMToOracleDB(OdeData odeData, String value) {
+    public void addBSMToDatabase(OdeData odeData, String value) {
         OdeBsmMetadata metadata = (OdeBsmMetadata) odeData.getMetadata();
         OdeBsmPayload payload = (OdeBsmPayload) odeData.getPayload();
         Gson gson = new Gson();
@@ -61,17 +61,17 @@ public class BsmService extends BaseService {
                 List<J2735BsmPart2Content> partII = payload.getBsm().getPartII();
                 if (bsmCoreDataId != null && !bsmCoreDataId.equals(Long.valueOf(0)) && partII != null) {
                     for (int i = 0; i < partII.size(); i++) {
-                        if (partII.get(i).getId().name() == "VehicleSafetyExtensions") {
+                        if (partII.get(i).getId().name().equalsIgnoreCase("VehicleSafetyExtensions")) {
                             J2735VehicleSafetyExtensions vse = jsonToJava
                                     .convertJ2735VehicleSafetyExtensionsJsonToJava(value, i);
                             if (vse != null)
                                 bsmPart2VseService.insertBSMPart2VSE(partII.get(i), vse, bsmCoreDataId);
-                        } else if (partII.get(i).getId().name() == "SpecialVehicleExtensions") {
+                        } else if (partII.get(i).getId().name().equalsIgnoreCase("SpecialVehicleExtensions")) {
                             J2735SpecialVehicleExtensions spve = jsonToJava
                                     .convertJ2735SpecialVehicleExtensionsJsonToJava(value, i);
                             if (spve != null)
                                 bsmPart2SpveService.insertBSMPart2SPVE(partII.get(i), spve, bsmCoreDataId);
-                        } else if (partII.get(i).getId().name() == "SupplementalVehicleExtensions") {
+                        } else if (partII.get(i).getId().name().equalsIgnoreCase("SupplementalVehicleExtensions")) {
                             J2735SupplementalVehicleExtensions suve = jsonToJava
                                     .convertJ2735SupplementalVehicleExtensionsJsonToJava(value, i);
                             if (suve != null)
@@ -81,17 +81,17 @@ public class BsmService extends BaseService {
                 }
             } else {
                 utility.logWithDate(
-                        "addBSMToOracleDB failed due to null payload.Bsm object. OdeData: " + gson.toJson(odeData));
+                        "addBSMToDatabase failed due to null payload.Bsm object. OdeData: " + gson.toJson(odeData));
             }
         } else {
-            utility.logWithDate("addBSMToOracleDB failed due to invalid OdeData object: " + gson.toJson(odeData));
+            utility.logWithDate("addBSMToDatabase failed due to invalid OdeData object: " + gson.toJson(odeData));
         }
     }
 
     public Long addBSMCoreData(OdeBsmMetadata metadata, J2735Bsm bsm) {
 
-        String bsmCoreInsertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_core_data",
-                bsmOracleTables.getBsmCoreDataTable());
+        String bsmCoreInsertQueryStatement = bsmDbTables.buildInsertQueryStatement("bsm_core_data",
+                bsmDbTables.getBsmCoreDataTable());
         PreparedStatement bsmPreparedStatement = null;
         Connection connection = null;
 
@@ -104,7 +104,7 @@ public class BsmService extends BaseService {
 
             int fieldNum = 1;
 
-            for (String col : bsmOracleTables.getBsmCoreDataTable()) {
+            for (String col : bsmDbTables.getBsmCoreDataTable()) {
                 if (col.equals("ID")) {
                     bsmPreparedStatement.setString(fieldNum, bsm.getCoreData().getId());
                 } else if (col.equals("MSGCNT")) {
@@ -217,9 +217,9 @@ public class BsmService extends BaseService {
                     bsmPreparedStatement.setString(fieldNum, metadata.getLogFileName());
                 } else if (col.equals("RECORD_GENERATED_AT")) {
                     if (metadata.getRecordGeneratedAt() != null) {
-                        java.util.Date recordGeneratedAtDate = convertDate(metadata.getRecordGeneratedAt());
+                        java.util.Date recordGeneratedAtDate = utility.convertDate(metadata.getRecordGeneratedAt());
                         sqlNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum,
-                                mstFormat.format(recordGeneratedAtDate));
+                                utility.timestampFormat.format(recordGeneratedAtDate));
                     } else
                         bsmPreparedStatement.setString(fieldNum, null);
                 } else if (col.equals("SECURITY_RESULT_CODE")) {
@@ -244,9 +244,9 @@ public class BsmService extends BaseService {
                     bsmPreparedStatement.setLong(fieldNum, metadata.getSerialId().getSerialNumber());
                 } else if (col.equals("ODE_RECEIVED_AT")) {
                     if (metadata.getOdeReceivedAt() != null) {
-                        java.util.Date receivedAtDate = convertDate(metadata.getOdeReceivedAt());
+                        java.util.Date receivedAtDate = utility.convertDate(metadata.getOdeReceivedAt());
                         sqlNullHandler.setStringOrNull(bsmPreparedStatement, fieldNum,
-                                mstFormat.format(receivedAtDate));
+                                utility.timestampFormat.format(receivedAtDate));
                     } else
                         bsmPreparedStatement.setString(fieldNum, null);
                 } else if (col.equals("RECORD_TYPE")) {

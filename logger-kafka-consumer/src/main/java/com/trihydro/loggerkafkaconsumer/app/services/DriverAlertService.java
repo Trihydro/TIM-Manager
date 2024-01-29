@@ -3,12 +3,13 @@ package com.trihydro.loggerkafkaconsumer.app.services;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.DriverAlertType;
 import com.trihydro.library.model.ItisCode;
-import com.trihydro.library.tables.DriverAlertOracleTables;
+import com.trihydro.library.tables.DriverAlertDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,24 +21,24 @@ import us.dot.its.jpo.ode.model.OdeLogMetadata;
 @Component
 public class DriverAlertService extends BaseService {
 
-    private DriverAlertOracleTables driverAlertOracleTables;
+    private DriverAlertDbTables driverAlertDbTables;
     private SQLNullHandler sqlNullHandler;
     private ItisCodeService itisCodeService;
     private DriverAlertTypeService driverAlertTypeService;
     private DriverAlertItisCodeService driverAlertItisCodeService;
 
     @Autowired
-    public void InjectDependencies(DriverAlertOracleTables _driverAlertOracleTables, SQLNullHandler _sqlNullHandler,
+    public void InjectDependencies(DriverAlertDbTables _driverAlertDbTables, SQLNullHandler _sqlNullHandler,
             ItisCodeService _itisCodeService, DriverAlertTypeService _driverAlertTypeService,
             DriverAlertItisCodeService _driverAlertItisCodeService) {
-        driverAlertOracleTables = _driverAlertOracleTables;
+        driverAlertDbTables = _driverAlertDbTables;
         sqlNullHandler = _sqlNullHandler;
         itisCodeService = _itisCodeService;
         driverAlertTypeService = _driverAlertTypeService;
         driverAlertItisCodeService = _driverAlertItisCodeService;
     }
 
-    public Long addDriverAlertToOracleDB(OdeData odeData) {
+    public Long addDriverAlertToDatabase(OdeData odeData) {
 
         System.out.println("Logging: " + ((OdeLogMetadata) odeData.getMetadata()).getLogFileName());
 
@@ -51,44 +52,45 @@ public class DriverAlertService extends BaseService {
         try {
 
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = driverAlertOracleTables.buildInsertQueryStatement("driver_alert",
-                    driverAlertOracleTables.getDriverAlertTable());
+            String insertQueryStatement = driverAlertDbTables.buildInsertQueryStatement("driver_alert",
+                    driverAlertDbTables.getDriverAlertTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "driver_alert_id" });
             int fieldNum = 1;
 
-            for (String col : driverAlertOracleTables.getDriverAlertTable()) {
+            for (String col : driverAlertDbTables.getDriverAlertTable()) {
                 if (col.equals("RECORD_GENERATED_BY"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
                             odeDriverAlertMetadata.getRecordGeneratedBy().toString());
                 else if (col.equals("SCHEMA_VERSION"))
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
                             odeDriverAlertMetadata.getSchemaVersion());
-                // else if(col.equals("SECURITY_RESULT_CODE")) {
-                // SecurityResultCodeType securityResultCodeType =
-                // securityResultCodeTypes.stream()
-                // .filter(x ->
-                // x.getSecurityResultCodeType().equals(odeDriverAlertMetadata.getSecurityResultCode().toString()))
-                // .findFirst()
-                // .orElse(null);
-                // preparedStatement.setInt(fieldNum,
-                // securityResultCodeType.getSecurityResultCodeTypeId());
-                // }
+                else if(col.equals("SECURITY_RESULT_CODE")) {
+                    // SecurityResultCodeType securityResultCodeType =
+                    // securityResultCodeTypes.stream()
+                    // .filter(x ->
+                    // x.getSecurityResultCodeType().equals(odeDriverAlertMetadata.getSecurityResultCode().toString()))
+                    // .findFirst()
+                    // .orElse(null);
+                    // preparedStatement.setInt(fieldNum,
+                    // securityResultCodeType.getSecurityResultCodeTypeId());
+
+                    preparedStatement.setNull(fieldNum, java.sql.Types.INTEGER);
+                }
                 else if (col.equals("LOG_FILE_NAME"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
                             odeDriverAlertMetadata.getLogFileName());
                 else if (col.equals("RECORD_GENERATED_AT")) {
                     if (odeDriverAlertMetadata.getRecordGeneratedAt() != null) {
-                        java.util.Date recordGeneratedAtDate = convertDate(
-                                odeDriverAlertMetadata.getRecordGeneratedAt());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                mstFormat.format(recordGeneratedAtDate));
+                        java.util.Date recordGeneratedAtDate = utility.convertDate(odeDriverAlertMetadata.getRecordGeneratedAt());
+                        Timestamp recordGeneratedAtTimestamp = new Timestamp(recordGeneratedAtDate.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, recordGeneratedAtTimestamp);
                     } else
-                        preparedStatement.setString(fieldNum, null);
+                        preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                 } else if (col.equals("SANITIZED")) {
                     if (odeDriverAlertMetadata.isSanitized())
-                        preparedStatement.setString(fieldNum, "1");
+                        preparedStatement.setInt(fieldNum, 1);
                     else
-                        preparedStatement.setString(fieldNum, "0");
+                        preparedStatement.setInt(fieldNum, 0);
                 } else if (col.equals("SERIAL_ID_STREAM_ID"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
                             odeDriverAlertMetadata.getSerialId().getStreamId());
@@ -112,26 +114,27 @@ public class DriverAlertService extends BaseService {
                             odeDriverAlertMetadata.getRecordType().toString());
                 else if (col.equals("ODE_RECEIVED_AT")) {
                     if (odeDriverAlertMetadata.getOdeReceivedAt() != null) {
-                        java.util.Date odeReceivedAt = convertDate(odeDriverAlertMetadata.getOdeReceivedAt());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, mstFormat.format(odeReceivedAt));
+                        java.util.Date odeReceivedAt = utility.convertDate(odeDriverAlertMetadata.getOdeReceivedAt());
+                        Timestamp odeReceivedAtTimestamp = new Timestamp(odeReceivedAt.getTime());
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, odeReceivedAtTimestamp);
                     } else {
-                        preparedStatement.setString(fieldNum, null);
+                        preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
                 } else if (col.equals("LATITUDE"))
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLatitude());
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                            Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLatitude()));
                 else if (col.equals("LONGITUDE"))
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLongitude());
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                            Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getLongitude()));
                 else if (col.equals("HEADING"))
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getHeading());
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                            Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getHeading()));
                 else if (col.equals("ELEVATION_M"))
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getElevation());
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                            Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getElevation()));
                 else if (col.equals("SPEED"))
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                            odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getSpeed());
+                    sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                            Double.parseDouble(odeDriverAlertMetadata.getReceivedMessageDetails().getLocationData().getSpeed()));
                 else if (col.equals("DRIVER_ALERT_TYPE_ID")) {
                     // check for TIMs
                     if (alert.split(",").length > 1) {
@@ -159,15 +162,27 @@ public class DriverAlertService extends BaseService {
             if (driverAlertId != null && alert.split(",").length > 1) {
                 for (String code : alert.split(",")) {
                     if (code.chars().allMatch(Character::isDigit)) {
-                        for (ItisCode itisCode : itisCodes) {
-                            try {
-                                if (itisCode.getItisCode() == Integer.parseInt(code)) {
-                                    driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
-                                            itisCode.getItisCodeId());
-                                }
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
+                        try {
+                            var foundItisCode = itisCodes.stream()
+                                    .filter(x -> x.getItisCode() == Integer.parseInt(code)).findFirst();
+                            if (!foundItisCode.isEmpty()) {
+                                driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
+                                        foundItisCode.get().getItisCodeId());
                             }
+                        } catch (Exception ex) {
+                            // Potentially the driver alert has a huge int ("2216472429100300968259" for
+                            // instance) and this fails to parse. Log it and move on
+                            utility.logWithDate("Failed to parse integer from driver alert: " + ex.getMessage());
+                        }
+                    } else {
+                        // look up by text
+                        var itisCode = itisCodes.stream().filter(x -> x.getDescription() != null
+                                && !x.getDescription().equals("") && x.getDescription().equals(code)).findFirst();
+                        // these text values end with 'START_ITIS_CODE'/'END_ITIS_CODE', so check for
+                        // nulls
+                        if (!itisCode.isEmpty()) {
+                            driverAlertItisCodeService.insertDriverAlertItisCode(driverAlertId,
+                                    itisCode.get().getItisCodeId());
                         }
                     }
                 }

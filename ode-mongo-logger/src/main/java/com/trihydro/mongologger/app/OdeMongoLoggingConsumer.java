@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
+import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.mongologger.app.loggers.MongoLogger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,61 +25,70 @@ public class OdeMongoLoggingConsumer {
 	Statement statement = null;
 	private MongoLoggerConfiguration mongoLoggerConfig;
 	private MongoLogger mongoLogger;
+	private Utility utility;
+	private EmailHelper emailHelper;
 
 	@Autowired
-	public OdeMongoLoggingConsumer(MongoLoggerConfiguration _mongoLoggerConfig, MongoLogger _mongoLogger)
-			throws IOException, SQLException {
+	public OdeMongoLoggingConsumer(MongoLoggerConfiguration _mongoLoggerConfig, MongoLogger _mongoLogger,
+			Utility _utility, EmailHelper _emailHelper) throws IOException, SQLException, Exception {
 		this.mongoLoggerConfig = _mongoLoggerConfig;
 		mongoLogger = _mongoLogger;
+		utility = _utility;
+		emailHelper = _emailHelper;
 
-		System.out.println("starting..............");
-		startKafkaConsumerAsync();
+		utility.logWithDate("starting..............");
+		startKafkaConsumer();
 	}
 
-	public void startKafkaConsumerAsync() {
-		// An Async task always executes in new thread
-		new Thread(new Runnable() {
-			public void run() {
-				String endpoint = mongoLoggerConfig.getHostname() + ":9092";
+	public void startKafkaConsumer() throws Exception {
+		String endpoint = mongoLoggerConfig.getHostname() + ":9092";
 
-				// Properties for the kafka topic
-				Properties props = new Properties();
-				props.put("bootstrap.servers", endpoint);
-				props.put("group.id", mongoLoggerConfig.getDepositGroup());
-				props.put("auto.commit.interval.ms", "1000");
-				props.put("session.timeout.ms", "30000");
-				props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		// Properties for the kafka topic
+		Properties props = new Properties();
+		props.put("bootstrap.servers", endpoint);
+		props.put("group.id", mongoLoggerConfig.getDepositGroup());
+		props.put("auto.commit.interval.ms", "1000");
+		props.put("session.timeout.ms", "30000");
+		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
-				KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
-				String topic = mongoLoggerConfig.getDepositTopic();
+		KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
+		String topic = mongoLoggerConfig.getDepositTopic();
 
-				stringConsumer.subscribe(Arrays.asList(topic));
-				System.out.println("Subscribed to topic " + topic);
-				try {
-					while (true) {
-						ConsumerRecords<String, String> records = stringConsumer.poll(100);
-						ArrayList<String> recStrings = new ArrayList<String>();
-						for (ConsumerRecord<String, String> record : records) {
-							recStrings.add(record.value());
-						}
+		stringConsumer.subscribe(Arrays.asList(topic));
+		System.out.println("Subscribed to topic " + topic);
+		try {
+			while (true) {
+				ConsumerRecords<String, String> records = stringConsumer.poll(100);
+				ArrayList<String> recStrings = new ArrayList<String>();
+				for (ConsumerRecord<String, String> record : records) {
+					recStrings.add(record.value());
+				}
 
-						if (recStrings.size() > 0) {
-							String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
+				if (recStrings.size() > 0) {
+					utility.logWithDate(String.format("Found %d %s records to parse", recStrings.size(), topic));
+					String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
 
-							if (topic.equals("topic.OdeTimJson")) {
-								mongoLogger.logTim(recStringArr);
-							} else if (topic.equals("topic.OdeBsmJson")) {
-								mongoLogger.logBsm(recStringArr);
-							} else if (topic.equals("topic.OdeDriverAlertJson")) {
-								mongoLogger.logDriverAlert(recStringArr);
-							}
-						}
+					if (topic.equals("topic.OdeTimJson")) {
+						mongoLogger.logTim(recStringArr);
+					} else if (topic.equals("topic.OdeBsmJson")) {
+						mongoLogger.logBsm(recStringArr);
+					} else if (topic.equals("topic.OdeDriverAlertJson")) {
+						mongoLogger.logDriverAlert(recStringArr);
 					}
-				} finally {
-					stringConsumer.close();
 				}
 			}
-		}).start();
+		} catch (Exception ex) {
+			utility.logWithDate("Exception in mongo logger application " + ex.getMessage());
+			emailHelper.ContainerRestarted(mongoLoggerConfig.getAlertAddresses(), mongoLoggerConfig.getMailPort(),
+					mongoLoggerConfig.getMailHost(), mongoLoggerConfig.getFromEmail(), topic + " Mongo Consumer");
+			throw (ex);
+		} finally {
+			try {
+				stringConsumer.close();
+			} catch (Exception consumerEx) {
+				consumerEx.printStackTrace();
+			}
+		}
 	}
 }

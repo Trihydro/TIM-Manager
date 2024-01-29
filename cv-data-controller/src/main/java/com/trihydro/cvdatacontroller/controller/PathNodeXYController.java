@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,12 +29,12 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 @ApiIgnore
 public class PathNodeXYController extends BaseController {
 
-	private TimOracleTables timOracleTables;
+	private TimDbTables timDbTables;
 	private SQLNullHandler sqlNullHandler;
 
 	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-		timOracleTables = _timOracleTables;
+	public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+		timDbTables = _timDbTables;
 		sqlNullHandler = _sqlNullHandler;
 	}
 
@@ -98,12 +98,12 @@ public class PathNodeXYController extends BaseController {
 		try {
 
 			connection = dbInteractions.getConnectionPool();
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("path_node_xy",
-					timOracleTables.getPathNodeXYTable());
+			String insertQueryStatement = timDbTables.buildInsertQueryStatement("path_node_xy",
+					timDbTables.getPathNodeXYTable());
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_node_xy_id" });
 			int fieldNum = 1;
 
-			for (String col : timOracleTables.getPathNodeXYTable()) {
+			for (String col : timDbTables.getPathNodeXYTable()) {
 				if (col.equals("NODE_XY_ID"))
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, nodeXYId);
 				else if (col.equals("PATH_ID"))

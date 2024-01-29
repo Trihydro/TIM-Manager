@@ -6,17 +6,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTimRc;
-import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -39,9 +43,9 @@ public class WydotTimCcController extends WydotTimBaseController {
     @Autowired
     public WydotTimCcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
     }
 
     @RequestMapping(value = "/cc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -50,10 +54,10 @@ public class WydotTimCcController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - CHAIN CONTROL TIM");
+        utility.logWithDate(dateFormat.format(date) + " - CHAIN CONTROL TIM", this.getClass());
 
         String post = gson.toJson(timRcList);
-        System.out.println(post.toString());
+        utility.logWithDate(post.toString(), this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -91,9 +95,10 @@ public class WydotTimCcController extends WydotTimBaseController {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
+                var startTime = getStartTime();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory);
+                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
+                            TravelerInfoType.advisory);
                 }
             }
         }).start();

@@ -1,6 +1,5 @@
 package com.trihydro.rsudatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,15 +11,16 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.service.RsuService;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class RsuTimControllerTest {
     @Mock
     RsuService mockRsuService;
@@ -39,8 +39,8 @@ public class RsuTimControllerTest {
         ResponseEntity<List<RsuTim>> result = uut.GetRsuTimsDeliveryStart("0.0.0.0");
 
         // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(1, result.getBody().size());
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertEquals(1, result.getBody().size());
     }
 
     @Test
@@ -49,8 +49,8 @@ public class RsuTimControllerTest {
         ResponseEntity<List<RsuTim>> result = uut.GetRsuTimsDeliveryStart("");
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertEquals(null, result.getBody());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        Assertions.assertEquals(null, result.getBody());
     }
 
     @Test
@@ -62,8 +62,8 @@ public class RsuTimControllerTest {
         ResponseEntity<List<RsuTim>> result = uut.GetRsuTimsDeliveryStart("0.0.0.0");
 
         // Assert
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getStatusCode());
-        assertEquals(null, result.getBody());
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getStatusCode());
+        Assertions.assertEquals(null, result.getBody());
         verify(mockUtility).logWithDate(any());
     }
 
@@ -76,8 +76,8 @@ public class RsuTimControllerTest {
         ResponseEntity<List<RsuTim>> result = uut.GetRsuTimsDeliveryStart("0.0.0.0");
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
-        assertEquals(null, result.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+        Assertions.assertEquals(null, result.getBody());
         verify(mockUtility).logWithDate(any());
     }
 }

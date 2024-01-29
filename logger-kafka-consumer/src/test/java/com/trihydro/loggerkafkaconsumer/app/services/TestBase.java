@@ -11,12 +11,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import com.trihydro.library.helpers.DbInteractions;
+import com.trihydro.library.helpers.Utility;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class TestBase<T extends BaseService> {
     // Mock Internals
     @Mock
@@ -31,11 +37,15 @@ public class TestBase<T extends BaseService> {
     // Mock BaseService dependencies
     @Mock
     protected DbInteractions mockDbInteractions;
+    @Mock
+    protected Utility mockUtility;
+
+    protected DateFormat timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
     protected T uut;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setup() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException,
             IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]
@@ -53,6 +63,6 @@ public class TestBase<T extends BaseService> {
         lenient().when(mockPreparedStatement.executeQuery()).thenReturn(mockRs);
         lenient().when(mockRs.next()).thenReturn(true).thenReturn(false);
 
-        uut.InjectBaseDependencies(mockDbInteractions);
+        uut.InjectBaseDependencies(mockDbInteractions, mockUtility);
     }
 }

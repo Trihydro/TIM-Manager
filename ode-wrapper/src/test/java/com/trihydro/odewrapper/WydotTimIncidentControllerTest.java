@@ -1,7 +1,5 @@
 package com.trihydro.odewrapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -12,29 +10,29 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.controller.WydotTimIncidentController;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
-import com.trihydro.odewrapper.service.WydotTimService;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
 
-@RunWith(StrictStubs.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 public class WydotTimIncidentControllerTest {
 
 	@Mock
@@ -45,6 +43,8 @@ public class WydotTimIncidentControllerTest {
 	TimTypeService mockTimTypeService;
 	@Mock
 	SetItisCodes setItisCodes;
+	@Mock
+	Utility utility;
 
 	@InjectMocks
 	@Spy
@@ -52,7 +52,7 @@ public class WydotTimIncidentControllerTest {
 
 	private Gson gson = new Gson();
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<ItisCode> itisCodes = new ArrayList<>();
 		ItisCode ic = new ItisCode();
@@ -81,14 +81,14 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.createIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("IN49251", resultArr[0].clientId);
-		assertEquals("I-80", resultArr[0].route);
-		assertEquals("b", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("IN49251", resultArr[0].clientId);
+		Assertions.assertEquals("I-80", resultArr[0].route);
+		Assertions.assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
@@ -103,13 +103,13 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.createIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
+		Assertions.assertNotNull(resultArr);
 
-		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("b", resultArr[0].direction);
-		assertEquals("IN49251", resultArr[0].clientId);
+		Assertions.assertEquals("route not supported", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
+		Assertions.assertEquals("IN49251", resultArr[0].clientId);
 	}
 
 	@Test
@@ -123,11 +123,11 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.createIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("b", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
 	}
 
 	@Test
@@ -140,13 +140,13 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.createIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
-		assertEquals("OD49251", resultArr[0].clientId);
-		assertEquals("I-80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
+		Assertions.assertEquals("OD49251", resultArr[0].clientId);
+		Assertions.assertEquals("I-80", resultArr[0].route);
 	}
 
 	@Test
@@ -160,12 +160,12 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.createIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
-		assertEquals("IN49251", resultArr[0].clientId);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals("route not supported", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
+		Assertions.assertEquals("IN49251", resultArr[0].clientId);
 	}
 
 	@Test
@@ -178,11 +178,11 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.createIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
 	}
 
 	@Test
@@ -201,8 +201,8 @@ public class WydotTimIncidentControllerTest {
 		Collection<ActiveTim> data = uut.getIncidentTims();
 
 		// Assert
-		assertEquals(1, data.size());
-		assertEquals(at, data.iterator().next());
+		Assertions.assertEquals(1, data.size());
+		Assertions.assertEquals(at, data.iterator().next());
 	}
 
 	@Test
@@ -222,8 +222,8 @@ public class WydotTimIncidentControllerTest {
 		Collection<ActiveTim> data = uut.getIncidentTimById(incidentId);
 
 		// Assert
-		assertEquals(1, data.size());
-		assertEquals(at, data.iterator().next());
+		Assertions.assertEquals(1, data.size());
+		Assertions.assertEquals(at, data.iterator().next());
 	}
 
 	@Test
@@ -237,13 +237,13 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.updateIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("i", resultArr[0].direction);
-		assertEquals("OD49251", resultArr[0].clientId);
-		assertEquals("I-80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("i", resultArr[0].direction);
+		Assertions.assertEquals("OD49251", resultArr[0].clientId);
+		Assertions.assertEquals("I-80", resultArr[0].route);
 	}
 
 	@Test
@@ -257,13 +257,13 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.updateIncidentTim(til);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("b", resultArr[0].direction);
-		assertEquals("IN49251", resultArr[0].clientId);
-		assertEquals("I-80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
+		Assertions.assertEquals("IN49251", resultArr[0].clientId);
+		Assertions.assertEquals("I-80", resultArr[0].route);
 	}
 
 	@Test
@@ -276,7 +276,7 @@ public class WydotTimIncidentControllerTest {
 		ResponseEntity<String> data = uut.deleteIncidentTim(incidentId);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
-		assertEquals("success", data.getBody());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals("success", data.getBody());
 	}
 }

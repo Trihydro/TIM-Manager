@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -8,29 +7,27 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 
-@RunWith(StrictStubs.class)
 public class RegionServiceTest extends TestBase<RegionService> {
 
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     @Test
@@ -48,7 +45,7 @@ public class RegionServiceTest extends TestBase<RegionService> {
         Long data = uut.AddRegion(dataFrameId, pathId, region);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, dataFrameId);// DATA_FRAME_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, region.getName());// NAME
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, region.getLaneWidth());// LANE_WIDTH
@@ -86,7 +83,7 @@ public class RegionServiceTest extends TestBase<RegionService> {
         Long data = uut.AddRegion(dataFrameId, pathId, region);
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        Assertions.assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

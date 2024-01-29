@@ -5,15 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,12 +31,12 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("active-tim-holding")
 @ApiIgnore
 public class ActiveTimHoldingController extends BaseController {
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -48,8 +47,8 @@ public class ActiveTimHoldingController extends BaseController {
         PreparedStatement preparedStatement = null;
         Long activeTimHoldingId = 0l;
         try {
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim_holding",
-                    timOracleTables.getActiveTimHoldingTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim_holding",
+                    timDbTables.getActiveTimHoldingTable());
 
             // get connection
             connection = dbInteractions.getConnectionPool();
@@ -58,7 +57,7 @@ public class ActiveTimHoldingController extends BaseController {
                     new String[] { "active_tim_holding_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getActiveTimHoldingTable()) {
+            for (String col : timDbTables.getActiveTimHoldingTable()) {
                 if (col.equals("ACTIVE_TIM_HOLDING_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTimHolding.getActiveTimHoldingId());
                 } else if (col.equals("CLIENT_ID")) {
@@ -71,31 +70,42 @@ public class ActiveTimHoldingController extends BaseController {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getSatRecordId());
                 } else if (col.equals("START_LATITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getStartPoint().getLatitude());
                     }
                 } else if (col.equals("START_LONGITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getStartPoint().getLongitude());
                     }
                 } else if (col.equals("END_LATITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getEndPoint().getLatitude());
                     }
                 } else if (col.equals("END_LONGITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
-                        sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 activeTimHolding.getEndPoint().getLongitude());
                     }
                 } else if (col.equals("RSU_INDEX")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
                 } else if (col.equals("DATE_CREATED")) {
-                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-                            LocalDateTime.parse(activeTimHolding.getDateCreated(), DateTimeFormatter.ISO_DATE_TIME)));
+                    java.util.Date dateCreated = utility.convertDate(activeTimHolding.getDateCreated());
+                    Timestamp dateCreatedTimestamp = new Timestamp(dateCreated.getTime());
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, dateCreatedTimestamp);
                 } else if (col.equals("PROJECT_KEY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
+                } else if (col.equals("EXPIRATION_DATE")) {
+                    if (activeTimHolding.getExpirationDateTime() != null) {
+                        java.util.Date tim_exp_date = utility.convertDate(activeTimHolding.getExpirationDateTime());
+                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                                utility.timestampFormat.format(tim_exp_date));
+                    } else {
+                        preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
+                    }
+                } else if (col.equals("PACKET_ID")) {
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getPacketId());
                 }
 
                 fieldNum++;
@@ -181,15 +191,17 @@ public class ActiveTimHoldingController extends BaseController {
                 activeTimHolding.setDirection(rs.getString("DIRECTION"));
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-                activeTimHolding
-                        .setStartPoint(new Coordinate(rs.getDouble("START_LATITUDE"), rs.getDouble("START_LONGITUDE")));
-                activeTimHolding
-                        .setEndPoint(new Coordinate(rs.getDouble("END_LATITUDE"), rs.getDouble("END_LONGITUDE")));
+                activeTimHolding.setStartPoint(
+                        new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(
+                        new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
                 activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
                 int rsu_index = rs.getInt("RSU_INDEX");
                 if (!rs.wasNull()) {
                     activeTimHolding.setRsuIndex(rsu_index);
                 }
+                activeTimHolding.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+                activeTimHolding.setPacketId(rs.getString("PACKET_ID"));
                 holdings.add(activeTimHolding);
             }
             return ResponseEntity.ok(holdings);

@@ -25,11 +25,12 @@ public class CleanupActiveTims implements Runnable {
     private RestTemplateProvider restTemplateProvider;
 
     @Autowired
-    public void InjectDependencies(DataTasksConfiguration configuration, Utility _utility,
+    public void InjectDependencies(DataTasksConfiguration _configuration, Utility _utility,
             ActiveTimService _activeTimService, RestTemplateProvider _restTemplateProvider) {
-        this.configuration = configuration;
+        configuration = _configuration;
         utility = _utility;
         activeTimService = _activeTimService;
+        restTemplateProvider = _restTemplateProvider;
     }
 
     public void run() {

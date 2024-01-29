@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,11 +16,12 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.CertExpirationModel;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +47,7 @@ public class TimService extends BaseService {
 
     public Gson gson = new Gson();
     private ActiveTimService activeTimService;
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
     private PathService pathService;
     private RegionService regionService;
@@ -59,16 +61,19 @@ public class TimService extends BaseService {
     private NodeXYService nodeXYService;
     private Utility utility;
     private ActiveTimHoldingService activeTimHoldingService;
+    private PathNodeLLService pathNodeLLService;
+    private NodeLLService nodeLLService;
 
     @Autowired
-    public void InjectDependencies(ActiveTimService _ats, TimOracleTables _timOracleTables,
+    public void InjectDependencies(ActiveTimService _ats, TimDbTables _timDbTables,
             SQLNullHandler _sqlNullHandler, PathService _pathService, RegionService _regionService,
             DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
             ItisCodeService _itisCodesService, TimRsuService _timRsuService,
             DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
-            NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService) {
+            NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService,
+            PathNodeLLService _pathNodeLLService, NodeLLService _nodeLLService) {
         activeTimService = _ats;
-        timOracleTables = _timOracleTables;
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
         pathService = _pathService;
         regionService = _regionService;
@@ -82,20 +87,30 @@ public class TimService extends BaseService {
         nodeXYService = _nodeXYService;
         utility = _utility;
         activeTimHoldingService = _athService;
+        pathNodeLLService = _pathNodeLLService;
+        nodeLLService = _nodeLLService;
     }
 
-    public void addTimToOracleDB(OdeData odeData) {
+    public void addTimToDatabase(OdeData odeData) {
 
         try {
 
-            utility.logWithDate("Called addTimToOracleDB");
+            utility.logWithDate("Called addTimToDatabase");
 
-            Long timId = AddTim(odeData.getMetadata(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getReceivedMessageDetails(),
-                    ((OdeTimPayload) odeData.getPayload()).getTim(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getRecordType(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getLogFileName(),
-                    ((OdeLogMetadata) odeData.getMetadata()).getSecurityResultCode(), null, null);
+            ReceivedMessageDetails rxMsgDet = null;
+            RecordType recType = null;
+            String logFileName = null;
+            SecurityResultCode secResCode = null;
+            if (odeData.getMetadata() instanceof OdeLogMetadata) {
+                var odeLogMetadata = (OdeLogMetadata) odeData.getMetadata();
+                rxMsgDet = odeLogMetadata.getReceivedMessageDetails();
+                recType = odeLogMetadata.getRecordType();
+                logFileName = odeLogMetadata.getLogFileName();
+                secResCode = odeLogMetadata.getSecurityResultCode();
+            }
+
+            Long timId = AddTim(odeData.getMetadata(), rxMsgDet, ((OdeTimPayload) odeData.getPayload()).getTim(),
+                    recType, logFileName, secResCode, null, null);
 
             // return if TIM is not inserted
             if (timId == null)
@@ -129,7 +144,7 @@ public class TimService extends BaseService {
                 regionService.AddRegion(dataFrameId, null, region);
             } else {
                 utility.logWithDate(
-                        "addTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+                        "addTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
                                 + dataFrameId + ")");
             }
 
@@ -150,25 +165,26 @@ public class TimService extends BaseService {
                     }
                 }
 
-                // save DataFrame ITIS codes
-                for (String timItisCodeId : dFrames[0].getItems()) {
-                    if (StringUtils.isNumeric(timItisCodeId)) {
-                        String itisCodeId = getItisCodeId(timItisCodeId);
+                var items = dFrames[0].getItems();
+                for (var i = 0; i < items.length; i++) {
+                    String timItisCode = items[i];
+                    if (StringUtils.isNumeric(timItisCode)) {
+                        String itisCodeId = getItisCodeId(timItisCode);
                         if (itisCodeId != null)
-                            dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+                            dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
                     } else
-                        dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+                        dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
                 }
             }
         } catch (NullPointerException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Null pointer exception encountered in TimService.addTimToDatabase() method: " + e.getMessage());
         }
     }
 
     // only does one TIM at a time ***
-    public void addActiveTimToOracleDB(OdeData odeData) {
+    public void addActiveTimToDatabase(OdeData odeData) {
 
-        utility.logWithDate("Called addActiveTimToOracleDB");
+        utility.logWithDate("Called addActiveTimToDatabase");
         // variables
         ActiveTim activeTim;
 
@@ -187,6 +203,9 @@ public class TimService extends BaseService {
         String name = regions[0].getName();
         if (StringUtils.isEmpty(name) || StringUtils.isBlank(name))
             return;
+        OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
+        if (metaData == null)
+            return;
 
         // get information from the region name, first check splitname length
         activeTim = setActiveTimByRegionName(name);
@@ -204,8 +223,7 @@ public class TimService extends BaseService {
 
         if (timId == null) {
             // TIM doesn't currently exist. Add it.
-            timId = AddTim((OdeRequestMsgMetadata) odeData.getMetadata(), null, tim, null, null, null, satRecordId,
-                    name);
+            timId = AddTim(metaData, null, tim, null, null, null, satRecordId, name);
 
             if (timId != null) {
                 // we inserted a new TIM, add additional data
@@ -229,8 +247,6 @@ public class TimService extends BaseService {
             utility.logWithDate("Added sat_record_id of " + satRecordId + " to TIM with tim_id " + timId);
         }
 
-        OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
-
         // TODO : Change to loop through RSU array - doing one rsu for now
         RSU firstRsu = null;
         if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
@@ -242,7 +258,17 @@ public class TimService extends BaseService {
         if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null)
             activeTim.setSatRecordId(metaData.getRequest().getSdw().getRecordId());
 
-        activeTim.setStartDateTime(dframes[0].getStartDateTime());
+        // the ODE now parses all dataframes to find the most recent and sets it
+        // to this new OdeTimStartDateTime. We'll take advantage.
+        // Occasionally the OdeTimStartDateTime is null...set to dfames[0] startDateTime
+        // in that case
+        var stDate = metaData.getOdeTimStartDateTime();
+        if (StringUtils.isEmpty(stDate)) {
+            stDate = dframes[0].getStartDateTime();
+            utility.logWithDate(String.format(
+                    "addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
+        }
+        activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);
 
         ActiveTimHolding ath = null;
@@ -257,10 +283,22 @@ public class TimService extends BaseService {
             }
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getRsuTarget());
+
+            if (ath == null) {
+                utility.logWithDate(String.format(
+                        "Could not find active_tim_holding for client_id '%s', direction '%s', rsu_target '%s'",
+                        activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget()));
+            }
         } else {
             // SDX tim, fetch holding
             ath = activeTimHoldingService.getSdxActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getSatRecordId());
+
+            if (ath == null) {
+                utility.logWithDate(String.format(
+                        "Could not find active_tim_holding for client_id '%s', direction '%s', sat_record_id '%s'",
+                        activeTim.getClientId(), activeTim.getDirection(), activeTim.getSatRecordId()));
+            }
         }
 
         // set end time if duration is not indefinite
@@ -277,6 +315,11 @@ public class TimService extends BaseService {
 
             // set projectKey
             activeTim.setProjectKey(ath.getProjectKey());
+
+            // set expiration time if found
+            if (StringUtils.isNotBlank(ath.getExpirationDateTime())) {
+                activeTim.setExpirationDateTime(ath.getExpirationDateTime());
+            }
         }
 
         // if true, TIM came from WYDOT
@@ -295,6 +338,14 @@ public class TimService extends BaseService {
             if (activeTimDb == null) {
                 activeTimService.insertActiveTim(activeTim);
             } else { // else update active TIM
+                // If we couldn't find an Active TIM Holding record, we should persist the
+                // existing values
+                // for startPoint, endPoint, and projectKey
+                if (ath == null) {
+                    activeTim.setStartPoint(activeTimDb.getStartPoint());
+                    activeTim.setEndPoint(activeTimDb.getEndPoint());
+                    activeTim.setProjectKey(activeTimDb.getProjectKey());
+                }
                 activeTim.setActiveTimId(activeTimDb.getActiveTimId());
                 activeTimService.updateActiveTim(activeTim);
             }
@@ -302,7 +353,7 @@ public class TimService extends BaseService {
         } else {
             // not from WYDOT application
             // just log for now
-            System.out.println("Inserting new active_tim, no TimType found - not from WYDOT application");
+            utility.logWithDate("Inserting new active_tim, no TimType found - not from WYDOT application");
             activeTimService.insertActiveTim(activeTim);
         }
 
@@ -354,13 +405,13 @@ public class TimService extends BaseService {
 
         try {
 
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim",
-                    timOracleTables.getTimTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim",
+                    timDbTables.getTimTable());
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getTimTable()) {
+            for (String col : timDbTables.getTimTable()) {
                 // default to null
                 preparedStatement.setString(fieldNum, null);
                 if (j2735TravelerInformationMessage != null) {
@@ -392,9 +443,9 @@ public class TimService extends BaseService {
                             preparedStatement.setString(fieldNum, null);
                     } else if (col.equals("RECORD_GENERATED_AT")) {
                         if (odeTimMetadata.getRecordGeneratedAt() != null) {
-                            java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(recordGeneratedAtDate));
+                            java.util.Date recordGeneratedAtDate = utility.convertDate(odeTimMetadata.getRecordGeneratedAt());
+                            Timestamp ts = new Timestamp(recordGeneratedAtDate.getTime());
+                            sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                         } else {
                             preparedStatement.setString(fieldNum, null);
                         }
@@ -402,18 +453,18 @@ public class TimService extends BaseService {
                         sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
                     } else if (col.equals("SANITIZED")) {
                         if (odeTimMetadata.isSanitized())
-                            preparedStatement.setString(fieldNum, "1");
+                            preparedStatement.setInt(fieldNum, 1);
                         else
-                            preparedStatement.setString(fieldNum, "0");
+                            preparedStatement.setInt(fieldNum, 0);
                     } else if (col.equals("PAYLOAD_TYPE")) {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
                     } else if (col.equals("ODE_RECEIVED_AT")) {
                         if (odeTimMetadata.getOdeReceivedAt() != null) {
-                            java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(receivedAtDate));
+                            java.util.Date receivedAtDate = utility.convertDate(odeTimMetadata.getOdeReceivedAt());
+                            Timestamp ts = new Timestamp(receivedAtDate.getTime());
+                            sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                         } else {
-                            preparedStatement.setString(fieldNum, null);
+                            preparedStatement.setTimestamp(fieldNum, null);
                         }
                     }
 
@@ -438,20 +489,20 @@ public class TimService extends BaseService {
                 if (receivedMessageDetails != null) {
                     if (receivedMessageDetails.getLocationData() != null) {
                         if (col.equals("RMD_LD_ELEVATION")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getElevation());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getElevation()));
                         } else if (col.equals("RMD_LD_HEADING")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getHeading());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getHeading()));
                         } else if (col.equals("RMD_LD_LATITUDE")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getLatitude());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getLatitude()));
                         } else if (col.equals("RMD_LD_LONGITUDE")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getLongitude());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getLongitude()));
                         } else if (col.equals("RMD_LD_SPEED")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getSpeed());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getSpeed()));
                         }
                     }
                     if (col.equals("RMD_RX_SOURCE") && receivedMessageDetails.getRxSource() != null) {
@@ -508,15 +559,22 @@ public class TimService extends BaseService {
             regionService.AddRegion(dataFrameId, pathId, region);
 
             Long nodeXYId;
+            Long nodeLLId;
             for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
-                nodeXYId = nodeXYService.AddNodeXY(nodeXY);
-                pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                if (nodeXY.getDelta().toLowerCase().contains("xy")) {
+                    nodeXYId = nodeXYService.AddNodeXY(nodeXY);
+                    pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                } else {
+                    // node-LL
+                    nodeLLId = nodeLLService.AddNodeLL(nodeXY);
+                    pathNodeLLService.insertPathNodeLL(nodeLLId, pathId);
+                }
             }
         } else if (geometry != null) {
             regionService.AddRegion(dataFrameId, null, region);
         } else {
             utility.logWithDate(
-                    "addActiveTimToOracleDB - Unable to insert region, no path or geometry found (data_frame_id: "
+                    "addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
                             + dataFrameId + ")");
         }
     }
@@ -528,15 +586,17 @@ public class TimService extends BaseService {
             System.out.println("No itis codes found to associate with data_frame " + dataFrameId);
             return;
         }
-        for (String timItisCodeId : items) {
-            if (StringUtils.isNumeric(timItisCodeId)) {
-                String itisCodeId = getItisCodeId(timItisCodeId);
+        for (var i = 0; i < items.length; i++) {
+            var timItisCode = items[i];
+
+            if (StringUtils.isNumeric(timItisCode)) {
+                String itisCodeId = getItisCodeId(timItisCode);
                 if (itisCodeId != null)
-                    dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId);
+                    dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
                 else
-                    utility.logWithDate("Could not find corresponding itis code it for " + timItisCodeId);
+                    utility.logWithDate("Could not find corresponding itis code it for " + timItisCode);
             } else
-                dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCodeId);
+                dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
         }
     }
 
@@ -635,11 +695,22 @@ public class TimService extends BaseService {
 
         String itisCodeId = null;
 
-        ItisCode itisCode = itisCodeService.selectAllItisCodes().stream()
-                .filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst().orElse(null);
-        if (itisCode != null)
-            itisCodeId = itisCode.getItisCodeId().toString();
+        try {
+            ItisCode itisCode = itisCodeService.selectAllItisCodes().stream()
+                    .filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst().orElse(null);
+            if (itisCode != null)
+                itisCodeId = itisCode.getItisCodeId().toString();
+        } catch (Exception ex) {
+            // on rare occasions we see an unparsable Integer
+            utility.logWithDate("Failed to parse ITIS integer(" + item + "): " + ex.getMessage());
+        }
 
         return itisCodeId;
+    }
+
+    public boolean updateActiveTimExpiration(CertExpirationModel cem) throws ParseException {
+        var minExp = activeTimService.getMinExpiration(cem.getPacketID(), cem.getExpirationDate());
+
+        return activeTimService.updateActiveTimExpiration(cem.getPacketID(), minExp);
     }
 }

@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class DriverAlertItisCodeService extends BaseService {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -29,15 +29,15 @@ public class DriverAlertItisCodeService extends BaseService {
 
         try {
 
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("driver_alert_itis_code",
-                    timOracleTables.getDriverAlertItisCodeTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("driver_alert_itis_code",
+                    timDbTables.getDriverAlertItisCodeTable());
             connection = dbInteractions.getConnectionPool();
             if (connection != null) {
                 preparedStatement = connection.prepareStatement(insertQueryStatement,
                         new String[] { "driver_alert_itis_code_id" });
                 int fieldNum = 1;
 
-                for (String col : timOracleTables.getDriverAlertItisCodeTable()) {
+                for (String col : timDbTables.getDriverAlertItisCodeTable()) {
                     if (col.equals("ITIS_CODE_ID"))
                         sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, itisCodeId);
                     else if (col.equals("DRIVER_ALERT_ID"))

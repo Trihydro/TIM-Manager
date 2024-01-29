@@ -1,7 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.dataConverters;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,11 +8,12 @@ import java.nio.file.Paths;
 
 import com.trihydro.library.helpers.JsonToJavaConverter;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import us.dot.its.jpo.ode.model.OdeBsmMetadata;
 import us.dot.its.jpo.ode.model.OdeBsmPayload;
@@ -25,7 +24,7 @@ import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
 import us.dot.its.jpo.ode.model.SerialId;
 import us.dot.its.jpo.ode.plugin.j2735.J2735TransmissionState;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class BsmDataConverterTest {
 
     @Spy
@@ -37,7 +36,6 @@ public class BsmDataConverterTest {
     @Test
     public void processBsmJson() throws IOException {
         // Arrange
-        // create test objects
         SerialId serialId;
 
         OdeBsmMetadata odeBsmMetadata = new OdeBsmMetadata();
@@ -67,32 +65,57 @@ public class BsmDataConverterTest {
         OdeBsmPayload odeBsmPayloadTest = (OdeBsmPayload) odeDataTest.getPayload();
 
         // Assert
-        assertNotNull(odeBsmMetadataTest);
-        assertEquals(odeBsmMetadata, odeBsmMetadataTest);
+        Assertions.assertNotNull(odeBsmMetadataTest);
+        Assertions.assertEquals(odeBsmMetadata, odeBsmMetadataTest);
 
-        assertNotNull(odeBsmPayloadTest);
-        assertEquals(Integer.valueOf(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
-        assertEquals("738B0000", odeBsmPayloadTest.getBsm().getCoreData().getId());
-        assertEquals(Integer.valueOf(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
-        assertEquals("40.4740003", odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLatitude().toString());
-        assertEquals("-104.9691846", odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLongitude().toString());
-        assertEquals(new BigDecimal(1489), odeBsmPayloadTest.getBsm().getCoreData().getPosition().getElevation());
-        assertEquals(new BigDecimal(0), odeBsmPayloadTest.getBsm().getCoreData().getAccelSet().getAccelYaw());
-        assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMajor().toString());
-        assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMinor().toString());
-        assertEquals(J2735TransmissionState.NEUTRAL, odeBsmPayloadTest.getBsm().getCoreData().getTransmission());
-        assertEquals("0.1", odeBsmPayloadTest.getBsm().getCoreData().getSpeed().toString());
-        assertEquals("19.9125", odeBsmPayloadTest.getBsm().getCoreData().getHeading().toString());
-        assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("leftFront"));
-        assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("rightFront"));
-        assertEquals(true, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("unavailable"));
-        assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("leftRear"));
-        assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("rightRear"));
-        assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getTraction());
-        assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAbs());
-        assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getScs());
-        assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getBrakeBoost());
-        assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAuxBrakes());
-        assertEquals(2, odeBsmPayloadTest.getBsm().getPartII().size());
+        Assertions.assertNotNull(odeBsmPayloadTest);
+        Assertions.assertEquals(Integer.valueOf(11), odeBsmPayloadTest.getBsm().getCoreData().getMsgCnt());
+        Assertions.assertEquals("738B0000", odeBsmPayloadTest.getBsm().getCoreData().getId());
+        Assertions.assertEquals(Integer.valueOf(19400), odeBsmPayloadTest.getBsm().getCoreData().getSecMark());
+        Assertions.assertEquals("40.4740003", odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLatitude().toString());
+        Assertions.assertEquals("-104.9691846", odeBsmPayloadTest.getBsm().getCoreData().getPosition().getLongitude().toString());
+        Assertions.assertEquals(new BigDecimal(1489), odeBsmPayloadTest.getBsm().getCoreData().getPosition().getElevation());
+        Assertions.assertEquals(new BigDecimal(0), odeBsmPayloadTest.getBsm().getCoreData().getAccelSet().getAccelYaw());
+        Assertions.assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMajor().toString());
+        Assertions.assertEquals("12.7", odeBsmPayloadTest.getBsm().getCoreData().getAccuracy().getSemiMinor().toString());
+        Assertions.assertEquals(J2735TransmissionState.NEUTRAL, odeBsmPayloadTest.getBsm().getCoreData().getTransmission());
+        Assertions.assertEquals("0.1", odeBsmPayloadTest.getBsm().getCoreData().getSpeed().toString());
+        Assertions.assertEquals("19.9125", odeBsmPayloadTest.getBsm().getCoreData().getHeading().toString());
+        Assertions.assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("leftFront"));
+        Assertions.assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("rightFront"));
+        Assertions.assertEquals(true, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("unavailable"));
+        Assertions.assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("leftRear"));
+        Assertions.assertEquals(false, odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getWheelBrakes().get("rightRear"));
+        Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getTraction());
+        Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAbs());
+        Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getScs());
+        Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getBrakeBoost());
+        Assertions.assertEquals("unavailable", odeBsmPayloadTest.getBsm().getCoreData().getBrakes().getAuxBrakes());
+        Assertions.assertEquals(2, odeBsmPayloadTest.getBsm().getPartII().size());
     }
+
+    @Test
+    public void processBsmJson_FAIL_Metadata() throws IOException {
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/bsmLogDuringEvent_OdeOutput_NullMetadata.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processBsmJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
+    }
+
+    @Test
+    public void processBsmJson_FAIL_Payload() throws IOException {
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/bsmLogDuringEvent_OdeOutput_NullPayload.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processBsmJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
+    }
+
 }

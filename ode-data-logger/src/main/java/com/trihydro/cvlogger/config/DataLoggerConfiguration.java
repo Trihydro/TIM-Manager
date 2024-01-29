@@ -1,11 +1,12 @@
 package com.trihydro.cvlogger.config;
 
 import com.trihydro.library.model.CVRestServiceProps;
+import com.trihydro.library.model.EmailProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class DataLoggerConfiguration implements CVRestServiceProps {
+public class DataLoggerConfiguration implements CVRestServiceProps, EmailProps {
     private String kafkaHostServer;
     private String tracUrl;
 
@@ -14,6 +15,7 @@ public class DataLoggerConfiguration implements CVRestServiceProps {
 
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
 
     private String depositTopic;
     private String depositGroup;
@@ -39,6 +41,14 @@ public class DataLoggerConfiguration implements CVRestServiceProps {
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String[] getAlertAddresses() {

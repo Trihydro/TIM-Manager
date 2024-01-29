@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.repositories;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import com.trihydro.cvdatacontroller.model.Milepost;
@@ -20,8 +21,8 @@ public interface MilepostRepository {
      * @param direction  direction of travel (I/D/B)
      * @return Collection of Milepost objects within given boundaries
      */
-    Collection<Milepost> getPathWithBuffer(String commonName, Double startLat, Double startLong, Double endLat,
-            Double endLong, String direction);
+    Collection<Milepost> getPathWithBuffer(String commonName, BigDecimal startLat, BigDecimal startLong, BigDecimal endLat,
+    BigDecimal endLong, String direction);
 
     /**
      * Finds a path along commonName route with the given point. Creates a buffer
@@ -35,6 +36,6 @@ public interface MilepostRepository {
      * @param bufferInMiles
      * @return
      */
-    Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, Double lat, Double lon, String direction,
+    Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, BigDecimal lat, BigDecimal lon, String direction,
             Double bufferInMiles);
 }

@@ -22,7 +22,7 @@
     "esbenp.prettier-vscode",
     "visualstudioexptteam.vscodeintellicode",
     "mhutchie.git-graph",
-    "ms-vsts.team"
+    "tabnine.tabnine-vscode"
   ],
 
   // Run post-create script after container is running and directory is mapped

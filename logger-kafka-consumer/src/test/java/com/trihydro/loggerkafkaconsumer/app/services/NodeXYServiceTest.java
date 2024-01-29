@@ -1,35 +1,32 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.Attributes;
 
-@RunWith(StrictStubs.class)
 public class NodeXYServiceTest extends TestBase<NodeXYService> {
 
     @Spy
-    private TimOracleTables mockTimOracleTables = new TimOracleTables();
+    private TimDbTables mockTimDbTables = new TimDbTables();
     @Mock
     private SQLNullHandler mockSqlNullHandler;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     @Test
@@ -42,7 +39,7 @@ public class NodeXYServiceTest extends TestBase<NodeXYService> {
         Long data = uut.AddNodeXY(nodeXY);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1, nodeXY.getDelta());// DELTA
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 2, nodeXY.getNodeLat());// NODE_LAT
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, nodeXY.getNodeLong());// NODE_LONG
@@ -65,7 +62,7 @@ public class NodeXYServiceTest extends TestBase<NodeXYService> {
         Long data = uut.AddNodeXY(nodeXY);
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        Assertions.assertEquals(Long.valueOf(0), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

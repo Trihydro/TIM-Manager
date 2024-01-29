@@ -1,47 +1,143 @@
 package com.trihydro.tasks.config;
 
+import java.math.BigDecimal;
+
 import com.trihydro.library.model.CVRestServiceProps;
+import com.trihydro.library.model.EmailProps;
+import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.TmddProps;
+import com.trihydro.library.service.TimGenerationProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps {
+public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps,
+        TimGenerationProps, OdeProps {
 
     private String cvRestService;
-    private String cvRestServiceDev; // Temporary
-    private String cvRestServiceProd; // Temporary
     private String rsuDataServiceUrl;
     private String wrapperUrl;
     private String sdwRestUrl;
     private String sdwApiKey;
+    private String odeUrl;
     private String tmddUrl;
     private String tmddUser;
     private String tmddPassword;
     private String[] alertAddresses;
     private String fromEmail;
+    private String environmentName;
     private String mailHost;
     private int mailPort;
+    private int bsmRetentionPeriodDays;
     private boolean runTmddValidation;
     private boolean runRsuValidation;
+    private int rsuValidationDelaySeconds = 60;
     private int rsuValThreadPoolSize = 1;
     private int rsuValTimeoutSeconds = 300; // 76 RSUs, 20s timeout each... Could still finish processing with up to 20%
                                             // of RSUs down in a pool w/ single thread
 
     private int removeExpiredPeriodMinutes = 1440;
+    private boolean retention_removeTims = true;
+    private boolean retention_removeDa = true;
+    private boolean retention_removeHmi = true;
+    private boolean retention_removeStatusLogs = true;
     private int cleanupPeriodMinutes = 1440;
     private int sdxValidationPeriodMinutes = 1440;
     private int rsuValidationPeriodMinutes = 1440;
     private int tmddValidationPeriodMinutes = 1440;
     private int retentionEnforcementPeriodMinutes = 1440;// run once a day by default
+    private int bsmCleanupPeriodMinutes = 1440;
+    private int hsmFunctionalityMinutes = 1;// run once a minute by default
+    private String hsmUrl = "http://10.145.9.74:55443/tmc";
+    private int hsmErrorEmailFrequencyMinutes = 10;// send an email every 10 minutes the system is down
+    private boolean runHsmCheck;
 
+    private TimeToLive sdwTtl;
+    private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);
+    private String[] rsuRoutes;
+    private Double pointIncidentBufferMiles;
+
+    /**
+     * Returns the defaultLaneWidth / 2
+     *
+     * @return
+     */
+    public Double getPathDistanceLimit() {
+        return defaultLaneWidth.divide(BigDecimal.valueOf(2)).doubleValue();
+    }
+
+    public boolean getRetention_removeStatusLogs() {
+        return retention_removeStatusLogs;
+    }
+
+    public void setRetention_removeStatusLogs(boolean retention_removeStatusLogs) {
+        this.retention_removeStatusLogs = retention_removeStatusLogs;
+    }
+
+    public boolean getRetention_removeHmi() {
+        return retention_removeHmi;
+    }
+
+    public void setRetention_removeHmi(boolean retention_removeHmi) {
+        this.retention_removeHmi = retention_removeHmi;
+    }
+
+    public boolean getRetention_removeDa() {
+        return retention_removeDa;
+    }
+
+    public void setRetention_removeDa(boolean retention_removeDa) {
+        this.retention_removeDa = retention_removeDa;
+    }
+
+    public boolean getRetention_removeTims() {
+        return retention_removeTims;
+    }
+
+    public void setRetention_removeTims(boolean retention_removeTims) {
+        this.retention_removeTims = retention_removeTims;
+    }
 
     public String getCvRestService() {
         return cvRestService;
+    }
+
+    public Double getPointIncidentBufferMiles() {
+        return pointIncidentBufferMiles;
+    }
+
+    public void setPointIncidentBufferMiles(Double pointIncidentBufferMiles) {
+        this.pointIncidentBufferMiles = pointIncidentBufferMiles;
+    }
+
+    public String[] getRsuRoutes() {
+        return rsuRoutes;
+    }
+
+    public void setRsuRoutes(String[] rsuRoutes) {
+        this.rsuRoutes = rsuRoutes;
+    }
+
+    public BigDecimal getDefaultLaneWidth() {
+        return defaultLaneWidth;
+    }
+
+    public void setDefaultLaneWidth(BigDecimal defaultLaneWidth) {
+        this.defaultLaneWidth = defaultLaneWidth;
+    }
+
+    public TimeToLive getSdwTtl() {
+        return sdwTtl;
+    }
+
+    public void setSdwTtl(TimeToLive sdwTtl) {
+        this.sdwTtl = sdwTtl;
     }
 
     public int getRetentionEnforcementPeriodMinutes() {
@@ -54,22 +150,6 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setCvRestService(String cvRestService) {
         this.cvRestService = cvRestService;
-    }
-
-    public String getCvRestServiceDev() {
-        return cvRestServiceDev;
-    }
-
-    public void setCvRestServiceDev(String cvRestServiceDev) {
-        this.cvRestServiceDev = cvRestServiceDev;
-    }
-
-    public String getCvRestServiceProd() {
-        return cvRestServiceProd;
-    }
-
-    public void setCvRestServiceProd(String cvRestServiceProd) {
-        this.cvRestServiceProd = cvRestServiceProd;
     }
 
     public String getRsuDataServiceUrl() {
@@ -104,6 +184,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.sdwApiKey = sdwApiKey;
     }
 
+    public String getOdeUrl() {
+        return odeUrl;
+    }
+
+    public void setOdeUrl(String odeUrl) {
+        this.odeUrl = odeUrl;
+    }
+
     public String[] getAlertAddresses() {
         return alertAddresses;
     }
@@ -118,6 +206,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public String getMailHost() {
@@ -136,6 +232,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.mailPort = mailPort;
     }
 
+    public int getBsmRetentionPeriodDays() {
+        return bsmRetentionPeriodDays;
+    }
+
+    public void setBsmRetentionPeriodDays(int bsmRetentionPeriodDays) {
+        this.bsmRetentionPeriodDays = bsmRetentionPeriodDays;
+    }
+
     public boolean getRunTmddValidation() {
         return runTmddValidation;
     }
@@ -150,6 +254,14 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setRunRsuValidation(boolean runRsuValidation) {
         this.runRsuValidation = runRsuValidation;
+    }
+
+    public int getRsuValidationDelaySeconds() {
+        return rsuValidationDelaySeconds;
+    }
+
+    public void setRsuValidationDelaySeconds(int rsuValidationDelaySeconds) {
+        this.rsuValidationDelaySeconds = rsuValidationDelaySeconds;
     }
 
     public int getRsuValThreadPoolSize() {
@@ -244,4 +356,43 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.tmddValidationPeriodMinutes = tmddValidationPeriodMinutes;
     }
 
+    public int getBsmCleanupPeriodMinutes() {
+        return bsmCleanupPeriodMinutes;
+    }
+
+    public void setBsmCleanupPeriodMinutes(int bsmCleanupPeriodMinutes) {
+        this.bsmCleanupPeriodMinutes = bsmCleanupPeriodMinutes;
+    }
+
+    public int getHsmFunctionalityMinutes() {
+        return hsmFunctionalityMinutes;
+    }
+
+    public void setHsmFunctionalityMinutes(int hsmFunctionalityMinutes) {
+        this.hsmFunctionalityMinutes = hsmFunctionalityMinutes;
+    }
+
+    public String getHsmUrl() {
+        return hsmUrl;
+    }
+
+    public void setHsmUrl(String hsmUrl) {
+        this.hsmUrl = hsmUrl;
+    }
+
+    public int getHsmErrorEmailFrequencyMinutes() {
+        return hsmErrorEmailFrequencyMinutes;
+    }
+
+    public void setHsmErrorEmailFrequencyMinutes(int hsmErrorEmailFrequencyMinutes) {
+        this.hsmErrorEmailFrequencyMinutes = hsmErrorEmailFrequencyMinutes;
+    }
+
+    public boolean getRunHsmCheck() {
+        return runHsmCheck;
+    }
+
+    public void setRunHsmCheck(boolean runHsmCheck) {
+        this.runHsmCheck = runHsmCheck;
+    }
 }

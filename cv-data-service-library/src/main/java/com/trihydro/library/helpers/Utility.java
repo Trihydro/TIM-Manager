@@ -7,6 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -18,7 +20,32 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Utility {
+	private DateFormat utcFormatMilliSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	private DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private DateFormat utcFormatMin = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+	public DateFormat timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+	public DateFormat utcTextFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z[UTC]'");
+
 	public Gson gson = new Gson();
+
+	public Date convertDate(String incomingDate) {
+		Date convertedDate = null;
+		try {
+			if (incomingDate != null) {
+				if (incomingDate.contains("UTC"))
+					convertedDate = utcTextFormat.parse(incomingDate);
+				else if (incomingDate.contains("."))
+					convertedDate = utcFormatMilliSec.parse(incomingDate);
+				else if (incomingDate.length() == 17)
+					convertedDate = utcFormatMin.parse(incomingDate);
+				else
+					convertedDate = utcFormatSec.parse(incomingDate);
+			}
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+		return convertedDate;
+	}
 
 	public <T> void logWithDate(String msg, Class<T> clazz) {
 		logWithDate(clazz.getSimpleName() + ": " + msg);
@@ -34,6 +61,9 @@ public class Utility {
 		int duration = getMinutesDurationWithSimpleDateFormat(startDateTime, endDateTime);
 		if (duration == -1) {
 			duration = getMinutesDurationWithZonedDateTime(startDateTime, endDateTime);
+		}
+		if (duration == -1) {
+			duration = getMinutesDurationWithYyMmDdFormat(startDateTime, endDateTime);
 		}
 		if (duration == -1) {
 			System.out.println(
@@ -68,7 +98,7 @@ public class Utility {
 
 	/**
 	 * Attempt to get duration in minutes between two dates parsed in
-	 * SimpleDateFormat("dd-MMM-yy HH.MM.SS"). If parsing fails, returns -1
+	 * SimpleDateFormat("dd-MMM-yy HH.mm.ss"). If parsing fails, returns -1
 	 * 
 	 * @param startDateTime
 	 * @param endDateTime
@@ -77,7 +107,29 @@ public class Utility {
 	 */
 	private int getMinutesDurationWithSimpleDateFormat(String startDateTime, String endDateTime) {
 		try {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yy HH.MM.SS");
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss");
+			Date startDate = simpleDateFormat.parse(startDateTime);
+			Date endDate = simpleDateFormat.parse(endDateTime);
+
+			long duration = (endDate.getTime() - startDate.getTime()) / 60000; // milliseconds to minutes is 1/60000
+			return toIntExact(duration);
+		} catch (Exception ex) {
+			return -1;
+		}
+	}
+
+	/**
+	 * Attempt to get duration in minutes between two dates parsed in
+	 * SimpleDateFormat("yyyy-MM-dd HH:mm:ss"). If parsing fails, returns -1
+	 * 
+	 * @param startDateTime
+	 * @param endDateTime
+	 * @return The duration in minutes between the two given dates. If parsing
+	 *         fails, returns -1
+	 */
+	private int getMinutesDurationWithYyMmDdFormat(String startDateTime, String endDateTime) {
+		try {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date startDate = simpleDateFormat.parse(startDateTime);
 			Date endDate = simpleDateFormat.parse(endDateTime);
 

@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.services;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import com.trihydro.cvdatacontroller.model.Milepost;
@@ -23,13 +24,13 @@ public class MilepostService {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Milepost> getPathWithBuffer(String commonName, Double startLat, Double startLong, Double endLat,
-            Double endLong, String direction) {
+    public Collection<Milepost> getPathWithBuffer(String commonName, BigDecimal startLat, BigDecimal startLong, BigDecimal endLat,
+    BigDecimal endLong, String direction) {
         return milepostRepository.getPathWithBuffer(commonName, startLat, startLong, endLat, endLong, direction);
     }
 
     @Transactional(readOnly = true)
-    public Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, Double lat, Double lon, String direction,
+    public Collection<Milepost> getPathWithSpecifiedBuffer(String commonName, BigDecimal lat, BigDecimal lon, String direction,
             Double bufferInMiles) {
         return milepostRepository.getPathWithSpecifiedBuffer(commonName, lat, lon, direction, bufferInMiles);
     }

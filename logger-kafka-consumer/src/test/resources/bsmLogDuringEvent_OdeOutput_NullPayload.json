@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "bsmSource": "RV",
+    "logFileName": "bsmLogDuringEvent_OdeOutput.csv",
+    "recordType": "bsmLogDuringEvent",
+    "payloadType": "us.dot.its.jpo.ode.model.OdeBsmPayload",
+    "serialId": {
+      "streamId": "c8babc6e-ec8a-4232-a151-1dcd27c323ef",
+      "bundleSize": 1,
+      "bundleId": 4070,
+      "recordId": 2,
+      "serialNumber": 0
+    },
+    "odeReceivedAt": "2017-11-22T18:37:29.31Z[UTC]",
+    "schemaVersion": 3,
+    "recordGeneratedAt": "2017-09-08T14:51:19.294Z[UTC]",
+    "recordGeneratedBy": "OBU",
+    "securityResultCode": "unknown",
+    "sanitized": false
+  }
+}

@@ -1,6 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -9,34 +8,32 @@ import static org.mockito.Mockito.verify;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.Attributes;
 
-@RunWith(StrictStubs.class)
 public class NodeXYControllerTest extends TestBase<NodeXYController> {
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
-    private TimOracleTables mockTimOracleTables;
+    private TimDbTables mockTimDbTables;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() throws SQLException {
-        lenient().doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(),
+        lenient().doReturn(mockPreparedStatement).when(mockTimDbTables).buildUpdateStatement(any(), any(), any(),
                 any(), any());
-        lenient().doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
+        lenient().doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
 
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
     }
 
     @Test
@@ -49,7 +46,7 @@ public class NodeXYControllerTest extends TestBase<NodeXYController> {
         ResponseEntity<Long> data = uut.AddNodeXY(nodeXY);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1, nodeXY.getDelta());// DELTA
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 2, nodeXY.getNodeLat());// NODE_LAT
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, nodeXY.getNodeLong());// NODE_LONG
@@ -72,7 +69,7 @@ public class NodeXYControllerTest extends TestBase<NodeXYController> {
         ResponseEntity<Long> data = uut.AddNodeXY(nodeXY);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

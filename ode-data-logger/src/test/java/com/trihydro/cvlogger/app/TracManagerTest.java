@@ -1,7 +1,5 @@
 package com.trihydro.cvlogger.app;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,15 +26,16 @@ import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TracMessageSentService;
 import com.trihydro.library.service.TracMessageTypeService;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -47,10 +46,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Unit tests for TimRefreshController
- */
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class TracManagerTest {
 
         @Mock
@@ -73,7 +69,7 @@ public class TracManagerTest {
         @InjectMocks
         TracManager uut;
 
-        @Before
+        @BeforeEach
         public void setup() {
                 List<TracMessageType> tmts = new ArrayList<TracMessageType>();
                 TracMessageType tmt = new TracMessageType();
@@ -82,6 +78,9 @@ public class TracManagerTest {
                 tmts.add(tmt);
                 when(mockTrackMessageTypeService.selectAll()).thenReturn(tmts);
                 when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(restTemplate);
+        }
+
+        private void setupMailSender(){
                 when(mockJavaMailSenderImplProvider.getJSenderImpl(anyString(), anyInt())).thenReturn(jmsi);
         }
 
@@ -109,10 +108,10 @@ public class TracManagerTest {
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
-                assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(Integer.valueOf(200), argument.getValue().getRestResponseCode());
-                assertEquals(true, argument.getValue().isMessageSent());
-                assertEquals(false, argument.getValue().isEmailSent());
+                Assertions.assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
+                Assertions.assertEquals(Integer.valueOf(200), argument.getValue().getRestResponseCode());
+                Assertions.assertEquals(true, argument.getValue().isMessageSent());
+                Assertions.assertEquals(false, argument.getValue().isEmailSent());
         }
 
         @Test
@@ -141,6 +140,7 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_ErrorSendEmail() throws IOException, URISyntaxException {
                 // setup
+                setupMailSender();
                 when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
                                 Mockito.<Class<String>>any())).thenThrow(new RestClientException("error"));
 
@@ -165,10 +165,10 @@ public class TracManagerTest {
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
-                assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(Integer.valueOf(-1), argument.getValue().getRestResponseCode());
-                assertEquals(false, argument.getValue().isMessageSent());
-                assertEquals(true, argument.getValue().isEmailSent());
+                Assertions.assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
+                Assertions.assertEquals(Integer.valueOf(-1), argument.getValue().getRestResponseCode());
+                Assertions.assertEquals(false, argument.getValue().isMessageSent());
+                Assertions.assertEquals(true, argument.getValue().isEmailSent());
 
                 verify(jmsi).send(any(SimpleMailMessage.class));
         }
@@ -176,6 +176,7 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_ServerErrorSendEmail() throws IOException, URISyntaxException {
                 // setup
+                setupMailSender();
                 when(restTemplate.exchange(any(URI.class), Mockito.any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
                                 Mockito.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -201,10 +202,10 @@ public class TracManagerTest {
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
-                assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(Integer.valueOf(500), argument.getValue().getRestResponseCode());
-                assertEquals(false, argument.getValue().isMessageSent());
-                assertEquals(true, argument.getValue().isEmailSent());
+                Assertions.assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
+                Assertions.assertEquals(Integer.valueOf(500), argument.getValue().getRestResponseCode());
+                Assertions.assertEquals(false, argument.getValue().isMessageSent());
+                Assertions.assertEquals(true, argument.getValue().isEmailSent());
 
                 verify(jmsi).send(any(SimpleMailMessage.class));
         }
@@ -212,6 +213,7 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_ServerErrorSendEmailFail() throws IOException, URISyntaxException {
                 // setup
+                setupMailSender();
                 when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
                                 Mockito.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -239,10 +241,10 @@ public class TracManagerTest {
 
                 ArgumentCaptor<TracMessageSent> argument = ArgumentCaptor.forClass(TracMessageSent.class);
                 verify(mockTracMessageSentService).insertTracMessageSent(argument.capture());
-                assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
-                assertEquals(Integer.valueOf(500), argument.getValue().getRestResponseCode());
-                assertEquals(false, argument.getValue().isMessageSent());
-                assertEquals(false, argument.getValue().isEmailSent());
+                Assertions.assertEquals("EC9C236B0000000000", argument.getValue().getPacketId());
+                Assertions.assertEquals(Integer.valueOf(500), argument.getValue().getRestResponseCode());
+                Assertions.assertEquals(false, argument.getValue().isMessageSent());
+                Assertions.assertEquals(false, argument.getValue().isEmailSent());
 
                 verify(jmsi).send(any(SimpleMailMessage.class));
         }
@@ -250,6 +252,7 @@ public class TracManagerTest {
         @Test
         public void TestSubmitDNMsgToTrac_ServerErrorCheckEmail() throws IOException, URISyntaxException {
                 // setup
+                setupMailSender();
                 when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), Mockito.<HttpEntity<?>>any(),
                                 Mockito.<Class<String>>any())).thenReturn(
                                                 new ResponseEntity<String>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -275,14 +278,14 @@ public class TracManagerTest {
                 ArgumentCaptor<SimpleMailMessage> smmArgument = ArgumentCaptor.forClass(SimpleMailMessage.class);
                 verify(jmsi).send(smmArgument.capture());
                 String[] tos = smmArgument.getValue().getTo();
-                assertEquals(2, tos.length);
+                Assertions.assertEquals(2, tos.length);
                 List<String> tosList = Arrays.asList(tos);
-                assertTrue(tosList.contains("email@test.com"));
-                assertTrue(tosList.contains("email2@test.com"));
+                Assertions.assertTrue(tosList.contains("email@test.com"));
+                Assertions.assertTrue(tosList.contains("email2@test.com"));
 
                 // verify bcc field
                 String[] bcc = smmArgument.getValue().getBcc();
-                assertEquals(1, bcc.length);
-                assertEquals("email@trihydro.com", bcc[0]);
+                Assertions.assertEquals(1, bcc.length);
+                Assertions.assertEquals("email@trihydro.com", bcc[0]);
         }
 }

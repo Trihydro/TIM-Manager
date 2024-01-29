@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -9,11 +8,9 @@ import java.util.List;
 
 import com.trihydro.library.model.TimType;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-@RunWith(StrictStubs.class)
 public class TimTypeServiceTest extends TestBase<TimTypeService> {
 
     @Test
@@ -25,7 +22,7 @@ public class TimTypeServiceTest extends TestBase<TimTypeService> {
         List<TimType> data = uut.getTimTypes();
 
         // Assert
-        assertEquals(0, data.size());
+        Assertions.assertEquals(0, data.size());
         verify(mockStatement).close();
         verify(mockRs).close();
         verify(mockConnection).close();
@@ -39,7 +36,7 @@ public class TimTypeServiceTest extends TestBase<TimTypeService> {
         List<TimType> data = uut.getTimTypes();
 
         // Assert
-        assertEquals(1, data.size());
+        Assertions.assertEquals(1, data.size());
         verify(mockRs).getLong("TIM_TYPE_ID");
         verify(mockRs).getString("TYPE");
         verify(mockRs).getString("DESCRIPTION");

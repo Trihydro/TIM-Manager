@@ -1,19 +1,17 @@
 package com.trihydro.loggerkafkaconsumer.app.dataConverters;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import com.trihydro.library.helpers.JsonToJavaConverter;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import us.dot.its.jpo.ode.model.OdeData;
 import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
@@ -25,7 +23,7 @@ import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
 import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.SerialId;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class DriverAlertDataConverterTest {
 
     @Spy
@@ -79,10 +77,36 @@ public class DriverAlertDataConverterTest {
         OdeDriverAlertPayload odeDriverAlertPayloadTest = (OdeDriverAlertPayload) odeDataTest.getPayload();
 
         // Assert
-        assertNotNull(odeDriverAlertMetadataTest);
-        assertEquals(odeDriverAlertMetadata, odeDriverAlertMetadataTest);
+        Assertions.assertNotNull(odeDriverAlertMetadataTest);
+        Assertions.assertEquals(odeDriverAlertMetadata, odeDriverAlertMetadataTest);
 
-        assertNotNull(odeDriverAlertPayloadTest);
-        assertEquals("ICW", odeDriverAlertPayloadTest.getAlert());
+        Assertions.assertNotNull(odeDriverAlertPayloadTest);
+        Assertions.assertEquals("ICW", odeDriverAlertPayloadTest.getAlert());
+    }
+
+    @Test
+    public void processDriverAlertJson_FAIL_Metadata() throws IOException {
+
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput_NullMetadata.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processDriverAlertJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
+    }
+
+    @Test
+    public void processDriverAlertJson_FAIL_Payload() throws IOException {
+
+        // Arrange
+        String value = new String(Files.readAllBytes(Paths.get("src/test/resources/driverAlert_OdeOutput_NullPayload.json")));
+
+        // Act
+        OdeData odeDataTest = uut.processDriverAlertJson(value);
+
+        // Assert
+        Assertions.assertNull(odeDataTest);
     }
 }

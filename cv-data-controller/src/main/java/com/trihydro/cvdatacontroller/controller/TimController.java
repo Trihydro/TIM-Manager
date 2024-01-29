@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -12,7 +13,7 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +34,14 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 @RestController
 public class TimController extends BaseController {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
     private SecurityResultCodeTypeController securityResultCodeTypeController;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler,
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler,
             SecurityResultCodeTypeController _securityResultCodeTypeController) {
-        timOracleTables = _timOracleTables;
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
         securityResultCodeTypeController = _securityResultCodeTypeController;
     }
@@ -97,8 +98,8 @@ public class TimController extends BaseController {
 
         try {
 
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("tim",
-                    timOracleTables.getTimTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim",
+                    timDbTables.getTimTable());
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
             int fieldNum = 1;
@@ -106,7 +107,7 @@ public class TimController extends BaseController {
             OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
             ReceivedMessageDetails receivedMessageDetails = tim.getReceivedMessageDetails();
 
-            for (String col : timOracleTables.getTimTable()) {
+            for (String col : timDbTables.getTimTable()) {
                 // default to null
                 preparedStatement.setString(fieldNum, null);
                 if (j2735 != null) {
@@ -135,28 +136,28 @@ public class TimController extends BaseController {
                             preparedStatement.setString(fieldNum, null);
                     } else if (col.equals("RECORD_GENERATED_AT")) {
                         if (odeTimMetadata.getRecordGeneratedAt() != null) {
-                            java.util.Date recordGeneratedAtDate = convertDate(odeTimMetadata.getRecordGeneratedAt());
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(recordGeneratedAtDate));
+                            java.util.Date recordGeneratedAtDate = utility.convertDate(odeTimMetadata.getRecordGeneratedAt());
+                            sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
+                                    new java.sql.Timestamp(recordGeneratedAtDate.getTime()));
                         } else {
-                            preparedStatement.setString(fieldNum, null);
+                            preparedStatement.setTimestamp(fieldNum, null);
                         }
                     } else if (col.equals("SCHEMA_VERSION")) {
                         sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
                     } else if (col.equals("SANITIZED")) {
                         if (odeTimMetadata.isSanitized())
-                            preparedStatement.setString(fieldNum, "1");
+                            preparedStatement.setInt(fieldNum, 1);
                         else
-                            preparedStatement.setString(fieldNum, "0");
+                            preparedStatement.setInt(fieldNum, 0);
                     } else if (col.equals("PAYLOAD_TYPE")) {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
                     } else if (col.equals("ODE_RECEIVED_AT")) {
                         if (odeTimMetadata.getOdeReceivedAt() != null) {
-                            java.util.Date receivedAtDate = convertDate(odeTimMetadata.getOdeReceivedAt());
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    mstFormat.format(receivedAtDate));
+                            java.util.Date receivedAtDate = utility.convertDate(odeTimMetadata.getOdeReceivedAt());
+                            sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
+                                    new java.sql.Timestamp(receivedAtDate.getTime()));
                         } else {
-                            preparedStatement.setString(fieldNum, null);
+                            preparedStatement.setTimestamp(fieldNum, null);
                         }
                     }
 
@@ -181,20 +182,20 @@ public class TimController extends BaseController {
                 if (receivedMessageDetails != null) {
                     if (receivedMessageDetails.getLocationData() != null) {
                         if (col.equals("RMD_LD_ELEVATION")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getElevation());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getElevation()));
                         } else if (col.equals("RMD_LD_HEADING")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getHeading());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getHeading()));
                         } else if (col.equals("RMD_LD_LATITUDE")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getLatitude());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getLatitude()));
                         } else if (col.equals("RMD_LD_LONGITUDE")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getLongitude());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getLongitude()));
                         } else if (col.equals("RMD_LD_SPEED")) {
-                            sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    receivedMessageDetails.getLocationData().getSpeed());
+                            sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
+                                    Double.parseDouble(receivedMessageDetails.getLocationData().getSpeed()));
                         }
                     }
                     if (col.equals("RMD_RX_SOURCE") && receivedMessageDetails.getRxSource() != null) {
@@ -247,11 +248,11 @@ public class TimController extends BaseController {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String strDate = getOneMonthPrior();
+        Timestamp oneMonthPriorTimestamp = getOneMonthPriorTimestamp();
 
         try {
-            deleteResult = deleteOldTimRsus(strDate);
-            deleteResult &= deleteOldDataFrames(strDate);
+            deleteResult = deleteOldTimRsus(oneMonthPriorTimestamp);
+            deleteResult &= deleteOldDataFrames(oneMonthPriorTimestamp);
 
             if (!deleteResult) {
                 utility.logWithDate("Failed to cleanup old tim_rsus");
@@ -261,10 +262,10 @@ public class TimController extends BaseController {
             String deleteSQL = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, oneMonthPriorTimestamp);
 
-            // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            // execute delete SQL statement
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -284,9 +285,9 @@ public class TimController extends BaseController {
         return ResponseEntity.ok(deleteResult);
     }
 
-    private boolean deleteOldDataFrames(String strDate) {
-        boolean deleteResult = deleteOldDataFrameItisCodes(strDate);
-        deleteResult &= deleteOldRegions(strDate);
+    private boolean deleteOldDataFrames(Timestamp timestamp) {
+        boolean deleteResult = deleteOldDataFrameItisCodes(timestamp);
+        deleteResult &= deleteOldRegions(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -298,10 +299,10 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -323,7 +324,7 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldDataFrameItisCodes(String strDate) {
+    private boolean deleteOldDataFrameItisCodes(Timestamp timestamp) {
         boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -334,10 +335,10 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -359,8 +360,8 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldRegions(String strDate) {
-        boolean deleteResult = deleteOldPaths(strDate);
+    private boolean deleteOldRegions(Timestamp timestamp) {
+        boolean deleteResult = deleteOldPaths(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -373,10 +374,10 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -398,8 +399,8 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldPaths(String strDate) {
-        boolean deleteResult = deleteOldPathNodeXY(strDate);
+    private boolean deleteOldPaths(Timestamp timestamp) {
+        boolean deleteResult = deleteOldPathNodeLL(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -412,10 +413,10 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -437,8 +438,8 @@ public class TimController extends BaseController {
         return deleteResult;
     }
 
-    private boolean deleteOldPathNodeXY(String strDate) {
-        boolean deleteResult = deleteOldNodeXY(strDate);
+    private boolean deleteOldPathNodeLL(Timestamp timestamp) {
+        boolean deleteResult = deleteOldNodeLL(timestamp);
         if (!deleteResult) {
             return false;
         }
@@ -446,15 +447,15 @@ public class TimController extends BaseController {
         PreparedStatement preparedStatement = null;
 
         try {
-            String deleteSQL = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+            String deleteSQL = "DELETE FROM path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -471,27 +472,27 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete path_node_xy");
+            utility.logWithDate("Failed to delete path_node_ll");
         }
         return deleteResult;
     }
 
-    private boolean deleteOldNodeXY(String strDate) {
+    private boolean deleteOldNodeLL(Timestamp timestamp) {
         boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
         try {
-            String deleteSQL = "DELETE FROM node_xy WHERE node_xy_id IN";
-            deleteSQL += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
+            String deleteSQL = "DELETE FROM node_ll WHERE node_ll_id IN";
+            deleteSQL += " (SELECT node_ll_id from path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
             deleteSQL += " (select data_frame_id from data_frame WHERE tim_id IN";
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim)))))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -508,12 +509,12 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete node_xy");
+            utility.logWithDate("Failed to delete node_ll");
         }
         return deleteResult;
     }
 
-    private boolean deleteOldTimRsus(String strDate) {
+    private boolean deleteOldTimRsus(Timestamp timestamp) {
         boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -523,10 +524,10 @@ public class TimController extends BaseController {
             deleteSQL += " (SELECT tim_id FROM tim WHERE ode_received_at < ? AND tim_id NOT IN (SELECT tim_id FROM active_tim))";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setString(1, strDate);
+            preparedStatement.setTimestamp(1, timestamp);
 
             // execute delete SQL stetement
-            deleteResult = dbInteractions.updateOrDelete(preparedStatement);
+            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

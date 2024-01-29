@@ -1,7 +1,6 @@
 package com.trihydro.tasks.actions;
 
 import static com.trihydro.tasks.TestHelper.importJsonArray;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -9,15 +8,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.mail.MessagingException;
 
+import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
+import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.SemiDialogID;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.SdwService;
@@ -26,16 +30,17 @@ import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailException;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class ValidateSdxTest {
     // Mocked dependencies
     @Mock
@@ -50,6 +55,8 @@ public class ValidateSdxTest {
     private DataTasksConfiguration mockConfig;
     @Mock
     private Utility mockUtility;
+    @Mock
+    private TimGenerationHelper mockTimGenerationHelper;
 
     // Argument Captors
     @Captor
@@ -57,7 +64,9 @@ public class ValidateSdxTest {
     @Captor
     private ArgumentCaptor<List<CAdvisorySituationDataDeposit>> deleteFromSdxCaptor;
     @Captor
-    private ArgumentCaptor<List<CActiveTim>> invOracleRecordsCaptor;
+    private ArgumentCaptor<List<CActiveTim>> invDbRecordsCaptor;
+    @Captor
+    private ArgumentCaptor<String> exceptionMessageCaptor;
 
     // Unit under test
     @InjectMocks
@@ -72,7 +81,7 @@ public class ValidateSdxTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // No email was sent
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
     }
 
     @Test
@@ -97,7 +106,7 @@ public class ValidateSdxTest {
         verify(mockSdwService, times(2)).getItisCodesFromAdvisoryMessage(any());
 
         // No email was sent
-        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
 
     }
 
@@ -111,13 +120,16 @@ public class ValidateSdxTest {
         // Arrange service responses
         when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
         when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
+        List<ResubmitTimException> resubExs = new ArrayList<>();
+        resubExs.add(new ResubmitTimException(-1l, "Unit test exception"));
+        when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExs);
 
         // Act
         uut.run();
 
         // Assert
         // 2 Active TIMs, with 0 records in the SDX. We're expecting:
-        // - Number of Oracle records without corresponding message in SDX: 2
+        // - Number of Database records without corresponding message in SDX: 2
         // - toResend to contain 2 records
 
         // Services were called
@@ -125,19 +137,28 @@ public class ValidateSdxTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(0), eq(0), eq(2), toResendCaptor.capture(),
-                deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
-        assertEquals(2, toResendCaptor.getValue().size());
-        assertEquals(0, deleteFromSdxCaptor.getValue().size());
-        assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(2, toResendCaptor.getValue().size());
+        Assertions.assertEquals(0, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
+
+        Gson gson = new Gson();
+        String exceptionText = "The following exceptions were found while attempting to resubmit TIMs: ";
+        exceptionText += "<br/>";
+        for (ResubmitTimException rte : resubExs) {
+            exceptionText += gson.toJson(rte);
+            exceptionText += "<br/>";
+        }
+        Assertions.assertEquals(exceptionText, exceptionMessageCaptor.getValue());
     }
 
     @Test
-    public void validateSDX_noOracle() throws MailException, MessagingException {
+    public void validateSDX_noDatabase() throws MailException, MessagingException {
         // Arrange
         // 0 Active TIMS, 2 SDX.
         ActiveTim[] activeTims = new ActiveTim[0];
@@ -147,12 +168,17 @@ public class ValidateSdxTest {
         when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
         when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
 
+        HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
+        sdxDelResults.put(0, true);
+        sdxDelResults.put(1, false);
+        when(mockSdwService.deleteSdxDataByRecordIdIntegers(any())).thenReturn(sdxDelResults);
+
         // Act
         uut.run();
 
         // Assert
         // 0 Active TIMs, with 2 records in the SDX. We're expecting:
-        // - Number of messages on SDX without corresponding Oracle record: 2
+        // - Number of messages on SDX without corresponding Database record: 2
         // - deleteFromSdx to contain 2 records
 
         // Services were called
@@ -160,15 +186,18 @@ public class ValidateSdxTest {
         verify(mockActiveTimService).getActiveTimsForSDX();
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
-                deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
-        assertEquals(0, toResendCaptor.getValue().size());
-        assertEquals(2, deleteFromSdxCaptor.getValue().size());
-        assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(0, toResendCaptor.getValue().size());
+        Assertions.assertEquals(2, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
+
+        String exText = "The following recordIds failed to delete from the SDX: 1<br>";
+        Assertions.assertEquals(exText, exceptionMessageCaptor.getValue());
     }
 
     @Test
@@ -189,17 +218,26 @@ public class ValidateSdxTest {
         // Stale record
         doReturn(Arrays.asList(0)).when(mockSdwService).getItisCodesFromAdvisoryMessage("-1");
 
+        HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
+        sdxDelResults.put(0, true);
+        sdxDelResults.put(1, false);
+        when(mockSdwService.deleteSdxDataByRecordIdIntegers(any())).thenReturn(sdxDelResults);
+
+        List<ResubmitTimException> resubExs = new ArrayList<>();
+        resubExs.add(new ResubmitTimException(-1l, "Unit test exception"));
+        when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExs);
+
         // Act
         uut.run();
 
         // Assert
         // We're expecting:
         // - Number of stale records on SDX (different ITIS codes than ActiveTim): 1
-        // - Number of messages on SDX without corresponding Oracle record: 1
-        // - Number of Oracle records without corresponding message in SDX: 1
+        // - Number of messages on SDX without corresponding Database record: 1
+        // - Number of Database records without corresponding message in SDX: 1
         // - toResend count: 1
         // - deleteFromSdx count: 1
-        // - invOracleRecords count: 0
+        // - invDbRecords count: 0
 
         // Services were called
         verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
@@ -207,14 +245,24 @@ public class ValidateSdxTest {
         verify(mockSdwService, times(3)).getItisCodesFromAdvisoryMessage(any());
 
         // Email was sent
-        verify(mockEmailHelper).SendEmail(any(), any(), any(), any(), any(), any(), any());
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
         // Email had expected counts
         verify(mockEmailFormatter).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),
-                deleteFromSdxCaptor.capture(), invOracleRecordsCaptor.capture());
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
-        assertEquals(2, toResendCaptor.getValue().size());
-        assertEquals(1, deleteFromSdxCaptor.getValue().size());
-        assertEquals(0, invOracleRecordsCaptor.getValue().size());
+        Assertions.assertEquals(2, toResendCaptor.getValue().size());
+        Assertions.assertEquals(1, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
+
+        Gson gson = new Gson();
+        String exceptionText = "The following recordIds failed to delete from the SDX: 1<br>";
+        exceptionText += "The following exceptions were found while attempting to resubmit TIMs: ";
+        exceptionText += "<br/>";
+        for (ResubmitTimException rte : resubExs) {
+            exceptionText += gson.toJson(rte);
+            exceptionText += "<br/>";
+        }
+        Assertions.assertEquals(exceptionText, exceptionMessageCaptor.getValue());
     }
 }

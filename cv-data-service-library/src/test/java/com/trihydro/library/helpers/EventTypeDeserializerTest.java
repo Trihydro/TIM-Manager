@@ -1,13 +1,13 @@
 package com.trihydro.library.helpers;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.trihydro.library.helpers.deserializers.D_EventType;
 import com.trihydro.library.model.tmdd.EventType;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 
 public class EventTypeDeserializerTest {
     @Test
@@ -20,7 +20,7 @@ public class EventTypeDeserializerTest {
 
         EventType result = gson.fromJson(event_type, EventType.class);
 
-        assertEquals("pavement-conditions", result.getType());
-        assertEquals("dry pavement", result.getValue());
+        Assertions.assertEquals("pavement-conditions", result.getType());
+        Assertions.assertEquals("dry pavement", result.getValue());
     }
 }

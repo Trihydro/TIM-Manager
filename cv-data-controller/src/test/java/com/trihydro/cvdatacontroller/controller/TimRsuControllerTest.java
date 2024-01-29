@@ -1,8 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -13,29 +10,30 @@ import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TimRsu;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RunWith(StrictStubs.class)
 public class TimRsuControllerTest extends TestBase<TimRsuController> {
 
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
-    private TimOracleTables mockTimOracleTables;
+    private TimDbTables mockTimDbTables;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
+    }
+
+    private void setupInsertQueryStatement() {
+        doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
     }
 
     @Test
@@ -46,7 +44,7 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
         ResponseEntity<Long> data = uut.AddTimRsu(-1l, -1, 99);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// TIM_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 2, -1);// RSU_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, 99);// RSU_INDEX
@@ -57,13 +55,14 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
     @Test
     public void AddTimRsu_FAIL() throws SQLException {
         // Arrange
+        setupInsertQueryStatement();
         doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);
 
         // Act
         ResponseEntity<Long> data = uut.AddTimRsu(-1l, -1, 99);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -77,9 +76,10 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
         ResponseEntity<List<TimRsu>> data = uut.GetTimRsusByTimId(timId);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertEquals(1, data.getBody().size());
-        verify(mockStatement).executeQuery("select * from TIM_RSU where tim_id = " + timId);
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
+        verify(mockStatement).executeQuery("select rsu_id,tim_id,rsu_index from tim_rsu where tim_id = " + timId
+                + " group by rsu_id,tim_id,rsu_index");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getLong("RSU_ID");
         verify(mockRs).getInt("RSU_INDEX");
@@ -98,9 +98,10 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
         ResponseEntity<List<TimRsu>> data = uut.GetTimRsusByTimId(timId);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertEquals(0, data.getBody().size());
-        verify(mockStatement).executeQuery("select * from TIM_RSU where tim_id = " + timId);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(0, data.getBody().size());
+        verify(mockStatement).executeQuery("select rsu_id,tim_id,rsu_index from tim_rsu where tim_id = " + timId
+                + " group by rsu_id,tim_id,rsu_index");
         verify(mockStatement).close();
         verify(mockConnection).close();
         verify(mockRs).close();
@@ -116,8 +117,8 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
         ResponseEntity<TimRsu> data = uut.GetTimRsu(timId, rsuId);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertNotNull(data.getBody());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertNotNull(data.getBody());
         verify(mockStatement).executeQuery("select * from TIM_RSU where rsu_id = " + rsuId + " and tim_id = " + timId);
         verify(mockRs).getLong("TIM_RSU_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -139,8 +140,8 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
         ResponseEntity<TimRsu> data = uut.GetTimRsu(timId, rsuId);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertNull(data.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertNull(data.getBody());
         verify(mockStatement).executeQuery("select * from TIM_RSU where rsu_id = " + rsuId + " and tim_id = " + timId);
         verify(mockStatement).close();
         verify(mockConnection).close();

@@ -1,22 +1,23 @@
 package com.trihydro.tasks.models;
 
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.RsuIndexInfo;
 
 public class ActiveTimMapping {
-    private EnvActiveTim envTim;
+    private ActiveTim activeTim;
     private RsuIndexInfo rsuIndexInfo;
 
-    public ActiveTimMapping(EnvActiveTim envTim, RsuIndexInfo rsuIndexInfo) {
-        this.envTim = envTim;
+    public ActiveTimMapping(ActiveTim activeTim, RsuIndexInfo rsuIndexInfo) {
+        this.activeTim = activeTim;
         this.rsuIndexInfo = rsuIndexInfo;
     }
 
-    public EnvActiveTim getEnvTim() {
-        return envTim;
+    public ActiveTim getActiveTim() {
+        return activeTim;
     }
 
-    public void setEnvTim(EnvActiveTim envTim) {
-        this.envTim = envTim;
+    public void setActiveTim(ActiveTim activeTim) {
+        this.activeTim = activeTim;
     }
 
     public RsuIndexInfo getRsuIndexInfo() {

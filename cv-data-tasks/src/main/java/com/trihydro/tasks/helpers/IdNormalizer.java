@@ -45,14 +45,23 @@ public class IdNormalizer {
     }
 
     public String fromActiveTim(ActiveTim activeTim) {
+        // Client Ids now follow the format: CLIENTID-n 
+        // where n is a number > 0, to designate TIMs in a group
+        int idx = activeTim.getClientId().lastIndexOf("-");
+
+        String clientId = activeTim.getClientId();
+        if(idx > 0) {
+            clientId = clientId.substring(0, idx);
+        }
+
         String result = null;
 
         switch (activeTim.getTimType()) {
             case "RC":
-                result = activeTim.getClientId();
+                result = clientId;
                 break;
             case "IN":
-                result = activeTim.getClientId().replace("IN", "I");
+                result = clientId.replace("IN", "I");
                 break;
             case "RW":
                 if (activeTim.getProjectKey() != null) {

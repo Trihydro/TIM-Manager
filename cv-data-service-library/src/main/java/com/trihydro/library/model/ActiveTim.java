@@ -1,6 +1,9 @@
 package com.trihydro.library.model;
 
+import java.sql.Timestamp;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class ActiveTim {
 
@@ -9,6 +12,8 @@ public class ActiveTim {
     private String timType;
     private Long timTypeId;
     private String direction;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    private Timestamp startTimestamp;
     private String startDateTime;
     private String endDateTime;
     private String expirationDateTime;
@@ -85,6 +90,14 @@ public class ActiveTim {
 
     public void setStartDateTime(String startDateTime) {
         this.startDateTime = startDateTime;
+    }
+
+    public Timestamp getStartTimestamp() {
+        return startTimestamp;
+    }
+
+    public void setStartTimestamp(Timestamp startTimestamp) {
+        this.startTimestamp = startTimestamp;
     }
 
     public String getEndDateTime() {

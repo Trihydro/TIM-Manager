@@ -12,23 +12,23 @@ import java.util.Enumeration;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.LoggingService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
+import com.trihydro.odewrapper.model.BufferedRequestWrapper;
+import com.trihydro.odewrapper.model.BufferedResponseWrapper;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class HttpLoggingFilterTest {
     @Mock
     HttpServletRequest mockHttpServletRequest;
@@ -38,10 +38,6 @@ public class HttpLoggingFilterTest {
     FilterChain mockFilterChain;
     @Mock
     FilterConfig mockFilterConfig;
-    @Mock
-    ServletInputStream mockServletInputStream;
-    @Mock
-    ServletOutputStream mockServletOutputStream;
 
     @Mock
     LoggingService mockLoggingService;
@@ -50,14 +46,25 @@ public class HttpLoggingFilterTest {
     @Mock
     Utility mockUtility;
 
+    @Mock
+    BufferedResponseWrapperFactory mockBufferedResponseWrapperFactory;
+    @Mock
+    BufferedResponseWrapper mockBufferedResponseWrapper;
+    @Mock
+    BufferedRequestWrapperFactory mockBufferedRequestWrapperFactory;
+    @Mock
+    BufferedRequestWrapper mockBufferedRequestWrapper;
+
     @InjectMocks
     HttpLoggingFilter uut;
 
-    @Before
+    @BeforeEach
     public void setup() throws ServletException, IOException {
         Enumeration<String> paramNames = Collections.emptyEnumeration();
         doReturn(paramNames).when(mockHttpServletRequest).getParameterNames();
-        doReturn(mockServletInputStream).when(mockHttpServletRequest).getInputStream();
+        doReturn(mockBufferedResponseWrapper).when(mockBufferedResponseWrapperFactory)
+                .getBufferedResponseWrapper(any());
+        doReturn(mockBufferedRequestWrapper).when(mockBufferedRequestWrapperFactory).getBufferedRequestWrapper(any());
 
         uut.init(mockFilterConfig);
     }
@@ -91,6 +98,9 @@ public class HttpLoggingFilterTest {
         // Arrange
         doReturn("/").when(mockHttpServletRequest).getServletPath();
         doReturn(2000).when(mockBasicConfiguration).getHttpLoggingMaxSize();
+        doReturn("log body").when(mockBufferedRequestWrapper).getRequestBody();
+        doReturn(200).when(mockBufferedResponseWrapper).getStatus();
+        doReturn("response").when(mockBufferedResponseWrapper).getContent();
 
         // Act
         uut.doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
@@ -103,7 +113,10 @@ public class HttpLoggingFilterTest {
     public void doFilter_SUCCESS_truncate() throws IOException, ServletException {
         // Arrange
         doReturn("/").when(mockHttpServletRequest).getServletPath();
-        doReturn(137).when(mockBasicConfiguration).getHttpLoggingMaxSize();
+        doReturn(150).when(mockBasicConfiguration).getHttpLoggingMaxSize();
+        doReturn("this is a long request body to be truncated").when(mockBufferedRequestWrapper).getRequestBody();
+        doReturn(200).when(mockBufferedResponseWrapper).getStatus();
+        doReturn("this is a longer content").when(mockBufferedResponseWrapper).getContent();
 
         // Act
         uut.doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
@@ -111,7 +124,7 @@ public class HttpLoggingFilterTest {
         // Assert
         verify(mockLoggingService).LogHttpRequest(any());
         verify(mockUtility).logWithDate(
-                "REST Request - [HTTP METHOD:null] [PATH INFO:/] [REQUEST PARAMETERS:{}] [REQUEST BODY:] [REMOTE ADDRESS:null] [RESPONSE CODE:0]");
+                "REST Request - [HTTP METHOD:null] [PATH INFO:/] [REQUEST PARAMETERS:{}] [REQUEST BODY:this is a long request...] [RESPONSE CODE:200] [RESPONSE:thi...]");
     }
 
 }

@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.trihydro.library.tables.BsmOracleTables;
+import com.trihydro.library.tables.BsmDbTables;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,12 +15,12 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
 @Component
 public class BsmPart2SpveService extends BaseService {
 
-    private BsmOracleTables bsmOracleTables;
+    private BsmDbTables bsmDbTables;
     // TODO: refactor code to use sqlNullHandler
 
     @Autowired
-    public void InjectDependencies(BsmOracleTables _bsmOracleTables) {
-        bsmOracleTables = _bsmOracleTables;
+    public void InjectDependencies(BsmDbTables _bsmDbTables) {
+        bsmDbTables = _bsmDbTables;
     }
 
     public Long insertBSMPart2SPVE(J2735BsmPart2Content part2Content, J2735SpecialVehicleExtensions spve,
@@ -32,8 +32,8 @@ public class BsmPart2SpveService extends BaseService {
         try {
 
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = bsmOracleTables.buildInsertQueryStatement("bsm_part2_spve",
-                    bsmOracleTables.getBsmPart2SpveTable());
+            String insertQueryStatement = bsmDbTables.buildInsertQueryStatement("bsm_part2_spve",
+                    bsmDbTables.getBsmPart2SpveTable());
             preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "bsm_part2_spve_id" });
 
             int fieldNum = 1;

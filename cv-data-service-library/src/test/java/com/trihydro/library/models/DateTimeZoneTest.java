@@ -1,21 +1,19 @@
 package com.trihydro.library.models;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.trihydro.library.model.tmdd.DateTimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class DateTimeZoneTest {
     private DateTimeFormatter format;
 
-    @Before
+    @BeforeEach
     public void setup() {
         format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     }
@@ -35,7 +33,7 @@ public class DateTimeZoneTest {
         String result = uut.asDateTimeString();
 
         // Assert
-        assertEquals(date.format(format), result);
+        Assertions.assertEquals(date.format(format), result);
     }
 
     @Test
@@ -53,7 +51,7 @@ public class DateTimeZoneTest {
         String result = uut.asDateTimeString();
 
         // Assert
-        assertEquals(date.format(format), result);
+        Assertions.assertEquals(date.format(format), result);
     }
 
     @Test
@@ -65,6 +63,6 @@ public class DateTimeZoneTest {
         String result = uut.asDateTimeString();
 
         // Assert
-        assertNull(result);
+        Assertions.assertNull(result);
     }
 }

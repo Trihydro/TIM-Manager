@@ -1,26 +1,27 @@
 package com.trihydro.odewrapper.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
+import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Buffer;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.TimRwList;
+import com.trihydro.library.model.WydotTimRw;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
-import com.trihydro.odewrapper.model.TimRwList;
-import com.trihydro.odewrapper.model.WydotTimRw;
-import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gavaghan.geodesy.Ellipsoid;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -49,20 +51,16 @@ public class WydotTimRwController extends WydotTimBaseController {
     @Autowired
     public WydotTimRwController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
     }
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-
-        System.out.println(dateFormat.format(date) + " - Create/Update RW TIM");
+        utility.logWithDate("Create/Update RW TIM", this.getClass());
         String post = gson.toJson(timRwList);
-        System.out.println(post.toString());
+        utility.logWithDate(post.toString(), this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -87,14 +85,14 @@ public class WydotTimRwController extends WydotTimBaseController {
                 wydotTim.getBuffers().sort(Comparator.comparingDouble(Buffer::getDistance));
 
             // if bi-directional
-            if (wydotTim.getDirection().equals("b")) {
+            if (wydotTim.getDirection().equalsIgnoreCase("b")) {
                 // make i TIMs
                 makeIncreasingTims(wydotTim);
                 // make d TIMs
                 makeDecreasingTims(wydotTim);
             }
             // else make one direction TIMs
-            else if (wydotTim.getDirection().equals("i"))
+            else if (wydotTim.getDirection().equalsIgnoreCase("i"))
                 makeIncreasingTims(wydotTim);
             else
                 makeDecreasingTims(wydotTim);
@@ -113,19 +111,13 @@ public class WydotTimRwController extends WydotTimBaseController {
     public void makeIncreasingTims(WydotTimRw wydotTim) {
 
         // i - add buffer for point TIMs
-        WydotTimRw timOneWay = null;
-
-        try {
-            timOneWay = wydotTim.clone();
-            if (StringUtils.isBlank(timOneWay.getSchedStart())) {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-                timOneWay.setSchedStart(startTime);
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        WydotTimRw timOneWay = wydotTim.copy();
+        if (StringUtils.isBlank(timOneWay.getSchedStart())) {
+            String startTime = getStartTime();
+            timOneWay.setSchedStart(startTime);
         }
 
-        timOneWay.setDirection("i");
+        timOneWay.setDirection("I");
         timsToSend.add(timOneWay);
 
         if (timOneWay.getBuffers() != null)
@@ -136,19 +128,13 @@ public class WydotTimRwController extends WydotTimBaseController {
 
         // d - add buffer for point TIMs
 
-        WydotTimRw timOneWay = null;
-
-        try {
-            timOneWay = wydotTim.clone();
-            if (StringUtils.isBlank(timOneWay.getSchedStart())) {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-                timOneWay.setSchedStart(startTime);
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        WydotTimRw timOneWay = wydotTim.copy();
+        if (StringUtils.isBlank(timOneWay.getSchedStart())) {
+            String startTime = getStartTime();
+            timOneWay.setSchedStart(startTime);
         }
 
-        timOneWay.setDirection("d");
+        timOneWay.setDirection("D");
         timsToSend.add(timOneWay);
         if (timOneWay.getBuffers() != null)
             makeDecreasingBufferTim(timOneWay);
@@ -179,8 +165,8 @@ public class WydotTimRwController extends WydotTimBaseController {
         double bufferBefore = 0.000;
 
         Ellipsoid reference = Ellipsoid.WGS84;
-        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getStartPoint().getLatitude(),
-                wydotTim.getStartPoint().getLongitude());
+        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getStartPoint().getLatitude().doubleValue(),
+                wydotTim.getStartPoint().getLongitude().doubleValue());
         GlobalCoordinates nextCoordinates = null;
         double bearing = getIBearingForRoute(wydotTim.getRoute());
         GeodeticCalculator calculator = new GeodeticCalculator();
@@ -192,19 +178,12 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTim.getBuffers().get(i).getDistanceMeters());
 
             // update start and stopping points
-            WydotTimRw wydotTimBuffer = null;
+            WydotTimRw wydotTimBuffer = wydotTim.copy();
 
-            try {
-                wydotTimBuffer = wydotTim.clone();
-                if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                    String startTime = java.time.Clock.systemUTC().instant().toString();
-                    wydotTimBuffer.setSchedStart(startTime);
-                }
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            wydotTimBuffer.setStartPoint(new Coordinate(nextCoordinates.getLatitude(), nextCoordinates.getLongitude()));
-            wydotTimBuffer.setEndPoint(new Coordinate(startCoordinates.getLatitude(), startCoordinates.getLongitude()));
+            wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),
+                    BigDecimal.valueOf(nextCoordinates.getLongitude())));
+            wydotTimBuffer.setEndPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
+                    BigDecimal.valueOf(startCoordinates.getLongitude())));
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
             wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 
@@ -230,8 +209,8 @@ public class WydotTimRwController extends WydotTimBaseController {
         double bufferBefore = 0;
 
         Ellipsoid reference = Ellipsoid.WGS84;
-        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getEndPoint().getLatitude(),
-                wydotTim.getEndPoint().getLongitude());
+        GlobalCoordinates startCoordinates = new GlobalCoordinates(wydotTim.getEndPoint().getLatitude().doubleValue(),
+                wydotTim.getEndPoint().getLongitude().doubleValue());
         GlobalCoordinates nextCoordinates = null;
         double bearing = getDBearingForRoute(wydotTim.getRoute());
         GeodeticCalculator calculator = new GeodeticCalculator();
@@ -243,19 +222,12 @@ public class WydotTimRwController extends WydotTimBaseController {
                     wydotTim.getBuffers().get(i).getDistanceMeters());
 
             // update start and stopping mileposts
-            WydotTimRw wydotTimBuffer = null;
-            try {
-                wydotTimBuffer = wydotTim.clone();
-                if (StringUtils.isBlank(wydotTimBuffer.getSchedStart())) {
-                    String startTime = java.time.Clock.systemUTC().instant().toString();
-                    wydotTimBuffer.setSchedStart(startTime);
-                }
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            wydotTimBuffer
-                    .setStartPoint(new Coordinate(startCoordinates.getLatitude(), startCoordinates.getLongitude()));
-            wydotTimBuffer.setEndPoint(new Coordinate(nextCoordinates.getLatitude(), nextCoordinates.getLongitude()));
+            WydotTimRw wydotTimBuffer = wydotTim.copy();
+
+            wydotTimBuffer.setStartPoint(new Coordinate(BigDecimal.valueOf(startCoordinates.getLatitude()),
+                    BigDecimal.valueOf(startCoordinates.getLongitude())));
+            wydotTimBuffer.setEndPoint(new Coordinate(BigDecimal.valueOf(nextCoordinates.getLatitude()),
+                    BigDecimal.valueOf(nextCoordinates.getLongitude())));
             wydotTimBuffer.setAction(wydotTim.getBuffers().get(i).getAction());
             wydotTimBuffer.setClientId(wydotTim.getClientId() + "%BUFF" + Integer.toString((int) bufferBefore));
 
@@ -279,13 +251,19 @@ public class WydotTimRwController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 for (WydotTimRw tim : timsToSend) {
-                    // check for speed limit, itis code 268
-                    if (tim.getAdvisory().length == 3 && tim.getAdvisory()[0] == 268) {
+                    // check for reduce speed, itis code 7443
+                    if (tim.getItisCodes() != null && tim.getItisCodes().size() == 3
+                            && tim.getItisCodes().get(0).equals("7443")) {
                         processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.speedLimit);
+                                ContentEnum.speedLimit, TravelerInfoType.advisory);
+                    } else if (tim.getItisCodes() != null && tim.getItisCodes().get(0).equals("7186")) {
+                        // prepare to stop
+                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
+                                ContentEnum.advisory, TravelerInfoType.advisory);
                     } else {
+                        // the rest are content=workZone
                         processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.advisory);
+                                ContentEnum.workZone, TravelerInfoType.advisory);
                     }
                 }
             }
@@ -295,13 +273,9 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-
-        System.out.println(dateFormat.format(date) + " - Delete RW TIM");
-        // clear TIM
-        wydotTimService.clearTimsById(type, id, null);
+        utility.logWithDate("Delete RW TIM", this.getClass());
+        // expire and clear TIM
+        wydotTimService.clearTimsById(type, id, null, true);
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);

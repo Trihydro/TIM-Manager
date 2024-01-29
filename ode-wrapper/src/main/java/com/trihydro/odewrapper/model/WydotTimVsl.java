@@ -8,6 +8,31 @@ public class WydotTimVsl extends WydotTim {
 
     private String deviceId;
 
+    private boolean offline;
+
+    public WydotTimVsl() {
+
+    }
+
+    public boolean getOffline() {
+        return offline;
+    }
+
+    public void setOffline(boolean offline) {
+        this.offline = offline;
+    }
+
+    public WydotTimVsl(WydotTimVsl o) {
+        super(o);
+        this.speed = o.speed;
+        this.deviceId = o.deviceId;
+    }
+
+    @Override
+    public WydotTimVsl copy() {
+        return new WydotTimVsl(this);
+    }
+
     public Integer getSpeed() {
         return this.speed;
     }

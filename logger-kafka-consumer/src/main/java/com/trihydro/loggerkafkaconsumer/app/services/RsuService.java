@@ -26,14 +26,14 @@ public class RsuService extends BaseService {
 
 			// select all RSUs from RSU table
 			rs = statement.executeQuery(
-					"select * from rsu inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid order by milepost asc");
+					"select * from rsu inner join rsu_view on rsu.deviceid = rsu_view.deviceid order by milepost asc");
 
 			while (rs.next()) {
 				WydotRsu rsu = new WydotRsu();
 				rsu.setRsuId(rs.getInt("RSU_ID"));
 				rsu.setRsuTarget(rs.getString("IPV4_ADDRESS"));
-				rsu.setLatitude(rs.getDouble("LATITUDE"));
-				rsu.setLongitude(rs.getDouble("LONGITUDE"));
+				rsu.setLatitude(rs.getBigDecimal("LATITUDE"));
+				rsu.setLongitude(rs.getBigDecimal("LONGITUDE"));
 				rsu.setRoute(rs.getString("ROUTE"));
 				rsu.setMilepost(rs.getDouble("MILEPOST"));
 				rsus.add(rsu);

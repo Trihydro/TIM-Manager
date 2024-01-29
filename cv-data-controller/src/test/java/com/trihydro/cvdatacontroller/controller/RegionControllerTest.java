@@ -1,8 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -12,14 +9,13 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -29,20 +25,20 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Geometry;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.DistanceUnits.DistanceUnitsEnum;
 
-@RunWith(StrictStubs.class)
 public class RegionControllerTest extends TestBase<RegionController> {
 
     @Mock
     private SQLNullHandler mockSqlNullHandler;
     @Spy
-    private TimOracleTables mockTimOracleTables;
+    private TimDbTables mockTimDbTables;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() throws SQLException {
-        doReturn(mockPreparedStatement).when(mockTimOracleTables).buildUpdateStatement(any(), any(), any(), any(),
-                any());
-        doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
-        uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler);
+        uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler);
+    }
+
+    private void setupInsertQueryStatement() {
+        doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
     }
 
     @Test
@@ -53,10 +49,10 @@ public class RegionControllerTest extends TestBase<RegionController> {
         ResponseEntity<Boolean> data = uut.UpdateRegionName(-1l, "name");
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
-        assertTrue("UpdateRegionName returned false when success", data.getBody());
+        Assertions.assertTrue(data.getBody(), "UpdateRegionName returned false when success");
     }
 
     @Test
@@ -68,13 +64,14 @@ public class RegionControllerTest extends TestBase<RegionController> {
         ResponseEntity<Boolean> data = uut.UpdateRegionName(-1l, "name");
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        assertFalse("UpdateRegionName returned true when error", data.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertFalse(data.getBody(), "UpdateRegionName returned true when error");
     }
 
     @Test
     public void AddRegion_SUCCESS() throws SQLException {
         // Arrange
+        setupInsertQueryStatement();
         Region region = new Region();
         Geometry geometry = new Geometry();
         Circle circle = new Circle();
@@ -97,13 +94,13 @@ public class RegionControllerTest extends TestBase<RegionController> {
         ResponseEntity<Long> data = uut.AddRegion(-1l, -1l, region);
 
         // Assert
-        assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// DATA_FRAME_ID
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, region.getName());// NAME
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, region.getLaneWidth());// LANE_WIDTH
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, region.getDirectionality());// DIRECTIONALITY
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, region.getDirection());// DIRECTION
-        verify(mockPreparedStatement).setBoolean(6, region.isClosedPath());// CLOSED_PATH
+        verify(mockPreparedStatement).setInt(6, region.isClosedPath() ? 1 : 0);// CLOSED_PATH
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 7, position.getLatitude());// ANCHOR_LAT
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 8, position.getLongitude());// ANCHOR_LONG
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 9, -1l);// PATH_ID
@@ -114,7 +111,7 @@ public class RegionControllerTest extends TestBase<RegionController> {
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 14, (BigDecimal) null);// GEOMETRY_CIRCLE_POSITION_LONG
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 15, (BigDecimal) null);// GEOMETRY_CIRCLE_POSITION_ELEV
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 16, null);// GEOMETRY_CIRCLE_RADIUS
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 17, null);// GEOMETRY_CIRCLE_UNITS
+        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 17, null);// GEOMETRY_CIRCLE_UNITS
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -122,6 +119,7 @@ public class RegionControllerTest extends TestBase<RegionController> {
     @Test
     public void AddRegion_FAIL() throws SQLException {
         // Arrange
+        setupInsertQueryStatement();
         Region region = new Region();
         doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);
 
@@ -129,7 +127,7 @@ public class RegionControllerTest extends TestBase<RegionController> {
         ResponseEntity<Long> data = uut.AddRegion(-1l, -1l, region);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

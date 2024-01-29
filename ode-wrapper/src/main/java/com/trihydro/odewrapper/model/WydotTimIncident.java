@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.model.Coordinate;
@@ -9,19 +10,18 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class WydotTimIncident extends WydotTim {
 
-    private String impact;
+    @ApiModelProperty(value = "Expected values are mudslide, livestock, avalanche, avalancheControl, landslide, wildfire, signInstall, mowing")
     private String problem;
     private String effect;
+
+    @ApiModelProperty(value = "Expected values are caution, delays, stop")
     private String action;
     @ApiModelProperty(required = true)
     private String incidentId;
     @ApiModelProperty(required = true)
     private String highway;
-    @ApiModelProperty(required = true)
-    private String schedStart;
-    private String schedEnd;
+
     private Integer pk;
-    private String problemOtherText;
     @ApiModelProperty(hidden = true)
     private transient String clientId;
     @ApiModelProperty(hidden = true)
@@ -29,31 +29,33 @@ public class WydotTimIncident extends WydotTim {
     @ApiModelProperty(hidden = true)
     private transient List<String> itisCodes;
 
-    @ApiModelProperty(required = false)
-	private transient Coordinate endPoint;
+    @ApiModelProperty(value = "Optional. If not provided, a TIM will be generated extending 1 mile upstream from the startPoint", required = false)
+    private transient Coordinate endPoint;
 
-    public String getSchedStart() {
-        return this.schedStart;
+    public WydotTimIncident() {
+
     }
 
-    public void setSchedStart(String schedStart) {
-        this.schedStart = schedStart;
+    public WydotTimIncident(WydotTimIncident o) {
+        super(o);
+        this.problem = o.problem;
+        this.effect = o.effect;
+        this.action = o.action;
+        this.incidentId = o.incidentId;
+        this.highway = o.highway;
+        this.pk = o.pk;
+        this.clientId = o.clientId;
+        this.route = o.route;
+
+        if (o.itisCodes != null)
+            this.itisCodes = new ArrayList<>(o.itisCodes);
+        if (o.endPoint != null)
+            this.endPoint = new Coordinate(o.endPoint.getLatitude(), o.endPoint.getLongitude());
     }
 
-    public String getSchedEnd() {
-        return this.schedEnd;
-    }
-
-    public void setSchedEnd(String schedEnd) {
-        this.schedEnd = schedEnd;
-    }
-
-    public String getProblemOtherText() {
-        return this.problemOtherText;
-    }
-
-    public void setProblemOtherText(String problemOtherText) {
-        this.problemOtherText = problemOtherText;
+    @Override
+    public WydotTimIncident copy() {
+        return new WydotTimIncident(this);
     }
 
     public Integer getPk() {
@@ -103,13 +105,4 @@ public class WydotTimIncident extends WydotTim {
     public void setAction(String action) {
         this.action = action;
     }
-
-    public String getImpact() {
-        return this.impact;
-    }
-
-    public void setImpact(String impact) {
-        this.impact = impact;
-    }
-    
 }

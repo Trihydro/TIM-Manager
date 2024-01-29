@@ -1,7 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,22 +12,20 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-@RunWith(StrictStubs.class)
 public class DriverAlertControllerTest extends TestBase<DriverAlertController> {
     @Test
     public void DeleteOldDriverAlert() throws SQLException {
         // Arrange
         DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
-        TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+        TimeZone toTimeZone = TimeZone.getTimeZone("UTC");
         sdf.setTimeZone(toTimeZone);
         Date dte = java.sql.Date.valueOf(LocalDate.now().minus(1, ChronoUnit.MONTHS));
         String strDate = sdf.format(dte.getTime());
-        doReturn(strDate).when(uut).getOneMonthPrior();
+        doReturn(strDate).when(uut).getOneMonthPriorString();
 
         // Act
         var data = uut.DeleteOldDriverAlert();
@@ -38,8 +34,8 @@ public class DriverAlertControllerTest extends TestBase<DriverAlertController> {
         String deleteSQL = "DELETE FROM driver_alert_itis_code WHERE driver_alert_id IN";
         deleteSQL += " (SELECT driver_alert_id FROM driver_alert WHERE ode_received_at < ?)";
 
-        assertEquals(HttpStatus.OK, data.getStatusCode());
-        assertTrue("Fail return on success", data.getBody());
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertTrue(data.getBody(), "Fail return on success");
         verify(mockConnection).prepareStatement(deleteSQL);
         verify(mockConnection).prepareStatement("DELETE FROM driver_alert WHERE ode_received_at < ?");
 

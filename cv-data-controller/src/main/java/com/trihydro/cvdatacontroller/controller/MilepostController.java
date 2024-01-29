@@ -117,8 +117,8 @@ public class MilepostController extends BaseController {
 				milepost.setCommonName(rs.getString("COMMON_NAME"));
 				milepost.setMilepost(rs.getDouble("MILEPOST"));
 				milepost.setDirection(rs.getString("DIRECTION"));
-				milepost.setLatitude(rs.getDouble("LATITUDE"));
-				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setLatitude(rs.getBigDecimal("LATITUDE"));
+				milepost.setLongitude(rs.getBigDecimal("LONGITUDE"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -172,8 +172,8 @@ public class MilepostController extends BaseController {
 				milepost.setCommonName(rs.getString("COMMON_NAME"));
 				milepost.setMilepost(rs.getDouble("MILEPOST"));
 				milepost.setDirection(rs.getString("DIRECTION"));
-				milepost.setLatitude(rs.getDouble("LATITUDE"));
-				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setLatitude(rs.getBigDecimal("LATITUDE"));
+				milepost.setLongitude(rs.getBigDecimal("LONGITUDE"));
 				mileposts.add(milepost);
 			}
 
@@ -229,8 +229,8 @@ public class MilepostController extends BaseController {
 				Milepost milepost = new Milepost();
 				milepost.setCommonName(rs.getString("COMMON_NAME"));
 				milepost.setMilepost(rs.getDouble("MILEPOST"));
-				milepost.setLatitude(rs.getDouble("LATITUDE"));
-				milepost.setLongitude(rs.getDouble("LONGITUDE"));
+				milepost.setLatitude(rs.getBigDecimal("LATITUDE"));
+				milepost.setLongitude(rs.getBigDecimal("LONGITUDE"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -396,9 +396,8 @@ public class MilepostController extends BaseController {
 				milepost.setCommonName(rs.getString("route"));
 				milepost.setMilepost(rs.getDouble("milepost"));
 				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setLatitude(rs.getBigDecimal("latitude"));
+				milepost.setLongitude(rs.getBigDecimal("longitude"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
@@ -459,9 +458,8 @@ public class MilepostController extends BaseController {
 				milepost.setCommonName(rs.getString("route"));
 				milepost.setMilepost(rs.getDouble("milepost"));
 				milepost.setDirection(rs.getString("direction"));
-				milepost.setLatitude(rs.getDouble("latitude"));
-				milepost.setLongitude(rs.getDouble("longitude"));
-				milepost.setBearing(rs.getDouble("bearing"));
+				milepost.setLatitude(rs.getBigDecimal("latitude"));
+				milepost.setLongitude(rs.getBigDecimal("longitude"));
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {

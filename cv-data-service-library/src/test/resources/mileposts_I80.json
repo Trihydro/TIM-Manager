@@ -1,0 +1,828 @@
+[
+    {
+        "milepost": 267.3,
+        "direction": "D",
+        "latitude": 41.63319799,
+        "longitude": -106.28218829,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 267.2,
+        "direction": "D",
+        "latitude": 41.63413485,
+        "longitude": -106.2836537,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 267.1,
+        "direction": "D",
+        "latitude": 41.63507328,
+        "longitude": -106.28512444,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 267.0,
+        "direction": "D",
+        "latitude": 41.63601212,
+        "longitude": -106.28659587,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.9,
+        "direction": "D",
+        "latitude": 41.63694941,
+        "longitude": -106.2880691,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.8,
+        "direction": "D",
+        "latitude": 41.63788555,
+        "longitude": -106.2895436,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.7,
+        "direction": "D",
+        "latitude": 41.63874071,
+        "longitude": -106.29110192,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.6,
+        "direction": "D",
+        "latitude": 41.63945326,
+        "longitude": -106.29278254,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.5,
+        "direction": "D",
+        "latitude": 41.6400238,
+        "longitude": -106.29455707,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.4,
+        "direction": "D",
+        "latitude": 41.64043923,
+        "longitude": -106.29640644,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.3,
+        "direction": "D",
+        "latitude": 41.6407678,
+        "longitude": -106.29828775,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.2,
+        "direction": "D",
+        "latitude": 41.64108922,
+        "longitude": -106.30017126,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.1,
+        "direction": "D",
+        "latitude": 41.64141084,
+        "longitude": -106.30205472,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 266.0,
+        "direction": "D",
+        "latitude": 41.64173036,
+        "longitude": -106.30393882,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.9,
+        "direction": "D",
+        "latitude": 41.64205305,
+        "longitude": -106.30582197,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.8,
+        "direction": "D",
+        "latitude": 41.6423739,
+        "longitude": -106.30770567,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.7,
+        "direction": "D",
+        "latitude": 41.64269711,
+        "longitude": -106.30958868,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.6,
+        "direction": "D",
+        "latitude": 41.6430157,
+        "longitude": -106.3114731,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.5,
+        "direction": "D",
+        "latitude": 41.64333718,
+        "longitude": -106.31335666,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.4,
+        "direction": "D",
+        "latitude": 41.64365786,
+        "longitude": -106.31524046,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.3,
+        "direction": "D",
+        "latitude": 41.64403407,
+        "longitude": -106.31710554,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.2,
+        "direction": "D",
+        "latitude": 41.64453748,
+        "longitude": -106.31891601,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.1,
+        "direction": "D",
+        "latitude": 41.64516579,
+        "longitude": -106.32065595,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 265.0,
+        "direction": "D",
+        "latitude": 41.64591299,
+        "longitude": -106.32231068,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.9,
+        "direction": "D",
+        "latitude": 41.64669853,
+        "longitude": -106.3239341,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.8,
+        "direction": "D",
+        "latitude": 41.64748575,
+        "longitude": -106.32555609,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.7,
+        "direction": "D",
+        "latitude": 41.64827029,
+        "longitude": -106.3271804,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.6,
+        "direction": "D",
+        "latitude": 41.64905615,
+        "longitude": -106.32880361,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.5,
+        "direction": "D",
+        "latitude": 41.64983998,
+        "longitude": -106.33042858,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.4,
+        "direction": "D",
+        "latitude": 41.6506266,
+        "longitude": -106.33205117,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.3,
+        "direction": "D",
+        "latitude": 41.65141269,
+        "longitude": -106.33367423,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.2,
+        "direction": "D",
+        "latitude": 41.65219737,
+        "longitude": -106.33529854,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.1,
+        "direction": "D",
+        "latitude": 41.65298529,
+        "longitude": -106.33692006,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 264.0,
+        "direction": "D",
+        "latitude": 41.6537693,
+        "longitude": -106.33854497,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.9,
+        "direction": "D",
+        "latitude": 41.65455519,
+        "longitude": -106.34016829,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.8,
+        "direction": "D",
+        "latitude": 41.65534117,
+        "longitude": -106.34179155,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.7,
+        "direction": "D",
+        "latitude": 41.65612661,
+        "longitude": -106.34341529,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.6,
+        "direction": "D",
+        "latitude": 41.65691388,
+        "longitude": -106.34503748,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.5,
+        "direction": "D",
+        "latitude": 41.65769559,
+        "longitude": -106.34666446,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.4,
+        "direction": "D",
+        "latitude": 41.65848402,
+        "longitude": -106.34828569,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.3,
+        "direction": "D",
+        "latitude": 41.6592717,
+        "longitude": -106.34990758,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.2,
+        "direction": "D",
+        "latitude": 41.66005584,
+        "longitude": -106.35153253,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.1,
+        "direction": "D",
+        "latitude": 41.66083983,
+        "longitude": -106.35315762,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 263.0,
+        "direction": "D",
+        "latitude": 41.66162486,
+        "longitude": -106.35478186,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.9,
+        "direction": "D",
+        "latitude": 41.66241108,
+        "longitude": -106.35640509,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.8,
+        "direction": "D",
+        "latitude": 41.66319878,
+        "longitude": -106.35802707,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.7,
+        "direction": "D",
+        "latitude": 41.66398121,
+        "longitude": -106.35965359,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.6,
+        "direction": "D",
+        "latitude": 41.66476697,
+        "longitude": -106.36127728,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.5,
+        "direction": "D",
+        "latitude": 41.66555136,
+        "longitude": -106.36290217,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.4,
+        "direction": "D",
+        "latitude": 41.66633656,
+        "longitude": -106.36452637,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.3,
+        "direction": "D",
+        "latitude": 41.66712312,
+        "longitude": -106.36614943,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.2,
+        "direction": "D",
+        "latitude": 41.66794373,
+        "longitude": -106.36774148,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.1,
+        "direction": "D",
+        "latitude": 41.66888803,
+        "longitude": -106.36920603,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 262.0,
+        "direction": "D",
+        "latitude": 41.6699542,
+        "longitude": -106.37051328,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.9,
+        "direction": "D",
+        "latitude": 41.67112806,
+        "longitude": -106.37164509,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.8,
+        "direction": "D",
+        "latitude": 41.67239394,
+        "longitude": -106.37258359,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.7,
+        "direction": "D",
+        "latitude": 41.67373379,
+        "longitude": -106.37331741,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.6,
+        "direction": "D",
+        "latitude": 41.67512772,
+        "longitude": -106.37384256,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.5,
+        "direction": "D",
+        "latitude": 41.67655002,
+        "longitude": -106.37421367,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.4,
+        "direction": "D",
+        "latitude": 41.67797229,
+        "longitude": -106.37458498,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.3,
+        "direction": "D",
+        "latitude": 41.67937313,
+        "longitude": -106.37507821,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.2,
+        "direction": "D",
+        "latitude": 41.68073464,
+        "longitude": -106.37573808,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.1,
+        "direction": "D",
+        "latitude": 41.68204558,
+        "longitude": -106.37656042,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 261.0,
+        "direction": "D",
+        "latitude": 41.68331901,
+        "longitude": -106.37748328,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.9,
+        "direction": "D",
+        "latitude": 41.68458883,
+        "longitude": -106.37841497,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.8,
+        "direction": "D",
+        "latitude": 41.68586922,
+        "longitude": -106.37932046,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.7,
+        "direction": "D",
+        "latitude": 41.6871656,
+        "longitude": -106.38018463,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.6,
+        "direction": "D",
+        "latitude": 41.68847648,
+        "longitude": -106.38100896,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.5,
+        "direction": "D",
+        "latitude": 41.68980124,
+        "longitude": -106.38179287,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.4,
+        "direction": "D",
+        "latitude": 41.69113244,
+        "longitude": -106.38255718,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.3,
+        "direction": "D",
+        "latitude": 41.69246193,
+        "longitude": -106.38332678,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.2,
+        "direction": "D",
+        "latitude": 41.69379385,
+        "longitude": -106.38409079,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.1,
+        "direction": "D",
+        "latitude": 41.69511765,
+        "longitude": -106.38488285,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 260.0,
+        "direction": "D",
+        "latitude": 41.69638255,
+        "longitude": -106.38582878,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.9,
+        "direction": "D",
+        "latitude": 41.69755984,
+        "longitude": -106.38695859,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.8,
+        "direction": "D",
+        "latitude": 41.69863239,
+        "longitude": -106.38826088,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.7,
+        "direction": "D",
+        "latitude": 41.69958648,
+        "longitude": -106.38971795,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.6,
+        "direction": "D",
+        "latitude": 41.70040751,
+        "longitude": -106.3913126,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.5,
+        "direction": "D",
+        "latitude": 41.70109244,
+        "longitude": -106.39301803,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.4,
+        "direction": "D",
+        "latitude": 41.70172454,
+        "longitude": -106.39476046,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.3,
+        "direction": "D",
+        "latitude": 41.70235068,
+        "longitude": -106.39650674,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.2,
+        "direction": "D",
+        "latitude": 41.70297719,
+        "longitude": -106.39825281,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.1,
+        "direction": "D",
+        "latitude": 41.70360381,
+        "longitude": -106.39999881,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 259.0,
+        "direction": "D",
+        "latitude": 41.70423088,
+        "longitude": -106.40174455,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.9,
+        "direction": "D",
+        "latitude": 41.70484489,
+        "longitude": -106.40349846,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.8,
+        "direction": "D",
+        "latitude": 41.70533814,
+        "longitude": -106.40531792,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.7,
+        "direction": "D",
+        "latitude": 41.70567691,
+        "longitude": -106.40719887,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.6,
+        "direction": "D",
+        "latitude": 41.70585771,
+        "longitude": -106.40911869,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.5,
+        "direction": "D",
+        "latitude": 41.7059407,
+        "longitude": -106.41105142,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.4,
+        "direction": "D",
+        "latitude": 41.70601095,
+        "longitude": -106.41298503,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.3,
+        "direction": "D",
+        "latitude": 41.70608314,
+        "longitude": -106.41491851,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.2,
+        "direction": "D",
+        "latitude": 41.70616534,
+        "longitude": -106.41685132,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.1,
+        "direction": "D",
+        "latitude": 41.70624102,
+        "longitude": -106.41878459,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 258.0,
+        "direction": "D",
+        "latitude": 41.70632498,
+        "longitude": -106.42071724,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.9,
+        "direction": "D",
+        "latitude": 41.70649601,
+        "longitude": -106.42263834,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.8,
+        "direction": "D",
+        "latitude": 41.70683512,
+        "longitude": -106.42451932,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.7,
+        "direction": "D",
+        "latitude": 41.70733996,
+        "longitude": -106.42633302,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.6,
+        "direction": "D",
+        "latitude": 41.70800027,
+        "longitude": -106.42805567,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.5,
+        "direction": "D",
+        "latitude": 41.70880811,
+        "longitude": -106.42966225,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.4,
+        "direction": "D",
+        "latitude": 41.70974452,
+        "longitude": -106.43114047,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.3,
+        "direction": "D",
+        "latitude": 41.7107078,
+        "longitude": -106.4325883,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.2,
+        "direction": "D",
+        "latitude": 41.71167755,
+        "longitude": -106.43402846,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.1,
+        "direction": "D",
+        "latitude": 41.71264269,
+        "longitude": -106.43547416,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 257.0,
+        "direction": "D",
+        "latitude": 41.71360186,
+        "longitude": -106.43692692,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.9,
+        "direction": "D",
+        "latitude": 41.71454,
+        "longitude": -106.43840388,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.8,
+        "direction": "D",
+        "latitude": 41.71545169,
+        "longitude": -106.43991009,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.7,
+        "direction": "D",
+        "latitude": 41.7163353,
+        "longitude": -106.44144585,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.6,
+        "direction": "D",
+        "latitude": 41.71719564,
+        "longitude": -106.44300496,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.5,
+        "direction": "D",
+        "latitude": 41.71802771,
+        "longitude": -106.4445911,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.4,
+        "direction": "D",
+        "latitude": 41.71883204,
+        "longitude": -106.44620262,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.3,
+        "direction": "D",
+        "latitude": 41.71960692,
+        "longitude": -106.44783966,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.2,
+        "direction": "D",
+        "latitude": 41.7203542,
+        "longitude": -106.44949942,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.1,
+        "direction": "D",
+        "latitude": 41.72107332,
+        "longitude": -106.45118114,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 256.0,
+        "direction": "D",
+        "latitude": 41.72175784,
+        "longitude": -106.45288846,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 255.9,
+        "direction": "D",
+        "latitude": 41.72242389,
+        "longitude": -106.4546088,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 255.8,
+        "direction": "D",
+        "latitude": 41.72308396,
+        "longitude": -106.45633325,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 255.7,
+        "direction": "D",
+        "latitude": 41.72373782,
+        "longitude": -106.45806194,
+        "commonName": "I 80"
+    },
+    {
+        "milepost": 255.6,
+        "direction": "D",
+        "latitude": 41.72439109,
+        "longitude": -106.45979094,
+        "commonName": "I 80"
+    }
+]

@@ -1,7 +1,5 @@
 package com.trihydro.cvdatacontroller.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -10,21 +8,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -37,39 +39,41 @@ import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.RxSource;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
-@RunWith(StrictStubs.class)
 public class TimControllerTest extends TestBase<TimController> {
 
         @Mock
         private SQLNullHandler mockSqlNullHandler;
         @Spy
-        private TimOracleTables mockTimOracleTables;
+        private TimDbTables mockTimDbTables;
         @Mock
         private SecurityResultCodeTypeController mockSecurityResultCodeTypeController;
         @Mock
         private ResponseEntity<List<SecurityResultCodeType>> mockResponseEntitySecurityResultCodeTypeList;
 
-        private String mstFormatedDate = "03-Feb-20 04.00.00.000 PM";
-
-        @Before
+        @BeforeEach
         public void setupSubTest() {
+                uut.InjectDependencies(mockTimDbTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
+        }
+
+        private void setupInsertQueryStatement() {
+                doReturn("").when(mockTimDbTables).buildInsertQueryStatement(any(), any());
+        }
+
+        private void setupSecurityResultTypes() {
                 List<SecurityResultCodeType> secResultCodeTypes = new ArrayList<>();
                 SecurityResultCodeType srct = new SecurityResultCodeType();
                 srct.setSecurityResultCodeType(SecurityResultCode.success.toString());
                 srct.setSecurityResultCodeTypeId(-1);
                 secResultCodeTypes.add(srct);
-
-                doReturn("").when(mockTimOracleTables).buildInsertQueryStatement(any(), any());
                 doReturn(secResultCodeTypes).when(mockResponseEntitySecurityResultCodeTypeList).getBody();
                 when(mockSecurityResultCodeTypeController.GetSecurityResultCodeTypes())
                                 .thenReturn(mockResponseEntitySecurityResultCodeTypeList);
-
-                uut.InjectDependencies(mockTimOracleTables, mockSqlNullHandler, mockSecurityResultCodeTypeController);
         }
 
         @Test
         public void AddTim_J2735_SUCCESS() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
                 TimInsertModel tim = new TimInsertModel();
                 tim.setJ2735TravelerInformationMessage(new OdeTravelerInformationMessage());
                 tim.setRecordType(RecordType.driverAlert);
@@ -83,7 +87,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 Long timId = uut.AddTim(tim);
 
                 // Assert
-                assertEquals(Long.valueOf(-1), timId);
+                Assertions.assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 1, j2735.getMsgCnt());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 2, j2735.getPacketID());
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 3, j2735.getUrlB());
@@ -95,6 +99,7 @@ public class TimControllerTest extends TestBase<TimController> {
         @Test
         public void AddTim_timMetadata_SUCCESS() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
                 TimInsertModel tim = new TimInsertModel();
                 OdeMsgMetadata omm = GetOmm();
                 omm.setRecordGeneratedBy(GeneratedBy.TMC);
@@ -106,18 +111,26 @@ public class TimControllerTest extends TestBase<TimController> {
                 tim.setRegionName("REGIONNAME");
                 OdeMsgMetadata odeTimMetadata = tim.getOdeTimMetadata();
 
+                var genTime = Instant.parse(tim.getOdeTimMetadata().getRecordGeneratedAt());
+                var recTime = Instant.parse(tim.getOdeTimMetadata().getOdeReceivedAt());
+                java.util.Date gen_at = java.util.Date.from(genTime);
+                java.util.Date rec_at = java.util.Date.from(recTime);
+                doReturn(gen_at).when(mockUtility).convertDate(tim.getOdeTimMetadata().getRecordGeneratedAt());
+                doReturn(rec_at).when(mockUtility).convertDate(tim.getOdeTimMetadata().getOdeReceivedAt());
+                mockUtility.timestampFormat = timestampFormat;
+
                 // Act
                 Long timId = uut.AddTim(tim);
 
                 // Assert
                 // j2735 fields are skipped, we start at index 5 after those
-                // See timOracleTables.getTimTable() for ordering
-                assertEquals(Long.valueOf(-1), timId);
+                // See timDbTables.getTimTable() for ordering
+                Assertions.assertEquals(Long.valueOf(-1), timId);
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5,
                                 odeTimMetadata.getRecordGeneratedBy().toString());// RECORD_GENERATED_BY
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 12,
                                 odeTimMetadata.getSchemaVersion());// SCHEMA_VERSION
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 15, mstFormatedDate);// RECORD_GENERATED_AT
+                verify(mockPreparedStatement).setString(1, null);// RECORD_GENERATED_AT
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 17,
                                 odeTimMetadata.getSerialId().getStreamId());// SERIAL_ID_STREAM_ID
                 verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 18,
@@ -129,7 +142,6 @@ public class TimControllerTest extends TestBase<TimController> {
                 verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 21,
                                 odeTimMetadata.getSerialId().getSerialNumber());// SERIAL_ID_SERIAL_NUMBER
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 22, odeTimMetadata.getPayloadType());// PAYLOAD_TYPE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 24, mstFormatedDate);// ODE_RECEIVED_AT
                 verify(mockPreparedStatement).close();
                 verify(mockConnection).close();
         }
@@ -137,6 +149,8 @@ public class TimControllerTest extends TestBase<TimController> {
         @Test
         public void AddTim_receivedMessageDetails_SUCCESS() throws SQLException {
                 // Arrange
+                setupInsertQueryStatement();
+                setupSecurityResultTypes();
                 TimInsertModel tim = new TimInsertModel();
                 tim.setReceivedMessageDetails(getRxMsg());
                 tim.setRecordType(RecordType.driverAlert);
@@ -150,18 +164,18 @@ public class TimControllerTest extends TestBase<TimController> {
                 Long timId = uut.AddTim(tim);
 
                 // Assert
-                // See timOracleTables.getTimTable() for ordering
-                assertEquals(Long.valueOf(-1), timId);
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 6,
-                                receivedMessageDetails.getLocationData().getElevation());// RMD_LD_ELEVATION
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 7,
-                                receivedMessageDetails.getLocationData().getHeading());// RMD_LD_HEADING
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 8,
-                                receivedMessageDetails.getLocationData().getLatitude());// RMD_LD_LATITUDE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 9,
-                                receivedMessageDetails.getLocationData().getLongitude());// RMD_LD_LONGITUDE
-                verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 10,
-                                receivedMessageDetails.getLocationData().getSpeed());// RMD_LD_SPEED
+                // See timDbTables.getTimTable() for ordering
+                Assertions.assertEquals(Long.valueOf(-1), timId);
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 6,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getElevation()));// RMD_LD_ELEVATION
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 7,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getHeading()));// RMD_LD_HEADING
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 8,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getLatitude()));// RMD_LD_LATITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 9,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getLongitude()));// RMD_LD_LONGITUDE
+                verify(mockSqlNullHandler).setDoubleOrNull(mockPreparedStatement, 10,
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getSpeed()));// RMD_LD_SPEED
                 verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 11,
                                 receivedMessageDetails.getRxSource().toString());// RMD_RX_SOURCE
                 verify(mockPreparedStatement).setInt(13, -1);// SECURITY_RESULT_CODE
@@ -179,7 +193,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 ResponseEntity<WydotOdeTravelerInformationMessage> data = uut.GetTim(timId);
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
                 verify(mockStatement).executeQuery(selectStatement);
                 verify(mockRs).getString("PACKET_ID");
                 verify(mockRs).getInt("MSG_CNT");
@@ -201,7 +215,7 @@ public class TimControllerTest extends TestBase<TimController> {
                 ResponseEntity<WydotOdeTravelerInformationMessage> data = uut.GetTim(timId);
 
                 // Assert
-                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+                Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
                 verify(mockStatement).executeQuery(selectStatement);
                 verify(mockStatement).close();
                 verify(mockConnection).close();
@@ -211,29 +225,29 @@ public class TimControllerTest extends TestBase<TimController> {
         @Test
         public void deleteOldTim() throws SQLException {
                 // Arrange
-                String strDate = uut.getOneMonthPrior();
-                doReturn(strDate).when(uut).getOneMonthPrior();
+                Timestamp oneMonthPriorTimestamp = uut.getOneMonthPriorTimestamp();
+                doReturn(oneMonthPriorTimestamp).when(uut).getOneMonthPriorTimestamp();
 
                 // Act
                 var data = uut.deleteOldTim();
 
                 // Assert
-                assertEquals(HttpStatus.OK, data.getStatusCode());
-                assertTrue("Fail return on success", data.getBody());
+                Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+                Assertions.assertTrue(data.getBody(), "Fail return on success");
 
-                verify(uut, times(2)).getOneMonthPrior();
+                verify(uut, times(2)).getOneMonthPriorTimestamp();
 
                 String deleteTimRsuSQL = "DELETE FROM tim_rsu WHERE tim_id IN";
 
                 String deleteDfItis = "DELETE FROM DATA_FRAME_ITIS_CODE where data_frame_id in";
                 deleteDfItis += " (select data_frame_id from data_frame WHERE tim_id IN";
 
-                String deleteNodeXy = "DELETE FROM node_xy WHERE node_xy_id IN";
-                deleteNodeXy += " (SELECT node_xy_id from path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
-                deleteNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+                String deleteNodeLL = "DELETE FROM node_ll WHERE node_ll_id IN";
+                deleteNodeLL += " (SELECT node_ll_id from path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deleteNodeLL += " (select data_frame_id from data_frame WHERE tim_id IN";
 
-                String deletePathNodeXy = "DELETE FROM path_node_xy WHERE path_id in (SELECT path_id from region where data_frame_id in";
-                deletePathNodeXy += " (select data_frame_id from data_frame WHERE tim_id IN";
+                String deletePathNodeLL = "DELETE FROM path_node_ll WHERE path_id in (SELECT path_id from region where data_frame_id in";
+                deletePathNodeLL += " (select data_frame_id from data_frame WHERE tim_id IN";
 
                 String deletePath = "DELETE FROM path WHERE path_id in (SELECT path_id from region where data_frame_id in";
                 deletePath += " (select data_frame_id from data_frame WHERE tim_id IN";
@@ -248,36 +262,44 @@ public class TimControllerTest extends TestBase<TimController> {
 
                 deleteTimRsuSQL += deleteSQL;
                 deleteDfItis += deleteSQL + ")";
-                deleteNodeXy += deleteSQL + ")))";
-                deletePathNodeXy += deleteSQL + "))";
+                deleteNodeLL += deleteSQL + ")))";
+                deletePathNodeLL += deleteSQL + "))";
                 deletePath += deleteSQL + "))";
                 deleteRegion += deleteSQL + ")";
                 deleteDataFrame += deleteSQL;
 
                 verify(mockConnection).prepareStatement(deleteTimRsuSQL);
                 verify(mockConnection).prepareStatement(deleteDfItis);
-                verify(mockConnection).prepareStatement(deleteNodeXy);
-                verify(mockConnection).prepareStatement(deletePathNodeXy);
+                verify(mockConnection).prepareStatement(deleteNodeLL);
+                verify(mockConnection).prepareStatement(deletePathNodeLL);
                 verify(mockConnection).prepareStatement(deletePath);
                 verify(mockConnection).prepareStatement(deleteRegion);
                 verify(mockConnection).prepareStatement(deleteDataFrame);
                 verify(mockConnection).prepareStatement(deleteTim);
 
-                verify(mockPreparedStatement, times(8)).setString(1, strDate);
+                verify(mockPreparedStatement, times(8)).setTimestamp(1, oneMonthPriorTimestamp);
                 verify(mockPreparedStatement, times(8)).close();
                 verify(mockConnection, times(8)).close();
         }
 
         private ReceivedMessageDetails getRxMsg() {
                 ReceivedMessageDetails rxMsg = new ReceivedMessageDetails();
-                rxMsg.setLocationData(new OdeLogMsgMetadataLocation());
+                
+                OdeLogMsgMetadataLocation locationData = new OdeLogMsgMetadataLocation();
+                locationData.setElevation("1.0");
+                locationData.setHeading("2.0");
+                locationData.setLatitude("3.0");
+                locationData.setLongitude("4.0");
+                locationData.setSpeed("5.0");
+                rxMsg.setLocationData(locationData);
+
                 rxMsg.setRxSource(RxSource.SNMP);
                 return rxMsg;
         }
 
         private OdeMsgMetadata GetOmm() {
                 OdeMsgMetadata omm = new OdeMsgMetadata();
-                omm.setRecordGeneratedAt("2020-02-03T16:00:00.000Z");
+                omm.setRecordGeneratedAt("2020-02-03T16:02:00.000Z");
                 omm.setOdeReceivedAt("2020-02-03T16:00:00.000Z");
                 return omm;
         }

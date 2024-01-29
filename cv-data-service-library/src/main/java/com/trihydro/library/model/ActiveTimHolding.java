@@ -13,15 +13,34 @@ public class ActiveTimHolding {
     private Coordinate endPoint;
     private String dateCreated;
     private Integer projectKey;
+    private String expirationDateTime;
+    private String packetId;
 
-    public ActiveTimHolding(WydotTim tim, String rsuTarget, String satRecordId) {
+
+    public ActiveTimHolding(WydotTim tim, String rsuTarget, String satRecordId, Coordinate endPt) {
         this.clientId = tim.getClientId();
         this.direction = tim.getDirection();
         this.rsuTarget = rsuTarget;
         this.satRecordId = satRecordId;
         this.startPoint = tim.getStartPoint();
-        this.endPoint = tim.getEndPoint();
+        this.endPoint = endPt;
         this.dateCreated = Instant.now().toString();
+    }
+
+    public String getPacketId() {
+        return packetId;
+    }
+
+    public void setPacketId(String packetId) {
+        this.packetId = packetId;
+    }
+
+    public String getExpirationDateTime() {
+        return expirationDateTime;
+    }
+
+    public void setExpirationDateTime(String expirationDateTime) {
+        this.expirationDateTime = expirationDateTime;
     }
 
     public String getDirection() {

@@ -1,32 +1,40 @@
 package com.trihydro.tasks.actions;
 
+//import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.ActiveTimError;
+import com.trihydro.library.model.ActiveTimErrorType;
+import com.trihydro.library.model.ActiveTimValidationResult;
+//import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.ResubmitTimException;
+import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TmddItisCode;
 import com.trihydro.library.model.tmdd.EventDescription;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
-import com.trihydro.library.model.tmdd.LinkLocation;
-import com.trihydro.library.model.tmdd.PointOnLink;
+//import com.trihydro.library.model.tmdd.LinkLocation;
+//import com.trihydro.library.model.tmdd.PointOnLink;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.ItisCodeService;
 import com.trihydro.library.service.TmddService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
-import com.trihydro.tasks.models.ActiveTimError;
-import com.trihydro.tasks.models.ActiveTimValidationResult;
 
-import org.gavaghan.geodesy.Ellipsoid;
-import org.gavaghan.geodesy.GeodeticCalculator;
-import org.gavaghan.geodesy.GeodeticCurve;
-import org.gavaghan.geodesy.GlobalCoordinates;
+import org.apache.commons.lang3.StringUtils;
+//import org.gavaghan.geodesy.Ellipsoid;
+//import org.gavaghan.geodesy.GeodeticCalculator;
+//import org.gavaghan.geodesy.GeodeticCurve;
+//import org.gavaghan.geodesy.GlobalCoordinates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,15 +48,17 @@ public class ValidateTmdd implements Runnable {
     private EmailFormatter emailFormatter;
     private EmailHelper mailHelper;
     private Utility utility;
-
+    private WydotTimService wydotTimService;
+    private TimGenerationHelper timGenerationHelper;
     private Map<String, Integer> tmddItisCodes;
-
     private List<String> errors;
+    private Gson gson = new Gson();
 
     @Autowired
     public void InjectDependencies(DataTasksConfiguration config, TmddService tmddService,
             ActiveTimService activeTimService, ItisCodeService itisCodeService, IdNormalizer idNormalizer,
-            EmailFormatter emailFormatter, EmailHelper mailHelper, Utility utility) {
+            EmailFormatter emailFormatter, EmailHelper mailHelper, Utility utility, WydotTimService _wydotTimService,
+            TimGenerationHelper _timGenerationHelper) {
         this.config = config;
         this.tmddService = tmddService;
         this.activeTimService = activeTimService;
@@ -57,6 +67,8 @@ public class ValidateTmdd implements Runnable {
         this.emailFormatter = emailFormatter;
         this.mailHelper = mailHelper;
         this.utility = utility;
+        wydotTimService = _wydotTimService;
+        timGenerationHelper = _timGenerationHelper;
     }
 
     public void run() {
@@ -66,7 +78,7 @@ public class ValidateTmdd implements Runnable {
         try {
             validateTmdd();
         } catch (Exception ex) {
-            utility.logWithDate("Error while validating Oracle with TMDD:", this.getClass());
+            utility.logWithDate("Error while validating Database with TMDD:", this.getClass());
             ex.printStackTrace();
             errors.add(ex.getMessage());
 
@@ -76,11 +88,10 @@ public class ValidateTmdd implements Runnable {
 
         if (errors.size() > 0) {
             try {
-                String email = "Error(s) occurred durring Oracle-TMDD message validation:<br>"
+                String email = "Error(s) occurred durring Database-TMDD message validation:<br>"
                         + String.join("<br><br>", errors);
 
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Error(s)", email,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Error(s)", email);
             } catch (Exception ex) {
                 utility.logWithDate("Failed to send error summary email:", this.getClass());
                 ex.printStackTrace();
@@ -157,51 +168,53 @@ public class ValidateTmdd implements Runnable {
 
             List<ActiveTimError> inconsistencies = new ArrayList<>();
 
-            // Check Start Time
-            String feuStartTime = getStartTime(feu);
-            if (feuStartTime == null || !feuStartTime.equals(tim.getStartDateTime())) {
-                inconsistencies.add(new ActiveTimError("Start Time", tim.getStartDateTime(), feuStartTime));
-            }
-
             // Check End Time (could be null)
             String feuEndTime = getEndTime(feu);
             if (feuEndTime == null) {
                 // If they aren't both null...
                 if (tim.getEndDateTime() != null) {
-                    inconsistencies.add(new ActiveTimError("End Time", tim.getEndDateTime(), feuEndTime));
+                    inconsistencies
+                            .add(new ActiveTimError(ActiveTimErrorType.endTime, tim.getEndDateTime(), feuEndTime));
                 }
             } else {
                 // feuEndTime isn't null, check if equal to tim's endDateTime
                 if (!feuEndTime.equals(tim.getEndDateTime())) {
-                    inconsistencies.add(new ActiveTimError("End Time", tim.getEndDateTime(), feuEndTime));
+                    inconsistencies
+                            .add(new ActiveTimError(ActiveTimErrorType.endTime, tim.getEndDateTime(), feuEndTime));
                 }
             }
 
-            LinkLocation feuLocation = getLocation(feu);
-            if (feuLocation != null) {
-                // Check Start Point
-                if (!pointsInRange(feuLocation.getPrimaryLocation(), tim.getStartPoint())) {
-                    inconsistencies.add(new ActiveTimError("Start Point", formatCoordinate(tim.getStartPoint()),
-                            formatPointOnLink(feuLocation.getPrimaryLocation())));
-                }
+            // Turning off start/endpoint validation for now, to compensate for TIM splitting in the ode-wrapper when TIMs have
+            // >63 nodes
+            // LinkLocation feuLocation = getLocation(feu);
+            // if (feuLocation != null) {
+            //     // Check Start Point
+            //     if (!pointsInRange(feuLocation.getPrimaryLocation(), tim.getStartPoint())) {
+            //         inconsistencies.add(
+            //                 new ActiveTimError(ActiveTimErrorType.startPoint, formatCoordinate(tim.getStartPoint()),
+            //                         formatPointOnLink(feuLocation.getPrimaryLocation())));
+            //     }
 
-                // Check End Point
-                if (!pointsInRange(feuLocation.getSecondaryLocation(), tim.getEndPoint())) {
-                    inconsistencies.add(new ActiveTimError("End Point", formatCoordinate(tim.getEndPoint()),
-                            formatPointOnLink(feuLocation.getSecondaryLocation())));
-                }
-            } else {
-                // FEU doesn't have a start or end point...
-                inconsistencies.add(new ActiveTimError("Start Point", formatCoordinate(tim.getStartPoint()), null));
-                inconsistencies.add(new ActiveTimError("End Point", formatCoordinate(tim.getEndPoint()), null));
-            }
+            //     // Check End Point
+            //     if (!pointsInRange(feuLocation.getSecondaryLocation(), tim.getEndPoint())) {
+            //         inconsistencies
+            //                 .add(new ActiveTimError(ActiveTimErrorType.endPoint, formatCoordinate(tim.getEndPoint()),
+            //                         formatPointOnLink(feuLocation.getSecondaryLocation())));
+            //     }
+            // } else {
+            //     // FEU doesn't have a start or end point...
+            //     inconsistencies.add(
+            //             new ActiveTimError(ActiveTimErrorType.startPoint, formatCoordinate(tim.getStartPoint()), null));
+            //     inconsistencies.add(
+            //             new ActiveTimError(ActiveTimErrorType.endPoint, formatCoordinate(tim.getEndPoint()), null));
+            // }
 
             // Check ITIS Codes
             List<EventDescription> feuEds = getEventDescriptions(feu);
             List<Integer> feuItisCodes = getNumericItisCodes(feuEds);
-            if (!sameItisCodes(feuItisCodes, tim.getItisCodes())) {
-                inconsistencies.add(new ActiveTimError("ITIS Codes", formatItisCodes(tim.getItisCodes()),
-                        formatItisCodes(feuItisCodes)));
+            if (!correctItisCodes(tim.getItisCodes(), feuItisCodes)) {
+                inconsistencies.add(new ActiveTimError(ActiveTimErrorType.itisCodes,
+                        formatItisCodes(tim.getItisCodes()), formatItisCodes(feuItisCodes)));
             }
 
             if (inconsistencies.size() > 0) {
@@ -214,11 +227,11 @@ public class ValidateTmdd implements Runnable {
         }
 
         if (unableToVerify.size() > 0 || validationResults.size() > 0) {
-            String email = emailFormatter.generateTmddSummaryEmail(unableToVerify, validationResults);
+            var exceptions = cleanupData(unableToVerify, validationResults);
+            String email = emailFormatter.generateTmddSummaryEmail(unableToVerify, validationResults, exceptions);
 
             try {
-                mailHelper.SendEmail(config.getAlertAddresses(), null, "TMDD Validation Results", email,
-                        config.getMailPort(), config.getMailHost(), config.getFromEmail());
+                mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Results", email);
             } catch (Exception ex) {
                 utility.logWithDate("Error sending summary email:", this.getClass());
                 ex.printStackTrace();
@@ -238,16 +251,6 @@ public class ValidateTmdd implements Runnable {
         }
     }
 
-    private String getStartTime(FullEventUpdate feu) {
-        String sTime = null;
-
-        if (feu != null && feu.getMessageHeader() != null && feu.getMessageHeader().getMessageTimeStamp() != null) {
-            sTime = feu.getMessageHeader().getMessageTimeStamp().asDateTimeString();
-        }
-
-        return sTime;
-    }
-
     private String getEndTime(FullEventUpdate feu) {
         String sTime = null;
 
@@ -259,20 +262,20 @@ public class ValidateTmdd implements Runnable {
         return sTime;
     }
 
-    private LinkLocation getLocation(FullEventUpdate feu) {
-        LinkLocation location = null;
+    // private LinkLocation getLocation(FullEventUpdate feu) {
+    //     LinkLocation location = null;
 
-        if (feu != null && feu.getEventElementDetails() != null && feu.getEventElementDetails().size() > 0
-                && feu.getEventElementDetails().get(0) != null
-                && feu.getEventElementDetails().get(0).getEventLocations() != null
-                && feu.getEventElementDetails().get(0).getEventLocations().size() > 0
-                && feu.getEventElementDetails().get(0).getEventLocations().get(0) != null) {
+    //     if (feu != null && feu.getEventElementDetails() != null && feu.getEventElementDetails().size() > 0
+    //             && feu.getEventElementDetails().get(0) != null
+    //             && feu.getEventElementDetails().get(0).getEventLocations() != null
+    //             && feu.getEventElementDetails().get(0).getEventLocations().size() > 0
+    //             && feu.getEventElementDetails().get(0).getEventLocations().get(0) != null) {
 
-            location = feu.getEventElementDetails().get(0).getEventLocations().get(0).getLocationOnLink();
-        }
+    //         location = feu.getEventElementDetails().get(0).getEventLocations().get(0).getLocationOnLink();
+    //     }
 
-        return location;
-    }
+    //     return location;
+    // }
 
     private List<EventDescription> getEventDescriptions(FullEventUpdate feu) {
         List<EventDescription> eventDescriptions = null;
@@ -307,73 +310,79 @@ public class ValidateTmdd implements Runnable {
         return itisCodes;
     }
 
-    private boolean sameItisCodes(List<Integer> o1, List<Integer> o2) {
-        boolean result = true;
+    // Check that all the ITIS Codes present in an Active TIM are present in the
+    // corresponding FEU. Note that FEUs may have more ITIS codes than an Active
+    // TIM, as the ITIS Codes reported in TIMs are a subset of those reported by the
+    // TMDD
+    private boolean correctItisCodes(List<Integer> activeTimItisCodes, List<Integer> feuItisCodes) {
+        if (activeTimItisCodes == null || feuItisCodes == null) {
+            if (activeTimItisCodes == null && feuItisCodes == null) {
+                return true;
+            }
 
-        if (o1 == null || o2 == null || o1.size() != o2.size()) {
-            result = false;
-        } else {
-            for (int i = 0; i < o1.size(); i++) {
-                boolean inBoth = false;
+            return false;
+        }
 
-                for (int j = 0; j < o2.size(); j++) {
-                    if (o1.get(i) != null && o1.get(i).equals(o2.get(j))) {
-                        inBoth = true;
-                        break;
-                    }
-                }
+        var result = true;
 
-                if (!inBoth) {
-                    result = false;
+        // Iterate over activeTimItisCodes and ensure each is present in feuItisCodes
+        for (var i = 0; i < activeTimItisCodes.size(); i++) {
+            var inBoth = false;
+            for (var j = 0; j < feuItisCodes.size(); j++) {
+                if (activeTimItisCodes.get(i) != null && activeTimItisCodes.get(i).equals(feuItisCodes.get(j))) {
+                    inBoth = true;
                     break;
                 }
+            }
+
+            if (!inBoth) {
+                result = false;
+                break;
             }
         }
 
         return result;
     }
 
-    private boolean pointsInRange(PointOnLink tmddPoint, Coordinate timPoint) {
-        if (tmddPoint == null || tmddPoint.getGeoLocation() == null || timPoint == null) {
-            return false;
-        }
+    // private boolean pointsInRange(PointOnLink tmddPoint, Coordinate timPoint) {
+    //     if (tmddPoint == null || tmddPoint.getGeoLocation() == null || timPoint == null) {
+    //         return false;
+    //     }
 
-        double tmddLat = tmddPoint.getGeoLocation().getLatitude() / 1000000.0;
-        double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000.0;
+    //     double tmddLat = tmddPoint.getGeoLocation().getLatitude() / 1000000.0;
+    //     double tmddLon = tmddPoint.getGeoLocation().getLongitude() / 1000000.0;
 
-        GlobalCoordinates tmdd = new GlobalCoordinates(tmddLat, tmddLon);
-        GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude(), timPoint.getLongitude());
+    //     GlobalCoordinates tmdd = new GlobalCoordinates(tmddLat, tmddLon);
+    //     GlobalCoordinates tim = new GlobalCoordinates(timPoint.getLatitude().doubleValue(),
+    //             timPoint.getLongitude().doubleValue());
 
-        GeodeticCalculator geoCalc = new GeodeticCalculator();
-        GeodeticCurve curve = geoCalc.calculateGeodeticCurve(Ellipsoid.WGS84, tmdd, tim);
-        double miles = 0.000621371 * curve.getEllipsoidalDistance();
+    //     GeodeticCalculator geoCalc = new GeodeticCalculator();
+    //     GeodeticCurve curve = geoCalc.calculateGeodeticCurve(Ellipsoid.WGS84, tmdd, tim);
+    //     double miles = 0.000621371 * curve.getEllipsoidalDistance();
 
-        // Are they within 1/5th of a mile?
-        return miles < 0.2;
-    }
+    //     // Are they within 1/5th of a mile?
+    //     return miles < 0.2;
+    // }
 
-    private String formatPointOnLink(PointOnLink point) {
-        if (point == null || point.getGeoLocation() == null) {
-            return null;
-        }
+    // private String formatPointOnLink(PointOnLink point) {
+    //     if (point == null || point.getGeoLocation() == null) {
+    //         return null;
+    //     }
 
-        double lat = point.getGeoLocation().getLatitude() / 1000000.0;
-        double lon = point.getGeoLocation().getLongitude() / 1000000.0;
+    //     double lat = point.getGeoLocation().getLatitude() / 1000000.0;
+    //     double lon = point.getGeoLocation().getLongitude() / 1000000.0;
 
-        return formatPoint(lat, lon);
-    }
+    //     var coord = new Coordinate(BigDecimal.valueOf(lat), BigDecimal.valueOf(lon));
+    //     return gson.toJson(coord);
+    // }
 
-    private String formatCoordinate(Coordinate point) {
-        if (point == null) {
-            return null;
-        }
+    // private String formatCoordinate(Coordinate point) {
+    //     if (point == null) {
+    //         return null;
+    //     }
 
-        return formatPoint(point.getLatitude(), point.getLongitude());
-    }
-
-    private String formatPoint(double lat, double lon) {
-        return String.format("{ lat: %.6f, lon: %.6f }", lat, lon);
-    }
+    //     return gson.toJson(point);
+    // }
 
     private String formatItisCodes(List<Integer> itisCodes) {
         // { }
@@ -391,5 +400,87 @@ public class ValidateTmdd implements Runnable {
         result += "}";
 
         return result;
+    }
+
+    private String cleanupData(List<ActiveTim> unableToVerify, List<ActiveTimValidationResult> validationResults) {
+        String cleanupError = "";
+        if (unableToVerify.size() > 0) {
+            cleanupError = deleteActiveTims(unableToVerify);
+        }
+        if (validationResults.size() > 0) {
+            cleanupError += updateAndResend(validationResults);
+        }
+        return cleanupError;
+    }
+
+    private String updateAndResend(List<ActiveTimValidationResult> validationResults) {
+        List<ActiveTim> toClear = new ArrayList<>();
+        List<ActiveTimValidationResult> toResend = new ArrayList<>();
+
+        for (var result : validationResults) {
+            var itisCodeError = result.getErrors().stream().filter(err -> err.getName() == ActiveTimErrorType.itisCodes)
+                    .findAny();
+            if (itisCodeError.isPresent()) {
+
+                if (itisCodeError.get().getTmddValue().replaceAll("\\{|\\s|\\}", "").equals("6011")) {
+                    // If it should be dry roads, submit an All Clear. This will delete the active
+                    // tim, rendering any other errors, if present, irrelevant.
+                    toClear.add(result.getActiveTim());
+
+                    // All Clear queued, no need to proceed with re-submitting the TIM (it will just
+                    // get cleared). So we won't add it to toResend.
+                } else {
+                    toResend.add(result);
+                }
+            } else {
+                toResend.add(result);
+            }
+        }
+
+        String exMsg = "";
+
+        if (toResend.size() > 0) {
+            var exceptions = timGenerationHelper.updateAndResubmitToOde(toResend);
+
+            if (exceptions.size() > 0 ) {
+                exMsg += "The Validate TMDD application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
+                exMsg += "<br/>";
+                for (ResubmitTimException rte : exceptions) {
+                    exMsg += gson.toJson(rte);
+                    exMsg += "<br/>";
+                }
+            }
+        }
+
+        if (toClear.size() > 0) {
+            exMsg += deleteActiveTims(toClear);
+        }
+
+        return exMsg;
+    }
+
+    private String deleteActiveTims(List<ActiveTim> unableToVerify) {
+        String errSummary = "";
+        TimDeleteSummary tds = wydotTimService.deleteTimsFromRsusAndSdx(unableToVerify);
+
+        // Check for exceptions and add to errSummary
+        if (StringUtils.isNotBlank(tds.getSatelliteErrorSummary())) {
+            errSummary += tds.getSatelliteErrorSummary();
+            errSummary += "<br/>";
+        }
+        if (tds.getFailedActiveTimDeletions().size() > 0) {
+            errSummary += "The following active tim record failed to delete: <br/>";
+        }
+        for (Long aTimId : tds.getFailedActiveTimDeletions()) {
+            errSummary += aTimId;
+            errSummary += "<br/>";
+        }
+        if (tds.getFailedRsuTimJson().size() > 0) {
+            errSummary += "<br/><br/>";
+            errSummary += "The following RsuTim records failed to remove values from associated RSUs: <br/>";
+            errSummary += tds.getRsuErrorSummary();
+        }
+
+        return errSummary;
     }
 }

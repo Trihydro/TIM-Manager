@@ -11,7 +11,7 @@ This project inserts BSMs from the ODE into a database running on WYDOT's server
 
 To use a running version of the ODE Data Logger, upload any .uper or .hex into the ODE through the web interface. Alternatively files can be dropped into /jpo-ode-svcs/target/uploads/bsm. Data will then be decoded by the ODE and then inserted into the CVCOMMS tables via the ODE Data Logger.
 
-### Oracle Schema Access
+### Oracle Schema Access (deprecated)
 
 **Step 1**: Log onto WYDOT server 10.145.9.204
 
@@ -41,7 +41,7 @@ git clone https://<username>@bitbucket.org/szumpf/ode-data-logger.git
 **Step 2**: Change into the repository directory
 
 ```bash
-$ cd oracle-data-logger
+$ cd ode-data-logger
 ```
 
 **Step 3**: Add the Oracle JDBC driver to your local Maven repository
@@ -54,7 +54,7 @@ $ mvn install:install-file -Dfile=oracle/ojdbc6.jar
 **Step 4**: Change into the project directory
 
 ```bash
-$ cd oracle-data-logger
+$ cd ode-data-logger
 ```
 
 **Step 5**: Compile the project
@@ -72,8 +72,6 @@ $ java -jar target/cv-logger-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 WINDOWS COMMANDS
 
 Desktop
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\oracle\\ojdbc6.jar" -DgroupId="com.oracle" -DartifactId=ojdbc6 -Dversion="11.2.0.4" -Dpackaging=jar
 
 mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-0.0.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="0.0.1-SNAPSHOT" -Dpackaging=jar
 
@@ -109,10 +107,6 @@ mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-sv
 
 mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\cv-data-service-library\\target\\cv-data-service-library-0.0.1-SNAPSHOT.jar" -DgroupId="com.wyocv" -DartifactId=cv-data-service-library -Dversion="0.0.1-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\ode-data-logger\\resources\\ojdbc6.jar" -DgroupId="com.oracle" -DartifactId=ojdbc6 -Dversion="11.2.0.4" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\cv-data-service-library\\src\\main\\resources\\ojdbc8.jar" -DgroupId="com.oracle" -DartifactId=ojdbc8 -Dversion="12.2.0.1.0" -Dpackaging=jar
-
 # Configuration Reference
 
 **SOME OF THESE PROPERTIES ARE SENSITIVE. DO NOT PUBLISH THEM TO VERSION CONTROL**
@@ -123,15 +117,15 @@ You may configure these values in `ode-mongo-logger/src/main/resources/applicati
 
 | Value in `application.properties` | Value as env var (in sample.env) | Description                               | Example Value                                                  |
 | --------------------------------- | -------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| hostname                          | MONGO_HOSTNAME                   | IP address of the host machine            | 0.0.0.0                                                        |
-| env                               | MONGO_ENV                        | Configuration environment                 | dev                                                            |
-| mongoHost                         | MONGO_HOST                       | IP address hosting Mongo server           | 0.0.0.0                                                        |
-| mongoDatabase                     | MONGO_DATABASE                   | Name of Mongo database                    | cvtest                                                         |
-| mongoUsername                     | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
-| mongoPassword                     | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
-| alertAddresses                    | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |
-| fromEmail                         | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
-| mailHost                          | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |
-| mailPort                          | MAIL_PORT                        | Port for mail host                        | 25                                                             |
-| depositTopic                      | (only set in docker-compose.yml) | Kafka topic for logger to subscribe to    | topic.OdeDNMsgJson                                             |
-| depositGroup                      | (only set in docker-compose.yml) | Kafka group name for subscriptions        | logger_group_tim_dev                                           |
+| mongologger.hostname              | MONGO_HOSTNAME                   | IP address of the kafka host              | 0.0.0.0                                                        |
+| mongologger.mongoHost             | MONGO_HOST                       | Mongo server (IP or DNS)                  | 0.0.0.0                                                        |
+| mongologger.mongoDatabase         | MONGO_DATABASE                   | Name of Mongo database                    | cvtest                                                         |
+| mongologger.mongoUsername         | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
+| mongologger.mongoPassword         | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
+| mongologger.alertAddresses        | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |
+| mongologger.fromEmail             | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
+| mongologger.environmentName       | ENVIRONMENT_NAME                 | Name of environment (for email subject)   | DEV                                                            |
+| mongologger.mailHost              | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |
+| mongologger.mailPort              | MAIL_PORT                        | Port for mail host                        | 25                                                             |
+| mongologger.depositTopic          | (only set in docker-compose.yml) | Kafka topic for logger to subscribe to    | topic.OdeDNMsgJson                                             |
+| mongologger.depositGroup          | (only set in docker-compose.yml) | Kafka group name for subscriptions        | logger_group_tim_dev                                           |

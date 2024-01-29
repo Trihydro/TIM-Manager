@@ -1,7 +1,5 @@
 package com.trihydro.odewrapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -12,30 +10,30 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.CreateBaseTimUtil;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.controller.WydotTimParkingController;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.odewrapper.helpers.util.CreateBaseTimUtil;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimParkingList;
-import com.trihydro.odewrapper.service.WydotTimService;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
 
-@RunWith(StrictStubs.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 public class WydotTimParkingControllerTest {
 
 	@Mock
@@ -48,6 +46,8 @@ public class WydotTimParkingControllerTest {
 	CreateBaseTimUtil mockCreateBaseTimUtil;
 	@Mock
 	SetItisCodes setItisCodes;
+	@Mock
+	Utility utility;
 
 	@InjectMocks
 	@Spy
@@ -57,7 +57,7 @@ public class WydotTimParkingControllerTest {
 	private ActiveTim at;
 	private List<ActiveTim> parkingTims;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<ItisCode> itisCodes = new ArrayList<>();
 		ItisCode ic = new ItisCode();
@@ -94,14 +94,14 @@ public class WydotTimParkingControllerTest {
 		ResponseEntity<String> data = uut.createParkingTim(tpl);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("d", resultArr[0].direction);
-		assertEquals("Parking49251", resultArr[0].clientId);
-		assertEquals("I-80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("d", resultArr[0].direction);
+		Assertions.assertEquals("Parking49251", resultArr[0].clientId);
+		Assertions.assertEquals("I-80", resultArr[0].route);
 	}
 
 	@Test
@@ -116,12 +116,12 @@ public class WydotTimParkingControllerTest {
 		ResponseEntity<String> data = uut.createParkingTim(tpl);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		assertEquals("d", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("route not supported", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test
@@ -135,14 +135,14 @@ public class WydotTimParkingControllerTest {
 		ResponseEntity<String> data = uut.createParkingTim(tpl);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("d", resultArr[0].direction);
-		assertEquals("Parking49251", resultArr[0].clientId);
-		assertEquals("I-80", resultArr[0].route);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("d", resultArr[0].direction);
+		Assertions.assertEquals("Parking49251", resultArr[0].clientId);
+		Assertions.assertEquals("I-80", resultArr[0].route);
 	}
 
 	@Test
@@ -155,14 +155,14 @@ public class WydotTimParkingControllerTest {
 		ResponseEntity<String> data = uut.createParkingTim(tpl);
 
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		assertNotNull(resultArr);
-		assertEquals(1, resultArr.length);
-		assertEquals("success", resultArr[0].resultMessages.get(0));
-		assertEquals("Parking49251", resultArr[0].clientId);
-		assertEquals("I-80", resultArr[0].route);
-		assertEquals("d", resultArr[0].direction);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("Parking49251", resultArr[0].clientId);
+		Assertions.assertEquals("I-80", resultArr[0].route);
+		Assertions.assertEquals("d", resultArr[0].direction);
 	}
 
 	@Test
@@ -173,8 +173,8 @@ public class WydotTimParkingControllerTest {
 		// Act
 		ResponseEntity<String> data = uut.deleteParkingTim(id);
 		// Assert
-		assertEquals(HttpStatus.OK, data.getStatusCode());
-		assertEquals("success", data.getBody());
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals("success", data.getBody());
 	}
 
 	@Test
@@ -186,8 +186,8 @@ public class WydotTimParkingControllerTest {
 		Collection<ActiveTim> data = uut.getParkingTims();
 
 		// Assert
-		assertEquals(1, data.size());
-		assertEquals(at, data.iterator().next());
+		Assertions.assertEquals(1, data.size());
+		Assertions.assertEquals(at, data.iterator().next());
 	}
 
 	@Test
@@ -201,7 +201,7 @@ public class WydotTimParkingControllerTest {
 		Collection<ActiveTim> data = uut.getParkingTimById(clientId);
 
 		// Assert
-		assertEquals(1, data.size());
-		assertEquals(at, data.iterator().next());
+		Assertions.assertEquals(1, data.size());
+		Assertions.assertEquals(at, data.iterator().next());
 	}
 }

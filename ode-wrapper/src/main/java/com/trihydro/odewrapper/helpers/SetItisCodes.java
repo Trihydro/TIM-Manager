@@ -3,6 +3,7 @@ package com.trihydro.odewrapper.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CustomItisEnum;
 import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.library.model.ItisCode;
@@ -25,13 +26,16 @@ public class SetItisCodes {
     private List<IncidentChoice> incidentActions;
     private IncidentChoicesService incidentChoicesService;
     private ItisCodeService itisCodeService;
+    private Utility utility;
 
     private List<ItisCode> itisCodes;
 
     @Autowired
-    public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService) {
+    public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService,
+            Utility _utility) {
         itisCodeService = _itisCodeService;
         incidentChoicesService = _incidentChoicesService;
+        utility = _utility;
     }
 
     public List<ItisCode> getItisCodes() {
@@ -62,12 +66,16 @@ public class SetItisCodes {
 
         List<String> items = new ArrayList<String>();
 
+        if (wydotTim.getAdvisory() == null) {
+            return items;
+        }
+
         ItisCode code = null;
 
         for (Integer item : wydotTim.getAdvisory()) {
 
             var alphaItis = getCustomAlphabetic(item);
-            if(alphaItis!=null){
+            if (alphaItis != null) {
                 items.add(alphaItis);
                 continue;
             }
@@ -126,31 +134,30 @@ public class SetItisCodes {
         ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
                 .findFirst().orElse(null);
 
-        System.out.println("Availablity : " + wydotTim.getAvailability());
-        System.out.println("Exit : " + wydotTim.getExit());
+        utility.logWithDate("Availablity : " + wydotTim.getAvailability(), this.getClass());
+        utility.logWithDate("Exit : " + wydotTim.getExit(), this.getClass());
 
         if (code != null)
             items.add(wydotTim.getAvailability().toString());
 
+        // for parking TIM, content=exitService, and includes additional itis codes
+        // depending on if rest area or exit number
         if (wydotTim.getExit() != null) {
-            items.add("11794");
-            int exitItisCodeNumber;
+            // if exit, the exit number should be a text value.
+            // This has some strange implications as seen here
+            // https://github.com/usdot-jpo-ode/jpo-ode/blob/540b79f1697f4d6464e8c4b8491666ec9cf08d8d/jpo-ode-plugins/src/main/java/us/dot/its/jpo/ode/plugin/j2735/builders/TravelerMessageFromHumanToAsnConverter.java#L337
+            // the ODE translates a text value only if we start with a single quote to
+            // denote this. No ending quote is used
+            items.add("11794");// Exit Number
             if (wydotTim.getExit().toLowerCase().equals("turnout")
                     || wydotTim.getExit().toLowerCase().equals("parking")) {
-                exitItisCodeNumber = convertNumberToItisCode((int) Math.round(wydotTim.getMileMarker()));
-                items.add(String.valueOf(exitItisCodeNumber));
+                items.add("'" + String.valueOf(((int) Math.round(wydotTim.getMileMarker()))));
             } else {
-                List<String> list = splitExitNumberFromLetter(wydotTim.getExit());
-                exitItisCodeNumber = convertNumberToItisCode(Integer.parseInt(list.get(0)));
-                items.add(String.valueOf(exitItisCodeNumber));
-                if (list.size() > 1) {
-                    items.add(list.get(1));
-                    System.out.println("list: " + list.get(1));
-                }
+                items.add("'" + wydotTim.getExit());
             }
         } else {
-            items.add("7986");
-            System.out.println("rest area");
+            items.add("7986");// Rest Area
+            utility.logWithDate("rest area", this.getClass());
         }
 
         return items;
@@ -181,7 +188,7 @@ public class SetItisCodes {
         // check to see if code exists
         List<String> items = new ArrayList<String>();
 
-        System.out.println("availability:" + wydotTim.getAvailability());
+        utility.logWithDate("availability:" + wydotTim.getAvailability(), this.getClass());
 
         ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
                 .findFirst().orElse(null);
@@ -197,11 +204,6 @@ public class SetItisCodes {
         }
 
         return items;
-    }
-
-    private int convertNumberToItisCode(int number) {
-        int itisCode = number + 12544;
-        return itisCode;
     }
 
     public List<String> setItisCodesIncident(WydotTimIncident wydotTim) {

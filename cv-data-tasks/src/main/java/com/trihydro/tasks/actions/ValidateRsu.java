@@ -1,8 +1,11 @@
 package com.trihydro.tasks.actions;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,24 +17,28 @@ import com.trihydro.library.model.RsuIndexInfo;
 import com.trihydro.library.service.RsuDataService;
 import com.trihydro.tasks.models.ActiveTimMapping;
 import com.trihydro.tasks.models.Collision;
-import com.trihydro.tasks.models.EnvActiveTim;
-import com.trihydro.tasks.models.PopulatedRsu;
+import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationResult;
 
 public class ValidateRsu implements Callable<RsuValidationResult> {
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat dateFormatWithMs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private RsuDataService rsuDataService;
 
-    private PopulatedRsu rsu;
+    private String ipv4Address;
+    private List<ActiveTim> activeTims;
     private List<RsuIndexInfo> rsuIndices;
     private RsuValidationResult result;
 
-    public ValidateRsu(PopulatedRsu rsu, RsuDataService rsuDataService) {
-        this.rsu = rsu;
+    public ValidateRsu(RsuInformation rsu, RsuDataService rsuDataService) {
+        this.ipv4Address = rsu.getIpv4Address();
         this.rsuDataService = rsuDataService;
+        // We need to copy this list since we'll be manipulating the list contents
+        activeTims = new ArrayList<>(rsu.getRsuActiveTims());
     }
 
-    public PopulatedRsu getRsu() {
-        return rsu;
+    public String getIpv4Address() {
+        return ipv4Address;
     }
 
     private static Comparator<RsuIndexInfo> findByIndex;
@@ -46,10 +53,10 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
 
     @Override
     public RsuValidationResult call() {
-        result = new RsuValidationResult(rsu.getIpv4Address());
+        result = new RsuValidationResult();
 
-        // Retrieve info for populates indexes on RSU
-        rsuIndices = rsuDataService.getRsuDeliveryStartTimes(rsu.getIpv4Address());
+        // Retrieve info for populated indexes on RSU
+        rsuIndices = rsuDataService.getRsuDeliveryStartTimes(ipv4Address);
 
         // Check if error occurred querying indices.
         if (rsuIndices == null) {
@@ -61,22 +68,28 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
         calculateCollisions();
 
         // Verify Active TIMs
-        for (EnvActiveTim record : rsu.getRsuActiveTims()) {
-            ActiveTim tim = record.getActiveTim();
+        for (ActiveTim tim : activeTims) {
 
             // Check if index claimed by ActiveTim is populated on RSU
             int pos = Collections.binarySearch(rsuIndices, new RsuIndexInfo(tim.getRsuIndex(), null), findByIndex);
 
             if (pos < 0) {
-                result.getMissingFromRsu().add(record);
+                result.getMissingFromRsu().add(tim);
             } else {
                 // We've mapped an ActiveTim to the RSU index. Remove this RSU index
                 // from the list of indexes, since we've accounted for it
                 RsuIndexInfo rsuInfo = rsuIndices.get(pos);
 
-                if (!tim.getStartDateTime().equals(rsuInfo.getDeliveryStartTime())) {
-                    // The message at this index on the RSU is stale.
-                    result.getStaleIndexes().add(new ActiveTimMapping(record, rsuInfo));
+                try {
+                    if (!datesEqual(tim.getStartDateTime(), rsuInfo.getDeliveryStartTime())) {
+                        // The message at this index on the RSU is stale.
+                        result.getStaleIndexes().add(new ActiveTimMapping(tim, rsuInfo));
+                    }
+                } catch(ParseException ex) {
+                    // Assume the index is stale if we can't verify the start dates.
+                    // Resubmitting this TIM should hopefully fix any issue in the DateTime
+                    // format on either the RSU or in the Database.
+                    result.getStaleIndexes().add(new ActiveTimMapping(tim, rsuInfo));
                 }
 
                 rsuIndices.remove(pos);
@@ -94,11 +107,11 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
     }
 
     private void calculateCollisions() {
-        Map<Integer, List<EnvActiveTim>> indexAssignments = new HashMap<>();
+        Map<Integer, List<ActiveTim>> indexAssignments = new HashMap<>();
 
         // Iterate over the Active Tims on this rsu. Group by assigned rsu index
-        for (EnvActiveTim record : rsu.getRsuActiveTims()) {
-            int currentIndex = record.getActiveTim().getRsuIndex();
+        for (ActiveTim tim : activeTims) {
+            int currentIndex = tim.getRsuIndex();
             // If this RSU index isn't present in the map, initialize value
             // to be an empty list of ActiveTims.
             if (!indexAssignments.containsKey(currentIndex)) {
@@ -106,7 +119,7 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
             }
 
             // Push Active Tim onto map at that index
-            indexAssignments.get(currentIndex).add(record);
+            indexAssignments.get(currentIndex).add(tim);
         }
 
         // Iterate over indexes and find any that have > 1 Active Tim assigned
@@ -130,6 +143,24 @@ public class ValidateRsu implements Callable<RsuValidationResult> {
             rsuIndices.remove(pos);
         }
 
-        rsu.getRsuActiveTims().removeIf((t) -> t.getActiveTim().getRsuIndex().equals(index));
+        activeTims.removeIf((t) -> t.getRsuIndex().equals(index));
+    }
+
+    // Checks if the dates are roughly equivalent (within 1 minute of eachother)
+    private boolean datesEqual(String first, String second) throws ParseException {
+        Date firstDate = getDate(first);
+        Date secondDate = getDate(second);
+
+        long diff = Math.abs(firstDate.getTime() - secondDate.getTime());
+
+        return diff < 60000; // 60,000 ms in 1 minute
+    }
+
+    private Date getDate(String toParse) throws ParseException {
+        if (toParse.contains(".")) {
+            return dateFormatWithMs.parse(toParse);
+        } else {
+            return dateFormat.parse(toParse);
+        }
     }
 }

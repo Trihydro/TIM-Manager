@@ -1,30 +1,35 @@
 package com.trihydro.library.model;
 
+import java.math.BigDecimal;
+
+import com.grum.geocalc.Coordinate;
+import com.grum.geocalc.EarthCalc;
+import com.grum.geocalc.Point;
+
 public class Milepost {
     private static final double RE = 6371000.0; // Earth radius for distance calculations
 
     private String commonName;
     private Double milepost;
     private String direction;
-    private Double latitude;
-    private Double longitude;
-    private Double bearing;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
-    public Milepost(){}
+    public Milepost() {
+    }
 
-      /**
-	 * A copy constructor to avoid using the clonable interface.
-	 *
-	 * @param Milepost original Milepost to be copied
-	 * @return a copy of the original Milepost
-	 */
-    public Milepost(Milepost mp){
-        commonName=mp.commonName;
+    /**
+     * A copy constructor to avoid using the clonable interface.
+     *
+     * @param Milepost original Milepost to be copied
+     * @return a copy of the original Milepost
+     */
+    public Milepost(Milepost mp) {
+        commonName = mp.commonName;
         milepost = mp.milepost;
-		direction = mp.direction;
-		latitude = mp.latitude;
-		longitude = mp.longitude;
-		bearing = mp.bearing;
+        direction = mp.direction;
+        latitude = mp.latitude;
+        longitude = mp.longitude;
     }
 
     public String getCommonName() {
@@ -51,29 +56,20 @@ public class Milepost {
         this.direction = direction;
     }
 
-    public Double getLatitude() {
+    public BigDecimal getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Double latitude) {
+    public void setLatitude(BigDecimal latitude) {
         this.latitude = latitude;
     }
 
-    public Double getLongitude() {
+    public BigDecimal getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Double longitude) {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
-    }
-
-    // TODO: this is used to determine tim direction, but is no longer in the view
-    public Double getBearing() {
-        return bearing;
-    }
-
-    public void setBearing(Double bearing) {
-        this.bearing = bearing;
     }
 
     /**
@@ -95,7 +91,6 @@ public class Milepost {
         double dXt = Math.asin(Math.sin(dso) * Math.sin(bso - bse)) * Milepost.RE;
 
         return dXt;
-
     }
 
     /**
@@ -106,19 +101,15 @@ public class Milepost {
      * @return bearing angle (radians) of great arc between this node and next node
      */
     public double bearingTo(Milepost nextNode) {
+        Point standPoint = Point.at(Coordinate.fromDegrees(this.getLatitude().doubleValue()),
+                Coordinate.fromDegrees(this.getLongitude().doubleValue()));
+        Point forePoint = Point.at(Coordinate.fromDegrees(nextNode.getLatitude().doubleValue()),
+                Coordinate.fromDegrees(nextNode.getLongitude().doubleValue()));
 
-        double lat1 = this.getLatitude();
-        double lat2 = nextNode.getLatitude();
-        double dlon = nextNode.getLongitude() - this.getLongitude();
-
-        double y = Math.sin(dlon) * Math.cos(lat2);
-        double x = (Math.cos(lat1) * Math.sin(lat2)) - (Math.sin(lat1) * Math.cos(lat2) * Math.cos(dlon));
-
-        double bearing = Math.atan2(y, x);
+        double bearing = Math.toRadians(EarthCalc.bearing(standPoint, forePoint));
 
         // convert bearing into a compass bearing (0 - 360 in radians)
         return Math.IEEEremainder(bearing + (2.0 * Math.PI), 2.0 * Math.PI);
-
     }
 
     /**
@@ -132,16 +123,18 @@ public class Milepost {
      */
     public double angularDistanceTo(Milepost nextNode) {
 
-        double lat1 = this.getLatitude();
-        double lat2 = nextNode.getLatitude();
+        double lat1 = Math.toRadians(this.getLatitude().doubleValue());
+        double lat2 = Math.toRadians(nextNode.getLatitude().doubleValue());
         double dlat = lat2 - lat1;
-        double dlon = nextNode.getLongitude() - this.getLongitude();
+
+        double lon1 = Math.toRadians(this.getLongitude().doubleValue());
+        double lon2 = Math.toRadians(nextNode.getLongitude().doubleValue());
+        double dlon = lon2 - lon1;
 
         double a = (Math.sin(dlat / 2.0) * Math.sin(dlat / 2.0))
                 + (Math.cos(lat1) * Math.cos(lat2) * Math.sin(dlon / 2.0) * Math.sin(dlon / 2.0));
         double c = 2.0 * (Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a)));
 
         return c;
-
     }
 }

@@ -1,6 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,8 +9,9 @@ import java.util.List;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.IncidentChoice;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpEntity;
@@ -33,7 +33,7 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
     @InjectMocks
     private IncidentChoicesService uut;
 
-    @Before
+    @BeforeEach
     public void setupSubTest() {
         IncidentChoice[] icArr = new IncidentChoice[1];
         ic = new IncidentChoice();
@@ -58,8 +58,8 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, IncidentChoice[].class);
-        assertEquals(1, data.size());
-        assertEquals(ic, data.get(0));
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(ic, data.get(0));
     }
 
     @Test
@@ -75,8 +75,8 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, IncidentChoice[].class);
-        assertEquals(1, data.size());
-        assertEquals(ic, data.get(0));
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(ic, data.get(0));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class IncidentChoicesServiceTest extends BaseServiceTest {
 
         // Assert
         verify(mockRestTemplate).exchange(url, HttpMethod.GET, entity, IncidentChoice[].class);
-        assertEquals(1, data.size());
-        assertEquals(ic, data.get(0));
+        Assertions.assertEquals(1, data.size());
+        Assertions.assertEquals(ic, data.get(0));
     }
 }

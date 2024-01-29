@@ -1,6 +1,5 @@
 package com.trihydro.library.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -12,18 +11,16 @@ import com.trihydro.library.helpers.GsonFactory;
 import com.trihydro.library.model.TmddProps;
 import com.trihydro.library.model.tmdd.FullEventUpdate;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.StrictStubs;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 
-@RunWith(StrictStubs.class)
 public class TmddServiceTest extends BaseServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -36,7 +33,7 @@ public class TmddServiceTest extends BaseServiceTest {
 
     TmddService uut;
 
-    @Before
+    @BeforeEach
     public void setupSubtest() {
         when(mockConfig.getTmddUrl()).thenReturn("endpoint");
         when(mockConfig.getTmddUser()).thenReturn("user");
@@ -62,21 +59,21 @@ public class TmddServiceTest extends BaseServiceTest {
         List<FullEventUpdate> result = uut.getTmddEvents();
 
         // Assert
-        assertEquals(0, result.size());
+        Assertions.assertEquals(0, result.size());
     }
 
     @Test
     public void getTmddEvents_badResponse() throws Exception {
         // Define our Assertions
-        thrown.expect(Exception.class);
-        thrown.expectMessage("Response from TMDD doesn't have the expected structure");
-
+        
         // Arrange
         String response = "{}";
         when(mockResponse.getBody()).thenReturn(response);
 
         // Act
-        uut.getTmddEvents();
+        var ex = Assertions.assertThrows(Exception.class, () -> uut.getTmddEvents());
+        Assertions.assertEquals("Response from TMDD doesn't have the expected structure", ex.getMessage());
+
     }
 
     @Test
@@ -88,7 +85,7 @@ public class TmddServiceTest extends BaseServiceTest {
         when(mockResponse.getBody()).thenThrow(new RestClientException("unable to connect"));
 
         // Act
-        uut.getTmddEvents();
+        Assertions.assertThrows(RestClientException.class,()-> uut.getTmddEvents());
     }
 
 }

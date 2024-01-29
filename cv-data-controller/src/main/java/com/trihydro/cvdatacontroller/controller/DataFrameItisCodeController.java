@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +25,12 @@ import springfox.documentation.annotations.ApiIgnore;
 @ApiIgnore
 public class DataFrameItisCodeController extends BaseController {
 
-    private TimOracleTables timOracleTables;
+    private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-        timOracleTables = _timOracleTables;
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
@@ -42,14 +42,14 @@ public class DataFrameItisCodeController extends BaseController {
 
         try {
 
-            String insertQueryStatement = timOracleTables.buildInsertQueryStatement("data_frame_itis_code",
-                    timOracleTables.getDataFrameItisCodeTable());
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("data_frame_itis_code",
+                    timDbTables.getDataFrameItisCodeTable());
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(insertQueryStatement,
                     new String[] { "data_frame_itis_code_id" });
             int fieldNum = 1;
 
-            for (String col : timOracleTables.getDataFrameItisCodeTable()) {
+            for (String col : timDbTables.getDataFrameItisCodeTable()) {
                 if (col.equals("ITIS_CODE_ID")) {
                     if (StringUtils.isNumeric(itis))
                         sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, Long.parseLong(itis));
@@ -60,8 +60,11 @@ public class DataFrameItisCodeController extends BaseController {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, itis);
                     else
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, null);
-                } else if (col.equals("DATA_FRAME_ID"))
+                } else if (col.equals("DATA_FRAME_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, dataFrameId);
+                } else if (col.equals("POSITION")) {
+                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, null); // should this be null?
+                }
                 fieldNum++;
             }
 

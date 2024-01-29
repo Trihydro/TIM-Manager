@@ -1,35 +1,51 @@
 package com.trihydro.odewrapper.controller;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
+import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Buffer;
 import com.trihydro.library.model.ContentEnum;
+import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotTim;
+import com.trihydro.library.model.WydotTimRw;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
-import com.trihydro.odewrapper.model.Buffer;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.IdGenerator;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
-import com.trihydro.odewrapper.model.WydotTimRw;
 import com.trihydro.odewrapper.model.WydotTimVsl;
-import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @Component
 public abstract class WydotTimBaseController {
@@ -41,22 +57,48 @@ public abstract class WydotTimBaseController {
     private SetItisCodes setItisCodes;
     protected ActiveTimService activeTimService;
     protected RestTemplateProvider restTemplateProvider;
+    MilepostReduction milepostReduction;
+    protected Utility utility;
+    protected TimGenerationHelper timGenerationHelper;
 
     private List<String> routes = new ArrayList<>();
+    protected static Gson gson = new Gson();
+    private List<TimType> timTypes;
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
         setItisCodes = _setItisCodes;
         activeTimService = _activeTimService;
         restTemplateProvider = _restTemplateProvider;
+        milepostReduction = _milepostReduction;
+        utility = _utility;
+        timGenerationHelper = _timGenerationHelper;
     }
 
-    protected static Gson gson = new Gson();
-    private List<TimType> timTypes;
+    protected String getStartTime() {
+        Date date = new Date();
+        return getIsoDateTimeString(date);
+    }
+
+    protected String getIsoDateTimeString(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(date);
+    }
+
+    protected String getIsoDateTimeString(ZonedDateTime date) {
+        if (date == null) {
+            return null;
+        }
+
+        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        var utcDate = date.withZoneSameInstant(ZoneOffset.UTC);
+        return utcDate.format(formatter);
+    }
 
     protected ControllerResult validateInputParking(WydotTimParking tim) {
 
@@ -75,8 +117,8 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getMileMarker() != null && tim.getMileMarker() < 0) {
@@ -121,8 +163,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getIncidentId() == null) {
@@ -168,8 +210,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -190,20 +232,24 @@ public abstract class WydotTimBaseController {
         if (tim.getSchedStart() == null) {
             resultMessages.add("Null value for schedStart");
         } else {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
-                Date convertedDate = dateFormat.parse(tim.getSchedStart());
-                tim.setSchedStart(convertedDate.toInstant().toString());
-            } catch (ParseException e) {
+                var convertedDate = LocalDate.parse(tim.getSchedStart(), DateTimeFormatter.ISO_LOCAL_DATE);
+                var startOfDay = convertedDate.atStartOfDay(ZoneId.systemDefault());
+                tim.setSchedStart(getIsoDateTimeString(startOfDay));
+            } catch (DateTimeParseException e) {
+                resultMessages.add("Bad value supplied for schedStart. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
         }
         if (tim.getSchedEnd() != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
-                Date convertedDate = dateFormat.parse(tim.getSchedEnd());
-                tim.setSchedEnd(convertedDate.toInstant().toString());
-            } catch (ParseException e) {
+                var convertedDate = LocalDate.parse(tim.getSchedEnd(), DateTimeFormatter.ISO_LOCAL_DATE);
+                // LocalTime.MAX sets the time to 11:59 PM. This is especially important when
+                // construction is only scheduled for a day (ex. 5-12 to 5-12)
+                var endOfDay = ZonedDateTime.of(LocalDateTime.of(convertedDate, LocalTime.MAX), ZoneId.systemDefault());
+                tim.setSchedEnd(getIsoDateTimeString(endOfDay));
+            } catch (DateTimeParseException e) {
+                resultMessages.add("Bad value supplied for schedEnd. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
         }
@@ -266,8 +312,8 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i")
+                && !tim.getDirection().equalsIgnoreCase("d") && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -299,6 +345,31 @@ public abstract class WydotTimBaseController {
         return result;
     }
 
+    protected ControllerResult validateRcAc(WydotTimRc allClear) {
+        ControllerResult result = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // All Clear must have a valid CLIENT_ID and DIRECTION
+        if (StringUtils.isBlank(allClear.getRoadCode())) {
+            resultMessages.add("Road Code must be supplied");
+        } else {
+            result.setClientId(allClear.getRoadCode());
+            allClear.setClientId(allClear.getRoadCode());
+        }
+
+        if (allClear.getDirection() == null) {
+            resultMessages.add("Null value for direction");
+        } else if (!allClear.getDirection().equalsIgnoreCase("i") && !allClear.getDirection().equalsIgnoreCase("d")
+                && !allClear.getDirection().equalsIgnoreCase("b")) {
+            resultMessages.add("direction not supported");
+        } else {
+            result.setDirection(allClear.getDirection());
+        }
+
+        result.setResultMessages(resultMessages);
+        return result;
+    }
+
     protected ControllerResult validateInputVsl(WydotTimVsl tim) {
 
         ControllerResult result = new ControllerResult();
@@ -315,8 +386,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -371,8 +442,8 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().toLowerCase().equals("i") && !tim.getDirection().toLowerCase().equals("d")
-                && !tim.getDirection().toLowerCase().equals("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
+                && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -445,15 +516,19 @@ public abstract class WydotTimBaseController {
     }
 
     public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk,
-            ContentEnum content) {
+            ContentEnum content, TravelerInfoType frameType) {
 
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
-            // i
-            createSendTims(wydotTim, "I", timType, startDateTime, endDateTime, pk, content);
-            // d
-            createSendTims(wydotTim, "D", timType, startDateTime, endDateTime, pk, content);
+            var iTim = wydotTim.copy();
+            var dTim = wydotTim.copy();
+            iTim.setDirection("I");
+            dTim.setDirection("D");
+            // I
+            createSendTims(iTim, timType, startDateTime, endDateTime, pk, content, frameType);
+            // D
+            createSendTims(dTim, timType, startDateTime, endDateTime, pk, content, frameType);
         } else {
-            createSendTims(wydotTim, wydotTim.getDirection(), timType, startDateTime, endDateTime, pk, content);
+            createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
         }
     }
 
@@ -478,21 +553,117 @@ public abstract class WydotTimBaseController {
         }
     }
 
+    protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
+            Integer pk, ContentEnum content, TravelerInfoType frameType) {
+        // Clear any existing TIMs with the same client id
+        Long timTypeId = timType != null ? timType.getTimTypeId() : null;
+        var existingTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
+                wydotTim.getDirection());
+
+        // Expire existing tims
+        List<Long> existingTimIds = new ArrayList<Long>();
+        for (ActiveTim existingTim : existingTims) {
+            existingTimIds.add(existingTim.getActiveTimId());
+        }
+        timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
+        
+        // Get mileposts that will define the TIM's region
+        var milepostsAll = wydotTimService.getAllMilepostsForTim(wydotTim);
+
+        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
+        // PER-encode TIM if we supply less than 2.
+        if (milepostsAll.size() < 2) {
+            utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
+            return;
+        }
+
+        var anchor = milepostsAll.remove(0);
+        var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
+                configuration.getPathDistanceLimit());
+
+        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,
+                reducedMileposts, anchor, new IdGenerator());
+    }
+
     // creates a TIM and sends it to RSUs and Satellite
-    protected void createSendTims(WydotTim wydotTim, String direction, TimType timType, String startDateTime,
-            String endDateTime, Integer pk, ContentEnum content) {
+    protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
+            Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
+            List<Milepost> reducedMileposts, Milepost anchor, IdGenerator idGenerator) {
+
+        if (reducedMileposts.size() > 63) {
+            // Even after reducing the mileposts, this TIM requires more nodes than J2735
+            // allows. Split this TIM into half. The first TIM will cover the first half of
+            // reduced nodes, the second TIM will cover the second.
+            var firstTim = wydotTim.copy();
+            var secondTim = wydotTim.copy();
+
+            // Note that the last milepost for firstTim is the same as the first milepost
+            // for secondTim. This ensures the first ends where the second begins, without
+            // any gap in coverage.
+            var firstStartMp = reducedMileposts.get(0);
+            var firstEndMp = reducedMileposts.get(reducedMileposts.size() / 2);
+            var secondStartMp = reducedMileposts.get(reducedMileposts.size() / 2);
+            var secondEndMp = reducedMileposts.get(reducedMileposts.size() - 1);
+
+            firstTim.setStartPoint(new Coordinate(firstStartMp.getLatitude(), firstStartMp.getLongitude()));
+            firstTim.setEndPoint(new Coordinate(firstEndMp.getLatitude(), firstEndMp.getLongitude()));
+            secondTim.setStartPoint(new Coordinate(secondStartMp.getLatitude(), secondStartMp.getLongitude()));
+            secondTim.setEndPoint(new Coordinate(secondEndMp.getLatitude(), secondEndMp.getLongitude()));
+
+            // The anchor point for the second TIM should be the milepost immediately before
+            // the start point. If we were to pull the anchor point from the reducedMilepost
+            // set, it may be much further down the road, which isn't what we want.
+            var firstEndIndex = allMileposts.indexOf(firstEndMp);
+            var secondStartIndex = allMileposts.indexOf(secondStartMp);
+
+            // Get the subset of "all mileposts" that pertains to our new TIM
+            // If we use the full set of mileposts we wouldn't get an accurate
+            // direction/heading slice.
+            // Note that .subList is inclusive of fromIndex, but exclusive of toIndex
+            var firstTimAllMileposts = allMileposts.subList(0, firstEndIndex + 1);
+            var secondTimAllMileposts = new ArrayList<Milepost>(
+                    allMileposts.subList(secondStartIndex, allMileposts.size()));
+            //.remove is removing this from ALL lists, which is inaccurate
+            // var secondAnchor = secondTimAllMileposts.remove(0);
+            var secondAnchor = allMileposts.get(secondStartIndex - 1);
+
+            createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, firstTimAllMileposts,
+                    reducedMileposts.subList(0, (reducedMileposts.size() / 2) + 1), anchor, idGenerator);
+            createSendTims(secondTim, timType, startDateTime, endDateTime, pk, content, frameType,
+                    secondTimAllMileposts,
+                    reducedMileposts.subList(reducedMileposts.size() / 2, reducedMileposts.size()), secondAnchor,
+                    idGenerator);
+
+            return;
+        }
+
+        wydotTim.setClientId(wydotTim.getClientId() + "-" + idGenerator.getNextId());
+
         // create TIM
-        WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, direction, timType.getType(),
-                startDateTime, endDateTime, content);
-        String regionNamePrev = direction + "_" + wydotTim.getRoute();
+        WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, timType.getType(), startDateTime,
+                endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+
+        if (timToSend == null) {
+            return;
+        }
+
+        String regionNamePrev = wydotTim.getDirection() + "_" + wydotTim.getRoute();
+
+        var endPoint = new Coordinate();
+        if (wydotTim.getEndPoint() != null) {
+            endPoint = wydotTim.getEndPoint();
+        } else {
+            var endMp = reducedMileposts.get(reducedMileposts.size() - 1);
+            endPoint = new Coordinate(endMp.getLatitude(), endMp.getLongitude());
+        }
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs
-            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, direction, timType, pk, endDateTime);
+            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, pk, endDateTime, endPoint);
         }
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, direction, timType, pk);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint, reducedMileposts);
     }
 }

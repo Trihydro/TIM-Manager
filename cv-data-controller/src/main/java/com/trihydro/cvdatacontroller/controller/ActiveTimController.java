@@ -1,23 +1,31 @@
 package com.trihydro.cvdatacontroller.controller;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
-import com.trihydro.library.tables.TimOracleTables;
+import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import springfox.documentation.annotations.ApiIgnore;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -40,16 +49,20 @@ import springfox.documentation.annotations.ApiIgnore;
 @ApiIgnore
 public class ActiveTimController extends BaseController {
 
-	private TimOracleTables timOracleTables;
+	private TimDbTables timDbTables;
 	private SQLNullHandler sqlNullHandler;
+	protected Calendar UTCCalendar;
+
+	public ActiveTimController() {
+		UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+	}
 
 	@Autowired
-	public void InjectDependencies(TimOracleTables _timOracleTables, SQLNullHandler _sqlNullHandler) {
-		timOracleTables = _timOracleTables;
+	public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+		timDbTables = _timDbTables;
 		sqlNullHandler = _sqlNullHandler;
 	}
 
-	// select all ITIS codes
 	@RequestMapping(value = "/expiring", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<TimUpdateModel>> GetExpiringActiveTims() {
 		TimUpdateModel activeTim = null;
@@ -66,7 +79,7 @@ public class ActiveTimController extends BaseController {
 			selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
 			selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
 			selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
-			selectStatement += ", r.region_id, r.name as region_name, r.anchor_lat, r.anchor_long, r.lane_width";
+			selectStatement += ", r.region_id, r.anchor_lat, r.anchor_long, r.lane_width";
 			selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
 			selectStatement += ", r.directionality, r.direction AS region_direction";
 			selectStatement += " FROM active_tim atim";
@@ -74,8 +87,14 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
 			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
-			selectStatement += " WHERE tim_start + INTERVAL '14' DAY <= SYSDATE + INTERVAL '1' DAY";
-			selectStatement += " AND (tim_end is null OR tim_end >= SYSDATE + INTERVAL '1' DAY)";
+			// where starting less than 2 hours away
+			selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR";
+			// and expiration_date within 2hrs
+			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
+			// check that end time isn't within 2hrs
+			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
+			// check that this TIM is capable of being refreshed (direction = I or D)
+			selectStatement += " AND UPPER(atim.direction) IN ('I', 'D')";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -96,22 +115,22 @@ public class ActiveTimController extends BaseController {
 
 				Coordinate startPoint = null;
 				Coordinate endPoint = null;
-				double startLat = rs.getDouble("START_LATITUDE");
-				double startLon = rs.getDouble("START_LONGITUDE");
+				BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+				BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 				if (!rs.wasNull()) {
 					startPoint = new Coordinate(startLat, startLon);
 				}
 				activeTim.setStartPoint(startPoint);
 
-				double endLat = rs.getDouble("END_LATITUDE");
-				double endLon = rs.getDouble("END_LONGITUDE");
+				BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+				BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 				if (!rs.wasNull()) {
 					endPoint = new Coordinate(endLat, endLon);
 				}
 				activeTim.setEndPoint(endPoint);
 
-				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START"));
-				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END"));
+				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START", UTCCalendar));
+				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END", UTCCalendar));
 
 				// Tim properties
 				activeTim.setMsgCnt(rs.getInt("MSG_CNT"));
@@ -124,7 +143,6 @@ public class ActiveTimController extends BaseController {
 
 				// Region Properties
 				activeTim.setRegionId(rs.getInt("REGION_ID"));
-				activeTim.setRegionName(rs.getString("REGION_NAME"));
 				activeTim.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
 				activeTim.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
 
@@ -137,21 +155,28 @@ public class ActiveTimController extends BaseController {
 
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
-				activeTim.setFrameType(rs.getInt("FRAME_TYPE"));
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
 				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
 				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
 				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
 				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setUrl(rs.getString("URL"));
+
+				int frameTypeValue = rs.getInt("FRAME_TYPE");
+				if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
+					activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
+				}
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
-				String dfContent = rs.getString("DF_CONTENT");
-				if (dfContent == null || dfContent == "") {
-					dfContent = "advisory";
+				String serializedContent = rs.getString("DF_CONTENT");
+				ContentEnum contentType;
+				if (serializedContent == null || serializedContent.isEmpty()) {
+					contentType = ContentEnum.advisory;
+				} else {
+					contentType = ContentEnum.fromString(serializedContent);
 				}
-				activeTim.setDfContent(dfContent);
-				activeTim.setUrl(rs.getString("URL"));
+				activeTim.setDfContent(contentType);
 
 				activeTims.add(activeTim);
 			}
@@ -177,6 +202,135 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(activeTims);
 	}
 
+	@RequestMapping(value = "/update-model/{activeTimId}", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<TimUpdateModel> GetUpdateModelFromActiveTimId(@PathVariable Long activeTimId) {
+		TimUpdateModel activeTim = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+
+			String selectStatement = "SELECT atim.*, tt.type AS tim_type_name, tt.description AS tim_type_description";
+			selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
+			selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
+			selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
+			selectStatement += ", r.region_id, r.anchor_lat, r.anchor_long, r.lane_width";
+			selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
+			selectStatement += ", r.directionality, r.direction AS region_direction";
+			selectStatement += " FROM active_tim atim";
+			selectStatement += " INNER JOIN tim t ON atim.tim_id = t.tim_id";
+			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
+			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
+			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
+			// where active_tim_id is provided
+			selectStatement += " WHERE atim.active_tim_id = " + activeTimId;
+			rs = statement.executeQuery(selectStatement);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				activeTim = new TimUpdateModel();
+
+				// Active_Tim properties
+				activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+				activeTim.setTimId(rs.getLong("TIM_ID"));
+				activeTim.setDirection(rs.getString("DIRECTION"));
+				activeTim.setStartDateTime(rs.getString("TIM_START"));
+				activeTim.setEndDateTime(rs.getString("TIM_END"));
+				activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+				activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+				activeTim.setClientId(rs.getString("CLIENT_ID"));
+				activeTim.setRoute(rs.getString("ROUTE"));
+
+				Coordinate startPoint = null;
+				Coordinate endPoint = null;
+				BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+				BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
+				if (!rs.wasNull()) {
+					startPoint = new Coordinate(startLat, startLon);
+				}
+				activeTim.setStartPoint(startPoint);
+
+				BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+				BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
+				if (!rs.wasNull()) {
+					endPoint = new Coordinate(endLat, endLon);
+				}
+				activeTim.setEndPoint(endPoint);
+
+				activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START", UTCCalendar));
+				activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END", UTCCalendar));
+
+				// Tim properties
+				activeTim.setMsgCnt(rs.getInt("MSG_CNT"));
+				activeTim.setUrlB(rs.getString("URL_B"));
+				activeTim.setPacketId(rs.getString("PACKET_ID"));
+
+				// Tim Type properties
+				activeTim.setTimTypeName(rs.getString("TIM_TYPE_NAME"));
+				activeTim.setTimTypeDescription(rs.getString("TIM_TYPE_DESCRIPTION"));
+
+				// Region Properties
+				activeTim.setRegionId(rs.getInt("REGION_ID"));
+				activeTim.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
+				activeTim.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
+
+				activeTim.setLaneWidth(rs.getBigDecimal("LANE_WIDTH"));
+				activeTim.setRegionDirection(rs.getString("REGION_DIRECTION"));
+				activeTim.setDirectionality(rs.getString("DIRECTIONALITY"));
+				activeTim.setClosedPath(rs.getBoolean("CLOSED_PATH"));
+				activeTim.setPathId(rs.getInt("PATH_ID"));
+				activeTim.setRegionDescription(rs.getString("REGION_DESCRIPTION"));
+
+				// DataFrame properties
+				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
+				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
+				activeTim.setSspLocationRights(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
+				activeTim.setSspTimRights(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
+				activeTim.setSspMsgTypes(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
+				activeTim.setSspMsgContent(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setUrl(rs.getString("URL"));
+
+				int frameTypeValue = rs.getInt("FRAME_TYPE");
+				if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
+					activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
+				}
+
+				// set dataFrame content. it's required for the ODE, so if we didn't record it,
+				// assume Advisory
+				String serializedContent = rs.getString("DF_CONTENT");
+				ContentEnum contentType;
+				if (serializedContent == null || serializedContent.isEmpty()) {
+					contentType = ContentEnum.advisory;
+				} else {
+					contentType = ContentEnum.fromString(serializedContent);
+				}
+				activeTim.setDfContent(contentType);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTim);
+	}
+
 	@RequestMapping(value = "/update-sat-record-id/{activeTimId}/{satRecordId}", method = RequestMethod.PUT)
 	public ResponseEntity<Boolean> updateActiveTim_SatRecordId(@PathVariable Long activeTimId,
 			@PathVariable String satRecordId) {
@@ -188,7 +342,7 @@ public class ActiveTimController extends BaseController {
 
 		try {
 			connection = dbInteractions.getConnectionPool();
-			preparedStatement = timOracleTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
+			preparedStatement = timDbTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols,
 					connection);
 
 			// execute update statement
@@ -328,12 +482,11 @@ public class ActiveTimController extends BaseController {
 
 			statement = connection.createStatement();
 
-			String selectStatement = "select ACTIVE_TIM_ID, ACTIVE_TIM.TIM_ID, ACTIVE_TIM.DIRECTION, SAT_RECORD_ID, START_LATITUDE, START_LONGITUDE, END_LATITUDE, END_LONGITUDE, TYPE, CLIENT_ID, ROUTE from active_tim";
-			selectStatement += " inner join tim_type on tim_type.tim_type_id = active_tim.tim_type_id";
-			selectStatement += "  WHERE TIM_END <= SYS_EXTRACT_UTC(SYSTIMESTAMP)";
+			String selectStatement = "select * from ACTIVE_TIM";
+			selectStatement += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
 
 			rs = statement.executeQuery(selectStatement);
-			activeTims = getActiveTimFromRS(rs, true);
+			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
@@ -374,8 +527,8 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
 			selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
 			selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
-			selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-			selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
+			selectStatement += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
+			selectStatement += " where rsu_view.ipv4_address = '" + rsuTarget + "'";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -405,9 +558,10 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(indices);
 	}
 
-	@RequestMapping(value = "/client-id-direction/{clientId}/{timTypeId}/{direction}", method = RequestMethod.GET)
+	@RequestMapping(value = { "/client-id-direction/{clientId}/{timTypeId}",
+			"/client-id-direction/{clientId}/{timTypeId}/{direction}" }, method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId,
-			@PathVariable Long timTypeId, @PathVariable String direction) {
+			@PathVariable Long timTypeId, @PathVariable(required = false) String direction) {
 		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 		Connection connection = null;
 		Statement statement = null;
@@ -416,12 +570,51 @@ public class ActiveTimController extends BaseController {
 		try {
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String query = "select * from active_tim where CLIENT_ID = '" + clientId + "' and TIM_TYPE_ID = "
+			// There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1,
+			// CLIENTID_2
+			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
 					+ timTypeId;
 
 			if (direction != null) {
 				query += " and DIRECTION = '" + direction + "'";
 			}
+
+			rs = statement.executeQuery(query);
+			activeTims = getActiveTimFromRS(rs, false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
+	@RequestMapping(value = { "/buffer-tims/{clientId}" }, method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetBufferTimsByClientId(@PathVariable String clientId) {
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+			String query = "select * from active_tim where CLIENT_ID like '" + clientId
+					+ "\\%BUFF_-%' ESCAPE '\\'";
 
 			rs = statement.executeQuery(query);
 			activeTims = getActiveTimFromRS(rs, false);
@@ -463,6 +656,7 @@ public class ActiveTimController extends BaseController {
 			selectStatement += "inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id ";
 			selectStatement += "inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id ";
 			selectStatement += "where active_tim_id = " + activeTimId;
+			selectStatement += " order by data_frame_itis_code.position asc";
 			rs = statement.executeQuery(selectStatement);
 
 			// convert to ActiveTim object
@@ -577,6 +771,53 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(deleteActiveTimResult);
 	}
 
+	@RequestMapping(value = "/get-by-ids", method = RequestMethod.POST)
+	public ResponseEntity<List<ActiveTim>> GetActiveTimsByIds(@RequestBody List<Long> ids) {
+		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+		if (ids == null || ids.size() == 0) {
+			return ResponseEntity.badRequest().body(activeTims);
+		}
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			String query = "select * from active_tim where active_tim_id in (";
+
+			for (int i = 0; i < ids.size(); i++) {
+				query += "?, ";
+			}
+			query = query.substring(0, query.length() - 2);// subtract ', '
+			query += ")";
+			ps = connection.prepareStatement(query);
+
+			for (int i = 0; i < ids.size(); i++) {
+				// set active_tim_id
+				ps.setLong(i + 1, ids.get(i));
+			}
+			rs = ps.executeQuery();
+			activeTims = getActiveTimFromRS(rs, false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+		} finally {
+			try {
+				// close prepared statement and result set (rs closed by prepared statement)
+				if (ps != null) {
+					ps.close();
+				}
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(activeTims);
+	}
+
 	@RequestMapping(value = "/get-by-wydot-tim/{timTypeId}", method = RequestMethod.POST)
 	public ResponseEntity<List<ActiveTim>> GetActiveTimsByWydotTim(@RequestBody List<? extends WydotTim> wydotTims,
 			@PathVariable Long timTypeId) {
@@ -599,7 +840,7 @@ public class ActiveTimController extends BaseController {
 				}
 				query += "(CLIENT_ID like ?";
 				wydotTim = wydotTims.get(i);
-				if (wydotTim.getDirection() != null) {
+				if (wydotTim.getDirection() != null && !wydotTim.getDirection().equalsIgnoreCase("B")) {
 					query += " and DIRECTION = ?";
 				}
 				query += ")";
@@ -618,11 +859,11 @@ public class ActiveTimController extends BaseController {
 				wydotTim = wydotTims.get(i);
 
 				// set client id
-				ps.setString(index, wydotTim.getClientId() + "%");
+				ps.setString(index, wydotTim.getClientId() + "-%");
 				index++;
 
 				// set direction
-				if (wydotTim.getDirection() != null) {
+				if (wydotTim.getDirection() != null && !wydotTim.getDirection().equalsIgnoreCase("B")) {
 					ps.setString(index, wydotTim.getDirection());
 					index++;
 				}
@@ -766,7 +1007,7 @@ public class ActiveTimController extends BaseController {
 				}
 			}
 
-			query += " order by active_tim.active_tim_id";
+			query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
 
 			rs = statement.executeQuery(query);
 
@@ -799,16 +1040,16 @@ public class ActiveTimController extends BaseController {
 					Coordinate endPoint = null;
 
 					// Set startPoint
-					double startLat = rs.getDouble("START_LATITUDE");
-					double startLon = rs.getDouble("START_LONGITUDE");
+					BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+					BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 					if (!rs.wasNull()) {
 						startPoint = new Coordinate(startLat, startLon);
 					}
 					activeTim.setStartPoint(startPoint);
 
 					// Set endPoint
-					double endLat = rs.getDouble("END_LATITUDE");
-					double endLon = rs.getDouble("END_LONGITUDE");
+					BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+					BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 					if (!rs.wasNull()) {
 						endPoint = new Coordinate(endLat, endLon);
 					}
@@ -828,8 +1069,11 @@ public class ActiveTimController extends BaseController {
 					}
 				}
 
-				// Add the ITIS code to the ActiveTim's ITIS codes
-				activeTim.getItisCodes().add(rs.getInt("ITIS_CODE"));
+				// Add the ITIS code to the ActiveTim's ITIS codes, if not null
+				var itisCode = rs.getInt("ITIS_CODE");
+				if (!rs.wasNull()) {
+					activeTim.getItisCodes().add(itisCode);
+				}
 			}
 
 			if (activeTim != null) {
@@ -875,12 +1119,12 @@ public class ActiveTimController extends BaseController {
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
-			String query = "select active_tim.*, rsu_vw.ipv4_address, tim_rsu.rsu_index from active_tim";
+			String query = "select active_tim.*, rsu_view.ipv4_address, tim_rsu.rsu_index from active_tim";
 			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
 			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
 			query += " where sat_record_id is null";
-			query += " order by rsu_vw.ipv4_address, tim_rsu.rsu_index";
+			query += " order by rsu_view.ipv4_address, tim_rsu.rsu_index"; // Required by ValidateRsus
 
 			rs = statement.executeQuery(query);
 
@@ -903,15 +1147,15 @@ public class ActiveTimController extends BaseController {
 				activeTim.setRsuIndex(rs.getInt("RSU_INDEX"));
 				Coordinate startPoint = null;
 				Coordinate endPoint = null;
-				double startLat = rs.getDouble("START_LATITUDE");
-				double startLon = rs.getDouble("START_LONGITUDE");
+				BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+				BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 				if (!rs.wasNull()) {
 					startPoint = new Coordinate(startLat, startLon);
 				}
 				activeTim.setStartPoint(startPoint);
 
-				double endLat = rs.getDouble("END_LATITUDE");
-				double endLon = rs.getDouble("END_LONGITUDE");
+				BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+				BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 				if (!rs.wasNull()) {
 					endPoint = new Coordinate(endLat, endLon);
 				}
@@ -954,7 +1198,7 @@ public class ActiveTimController extends BaseController {
 			String query = "select * from active_tim";
 			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
 			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
 			query += " where ipv4_address = '" + artqm.getIpv4() + "' and client_id = '" + artqm.getClientId()
 					+ "' and active_tim.direction = '" + artqm.getDirection() + "'";
 
@@ -992,8 +1236,8 @@ public class ActiveTimController extends BaseController {
 		PreparedStatement preparedStatement = null;
 		Long activeTimId = 0l;
 		try {
-			String insertQueryStatement = timOracleTables.buildInsertQueryStatement("active_tim",
-					timOracleTables.getActiveTimTable());
+			String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
+					timDbTables.getActiveTimTable());
 
 			// get connection
 			connection = dbInteractions.getConnectionPool();
@@ -1001,25 +1245,27 @@ public class ActiveTimController extends BaseController {
 			preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
 			int fieldNum = 1;
 
-			for (String col : timOracleTables.getActiveTimTable()) {
+			for (String col : timDbTables.getActiveTimTable()) {
 				if (col.equals("TIM_ID"))
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
 				else if (col.equals("DIRECTION"))
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
-				else if (col.equals("TIM_START"))
-					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-							LocalDateTime.parse(activeTim.getStartDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
-				else if (col.equals("TIM_END"))
-					if (activeTim.getEndDateTime() != null)
-						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, java.sql.Timestamp.valueOf(
-								LocalDateTime.parse(activeTim.getEndDateTime(), DateTimeFormatter.ISO_DATE_TIME)));
-					else
+				else if (col.equals("TIM_START")) {
+					java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
+					Timestamp tim_start_timestamp = new Timestamp(tim_start_date.getTime());
+					sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_start_timestamp);
+				} else if (col.equals("TIM_END")) {
+					if (activeTim.getEndDateTime() != null) {
+						java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
+						Timestamp tim_end_timestamp = new Timestamp(tim_end_date.getTime());
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_end_timestamp);
+					} else
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
-				else if (col.equals("EXPIRATION_DATE")) {
+				} else if (col.equals("EXPIRATION_DATE")) {
 					if (activeTim.getExpirationDateTime() != null) {
-						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-								java.sql.Timestamp.valueOf(LocalDateTime.parse(activeTim.getExpirationDateTime(),
-										DateTimeFormatter.ISO_DATE_TIME)));
+						java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
+						Timestamp tim_exp_timestamp = new Timestamp(tim_exp_date.getTime());
+						sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_exp_timestamp);
 					} else {
 						preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
 					}
@@ -1034,25 +1280,27 @@ public class ActiveTimController extends BaseController {
 				else if (col.equals("PK"))
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
 				else if (col.equals("START_LATITUDE")) {
-					Double start_lat = null;
+					BigDecimal start_lat = null;
 					if (activeTim.getStartPoint() != null)
 						start_lat = activeTim.getStartPoint().getLatitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lat);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, start_lat);
 				} else if (col.equals("START_LONGITUDE")) {
-					Double start_lon = null;
+					BigDecimal start_lon = null;
 					if (activeTim.getStartPoint() != null)
 						start_lon = activeTim.getStartPoint().getLongitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, start_lon);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, start_lon);
 				} else if (col.equals("END_LATITUDE")) {
-					Double end_lat = null;
+					BigDecimal end_lat = null;
 					if (activeTim.getEndPoint() != null)
 						end_lat = activeTim.getEndPoint().getLatitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lat);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lat);
 				} else if (col.equals("END_LONGITUDE")) {
-					Double end_lon = null;
+					BigDecimal end_lon = null;
 					if (activeTim.getEndPoint() != null)
 						end_lon = activeTim.getEndPoint().getLongitude();
-					sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum, end_lon);
+					sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lon);
+				} else if (col.equals("PROJECT_KEY")) {
+					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getProjectKey());
 				}
 
 				fieldNum++;
@@ -1102,15 +1350,15 @@ public class ActiveTimController extends BaseController {
 
 			Coordinate startPoint = null;
 			Coordinate endPoint = null;
-			double startLat = rs.getDouble("START_LATITUDE");
-			double startLon = rs.getDouble("START_LONGITUDE");
+			BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+			BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
 			if (!rs.wasNull()) {
 				startPoint = new Coordinate(startLat, startLon);
 			}
 			activeTim.setStartPoint(startPoint);
 
-			double endLat = rs.getDouble("END_LATITUDE");
-			double endLon = rs.getDouble("END_LONGITUDE");
+			BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+			BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 			if (!rs.wasNull()) {
 				endPoint = new Coordinate(endLat, endLon);
 			}
@@ -1120,5 +1368,185 @@ public class ActiveTimController extends BaseController {
 		}
 
 		return activeTims;
+	}
+
+	private String translateIso8601ToTimestampFormat(String date) throws ParseException {
+		DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
+		// TimeZone toTimeZone = TimeZone.getTimeZone("MST");
+		// sdf.setTimeZone(toTimeZone);
+		DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		Date dte = m_ISO8601Local.parse(date);
+		return sdf.format(dte.getTime());
+	}
+
+	private List<List<Long>> SplitMaxList(List<Long> activeTimIds, int maxListSize) {
+		Long[] elements = activeTimIds.toArray(new Long[0]);
+		int maxChunks = (int) Math.ceil(elements.length / (double) maxListSize);
+		List<List<Long>> returnValues = new ArrayList<List<Long>>(maxChunks);
+
+		for (int i = 0; i < maxChunks; i++) {
+			int from = i * maxListSize;
+			int to = Math.min(from + maxListSize, elements.length);
+			Long[] range = Arrays.copyOfRange(elements, from, to);
+			returnValues.add(Arrays.asList(range));
+		}
+		return returnValues;
+	}
+
+	@RequestMapping(value = "/reset-expiration-date", method = RequestMethod.PUT, headers = "Accept=application/json")
+	public ResponseEntity<Boolean> ResetExpirationDate(@RequestBody List<Long> activeTimIds) {
+		if (activeTimIds == null || activeTimIds.size() == 0) {
+			return ResponseEntity.ok(true);
+		}
+
+		boolean result = true;
+		// on occasion we have over 1000 active tim ids, resulting in error
+		// split this out by 500 records at a time to avoid issues
+		List<List<Long>> splitActiveTims = SplitMaxList(activeTimIds, 500);
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+
+			for (int splitTimsIndex = 0; splitTimsIndex < splitActiveTims.size(); splitTimsIndex++) {
+				List<Long> splitTims = splitActiveTims.get(splitTimsIndex);
+				String updateSql = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (";
+
+				for (int i = 0; i < splitTims.size(); i++) {
+					updateSql += "?,";
+				}
+				updateSql = updateSql.substring(0, updateSql.length() - 1);
+				updateSql += ")";
+
+				preparedStatement = connection.prepareStatement(updateSql);
+				for (int i = 0; i < splitTims.size(); i++) {
+					preparedStatement.setLong(i + 1, splitTims.get(i));
+				}
+
+				// execute delete SQL statement
+				result &= dbInteractions.updateOrDelete(preparedStatement);
+			}
+
+			System.out.println("Reset expiration date for Active Tims (active_tim_ids "
+					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return ResponseEntity.ok(result);
+	}
+
+	@RequestMapping(value = "/update-expiration/{packetID}/{expDate}", method = RequestMethod.PUT)
+	public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID, @PathVariable String expDate) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		boolean success = false;
+
+		String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
+		query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+		query += " WHERE TIM.PACKET_ID = ?";
+
+		String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+		updateStatement += query;
+		updateStatement += ")";
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			preparedStatement = connection.prepareStatement(updateStatement);
+			Date date = utility.convertDate(expDate);
+			Timestamp expDateTimestamp = new Timestamp(date.getTime());
+			preparedStatement.setTimestamp(1, expDateTimestamp);// expDate comes in as MST from previously called function
+													// (GetMinExpiration)
+			preparedStatement.setObject(2, packetID);
+
+			// execute update statement
+			success = dbInteractions.updateOrDelete(preparedStatement);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		utility.logWithDate(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
+				packetID, expDate, success));
+		return ResponseEntity.ok(success);
+	}
+
+	@RequestMapping(value = "/get-min-expiration/{packetID}/{expDate}")
+	public ResponseEntity<String> GetMinExpiration(@PathVariable String packetID, @PathVariable String expDate)
+			throws ParseException {
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		String minStart = "";
+
+		try {
+			// Fetch the minimum of passed in expDate and database held
+			// active_tim.expiration_date. To compare like values we convert the expDate
+			// TO_TIMESTAMP. Without this it compares string length.
+			// Also, there are some null values in the db. To get around these, we use the
+			// coalesce function with the expDate passed in value.
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+			String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
+					translateIso8601ToTimestampFormat(expDate), targetFormat);
+
+
+			String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
+			minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+			minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+
+			String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
+					selectTimestamp, minExpDate, selectTimestamp);
+			rs = statement.executeQuery(query);
+			while (rs.next()) {
+				var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);
+				minStart = utility.timestampFormat.format(tmpTs);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(minStart);
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
+				packetID, expDate, minStart));
+		return ResponseEntity.ok(minStart);
 	}
 }

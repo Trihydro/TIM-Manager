@@ -183,16 +183,22 @@ public class JsonToJavaConverter {
             int rsuIndex;
             if (rsusNode == null) {
                 odeTimMetadata = mapper.treeToValue(metaDataNode, OdeRequestMsgMetadata.class);
-                return odeTimMetadata;
             } else {
                 odeTimMetadata = new OdeRequestMsgMetadata();
                 ServiceRequest serviceRequest = new ServiceRequest();
 
+                String timStartDateTime = "";
+                if (metaDataNode.get("odeTimStartDateTime") != null) {
+                    timStartDateTime = metaDataNode.get("odeTimStartDateTime").asText();
+                }
                 RSU rsuTemp = new RSU();
-                rsuTarget = rsusNode.get("rsus").get("rsuTarget").asText();
-                rsuIndex = rsusNode.get("rsus").get("rsuIndex").asInt();
-                rsuTemp.setRsuIndex(rsuIndex);
-                rsuTemp.setRsuTarget(rsuTarget);
+                var rsu = rsusNode.get("rsus");
+                if (rsu != null) {
+                    rsuTarget = rsu.get("rsuTarget").asText();
+                    rsuIndex = rsu.get("rsuIndex").asInt();
+                    rsuTemp.setRsuIndex(rsuIndex);
+                    rsuTemp.setRsuTarget(rsuTarget);
+                }
 
                 RSU[] rsuArr = new RSU[1];
                 rsuArr[0] = rsuTemp;
@@ -216,6 +222,7 @@ public class JsonToJavaConverter {
                 odeTimMetadata.setSanitized(metaDataNode.get("sanitized").asBoolean());
                 odeTimMetadata.setRecordGeneratedAt(metaDataNode.get("recordGeneratedAt").asText());
                 odeTimMetadata.setOdeReceivedAt(metaDataNode.get("odeReceivedAt").asText());
+                odeTimMetadata.setOdeTimStartDateTime(timStartDateTime);
             }
 
         } catch (IOException e) {
@@ -224,7 +231,6 @@ public class JsonToJavaConverter {
         } catch (NullPointerException e) {
             System.out.println(e.getMessage());
         }
-
         return odeTimMetadata;
     }
 
@@ -331,14 +337,19 @@ public class JsonToJavaConverter {
             JsonNode contentNode = travelerDataFrame.get("content");
             if (contentNode.has(ContentEnum.advisory.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.advisory.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
             } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.speedLimit.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
             } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.exitService.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.exitService.getStringValue());
             } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.genericSign.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.genericSign.getStringValue());
             } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.workZone.getStringValue());
             }
 
             LocalDate now = LocalDate.now();
@@ -405,13 +416,22 @@ public class JsonToJavaConverter {
             if (pathNode == null)
                 return null;
             JsonNode xyNode = pathNode.get("offset").get("xy");
+            Boolean isXy = true;
+
+            // switching to using ll offset produces "ll" instead of "xy"
+            if (xyNode == null) {
+                xyNode = pathNode.get("offset").get("ll");
+                isXy = false;
+            }
+
             if (xyNode == null)
                 return null;
+
             JsonNode nodesNode = xyNode.get("nodes");
             if (nodesNode == null)
                 return null;
 
-            JsonNode nodeXYArrNode = nodesNode.get("NodeXY");
+            JsonNode nodeXYArrNode = isXy ? nodesNode.get("NodeXY") : nodesNode.get("NodeLL");
             OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
             List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
             OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
@@ -419,13 +439,15 @@ public class JsonToJavaConverter {
             if (nodeXYArrNode.isArray()) {
                 for (final JsonNode objNode : nodeXYArrNode) {
                     nodeXY = new OdeTravelerInformationMessage.NodeXY();
-                    JsonNode nodeLatLon = objNode.get("delta").get("node-LatLon");
+                    var deltaObj = objNode.get("delta");
+                    var firstObj = deltaObj.fields().next();
+                    JsonNode nodeLatLon = firstObj.getValue();// objNode.get("delta").get("node-LatLon");
                     if (nodeLatLon != null) {
                         BigDecimal lat = mapper.treeToValue(nodeLatLon.get("lat"), BigDecimal.class);
                         BigDecimal lon = mapper.treeToValue(nodeLatLon.get("lon"), BigDecimal.class);
                         nodeXY.setNodeLat(lat.multiply(new BigDecimal(".0000001")));
                         nodeXY.setNodeLong(lon.multiply(new BigDecimal(".0000001")));
-                        nodeXY.setDelta("node-LatLon");
+                        nodeXY.setDelta(firstObj.getKey());
                         nodeXYs.add(nodeXY);
                     }
                 }
@@ -493,38 +515,52 @@ public class JsonToJavaConverter {
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
             OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
 
-            JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
-                    .get("TravelerInformation");
-            JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
-            JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
+            // JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
+            //         .get("TravelerInformation");
+            JsonNode timNode = JsonUtils.getJsonNode(value, "payload").findValue("TravelerInformation");
+            JsonNode travelerDataFrame = timNode.findValue("TravelerDataFrame");
+            JsonNode geoPath = travelerDataFrame.findValue("GeographicalPath");
+
+            JsonNode sequenceArrNode = null;
+            JsonNode contentNode = travelerDataFrame.get("content");
+            if (contentNode.has(ContentEnum.advisory.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.advisory.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
+            } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.speedLimit.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
+            } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.exitService.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.exitService.getStringValue());
+            } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.genericSign.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.genericSign.getStringValue());
+            } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
+                sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
+                dataFrame.setContent(ContentEnum.workZone.getStringValue());
+            }
 
             List<String> itemsList = new ArrayList<String>();
-            JsonNode advisoryNode = travelerDataFrame.get("content").get("advisory");// content is a CHOICE
-            if (advisoryNode != null) {
-                JsonNode sequenceArrNode = advisoryNode.get("SEQUENCE");
-
-                // if ITIS codes are in an array
-                String item = null;
-                if (sequenceArrNode.isArray()) {
-                    for (final JsonNode objNode : sequenceArrNode) {
-                        if (objNode.get("item").get("itis") != null)
-                            item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
-                        else if (objNode.get("item").get("text") != null)
-                            item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
-
-                        itemsList.add(item);
-                    }
-                }
-
-                // ADD NON ARRAY ELEMENT
-                if (!sequenceArrNode.isArray()) {
-                    if (sequenceArrNode.get("item").get("itis") != null)
-                        item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
-                    else if (sequenceArrNode.get("item").get("text") != null)
-                        item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+            String item = null;
+            if (sequenceArrNode != null && sequenceArrNode.isArray()) {
+                for (final JsonNode objNode : sequenceArrNode) {
+                    if (objNode.get("item").get("itis") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
+                    else if (objNode.get("item").get("text") != null)
+                        item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
 
                     itemsList.add(item);
                 }
+            }
+
+            // ADD NON ARRAY ELEMENT
+            if (sequenceArrNode != null && !sequenceArrNode.isArray()) {
+                if (sequenceArrNode.get("item").get("itis") != null)
+                    item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
+                else if (sequenceArrNode.get("item").get("text") != null)
+                    item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+
+                itemsList.add(item);
             }
 
             // TravelerInfoType.valueOf();
@@ -542,7 +578,6 @@ public class JsonToJavaConverter {
             JsonNode durationNode = travelerDataFrame.get("duratonTime");
             JsonNode priorityNode = travelerDataFrame.get("priority");
             JsonNode sspLocationRightsNode = travelerDataFrame.get("sspLocationRights");
-            JsonNode contentNode = travelerDataFrame.get("content");
             JsonNode sspTimRightsNode = travelerDataFrame.get("sspTimRights");
 
             LocalDate now = LocalDate.now();
@@ -563,7 +598,6 @@ public class JsonToJavaConverter {
             dataFrame.setPriority(priorityNode.asInt());
             dataFrame.setSspLocationRights((short) sspLocationRightsNode.asInt());
             dataFrame.setSspTimRights((short) sspTimRightsNode.asInt());
-            dataFrame.setContent(contentNode.asText());
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 
@@ -582,9 +616,7 @@ public class JsonToJavaConverter {
             tim.setDataframes(dataFrames);
             odeTimPayload = new OdeTimPayload();
             odeTimPayload.setTim(tim);
-        } catch (
-
-        IOException e) {
+        } catch (IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
             System.out.println(e.getMessage());
@@ -623,9 +655,12 @@ public class JsonToJavaConverter {
     }
 
     public OdeDriverAlertPayload convertDriverAlertPayloadJsonToJava(String value) {
-
         OdeDriverAlertPayload odeDriverAlertPayload = null;
-        JsonNode alertNode = JsonUtils.getJsonNode(value, "payload").get("alert");
+        var payloadNode = JsonUtils.getJsonNode(value, "payload");
+        if (payloadNode == null) {
+            return null;
+        }
+        JsonNode alertNode = payloadNode.get("alert");
 
         try {
             String alert = mapper.treeToValue(alertNode, String.class);

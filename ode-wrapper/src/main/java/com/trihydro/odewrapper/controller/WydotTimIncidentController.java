@@ -6,18 +6,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
+import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.TimGenerationHelper;
+import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
+import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
-import com.trihydro.odewrapper.service.WydotTimService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -41,9 +44,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     @Autowired
     public WydotTimIncidentController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
     }
 
     @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -52,9 +55,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - Create Incident TIM");
+        utility.logWithDate(dateFormat.format(date) + " - Create Incident TIM", this.getClass());
         String post = gson.toJson(timIncidentList);
-        System.out.println(post.toString());
+        utility.logWithDate(post.toString(), this.getClass());
 
         List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
 
@@ -90,9 +93,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - Update Incident TIM");
+        utility.logWithDate(dateFormat.format(date) + " - Update Incident TIM", this.getClass());
         String post = gson.toJson(timIncidentList);
-        System.out.println(post.toString());
+        utility.logWithDate(post.toString(), this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -114,10 +117,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
             resultTim.getResultMessages().add("success");
             resultList.add(resultTim);
         }
-        wydotTimService.deleteWydotTimsByType(timIncidentList.getTimIncidentList(), type);
-
-        // make tims and send them
-        makeTimsAsync(timsToSend);
+        if (timsToSend.size() > 0) {
+            // make tims, expire existing ones, and send them
+            makeTimsAsync(timsToSend);
+        }
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -127,24 +130,12 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
         new Thread(new Runnable() {
             public void run() {
-                String startTime = java.time.Clock.systemUTC().instant().toString();
-
+                var startTime = getStartTime();
                 for (WydotTimIncident wydotTim : wydotTims) {
                     // set route
                     wydotTim.setRoute(wydotTim.getHighway());
-
-                    // check if this is a point TIM
-                    if (wydotTim.getDirection().toLowerCase().equals("b")) {
-                        createSendTims(wydotTim, "i", getTimType(type), startTime, null, wydotTim.getPk(),
-                                ContentEnum.advisory);
-
-                        createSendTims(wydotTim, "d", getTimType(type), startTime, null, wydotTim.getPk(),
-                                ContentEnum.advisory);
-                    } else {
-                        // single direction TIM
-                        createSendTims(wydotTim, wydotTim.getDirection(), getTimType(type), startTime, null,
-                                wydotTim.getPk(), ContentEnum.advisory);
-                    }
+                    processRequest(wydotTim, getTimType(type), startTime, null, wydotTim.getPk(), ContentEnum.advisory,
+                            TravelerInfoType.advisory);
                 }
             }
         }).start();
@@ -156,9 +147,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println(dateFormat.format(date) + " - Delete Incident TIM");
+        utility.logWithDate(dateFormat.format(date) + " - Delete Incident TIM", this.getClass());
 
-        // clear TIM
+        // expire and clear TIM
         wydotTimService.clearTimsById("I", incidentId, null);
 
         String responseMessage = "success";

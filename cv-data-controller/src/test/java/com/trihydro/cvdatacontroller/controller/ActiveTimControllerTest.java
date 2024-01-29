@@ -388,8 +388,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
         selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
         selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
-        selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-        selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
+        selectStatement += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
+        selectStatement += " where rsu_view.ipv4_address = '" + rsuTarget + "'";
 
         // Act
         ResponseEntity<List<Integer>> data = uut.GetActiveTimIndicesByRsu(rsuTarget);
@@ -411,8 +411,8 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
         selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
         selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
-        selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-        selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
+        selectStatement += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
+        selectStatement += " where rsu_view.ipv4_address = '" + rsuTarget + "'";
         doThrow(new SQLException()).when(mockRs).getInt("RSU_INDEX");
 
         // Act
@@ -929,7 +929,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String query = "select * from active_tim";
         query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
         query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-        query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+        query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
         query += " where ipv4_address = '" + ipv4Address + "' and client_id = '" + clientId;
         query += "' and active_tim.direction = '" + direction + "'";
 
@@ -968,7 +968,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String query = "select * from active_tim";
         query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
         query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-        query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+        query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
         query += " where ipv4_address = '" + ipv4Address + "' and client_id = '" + clientId;
         query += "' and active_tim.direction = '" + direction + "'";
         doThrow(new SQLException()).when(mockStatement).executeQuery(query);

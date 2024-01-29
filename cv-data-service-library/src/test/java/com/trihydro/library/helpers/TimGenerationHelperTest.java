@@ -593,7 +593,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void c_updatesDurationTimeToZero() {
+    public void c_updatesDurationTimeToFiveMinutes() {
         // Arrange
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1L);
@@ -622,8 +622,8 @@ public class TimGenerationHelperTest {
 
         Assertions.assertNotNull(dataFrame.getDurationTime());
 
-        // Duration Time should still be 0 since resetExpirationTime is set to True
-        Assertions.assertEquals(0, dataFrame.getDurationTime());
+        // Duration Time should be 5 since resetExpirationTime is set to True
+        Assertions.assertEquals(5, dataFrame.getDurationTime());
     }
 
     @Test

@@ -10,7 +10,11 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+
+- checkout: self
+
 - task: Maven@3
+  name: 'Install_ODE_Plugins'
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -21,6 +25,7 @@ steps:
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.1.0.jar -DgeneratePom=true'
 
 - task: Maven@3
+  name: 'Install_ODE_Core'
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -31,6 +36,7 @@ steps:
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.1.0.jar -DgeneratePom=true'
 
 - task: Maven@3
+  name: 'Install_ODE_Common'
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -41,6 +47,7 @@ steps:
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.1.0.jar -DgeneratePom=true'
 
 - task: Maven@3
+  name: 'Install_ODE_svcs'
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -51,6 +58,7 @@ steps:
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar -DgeneratePom=true'
 
 - task: Maven@3
+  name: 'Install_pgsql'
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
@@ -58,22 +66,15 @@ steps:
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ojdbc8.jar -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion="12.2.0.1.0" -Dpackaging=jar -DgeneratePom=true'
+    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/postgresql-42.6.0.jar -DgroupId=org.postgresql -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar -DgeneratePom=true'
+
+# - task: Bash@3
+#   inputs:
+#     targetType: 'inline'
+#     script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/usdot/jpo/ode/jpo-ode-core/1.0.10-SNAPSHOT)'
 
 - task: Maven@3
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: false
-    goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/ucp.jar -DgroupId=com.oracle -DartifactId=ucp -Dversion="12.2.0.1.0" -Dpackaging=jar -DgeneratePom=true'
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/usdot/jpo/ode/jpo-ode-core/1.0.10-SNAPSHOT)'
-- task: Maven@3
+  name: 'Build'
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'

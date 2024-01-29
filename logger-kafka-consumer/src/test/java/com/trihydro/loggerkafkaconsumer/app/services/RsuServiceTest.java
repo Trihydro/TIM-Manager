@@ -23,7 +23,7 @@ public class RsuServiceTest extends TestBase<RsuService> {
         // Assert
         Assertions.assertEquals(1, data.size());
         verify(mockStatement).executeQuery(
-                "select * from rsu inner join its.rsu_vw on rsu.deviceid = its.rsu_vw.deviceid order by milepost asc");
+                "select * from rsu inner join rsu_view on rsu.deviceid = rsu_view.deviceid order by milepost asc");
         verify(mockRs).getInt("RSU_ID");
         verify(mockRs).getString("IPV4_ADDRESS");
         verify(mockRs).getBigDecimal("LATITUDE");
@@ -45,7 +45,7 @@ public class RsuServiceTest extends TestBase<RsuService> {
         // Assert
         Assertions.assertEquals(0, data.size());
         verify(mockStatement).executeQuery(
-                "select * from rsu inner join its.rsu_vw on rsu.deviceid = its.rsu_vw.deviceid order by milepost asc");
+                "select * from rsu inner join rsu_view on rsu.deviceid = rsu_view.deviceid order by milepost asc");
         verify(mockStatement).close();
         verify(mockRs).close();
         verify(mockConnection).close();

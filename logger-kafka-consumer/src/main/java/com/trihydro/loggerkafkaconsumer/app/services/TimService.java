@@ -505,6 +505,13 @@ public class TimService extends BaseService {
                                     Double.parseDouble(receivedMessageDetails.getLocationData().getSpeed()));
                         }
                     }
+                    else {
+                        // location data is null, set all to null (with correct type)
+                        if (col.equals("RMD_LD_ELEVATION") || col.equals("RMD_LD_HEADING") || col.equals("RMD_LD_LATITUDE")
+                                || col.equals("RMD_LD_LONGITUDE") || col.equals("RMD_LD_SPEED")) {
+                            preparedStatement.setNull(fieldNum, java.sql.Types.NUMERIC);
+                        }
+                    }
                     if (col.equals("RMD_RX_SOURCE") && receivedMessageDetails.getRxSource() != null) {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
                                 receivedMessageDetails.getRxSource().toString());
@@ -512,7 +519,23 @@ public class TimService extends BaseService {
                         SecurityResultCodeType securityResultCodeType = GetSecurityResultCodeTypes().stream()
                                 .filter(x -> x.getSecurityResultCodeType().equals(securityResultCode.toString()))
                                 .findFirst().orElse(null);
-                        preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());
+                        if (securityResultCodeType != null) {
+                            preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());
+                        }
+                        else {
+                            preparedStatement.setNull(fieldNum, java.sql.Types.INTEGER);
+                        }
+                    }
+                }
+                else {
+                    // message details are null, set all to null (with correct type)
+                    if (col.equals("RMD_LD_ELEVATION") || col.equals("RMD_LD_HEADING") || col.equals("RMD_LD_LATITUDE")
+                            || col.equals("RMD_LD_LONGITUDE") || col.equals("RMD_LD_SPEED")) {
+                        preparedStatement.setNull(fieldNum, java.sql.Types.NUMERIC);
+                    } else if (col.equals("RMD_RX_SOURCE")) {
+                        preparedStatement.setString(fieldNum, null);
+                    } else if (col.equals("SECURITY_RESULT_CODE")) {
+                        preparedStatement.setNull(fieldNum, java.sql.Types.INTEGER);
                     }
                 }
 

@@ -51,7 +51,7 @@ public class RegionServiceTest extends TestBase<RegionService> {
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, region.getLaneWidth());// LANE_WIDTH
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, region.getDirectionality());// DIRECTIONALITY
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 5, region.getDirection());// DIRECTION
-        verify(mockPreparedStatement).setBoolean(6, region.isClosedPath());// CLOSED_PATH
+        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 6, region.isClosedPath() ? 1 : 0);// CLOSED_PATH
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 7, anchor.getLatitude());// ANCHOR_LAT
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 8, anchor.getLongitude());// ANCHOR_LONG
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 9, pathId);// PATH_ID
@@ -62,7 +62,7 @@ public class RegionServiceTest extends TestBase<RegionService> {
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 14, (BigDecimal) null);// GEOMETRY_CIRCLE_POSITION_LONG
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 15, (BigDecimal) null);// GEOMETRY_CIRCLE_POSITION_ELEV
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 16, null);// GEOMETRY_CIRCLE_RADIUS
-        verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 17, null);// GEOMETRY_CIRCLE_UNITS
+        verify(mockPreparedStatement).setNull(17, java.sql.Types.INTEGER);// GEOMETRY_CIRCLE_UNITS
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

@@ -25,7 +25,7 @@ steps:
     options: |
       -Dfile="$(System.DefaultWorkingDirectory)/resources/jpo-ode-plugins-1.2.0.jar"
       -DgroupId="us.dot.jpo.ode"
-      -DartifactId=jpo-ode-plugins'
+      -DartifactId=jpo-ode-plugins
       -Dversion="1.2.0"
       -Dpackaging=jar
     goals: 'install:install-file'
@@ -42,7 +42,7 @@ steps:
     options: |
       -Dfile="$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.2.0.jar"
       -DgroupId="us.dot.jpo.ode"
-      -DartifactId=jpo-ode-core'
+      -DartifactId=jpo-ode-core
       -Dversion="1.2.0"
       -Dpackaging=jar
     goals: 'install:install-file'
@@ -59,7 +59,7 @@ steps:
     options: |
       -Dfile="$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.2.0.jar"
       -DgroupId="us.dot.jpo.ode"
-      -DartifactId=jpo-ode-common'
+      -DartifactId=jpo-ode-common
       -Dversion="1.2.0"
       -Dpackaging=jar
     goals: 'install:install-file'
@@ -76,7 +76,7 @@ steps:
     options: |
       -Dfile="$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar"
       -DgroupId="us.dot.jpo.ode"
-      -DartifactId=jpo-ode-svcs'
+      -DartifactId=jpo-ode-svcs
       -Dversion="1.2.0"
       -Dpackaging=jar
     goals: 'install:install-file'
@@ -93,7 +93,7 @@ steps:
     options: |
       -Dfile="$(System.DefaultWorkingDirectory)/resources/postgresql-42.6.0.jar"
       -DgroupId="org.postgresql"
-      -DartifactId=postgresql'
+      -DartifactId=postgresql
       -Dversion="42.6.0"
       -Dpackaging=jar
     goals: 'install:install-file'

@@ -13,6 +13,12 @@ steps:
 
 - checkout: self
 
+- task: Bash@3
+  name: 'LS_Files'
+  inputs:
+    targetType: 'inline'
+    script: '(ls -al resources)'
+
 - task: Maven@4
   name: 'Install_ODE_Plugins'
   inputs:

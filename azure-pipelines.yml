@@ -13,12 +13,6 @@ steps:
 
 - checkout: self
 
-- task: Bash@3
-  name: 'LS_Files'
-  inputs:
-    targetType: 'inline'
-    script: '(ls -al resources)'
-
 - task: Maven@4
   name: 'Install_ODE_Plugins'
   inputs:
@@ -88,9 +82,9 @@ steps:
 # https://stackoverflow.com/questions/74398884/where-to-save-a-reusable-static-jar-to-be-used-from-an-azure-devops-pipeline
 # https://learn.microsoft.com/en-us/azure/devops/artifacts/quickstarts/universal-packages?view=azure-devops&tabs=Windows#publish-universal-packages
 - task: Maven@4
-  name: 'Build_cv_data_service_library'
+  name: 'Build_All'
   inputs:
-    mavenPomFile: 'cv-data-service-library/pom.xml'
+    mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
     jdkVersionOption: '1.11'
@@ -99,110 +93,122 @@ steps:
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'install'
 
-- task: Maven@4
-  name: 'Build_cv_data_controller'
-  inputs:
-    mavenPomFile: 'cv-data-controller/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_cv_data_service_library'
+#   inputs:
+#     mavenPomFile: 'cv-data-service-library/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'install'
 
-- task: Maven@4
-  name: 'Build_rsu_data_controller'
-  inputs:
-    mavenPomFile: 'rsu-data-controller/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_cv_data_controller'
+#   inputs:
+#     mavenPomFile: 'cv-data-controller/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
 
-- task: Maven@4
-  name: 'Build_ode_data_logger'
-  inputs:
-    mavenPomFile: 'ode-data-logger/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_rsu_data_controller'
+#   inputs:
+#     mavenPomFile: 'rsu-data-controller/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
 
-- task: Maven@4
-  name: 'Build_ode_mongo_logger'
-  inputs:
-    mavenPomFile: 'ode-mongo-logger/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_ode_data_logger'
+#   inputs:
+#     mavenPomFile: 'ode-data-logger/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
 
-- task: Maven@4
-  name: 'Build_ode_wrapper'
-  inputs:
-    mavenPomFile: 'ode-wrapper/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_ode_mongo_logger'
+#   inputs:
+#     mavenPomFile: 'ode-mongo-logger/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
 
-- task: Maven@4
-  name: 'Build_cv_data_tasks'
-  inputs:
-    mavenPomFile: 'cv-data-tasks/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_ode_wrapper'
+#   inputs:
+#     mavenPomFile: 'ode-wrapper/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
 
-- task: Maven@4
-  name: 'Build_tim_refresh'
-  inputs:
-    mavenPomFile: 'tim-refresh/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_cv_data_tasks'
+#   inputs:
+#     mavenPomFile: 'cv-data-tasks/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
 
-- task: Maven@4
-  name: 'Build_logger_kafka_consumer'
-  inputs:
-    mavenPomFile: 'logger-kafka-consumer/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_tim_refresh'
+#   inputs:
+#     mavenPomFile: 'tim-refresh/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
 
-- task: Maven@4
-  name: 'Build_cert_expiration'
-  inputs:
-    mavenPomFile: 'cert-expiration/pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    pulishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'compile test'
+# - task: Maven@4
+#   name: 'Build_logger_kafka_consumer'
+#   inputs:
+#     mavenPomFile: 'logger-kafka-consumer/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'
+
+# - task: Maven@4
+#   name: 'Build_cert_expiration'
+#   inputs:
+#     mavenPomFile: 'cert-expiration/pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeVersion: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     pulishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'compile test'

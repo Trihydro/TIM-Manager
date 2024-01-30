@@ -71,7 +71,7 @@ steps:
 - task: Bash@3
   inputs:
     targetType: 'inline'
-    script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository)'
+    script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/us/dot/jpo/ode)'
 
 - task: Maven@4
   name: 'Build_cv_data_service_library'

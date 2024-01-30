@@ -44,20 +44,13 @@ git clone https://<username>@bitbucket.org/szumpf/ode-data-logger.git
 $ cd ode-data-logger
 ```
 
-**Step 3**: Add the Oracle JDBC driver to your local Maven repository
-
-```bash
-$ mvn install:install-file -Dfile=oracle/ojdbc6.jar
-      -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0.4 -Dpackaging=jar
-```
-
-**Step 4**: Change into the project directory
+**Step 3**: Change into the project directory
 
 ```bash
 $ cd ode-data-logger
 ```
 
-**Step 5**: Compile the project
+**Step 4**: Compile the project
 
 ```bash
 $ mvn clean compile assembly:single install

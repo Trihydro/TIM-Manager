@@ -56,7 +56,7 @@ steps:
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar -DgroupId=us.dot.jpo.ode -DartifactId=jpo-ode-svcs -Dversion="1.2.0" -Dpackaging=jar'
-    
+
 - task: Maven@4
   name: 'Install_pgsql'
   inputs:
@@ -68,10 +68,10 @@ steps:
     publishJUnitResults: false
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/postgresql-42.6.0.jar -DgroupId=org.postgresql -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar'
 
-# - task: Bash@3
-#   inputs:
-#     targetType: 'inline'
-#     script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/usdot/jpo/ode/jpo-ode-core/1.0.10-SNAPSHOT)'
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/usdot/jpo/ode/jpo-ode-core/1.0.10-SNAPSHOT)'
 
 - task: Maven@4
   name: 'Build_cv_data_service_library'

@@ -109,7 +109,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_rsu_data_controller'
@@ -121,7 +121,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_ode_data_logger'
@@ -133,7 +133,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_ode_mongo_logger'
@@ -145,7 +145,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_ode_wrapper'
@@ -157,7 +157,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_cv_data_tasks'
@@ -169,7 +169,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_tim_refresh'
@@ -181,7 +181,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_logger_kafka_consumer'
@@ -193,7 +193,7 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'
 
 - task: Maven@4
   name: 'Build_cert_expiration'
@@ -205,4 +205,4 @@ steps:
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'compile test'

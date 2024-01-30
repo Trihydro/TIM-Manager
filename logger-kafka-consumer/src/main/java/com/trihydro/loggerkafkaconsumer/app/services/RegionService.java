@@ -57,7 +57,7 @@ public class RegionService extends BaseService {
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, region.getDirection());
                 else if (col.equals("CLOSED_PATH"))
-                    preparedStatement.setBoolean(fieldNum, region.isClosedPath());
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, region.isClosedPath() ? 1 : 0);
                 else if (col.equals("ANCHOR_LAT") && anchor != null)
                     sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, anchor.getLatitude());
                 else if (col.equals("ANCHOR_LONG") && anchor != null)
@@ -103,7 +103,7 @@ public class RegionService extends BaseService {
                     String units = (pathId == null && geometry != null && geometry.getCircle() != null)
                             ? geometry.getCircle().getUnits()
                             : null;
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, units);
+                    setIntFromStringSafe(preparedStatement, fieldNum, units);
                 }
                 fieldNum++;
             }
@@ -126,5 +126,19 @@ public class RegionService extends BaseService {
             }
         }
         return Long.valueOf(0);
+    }
+
+    private void setIntFromStringSafe(PreparedStatement preparedStatement, int fieldNum, String string) throws SQLException {
+        int intToDeposit = -1;
+        try {
+            intToDeposit = Integer.parseInt(string);
+        }
+        catch (NumberFormatException e) {
+            // failed to parse to int (e.g. null or not a number)
+            preparedStatement.setNull(fieldNum, java.sql.Types.INTEGER);
+            return;
+        }
+
+        sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, intToDeposit);   
     }
 }

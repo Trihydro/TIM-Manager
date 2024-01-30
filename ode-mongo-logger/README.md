@@ -119,7 +119,8 @@ You may configure these values in `ode-mongo-logger/src/main/resources/applicati
 | --------------------------------- | -------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
 | mongologger.hostname              | MONGO_HOSTNAME                   | IP address of the kafka host              | 0.0.0.0                                                        |
 | mongologger.mongoHost             | MONGO_HOST                       | Mongo server (IP or DNS)                  | 0.0.0.0                                                        |
-| mongologger.mongoDatabase         | MONGO_DATABASE                   | Name of Mongo database                    | cvtest                                                         |
+| mongologger.mongoDatabase         | MONGO_DATABASE                   | Name of Mongo database to deposit into                    | cvtest                                                         |
+| mongologger.mongoAuthDatabase         | MONGO_AUTH_DATABASE                   | Name of Mongo database the user is defined in                    | cvtest                                                         |
 | mongologger.mongoUsername         | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
 | mongologger.mongoPassword         | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
 | mongologger.alertAddresses        | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |

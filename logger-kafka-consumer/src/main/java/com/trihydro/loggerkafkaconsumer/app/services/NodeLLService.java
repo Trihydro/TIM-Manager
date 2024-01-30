@@ -53,13 +53,13 @@ public class NodeLLService extends BaseService {
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 nodeXY.getAttributes().getdWidth());
                     else
-                        preparedStatement.setString(fieldNum, null);
+                        preparedStatement.setNull(fieldNum, java.sql.Types.NUMERIC);
                 else if (col.equals("ATTRIBUTES_DELEVATION"))
                     if (nodeXY.getAttributes() != null)
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
                                 nodeXY.getAttributes().getdElevation());
                     else
-                        preparedStatement.setString(fieldNum, null);
+                        preparedStatement.setNull(fieldNum, java.sql.Types.NUMERIC);
                 fieldNum++;
             }
             Long nodeLLId = dbInteractions.executeAndLog(preparedStatement, "nodell");

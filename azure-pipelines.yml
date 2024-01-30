@@ -29,12 +29,11 @@ steps:
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     options: |
-      -Dfile="resources/jpo-ode-plugins-1.2.0.jar"
       -DgroupId="us.dot.jpo.ode"
       -DartifactId=jpo-ode-plugins
       -Dversion="1.2.0"
       -Dpackaging=jar
-    goals: 'install:install-file'
+    goals: 'install:install-file -Dfile=resources/jpo-ode-plugins-1.2.0.jar'
 
 - task: Maven@4
   name: 'Install_ODE_Core'

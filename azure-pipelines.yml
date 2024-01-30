@@ -25,7 +25,7 @@ steps:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     options: '-Dfile=resources/jpo-ode-plugins-1.2.0.jar -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.2.0" -Dpackaging=jar'
@@ -37,7 +37,7 @@ steps:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     options: '-Dfile="$(System.DefaultWorkingDirectory)/resources/jpo-ode-core-1.2.0.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.2.0" -Dpackaging=jar'
@@ -49,7 +49,7 @@ steps:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     options: '-Dfile="$(System.DefaultWorkingDirectory)/resources/jpo-ode-common-1.2.0.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.2.0" -Dpackaging=jar'
@@ -61,7 +61,7 @@ steps:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     options: '-Dfile="$(System.DefaultWorkingDirectory)/resources/jpo-ode-svcs.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.2.0" -Dpackaging=jar'
@@ -73,7 +73,7 @@ steps:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     options: '-Dfile="$(System.DefaultWorkingDirectory)/resources/postgresql-42.6.0.jar" -DgroupId="org.postgresql" -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar'
@@ -93,7 +93,7 @@ steps:
     mavenPomFile: 'cv-data-service-library/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -105,7 +105,7 @@ steps:
     mavenPomFile: 'cv-data-controller/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -117,7 +117,7 @@ steps:
     mavenPomFile: 'rsu-data-controller/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -129,7 +129,7 @@ steps:
     mavenPomFile: 'ode-data-logger/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -141,7 +141,7 @@ steps:
     mavenPomFile: 'ode-mongo-logger/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -153,7 +153,7 @@ steps:
     mavenPomFile: 'ode-wrapper/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -165,7 +165,7 @@ steps:
     mavenPomFile: 'cv-data-tasks/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -177,7 +177,7 @@ steps:
     mavenPomFile: 'tim-refresh/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -189,7 +189,7 @@ steps:
     mavenPomFile: 'logger-kafka-consumer/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -201,7 +201,7 @@ steps:
     mavenPomFile: 'cert-expiration/pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeVersion: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     pulishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'

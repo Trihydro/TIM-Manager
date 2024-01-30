@@ -68,11 +68,14 @@ steps:
     publishJUnitResults: false
     goals: 'install:install-file -Dfile=$(System.DefaultWorkingDirectory)/resources/postgresql-42.6.0.jar -DgroupId=org.postgresql -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar'
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/us/dot/jpo/ode)'
-
+# - task: Bash@3
+#   inputs:
+#     targetType: 'inline'
+#     script: '(cd /home/vsts/.m2; find . -name "_remote.repositories" -type f -delete; ls -al /home/vsts/.m2/repository/us/dot/jpo/ode)'
+# for some reason the builds are not finding the installed jar files
+# TODO: swap to universal package repo
+# https://stackoverflow.com/questions/74398884/where-to-save-a-reusable-static-jar-to-be-used-from-an-azure-devops-pipeline
+# https://learn.microsoft.com/en-us/azure/devops/artifacts/quickstarts/universal-packages?view=azure-devops&tabs=Windows#publish-universal-packages
 - task: Maven@4
   name: 'Build_cv_data_service_library'
   inputs:

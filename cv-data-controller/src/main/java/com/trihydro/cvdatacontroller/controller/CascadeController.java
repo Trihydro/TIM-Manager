@@ -68,16 +68,15 @@ public class CascadeController extends BaseController {
         TriggerRoad triggerRoad = null;
         boolean cached = false;
 
-        try {
-            List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
+        List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
+        if (countyRoadIds != null) {
             cached = true;
             if (countyRoadIds.size() == 0) {
                 // avoid hitting the database if we know there are no segments associated with this road code
                 return new ResponseEntity<TriggerRoad>(new TriggerRoad(roadCode, new ArrayList<CountyRoadSegment>()), HttpStatus.OK);
             }
-        } catch (TriggerRoadCache.NotCachedException notCachedException) {
-            cached = false;
         }
+
         try {
             triggerRoad = retrieveTriggerRoadFromDatabase(roadCode);
             if (!cached) {

@@ -107,7 +107,16 @@ public class CascadeController extends BaseController {
 
             // build SQL statement
             String viewName = CountyRoadsGeometryView.countyRoadsGeometryViewName;
-            String query = "select * from " + viewName + " where cr_id = " + countyRoadId;
+            String query = String.format("select %s, %s, %s, %s, %s from %s where %s = %d order by %s asc",
+                    CountyRoadsGeometryView.commonNameColumnName,
+                    CountyRoadsGeometryView.directionColumnName,
+                    CountyRoadsGeometryView.milepostColumnName,
+                    CountyRoadsGeometryView.longitudeColumnName,
+                    CountyRoadsGeometryView.latitudeColumnName,
+                    viewName,
+                    "cr_id",
+                    countyRoadId,
+                    CountyRoadsGeometryView.milepostColumnName);
             rs = statement.executeQuery(query);
 
             while (rs.next()) {

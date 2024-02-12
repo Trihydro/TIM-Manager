@@ -30,9 +30,9 @@ public class TimRsuService extends BaseService {
 
         try {
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("TIM_RSU",
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim_rsu",
                     timDbTables.getTimRsuTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "TIM_RSU_ID" });
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_rsu_id" });
             int fieldNum = 1;
 
             for (String col : timDbTables.getTimRsuTable()) {

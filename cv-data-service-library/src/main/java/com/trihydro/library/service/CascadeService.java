@@ -117,7 +117,11 @@ public class CascadeService extends CvDataServiceLibrary {
      * @return true if the TIM is a cascade TIM, false otherwise
      */
     public static boolean isCascadeTim(WydotTim wydotTim) {
-        return wydotTim.getClientId().contains(CASCADE_TIM_ID_DELIMITER);
+        String clientId = wydotTim.getClientId();
+        if (clientId == null) {
+            return false;
+        }
+        return clientId.contains(CASCADE_TIM_ID_DELIMITER);
     }
 
     /**

@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.helpers.caches.TriggerRoadCache.NotCachedException;
 import com.trihydro.library.model.CountyRoadSegment;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
@@ -47,12 +46,7 @@ public class TriggerRoadCacheTest {
         TriggerRoadCache triggerRoadCache = new TriggerRoadCache(mockUtility, mockConfig);
 
         // execute
-        List<Integer> segmentIds = null;
-        try {
-            segmentIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad("I80");
-        } catch (NotCachedException e) {
-            // ignore
-        }
+        List<Integer> segmentIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad("I80");
         
         // verify null
         assertNull(segmentIds);
@@ -73,12 +67,7 @@ public class TriggerRoadCacheTest {
         triggerRoadCache.updateCache("I80", triggerRoad);
 
         // execute
-        List<Integer> segmentIds = null;
-        try {
-            segmentIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad("I80");
-        } catch (NotCachedException e) {
-            // ignore
-        }
+        List<Integer> segmentIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad("I80");
         
         // verify
         assertNotNull(segmentIds);
@@ -99,12 +88,7 @@ public class TriggerRoadCacheTest {
 
         // execute & verify
         triggerRoadCache.clear();
-        List<Integer> segmentIds = null;
-        try {
-            segmentIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad("I80");
-        } catch (NotCachedException e) {
-            assertNotNull(e);
-        }
+        List<Integer> segmentIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad("I80");
         assertNull(segmentIds);
     }
 

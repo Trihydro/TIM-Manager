@@ -217,7 +217,7 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         query += " from active_tim atim";
         query += " inner join tim_rsu on atim.tim_id = tim_rsu.tim_id";
         query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-        query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+        query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
         query += " where sat_record_id is null";
         query += " and ipv4_address = 'ipv4Address' and client_id = 'clientId'";
         query += " and atim.direction = 'direction'";
@@ -259,10 +259,10 @@ public class ActiveTimServiceTest extends TestBase<ActiveTimService> {
         when(mockRs.getTimestamp(eq("MINSTART"), any())).thenReturn(dbValue);
         mockUtility.timestampFormat = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
 
-        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-YYYY HH12.MI.SS.SSS a')), "
+        String query = "SELECT LEAST((SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-YYYY HH12.MI.SS a')), "
                 + "(COALESCE((SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID "
                 + "WHERE TIM.PACKET_ID = '0000'),"
-                + "(SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-YYYY HH12.MI.SS.SSS a'))))) minStart";
+                + "(SELECT TO_TIMESTAMP('03-Jan-21 12.00.00.000 AM', 'DD-MON-YYYY HH12.MI.SS a'))))) minStart";
 
         // Act
         String minExp = uut.getMinExpiration("0000", expDate);

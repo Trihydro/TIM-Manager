@@ -68,16 +68,15 @@ public class CascadeController extends BaseController {
         TriggerRoad triggerRoad = null;
         boolean cached = false;
 
-        try {
-            List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
+        List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
+        if (countyRoadIds != null) {
             cached = true;
             if (countyRoadIds.size() == 0) {
                 // avoid hitting the database if we know there are no segments associated with this road code
                 return new ResponseEntity<TriggerRoad>(new TriggerRoad(roadCode, new ArrayList<CountyRoadSegment>()), HttpStatus.OK);
             }
-        } catch (TriggerRoadCache.NotCachedException notCachedException) {
-            cached = false;
         }
+
         try {
             triggerRoad = retrieveTriggerRoadFromDatabase(roadCode);
             if (!cached) {
@@ -108,7 +107,16 @@ public class CascadeController extends BaseController {
 
             // build SQL statement
             String viewName = CountyRoadsGeometryView.countyRoadsGeometryViewName;
-            String query = "select * from " + viewName + " where cr_id = " + countyRoadId;
+            String query = String.format("select %s, %s, %s, %s, %s from %s where %s = %d order by %s asc",
+                    CountyRoadsGeometryView.commonNameColumnName,
+                    CountyRoadsGeometryView.directionColumnName,
+                    CountyRoadsGeometryView.milepostColumnName,
+                    CountyRoadsGeometryView.longitudeColumnName,
+                    CountyRoadsGeometryView.latitudeColumnName,
+                    viewName,
+                    "cr_id",
+                    countyRoadId,
+                    CountyRoadsGeometryView.milepostColumnName);
             rs = statement.executeQuery(query);
 
             while (rs.next()) {

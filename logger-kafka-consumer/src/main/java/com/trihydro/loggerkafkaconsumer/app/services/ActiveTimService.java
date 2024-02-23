@@ -281,7 +281,7 @@ public class ActiveTimService extends BaseService {
             query += " from active_tim atim";
             query += " inner join tim_rsu on atim.tim_id = tim_rsu.tim_id";
             query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-            query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+            query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
             query += " where sat_record_id is null and ipv4_address = '" + ipv4Address + "' and client_id = '"
                     + clientId + "' and atim.direction = '" + direction + "'";
 
@@ -463,7 +463,7 @@ public class ActiveTimService extends BaseService {
             // coalesce function with the expDate passed in value.
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
-            String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+            String targetFormat = "DD-MON-YYYY HH12.MI.SS a";
             String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
                     translateIso8601ToTimestampFormat(expDate), targetFormat);
 

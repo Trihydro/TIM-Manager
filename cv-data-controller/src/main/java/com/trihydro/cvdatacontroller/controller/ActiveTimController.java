@@ -527,8 +527,8 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
 			selectStatement += " inner join tim_rsu on tim_rsu.tim_id = tim.tim_id";
 			selectStatement += " inner join rsu on rsu.rsu_id = tim_rsu.rsu_id";
-			selectStatement += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
-			selectStatement += " where rsu_vw.ipv4_address = '" + rsuTarget + "'";
+			selectStatement += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
+			selectStatement += " where rsu_view.ipv4_address = '" + rsuTarget + "'";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -1119,12 +1119,12 @@ public class ActiveTimController extends BaseController {
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
 
-			String query = "select active_tim.*, rsu_vw.ipv4_address, tim_rsu.rsu_index from active_tim";
+			String query = "select active_tim.*, rsu_view.ipv4_address, tim_rsu.rsu_index from active_tim";
 			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
 			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
 			query += " where sat_record_id is null";
-			query += " order by rsu_vw.ipv4_address, tim_rsu.rsu_index"; // Required by ValidateRsus
+			query += " order by rsu_view.ipv4_address, tim_rsu.rsu_index"; // Required by ValidateRsus
 
 			rs = statement.executeQuery(query);
 
@@ -1198,7 +1198,7 @@ public class ActiveTimController extends BaseController {
 			String query = "select * from active_tim";
 			query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
 			query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-			query += " inner join rsu_vw on rsu.deviceid = rsu_vw.deviceid";
+			query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
 			query += " where ipv4_address = '" + artqm.getIpv4() + "' and client_id = '" + artqm.getClientId()
 					+ "' and active_tim.direction = '" + artqm.getDirection() + "'";
 
@@ -1511,7 +1511,7 @@ public class ActiveTimController extends BaseController {
 			// coalesce function with the expDate passed in value.
 			connection = dbInteractions.getConnectionPool();
 			statement = connection.createStatement();
-			String targetFormat = "DD-MON-YYYY HH12.MI.SS.SSS a";
+			String targetFormat = "DD-MON-YYYY HH12.MI.SS a";
 			String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
 					translateIso8601ToTimestampFormat(expDate), targetFormat);
 

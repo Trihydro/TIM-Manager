@@ -729,7 +729,7 @@ public class TimGenerationHelper {
 
         // set durationTime
         if (resetExpirationTime) {
-            df.setDurationTime(0);
+            df.setDurationTime(5); // set to non-zero so RSUs send to OBUs
         } else if (aTim.getEndDateTime() != null) {
             int durationTime = utility.getMinutesDurationBetweenTwoDates(df.getStartDateTime(), aTim.getEndDateTime());
             // J2735 has duration time of 0-32000

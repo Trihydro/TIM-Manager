@@ -23,7 +23,7 @@ public class SnmpHelper {
                             // to hex string 8003 when p-encoded
         snmp.setMsgid(31);
         snmp.setMode(1);
-        snmp.setInterval(2);
+        snmp.setInterval(2000); // specified in milliseconds, as required by 4.1 & NTCIP1218
         snmp.setDeliverystart(startDateTime);// "2018-01-01T00:00:00-06:00");
 
         if (endDateTime == null || StringUtils.isBlank(endDateTime)) {

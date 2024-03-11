@@ -274,21 +274,63 @@ public class TimController extends BaseController {
         Timestamp oneMonthPriorTimestamp = getOneMonthPriorTimestamp();
 
         try {
+            // 1. delete old tim_rsu records
             deleteResult = deleteOldTimRsus(oneMonthPriorTimestamp);
-            deleteResult &= deleteOldDataFrames(oneMonthPriorTimestamp);
-
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old tim_rsus");
+                utility.logWithDate("Failed to cleanup old tim_rsu records");
                 return ResponseEntity.ok(false);
             }
 
+            // 2. delete old data_frame_itis_code records
+            deleteResult &= deleteOldDataFrameItisCodes(oneMonthPriorTimestamp);
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old data_frame_itis_code records");
+                return ResponseEntity.ok(false);
+            }
+
+            // 3. delete old region records
+            deleteResult &= deleteOldRegions(oneMonthPriorTimestamp);
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old region records");
+                return ResponseEntity.ok(false);
+            }
+
+            // 4. delete old path_node_ll records
+            deleteResult &= deleteOldPathNodeLL(oneMonthPriorTimestamp);
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old path_node_ll records");
+                return ResponseEntity.ok(false);
+            }
+
+            // 5. delete old path records
+            deleteResult &= deleteOldPaths(oneMonthPriorTimestamp);
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old path records");
+                return ResponseEntity.ok(false);
+            }
+
+            // 6. delete old node_ll records
+            deleteResult &= deleteOldNodeLL(oneMonthPriorTimestamp);
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old node_ll records");
+                return ResponseEntity.ok(false);
+            }
+
+            // 7. delete old data_frame records
+            deleteResult &= deleteOldDataFrames(oneMonthPriorTimestamp);
+            if (!deleteResult) {
+                utility.logWithDate("Failed to cleanup old data_frame records");
+                return ResponseEntity.ok(false);
+            }
+
+            // 8. delete old tim records
             String deleteSQL = "DELETE FROM tim WHERE ode_received_at < ? and tim_id NOT IN (SELECT tim_id FROM active_tim)";
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(deleteSQL);
             preparedStatement.setTimestamp(1, oneMonthPriorTimestamp);
 
             // execute delete SQL statement
-            deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
+            deleteResult &= dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -309,11 +351,7 @@ public class TimController extends BaseController {
     }
 
     private boolean deleteOldDataFrames(Timestamp timestamp) {
-        boolean deleteResult = deleteOldDataFrameItisCodes(timestamp);
-        deleteResult &= deleteOldRegions(timestamp);
-        if (!deleteResult) {
-            return false;
-        }
+        boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -384,10 +422,7 @@ public class TimController extends BaseController {
     }
 
     private boolean deleteOldRegions(Timestamp timestamp) {
-        boolean deleteResult = deleteOldPaths(timestamp);
-        if (!deleteResult) {
-            return false;
-        }
+        boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -423,10 +458,7 @@ public class TimController extends BaseController {
     }
 
     private boolean deleteOldPaths(Timestamp timestamp) {
-        boolean deleteResult = deleteOldPathNodeLL(timestamp);
-        if (!deleteResult) {
-            return false;
-        }
+        boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -462,10 +494,7 @@ public class TimController extends BaseController {
     }
 
     private boolean deleteOldPathNodeLL(Timestamp timestamp) {
-        boolean deleteResult = deleteOldNodeLL(timestamp);
-        if (!deleteResult) {
-            return false;
-        }
+        boolean deleteResult = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 

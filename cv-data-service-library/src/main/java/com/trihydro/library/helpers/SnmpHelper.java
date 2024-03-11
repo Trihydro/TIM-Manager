@@ -18,7 +18,7 @@ import us.dot.its.jpo.ode.plugin.SNMP;
 public class SnmpHelper {   
     public SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
         SNMP snmp = new SNMP();
-        snmp.setChannel(178);
+        snmp.setChannel(183);
         snmp.setRsuid("83");// RSU wants hex 83, and the ODE is expecting a hex value to parse. This parses
                             // to hex string 8003 when p-encoded
         snmp.setMsgid(31);

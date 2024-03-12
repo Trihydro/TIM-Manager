@@ -46,10 +46,10 @@ public class CreateBaseTimUtil {
 
         // set TIM Properties
         OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
-        dataFrame.setSspTimRights((short) 1);
-        dataFrame.setSspLocationRights((short) 1);
-        dataFrame.setSspMsgContent((short) 1);
-        dataFrame.setSspMsgTypes((short) 1);
+        dataFrame.setNotUsed((short) 1);
+        dataFrame.setNotUsed1((short) 1);
+        dataFrame.setNotUsed2((short) 1);
+        dataFrame.setNotUsed3((short) 1);
 
         // set TIM TimeStamp and StartDateTime to current time in UTC
         String nowAsISO = Instant.now().toString();

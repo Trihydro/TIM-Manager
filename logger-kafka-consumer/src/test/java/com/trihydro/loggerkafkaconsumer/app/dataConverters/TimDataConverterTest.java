@@ -117,7 +117,7 @@ public class TimDataConverterTest {
                 dataFrames[0] = dataFrame;
                 tim.setDataframes(dataFrames);
 
-                odeTimPayload.setTim(tim);
+                odeTimPayload.setData(tim);
 
                 // Act
                 OdeData odeDataTest = uut.processTimJson(value);
@@ -130,27 +130,27 @@ public class TimDataConverterTest {
 
                 for (int i = 0; i < 2; i++) {
                         Assertions.assertEquals(
-                                        odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath()
+                                        getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getNodeLat(),
-                                        odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath()
+                                        getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getNodeLat());
                         Assertions.assertEquals(
-                                        odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath()
+                                        getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getNodeLong(),
-                                        odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath()
+                                        getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getNodeLong());
                         Assertions.assertEquals(
-                                        odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath()
+                                        getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getDelta(),
-                                        odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath()
+                                        getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath()
                                                         .getNodes()[i].getDelta());
                 }
 
-                Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
-                                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
-                Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
-                Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
-                Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
+                Assertions.assertEquals(getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getAnchorPosition(),
+                                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getAnchorPosition());
+                Assertions.assertEquals(getTim(odeTimPayload).getMsgCnt(), getTim(odeTimPayloadTest).getMsgCnt());
+                Assertions.assertEquals(getTim(odeTimPayload).getPacketID(), getTim(odeTimPayloadTest).getPacketID());
+                Assertions.assertEquals(getTim(odeTimPayload).getUrlB(), getTim(odeTimPayloadTest).getUrlB());
         }
 
         @Test
@@ -219,5 +219,12 @@ public class TimDataConverterTest {
                 // Assert
                 Assertions.assertNotNull(data);
                 Assertions.assertNotNull(data.getMetadata());
+        }
+
+        /**
+         * Helper method to get an OdeTravelerInformationMessage object given an OdeTimPayload.
+         */
+        private OdeTravelerInformationMessage getTim(OdeTimPayload odeTimPayload) {
+                return (OdeTravelerInformationMessage) odeTimPayload.getData();
         }
 }

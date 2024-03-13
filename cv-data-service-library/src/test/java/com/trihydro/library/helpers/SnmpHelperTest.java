@@ -24,8 +24,8 @@ public class SnmpHelperTest {
         Assertions.assertEquals("83", snmp.getRsuid());
         Assertions.assertEquals(31, snmp.getMsgid());
         Assertions.assertEquals(1, snmp.getMode());
-        Assertions.assertEquals(178, snmp.getChannel());
-        Assertions.assertEquals(2, snmp.getInterval());
+        Assertions.assertEquals(183, snmp.getChannel());
+        Assertions.assertEquals(2000, snmp.getInterval());
         Assertions.assertEquals(startDateTime, snmp.getDeliverystart());
         Assertions.assertEquals(endDateTime, snmp.getDeliverystop());
         Assertions.assertEquals(1, snmp.getEnable());

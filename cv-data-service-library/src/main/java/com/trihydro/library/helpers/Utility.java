@@ -224,7 +224,16 @@ public class Utility {
 	}
 
     /**
-     * This method calculates the anchor coordinate for the given mileposts.
+     * This method calculates the anchor coordinate for the given mileposts by using the formula:
+	 *	1) dLat = firstPointLat - secondPointLat
+	 *	2) dLon = firstPointLon - secondPointLon
+	 *	3) d0Lat = 111195 * dLat
+	 *	4) d0Lon = 111195 * cos(firstPointLat) * dLon
+	 *	5) d0 = sqrt(d0Lat^2 + d0Lon^2)
+	 *	6) mD = 15 / d0
+	 *	7) anchorLat = firstPointLat + mD * dLat
+	 *	8) anchorLon = firstPointLon + mD * dLon
+	 *  9) return (anchorLat, anchorLon) as the anchor coordinate
      * @param firstPoint The first milepost.
      * @param secondPoint The second milepost.
      * @return The anchor coordinate.

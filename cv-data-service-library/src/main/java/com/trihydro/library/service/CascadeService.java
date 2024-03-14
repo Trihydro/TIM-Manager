@@ -82,15 +82,15 @@ public class CascadeService extends CvDataServiceLibrary {
     /**
      * This method builds a WydotTim for one or more cascading conditions associated with a segment.
      * @param countyRoadSegment The segment that has the condition(s)
-     * @param anchor The first milepost in the segment
+     * @param firstMilepost The first milepost in the segment
      * @param lastMilepost The last milepost in the segment
      * @param clientId The client ID of the original TIM
      * @return A WydotTim that represents the cascading condition(s) for the segment
      */
-    public WydotTim buildCascadeTim(CountyRoadSegment countyRoadSegment, Milepost anchor, Milepost lastMilepost, String clientId) {
+    public WydotTim buildCascadeTim(CountyRoadSegment countyRoadSegment, Milepost firstMilepost, Milepost lastMilepost, String clientId) {
         WydotTim toReturn = new WydotTim();
         // note: direction not set because it's not applicable to cascading conditions
-        toReturn.setStartPoint(new Coordinate(anchor.getLatitude(), anchor.getLongitude()));
+        toReturn.setStartPoint(new Coordinate(firstMilepost.getLatitude(), firstMilepost.getLongitude()));
         toReturn.setEndPoint(new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude()));
         toReturn.setRoute(countyRoadSegment.getCommonName());
         List<String> itisCodes = new ArrayList<String>();

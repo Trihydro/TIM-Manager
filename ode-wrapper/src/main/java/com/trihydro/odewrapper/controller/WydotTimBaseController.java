@@ -736,7 +736,7 @@ public abstract class WydotTimBaseController {
         }
         var anchor = getAnchorPoint(cascadeMileposts);
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
-        WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, anchor, reducedMileposts.get(reducedMileposts.size() - 1), clientId);
+        WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, reducedMileposts.get(0), reducedMileposts.get(reducedMileposts.size() - 1), clientId);
         createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
     }
 

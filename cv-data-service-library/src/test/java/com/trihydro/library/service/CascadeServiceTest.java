@@ -143,16 +143,16 @@ public class CascadeServiceTest extends BaseServiceTest {
     public void testBuildCascadeTim_CLOSED() {
         // prepare
         CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, true, false, false, false);
-        Milepost anchor = new Milepost();
+        Milepost firstMilepost = new Milepost();
         Milepost lastMilepost = new Milepost();
         String clientId = "test";
 
         // execute
-        WydotTim result = uut.buildCascadeTim(countyRoadSegment, anchor, lastMilepost, clientId);
+        WydotTim result = uut.buildCascadeTim(countyRoadSegment, firstMilepost, lastMilepost, clientId);
 
         // verify
         String expectedClientId = String.format(clientId + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId());
-        Coordinate expectedStartPoint = new Coordinate(anchor.getLatitude(), anchor.getLongitude());
+        Coordinate expectedStartPoint = new Coordinate(firstMilepost.getLatitude(), firstMilepost.getLongitude());
         Coordinate expectedEndPoint = new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude());
         List<String> expectedItisCodes = new ArrayList<String>() {
             {
@@ -171,16 +171,16 @@ public class CascadeServiceTest extends BaseServiceTest {
     public void testBuildCascadeTim_C2LHPV() {
         // prepare
         CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, true, false, false);
-        Milepost anchor = new Milepost();
+        Milepost firstMilepost = new Milepost();
         Milepost lastMilepost = new Milepost();
         String clientId = "test";
 
         // execute
-        WydotTim result = uut.buildCascadeTim(countyRoadSegment, anchor, lastMilepost, clientId);
+        WydotTim result = uut.buildCascadeTim(countyRoadSegment, firstMilepost, lastMilepost, clientId);
 
         // verify
         String expectedClientId = String.format(clientId + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId());
-        Coordinate expectedStartPoint = new Coordinate(anchor.getLatitude(), anchor.getLongitude());
+        Coordinate expectedStartPoint = new Coordinate(firstMilepost.getLatitude(), firstMilepost.getLongitude());
         Coordinate expectedEndPoint = new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude());
         List<String> expectedItisCodes = new ArrayList<String>() {
             {

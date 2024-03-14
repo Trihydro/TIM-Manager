@@ -731,7 +731,7 @@ public abstract class WydotTimBaseController {
         }
         List<Milepost> cascadeMileposts = cascadeService.getMilepostsForSegment(countyRoadSegment);
         if (cascadeMileposts.size() < 2) { // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode TIM if we supply less than 2.
-            utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
+            utility.logWithDate("Found less than 2 mileposts while attempting to cascade condition, unable to generate TIM.");
             return;
         }
         var anchor = getAnchorPoint(cascadeMileposts);

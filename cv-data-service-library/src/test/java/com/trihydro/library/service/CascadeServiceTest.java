@@ -103,43 +103,6 @@ public class CascadeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testContainsCascadingCondition_TRUE() {
-        // prepare
-        List<String> itisCodes = new ArrayList<String>() {
-            {
-                add("770");
-                add("Closed to light, high profile vehicles");
-            }
-        };
-        WydotTim wydotTim = new WydotTim();
-        wydotTim.setItisCodes(itisCodes);
-
-        // execute
-        boolean result = uut.containsCascadingCondition(wydotTim);
-
-        // verify
-        Assertions.assertTrue(result);
-    }
-
-    @Test
-    public void testContainsCascadingCondition_FALSE() {
-        // prepare
-        List<String> itisCodes = new ArrayList<String>() {
-            {
-                add("test");
-            }
-        };
-        WydotTim wydotTim = new WydotTim();
-        wydotTim.setItisCodes(itisCodes);
-
-        // execute
-        boolean result = uut.containsCascadingCondition(wydotTim);
-
-        // verify
-        Assertions.assertFalse(result);
-    }
-
-    @Test
     public void testBuildCascadeTim_CLOSED() {
         // prepare
         CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, true, false, false, false);

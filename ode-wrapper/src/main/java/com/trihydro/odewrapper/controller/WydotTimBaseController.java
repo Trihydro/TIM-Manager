@@ -539,8 +539,10 @@ public abstract class WydotTimBaseController {
             expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
         }
 
-        if (cascadeService.containsCascadingCondition(wydotTim)) {
-            handleCascadingConditions(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
+        // if tim is associated with a trigger road, cascade conditions
+        TriggerRoad triggerRoad = getTriggerRoad(wydotTim);
+        if (triggerRoad != null) {
+            handleCascadingConditions(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, triggerRoad);
         }
     }
 
@@ -680,22 +682,24 @@ public abstract class WydotTimBaseController {
     }
 
     /**
-     * This method retrieves the trigger road for the route and cascades conditions for each associated segment.
+     * This method retrieves the trigger road for the given WydotTim.
+     * @param wydotTim The WydotTim to retrieve the trigger road for.
+     * @return The trigger road for the given WydotTim if it exists, otherwise null.
      */
-    private void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType) {
-        // check for road_code by casting WydotTim and only check cascading conditions if road_code is present in the class
+    private TriggerRoad getTriggerRoad(WydotTim wydotTim) {
+        // check for road_code by casting WydotTim and only attempt to retrieve TriggerRoad if road_code is present in the class
         String roadCode = null;
         if (wydotTim instanceof WydotTimCc) {
             // Model `WydotTimCc` does not have a road_code field, return
-            return;
+            return null;
         }
         else if (wydotTim instanceof WydotTimIncident) {
             // Model `WydotTimIncident` does not have a road_code field, return
-            return;
+            return null;
         }
         else if (wydotTim instanceof WydotTimParking) {
             // Model `WydotTimParking` does not have a road_code field, return
-            return;
+            return null;
         }
         else if (wydotTim instanceof WydotTimRc) {
             // retrieve road_code from WydotTimRc
@@ -703,19 +707,25 @@ public abstract class WydotTimBaseController {
         }
         else if (wydotTim instanceof WydotTimRw) {
             // Model `WydotTimRw` does not have a road_code field, return
-            return;
+            return null;
         }
         else if (wydotTim instanceof WydotTimVsl) {
             // Model `WydotTimVsl` does not have a road_code field, return
-            return;
+            return null;
         }
         else {
             utility.logWithDate("Unrecognized model type, unable to generate cascading conditions.");
-            return;
+            return null;
         }
         
-        // retrieve trigger road and cascade conditions for each segment
-        TriggerRoad triggerRoad = cascadeService.getTriggerRoad(roadCode);
+        // retrieve trigger road
+        return cascadeService.getTriggerRoad(roadCode);
+    }
+
+    /**
+     * This method cascades conditions for each associated segment of the given trigger road.
+     */
+    private void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, TriggerRoad triggerRoad) {
         List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
         for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
             cascadeConditionsForSegment(countyRoadSegment, timType, startDateTime, endDateTime, pk, content, frameType, wydotTim.getClientId());

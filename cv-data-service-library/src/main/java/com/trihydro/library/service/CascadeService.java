@@ -73,13 +73,6 @@ public class CascadeService extends CvDataServiceLibrary {
     }
 
     /**
-     * This method checks if the TIM contains any cascading conditions. Returns true if it does, false otherwise.
-     */
-    public boolean containsCascadingCondition(WydotTim wydotTim) {
-        return wydotTim.getItisCodes().stream().anyMatch(cascadingItisCodes::contains);
-    }
-
-    /**
      * This method builds a WydotTim for one or more cascading conditions associated with a segment.
      * @param countyRoadSegment The segment that has the condition(s)
      * @param firstMilepost The first milepost in the segment

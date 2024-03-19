@@ -17,19 +17,19 @@ services:
       CONFIG_SDW_API_KEY: ${SDW_API_KEY}
       CONFIG_ALERT_ADDRESSES: ${WRAPPER_CONFIG_ALERT_ADDRESSES}
       CONFIG_FROM_EMAIL: ${WRAPPER_CONFIG_FROM_EMAIL}
-      CONFIG_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
       CONFIG_MAIL_HOST: ${MAIL_HOST}
       CONFIG_MAIL_PORT: ${MAIL_PORT}
+      CONFIG_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
       CONFIG_DEFAULT_LANE_WIDTH: ${WRAPPER_CONFIG_DEFAULT_LANE_WIDTH}
       CONFIG_CV_REST_SERVICE: ${WRAPPER_CONFIG_CV_REST_SERVICE}
       CONFIG_HTTP_LOGGING_MAX_SIZE: ${WRAPPER_CONFIG_HTTP_LOGGING_MAX_SIZE}
       CONFIG_RSU_ROUTES: ${WRAPPER_CONFIG_RSU_ROUTES}
       CONFIG_POINT_INCIDENT_BUFFER_MILES: ${WRAPPER_CONFIG_POINT_INCIDENT_BUFFER_MILES}
-      # THE FOLLOWING ARE ONLY USED IN PRODUCTION:
-      # SERVER_SSL_KEY_STORE: ${WRAPPER_SERVER_SSL_KEY_STORE}
-      # SERVER_SSL_KEY_STORE_PASSWORD: ${WRAPPER_SERVER_SSL_KEY_STORE_PASSWORD}
-      # SERVER_SSL_KEY_STORE_TYPE: ${WRAPPER_SERVER_SSL_KEY_STORE_TYPE}
-      # SERVER_SSL_KEY_ALIAS: ${WRAPPER_SERVER_SSL_KEY_ALIAS}
+# following only used in prod environment
+#      SERVER_SSL_KEY_STORE: ${WRAPPER_SERVER_SSL_KEY_STORE}
+#      SERVER_SSL_KEY_STORE_PASSWORD: ${WRAPPER_SERVER_SSL_KEY_STORE_PASSWORD}
+#      SERVER_SSL_KEY_STORE_TYPE: ${WRAPPER_SERVER_SSL_KEY_STORE_TYPE}
+#      SERVER_SSL_KEY_ALIAS: ${WRAPPER_SERVER_SSL_KEY_ALIAS}
     ports:
       - "7777:7777"
     logging:
@@ -69,6 +69,10 @@ services:
       CONFIG_RSU_VALIDATION_PERIOD_MINUTES: ${TASKS_CONFIG_RSU_VALIDATION_PERIOD_MINUTES}
       CONFIG_TMDD_VALIDATION_PERIOD_MINUTES: ${TASKS_CONFIG_TMDD_VALIDATION_PERIOD_MINUTES}
       CONFIG_RETENTION_ENFORCEMENT_PERIOD_MINUTES: ${TASKS_CONFIG_RETENTION_ENFORCEMENT_PERIOD_MINUTES}
+      CONFIG_RETENTION_REMOVE_TIMS: ${TASKS_CONFIG_RETENTION_REMOVE_TIMS}
+      CONFIG_RETENTION_REMOVE_DA: ${TASKS_CONFIG_RETENTION_REMOVE_DA}
+      CONFIG_RETENTION_REMOVE_HMI: ${TASKS_CONFIG_RETENTION_REMOVE_HMI}
+      CONFIG_RETENTION_REMOVE_STATUS_LOGS: ${TASKS_CONFIG_RETENTION_REMOVE_STATUS_LOGS}
       CONFIG_BSM_CLEANUP_PERIOD_MINUTES: ${TASKS_CONFIG_BSM_CLEANUP_PERIOD_MINUTES}
       CONFIG_HSM_FUNCTIONALITY_MINUTES: ${TASKS_CONFIG_HSM_FUNCTIONALITY_MINUTES}
       CONFIG_HSM_URL: ${TASKS_CONFIG_HSM_URL}
@@ -160,71 +164,6 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  bsm_logger_mongo:
-    build: ode-mongo-logger
-    restart: always
-    environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: ${BSM_TOPIC}
-      MONGOLOGGER_DEPOSIT_GROUP: ${BSM_GROUP_MONGO}
-      MONGOLOGGER_HOSTNAME: ${MONGO_HOSTNAME}
-      MONGOLOGGER_MONGO_HOST: ${MONGO_HOST}
-      MONGOLOGGER_MONGO_DATABASE: ${MONGO_DATABASE}
-      MONGOLOGGER_MONGO_AUTH_DATABASE: ${MONGO_AUTH_DATABASE}
-      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGOLOGGER_ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
-      MONGOLOGGER_FROM_EMAIL: ${MONGO_FROM_EMAIL}
-      MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
-      MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  bsm_logger_mongo_2:
-    build: ode-mongo-logger
-    restart: always
-    environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: ${BSM_TOPIC}
-      MONGOLOGGER_DEPOSIT_GROUP: ${BSM_GROUP_MONGO}
-      MONGOLOGGER_HOSTNAME: ${MONGO_HOSTNAME}
-      MONGOLOGGER_MONGO_HOST: ${MONGO_HOST}
-      MONGOLOGGER_MONGO_DATABASE: ${MONGO_DATABASE}
-      MONGOLOGGER_MONGO_AUTH_DATABASE: ${MONGO_AUTH_DATABASE}
-      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGOLOGGER_ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
-      MONGOLOGGER_FROM_EMAIL: ${MONGO_FROM_EMAIL}
-      MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
-      MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  # bsm_logger:
-  #   build: ode-data-logger
-  #   restart: always
-  #   environment:
-  #     KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-  #     TRAC_URL: ${LOGGER_TRAC_URL}
-  #     ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-  #     FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-  #     ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-  #     MAIL_HOST: ${MAIL_HOST}
-  #     MAIL_PORT: ${MAIL_PORT}
-  #     DEPOSIT_TOPIC: ${BSM_TOPIC}
-  #     DEPOSIT_GROUP: ${BSM_GROUP_ORACLE}
-  #     CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-  #     PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-  #     ENV: ${LOGGER_ENV}
-  #   logging:
-  #     options:
-  #       max-size: "20m"
-  #       max-file: "3"
-
   tim_logger_mongo:
     build: ode-mongo-logger
     restart: always
@@ -247,12 +186,34 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  tim_logger_mongo_2:
+  bsm_logger_mongo:
     build: ode-mongo-logger
     restart: always
     environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: ${TIM_TOPIC}
-      MONGOLOGGER_DEPOSIT_GROUP: ${TIM_GROUP_MONGO}
+      MONGOLOGGER_DEPOSIT_TOPIC: ${BSM_TOPIC}
+      MONGOLOGGER_DEPOSIT_GROUP: ${BSM_GROUP_MONGO}
+      MONGOLOGGER_HOSTNAME: ${MONGO_HOSTNAME}
+      MONGOLOGGER_MONGO_HOST: ${MONGO_HOST}
+      MONGOLOGGER_MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGOLOGGER_MONGO_AUTH_DATABASE: ${MONGO_AUTH_DATABASE}
+      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGOLOGGER_ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
+      MONGOLOGGER_FROM_EMAIL: ${MONGO_FROM_EMAIL}
+      MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
+      MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
+      MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  driveralert_logger_mongo:
+    build: ode-mongo-logger
+    restart: always
+    environment:
+      MONGOLOGGER_DEPOSIT_TOPIC: ${DA_TOPIC}
+      MONGOLOGGER_DEPOSIT_GROUP: ${DA_GROUP_MONGO}
       MONGOLOGGER_HOSTNAME: ${MONGO_HOSTNAME}
       MONGOLOGGER_MONGO_HOST: ${MONGO_HOST}
       MONGOLOGGER_MONGO_DATABASE: ${MONGO_DATABASE}
@@ -311,51 +272,7 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  da_logger_mongo:
-    build: ode-mongo-logger
-    restart: always
-    environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: ${DA_TOPIC}
-      MONGOLOGGER_DEPOSIT_GROUP: ${DA_GROUP_MONGO}
-      MONGOLOGGER_HOSTNAME: ${MONGO_HOSTNAME}
-      MONGOLOGGER_MONGO_HOST: ${MONGO_HOST}
-      MONGOLOGGER_MONGO_DATABASE: ${MONGO_DATABASE}
-      MONGOLOGGER_MONGO_AUTH_DATABASE: ${MONGO_AUTH_DATABASE}
-      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGOLOGGER_ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
-      MONGOLOGGER_FROM_EMAIL: ${MONGO_FROM_EMAIL}
-      MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
-      MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  da_logger_mongo_2:
-    build: ode-mongo-logger
-    restart: always
-    environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: ${DA_TOPIC}
-      MONGOLOGGER_DEPOSIT_GROUP: ${DA_GROUP_MONGO}
-      MONGOLOGGER_HOSTNAME: ${MONGO_HOSTNAME}
-      MONGOLOGGER_MONGO_HOST: ${MONGO_HOST}
-      MONGOLOGGER_MONGO_DATABASE: ${MONGO_DATABASE}
-      MONGOLOGGER_MONGO_AUTH_DATABASE: ${MONGO_AUTH_DATABASE}
-      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGOLOGGER_ALERT_ADDRESSES: ${MONGO_ALERT_ADDRESSES}
-      MONGOLOGGER_FROM_EMAIL: ${MONGO_FROM_EMAIL}
-      MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
-      MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  da_logger:
+  tim_logger_3:
     build: ode-data-logger
     restart: always
     environment:
@@ -366,8 +283,8 @@ services:
       ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${DA_TOPIC}
-      DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
       PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
@@ -376,7 +293,7 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  da_logger_2:
+  tim_logger_4:
     build: ode-data-logger
     restart: always
     environment:
@@ -387,8 +304,29 @@ services:
       ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${DA_TOPIC}
-      DEPOSIT_GROUP: ${DA_GROUP_ORACLE}
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
+      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
+      ENV: ${LOGGER_ENV}
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  tim_logger_5:
+    build: ode-data-logger
+    restart: always
+    environment:
+      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
+      TRAC_URL: ${LOGGER_TRAC_URL}
+      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
+      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
+      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      DEPOSIT_TOPIC: ${TIM_TOPIC}
+      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
       PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
@@ -418,15 +356,20 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  smdm:
-    build: smdm
-    restart: always
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-    ports:
-      - "8081:8081"
+# not used right now
+#  smdm:
+#    build: smdm
+#    restart: always
+#    environment:
+#      DATABASE_URL: jdbc:oracle:thin:@10.145.9.78:1521/tempoda.gisits.local
+#    logging:
+#      options:
+#        max-size: "20m"
+#        max-file: "3"
+#    ports:
+#      - "8081:8081"
+#    volumes:
+#      - /home/wyocvadmin/firmware:/firmware
 
   logger-kafka-consumer:
     build: logger-kafka-consumer
@@ -462,13 +405,9 @@ services:
       - "6687:7687"
     volumes:
       - ./milepost-graph-db/neo-data/plugins:/var/lib/neo4j/plugins
-
       - ./milepost-graph-db/neo-data/import:/var/lib/neo4j/import
-
       - ./milepost-graph-db/neo-data/conf:/var/lib/neo4j/conf
-
       - ./milepost-graph-db/neo-data/data:/var/lib/neo4j/data
-
     environment:
       NEO4J_AUTH: none
     logging:
@@ -488,8 +427,8 @@ services:
       MAIL_PORT: ${MAIL_PORT}
       DEPOSIT_TOPIC: ${EXP_TOPIC}
       DEPOSIT_GROUP: ${EXP_GROUP}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
+      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
     logging:
       options:
         max-size: "20m"

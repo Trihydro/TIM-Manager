@@ -6,6 +6,6 @@ RUN apk update && apk add net-snmp
 # Clean up
 RUN apk del maven
 
-ADD rsu-data-controller-0.0.1-SNAPSHOT.jar /app/
+ADD rsu-data-controller-0.0.2-SNAPSHOT.jar /app/
 
-CMD java -jar /app/rsu-data-controller-0.0.1-SNAPSHOT.jar
+CMD java -jar /app/rsu-data-controller-0.0.2-SNAPSHOT.jar

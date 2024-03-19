@@ -1,5 +1,5 @@
 # Required resources for deployment:
-# - cv-data-tasks-0.0.1-SNAPSHOT.jar
+# - cv-data-tasks-0.0.2-SNAPSHOT.jar
 # - resdf.wyoroad.info.cer (from WyoCV resources)
 
 FROM maven:3.8-eclipse-temurin-21-alpine
@@ -10,4 +10,4 @@ ADD . $install_dir
 
 RUN keytool -import -alias resdf -storepass changeit -noprompt -cacerts -file ${install_dir}/resdf.wyoroad.info.cer
 
-CMD java -jar ${install_dir}/cv-data-tasks-0.0.1-SNAPSHOT.jar
+CMD java -jar ${install_dir}/cv-data-tasks-0.0.2-SNAPSHOT.jar

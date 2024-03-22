@@ -88,6 +88,8 @@ services:
         max-file: "3"
     depends_on:
       - ode_wrapper
+      - cv-data-controller
+      - rsu-data-controller
 
   tim-refresh:
     build: tim-refresh

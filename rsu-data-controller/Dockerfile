@@ -1,11 +1,15 @@
-FROM maven:3.8-eclipse-temurin-21-alpine
+FROM ubuntu:latest
+
+# Install Java
+RUN apt-get update && apt install -y openjdk-21-jre
 
 # Install snmpwalk
-RUN apk update && apk add net-snmp
+RUN apt-get install -y snmp
 
 # Clean up
-RUN apk del maven
+RUN apt-get autoremove -y \
+    && apt-get clean -y
 
-ADD rsu-data-controller-0.0.1-SNAPSHOT.jar /app/
+ADD rsu-data-controller-0.0.2-SNAPSHOT.jar /app/
 
-CMD java -jar /app/rsu-data-controller-0.0.1-SNAPSHOT.jar
+CMD java -jar /app/rsu-data-controller-0.0.2-SNAPSHOT.jar

@@ -115,6 +115,25 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
          * bufferStart, mp call algo.shortestPath.stream(bufferStart,mp) yield nodeId
          * match(other:Milepost) where id(other) = nodeId return other
          */
+
+        /*
+         * 3/15/24 seeing issue with matching multiple startMpNum values, tweaking to
+         * following format:
+         * match(mp:Milepost{CommonName: 'WY 130'})
+         * where mp.Direction in ['I', 'B'] with
+         * min(mp) as extremeMp
+         * 
+         * match(mp:Milepost{CommonName: 'WY 130'})
+         * where mp.Direction in ['I', 'B']
+         * with extremeMp, mp,
+         * distance(point({longitude:-105.62924042,latitude:41.3088996361}),
+         * point({longitude:mp.Longitude,latitude:mp.Latitude})) as d1
+         * with extremeMp, mp, d1 ORDER BY d1 ASC LIMIT 1
+         * 
+         * match path=(mp)-[rels:WY_130_I*0..10]-(d)
+         * where all(rel in rels WHERE rel.Direction in ['I', 'B'])
+         * return path
+         */
         boolean increasing = direction.equalsIgnoreCase("I");
         String dirQuery = "[";
         if (!direction.equalsIgnoreCase("B")) {
@@ -136,28 +155,17 @@ public class MilepostRepositoryImplementation implements MilepostRepository {
         query += " with extremeMp, mp, d1 ORDER BY d1 ASC LIMIT 1";// here we have the closest point, now go back
                                                                    // bufferInMiles
 
-        // get the buffered start
-        // if 'I' direction, get bufferedMiles before
-        // if 'D' direction, get bufferMiles after
-        query += " with mp,";
-        if (increasing) {
-            query += " case when mp.Milepost - ";
-            query += bufferInMiles;
-            query += " < extremeMp.Milepost then extremeMp.Milepost else mp.Milepost - ";
-        } else {
-            query += " case when mp.Milepost + ";
-            query += bufferInMiles;
-            query += " > extremeMp.Milepost then extremeMp.Milepost else mp.Milepost + ";
-        }
-        query += bufferInMiles;
-        query += " end as startMpNum";
-        query += " match(bufferStart:Milepost{CommonName:mp.CommonName, Milepost:startMpNum})";
-        query += " where bufferStart.Direction in " + dirQuery;
+        // determine the relationship name and buffer in miles (mileposts are in tenths
+        // of a mile, so 1 mile = 10 mileposts)
+        var relationShipName = commonName.replace(" ", "_") + "_" + (increasing ? "I" : "D");
+        var milepostNumbers = bufferInMiles.intValue() * 10;
 
-        query += " with bufferStart, mp";
-        query += " call algo.shortestPath.stream(bufferStart,mp) yield nodeId";
-        query += " match(other:Milepost)";
-        query += " where id(other) = nodeId return other order by other.Milepost";
+        // add match for the path from known point up/downstream the calculated number
+        // of mileposts
+        query += " match path=(mp)-[rels:" + relationShipName + "*0.." + milepostNumbers + "]-(d)";
+        // add where clause to ensure all relationships are in the correct direction
+        query += " where all(rel in rels WHERE rel.Direction in " + dirQuery + ")";
+        query += " return path order by mp.Milepost";
         if (!increasing) {
             query += " desc";
         }

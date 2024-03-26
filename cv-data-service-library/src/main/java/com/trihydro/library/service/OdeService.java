@@ -13,6 +13,7 @@ import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotTravelerInputData;
 
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -106,6 +107,7 @@ public class OdeService {
 
         // tim query to ODE
         var odeRsu = new RSU();
+        odeRsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
         odeRsu.setRsuTarget(rsu.getRsuTarget());
         // rsuUsername, rsuPassword will take ODE defaults.
         odeRsu.setRsuRetries(3);

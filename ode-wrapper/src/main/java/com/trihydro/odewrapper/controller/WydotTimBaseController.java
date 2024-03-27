@@ -737,6 +737,8 @@ public abstract class WydotTimBaseController {
      */
     private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
         if (!countyRoadSegment.hasOneOrMoreCondition()) {
+            // County road segment has no conditions, expire any existing TIMs for this segment
+            wydotTimService.clearTimsById(timType.getType(), clientId + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId(), null);
             return;
         }
         List<Milepost> cascadeMileposts = cascadeService.getMilepostsForSegment(countyRoadSegment);

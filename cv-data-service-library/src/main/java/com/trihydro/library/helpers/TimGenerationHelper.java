@@ -887,7 +887,9 @@ public class TimGenerationHelper {
                 rsus[0] = rsu;
                 timToSend.getRequest().setRsus(rsus);
 
-                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
+                String regionName = getRsuRegionName(aTim, wydotRsu);
+                regionName = trimRegionNameIfTooLong(regionName);
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
 
                 var rsuClearExMsg = odeService.deleteTimFromRsu(rsu, Integer.valueOf(wydotRsu.getIndex()));
@@ -905,7 +907,9 @@ public class TimGenerationHelper {
             // we don't have any existing RSUs, but some fall within the boundary so send
             // new ones there. We need to update requestName in this case
             for (int i = 0; i < dbRsus.size(); i++) {
-                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, dbRsus.get(i)));
+                String regionName = getRsuRegionName(aTim, dbRsus.get(i));
+                regionName = trimRegionNameIfTooLong(regionName);
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
 
@@ -986,6 +990,7 @@ public class TimGenerationHelper {
         sdw.setServiceRegion(serviceRegion);
 
         String regionName = getSATRegionName(aTim, aTim.getSatRecordId());
+        regionName = trimRegionNameIfTooLong(regionName);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
         // set sdw block in TIM
@@ -1025,5 +1030,18 @@ public class TimGenerationHelper {
             System.out.println("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
+    }
+
+    /**
+     * Trims the region name if it is too long. Region names longer than 63 characters will fail to be processed by the ODE.
+     * @param regionName The region name to trim
+     * @return The trimmed region name
+     */
+    private String trimRegionNameIfTooLong(String regionName) {
+        if (regionName.length() > 63) {
+            // trim the region name to 60 characters and add an ellipsis
+            return regionName.substring(0, 60) + "...";
+        }
+        return regionName;
     }
 }

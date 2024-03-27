@@ -212,6 +212,7 @@ public class WydotTimService {
         if (pk != null)
             regionNameTemp += "_" + pk;
 
+        regionNameTemp = trimRegionNameIfTooLong(regionNameTemp);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
         if (activeSatTims != null && activeSatTims.size() > 0) {
@@ -260,6 +261,7 @@ public class WydotTimService {
                 regionNameTemp += "_" + pk;
 
             // set region name -- used for active tim logging
+            regionNameTemp = trimRegionNameIfTooLong(regionNameTemp);
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
@@ -753,5 +755,18 @@ public class WydotTimService {
             // TTL buckets. Return the largest, finite TTL value.
             return TimeToLive.oneyear;
         }
+    }
+
+    /**
+     * Trims the region name if it is too long. Region names longer than 63 characters will fail to be processed by the ODE.
+     * @param regionName The region name to trim
+     * @return The trimmed region name
+     */
+    private String trimRegionNameIfTooLong(String regionName) {
+        if (regionName.length() > 63) {
+            // trim the region name to 60 characters and add an ellipsis
+            return regionName.substring(0, 60) + "...";
+        }
+        return regionName;
     }
 }

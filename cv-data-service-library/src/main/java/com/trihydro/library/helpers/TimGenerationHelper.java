@@ -781,7 +781,7 @@ public class TimGenerationHelper {
         region.setDescription(regionDescrip);
 
         if (aTim.getPathId() != null) {
-            NodeXY[] nodes = pathNodeLLService.getNodeLLForPath(aTim.getPathId());
+            // NodeXY[] nodes = pathNodeLLService.getNodeLLForPath(aTim.getPathId());
             // // Periodically we see a mismatch in our node-LL# from the database and what
             // // the ODE thinks it should use. As a result, this errs out if we specify the
             // // wrong number. To combat this, just reset to node-LL
@@ -792,7 +792,7 @@ public class TimGenerationHelper {
             // }
             // 3/27/24, nodell doesn't have an order so refreshing is causing major issues
             // instead, we will just generate the path from the mileposts
-            nodes = buildNodePathFromMileposts(mps, anchor);
+            NodeXY[] nodes = buildNodePathFromMileposts(mps, anchor);
             Path path = new Path();
             path.setScale(0);
             path.setType("ll");// offset path is now standard

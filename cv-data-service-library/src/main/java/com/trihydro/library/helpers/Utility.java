@@ -225,15 +225,15 @@ public class Utility {
 
     /**
      * This method calculates the anchor coordinate for the given mileposts by using the formula:
-	 *	1) dLat = firstPointLat - secondPointLat
-	 *	2) dLon = firstPointLon - secondPointLon
-	 *	3) d0Lat = 111195 * dLat
-	 *	4) d0Lon = 111195 * cos(firstPointLat) * dLon
-	 *	5) d0 = sqrt(d0Lat^2 + d0Lon^2)
-	 *	6) mD = 15 / d0
-	 *	7) anchorLat = firstPointLat + mD * dLat
-	 *	8) anchorLon = firstPointLon + mD * dLon
-	 *  9) return (anchorLat, anchorLon) as the anchor coordinate
+	 *	1) Get the difference in latitude between the first and second points.
+	 *	2) Get the difference in longitude between the first and second points.
+	 *	3) Multiply the difference in latitude by 111195 to get d0Latitude.
+	 *  4) Multiply the difference in longitude by the cosine of the first point's latitude multiplied by the difference in longitude to get d0Longitude.
+	 *	5) Take the square root of d0Latitude squared plus d0Longitude squared to get d0.
+	 *	6) Divide 15 by d0 to get mD.
+	 *	7) Multiply mD by the difference in latitude and add the first point's latitude to get the anchor's latitude.
+	 *	8) Multiply mD by the difference in longitude and add the first point's longitude to get the anchor's longitude.
+	 *  9) The anchor coordinate is (anchor latitude, anchor longitude).
      * @param firstPoint The first milepost.
      * @param secondPoint The second milepost.
      * @return The anchor coordinate.
@@ -241,34 +241,34 @@ public class Utility {
     public Coordinate calculateAnchorCoordinate(Milepost firstPoint, Milepost secondPoint) {
 		int precision = 9;
 
-        BigDecimal firstPointLat = firstPoint.getLatitude().round(new java.math.MathContext(precision));
-        BigDecimal firstPointLon = firstPoint.getLongitude().round(new java.math.MathContext(precision));
-        BigDecimal secondPointLat = secondPoint.getLatitude().round(new java.math.MathContext(precision));
-        BigDecimal secondPointLon = secondPoint.getLongitude().round(new java.math.MathContext(precision));
+        BigDecimal firstPointLatitude = firstPoint.getLatitude().round(new java.math.MathContext(precision));
+        BigDecimal firstPointLongitude = firstPoint.getLongitude().round(new java.math.MathContext(precision));
+        BigDecimal secondPointLatitude = secondPoint.getLatitude().round(new java.math.MathContext(precision));
+        BigDecimal secondPointLongitude = secondPoint.getLongitude().round(new java.math.MathContext(precision));
 
-		// dLat = firstPointLat - secondPointLat
-        BigDecimal dLat = firstPointLat.subtract(secondPointLat);
+		// differenceInLatitude = firstPointLatitude - secondPointLatitude
+        BigDecimal differenceInLatitude = firstPointLatitude.subtract(secondPointLatitude);
 
-        // dLon = firstPointLon - secondPointLon
-		BigDecimal dLon = firstPointLon.subtract(secondPointLon);
+        // differenceInLongitude = firstPointLongitude - secondPointLongitude
+		BigDecimal differenceInLongitude = firstPointLongitude.subtract(secondPointLongitude);
 
-		// d0Lat = 111195 * dLat
-        BigDecimal d0Lat = new BigDecimal(111195).multiply(dLat);
-        // d0Lon = 111195 * cos(firstPointLat) * dLon
-		BigDecimal firstPointLatInRadians = firstPointLat.multiply(new BigDecimal(Math.PI)).divide(new BigDecimal(180), new java.math.MathContext(precision));
-		BigDecimal d0Lon = new BigDecimal(111195).multiply(new BigDecimal(Math.cos(firstPointLatInRadians.doubleValue()))).multiply(dLon);
+		// d0Latitude = 111195 * differenceInLatitude
+        BigDecimal d0Latitude = new BigDecimal(111195).multiply(differenceInLatitude);
+        // d0Longitude = 111195 * cos(firstPointLatitude) * differenceInLongitude
+		BigDecimal firstPointLatitudeInRadians = firstPointLatitude.multiply(new BigDecimal(Math.PI)).divide(new BigDecimal(180), new java.math.MathContext(precision));
+		BigDecimal d0Longitude = new BigDecimal(111195).multiply(new BigDecimal(Math.cos(firstPointLatitudeInRadians.doubleValue()))).multiply(differenceInLongitude);
 
-		// d0 = sqrt(d0Lat^2 + d0Lon^2)
-        BigDecimal d0 = d0Lat.pow(2).add(d0Lon.pow(2)).sqrt(new java.math.MathContext(6));
+		// d0 = sqrt(d0Latitude^2 + d0Longitude^2)
+        BigDecimal d0 = d0Latitude.pow(2).add(d0Longitude.pow(2)).sqrt(new java.math.MathContext(6));
 
 		// mD = 15 / d0
         BigDecimal mD = new BigDecimal(15).divide(d0, new java.math.MathContext(6));
 
-		// anchorLat = firstPointLat + mD * dLat
-        BigDecimal anchorLat = firstPointLat.add(mD.multiply(dLat)).round(new java.math.MathContext(precision));
-        // anchorLon = firstPointLon + mD * dLon
-		BigDecimal anchorLon = firstPointLon.add(mD.multiply(dLon)).round(new java.math.MathContext(precision));
+		// anchorLatitude = firstPointLat + mD * differenceInLatitude
+        BigDecimal anchorLatitude = firstPointLatitude.add(mD.multiply(differenceInLatitude)).round(new java.math.MathContext(precision));
+        // anchorLongitude = firstPointLongitude + mD * differenceInLongitude
+		BigDecimal anchorLongitude = firstPointLongitude.add(mD.multiply(differenceInLongitude)).round(new java.math.MathContext(precision));
 
-        return new Coordinate(anchorLat, anchorLon);
+        return new Coordinate(anchorLatitude, anchorLongitude);
     }
 }

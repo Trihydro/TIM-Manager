@@ -224,51 +224,58 @@ public class Utility {
 	}
 
     /**
-     * This method calculates the anchor coordinate for the given mileposts by using the formula:
-	 *	1) Get the difference in latitude between the first and second points.
-	 *	2) Get the difference in longitude between the first and second points.
-	 *	3) Multiply the difference in latitude by 111195 to get d0Latitude.
-	 *  4) Multiply the difference in longitude by the cosine of the first point's latitude multiplied by the difference in longitude to get d0Longitude.
-	 *	5) Take the square root of d0Latitude squared plus d0Longitude squared to get d0.
-	 *	6) Divide 15 by d0 to get mD.
-	 *	7) Multiply mD by the difference in latitude and add the first point's latitude to get the anchor's latitude.
-	 *	8) Multiply mD by the difference in longitude and add the first point's longitude to get the anchor's longitude.
-	 *  9) The anchor coordinate is (anchor latitude, anchor longitude).
+	 *	Calculates an anchor point for a TIM path. The anchor point is determined by
+	 *  moving 15 meters upstream from the first point of the original TIM path. The first
+	 *  two points of the TIM path are used to determine a bearing direction of this initial
+	 *  section of the path. The anchor point is calculated as 15 meters from the first path
+	 *  point, in the opposite direction of the initial path bearing. The earth surface
+	 *  distance calculations are implemented very roughly (optimized for fast calculation)
+	 *  because there is no need for high accuracy for the anchor point position.
+	 *  Two shortcuts were applied for the earth surface distance calculations:
+	 *	    1) a spherical earth is assumed with a fixed 111195 meters per surface degree
+	 *         distance to calculate the delta degrees difference between the first two path points
+	 *		2) a flat plane assumption was used to calculate the bearing line distance from
+     *         the previously calculated latitude and longitude delta distance (d0Latitude, d0Longitude),
+	 *         and these delta distances provide the flat plane bearing direction to move upstream to
+	 *         reach the anchor point
+	 * 
      * @param firstPoint The first milepost.
      * @param secondPoint The second milepost.
      * @return The anchor coordinate.
      */
     public Coordinate calculateAnchorCoordinate(Milepost firstPoint, Milepost secondPoint) {
 		int precision = 9;
+		int metersPerSurfaceDegree = 111195;
 
         BigDecimal firstPointLatitude = firstPoint.getLatitude().round(new java.math.MathContext(precision));
         BigDecimal firstPointLongitude = firstPoint.getLongitude().round(new java.math.MathContext(precision));
         BigDecimal secondPointLatitude = secondPoint.getLatitude().round(new java.math.MathContext(precision));
         BigDecimal secondPointLongitude = secondPoint.getLongitude().round(new java.math.MathContext(precision));
 
-		// differenceInLatitude = firstPointLatitude - secondPointLatitude
+		// 1) Get the difference in latitude between the first and second points.
         BigDecimal differenceInLatitude = firstPointLatitude.subtract(secondPointLatitude);
 
-        // differenceInLongitude = firstPointLongitude - secondPointLongitude
+        // 2) Get the difference in longitude between the first and second points.
 		BigDecimal differenceInLongitude = firstPointLongitude.subtract(secondPointLongitude);
 
-		// d0Latitude = 111195 * differenceInLatitude
-        BigDecimal d0Latitude = new BigDecimal(111195).multiply(differenceInLatitude);
-        // d0Longitude = 111195 * cos(firstPointLatitude) * differenceInLongitude
+		// 3) Multiply the difference in latitude by the meters per surface degree to get d0Latitude.
+        BigDecimal d0Latitude = new BigDecimal(metersPerSurfaceDegree).multiply(differenceInLatitude);
+        // 4) Multiply the difference in longitude by the cosine of the first point's latitude multiplied by the difference in longitude to get d0Longitude.
 		BigDecimal firstPointLatitudeInRadians = firstPointLatitude.multiply(new BigDecimal(Math.PI)).divide(new BigDecimal(180), new java.math.MathContext(precision));
 		BigDecimal d0Longitude = new BigDecimal(111195).multiply(new BigDecimal(Math.cos(firstPointLatitudeInRadians.doubleValue()))).multiply(differenceInLongitude);
 
-		// d0 = sqrt(d0Latitude^2 + d0Longitude^2)
+		// 5) Take the square root of d0Latitude squared plus d0Longitude squared to get d0.
         BigDecimal d0 = d0Latitude.pow(2).add(d0Longitude.pow(2)).sqrt(new java.math.MathContext(6));
 
-		// mD = 15 / d0
+		// 6) Divide 15 by d0 to get mD.
         BigDecimal mD = new BigDecimal(15).divide(d0, new java.math.MathContext(6));
 
-		// anchorLatitude = firstPointLat + mD * differenceInLatitude
+		// 7) Multiply mD by the difference in latitude and add the first point's latitude to get the anchor's latitude.
         BigDecimal anchorLatitude = firstPointLatitude.add(mD.multiply(differenceInLatitude)).round(new java.math.MathContext(precision));
-        // anchorLongitude = firstPointLongitude + mD * differenceInLongitude
+        // 8) Multiply mD by the difference in longitude and add the first point's longitude to get the anchor's longitude.
 		BigDecimal anchorLongitude = firstPointLongitude.add(mD.multiply(differenceInLongitude)).round(new java.math.MathContext(precision));
 
+		// 9) The anchor coordinate is (anchor latitude, anchor longitude).
         return new Coordinate(anchorLatitude, anchorLongitude);
     }
 }

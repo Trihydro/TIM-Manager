@@ -51,9 +51,9 @@ public class RegionNameTrimmerTest {
 
     @Test
     public void testTrimRegionName_RegionNameWithCascadeTimIdDelimiter() {
-        String regionName = "123456789012345678901234567890123456789012345678901234567890123_triggered_12345";
+        String regionName = "123456789012345678901234567890123456789012345678901234567890123_trgd_12345";
         String trimmedRegionName = uut.trimRegionNameIfTooLong(regionName);
-        String expectedTrimmedRegionName = "12345678901234567890123456789012345678901234..._triggered_12345";
+        String expectedTrimmedRegionName = "1234567890123456789012345678901234567890123456789..._trgd_12345";
         assertEquals(expectedTrimmedRegionName, trimmedRegionName);
     }
     

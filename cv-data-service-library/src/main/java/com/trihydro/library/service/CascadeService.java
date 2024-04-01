@@ -21,7 +21,7 @@ public class CascadeService extends CvDataServiceLibrary {
      * This is the delimiter used to separate the original client ID
      * from the segment ID in the client ID of a cascading TIM.
      */
-    public static final String CASCADE_TIM_ID_DELIMITER = "_triggered_";
+    public static final String CASCADE_TIM_ID_DELIMITER = "_trgd_";
 
     private static final String closedItisCode = "770";
     private static final String c2lhpvItisCode = "Closed to light, high profile vehicles";

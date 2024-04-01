@@ -28,15 +28,6 @@ public class CascadeService extends CvDataServiceLibrary {
     private static final String loctItisCode = "2567";
     private static final String nttItisCode = "2568";
 
-    private static final List<String> cascadingItisCodes = new ArrayList<String>() {
-        {
-            add(closedItisCode);
-            add(c2lhpvItisCode);
-            add(loctItisCode);
-            add(nttItisCode);
-        }
-    };
-
     /**
      * This method sends a request to the CV Data Controller to get the trigger road for the given road code.
      * @param roadCode the road code to get the trigger road for

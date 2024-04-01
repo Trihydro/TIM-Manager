@@ -79,13 +79,14 @@ public class TimGenerationHelper {
     private ActiveTimHoldingService activeTimHoldingService;
     private SdwService sdwService;
     private SnmpHelper snmpHelper;
+    private RegionNameTrimmer regionNameTrimmer;
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
             MilepostReduction _milepostReduction, TimGenerationProps _config, RsuService _rsuService,
             OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService, SdwService _sdwService,
-            SnmpHelper _snmpHelper, CascadeService _cascadeService) {
+            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -100,6 +101,7 @@ public class TimGenerationHelper {
         sdwService = _sdwService;
         snmpHelper = _snmpHelper;
         cascadeService = _cascadeService;
+        regionNameTrimmer = _regionNameTrimmer;
     }
 
     private String getIsoDateTimeString(ZonedDateTime date) {
@@ -888,7 +890,7 @@ public class TimGenerationHelper {
                 timToSend.getRequest().setRsus(rsus);
 
                 String regionName = getRsuRegionName(aTim, wydotRsu);
-                regionName = trimRegionNameIfTooLong(regionName);
+                regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
 
@@ -908,7 +910,7 @@ public class TimGenerationHelper {
             // new ones there. We need to update requestName in this case
             for (int i = 0; i < dbRsus.size(); i++) {
                 String regionName = getRsuRegionName(aTim, dbRsus.get(i));
-                regionName = trimRegionNameIfTooLong(regionName);
+                regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
@@ -990,7 +992,7 @@ public class TimGenerationHelper {
         sdw.setServiceRegion(serviceRegion);
 
         String regionName = getSATRegionName(aTim, aTim.getSatRecordId());
-        regionName = trimRegionNameIfTooLong(regionName);
+        regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
         // set sdw block in TIM
@@ -1030,18 +1032,5 @@ public class TimGenerationHelper {
             System.out.println("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
-    }
-
-    /**
-     * Trims the region name if it is too long. Region names longer than 63 characters will fail to be processed by the ODE.
-     * @param regionName The region name to trim
-     * @return The trimmed region name
-     */
-    private String trimRegionNameIfTooLong(String regionName) {
-        if (regionName.length() > 63) {
-            // trim the region name to 60 characters and add an ellipsis
-            return regionName.substring(0, 60) + "...";
-        }
-        return regionName;
     }
 }

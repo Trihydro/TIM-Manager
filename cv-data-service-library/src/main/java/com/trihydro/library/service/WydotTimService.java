@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.RegionNameTrimmer;
 import com.trihydro.library.helpers.SnmpHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
@@ -72,6 +73,7 @@ public class WydotTimService {
     private SnmpHelper snmpHelper;
     private MilepostService milepostService;
     private TimGenerationHelper timGenerationHelper;
+    private RegionNameTrimmer regionNameTrimmer;
 
     @Autowired
     public void InjectDependencies(EmailProps _emailProps, OdeProps _odeProps, TimGenerationProps _genProps,
@@ -79,7 +81,8 @@ public class WydotTimService {
             OdeService _odeService, CreateBaseTimUtil _createBaseTimUtil,
             ActiveTimHoldingService _activeTimHoldingService, ActiveTimService _activeTimService,
             TimRsuService _timRsuService, RestTemplateProvider _restTemplateProvider, RsuService _rsuService,
-            TimService _timService, SnmpHelper _snmpHelper, MilepostService _milepostService, TimGenerationHelper _timGenerationHelper) {
+            TimService _timService, SnmpHelper _snmpHelper, MilepostService _milepostService, TimGenerationHelper _timGenerationHelper,
+            RegionNameTrimmer _regionNameTrimmer) {
         emailProps = _emailProps;
         odeProps = _odeProps;
         genProps = _genProps;
@@ -98,6 +101,7 @@ public class WydotTimService {
         snmpHelper = _snmpHelper;
         milepostService = _milepostService;
         timGenerationHelper = _timGenerationHelper;
+        regionNameTrimmer = _regionNameTrimmer;
     }
 
     private RestTemplateProvider restTemplateProvider;
@@ -212,7 +216,7 @@ public class WydotTimService {
         if (pk != null)
             regionNameTemp += "_" + pk;
 
-        regionNameTemp = trimRegionNameIfTooLong(regionNameTemp);
+        regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
         if (activeSatTims != null && activeSatTims.size() > 0) {
@@ -261,7 +265,7 @@ public class WydotTimService {
                 regionNameTemp += "_" + pk;
 
             // set region name -- used for active tim logging
-            regionNameTemp = trimRegionNameIfTooLong(regionNameTemp);
+            regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
@@ -755,18 +759,5 @@ public class WydotTimService {
             // TTL buckets. Return the largest, finite TTL value.
             return TimeToLive.oneyear;
         }
-    }
-
-    /**
-     * Trims the region name if it is too long. Region names longer than 63 characters will fail to be processed by the ODE.
-     * @param regionName The region name to trim
-     * @return The trimmed region name
-     */
-    private String trimRegionNameIfTooLong(String regionName) {
-        if (regionName.length() > 63) {
-            // trim the region name to 60 characters and add an ellipsis
-            return regionName.substring(0, 60) + "...";
-        }
-        return regionName;
     }
 }

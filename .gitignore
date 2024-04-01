@@ -60,3 +60,5 @@ Thumbs.db
 *.bak
 
 **/failsafe-summary.xml
+
+jars/*.jar

@@ -4,13 +4,13 @@
   <parent>
     <groupId>com.wyocv</groupId>
     <artifactId>wyo-cv</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>cv-data-service-library</artifactId>
   <name>cv-data-service-library</name>
   <packaging>jar</packaging>
-  <!-- <version>0.0.1-SNAPSHOT</version> -->
+  <!-- <version>0.0.2-SNAPSHOT</version> -->
 
   <url>http://maven.apache.org</url>
   
@@ -89,10 +89,39 @@
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
-      <artifactId>commons-jcs-core</artifactId>
-      <version>2.2.1</version>
+      <artifactId>commons-jcs3-core</artifactId>
+      <version>3.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.2</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.dataformat</groupId>
+    	<artifactId>jackson-dataformat-xml</artifactId>
+      <version>2.15.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.15.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.15.2</version>
+    </dependency>
+		<dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>4.0.0</version>
+		</dependency>
   </dependencies>
+
+  <properties>
+    <java.version>21</java.version>
+  </properties>
 
   <build>
     <plugins>

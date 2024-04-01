@@ -47,6 +47,7 @@ import com.trihydro.library.model.WydotTravelerInputData;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -241,6 +242,7 @@ public class WydotTimService {
         for (WydotRsu rsu : rsus) {
 
             var odeRsu = new RSU();
+            odeRsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
 
             odeRsu.setRsuIndex(rsu.getRsuIndex());
             odeRsu.setRsuTarget(rsu.getRsuTarget());

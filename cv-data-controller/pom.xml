@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.wyocv</groupId>
         <artifactId>wyo-cv</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
     <dependencies>
         <dependency>
@@ -57,17 +57,42 @@
             <artifactId>neo4j-ogm-bolt-driver</artifactId>
             <version>${neo4j-ogm.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.mapbox.mapboxsdk</groupId>
             <artifactId>mapbox-java-geojson</artifactId>
             <version>2.2.10</version>
         </dependency>
+        <dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.0</version>
+		</dependency>
 
     </dependencies>
 
     <properties>
         <neo4j-ogm.version>3.2.8</neo4j-ogm.version>
+        <java.version>21</java.version>
     </properties>
 
     <build>

@@ -85,6 +85,10 @@ services:
       options:
         max-size: "20m"
         max-file: "3"
+    depends_on:
+      - ode_wrapper
+      - cv-data-controller
+      - rsu-data-controller
 
   tim-refresh:
     build: tim-refresh
@@ -157,15 +161,15 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  angular:
-    build: timBuilder
-    restart: always
-    ports:
-      - "4200:4200"
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
+  # angular:
+  #   build: timBuilder
+  #   restart: always
+  #   ports:
+  #     - "4200:4200"
+  #   logging:
+  #     options:
+  #       max-size: "20m"
+  #       max-file: "3"
 
   tim_logger_mongo:
     build: ode-mongo-logger

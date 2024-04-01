@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.wyocv</groupId>
         <artifactId>wyo-cv</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
         <!-- <relativePath />  -->
     </parent>
     <dependencies>
@@ -107,6 +107,31 @@
             <artifactId>geocalc</artifactId>
             <version>0.5.8</version>
         </dependency>
+        <dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.0</version>
+		</dependency>
     </dependencies>
 
     <build>
@@ -124,6 +149,10 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
 
     <repositories>
         <repository>

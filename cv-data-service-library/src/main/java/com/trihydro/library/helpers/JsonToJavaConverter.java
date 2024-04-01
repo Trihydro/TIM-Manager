@@ -31,6 +31,7 @@ import us.dot.its.jpo.ode.model.SerialId;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.plugin.j2735.J2735BsmCoreData;
 import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
@@ -192,6 +193,7 @@ public class JsonToJavaConverter {
                     timStartDateTime = metaDataNode.get("odeTimStartDateTime").asText();
                 }
                 RSU rsuTemp = new RSU();
+                rsuTemp.setSnmpProtocol(SnmpProtocol.NTCIP1218);
                 var rsu = rsusNode.get("rsus");
                 if (rsu != null) {
                     rsuTarget = rsu.get("rsuTarget").asText();
@@ -401,7 +403,7 @@ public class JsonToJavaConverter {
             dataFrames[0] = dataFrame;
             tim.setDataframes(dataFrames);
             odeTimPayload = new OdeTimPayload();
-            odeTimPayload.setTim(tim);
+            odeTimPayload.setData(tim);
         } catch (IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
@@ -575,10 +577,10 @@ public class JsonToJavaConverter {
             }
 
             JsonNode startTimeNode = travelerDataFrame.get("startTime");
-            JsonNode durationNode = travelerDataFrame.get("duratonTime");
+            JsonNode durationNode = travelerDataFrame.get("durationTime");
             JsonNode priorityNode = travelerDataFrame.get("priority");
-            JsonNode sspLocationRightsNode = travelerDataFrame.get("sspLocationRights");
-            JsonNode sspTimRightsNode = travelerDataFrame.get("sspTimRights");
+            JsonNode notUsed1Node = travelerDataFrame.get("notUsed1");
+            JsonNode notUsedNode = travelerDataFrame.get("notUsed");
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
@@ -596,8 +598,8 @@ public class JsonToJavaConverter {
             dataFrame.setStartDateTime(startDate.toString() + "Z");
             dataFrame.setDurationTime(durationNode.asInt());
             dataFrame.setPriority(priorityNode.asInt());
-            dataFrame.setSspLocationRights((short) sspLocationRightsNode.asInt());
-            dataFrame.setSspTimRights((short) sspTimRightsNode.asInt());
+            dataFrame.setNotUsed1((short) notUsed1Node.asInt());
+            dataFrame.setNotUsed((short) notUsedNode.asInt());
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 
@@ -615,7 +617,7 @@ public class JsonToJavaConverter {
             dataFrames[0] = dataFrame;
             tim.setDataframes(dataFrames);
             odeTimPayload = new OdeTimPayload();
-            odeTimPayload.setTim(tim);
+            odeTimPayload.setData(tim);
         } catch (IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {

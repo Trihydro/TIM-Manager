@@ -46,7 +46,7 @@ public class DataFrameService extends BaseService {
                 if (col.equals("TIM_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
                 } else if (col.equals("SSP_TIM_RIGHTS")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspTimRights());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed());
                 } else if (col.equals("FRAME_TYPE")) {
                     Integer ordinal = null;
                     if (dFrame.getFrameType() != null) {
@@ -58,11 +58,11 @@ public class DataFrameService extends BaseService {
                 } else if (col.equals("PRIORITY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getPriority());
                 } else if (col.equals("SSP_LOCATION_RIGHTS")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspLocationRights());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed1());
                 } else if (col.equals("SSP_MSG_TYPES")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspMsgTypes());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed3());
                 } else if (col.equals("SSP_MSG_CONTENT")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getSspMsgContent());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed2());
                 } else if (col.equals("CONTENT")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getContent());
                 } else if (col.equals("URL")) {

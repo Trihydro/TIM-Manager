@@ -32,10 +32,10 @@ public class TimUpdateModel extends ActiveTim {
     private int dataFrameId;
     private TravelerInfoType frameType;
     private int durationTime;
-    private short sspLocationRights;
-    private short sspTimRights;
-    private short sspMsgTypes;
-    private short sspMsgContent;
+    private short notUsed1;
+    private short notUsed;
+    private short notUsed3;
+    private short notUsed2;
     private ContentEnum dfContent;
     private String url;
 
@@ -172,12 +172,12 @@ public class TimUpdateModel extends ActiveTim {
         this.frameType = frameType;
     }
 
-    public short getSspTimRights() {
-        return sspTimRights;
+    public short getNotUsed() {
+        return notUsed;
     }
 
-    public void setSspTimRights(short sspTimRights) {
-        this.sspTimRights = sspTimRights;
+    public void setNotUsed(short notUsed) {
+        this.notUsed = notUsed;
     }
 
     public ContentEnum getDfContent() {
@@ -188,28 +188,28 @@ public class TimUpdateModel extends ActiveTim {
         this.dfContent = dfContent;
     }
 
-    public short getSspMsgContent() {
-        return sspMsgContent;
+    public short getNotUsed2() {
+        return notUsed2;
     }
 
-    public void setSspMsgContent(short sspMsgContent) {
-        this.sspMsgContent = sspMsgContent;
+    public void setNotUsed2(short notUsed2) {
+        this.notUsed2 = notUsed2;
     }
 
-    public short getSspMsgTypes() {
-        return sspMsgTypes;
+    public short getNotUsed3() {
+        return notUsed3;
     }
 
-    public void setSspMsgTypes(short sspMsgTypes) {
-        this.sspMsgTypes = sspMsgTypes;
+    public void setNotUsed3(short notUsed3) {
+        this.notUsed3 = notUsed3;
     }
 
-    public short getSspLocationRights() {
-        return sspLocationRights;
+    public short getNotUsed1() {
+        return notUsed1;
     }
 
-    public void setSspLocationRights(short sspLocationRights) {
-        this.sspLocationRights = sspLocationRights;
+    public void setNotUsed1(short notUsed1) {
+        this.notUsed1 = notUsed1;
     }
 
     public BigDecimal getAnchorLong() {

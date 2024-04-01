@@ -1,8 +1,5 @@
-FROM ubuntu:latest
+FROM maven:3.8-eclipse-temurin-21-alpine
 
 ADD . /home/wyocv/wyocv_applications/cert-expiration
 
-RUN apt-get update && \
- apt-get install -y openjdk-11-jre
-
-CMD java -jar /home/wyocv/wyocv_applications/cert-expiration/cert-expiration-0.0.1-SNAPSHOT.jar
+CMD java -jar /home/wyocv/wyocv_applications/cert-expiration/cert-expiration-0.0.2-SNAPSHOT.jar

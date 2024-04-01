@@ -143,31 +143,31 @@ public class JsonToJavaConverterTest {
         dataFrames[0] = dataFrame;
         tim.setDataframes(dataFrames);
 
-        odeTimPayload.setTim(tim);
+        odeTimPayload.setData(tim);
 
         String value = new String(
                 Files.readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput.json").toURI())));
         OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
-        System.out.println("PACKETID: " + odeTimPayload.getTim().getPacketID());
+        System.out.println("PACKETID: " + getTim(odeTimPayload).getPacketID());
         for (int i = 0; i < 2; i++) {
             Assertions.assertEquals(
-                    odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat(),
-                    odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat());
+                    getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat(),
+                    getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat());
             Assertions.assertEquals(
-                    odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLong(),
-                    odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
+                    getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLong(),
+                    getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
                             .getNodeLong());
             Assertions.assertEquals(
-                    odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta(),
-                    odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta());
+                    getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta(),
+                    getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta());
         }
 
-        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
-        Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
+        Assertions.assertEquals(getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getAnchorPosition(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getAnchorPosition());
+        Assertions.assertEquals(getTim(odeTimPayload).getMsgCnt(), getTim(odeTimPayloadTest).getMsgCnt());
 
-        Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
-        Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
+        Assertions.assertEquals(getTim(odeTimPayload).getPacketID(), getTim(odeTimPayloadTest).getPacketID());
+        Assertions.assertEquals(getTim(odeTimPayload).getUrlB(), getTim(odeTimPayloadTest).getUrlB());
     }
 
     @Test
@@ -181,10 +181,10 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(odeTimPayloadTest);
-        Assertions.assertTrue(odeTimPayloadTest.getTim().getDataframes()[0].getItems().length > 0);
-        Assertions.assertEquals("speedLimit", odeTimPayloadTest.getTim().getDataframes()[0].getContent());
+        Assertions.assertTrue(getTim(odeTimPayloadTest).getDataframes()[0].getItems().length > 0);
+        Assertions.assertEquals("speedLimit", getTim(odeTimPayloadTest).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "13609", "268", "12554", "8720" },
-                odeTimPayloadTest.getTim().getDataframes()[0].getItems());
+                getTim(odeTimPayloadTest).getDataframes()[0].getItems());
     }
 
     @Test
@@ -231,56 +231,56 @@ public class JsonToJavaConverterTest {
         dataFrames[0] = dataFrame;
         tim.setDataframes(dataFrames);
 
-        odeTimPayload.setTim(tim);
+        odeTimPayload.setData(tim);
 
         String value = new String(
                 Files.readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput_Geometry.json").toURI())));
         OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
-        System.out.println("PACKETID: " + odeTimPayload.getTim().getPacketID());
+        System.out.println("PACKETID: " + getTim(odeTimPayload).getPacketID());
 
         // test geometry properties
         // direction
-        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getDirection(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getDirection());
+        Assertions.assertEquals(getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getDirection(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getDirection());
         // extent
-        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getExtent(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getExtent());
+        Assertions.assertEquals(getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getExtent(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getExtent());
         // laneWidth
-        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getLaneWidth(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getLaneWidth());
+        Assertions.assertEquals(getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getLaneWidth(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getLaneWidth());
         // circle/radius
         Assertions.assertEquals(
-                odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getRadius(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getRadius());
+                getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getRadius(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getRadius());
         // circle/units
         Assertions.assertEquals(
-                odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getUnits(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getUnits());
+                getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getUnits(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getUnits());
         // circle/position/latitude
         Assertions.assertEquals(
-                odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
+                getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
                         .getLatitude(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
                         .getLatitude());
         // circle/position/longitude
         Assertions.assertEquals(
-                odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
+                getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
                         .getLongitude(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
                         .getLongitude());
         // circle/position/elevation
         Assertions.assertEquals(
-                odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
+                getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
                         .getElevation(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getGeometry().getCircle().getCenter()
                         .getElevation());
 
-        Assertions.assertEquals(odeTimPayload.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition(),
-                odeTimPayloadTest.getTim().getDataframes()[0].getRegions()[0].getAnchorPosition());
-        Assertions.assertEquals(odeTimPayload.getTim().getMsgCnt(), odeTimPayloadTest.getTim().getMsgCnt());
+        Assertions.assertEquals(getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getAnchorPosition(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getAnchorPosition());
+        Assertions.assertEquals(getTim(odeTimPayload).getMsgCnt(), getTim(odeTimPayloadTest).getMsgCnt());
 
-        Assertions.assertEquals(odeTimPayload.getTim().getPacketID(), odeTimPayloadTest.getTim().getPacketID());
-        Assertions.assertEquals(odeTimPayload.getTim().getUrlB(), odeTimPayloadTest.getTim().getUrlB());
+        Assertions.assertEquals(getTim(odeTimPayload).getPacketID(), getTim(odeTimPayloadTest).getPacketID());
+        Assertions.assertEquals(getTim(odeTimPayload).getUrlB(), getTim(odeTimPayloadTest).getUrlB());
     }
 
     @Test
@@ -498,9 +498,9 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_vsl);
-        Assertions.assertEquals("speedLimit", tim_vsl.getTim().getDataframes()[0].getContent());
+        Assertions.assertEquals("speedLimit", getTim(tim_vsl).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "268", "12604", "8720" },
-                tim_vsl.getTim().getDataframes()[0].getItems());
+                getTim(tim_vsl).getDataframes()[0].getItems());
     }
 
     @Test
@@ -513,9 +513,9 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_parking);
-        Assertions.assertEquals("exitService", tim_parking.getTim().getDataframes()[0].getContent());
+        Assertions.assertEquals("exitService", getTim(tim_parking).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "4104", "11794", "345" },
-                tim_parking.getTim().getDataframes()[0].getItems());
+                getTim(tim_parking).getDataframes()[0].getItems());
     }
 
     @Test
@@ -529,9 +529,16 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_construction);
-        Assertions.assertEquals("workZone", tim_construction.getTim().getDataframes()[0].getContent());
+        Assertions.assertEquals("workZone", getTim(tim_construction).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "1537", "12554", "8728" },
-                tim_construction.getTim().getDataframes()[0].getItems());
+                getTim(tim_construction).getDataframes()[0].getItems());
     }
 
+
+    /**
+     * Helper method to get an OdeTravelerInformationMessage object given an OdeTimPayload.
+     */
+    private OdeTravelerInformationMessage getTim(OdeTimPayload odeTimPayload) {
+        return (OdeTravelerInformationMessage) odeTimPayload.getData();
+    }
 }

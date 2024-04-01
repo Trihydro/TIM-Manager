@@ -52,6 +52,7 @@ import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
@@ -694,13 +695,13 @@ public class TimGenerationHelper {
 
         // DataFrame
         DataFrame df = new DataFrame();
-        df.setSspTimRights(aTim.getSspTimRights());
+        df.setNotUsed(aTim.getNotUsed());
         df.setFrameType(aTim.getFrameType());
         df.setMsgId(msgId);
         df.setPriority(5);// 0-7, 0 being least important, 7 being most
-        df.setSspLocationRights(aTim.getSspLocationRights());
-        df.setSspMsgTypes(aTim.getSspMsgTypes());
-        df.setSspMsgContent(aTim.getSspMsgContent());
+        df.setNotUsed1(aTim.getNotUsed1());
+        df.setNotUsed3(aTim.getNotUsed3());
+        df.setNotUsed2(aTim.getNotUsed2());
         if (aTim.getDfContent() != null)
             df.setContent(aTim.getDfContent().getStringValue());
         df.setUrl(aTim.getUrl());
@@ -869,6 +870,7 @@ public class TimGenerationHelper {
                 var wydotRsu = wydotRsus.get(i);
                 // set RSUS
                 rsu = new RSU();
+                rsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
                 rsu.setRsuIndex(wydotRsu.getIndex());
                 rsu.setRsuTarget(wydotRsu.getRsuTarget());
                 // rsuUsername, rsuPassword will take ODE defaults.

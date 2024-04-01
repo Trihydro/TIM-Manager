@@ -2,6 +2,7 @@ package com.trihydro.library.model;
 
 import java.math.BigDecimal;
 
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 
 public class WydotRsu extends RSU
@@ -12,6 +13,12 @@ public class WydotRsu extends RSU
 	private Integer rsuId;
 	private String route;
 	private Double milepost;
+
+	public WydotRsu() 
+	{
+		super();
+		setSnmpProtocol(SnmpProtocol.NTCIP1218);
+	}
 	
 	public Integer getRsuId() 
 	{

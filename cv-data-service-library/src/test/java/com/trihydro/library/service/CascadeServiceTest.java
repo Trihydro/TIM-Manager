@@ -119,7 +119,7 @@ public class CascadeServiceTest extends BaseServiceTest {
         Coordinate expectedEndPoint = new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude());
         List<String> expectedItisCodes = new ArrayList<String>() {
             {
-                add("770");
+                add("769");
             }
         };
         Assertions.assertEquals(expectedClientId, result.getClientId());
@@ -147,7 +147,7 @@ public class CascadeServiceTest extends BaseServiceTest {
         Coordinate expectedEndPoint = new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude());
         List<String> expectedItisCodes = new ArrayList<String>() {
             {
-                add("Closed to light, high profile vehicles");
+                add("2569");
             }
         };
         Assertions.assertEquals(expectedClientId, result.getClientId());

@@ -23,8 +23,8 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public static final String CASCADE_TIM_ID_DELIMITER = "_trgd_";
 
-    private static final String closedItisCode = "770";
-    private static final String c2lhpvItisCode = "Closed to light, high profile vehicles";
+    private static final String closedItisCode = "769";
+    private static final String c2lhpvItisCode = "2569";
     private static final String loctItisCode = "2567";
     private static final String nttItisCode = "2568";
 

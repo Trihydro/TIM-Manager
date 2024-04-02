@@ -1,8 +1,7 @@
 FROM ubuntu:latest
 
 # Install Java
-RUN apt-get update && \
- apt-get install -y openjdk-11-jre
+RUN apt-get update && apt install -y openjdk-21-jre
 
 # Install snmpwalk
 RUN apt-get install -y snmp

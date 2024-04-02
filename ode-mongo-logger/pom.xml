@@ -67,6 +67,9 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
   </dependencies>
+  <properties>
+    <java.version>21</java.version>
+  </properties>
   <build>
     <plugins>
       <plugin>

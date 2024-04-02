@@ -1,8 +1,5 @@
-FROM ubuntu:latest
-
-RUN apt-get update && \
- apt-get install -y openjdk-11-jre
+FROM maven:3.8-eclipse-temurin-21-alpine
 
 ADD . /home/wyocv/wyocv_applications/cv-data-controller
 
-CMD java -jar /home/wyocv/wyocv_applications/cv-data-controller/cv-data-controller-0.0.1-SNAPSHOT.jar
+CMD java --add-opens java.base/java.lang=ALL-UNNAMED -jar /home/wyocv/wyocv_applications/cv-data-controller/cv-data-controller-0.0.1-SNAPSHOT.jar

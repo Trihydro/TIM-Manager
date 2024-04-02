@@ -107,7 +107,7 @@ public class TriggerRoadCacheTest {
 
         @Override
         public String getCacheAttributes() {
-            return "org.apache.jcs.engine.CompositeCacheAttributes";
+            return "org.apache.commons.jcs3.engine.CompositeCacheAttributes";
         }
 
         @Override
@@ -127,7 +127,7 @@ public class TriggerRoadCacheTest {
 
         @Override
         public String getMemoryCacheName() {
-            return "org.apache.jcs.engine.memory.lru.LRUMemoryCache";
+            return "org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache";
         }
 
         @Override
@@ -177,7 +177,7 @@ public class TriggerRoadCacheTest {
 
         @Override
         public String getElementAttributes() {
-            return "org.apache.jcs.engine.ElementAttributes";
+            return "org.apache.commons.jcs3.engine.ElementAttributes";
         }
 
         @Override

@@ -3,10 +3,10 @@ package com.trihydro.library.helpers.caches;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.jcs.JCS;
-import org.apache.commons.jcs.access.CacheAccess;
-import org.apache.commons.jcs.access.exception.CacheException;
-import org.apache.commons.jcs.engine.control.CompositeCacheManager;
+import org.apache.commons.jcs3.JCS;
+import org.apache.commons.jcs3.access.CacheAccess;
+import org.apache.commons.jcs3.access.exception.CacheException;
+import org.apache.commons.jcs3.engine.control.CompositeCacheManager;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;

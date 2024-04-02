@@ -43,14 +43,14 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
     public void setupSubTest() throws SQLException {
         mockJCSCacheProps = mock(JCSCacheProps.class);
         doReturn("").when(mockJCSCacheProps).getJcsDefault();
-        doReturn("org.apache.jcs.engine.CompositeCacheAttributes").when(mockJCSCacheProps).getCacheAttributes();
+        doReturn("org.apache.commons.jcs3.engine.CompositeCacheAttributes").when(mockJCSCacheProps).getCacheAttributes();
         doReturn("1000").when(mockJCSCacheProps).getMaxObjects();
-        doReturn("org.apache.jcs.engine.memory.lru.LRUMemoryCache").when(mockJCSCacheProps).getMemoryCacheName();
+        doReturn("org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache").when(mockJCSCacheProps).getMemoryCacheName();
         doReturn("true").when(mockJCSCacheProps).getUseMemoryShrinker();
         doReturn("3600").when(mockJCSCacheProps).getMaxMemoryIdleTimeSeconds();
         doReturn("60").when(mockJCSCacheProps).getShrinkerIntervalSeconds();
         doReturn("500").when(mockJCSCacheProps).getMaxSpoolPerRun();
-        doReturn("org.apache.jcs.engine.ElementAttributes").when(mockJCSCacheProps).getElementAttributes();
+        doReturn("org.apache.commons.jcs3.engine.ElementAttributes").when(mockJCSCacheProps).getElementAttributes();
         doReturn("false").when(mockJCSCacheProps).getIsEternal();
         doReturn("3600").when(mockJCSCacheProps).getMaxLife();
         doReturn("true").when(mockJCSCacheProps).getIsSpool();

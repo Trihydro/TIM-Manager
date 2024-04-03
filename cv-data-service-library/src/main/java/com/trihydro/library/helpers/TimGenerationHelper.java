@@ -892,7 +892,11 @@ public class TimGenerationHelper {
                 timToSend.getRequest().setRsus(rsus);
 
                 String regionName = getRsuRegionName(aTim, wydotRsu);
-                regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+                try {
+                    regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+                } catch (IllegalArgumentException e) {
+                    utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
 
@@ -912,7 +916,11 @@ public class TimGenerationHelper {
             // new ones there. We need to update requestName in this case
             for (int i = 0; i < dbRsus.size(); i++) {
                 String regionName = getRsuRegionName(aTim, dbRsus.get(i));
-                regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+                try {
+                    regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+                } catch (IllegalArgumentException e) {
+                    utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
@@ -994,7 +1002,11 @@ public class TimGenerationHelper {
         sdw.setServiceRegion(serviceRegion);
 
         String regionName = getSATRegionName(aTim, aTim.getSatRecordId());
-        regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+        try {
+            regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+        } catch (IllegalArgumentException e) {
+            utility.logWithDate("Failed to trim region name: " + e.getMessage());
+        }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
         // set sdw block in TIM

@@ -216,7 +216,12 @@ public class WydotTimService {
         if (pk != null)
             regionNameTemp += "_" + pk;
 
-        regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
+        try {
+            regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
+        } catch (IllegalArgumentException e) {
+            utility.logWithDate("Failed to trim region name: " + e.getMessage());
+            return;
+        }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
         if (activeSatTims != null && activeSatTims.size() > 0) {
@@ -265,7 +270,12 @@ public class WydotTimService {
                 regionNameTemp += "_" + pk;
 
             // set region name -- used for active tim logging
-            regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
+            try {
+                regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
+            } catch (IllegalArgumentException e) {
+                utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                return;
+            }
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu

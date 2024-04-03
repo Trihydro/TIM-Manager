@@ -1,5 +1,6 @@
 package com.trihydro.library.helpers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.trihydro.library.service.CascadeService;
@@ -7,13 +8,20 @@ import com.trihydro.library.service.CascadeService;
 @Component
 public class RegionNameTrimmer {
     private static final int MAX_REGION_NAME_LENGTH = 63;
+    
+    private Utility utility;
+
+    @Autowired
+    public RegionNameTrimmer(Utility _utility) {
+        utility = _utility;
+    }
 
     /**
      * Trims the region name if it is too long. Region names longer than 63 characters will fail to be processed by the ODE.
      * @param regionName The region name to trim
      * @return The trimmed region name
      */
-    public String trimRegionNameIfTooLong(String regionName) {
+    public String trimRegionNameIfTooLong(String regionName) throws IllegalArgumentException {
         if (regionName == null) {
             return regionName;
         }
@@ -28,28 +36,36 @@ public class RegionNameTrimmer {
     }
 
     private String trimRegionName(String regionName) {
-        if (containsCascadeTimIdDelimiter(regionName)) {
-            return trimRegionNameWithCascadeTimIdDelimiter(regionName);
+        if (!containsCascadeTimIdDelimiter(regionName)) {
+            throw new IllegalArgumentException("No cascade TIM ID delimiter found in region name, indicating that this is for a regular TIM and should not be trimmed");
         }
-        String trimmedRegionName = regionName.substring(0, MAX_REGION_NAME_LENGTH - 3);
-        String trimmedRegionNameWithEllipsis = addEllipsis(trimmedRegionName);
-        return trimmedRegionNameWithEllipsis;
+        int charactersToTrim = regionName.length() - MAX_REGION_NAME_LENGTH;
+        String[] splitName = regionName.split("_");
+        String direction = splitName[0];
+        String route = splitName[1];
+        String rsuOrSat = splitName[2];
+        String timType = splitName[3];
+        String timId = splitName[4];
+        String cascadeTimIdDelimiter = splitName[5];
+        String cascadeTimId = splitName[6];
+        return trimRegionNameWithCascadeTimIdDelimiter(direction, route, rsuOrSat, timType, timId, cascadeTimIdDelimiter, cascadeTimId, charactersToTrim);
     }
 
-    private String trimRegionNameWithCascadeTimIdDelimiter(String regionName) {
-        int cascadeTimIdDelimiterIndex = regionName.indexOf(CascadeService.CASCADE_TIM_ID_DELIMITER);
-        String stringBeforeCascadeTimIdDelimiter = regionName.substring(0, cascadeTimIdDelimiterIndex);
-        String stringAfterCascadeTimIdDelimiter = regionName.substring(cascadeTimIdDelimiterIndex);
-        String trimmedStringBeforeCascadeTimIdDelimiter = stringBeforeCascadeTimIdDelimiter.substring(0, (MAX_REGION_NAME_LENGTH - 3) - stringAfterCascadeTimIdDelimiter.length());
-        String trimmedStringBeforeCascadeTimIdDelimiterWithEllipsis = addEllipsis(trimmedStringBeforeCascadeTimIdDelimiter);
-        return trimmedStringBeforeCascadeTimIdDelimiterWithEllipsis + stringAfterCascadeTimIdDelimiter;
+    private String trimRegionNameWithCascadeTimIdDelimiter(String direction, String route, String rsuOrSat, String timType, String timId, String cascadeTimIdDelimiter, String cascadeTimId, int charactersToTrim) {
+        if (cannotBeTrimmedAndStillHaveRoomForEllipsis(route, charactersToTrim)) {
+            throw new IllegalArgumentException("Region name is too long and cannot be trimmed without unacceptable data loss");
+        }
+        
+        utility.logWithDate("Trimming 'route' part of region name of cascade TIM to fit within 63 characters.");
+        route = route.substring(0, route.length() - (charactersToTrim + 3));
+        return direction + "_" + route + "..." + "_" + rsuOrSat + "_" + timType + "_" + timId + "_" + cascadeTimIdDelimiter + "_" + cascadeTimId;
+    }
+
+    private boolean cannotBeTrimmedAndStillHaveRoomForEllipsis(String route, int charactersToTrim) {
+        return route.length() <= charactersToTrim + 3;
     }
 
     private boolean containsCascadeTimIdDelimiter(String regionName) {
         return regionName.contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
-    }
-
-    private String addEllipsis(String regionName) {
-        return regionName + "...";
     }
 }

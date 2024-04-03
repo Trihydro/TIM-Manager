@@ -56,5 +56,21 @@ public class RegionNameTrimmerTest {
         String expectedTrimmedRegionName = "1234567890123456789012345678901234567890123456789..._trgd_12345";
         assertEquals(expectedTrimmedRegionName, trimmedRegionName);
     }
+
+    @Test
+    public void testTrimRegionName_RegionNameWithCascadeTimIdDelimiter_RsuData_ClientIdCutOffPartly() {
+        String regionName = "I_Prairie Center Cir_RSU-10.145.1.100_RC_somelongclientid_trgd_12345";
+        String trimmedRegionName = uut.trimRegionNameIfTooLong(regionName);
+        String expectedTrimmedRegionName = "I_Prairie Center Cir_RSU-10.145.1.100_RC_somelong..._trgd_12345";
+        assertEquals(expectedTrimmedRegionName, trimmedRegionName);
+    }
+
+    @Test
+    public void testTrimRegionName_RegionNameWithCascadeTimIdDelimiter_RsuData_ClientIdCutOffFully() {
+        String regionName = "I_Prairie Center Circle Drive_RSU-10.145.1.100_RC_somelongclientid_trgd_12345";
+        String trimmedRegionName = uut.trimRegionNameIfTooLong(regionName);
+        String expectedTrimmedRegionName = "I_Prairie Center Circle Drive_RSU-10.145.1.100_RC..._trgd_12345";
+        assertEquals(expectedTrimmedRegionName, trimmedRegionName);
+    }
     
 }

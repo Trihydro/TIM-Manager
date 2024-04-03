@@ -48,17 +48,18 @@ public class RegionNameTrimmer {
         String timId = splitName[4];
         String cascadeTimIdDelimiter = splitName[5];
         String cascadeTimId = splitName[6];
-        return trimRegionNameWithCascadeTimIdDelimiter(direction, route, rsuOrSat, timType, timId, cascadeTimIdDelimiter, cascadeTimId, charactersToTrim);
+        RegionNameElementCollection elements = new RegionNameElementCollection(direction, route, rsuOrSat, timType, timId, cascadeTimIdDelimiter, cascadeTimId);
+        return trimRegionNameWithCascadeTimIdDelimiter(elements, charactersToTrim);
     }
 
-    private String trimRegionNameWithCascadeTimIdDelimiter(String direction, String route, String rsuOrSat, String timType, String timId, String cascadeTimIdDelimiter, String cascadeTimId, int charactersToTrim) {
-        if (cannotBeTrimmedAndStillHaveRoomForEllipsis(route, charactersToTrim)) {
+    private String trimRegionNameWithCascadeTimIdDelimiter(RegionNameElementCollection elements, int charactersToTrim) {
+        if (cannotBeTrimmedAndStillHaveRoomForEllipsis(elements.route, charactersToTrim)) {
             throw new IllegalArgumentException("Region name is too long and cannot be trimmed without unacceptable data loss");
         }
         
         utility.logWithDate("Trimming 'route' part of region name of cascade TIM to fit within 63 characters.");
-        route = route.substring(0, route.length() - (charactersToTrim + 3));
-        return direction + "_" + route + "..." + "_" + rsuOrSat + "_" + timType + "_" + timId + "_" + cascadeTimIdDelimiter + "_" + cascadeTimId;
+        elements.route = elements.route.substring(0, elements.route.length() - (charactersToTrim + 3));
+        return elements.direction + "_" + elements.route + "..." + "_" + elements.rsuOrSat + "_" + elements.timType + "_" + elements.timId + "_" + elements.cascadeTimIdDelimiter + "_" + elements.cascadeTimId;
     }
 
     private boolean cannotBeTrimmedAndStillHaveRoomForEllipsis(String route, int charactersToTrim) {
@@ -67,5 +68,25 @@ public class RegionNameTrimmer {
 
     private boolean containsCascadeTimIdDelimiter(String regionName) {
         return regionName.contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
+    }
+
+    private class RegionNameElementCollection {
+        public String direction;
+        public String route;
+        public String rsuOrSat;
+        public String timType;
+        public String timId;
+        public String cascadeTimIdDelimiter;
+        public String cascadeTimId;
+
+        public RegionNameElementCollection(String direction, String route, String rsuOrSat, String timType, String timId, String cascadeTimIdDelimiter, String cascadeTimId) {
+            this.direction = direction;
+            this.route = route;
+            this.rsuOrSat = rsuOrSat;
+            this.timType = timType;
+            this.timId = timId;
+            this.cascadeTimIdDelimiter = cascadeTimIdDelimiter;
+            this.cascadeTimId = cascadeTimId;
+        }
     }
 }

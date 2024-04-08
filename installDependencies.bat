@@ -7,5 +7,3 @@ call mvn install:install-file -Dfile="resources\\jpo-ode-common-1.0.4.jar" -Dgro
 call mvn install:install-file -Dfile="resources\\jpo-ode-svcs.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.0.4" -Dpackaging=jar
 
 call mvn install:install-file -Dfile="resources\\postgresql-42.6.0.jar" -DgroupId="org.postgresql" -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar
-
-call mvn install:install-file -Dfile="resources\\ucp.jar" -DgroupId="com.oracle" -DartifactId=ucp -Dversion="12.2.0.1.0" -Dpackaging=jar

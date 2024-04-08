@@ -116,7 +116,7 @@ You may configure these values in `ode-mongo-logger/src/main/resources/applicati
 | mongologger.mongoAuthDatabase         | MONGO_AUTH_DATABASE                   | Name of Mongo database the user is defined in                    | cvtest                                                         |
 | mongologger.mongoUsername         | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
 | mongologger.mongoPassword         | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
-| mongologger.alertAddresses        | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com,ttrouchon@trihydro.com |
+| mongologger.alertAddresses        | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com |
 | mongologger.fromEmail             | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
 | mongologger.environmentName       | ENVIRONMENT_NAME                 | Name of environment (for email subject)   | DEV                                                            |
 | mongologger.mailHost              | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |

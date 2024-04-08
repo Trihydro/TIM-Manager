@@ -68,6 +68,7 @@
 
     <properties>
         <neo4j-ogm.version>3.2.8</neo4j-ogm.version>
+        <java.version>21</java.version>
     </properties>
 
     <build>

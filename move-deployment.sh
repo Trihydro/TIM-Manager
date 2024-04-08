@@ -10,7 +10,7 @@
 # 3. Move the corresponding .jar from ./deployment to the correct folder 
 
 directory=""
-base=/home/wyocvadmin/config/wyocv_applications
+base=/home/wyocvadmin/wyocv
 for path in ./deployment/*; do 
     file=$(basename $path)
     # Extract the directory name from the .jar (e.g. cv-data-tasks-0.0.1-SNAPSHOT.jar -> cv-data-tasks)

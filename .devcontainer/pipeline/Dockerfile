@@ -69,7 +69,7 @@ ADD ../../resources /home/wyocv/wyocv_applications/resources
 
 ADD ./post-create.sh /home/wyocv/wyocv_applications
 
-# Allow for a consistant java home location for settings - image is changing over time
+# Allow for a consistent java home location for settings - image is changing over time
 RUN if [ ! -d "/docker-java-home" ]; then ln -s "${JAVA_HOME}" /docker-java-home; fi
 
 CMD /home/wyocv/wyocv_applications/post-create.sh

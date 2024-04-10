@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 @Component
@@ -64,6 +65,8 @@ public class SdwService {
 
             results = Arrays.asList(response.getBody());
         } catch (RestClientException ex) {
+            utility.logWithDate("An exception occurred while attempting to get messages from SDX: " + ex.getMessage());
+            utility.logWithDate("Is the SDX API key valid?");
             ex.printStackTrace();
         }
 
@@ -104,6 +107,8 @@ public class SdwService {
 
             decodeResponse = response.getBody();
         } catch (RestClientException ex) {
+            utility.logWithDate("An exception occurred while attempting to decode message: " + ex.getMessage());
+            utility.logWithDate("Is the SDX API key valid?");
             ex.printStackTrace();
             return null;
         }
@@ -165,8 +170,15 @@ public class SdwService {
         HttpEntity<List<Integer>> entity = new HttpEntity<List<Integer>>(satRecordInts, headers);
         ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
         };
-        ResponseEntity<HashMap<Integer, Boolean>> response = restTemplateProvider.GetRestTemplate().exchange(url,
-                HttpMethod.DELETE, entity, responseType);
+        ResponseEntity<HashMap<Integer, Boolean>> response;
+        try {
+            response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
+        } catch (HttpClientErrorException ex) {
+            utility.logWithDate("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
+            utility.logWithDate("Is the SDX API key valid?");
+            ex.printStackTrace();
+            response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
+        }
 
         if (response.getStatusCode() != HttpStatus.OK) {
             utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
@@ -192,8 +204,15 @@ public class SdwService {
         HttpEntity<List<Integer>> entity = new HttpEntity<List<Integer>>(satRecordInts, headers);
         ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
         };
-        ResponseEntity<HashMap<Integer, Boolean>> response = restTemplateProvider.GetRestTemplate().exchange(url,
-                HttpMethod.DELETE, entity, responseType);
+        ResponseEntity<HashMap<Integer, Boolean>> response;
+        try {
+            response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
+        } catch (HttpClientErrorException ex) {
+            utility.logWithDate("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
+            utility.logWithDate("Is the SDX API key valid?");
+            ex.printStackTrace();
+            response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
+        }
 
         if (response.getStatusCode() != HttpStatus.OK) {
             utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");

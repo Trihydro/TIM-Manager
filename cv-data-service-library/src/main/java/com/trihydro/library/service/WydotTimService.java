@@ -676,11 +676,11 @@ public class WydotTimService {
         if (action.equals("leftClosed")) {
             codes = new Integer[2];
             codes[0] = 777;
-            codes[1] = 13580;
+            codes[1] = 13579;
         } else if (action.equals("rightClosed")) { // Right lane closed
             codes = new Integer[2];
             codes[0] = 777;
-            codes[1] = 13579;
+            codes[1] = 13580;
         } else if (action.equals("workers")) {
             codes = new Integer[1];
             codes[0] = 6952;

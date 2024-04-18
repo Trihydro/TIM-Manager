@@ -736,11 +736,14 @@ public abstract class WydotTimBaseController {
      * This method creates a new WydotTim for the given segment and sends it to RSUs and Satellite.
      */
     private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
+        // clear any conditions previously cascaded for this segment to ensure outdated conditions do not get left behind
+        wydotTimService.clearTimsById(timType.getType(), clientId + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId(), null);
+        
         if (!countyRoadSegment.hasOneOrMoreCondition()) {
-            // County road segment has no conditions, expire any existing TIMs for this segment
-            wydotTimService.clearTimsById(timType.getType(), clientId + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId(), null);
+            // no conditions associated with the segment, no need to generate any TIMs
             return;
         }
+
         List<Milepost> cascadeMileposts = cascadeService.getMilepostsForSegment(countyRoadSegment);
         if (cascadeMileposts.size() < 2) { // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode TIM if we supply less than 2.
             utility.logWithDate("Found less than 2 mileposts while attempting to cascade condition, unable to generate TIM.");

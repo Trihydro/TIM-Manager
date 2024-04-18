@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.AdvisorySituationDataDeposit;
@@ -25,9 +26,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 public class SdwServiceTest extends BaseServiceTest {
@@ -120,6 +122,63 @@ public class SdwServiceTest extends BaseServiceTest {
         // Assert
         Assertions.assertNotNull(results);
         Assertions.assertTrue(results.containsKey(-1));
+    }
+
+    @Test
+    public void deleteSdxDataBySatRecordId_handlesHttpClientErrorException() {
+        // Arrange
+        setupConfig();
+        List<String> satRecordIds = new ArrayList<String>();
+        satRecordIds.add("A9184436");
+        
+        List<Integer> satRecordInts = satRecordIds.stream().map(x -> Integer.parseUnsignedInt(x, 16))
+                .collect(Collectors.toList());
+
+        String url = String.format("%s/api/delete-multiple-by-recordid", baseUrl);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("apikey", apiKey);
+        HttpEntity<List<Integer>> entity = new HttpEntity<List<Integer>>(satRecordInts, headers);
+        ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
+        };
+        when(mockRestTemplate.exchange(url, HttpMethod.DELETE, entity, responseType))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "something went wrong..."));
+
+        // Act
+        HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satRecordIds);
+
+        // Assert
+        Assertions.assertNull(results);
+        verify(mockUtility).logWithDate("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
+        verify(mockUtility).logWithDate("Is the SDX API key valid?");
+    }
+
+    @Test
+    public void deleteSdxDataByRecordIdIntegers_handlesHttpClientErrorException() {
+        // Arrange
+        setupConfig();
+        List<Integer> recordIds = new ArrayList<Integer>();
+        recordIds.add(1);
+        recordIds.add(2);
+        recordIds.add(3);
+
+        String url = String.format("%s/api/delete-multiple-by-recordid", baseUrl);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("apikey", apiKey);
+        HttpEntity<List<Integer>> entity = new HttpEntity<List<Integer>>(recordIds, headers);
+        ParameterizedTypeReference<HashMap<Integer, Boolean>> responseType = new ParameterizedTypeReference<HashMap<Integer, Boolean>>() {
+        };
+        when(mockRestTemplate.exchange(url, HttpMethod.DELETE, entity, responseType))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "something went wrong..."));
+
+        // Act
+        HashMap<Integer, Boolean> results = sdwService.deleteSdxDataByRecordIdIntegers(recordIds);
+
+        // Assert
+        Assertions.assertNull(results);
+        verify(mockUtility).logWithDate("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
+        verify(mockUtility).logWithDate("Is the SDX API key valid?");
     }
 
     @Test
@@ -247,6 +306,8 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(result);
+        verify(mockUtility).logWithDate("An exception occurred while attempting to decode message: something went wrong...");
+        verify(mockUtility).logWithDate("Is the SDX API key valid?");
     }
 
     @Test
@@ -284,5 +345,7 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(results);
+        verify(mockUtility).logWithDate("An exception occurred while attempting to get messages from SDX: something went wrong...");
+        verify(mockUtility).logWithDate("Is the SDX API key valid?");
     }
 }

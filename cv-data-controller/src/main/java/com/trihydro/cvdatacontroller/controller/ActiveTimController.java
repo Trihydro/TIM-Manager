@@ -156,10 +156,10 @@ public class ActiveTimController extends BaseController {
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-				activeTim.setNotUsed1(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
-				activeTim.setNotUsed(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
-				activeTim.setNotUsed3(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
-				activeTim.setNotUsed2(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setNotUsed1((short) 0);
+				activeTim.setNotUsed((short) 0);
+				activeTim.setNotUsed3((short) 0);
+				activeTim.setNotUsed2((short) 0);
 				activeTim.setUrl(rs.getString("URL"));
 
 				int frameTypeValue = rs.getInt("FRAME_TYPE");
@@ -287,10 +287,10 @@ public class ActiveTimController extends BaseController {
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-				activeTim.setNotUsed1(utility.GetShortValueFromResultSet(rs, "SSP_LOCATION_RIGHTS"));
-				activeTim.setNotUsed(utility.GetShortValueFromResultSet(rs, "SSP_TIM_RIGHTS"));
-				activeTim.setNotUsed3(utility.GetShortValueFromResultSet(rs, "SSP_MSG_TYPES"));
-				activeTim.setNotUsed2(utility.GetShortValueFromResultSet(rs, "SSP_MSG_CONTENT"));
+				activeTim.setNotUsed1((short) 0);
+				activeTim.setNotUsed((short) 0);
+				activeTim.setNotUsed3((short) 0);
+				activeTim.setNotUsed2((short) 0);
 				activeTim.setUrl(rs.getString("URL"));
 
 				int frameTypeValue = rs.getInt("FRAME_TYPE");

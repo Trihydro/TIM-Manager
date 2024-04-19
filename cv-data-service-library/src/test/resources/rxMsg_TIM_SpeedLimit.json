@@ -81,11 +81,11 @@
                       "direction": 1111100000000001
                     }
                   },
-                  "duratonTime": 32000,
-                  "sspMsgRights1": 0,
-                  "sspMsgRights2": 0,
-                  "sspTimRights": 0,
-                  "sspLocationRights": 0,
+                  "durationTime": 32000,
+                  "notUsed2": 0,
+                  "notUsed3": 0,
+                  "notUsed": 0,
+                  "notUsed1": 0,
                   "frameType": {
                     "roadSignage": ""
                   },

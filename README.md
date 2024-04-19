@@ -79,28 +79,28 @@ This will create the `target` folder under each module. From here, create a new 
 ```
 .
 ├── cv-data-controller
-│   ├── cv-data-controller-0.0.1-SNAPSHOT.jar
+│   ├── cv-data-controller-0.0.2-SNAPSHOT.jar
 │   ├── Dockerfile
 ├── cv-data-tasks
-│   ├── cv-data-tasks-0.0.1-SNAPSHOT.jar
+│   ├── cv-data-tasks-0.0.2-SNAPSHOT.jar
 │   ├── Dockerfile
 ├── docker-compose.yml
 ├── ode-data-logger
 │   ├── Dockerfile
-│   ├── ode-data-logger-0.0.1-SNAPSHOT.jar
+│   ├── ode-data-logger-0.0.2-SNAPSHOT.jar
 ├── ode-mongo-logger
 │   ├── Dockerfile
-│   ├── ode-mongo-logger-0.0.1-SNAPSHOT.jar
+│   ├── ode-mongo-logger-0.0.2-SNAPSHOT.jar
 ├── ode-wrapper
 │   ├── Dockerfile
-│   ├── ode-wrapper-0.0.1-SNAPSHOT.jar
+│   ├── ode-wrapper-0.0.2-SNAPSHOT.jar
 ├── ode-wrapper-docs
 │   └── swagger-ui-master
 │       ├── Dockerfile
 │       ├── (swagger folder structure)
 └── tim-refresh
     ├── Dockerfile   
-    ├── tim-refresh-0.0.1-SNAPSHOT.jar
+    ├── tim-refresh-0.0.2-SNAPSHOT.jar
 
 ```
 

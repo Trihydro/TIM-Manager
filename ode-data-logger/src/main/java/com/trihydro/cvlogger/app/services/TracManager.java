@@ -25,6 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeTimPayload;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 
@@ -88,7 +89,7 @@ public class TracManager {
 		OdeTimPayload payload = jsonToJava.convertTimPayloadJsonToJava(value);
 
 		// check if packetId is in trac message sent table
-		if (isDnMsgInTrac(payload.getTim().getPacketID())) {
+		if (isDnMsgInTrac(getTim(payload).getPacketID())) {
 			// if so, return
 			System.out.println("TRAC already submitted, returning");
 			return;
@@ -101,7 +102,7 @@ public class TracManager {
 		String latitude = null;
 		String longitude = null;
 
-		DataFrame[] dfs = payload.getTim().getDataframes();
+		DataFrame[] dfs = getTim(payload).getDataframes();
 		if (dfs.length > 0) {
 			Region[] regs = dfs[0].getRegions();
 			if (regs.length > 0) {
@@ -209,8 +210,15 @@ public class TracManager {
 			}
 		}
 
-		logNewDistressNotification(payload.getTim().getPacketID(),
+		logNewDistressNotification(getTim(payload).getPacketID(),
 				"Distress Notification Issued at " + latitude + "/" + longitude, responseCode, responseText, msgSent,
 				emailSent);
 	}
+
+	/**
+     * Helper method to get an OdeTravelerInformationMessage object given an OdeTimPayload.
+     */
+    private OdeTravelerInformationMessage getTim(OdeTimPayload odeTimPayload) {
+        return (OdeTravelerInformationMessage) odeTimPayload.getData();
+    }
 }

@@ -51,13 +51,13 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         // Assert
         Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// TIM_ID
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 2, dFrame.getSspTimRights());// SSP_TIM_RIGHTS
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 2, dFrame.getNotUsed());// SSP_TIM_RIGHTS
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, null);// FRAME_TYPE
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 4, dFrame.getDurationTime());// DURATION_TIME
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 5, dFrame.getPriority());// PRIORITY
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 6, dFrame.getSspLocationRights());// SSP_LOCATION_RIGHTS
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 7, dFrame.getSspMsgTypes());// SSP_MSG_TYPES
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 8, dFrame.getSspMsgContent());// SSP_MSG_CONTENT
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 6, dFrame.getNotUsed1());// SSP_LOCATION_RIGHTS
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 7, dFrame.getNotUsed3());// SSP_MSG_TYPES
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 8, dFrame.getNotUsed2());// SSP_MSG_CONTENT
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 9, dFrame.getContent());// CONTENT
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 10, dFrame.getUrl());// URL
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11, time);// START_DATE_TIME

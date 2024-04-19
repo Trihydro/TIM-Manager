@@ -109,7 +109,7 @@ public class TimService extends BaseService {
                 secResCode = odeLogMetadata.getSecurityResultCode();
             }
 
-            Long timId = AddTim(odeData.getMetadata(), rxMsgDet, ((OdeTimPayload) odeData.getPayload()).getTim(),
+            Long timId = AddTim(odeData.getMetadata(), rxMsgDet, getTim((OdeTimPayload) odeData.getPayload()),
                     recType, logFileName, secResCode, null, null);
 
             // return if TIM is not inserted
@@ -119,7 +119,7 @@ public class TimService extends BaseService {
             Path path = null;
             Geometry geometry = null;
             OdeTravelerInformationMessage.DataFrame.Region region = null;
-            DataFrame[] dFrames = ((OdeTimPayload) odeData.getPayload()).getTim().getDataframes();
+            DataFrame[] dFrames = getTim((OdeTimPayload) odeData.getPayload()).getDataframes();
             if (dFrames.length > 0) {
                 us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0]
                         .getRegions();
@@ -191,7 +191,7 @@ public class TimService extends BaseService {
         OdeTimPayload payload = (OdeTimPayload) odeData.getPayload();
         if (payload == null)
             return;
-        OdeTravelerInformationMessage tim = payload.getTim();
+        OdeTravelerInformationMessage tim = getTim(payload);
         if (tim == null)
             return;
         DataFrame[] dframes = tim.getDataframes();
@@ -744,5 +744,12 @@ public class TimService extends BaseService {
 
     private boolean containsCascadeTimIdDelimiter(String regionName) {
         return regionName.contains("_trgd_");
+    }
+
+    /**
+     * Helper method to get an OdeTravelerInformationMessage object given an OdeTimPayload.
+     */
+    private OdeTravelerInformationMessage getTim(OdeTimPayload odeTimPayload) {
+        return (OdeTravelerInformationMessage) odeTimPayload.getData();
     }
 }

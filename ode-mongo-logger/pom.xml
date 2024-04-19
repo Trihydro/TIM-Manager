@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.wyocv</groupId>
     <artifactId>wyo-cv</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
 
   <!-- <groupId>com.trihydro</groupId> -->

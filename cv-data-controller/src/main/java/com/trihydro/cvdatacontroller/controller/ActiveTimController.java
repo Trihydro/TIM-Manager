@@ -287,10 +287,10 @@ public class ActiveTimController extends BaseController {
 				// DataFrame properties
 				activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
 				activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-				activeTim.setNotUsed1((short) 0); // as of J2735 this should be set to 0 and is ignored
-				activeTim.setNotUsed((short) 0); // as of J2735 this should be set to 0 and is ignored
-				activeTim.setNotUsed3((short) 0); // as of J2735 this should be set to 0 and is ignored
-				activeTim.setNotUsed2((short) 0); // as of J2735 this should be set to 0 and is ignored
+				activeTim.setNotUsed1((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
+				activeTim.setNotUsed((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
+				activeTim.setNotUsed3((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
+				activeTim.setNotUsed2((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
 				activeTim.setUrl(rs.getString("URL"));
 
 				int frameTypeValue = rs.getInt("FRAME_TYPE");

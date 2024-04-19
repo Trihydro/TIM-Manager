@@ -4,6 +4,7 @@ import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.RegionNameTrimmer;
 import com.trihydro.library.helpers.SnmpHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
@@ -53,7 +54,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         TimGenerationHelper.class,
         Utility.class,
         WydotTimService.class,
-        CascadeService.class })
+        CascadeService.class,
+        RegionNameTrimmer.class })
 public class ApplicationConfig implements WebMvcConfigurer {
     public ApplicationConfig() {
         super();

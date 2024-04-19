@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.RegionNameTrimmer;
 import com.trihydro.library.helpers.SnmpHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
@@ -73,6 +74,7 @@ public class WydotTimService {
     private SnmpHelper snmpHelper;
     private MilepostService milepostService;
     private TimGenerationHelper timGenerationHelper;
+    private RegionNameTrimmer regionNameTrimmer;
 
     @Autowired
     public void InjectDependencies(EmailProps _emailProps, OdeProps _odeProps, TimGenerationProps _genProps,
@@ -80,7 +82,8 @@ public class WydotTimService {
             OdeService _odeService, CreateBaseTimUtil _createBaseTimUtil,
             ActiveTimHoldingService _activeTimHoldingService, ActiveTimService _activeTimService,
             TimRsuService _timRsuService, RestTemplateProvider _restTemplateProvider, RsuService _rsuService,
-            TimService _timService, SnmpHelper _snmpHelper, MilepostService _milepostService, TimGenerationHelper _timGenerationHelper) {
+            TimService _timService, SnmpHelper _snmpHelper, MilepostService _milepostService, TimGenerationHelper _timGenerationHelper,
+            RegionNameTrimmer _regionNameTrimmer) {
         emailProps = _emailProps;
         odeProps = _odeProps;
         genProps = _genProps;
@@ -99,6 +102,7 @@ public class WydotTimService {
         snmpHelper = _snmpHelper;
         milepostService = _milepostService;
         timGenerationHelper = _timGenerationHelper;
+        regionNameTrimmer = _regionNameTrimmer;
     }
 
     private RestTemplateProvider restTemplateProvider;
@@ -213,6 +217,12 @@ public class WydotTimService {
         if (pk != null)
             regionNameTemp += "_" + pk;
 
+        try {
+            regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
+        } catch (IllegalArgumentException e) {
+            utility.logWithDate("Failed to trim region name: " + e.getMessage());
+            return;
+        }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
         if (activeSatTims != null && activeSatTims.size() > 0) {
@@ -262,6 +272,12 @@ public class WydotTimService {
                 regionNameTemp += "_" + pk;
 
             // set region name -- used for active tim logging
+            try {
+                regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
+            } catch (IllegalArgumentException e) {
+                utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                return;
+            }
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
 
             // look for active tim on this rsu
@@ -678,11 +694,11 @@ public class WydotTimService {
         if (action.equals("leftClosed")) {
             codes = new Integer[2];
             codes[0] = 777;
-            codes[1] = 13580;
+            codes[1] = 13579;
         } else if (action.equals("rightClosed")) { // Right lane closed
             codes = new Integer[2];
             codes[0] = 777;
-            codes[1] = 13579;
+            codes[1] = 13580;
         } else if (action.equals("workers")) {
             codes = new Integer[1];
             codes[0] = 6952;

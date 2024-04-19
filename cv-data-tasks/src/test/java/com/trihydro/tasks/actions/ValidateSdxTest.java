@@ -84,31 +84,31 @@ public class ValidateSdxTest {
         verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
     }
 
-    // @Test
-    // public void validateSDX_run_allValid() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
-    //     ActiveTim[] activeTims = importJsonArray("/activeTims_1.json", ActiveTim[].class);
-    //     AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
+    @Test
+    public void validateSDX_run_allValid() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
+        ActiveTim[] activeTims = importJsonArray("/activeTims_1.json", ActiveTim[].class);
+        AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
 
-    //     // Arrange service responses
-    //     when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
-    //     when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
-    //     // Return ITIS codes for ASDDs
-    //     doReturn(Arrays.asList(8, 7, 6)).when(mockSdwService).getItisCodesFromAdvisoryMessage("0");
-    //     doReturn(Arrays.asList(17, 16, 18)).when(mockSdwService).getItisCodesFromAdvisoryMessage("-1");
+        // Arrange service responses
+        when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
+        when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
+        // Return ITIS codes for ASDDs
+        doReturn(Arrays.asList(8, 7, 6)).when(mockSdwService).getItisCodesFromAdvisoryMessage("0");
+        doReturn(Arrays.asList(17, 16, 18)).when(mockSdwService).getItisCodesFromAdvisoryMessage("-1");
 
-    //     // Act
-    //     uut.run();
+        // Act
+        uut.run();
 
-    //     // Assert
-    //     // Services were called
-    //     verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
-    //     verify(mockActiveTimService).getActiveTimsForSDX();
-    //     verify(mockSdwService, times(2)).getItisCodesFromAdvisoryMessage(any());
+        // Assert
+        // Services were called
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
+        verify(mockActiveTimService).getActiveTimsForSDX();
+        verify(mockSdwService, times(2)).getItisCodesFromAdvisoryMessage(any());
 
-    //     // No email was sent
-    //     verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
+        // No email was sent
+        verify(mockEmailHelper, times(0)).SendEmail(any(), any(), any());
 
-    // }
+    }
 
     @Test
     public void validateSDX_noSdx() throws MailException, MessagingException {
@@ -157,112 +157,112 @@ public class ValidateSdxTest {
         Assertions.assertEquals(exceptionText, exceptionMessageCaptor.getValue());
     }
 
-    // @Test
-    // public void validateSDX_noDatabase() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
-    //     // Arrange
-    //     // 0 Active TIMS, 2 SDX.
-    //     ActiveTim[] activeTims = new ActiveTim[0];
-    //     AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
+    @Test
+    public void validateSDX_noDatabase() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
+        // Arrange
+        // 0 Active TIMS, 2 SDX.
+        ActiveTim[] activeTims = new ActiveTim[0];
+        AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
 
-    //     // Arrange service responses
-    //     when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
-    //     when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
+        // Arrange service responses
+        when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
+        when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
 
-    //     HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
-    //     sdxDelResults.put(0, true);
-    //     sdxDelResults.put(1, false);
-    //     when(mockSdwService.deleteSdxDataByRecordIdIntegers(any())).thenReturn(sdxDelResults);
+        HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
+        sdxDelResults.put(0, true);
+        sdxDelResults.put(1, false);
+        when(mockSdwService.deleteSdxDataByRecordIdIntegers(any())).thenReturn(sdxDelResults);
 
-    //     // Act
-    //     uut.run();
+        // Act
+        uut.run();
 
-    //     // Assert
-    //     // 0 Active TIMs, with 2 records in the SDX. We're expecting:
-    //     // - Number of messages on SDX without corresponding Database record: 2
-    //     // - deleteFromSdx to contain 2 records
+        // Assert
+        // 0 Active TIMs, with 2 records in the SDX. We're expecting:
+        // - Number of messages on SDX without corresponding Database record: 2
+        // - deleteFromSdx to contain 2 records
 
-    //     // Services were called
-    //     verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
-    //     verify(mockActiveTimService).getActiveTimsForSDX();
+        // Services were called
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
+        verify(mockActiveTimService).getActiveTimsForSDX();
 
-    //     // Email was sent
-    //     verify(mockEmailHelper).SendEmail(any(), any(), any());
+        // Email was sent
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
-    //     // Email had expected counts
-    //     verify(mockEmailFormatter).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
-    //             deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
+        // Email had expected counts
+        verify(mockEmailFormatter).generateSdxSummaryEmail(eq(2), eq(0), eq(0), toResendCaptor.capture(),
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
-    //     Assertions.assertEquals(0, toResendCaptor.getValue().size());
-    //     Assertions.assertEquals(2, deleteFromSdxCaptor.getValue().size());
-    //     Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
+        Assertions.assertEquals(0, toResendCaptor.getValue().size());
+        Assertions.assertEquals(2, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
 
-    //     String exText = "The following recordIds failed to delete from the SDX: 1<br>";
-    //     Assertions.assertEquals(exText, exceptionMessageCaptor.getValue());
-    // }
+        String exText = "The following recordIds failed to delete from the SDX: 1<br>";
+        Assertions.assertEquals(exText, exceptionMessageCaptor.getValue());
+    }
 
-    // @Test
-    // public void validateSDX_mixSuccess() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
-    //     // 3 Active TIMs, 3 SDX records.
-    //     // 2 Active TIM and SDX records are aligned. Of those, 1 pair is accurate while
-    //     // another is "stale".
-    //     // The last Active TIM isn't present on the SDX, and the last SDX record is
-    //     // orphaned.
-    //     ActiveTim[] activeTims = importJsonArray("/activeTims_2.json", ActiveTim[].class);
-    //     AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_2.json", AdvisorySituationDataDeposit[].class);
+    @Test
+    public void validateSDX_mixSuccess() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
+        // 3 Active TIMs, 3 SDX records.
+        // 2 Active TIM and SDX records are aligned. Of those, 1 pair is accurate while
+        // another is "stale".
+        // The last Active TIM isn't present on the SDX, and the last SDX record is
+        // orphaned.
+        ActiveTim[] activeTims = importJsonArray("/activeTims_2.json", ActiveTim[].class);
+        AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_2.json", AdvisorySituationDataDeposit[].class);
 
-    //     // Arrange service responses
-    //     when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
-    //     when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
-    //     // Return ITIS codes for ASDDs
-    //     doReturn(Arrays.asList(8, 7, 6)).when(mockSdwService).getItisCodesFromAdvisoryMessage("0");
-    //     // Stale record
-    //     doReturn(Arrays.asList(0)).when(mockSdwService).getItisCodesFromAdvisoryMessage("-1");
+        // Arrange service responses
+        when(mockSdwService.getMsgsForOdeUser(SemiDialogID.AdvSitDataDep)).thenReturn(Arrays.asList(asdds));
+        when(mockActiveTimService.getActiveTimsForSDX()).thenReturn(Arrays.asList(activeTims));
+        // Return ITIS codes for ASDDs
+        doReturn(Arrays.asList(8, 7, 6)).when(mockSdwService).getItisCodesFromAdvisoryMessage("0");
+        // Stale record
+        doReturn(Arrays.asList(0)).when(mockSdwService).getItisCodesFromAdvisoryMessage("-1");
 
-    //     HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
-    //     sdxDelResults.put(0, true);
-    //     sdxDelResults.put(1, false);
-    //     when(mockSdwService.deleteSdxDataByRecordIdIntegers(any())).thenReturn(sdxDelResults);
+        HashMap<Integer, Boolean> sdxDelResults = new HashMap<>();
+        sdxDelResults.put(0, true);
+        sdxDelResults.put(1, false);
+        when(mockSdwService.deleteSdxDataByRecordIdIntegers(any())).thenReturn(sdxDelResults);
 
-    //     List<ResubmitTimException> resubExs = new ArrayList<>();
-    //     resubExs.add(new ResubmitTimException(-1l, "Unit test exception"));
-    //     when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExs);
+        List<ResubmitTimException> resubExs = new ArrayList<>();
+        resubExs.add(new ResubmitTimException(-1l, "Unit test exception"));
+        when(mockTimGenerationHelper.resubmitToOde(any())).thenReturn(resubExs);
 
-    //     // Act
-    //     uut.run();
+        // Act
+        uut.run();
 
-    //     // Assert
-    //     // We're expecting:
-    //     // - Number of stale records on SDX (different ITIS codes than ActiveTim): 1
-    //     // - Number of messages on SDX without corresponding Database record: 1
-    //     // - Number of Database records without corresponding message in SDX: 1
-    //     // - toResend count: 1
-    //     // - deleteFromSdx count: 1
-    //     // - invDbRecords count: 0
+        // Assert
+        // We're expecting:
+        // - Number of stale records on SDX (different ITIS codes than ActiveTim): 1
+        // - Number of messages on SDX without corresponding Database record: 1
+        // - Number of Database records without corresponding message in SDX: 1
+        // - toResend count: 1
+        // - deleteFromSdx count: 1
+        // - invDbRecords count: 0
 
-    //     // Services were called
-    //     verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
-    //     verify(mockActiveTimService).getActiveTimsForSDX();
-    //     verify(mockSdwService, times(3)).getItisCodesFromAdvisoryMessage(any());
+        // Services were called
+        verify(mockSdwService).getMsgsForOdeUser(SemiDialogID.AdvSitDataDep);
+        verify(mockActiveTimService).getActiveTimsForSDX();
+        verify(mockSdwService, times(3)).getItisCodesFromAdvisoryMessage(any());
 
-    //     // Email was sent
-    //     verify(mockEmailHelper).SendEmail(any(), any(), any());
+        // Email was sent
+        verify(mockEmailHelper).SendEmail(any(), any(), any());
 
-    //     // Email had expected counts
-    //     verify(mockEmailFormatter).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),
-    //             deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
+        // Email had expected counts
+        verify(mockEmailFormatter).generateSdxSummaryEmail(eq(1), eq(1), eq(1), toResendCaptor.capture(),
+                deleteFromSdxCaptor.capture(), invDbRecordsCaptor.capture(), exceptionMessageCaptor.capture());
 
-    //     Assertions.assertEquals(2, toResendCaptor.getValue().size());
-    //     Assertions.assertEquals(1, deleteFromSdxCaptor.getValue().size());
-    //     Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
+        Assertions.assertEquals(2, toResendCaptor.getValue().size());
+        Assertions.assertEquals(1, deleteFromSdxCaptor.getValue().size());
+        Assertions.assertEquals(0, invDbRecordsCaptor.getValue().size());
 
-    //     Gson gson = new Gson();
-    //     String exceptionText = "The following recordIds failed to delete from the SDX: 1<br>";
-    //     exceptionText += "The following exceptions were found while attempting to resubmit TIMs: ";
-    //     exceptionText += "<br/>";
-    //     for (ResubmitTimException rte : resubExs) {
-    //         exceptionText += gson.toJson(rte);
-    //         exceptionText += "<br/>";
-    //     }
-    //     Assertions.assertEquals(exceptionText, exceptionMessageCaptor.getValue());
-    // }
+        Gson gson = new Gson();
+        String exceptionText = "The following recordIds failed to delete from the SDX: 1<br>";
+        exceptionText += "The following exceptions were found while attempting to resubmit TIMs: ";
+        exceptionText += "<br/>";
+        for (ResubmitTimException rte : resubExs) {
+            exceptionText += gson.toJson(rte);
+            exceptionText += "<br/>";
+        }
+        Assertions.assertEquals(exceptionText, exceptionMessageCaptor.getValue());
+    }
 }

@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,12 +24,15 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Buffer;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
+import com.trihydro.library.model.CountyRoadSegment;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTimRw;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
@@ -36,6 +40,7 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.IdGenerator;
+import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
@@ -60,6 +65,7 @@ public abstract class WydotTimBaseController {
     MilepostReduction milepostReduction;
     protected Utility utility;
     protected TimGenerationHelper timGenerationHelper;
+    protected CascadeService cascadeService;
 
     private List<String> routes = new ArrayList<>();
     protected static Gson gson = new Gson();
@@ -67,7 +73,8 @@ public abstract class WydotTimBaseController {
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, TimGenerationHelper _timGenerationHelper) {
+            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility, 
+            TimGenerationHelper _timGenerationHelper, CascadeService _cascadeService) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
@@ -77,6 +84,7 @@ public abstract class WydotTimBaseController {
         milepostReduction = _milepostReduction;
         utility = _utility;
         timGenerationHelper = _timGenerationHelper;
+        cascadeService = _cascadeService;
     }
 
     protected String getStartTime() {
@@ -524,11 +532,17 @@ public abstract class WydotTimBaseController {
             iTim.setDirection("I");
             dTim.setDirection("D");
             // I
-            createSendTims(iTim, timType, startDateTime, endDateTime, pk, content, frameType);
+            expireReduceCreateSendTims(iTim, timType, startDateTime, endDateTime, pk, content, frameType);
             // D
-            createSendTims(dTim, timType, startDateTime, endDateTime, pk, content, frameType);
+            expireReduceCreateSendTims(dTim, timType, startDateTime, endDateTime, pk, content, frameType);
         } else {
-            createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
+            expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
+        }
+
+        // if tim is associated with a trigger road, cascade conditions
+        TriggerRoad triggerRoad = getTriggerRoad(wydotTim);
+        if (triggerRoad != null) {
+            handleCascadingConditions(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, triggerRoad);
         }
     }
 
@@ -553,7 +567,7 @@ public abstract class WydotTimBaseController {
         }
     }
 
-    protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
+    protected void expireReduceCreateSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
             Integer pk, ContentEnum content, TravelerInfoType frameType) {
         // Clear any existing TIMs with the same client id
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
@@ -577,7 +591,7 @@ public abstract class WydotTimBaseController {
             return;
         }
 
-        var anchor = milepostsAll.remove(0);
+        var anchor = getAnchorPoint(milepostsAll);
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
                 configuration.getPathDistanceLimit());
 
@@ -665,5 +679,98 @@ public abstract class WydotTimBaseController {
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
         wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint, reducedMileposts);
+    }
+
+    /**
+     * This method retrieves the trigger road for the given WydotTim.
+     * @param wydotTim The WydotTim to retrieve the trigger road for.
+     * @return The trigger road for the given WydotTim if it exists, otherwise null.
+     */
+    private TriggerRoad getTriggerRoad(WydotTim wydotTim) {
+        // check for road_code by casting WydotTim and only attempt to retrieve TriggerRoad if road_code is present in the class
+        String roadCode = null;
+        if (wydotTim instanceof WydotTimCc) {
+            // Model `WydotTimCc` does not have a road_code field, return
+            return null;
+        }
+        else if (wydotTim instanceof WydotTimIncident) {
+            // Model `WydotTimIncident` does not have a road_code field, return
+            return null;
+        }
+        else if (wydotTim instanceof WydotTimParking) {
+            // Model `WydotTimParking` does not have a road_code field, return
+            return null;
+        }
+        else if (wydotTim instanceof WydotTimRc) {
+            // retrieve road_code from WydotTimRc
+            roadCode = ((WydotTimRc) wydotTim).getRoadCode();
+        }
+        else if (wydotTim instanceof WydotTimRw) {
+            // Model `WydotTimRw` does not have a road_code field, return
+            return null;
+        }
+        else if (wydotTim instanceof WydotTimVsl) {
+            // Model `WydotTimVsl` does not have a road_code field, return
+            return null;
+        }
+        else {
+            utility.logWithDate("Unrecognized model type, unable to generate cascading conditions.");
+            return null;
+        }
+        
+        // retrieve trigger road
+        return cascadeService.getTriggerRoad(roadCode);
+    }
+
+    /**
+     * This method cascades conditions for each associated segment of the given trigger road.
+     */
+    private void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, TriggerRoad triggerRoad) {
+        List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
+        for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
+            cascadeConditionsForSegment(countyRoadSegment, timType, startDateTime, endDateTime, pk, content, frameType, wydotTim.getClientId());
+        }
+    }
+
+    /**
+     * This method creates a new WydotTim for the given segment and sends it to RSUs and Satellite.
+     */
+    private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
+        // clear any conditions previously cascaded for this segment to ensure outdated conditions do not get left behind
+        wydotTimService.clearTimsById(timType.getType(), clientId + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId(), null);
+        
+        if (!countyRoadSegment.hasOneOrMoreCondition()) {
+            // no conditions associated with the segment, no need to generate any TIMs
+            return;
+        }
+
+        List<Milepost> cascadeMileposts = cascadeService.getMilepostsForSegment(countyRoadSegment);
+        if (cascadeMileposts.size() < 2) { // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to PER-encode TIM if we supply less than 2.
+            utility.logWithDate("Found less than 2 mileposts while attempting to cascade condition, unable to generate TIM.");
+            return;
+        }
+        var anchor = getAnchorPoint(cascadeMileposts);
+        var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
+        WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, reducedMileposts.get(0), reducedMileposts.get(reducedMileposts.size() - 1), clientId);
+        createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
+    }
+
+    /**
+     * This method returns the anchor point for the given mileposts.
+     * @param mileposts The mileposts to find the anchor point for.
+     * @return The anchor point.
+     */
+    private Milepost getAnchorPoint(List<Milepost> mileposts) {
+        Milepost firstPoint = mileposts.get(0);
+        Milepost secondPoint = mileposts.get(1);
+
+        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+
+        Milepost anchor = new Milepost();
+        anchor.setLatitude(anchorCoordinate.getLatitude());
+        anchor.setLongitude(anchorCoordinate.getLongitude());
+        anchor.setMilepost(firstPoint.getMilepost());
+        anchor.setDirection(firstPoint.getDirection());
+        return anchor;
     }
 }

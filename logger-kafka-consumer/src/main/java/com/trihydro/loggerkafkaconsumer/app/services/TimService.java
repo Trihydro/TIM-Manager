@@ -656,6 +656,11 @@ public class TimService extends BaseService {
 
         ActiveTim activeTim = new ActiveTim();
 
+        if (containsCascadeTimIdDelimiter(regionName)) {
+            // remove the cascade TIM id delimiter and everything after it
+            regionName = regionName.substring(0, regionName.indexOf("_trgd_"));
+        }
+
         String[] splitName = regionName.split("_");
 
         if (splitName.length == 0)
@@ -735,6 +740,10 @@ public class TimService extends BaseService {
         var minExp = activeTimService.getMinExpiration(cem.getPacketID(), cem.getExpirationDate());
 
         return activeTimService.updateActiveTimExpiration(cem.getPacketID(), minExp);
+    }
+
+    private boolean containsCascadeTimIdDelimiter(String regionName) {
+        return regionName.contains("_trgd_");
     }
 
     /**

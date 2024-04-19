@@ -9,6 +9,7 @@ import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.IncidentChoicesService;
 import com.trihydro.library.service.ItisCodeService;
@@ -51,7 +52,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         TimTypeService.class,
         TimGenerationHelper.class,
         Utility.class,
-        WydotTimService.class })
+        WydotTimService.class,
+        CascadeService.class })
 public class ApplicationConfig implements WebMvcConfigurer {
     public ApplicationConfig() {
         super();

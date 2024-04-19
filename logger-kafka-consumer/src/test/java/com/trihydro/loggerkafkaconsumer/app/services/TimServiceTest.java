@@ -588,6 +588,28 @@ public class TimServiceTest extends TestBase<TimService> {
     }
 
     @Test
+    public void setActiveTimByRegionName_RsuSUCCESS_TrimmedRegion_RouteCutOffPartly() {
+        // Arrange
+        String regionName = "I_Prairie Center Cir..._RSU-10.145.1.100_RC_clientid_trgd_12345";
+        TimType timType = new TimType();
+        timType.setType("RC");
+        timType.setTimTypeId(-1l);
+        doReturn(timType).when(uut).getTimType("RC");
+
+        // Act
+        ActiveTim data = uut.setActiveTimByRegionName(regionName);
+
+        // Assert
+        Assertions.assertNotNull(data);
+        Assertions.assertEquals("I", data.getDirection());
+        Assertions.assertEquals("Prairie Center Cir...", data.getRoute());
+        Assertions.assertEquals("10.145.1.100", data.getRsuTarget());
+        Assertions.assertEquals("RC", data.getTimType());
+        Assertions.assertEquals(Long.valueOf(-1), data.getTimTypeId());
+        Assertions.assertEquals("clientid", data.getClientId());
+    }
+
+    @Test
     public void setActiveTimByRegionName_SatSUCCESS() {
         // Arrange
         String regionName = "I_Prairie Center Cir_SAT-satId_RC_clientId";

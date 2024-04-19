@@ -79,6 +79,8 @@ public class TimGenerationHelperTest {
     private SdwService mockSdwService;
     @Mock
     private SnmpHelper mockSnmpHelper;
+    @Mock
+    private RegionNameTrimmer mockRegionNameTrimmer;
 
     private static Long activeTimId = -1l;
     private TimUpdateModel tum;

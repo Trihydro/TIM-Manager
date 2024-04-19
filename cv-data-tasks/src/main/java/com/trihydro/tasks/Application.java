@@ -18,6 +18,7 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.BsmService;
+import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.DriverAlertService;
 import com.trihydro.library.service.HmiLogService;
@@ -59,7 +60,7 @@ import org.springframework.context.annotation.Import;
                 TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class, MilepostReduction.class,
                 RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class,
                 WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class, TimRsuService.class,
-                SnmpHelper.class })
+                SnmpHelper.class, CascadeService.class })
 
 public class Application {
         protected static DataTasksConfiguration config;

@@ -21,7 +21,6 @@ import com.grum.geocalc.Point;
 import com.trihydro.library.model.ActiveTimError;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.ActiveTimValidationResult;
-import com.trihydro.library.model.AdvisorySituationDataDeposit;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
@@ -35,6 +34,7 @@ import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
+import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.OdeService;
@@ -51,7 +51,6 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
-import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
@@ -71,6 +70,7 @@ public class TimGenerationHelper {
     private PathNodeLLService pathNodeLLService;
     private ActiveTimService activeTimService;
     private MilepostService milepostService;
+    private CascadeService cascadeService;
     private Gson gson;
     private MilepostReduction milepostReduction;
     private RsuService rsuService;
@@ -79,13 +79,14 @@ public class TimGenerationHelper {
     private ActiveTimHoldingService activeTimHoldingService;
     private SdwService sdwService;
     private SnmpHelper snmpHelper;
+    private RegionNameTrimmer regionNameTrimmer;
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
             MilepostReduction _milepostReduction, TimGenerationProps _config, RsuService _rsuService,
             OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService, SdwService _sdwService,
-            SnmpHelper _snmpHelper) {
+            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -99,6 +100,8 @@ public class TimGenerationHelper {
         activeTimHoldingService = _activeTimHoldingService;
         sdwService = _sdwService;
         snmpHelper = _snmpHelper;
+        cascadeService = _cascadeService;
+        regionNameTrimmer = _regionNameTrimmer;
     }
 
     private String getIsoDateTimeString(ZonedDateTime date) {
@@ -302,21 +305,32 @@ public class TimGenerationHelper {
 
     private List<Milepost> getAllMps(WydotTim wydotTim) {
         List<Milepost> allMps = new ArrayList<>();
-        if (wydotTim.getEndPoint() != null) {
-            allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
-            utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
-                    gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
-        } else {
-            // point incident
-            MilepostBuffer mpb = new MilepostBuffer();
-            mpb.setBufferMiles(config.getPointIncidentBufferMiles());
-            mpb.setCommonName(wydotTim.getRoute());
-            mpb.setDirection(wydotTim.getDirection());
-            mpb.setPoint(wydotTim.getStartPoint());
-            allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
-            utility.logWithDate(String.format("Found %d mileposts for point %s", allMps.size(),
-                    gson.toJson(wydotTim.getStartPoint())));
+
+        if (!CascadeService.isCascadeTim(wydotTim)) {
+            if (wydotTim.getEndPoint() != null) {
+                allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+                utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
+                        gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
+            } else {
+                // point incident
+                MilepostBuffer mpb = new MilepostBuffer();
+                mpb.setBufferMiles(config.getPointIncidentBufferMiles());
+                mpb.setCommonName(wydotTim.getRoute());
+                mpb.setDirection(wydotTim.getDirection());
+                mpb.setPoint(wydotTim.getStartPoint());
+                allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
+                utility.logWithDate(String.format("Found %d mileposts for point %s", allMps.size(),
+                        gson.toJson(wydotTim.getStartPoint())));
+            }
         }
+        else {
+            try {
+                allMps = cascadeService.getAllMilepostsFromCascadeTim(wydotTim);
+            } catch (ArrayIndexOutOfBoundsException | NumberFormatException ex) {
+                utility.logWithDate("Failed to get mileposts from cascade tim: " + ex.getMessage());
+            }
+        }
+
         return allMps;
     }
 
@@ -877,7 +891,13 @@ public class TimGenerationHelper {
                 rsus[0] = rsu;
                 timToSend.getRequest().setRsus(rsus);
 
-                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, rsu));
+                String regionName = getRsuRegionName(aTim, wydotRsu);
+                try {
+                    regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+                } catch (IllegalArgumentException e) {
+                    utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                }
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
 
                 var rsuClearExMsg = odeService.deleteTimFromRsu(rsu, Integer.valueOf(wydotRsu.getIndex()));
@@ -895,7 +915,13 @@ public class TimGenerationHelper {
             // we don't have any existing RSUs, but some fall within the boundary so send
             // new ones there. We need to update requestName in this case
             for (int i = 0; i < dbRsus.size(); i++) {
-                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(getRsuRegionName(aTim, dbRsus.get(i)));
+                String regionName = getRsuRegionName(aTim, dbRsus.get(i));
+                try {
+                    regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+                } catch (IllegalArgumentException e) {
+                    utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                }
+                timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = dbRsus.get(i);
                 timToSend.getRequest().setRsus(rsus);
 
@@ -976,6 +1002,11 @@ public class TimGenerationHelper {
         sdw.setServiceRegion(serviceRegion);
 
         String regionName = getSATRegionName(aTim, aTim.getSatRecordId());
+        try {
+            regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
+        } catch (IllegalArgumentException e) {
+            utility.logWithDate("Failed to trim region name: " + e.getMessage());
+        }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
         // set sdw block in TIM

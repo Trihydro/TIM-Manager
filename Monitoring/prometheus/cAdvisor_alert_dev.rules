@@ -14,7 +14,7 @@ groups:
 - name: host
   rules:
   - alert: high_cpu_load
-    expr: node_load1 > 12
+    expr: node_load1 > 18
     for: 1m
     labels:
       severity: warning

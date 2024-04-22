@@ -36,5 +36,5 @@ inhibit_rules:
 receivers:
 - name: 'team-X-mails'
   email_configs:
-  - to: 'bpayne@trihydro.com'
+  - to: 'dstephenson@trihydro.com, bpayne@trihydro.com'
     require_tls: false

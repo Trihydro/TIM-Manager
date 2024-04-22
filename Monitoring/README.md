@@ -42,11 +42,11 @@ The `docker-compose.yml` file holds the information needed to get up and running
 ### Alert Manager ###
 The `alertmanager` folder contains alert configurations in the `config.yml` file. This is used to manage email recipients and SMTP settings. 
 ### Prometheus ###
-The `prometheus` folder holds the Prometheus config as well as alert rules to use for sending alerts. Prometheus runs on port 9091 ([DEV](http://10.145.9.205:9091/), [PROD](http://10.145.9.204:9091/)) where alerts can be viewed and queries tested.
+The `prometheus` folder holds the Prometheus config as well as alert rules to use for sending alerts. Prometheus runs on port 9091 ([DEV](http://10.145.7.48:9091/), [PROD](http://10.145.7.52:9091/)) where alerts can be viewed and queries tested.
 ### Grafana ###
-Grafana runs on port 9095 ([DEV](http://10.145.9.205:9095/), [PROD](http://10.145.9.204:9095/)). Note the `Docker and system monitoring` dashboard for useful information.
+Grafana runs on port 9095 ([DEV](http://10.145.7.48:9095/), [PROD](http://10.145.7.52:9095/)). Note the `Docker and system monitoring` dashboard for useful information.
 ### Data Scraping ###
-The solution uses Prometheus to scrape data from a couple of different sources, namely `node_exporter` and `docker_exporter`. To see available fields these can be viewed [DEV](http://10.145.9.205:9100/metrics) and [DEV](http://10.145.9.205:9417/metrics) respectively. 
+The solution uses Prometheus to scrape data from a couple of different sources, namely `node_exporter` and `docker_exporter`. To see available fields these can be viewed [DEV](http://10.145.7.48:9100/metrics) and [DEV](http://10.145.7.48:9417/metrics) respectively. 
 
 ## 🚀 Deployment <a name = "deployment"></a>
 

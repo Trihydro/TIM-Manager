@@ -12,6 +12,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.GsonFactory;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.MilepostReduction;
+import com.trihydro.library.helpers.RegionNameTrimmer;
 import com.trihydro.library.helpers.SnmpHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
@@ -60,7 +61,7 @@ import org.springframework.context.annotation.Import;
                 TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class, MilepostReduction.class,
                 RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class,
                 WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class, TimRsuService.class,
-                SnmpHelper.class, CascadeService.class })
+                SnmpHelper.class, CascadeService.class, RegionNameTrimmer.class })
 
 public class Application {
         protected static DataTasksConfiguration config;

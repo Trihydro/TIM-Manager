@@ -52,6 +52,7 @@ import us.dot.its.jpo.ode.model.ReceivedMessageDetails;
 import us.dot.its.jpo.ode.model.SerialId;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
@@ -758,6 +759,7 @@ public class TimServiceTest extends TestBase<TimService> {
         ServiceRequest sr = new ServiceRequest();
         RSU[] rsus = new RSU[1];
         RSU rsu = new RSU();
+        rsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
         rsu.setRsuTarget("127.0.0.1");
         rsus[0] = rsu;
         sr.setRsus(rsus);

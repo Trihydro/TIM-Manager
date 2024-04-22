@@ -51,6 +51,7 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
@@ -883,6 +884,7 @@ public class TimGenerationHelper {
                 var wydotRsu = wydotRsus.get(i);
                 // set RSUS
                 rsu = new RSU();
+                rsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
                 rsu.setRsuIndex(wydotRsu.getIndex());
                 rsu.setRsuTarget(wydotRsu.getRsuTarget());
                 // rsuUsername, rsuPassword will take ODE defaults.

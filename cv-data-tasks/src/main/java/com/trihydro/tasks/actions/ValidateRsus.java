@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 
 @Component
 public class ValidateRsus implements Runnable {
@@ -178,6 +179,7 @@ public class ValidateRsus implements Runnable {
             // If this RSU has any indices that are unaccounted for, clear them
             if (result.getUnaccountedForIndices().size() > 0) {
                 var rsu = new RSU();
+                rsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
                 rsu.setRsuTarget(rsuRecord.getRsuInformation().getIpv4Address());
                 rsu.setRsuRetries(2);
                 rsu.setRsuTimeout(3000);

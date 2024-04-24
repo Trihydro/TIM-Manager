@@ -779,7 +779,9 @@ public abstract class WydotTimBaseController {
      * This method cascades conditions for each associated segment of the given trigger road.
      */
     private void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, TriggerRoad triggerRoad) {
+        utility.logWithDate("Handling cascading conditions for trigger road: " + triggerRoad.getRoadCode());
         List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
+        utility.logWithDate("Trigger road has " + countyRoadSegments.size() + " segments associated with it.");
         for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
             cascadeConditionsForSegment(countyRoadSegment, timType, startDateTime, endDateTime, pk, content, frameType, wydotTim.getClientId());
         }
@@ -794,6 +796,7 @@ public abstract class WydotTimBaseController {
         
         if (!countyRoadSegment.hasOneOrMoreCondition()) {
             // no conditions associated with the segment, no need to generate any TIMs
+            utility.logWithDate("No conditions associated with segment " + countyRoadSegment.getId() + ", skipping TIM generation.");
             return;
         }
 

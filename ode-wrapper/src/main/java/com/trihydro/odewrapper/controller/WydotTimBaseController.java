@@ -768,6 +768,7 @@ public abstract class WydotTimBaseController {
         }
         else if (wydotTim instanceof WydotTimBowr) {
             // Model `WydotTimBowr` does not have a road_code field, return
+            return null;
         }
         else {
             utility.logWithDate("Unrecognized model type, unable to generate cascading conditions.");

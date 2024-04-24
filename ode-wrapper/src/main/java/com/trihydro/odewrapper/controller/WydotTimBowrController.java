@@ -6,6 +6,7 @@ import java.util.List;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
@@ -85,9 +86,30 @@ public class WydotTimBowrController extends WydotTimBaseController {
     public ResponseEntity<String> submitBowrClear(@PathVariable String clientId) {
         utility.logWithDate("Submit Blow Over Weight Restriction Clear", this.getClass());
 
-        // TODO: implement
+        List<Long> existingTimIds = new ArrayList<Long>();
 
-        String responseMessage = "Test";
+        // validate client id
+        if (clientId == null || clientId.length() == 0) {
+            String responseMessage = "Null or empty value for client id";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
+        }
+
+        // get existing active TIMs
+        var timType = getTimType(type);
+        Long timTypeId = timType != null ? timType.getTimTypeId() : null;
+        List<ActiveTim> existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timTypeId, null);
+
+        // get ids from existingActiveTims
+        for (ActiveTim existingActiveTim : existingActiveTims) {
+            existingTimIds.add(existingActiveTim.getActiveTimId());
+        }
+
+        // expire existing tims
+        if (existingTimIds.size() > 0) {
+            timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
+        }
+
+        String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 

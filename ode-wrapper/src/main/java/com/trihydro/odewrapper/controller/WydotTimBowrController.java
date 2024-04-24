@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.trihydro.library.helpers.MilepostReduction;
@@ -14,7 +15,10 @@ import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
+import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimBowrList;
+import com.trihydro.odewrapper.model.WydotTimBowr;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,17 +50,40 @@ public class WydotTimBowrController extends WydotTimBaseController {
 
     @RequestMapping(value = "/create-or-update-bowr-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createOrUpdateBowrTim(@RequestBody TimBowrList timBowrList) {
-        utility.logWithDate("Create Or Update Blow Over Weight Restriction TIM");
+        utility.logWithDate("Create Or Update Blow Over Weight Restriction TIM", this.getClass());
 
-        // TODO: implement
+        List<ControllerResult> results = new ArrayList<ControllerResult>();
+        List<ControllerResult> errors = new ArrayList<ControllerResult>();
+        ControllerResult timResult = null;
+        List<WydotTim> timsToSend = new ArrayList<WydotTim>();
 
-        String responseMessage = "Test";
+        for (WydotTimBowr wydotTimBowr : timBowrList.getTimBowrList()) {
+            
+            timResult = validateInputBowr(wydotTimBowr);
+
+            if (timResult.getResultMessages().size() > 0) {
+                results.add(timResult);
+                errors.add(timResult);
+                continue;
+            }
+
+            timsToSend.add(wydotTimBowr);
+
+            timResult.getResultMessages().add("success");
+            results.add(timResult);
+        }
+
+        processRequestAsync(timsToSend);
+        String responseMessage = gson.toJson(results);
+        if (errors.size() > 0) {
+            utility.logWithDate("Failed to send TIMs: " + gson.toJson(errors), this.getClass());
+        }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
     @RequestMapping(value = "/submit-bowr-clear/{clientId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> submitBowrClear(@PathVariable String clientId) {
-        utility.logWithDate("Submit Blow Over Weight Restriction Clear");
+        utility.logWithDate("Submit Blow Over Weight Restriction Clear", this.getClass());
 
         // TODO: implement
 

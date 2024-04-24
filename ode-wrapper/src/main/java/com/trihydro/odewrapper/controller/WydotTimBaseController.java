@@ -1,6 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,8 +37,10 @@ import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
+import com.trihydro.odewrapper.helpers.SetItisCodes.WeightNotSupportedException;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.IdGenerator;
+import com.trihydro.odewrapper.model.WydotTimBowr;
 import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
@@ -521,6 +522,58 @@ public abstract class WydotTimBaseController {
             return true;
         }
         return false;
+    }
+
+    protected ControllerResult validateInputBowr(WydotTimBowr tim) {
+        ControllerResult toReturn = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // check direction
+        if (tim.getDirection() != null) {
+            toReturn.setDirection(tim.getClientId());
+        }
+        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d") && !tim.getDirection().equalsIgnoreCase("b")) {
+            resultMessages.add("direction not supported");
+        }
+
+        // check route
+        if (tim.getRoute() == null) {
+            resultMessages.add("Null value for route");
+        }
+        else if (!routeSupported(tim.getRoute())) {
+            resultMessages.add("route not supported");
+        }
+        else {
+            toReturn.setRoute(tim.getRoute());
+        }
+
+        // check points
+        if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
+            resultMessages.add("Invalid startPoint");
+        }
+        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+            resultMessages.add("Invalid endPoint");
+        }
+
+        if (tim.getClientId() == null) {
+            resultMessages.add("Null value for client id");
+        } else {
+            tim.setClientId(tim.getClientId());
+        }
+
+        // set itis codes
+        List<String> itisCodes = new ArrayList<>();
+        try {
+            setItisCodes.setItisCodesBowr(tim);
+        } catch (WeightNotSupportedException exception) {
+            resultMessages.add(exception.getMessage());
+        }
+        toReturn.setItisCodes(itisCodes);
+        tim.setItisCodes(itisCodes);
+
+        // return
+        toReturn.setResultMessages(resultMessages);
+        return toReturn;
     }
 
     public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk,

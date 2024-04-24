@@ -9,10 +9,11 @@ import com.trihydro.library.model.CustomItisEnum;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.service.IncidentChoicesService;
 import com.trihydro.library.service.ItisCodeService;
+import com.trihydro.odewrapper.helpers.SetItisCodes.WeightNotSupportedException;
+import com.trihydro.odewrapper.model.WydotTimBowr;
 import com.trihydro.odewrapper.model.WydotTimRc;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,6 @@ public class SetItisCodesTest {
     @InjectMocks
     SetItisCodes uut;
 
-    @BeforeEach
     public void setup() {
         List<ItisCode> itisCodes = new ArrayList<>();
         ItisCode code = new ItisCode();
@@ -63,6 +63,7 @@ public class SetItisCodesTest {
     @Test
     public void setItisCodesRc_numeric() {
         // Arrange
+        setup();
         WydotTimRc tim = new WydotTimRc();
         Integer[] itisCodes = new Integer[2];
         itisCodes[0] = 4868;
@@ -78,6 +79,7 @@ public class SetItisCodesTest {
     @Test
     public void setItisCodesRc_nonExistent() {
         // Arrange
+        setup();
         WydotTimRc tim = new WydotTimRc();
         Integer[] itisCodes = new Integer[2];
         itisCodes[0] = 0;
@@ -93,6 +95,7 @@ public class SetItisCodesTest {
     @Test
     public void setItisCodesRc_translated() {
         // Arrange
+        setup();
         WydotTimRc tim = new WydotTimRc();
         Integer[] itisCodes = new Integer[2];
         itisCodes[0] = 4868;
@@ -109,6 +112,7 @@ public class SetItisCodesTest {
     @Test
     public void setItisCodesRc_alphabetic() {
         // Arrange
+        setup();
         WydotTimRc tim = new WydotTimRc();
         Integer[] itisCodes = new Integer[2];
         itisCodes[0] = 4868;
@@ -120,5 +124,37 @@ public class SetItisCodesTest {
         // Assert
         Assertions.assertEquals(2, result.size());
         Assertions.assertTrue(result.contains("Extreme blow over risk"));
+    }
+
+    @Test
+    public void setItisCodesBowr_SUCCESS() throws WeightNotSupportedException {
+        // Arrange
+        // calling setup() not necessary here
+        int weightInPounds = 20000;
+        String weightAsItisCode = "11589";
+        WydotTimBowr tim = new WydotTimBowr();
+        tim.setData(weightInPounds);
+        List<String> expectedResult = List.of("5127", "2563", "2569", "7682", "2557", weightAsItisCode, "8739");
+
+        // Act
+        List<String> result = uut.setItisCodesBowr(tim);
+
+        // Assert
+        Assertions.assertEquals(expectedResult.size(), result.size());
+        for (String code : expectedResult) {
+            Assertions.assertTrue(result.contains(code));
+        }
+    }
+
+    @Test
+    public void setItisCodesBowr_FAILURE() throws WeightNotSupportedException {
+        // Arrange
+        // calling setup() not necessary here
+        int weightInPounds = 23456;
+        WydotTimBowr tim = new WydotTimBowr();
+        tim.setData(weightInPounds);
+
+        // Act & Assert
+        Assertions.assertThrows(WeightNotSupportedException.class, () -> uut.setItisCodesBowr(tim));
     }
 }

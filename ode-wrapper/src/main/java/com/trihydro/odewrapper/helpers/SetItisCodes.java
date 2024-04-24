@@ -10,6 +10,7 @@ import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.IncidentChoicesService;
 import com.trihydro.library.service.ItisCodeService;
+import com.trihydro.odewrapper.model.WydotTimBowr;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
@@ -288,6 +289,77 @@ public class SetItisCodes {
         items.add("1025");
 
         return items;
+    }
+
+    public List<String> setItisCodesBowr(WydotTimBowr tim) throws WeightNotSupportedException {
+        List<String> itisCodes = new ArrayList<String>();
+
+        int weightInPounds = tim.getData();
+
+        itisCodes.add("5127");
+        itisCodes.add("2563");
+        itisCodes.add("2569");
+        itisCodes.add("7682");
+        itisCodes.add("2557");
+        itisCodes.add(translateWeightToItisCode(weightInPounds));
+        itisCodes.add("8739");
+
+        return itisCodes;
+    }
+
+    /**
+     * Supported weights are 20000 to 30000 in increments of 1000 and 30000 to 70000 in increments of 5000
+     * @throws WeightNotSupportedException 
+     */
+    private String translateWeightToItisCode(int weightInPounds) throws WeightNotSupportedException {
+        switch(weightInPounds) {
+            case 20000:
+                return "11589";
+            case 21000:
+                return "11590";
+            case 22000:
+                return "11591";
+            case 23000:
+                return "11592";
+            case 24000:
+                return "11593";
+            case 25000:
+                return "11594";
+            case 26000:
+                return "11595";
+            case 27000:
+                return "11596";
+            case 28000:
+                return "11597";
+            case 29000:
+                return "11598";
+            case 30000:
+                return "11599";
+            case 35000:
+                return "11600";
+            case 40000:
+                return "11601";
+            case 45000:
+                return "11602";
+            case 50000:
+                return "11603";
+            case 55000:
+                return "11604";
+            case 60000:
+                return "11605";
+            case 65000:
+                return "11606";
+            case 70000:
+                return "11607";
+            default:
+                throw new WeightNotSupportedException("Weight " + weightInPounds + " is not supported");
+        }
+    }
+    
+    public class WeightNotSupportedException extends Exception {
+        public WeightNotSupportedException(String message) {
+            super(message);
+        }
     }
 
 }

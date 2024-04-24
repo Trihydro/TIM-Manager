@@ -564,7 +564,7 @@ public abstract class WydotTimBaseController {
         // set itis codes
         List<String> itisCodes = new ArrayList<>();
         try {
-            setItisCodes.setItisCodesBowr(tim);
+            itisCodes = setItisCodes.setItisCodesBowr(tim);
         } catch (WeightNotSupportedException exception) {
             resultMessages.add(exception.getMessage());
         }
@@ -765,6 +765,9 @@ public abstract class WydotTimBaseController {
         else if (wydotTim instanceof WydotTimVsl) {
             // Model `WydotTimVsl` does not have a road_code field, return
             return null;
+        }
+        else if (wydotTim instanceof WydotTimBowr) {
+            // Model `WydotTimBowr` does not have a road_code field, return
         }
         else {
             utility.logWithDate("Unrecognized model type, unable to generate cascading conditions.");

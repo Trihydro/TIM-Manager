@@ -39,6 +39,7 @@ public class WydotTimBowr extends WydotTim {
     }
 
     public WydotTimBowr(WydotTimBowr o) {
+        super(o);
         this.direction = o.direction;
         this.type = o.type;
         this.route = o.route;

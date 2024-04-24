@@ -571,6 +571,24 @@ public abstract class WydotTimBaseController {
         toReturn.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
+        // check start/end datetimes, which are optional
+        if (tim.getStartDateTime() != null) {
+            // ensure this is specified in ISO8601-2019
+            try {
+                ZonedDateTime.parse(tim.getStartDateTime());
+            } catch (DateTimeParseException e) {
+                resultMessages.add("Invalid startDateTime. Must be in ISO8601-2019 format.");
+            }
+        }
+        if (tim.getEndDateTime() != null) {
+            // ensure this is specified in ISO8601-2019
+            try {
+                ZonedDateTime.parse(tim.getEndDateTime());
+            } catch (DateTimeParseException e) {
+                resultMessages.add("Invalid endDateTime. Must be in ISO8601-2019 format.");
+            }
+        }
+
         // return
         toReturn.setResultMessages(resultMessages);
         return toReturn;

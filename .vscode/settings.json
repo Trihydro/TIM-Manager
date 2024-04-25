@@ -1,5 +1,10 @@
 {
     "editor.multiCursorModifier": "ctrlCmd",
     "java.configuration.updateBuildConfiguration": "disabled",
-    "java.server.launchMode": "Standard"
+    "java.server.launchMode": "Standard",
+    "java.test.defaultConfig": "Allow Reflection",
+    "java.test.config": {
+        "name": "Allow Reflection",
+        "vmArgs": ["--add-opens", "java.base/java.time=ALL-UNNAMED"]
+    }
 }

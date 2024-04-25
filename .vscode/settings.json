@@ -2,9 +2,11 @@
     "editor.multiCursorModifier": "ctrlCmd",
     "java.configuration.updateBuildConfiguration": "disabled",
     "java.server.launchMode": "Standard",
+
+    // configuration for 'Test Runner for Java' VSCode extension
     "java.test.defaultConfig": "Allow Reflection",
     "java.test.config": {
         "name": "Allow Reflection",
-        "vmArgs": ["--add-opens", "java.base/java.time=ALL-UNNAMED"]
+        "vmArgs": ["--add-opens", "java.base/java.time=ALL-UNNAMED"] // allows the ValidateSdx tests, which use reflection, to run
     }
 }

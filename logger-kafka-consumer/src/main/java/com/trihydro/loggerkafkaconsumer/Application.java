@@ -7,6 +7,7 @@ import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.RegionNameElementCollection;
 import com.trihydro.library.tables.BsmDbTables;
 import com.trihydro.library.tables.DriverAlertDbTables;
 import com.trihydro.library.tables.TimDbTables;
@@ -19,7 +20,7 @@ import org.springframework.context.annotation.Import;
 
 @Import({ Utility.class, DbInteractions.class, JsonToJavaConverter.class, TimDbTables.class, BsmDbTables.class,
 		SQLNullHandler.class, DriverAlertDbTables.class, EmailHelper.class, JavaMailSenderImplProvider.class,
-		KafkaFactory.class })
+		KafkaFactory.class, RegionNameElementCollection.class })
 @SpringBootApplication
 @EnableConfigurationProperties(LoggerConfiguration.class)
 public class Application {

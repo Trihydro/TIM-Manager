@@ -74,7 +74,7 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public WydotTim buildCascadeTim(CountyRoadSegment countyRoadSegment, Milepost firstMilepost, Milepost lastMilepost, String clientId) {
         WydotTim toReturn = new WydotTim();
-        toReturn.setDirection("1111111111111111"); // direction not applicable but must be set in order to insert into active tim holding table
+        toReturn.setDirection("B"); // direction not applicable but must be set in order to insert into active tim holding table
         toReturn.setStartPoint(new Coordinate(firstMilepost.getLatitude(), firstMilepost.getLongitude()));
         toReturn.setEndPoint(new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude()));
         toReturn.setRoute(countyRoadSegment.getCommonName());

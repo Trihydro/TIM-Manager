@@ -301,6 +301,7 @@ public class TimGenerationHelper {
         wydotTim.setDirection(tum.getDirection());
         wydotTim.setStartPoint(tum.getStartPoint());
         wydotTim.setEndPoint(tum.getEndPoint());
+        wydotTim.setClientId(tum.getClientId());
         return wydotTim;
     }
 
@@ -326,7 +327,7 @@ public class TimGenerationHelper {
             }
         }
         else {
-            utility.logWithDate("Fetching mileposts for cascade TIM " + wydotTim.getClientId());
+            utility.logWithDate("Fetching mileposts for cascade TIM with client id: " + wydotTim.getClientId());
             try {
                 allMps = cascadeService.getAllMilepostsFromCascadeTim(wydotTim);
                 utility.logWithDate(String.format("Found %d mileposts for cascade TIM with client id: %s", allMps.size(),

@@ -251,4 +251,39 @@ public class CascadeServiceTest extends BaseServiceTest {
             uut.getAllMilepostsFromCascadeTim(wydotTim);
         });
     }
+
+    @Test
+    public void testGetSegmentIdFromClientId_SUCCESS() {
+        // prepare
+        int segmentId = 1;
+        String clientId = "test" + CascadeService.CASCADE_TIM_ID_DELIMITER + segmentId + "-number";
+
+        // execute
+        int result = uut.getSegmentIdFromClientId(clientId);
+
+        // verify
+        Assertions.assertEquals(segmentId, result);
+    }
+
+    @Test
+    public void testGetSegmentIdFromClientId_FAILURE_ArrayOutOfBoundsException() {
+        // prepare
+        String clientId = "test";
+
+        // execute and verify exception occurred
+        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
+            uut.getSegmentIdFromClientId(clientId);
+        });
+    }
+
+    @Test
+    public void testGetSegmentIdFromClientId_FAILURE_NumberFormatException() {
+        // prepare
+        String clientId = "test" + CascadeService.CASCADE_TIM_ID_DELIMITER + "test";
+
+        // execute and verify exception occurred
+        Assertions.assertThrows(NumberFormatException.class, () -> {
+            uut.getSegmentIdFromClientId(clientId);
+        });
+    }
 }

@@ -166,7 +166,7 @@ public class TimGenerationHelper {
                 }
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(allMps);
                 mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp, false);
                 if (tim == null) {
@@ -286,7 +286,7 @@ public class TimGenerationHelper {
             }
 
             // reduce the mileposts by removing straight away posts
-            var anchorMp = allMps.remove(0);
+            var anchorMp = getAnchorPoint(allMps);
             mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
             tim = getTim(tum, mps, allMps, anchorMp, false);
             if (tim == null) {
@@ -391,7 +391,7 @@ public class TimGenerationHelper {
                 }
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(allMps);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, false);
                 if (tim == null) {
@@ -464,7 +464,7 @@ public class TimGenerationHelper {
                 }
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(allMps);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, true, false);
                 if (tim == null) {
@@ -537,7 +537,7 @@ public class TimGenerationHelper {
                 }
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(allMps);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);
                 if (tim == null) {
@@ -1072,5 +1072,24 @@ public class TimGenerationHelper {
             System.out.println("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
+    }
+
+    /**
+     * This method returns the anchor point for the given mileposts.
+     * @param mileposts The mileposts to find the anchor point for.
+     * @return The anchor point.
+     */
+    private Milepost getAnchorPoint(List<Milepost> mileposts) {
+        Milepost firstPoint = mileposts.get(0);
+        Milepost secondPoint = mileposts.get(1);
+
+        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+
+        Milepost anchor = new Milepost();
+        anchor.setLatitude(anchorCoordinate.getLatitude());
+        anchor.setLongitude(anchorCoordinate.getLongitude());
+        anchor.setMilepost(firstPoint.getMilepost());
+        anchor.setDirection(firstPoint.getDirection());
+        return anchor;
     }
 }

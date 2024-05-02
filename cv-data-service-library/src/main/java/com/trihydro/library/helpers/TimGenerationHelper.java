@@ -127,6 +127,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> updateAndResubmitToOde(List<ActiveTimValidationResult> validationResults) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (validationResults == null || validationResults.size() == 0) {
+            utility.logWithDate("No validation results found to update and resubmit to ODE.", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -197,6 +198,9 @@ public class TimGenerationHelper {
                         + gson.toJson(validationResult));
                 ex.printStackTrace();
             }
+        }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -344,6 +348,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
+            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -401,6 +406,9 @@ public class TimGenerationHelper {
                 exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
             }
         }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+        }
         return exceptions;
     }
 
@@ -413,6 +421,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> resetTimStartTimeAndResubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
+            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -470,6 +479,9 @@ public class TimGenerationHelper {
                 exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
             }
         }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+        }
         return exceptions;
     }
 
@@ -482,6 +494,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> expireTimAndResubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
+            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -538,6 +551,9 @@ public class TimGenerationHelper {
             } catch (Exception ex) {
                 exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
             }
+        }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -616,6 +632,9 @@ public class TimGenerationHelper {
             String exMsg = "active_tim_id " + tum.getActiveTimId()
                     + " not sent to SDX (no SAT_RECORD_ID found in database)";
             utility.logWithDate(exMsg);
+        }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
         }
         return exceptions;
     }

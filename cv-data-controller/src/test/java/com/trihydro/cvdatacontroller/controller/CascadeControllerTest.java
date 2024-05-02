@@ -71,12 +71,13 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         doReturn("test").when(mockRs).getString("common_name");
 
         // execute
-        ResponseEntity<TriggerRoad> data = uut.getTriggerRoad(roadCode);
+        ResponseEntity<String> responseJson = uut.getTriggerRoad(roadCode);
+        TriggerRoad result = TriggerRoad.fromJson(responseJson.getBody());
 
         // verify
-        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        Assertions.assertEquals(1, data.getBody().getCountyRoadSegments().size());
-        Assertions.assertEquals(roadCode, data.getBody().getRoadCode());
+        Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
+        Assertions.assertEquals(1, result.getCountyRoadSegments().size());
+        Assertions.assertEquals(roadCode, result.getRoadCode());
     }
 
     @Test
@@ -87,12 +88,13 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         uut.addToCache(triggerRoad); // add to cache to ensure cache hit
 
         // execute
-        ResponseEntity<TriggerRoad> data = uut.getTriggerRoad(roadCode);
+        ResponseEntity<String> responseJson = uut.getTriggerRoad(roadCode);
+        TriggerRoad result = TriggerRoad.fromJson(responseJson.getBody());
 
         // verify
-        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        Assertions.assertEquals(0, data.getBody().getCountyRoadSegments().size());
-        Assertions.assertEquals(roadCode, data.getBody().getRoadCode());
+        Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
+        Assertions.assertEquals(0, result.getCountyRoadSegments().size());
+        Assertions.assertEquals(roadCode, result.getRoadCode());
     }
 
     @Test
@@ -106,12 +108,13 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         uut.clearCache(); // clear cache to ensure cache miss
         
         // execute
-        ResponseEntity<TriggerRoad> data = uut.getTriggerRoad(roadCode);
+        ResponseEntity<String> responseJson = uut.getTriggerRoad(roadCode);
+        TriggerRoad result = TriggerRoad.fromJson(responseJson.getBody());
 
         // verify
-        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        Assertions.assertEquals(1, data.getBody().getCountyRoadSegments().size());
-        Assertions.assertEquals(roadCode, data.getBody().getRoadCode());
+        Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
+        Assertions.assertEquals(1, result.getCountyRoadSegments().size());
+        Assertions.assertEquals(roadCode, result.getRoadCode());
     }
 
     @Test
@@ -121,12 +124,13 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         uut.clearCache(); // clear cache to ensure cache miss
         
         // execute
-        ResponseEntity<TriggerRoad> data = uut.getTriggerRoad(roadCode);
+        ResponseEntity<String> responseJson = uut.getTriggerRoad(roadCode);
+        TriggerRoad result = TriggerRoad.fromJson(responseJson.getBody());
 
         // verify
-        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        Assertions.assertEquals(0, data.getBody().getCountyRoadSegments().size());
-        Assertions.assertEquals(roadCode, data.getBody().getRoadCode());
+        Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
+        Assertions.assertEquals(0, result.getCountyRoadSegments().size());
+        Assertions.assertEquals(roadCode, result.getRoadCode());
     }
 
     @Test
@@ -137,11 +141,11 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         uut.clearCache(); // clear cache to ensure cache miss
 
         // execute
-        ResponseEntity<TriggerRoad> data = uut.getTriggerRoad(roadCode);
+        ResponseEntity<String> responseJson = uut.getTriggerRoad(roadCode);
 
         // verify
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        Assertions.assertNull(data.getBody());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseJson.getStatusCode());
+        Assertions.assertNull(responseJson.getBody());
     }
 
     @Test

@@ -64,7 +64,7 @@ public class CascadeController extends BaseController {
      * @return the trigger road (county road segments list will be empty if no records found)
      */
     @RequestMapping(value = "/trigger-road/{roadCode}", method = RequestMethod.GET, headers = "Accept=application/json")
-    public ResponseEntity<TriggerRoad> getTriggerRoad(@PathVariable String roadCode) {
+    public ResponseEntity<String> getTriggerRoad(@PathVariable String roadCode) {
         TriggerRoad triggerRoad = null;
         boolean cached = false;
 
@@ -73,7 +73,8 @@ public class CascadeController extends BaseController {
             cached = true;
             if (countyRoadIds.size() == 0) {
                 // avoid hitting the database if we know there are no segments associated with this road code
-                return new ResponseEntity<TriggerRoad>(new TriggerRoad(roadCode, new ArrayList<CountyRoadSegment>()), HttpStatus.OK);
+                String json = new TriggerRoad(roadCode).toJson();
+                return new ResponseEntity<String>(json, HttpStatus.OK);
             }
         }
 
@@ -86,7 +87,8 @@ public class CascadeController extends BaseController {
             sqlException.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return new ResponseEntity<TriggerRoad>(triggerRoad, HttpStatus.OK);
+        String json = triggerRoad.toJson();
+        return new ResponseEntity<String>(json, HttpStatus.OK);
     }
 
     /**

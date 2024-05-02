@@ -37,8 +37,9 @@ public class CascadeService extends CvDataServiceLibrary {
         String cvRestService = config.getCvRestService();
         String url = String.format("%s/cascade/trigger-road/%s", cvRestService, roadCode);
         RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
-        ResponseEntity<TriggerRoad> response = restTemplate.exchange(url, HttpMethod.GET, null, TriggerRoad.class);
-        return response.getBody();
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        TriggerRoad toReturn = TriggerRoad.fromJson(response.getBody());
+        return toReturn;
     }
 
     /**
@@ -73,7 +74,7 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public WydotTim buildCascadeTim(CountyRoadSegment countyRoadSegment, Milepost firstMilepost, Milepost lastMilepost, String clientId) {
         WydotTim toReturn = new WydotTim();
-        // note: direction not set because it's not applicable to cascading conditions
+        toReturn.setDirection("B"); // direction not applicable but must be set in order to insert into active tim holding table
         toReturn.setStartPoint(new Coordinate(firstMilepost.getLatitude(), firstMilepost.getLongitude()));
         toReturn.setEndPoint(new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude()));
         toReturn.setRoute(countyRoadSegment.getCommonName());

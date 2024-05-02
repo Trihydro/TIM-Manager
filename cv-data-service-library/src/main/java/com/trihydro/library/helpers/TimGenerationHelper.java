@@ -305,6 +305,7 @@ public class TimGenerationHelper {
         wydotTim.setDirection(tum.getDirection());
         wydotTim.setStartPoint(tum.getStartPoint());
         wydotTim.setEndPoint(tum.getEndPoint());
+        wydotTim.setClientId(tum.getClientId());
         return wydotTim;
     }
 
@@ -312,6 +313,7 @@ public class TimGenerationHelper {
         List<Milepost> allMps = new ArrayList<>();
 
         if (!CascadeService.isCascadeTim(wydotTim)) {
+            utility.logWithDate("Fetching mileposts for regular TIM with client id: " + wydotTim.getClientId());
             if (wydotTim.getEndPoint() != null) {
                 allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
                 utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
@@ -329,8 +331,11 @@ public class TimGenerationHelper {
             }
         }
         else {
+            utility.logWithDate("Fetching mileposts for cascade TIM with client id: " + wydotTim.getClientId());
             try {
                 allMps = cascadeService.getAllMilepostsFromCascadeTim(wydotTim);
+                utility.logWithDate(String.format("Found %d mileposts for cascade TIM with client id: %s", allMps.size(),
+                        wydotTim.getClientId()));
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException ex) {
                 utility.logWithDate("Failed to get mileposts from cascade tim: " + ex.getMessage());
             }

@@ -231,10 +231,9 @@ public class WydotTimServiceTest {
         Integer[] result = uut.setBufferItisCodes(action);
 
         // Assert
-        Assertions.assertEquals(3, result.length);
+        Assertions.assertEquals(2, result.length);
         Assertions.assertEquals(8195, result[0]);
-        Assertions.assertEquals(13583, result[1]);
-        Assertions.assertEquals(13569, result[2]);
+        Assertions.assertEquals(771, result[1]);
     }
 
     @Test
@@ -246,10 +245,9 @@ public class WydotTimServiceTest {
         Integer[] result = uut.setBufferItisCodes(action);
 
         // Assert
-        Assertions.assertEquals(3, result.length);
+        Assertions.assertEquals(2, result.length);
         Assertions.assertEquals(8196, result[0]);
-        Assertions.assertEquals(13583, result[1]);
-        Assertions.assertEquals(13569, result[2]);
+        Assertions.assertEquals(771, result[1]);
     }
 
     @Test

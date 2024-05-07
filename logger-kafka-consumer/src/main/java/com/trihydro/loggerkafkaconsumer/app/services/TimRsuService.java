@@ -66,4 +66,42 @@ public class TimRsuService extends BaseService {
             }
         }
     }
+
+    public boolean recordExists(Long timId, Integer rsuId, int rsuIndex) {
+        PreparedStatement preparedStatement = null;
+        Connection connection = null;
+
+        try {
+            connection = dbInteractions.getConnectionPool();
+            
+            String selectStatement = "SELECT COUNT(*) FROM TIM_RSU WHERE TIM_ID = ? AND RSU_ID = ? AND RSU_INDEX = ?";
+            preparedStatement = connection.prepareStatement(selectStatement, new String[] { "tim_rsu_id" });
+
+            for (String col : timDbTables.getTimRsuTable()) {
+                if (col.equals("TIM_ID"))
+                    sqlNullHandler.setLongOrNull(preparedStatement, 1, timId);
+                else if (col.equals("RSU_ID"))
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, 2, rsuId);
+                else if (col.equals("RSU_INDEX"))
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, 3, rsuIndex);
+            }
+    
+            Long count = dbInteractions.executeAndLog(preparedStatement, "tim_rsu");
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

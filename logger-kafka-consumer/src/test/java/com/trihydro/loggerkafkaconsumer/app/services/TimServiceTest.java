@@ -607,7 +607,7 @@ public class TimServiceTest extends TestBase<TimService> {
         Assertions.assertEquals("10.145.1.100", data.getRsuTarget());
         Assertions.assertEquals("RC", data.getTimType());
         Assertions.assertEquals(Long.valueOf(-1), data.getTimTypeId());
-        Assertions.assertEquals("clientid", data.getClientId());
+        Assertions.assertEquals("clientid_trgd_12345", data.getClientId());
     }
 
     @Test

@@ -18,6 +18,7 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.CertExpirationModel;
 import com.trihydro.library.model.ItisCode;
+import com.trihydro.library.model.RegionNameElementCollection;
 import com.trihydro.library.model.SecurityResultCodeType;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
@@ -666,26 +667,17 @@ public class TimService extends BaseService {
         }
 
         ActiveTim activeTim = new ActiveTim();
+        RegionNameElementCollection elements = new RegionNameElementCollection(regionName);
 
-        if (containsCascadeTimIdDelimiter(regionName)) {
-            // remove the cascade TIM id delimiter and everything after it
-            regionName = regionName.substring(0, regionName.indexOf("_trgd_"));
-        }
+        activeTim.setDirection(elements.direction);
 
-        String[] splitName = regionName.split("_");
-
-        if (splitName.length == 0)
-            return null;
-
-        activeTim.setDirection(splitName[0]);
-
-        if (splitName.length > 1)
-            activeTim.setRoute(splitName[1]);
+        if (elements.route != null)
+            activeTim.setRoute(elements.route);
         else
             return activeTim;
-        if (splitName.length > 2) {
+        if (elements.rsuOrSat != null) {
             // if this is an RSU TIM
-            String[] hyphen_array = splitName[2].split("-");
+            String[] hyphen_array = elements.rsuOrSat.split("-");
             if (hyphen_array.length > 1) {
                 if (hyphen_array[0].equals("SAT")) {
                     activeTim.setSatRecordId(hyphen_array[1]);
@@ -695,29 +687,37 @@ public class TimService extends BaseService {
             }
         } else
             return activeTim;
-        if (splitName.length > 3) {
-            TimType timType = getTimType((splitName[3]));
+        if (elements.timType != null) {
+            TimType timType = getTimType(elements.timType);
             if (timType != null) {
                 activeTim.setTimType(timType.getType());
                 activeTim.setTimTypeId(timType.getTimTypeId());
             }
-        } else
+        } else {
             return activeTim;
+        }
 
-        if (splitName.length > 4)
-            activeTim.setClientId(splitName[4]);
-        else
+        if (elements.timId != null) {
+            if (containsCascadeTimIdDelimiter(regionName)) {
+                activeTim.setClientId(elements.timId + "_trgd_" + elements.cascadeTimId);
+            }
+            else {
+                activeTim.setClientId(elements.timId);
+            }
+        }
+        else {
             return activeTim;
+        }
 
-        if (splitName.length > 5) {
+        if (!containsCascadeTimIdDelimiter(regionName) && elements.cascadeTimIdDelimiter != null) {
+            // elements.cascadeTimIdDelimiter will actually be pk
             try {
-                Integer pk = Integer.valueOf(splitName[5]);
+                Integer pk = Integer.valueOf(elements.cascadeTimIdDelimiter);
                 activeTim.setPk(pk);
             } catch (NumberFormatException ex) {
                 // the pk won't get set here
             }
-        } else
-            return activeTim;
+        }
 
         return activeTim;
     }

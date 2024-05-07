@@ -2,8 +2,10 @@ package com.trihydro.loggerkafkaconsumer.app.services;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Statement;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
@@ -68,34 +70,28 @@ public class TimRsuService extends BaseService {
     }
 
     public boolean recordExists(Long timId, Integer rsuId, int rsuIndex) {
-        PreparedStatement preparedStatement = null;
-        Connection connection = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
 
         try {
-            connection = dbInteractions.getConnectionPool();
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
             
-            String selectStatement = "SELECT COUNT(*) FROM TIM_RSU WHERE TIM_ID = ? AND RSU_ID = ? AND RSU_INDEX = ?";
-            preparedStatement = connection.prepareStatement(selectStatement, new String[] { "tim_rsu_id" });
-
-            for (String col : timDbTables.getTimRsuTable()) {
-                if (col.equals("TIM_ID"))
-                    sqlNullHandler.setLongOrNull(preparedStatement, 1, timId);
-                else if (col.equals("RSU_ID"))
-                    sqlNullHandler.setIntegerOrNull(preparedStatement, 2, rsuId);
-                else if (col.equals("RSU_INDEX"))
-                    sqlNullHandler.setIntegerOrNull(preparedStatement, 3, rsuIndex);
-            }
-    
-            Long count = dbInteractions.executeAndLog(preparedStatement, "tim_rsu");
-            return count > 0;
+            String query = String.format("SELECT 1 FROM %s WHERE TIM_ID = %d AND RSU_ID = %d AND RSU_INDEX = %d", timDbTables.getTimRsuTable(), timId, rsuId, rsuIndex);
+            rs = statement.executeQuery(query);
+            
+            return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         } finally {
             try {
-                // close prepared statement
-                if (preparedStatement != null)
-                    preparedStatement.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+                // close statement
+                if (statement != null)
+                    statement.close();
                 // return connection back to pool
                 if (connection != null)
                     connection.close();
@@ -103,5 +99,6 @@ public class TimRsuService extends BaseService {
                 e.printStackTrace();
             }
         }
+        return false;
     }
 }

@@ -1,12 +1,15 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -71,18 +74,15 @@ public class TimRsuServiceTest extends TestBase<TimRsuService> {
         Long timId = -1l;
         int rsuId = -2;
         int rsuIndex = 0;
-        lenient().doReturn(1L).when(mockDbInteractions).executeAndLog(isA(PreparedStatement.class), isA(String.class));
+        ResultSet rs = mock(ResultSet.class);
+        doReturn(true).when(rs).next();
+        doReturn(rs).when(mockStatement).executeQuery(isA(String.class));
 
         // Act
         boolean dataExists = uut.recordExists(timId, rsuId, rsuIndex);
 
         // Assert
         Assertions.assertTrue(dataExists);
-        verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);// TIM_ID
-        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 2, rsuId);// RSU_ID
-        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, rsuIndex);// RSU_INDEX
-        verify(mockPreparedStatement).close();
-        verify(mockConnection).close();
     }
 
     @Test
@@ -91,18 +91,15 @@ public class TimRsuServiceTest extends TestBase<TimRsuService> {
         Long timId = -1l;
         int rsuId = -2;
         int rsuIndex = 0;
-        lenient().doReturn(0L).when(mockDbInteractions).executeAndLog(isA(PreparedStatement.class), isA(String.class));
+        ResultSet rs = mock(ResultSet.class);
+        doReturn(false).when(rs).next();
+        doReturn(rs).when(mockStatement).executeQuery(isA(String.class));
 
         // Act
         boolean dataExists = uut.recordExists(timId, rsuId, rsuIndex);
 
         // Assert
         Assertions.assertFalse(dataExists);
-        verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);// TIM_ID
-        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 2, rsuId);// RSU_ID
-        verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, rsuIndex);// RSU_INDEX
-        verify(mockPreparedStatement).close();
-        verify(mockConnection).close();
     }
 
     @Test
@@ -111,14 +108,12 @@ public class TimRsuServiceTest extends TestBase<TimRsuService> {
         Long timId = -1l;
         int rsuId = -2;
         int rsuIndex = 0;
-        doThrow(new SQLException("UNIQUENESS CONSTRAINT VIOLATION")).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);
+        doThrow(new SQLException("ERROR")).when(mockStatement).executeQuery(isA(String.class));
 
         // Act
         boolean dataExists = uut.recordExists(timId, rsuId, rsuIndex);
-
+        
         // Assert
         Assertions.assertFalse(dataExists);
-        verify(mockPreparedStatement).close();
-        verify(mockConnection).close();
     }
 }

@@ -692,11 +692,11 @@ public class WydotTimService {
         Integer[] codes = null;
 
         if (action.equals("leftClosed")) {
-            codes = new Integer[3];
+            codes = new Integer[2];
             codes[0] = 8195; // left-lane
             codes[1] = 771; // closed-ahead
         } else if (action.equals("rightClosed")) {
-            codes = new Integer[3];
+            codes = new Integer[2];
             codes[0] = 8196; // right-lane
             codes[1] = 771; // closed-ahead
         } else if (action.equals("workers")) {

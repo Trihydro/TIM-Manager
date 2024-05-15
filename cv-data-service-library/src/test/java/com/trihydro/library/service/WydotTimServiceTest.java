@@ -221,4 +221,140 @@ public class WydotTimServiceTest {
         String jsonVal = String.join(",", timRsuJson);
         Assertions.assertEquals(jsonVal, result.getRsuErrorSummary());
     }
+
+    @Test
+    public void setBufferItisCodes_leftClosed() {
+        // Arrange
+        String action = "leftClosed";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(2, result.length);
+        Assertions.assertEquals(8195, result[0]);
+        Assertions.assertEquals(771, result[1]);
+    }
+
+    @Test
+    public void setBufferItisCodes_rightClosed() {
+        // Arrange
+        String action = "rightClosed";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(2, result.length);
+        Assertions.assertEquals(8196, result[0]);
+        Assertions.assertEquals(771, result[1]);
+    }
+
+    @Test
+    public void setBufferItisCodes_workers() {
+        // Arrange
+        String action = "workers";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(6952, result[0]);
+    }
+
+    @Test
+    public void setBufferItisCodes_surfaceGravel() {
+        // Arrange
+        String action = "surfaceGravel";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(5933, result[0]);
+    }
+
+    @Test
+    public void setBufferItisCodes_surfaceMilled() {
+        // Arrange
+        String action = "surfaceMilled";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(6017, result[0]);
+    }
+
+    @Test
+    public void setBufferItisCodes_surfaceDirt() {
+        // Arrange
+        String action = "surfaceDirt";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(6016, result[0]);
+    }
+
+    @Test
+    public void setBufferItisCodes_delay_x() {
+        // Arrange
+        String action = "delay_10";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(3, result.length);
+        Assertions.assertEquals(1537, result[0]);
+        Assertions.assertEquals(12554, result[1]);
+        Assertions.assertEquals(8728, result[2]);
+    }
+
+    @Test
+    public void setBufferItisCodes_prepareStop() {
+        // Arrange
+        String action = "prepareStop";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(1, result.length);
+        Assertions.assertEquals(7186, result[0]);
+    }
+
+    @Test
+    public void setBufferItisCodes_reduceSpeed_x() {
+        // Arrange
+        String action = "reduceSpeed_20";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(3, result.length);
+        Assertions.assertEquals(7443, result[0]);
+        Assertions.assertEquals(12564, result[1]);
+        Assertions.assertEquals(8720, result[2]);
+    }
+
+    @Test
+    public void setBufferItisCodes_unrecognizedAction() {
+        // Arrange
+        String action = "banana";
+
+        // Act
+        Integer[] result = uut.setBufferItisCodes(action);
+
+        // Assert
+        Assertions.assertEquals(null, result);
+    }
+
 }

@@ -74,9 +74,9 @@ public class TimRsuServiceTest extends TestBase<TimRsuService> {
         Long timId = -1l;
         int rsuId = -2;
         int rsuIndex = 0;
-        ResultSet rs = mock(ResultSet.class);
-        doReturn(true).when(rs).next();
-        doReturn(rs).when(mockStatement).executeQuery(isA(String.class));
+        ResultSet mockRsToReturn = mock(ResultSet.class);
+        doReturn(true).when(mockRsToReturn).next();
+        doReturn(mockRsToReturn).when(mockPreparedStatement).executeQuery();
 
         // Act
         boolean dataExists = uut.recordExists(timId, rsuId, rsuIndex);
@@ -90,10 +90,10 @@ public class TimRsuServiceTest extends TestBase<TimRsuService> {
         // Arrange
         Long timId = -1l;
         int rsuId = -2;
-        int rsuIndex = 0;
-        ResultSet rs = mock(ResultSet.class);
-        doReturn(false).when(rs).next();
-        doReturn(rs).when(mockStatement).executeQuery(isA(String.class));
+        int rsuIndex = 99999;
+        ResultSet mockRsToReturn = mock(ResultSet.class);
+        doReturn(false).when(mockRsToReturn).next();
+        doReturn(mockRsToReturn).when(mockPreparedStatement).executeQuery();
 
         // Act
         boolean dataExists = uut.recordExists(timId, rsuId, rsuIndex);
@@ -108,7 +108,7 @@ public class TimRsuServiceTest extends TestBase<TimRsuService> {
         Long timId = -1l;
         int rsuId = -2;
         int rsuIndex = 0;
-        doThrow(new SQLException("ERROR")).when(mockStatement).executeQuery(isA(String.class));
+        doThrow(new SQLException("ERROR")).when(mockPreparedStatement).executeQuery();
 
         // Act
         boolean dataExists = uut.recordExists(timId, rsuId, rsuIndex);

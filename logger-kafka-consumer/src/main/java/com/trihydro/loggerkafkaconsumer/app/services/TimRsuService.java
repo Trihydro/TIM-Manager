@@ -69,34 +69,32 @@ public class TimRsuService extends BaseService {
         }
     }
 
-    public boolean recordExists(Long timId, Integer rsuId, int rsuIndex) {
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
+    public boolean recordExists(Long timId, int rsuId, int rsuIndex) {
+        ResultSet rs = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
 
         try {
-			connection = dbInteractions.getConnectionPool();
-			statement = connection.createStatement();
-            
-            String query = String.format("SELECT 1 FROM %s WHERE TIM_ID = %d AND RSU_ID = %d AND RSU_INDEX = %d", timDbTables.getTimRsuTable(), timId, rsuId, rsuIndex);
-            rs = statement.executeQuery(query);
-            
+            connection = dbInteractions.getConnectionPool();
+            preparedStatement = connection
+                    .prepareStatement("SELECT 1 FROM TIM_RSU WHERE TIM_ID = ? AND RSU_ID = ? AND RSU_INDEX = ?");
+            preparedStatement.setLong(1, timId);
+            preparedStatement.setLong(2, rsuId);
+            preparedStatement.setLong(3, rsuIndex);
+
+            rs = preparedStatement.executeQuery();
             return rs.next();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
-                // close result set
-                if (rs != null)
-                    rs.close();
-                // close statement
-                if (statement != null)
-                    statement.close();
-                // return connection back to pool
+                if (preparedStatement != null)
+                    preparedStatement.close();
+
                 if (connection != null)
                     connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
             }
         }
         return false;

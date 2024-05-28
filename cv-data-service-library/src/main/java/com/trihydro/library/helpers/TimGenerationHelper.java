@@ -156,17 +156,19 @@ public class TimGenerationHelper {
                 WydotTim wydotTim = getWydotTimFromTum(tum);
                 List<Milepost> mps = new ArrayList<>();
                 List<Milepost> allMps = getAllMps(wydotTim);
-                if (allMps.size() == 0) {
+                if (allMps.size() < 2) {
                     String exMsg = String.format(
-                            "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                            "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d",
                             tum.getActiveTimId());
                     utility.logWithDate(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = getAnchorPoint(allMps);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp, false);
                 if (tim == null) {
@@ -276,17 +278,19 @@ public class TimGenerationHelper {
             WydotTim wydotTim = getWydotTimFromTum(tum);
             List<Milepost> mps = new ArrayList<>();
             List<Milepost> allMps = getAllMps(wydotTim);
-            if (allMps.size() == 0) {
+            if (allMps.size() < 2) {
                 String exMsg = String.format(
-                        "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                        "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d",
                         tum.getActiveTimId());
                 utility.logWithDate(exMsg);
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
+            Milepost firstPoint = allMps.get(0);
+            Milepost secondPoint = allMps.get(1);
 
             // reduce the mileposts by removing straight away posts
-            var anchorMp = getAnchorPoint(allMps);
+            var anchorMp = getAnchorPoint(firstPoint, secondPoint);
             mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
             tim = getTim(tum, mps, allMps, anchorMp, false);
             if (tim == null) {
@@ -389,9 +393,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = getAnchorPoint(allMps);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, false);
                 if (tim == null) {
@@ -462,9 +468,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = getAnchorPoint(allMps);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, true, false);
                 if (tim == null) {
@@ -535,9 +543,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = getAnchorPoint(allMps);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);
                 if (tim == null) {
@@ -1076,13 +1086,11 @@ public class TimGenerationHelper {
 
     /**
      * This method returns the anchor point for the given mileposts.
-     * @param mileposts The mileposts to find the anchor point for.
-     * @return The anchor point.
+     * @param firstPoint The first milepost.
+     * @param secondPoint The second milepost.
+     * @return The anchor point as a Milepost.
      */
-    private Milepost getAnchorPoint(List<Milepost> mileposts) {
-        Milepost firstPoint = mileposts.get(0);
-        Milepost secondPoint = mileposts.get(1);
-
+    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint) {
         Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
 
         Milepost anchor = new Milepost();

@@ -783,7 +783,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+                "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d", activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService, mockSdwService);
@@ -820,7 +820,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+                "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d", activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
@@ -894,7 +894,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+                "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d", activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());

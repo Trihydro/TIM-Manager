@@ -74,7 +74,7 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public WydotTim buildCascadeTim(CountyRoadSegment countyRoadSegment, Milepost firstMilepost, Milepost lastMilepost, String clientId) {
         WydotTim toReturn = new WydotTim();
-        toReturn.setDirection("1111111111111111"); // direction not applicable but must be set in order to insert into active tim holding table
+        toReturn.setDirection("B"); // direction not applicable but must be set in order to insert into active tim holding table
         toReturn.setStartPoint(new Coordinate(firstMilepost.getLatitude(), firstMilepost.getLongitude()));
         toReturn.setEndPoint(new Coordinate(lastMilepost.getLatitude(), lastMilepost.getLongitude()));
         toReturn.setRoute(countyRoadSegment.getCommonName());
@@ -118,12 +118,24 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public List<Milepost> getAllMilepostsFromCascadeTim(WydotTim cascadeTim) throws ArrayIndexOutOfBoundsException, NumberFormatException {
         List<Milepost> allMps = new ArrayList<>();
-        String countyRoadIdString = cascadeTim.getClientId().split(CASCADE_TIM_ID_DELIMITER)[1];
-        if (countyRoadIdString == null) {
+        String clientId = cascadeTim.getClientId();
+        if (clientId == null) {
             return allMps;
         }
-        int countyRoadId = Integer.parseInt(countyRoadIdString);
-        allMps = getMilepostsForSegment(countyRoadId);
-        return allMps;
+        int countyRoadId = getSegmentIdFromClientId(clientId);
+        return getMilepostsForSegment(countyRoadId);
+    }
+
+    /**
+     * This method gets the segment ID from the client ID of a cascade TIM.
+     * @param clientId The client ID of the cascade TIM with expected format: originalClientId_trgd_segmentId-number
+     * @return The segment ID from the client ID of the cascade TIM
+     */
+    public int getSegmentIdFromClientId(String clientId) throws ArrayIndexOutOfBoundsException, NumberFormatException {
+        String clientIdSplit[] = clientId.split(CASCADE_TIM_ID_DELIMITER); // [originalClientId, segmentId-number]
+        String countyRoadIdString = clientIdSplit[1]; // segmentId-number
+        String countyRoadIdStringSplit[] = countyRoadIdString.split("-"); // [segmentId, number]
+        countyRoadIdString = countyRoadIdStringSplit[0]; // segmentId
+        return Integer.parseInt(countyRoadIdString);
     }
 }

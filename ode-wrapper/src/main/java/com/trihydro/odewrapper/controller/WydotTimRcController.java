@@ -11,6 +11,7 @@ import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
+import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.CascadeService;
@@ -146,6 +147,9 @@ public class WydotTimRcController extends WydotTimBaseController {
             timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
         }
 
+        // check for trigger roads and cascade conditions if necessary
+        handleCascadingConditionsAsync(timRcList.getTimRcList());
+
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
@@ -158,6 +162,23 @@ public class WydotTimRcController extends WydotTimBaseController {
                 for (WydotTim tim : wydotTims) {
                     processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
                             TravelerInfoType.advisory);
+                }
+            }
+        }).start();
+    }
+
+    public void handleCascadingConditionsAsync(List<WydotTimRc> wydotTims) {
+        // An Async task always executes in new thread
+        new Thread(new Runnable() {
+            public void run() {
+                var startTime = getStartTime();
+                for (WydotTimRc tim : wydotTims) {
+                    // if tim is associated with a trigger road, cascade conditions
+                    TriggerRoad triggerRoad = cascadeService.getTriggerRoad(tim.getRoadCode());
+                    if (triggerRoad != null) {
+                        handleCascadingConditions(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
+                                TravelerInfoType.advisory, triggerRoad);
+                    }
                 }
             }
         }).start();

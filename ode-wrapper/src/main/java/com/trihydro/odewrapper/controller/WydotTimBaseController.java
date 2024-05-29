@@ -661,8 +661,10 @@ public abstract class WydotTimBaseController {
             utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
             return;
         }
+        Milepost firstPoint = milepostsAll.get(0);
+        Milepost secondPoint = milepostsAll.get(1);
 
-        var anchor = getAnchorPoint(milepostsAll);
+        var anchor = getAnchorPoint(firstPoint, secondPoint);
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
                 configuration.getPathDistanceLimit());
 
@@ -800,7 +802,7 @@ public abstract class WydotTimBaseController {
     /**
      * This method cascades conditions for each associated segment of the given trigger road.
      */
-    private void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, TriggerRoad triggerRoad) {
+    protected void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, TriggerRoad triggerRoad) {
         utility.logWithDate("Handling cascading conditions for trigger road: " + triggerRoad.getRoadCode());
         List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
         utility.logWithDate("Trigger road has " + countyRoadSegments.size() + " segments associated with it.");
@@ -827,7 +829,9 @@ public abstract class WydotTimBaseController {
             utility.logWithDate("Found less than 2 mileposts while attempting to cascade condition, unable to generate TIM.");
             return;
         }
-        var anchor = getAnchorPoint(cascadeMileposts);
+        Milepost firstPoint = cascadeMileposts.get(0);
+        Milepost secondPoint = cascadeMileposts.get(1);
+        var anchor = getAnchorPoint(firstPoint, secondPoint);
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
         WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, reducedMileposts.get(0), reducedMileposts.get(reducedMileposts.size() - 1), clientId);
         createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
@@ -835,13 +839,11 @@ public abstract class WydotTimBaseController {
 
     /**
      * This method returns the anchor point for the given mileposts.
-     * @param mileposts The mileposts to find the anchor point for.
-     * @return The anchor point.
+     * @param firstPoint The first milepost.
+     * @param secondPoint The second milepost.
+     * @return The anchor point as a Milepost.
      */
-    private Milepost getAnchorPoint(List<Milepost> mileposts) {
-        Milepost firstPoint = mileposts.get(0);
-        Milepost secondPoint = mileposts.get(1);
-
+    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint) {
         Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
 
         Milepost anchor = new Milepost();

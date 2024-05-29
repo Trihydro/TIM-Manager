@@ -244,6 +244,9 @@ public class WydotTimRcControllerTest {
 
 		// Route isn't required for an AC, so it isn't set in the response.
 		Assertions.assertEquals(null, resultArr[0].route);
+
+		// Verify that cascading conditions get handled
+		verify(uut).handleCascadingConditionsAsync(timRcList.getTimRcList());
 	}
 
 	@Test
@@ -260,6 +263,9 @@ public class WydotTimRcControllerTest {
 		// Assert
 		verify(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
 		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+
+		// Verify that cascading conditions get handled
+		verify(uut).handleCascadingConditionsAsync(timRcList.getTimRcList());
 	}
 
 	@Test
@@ -285,5 +291,8 @@ public class WydotTimRcControllerTest {
 		// Route isn't required for an AC, so it isn't set in the response.
 		Assertions.assertEquals(null, resultArr[0].route);
 		verify(mockActiveTimService).getActiveTimsByClientIdDirection("LARI80WQDHLD", null, null);
+
+		// Verify that cascading conditions get handled
+		verify(uut).handleCascadingConditionsAsync(timRcList.getTimRcList());
 	}
 }

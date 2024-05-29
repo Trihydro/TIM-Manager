@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.wyocv</groupId>
         <artifactId>wyo-cv</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>

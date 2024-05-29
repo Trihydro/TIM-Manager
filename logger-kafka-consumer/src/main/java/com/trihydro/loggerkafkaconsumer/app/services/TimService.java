@@ -162,12 +162,7 @@ public class TimService extends BaseService {
                                 .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
                                 .orElse(null);
                         if (rsu != null) {
-                            if (!timRsuService.recordExists(timId, rsu.getRsuId(), rsu.getRsuIndex())) {
-                                timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
-                            }
-                            else {
-                                utility.logWithDate("Record already exists in 'tim_rsu' table for tim_id " + timId + ", rsu_id " + rsu.getRsuId() + ", rsu_index " + rsu.getRsuIndex(), TimService.class);
-                            }
+                            timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
                         }
                     }
                 }
@@ -286,12 +281,7 @@ public class TimService extends BaseService {
             WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
                     .findFirst().orElse(null);
             if (rsu != null) {
-                if (!timRsuService.recordExists(timId, rsu.getRsuId(), firstRsu.getRsuIndex())) {
-                    timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
-                }
-                else {
-                    utility.logWithDate("Record already exists in 'tim_rsu' table for tim_id " + timId + ", rsu_id " + rsu.getRsuId() + ", rsu_index " + firstRsu.getRsuIndex(), TimService.class);
-                }
+                timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
             }
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getRsuTarget());

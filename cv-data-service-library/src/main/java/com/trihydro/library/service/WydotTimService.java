@@ -48,6 +48,7 @@ import com.trihydro.library.model.WydotTravelerInputData;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -251,6 +252,7 @@ public class WydotTimService {
         for (WydotRsu rsu : rsus) {
 
             var odeRsu = new RSU();
+            odeRsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
 
             odeRsu.setRsuIndex(rsu.getRsuIndex());
             odeRsu.setRsuTarget(rsu.getRsuTarget());
@@ -691,12 +693,12 @@ public class WydotTimService {
 
         if (action.equals("leftClosed")) {
             codes = new Integer[2];
-            codes[0] = 777;
-            codes[1] = 13579;
-        } else if (action.equals("rightClosed")) { // Right lane closed
+            codes[0] = 8195; // left-lane
+            codes[1] = 771; // closed-ahead
+        } else if (action.equals("rightClosed")) {
             codes = new Integer[2];
-            codes[0] = 777;
-            codes[1] = 13580;
+            codes[0] = 8196; // right-lane
+            codes[1] = 771; // closed-ahead
         } else if (action.equals("workers")) {
             codes = new Integer[1];
             codes[0] = 6952;
@@ -720,7 +722,7 @@ public class WydotTimService {
             String number = result[1];
             codes[1] = Integer.parseInt(number) + 12544;
 
-            // mintues ITIS code
+            // minutes ITIS code
             codes[2] = 8728;
         } else if (action.equals("prepareStop")) {
             // content=advisory

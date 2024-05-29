@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+
 /**
  * A trigger road is a road that triggers cascading conditions on a number of county road segments.
  */
@@ -43,5 +45,15 @@ public class TriggerRoad implements Serializable {
 
     public boolean hasCountyRoadSegments() {
         return countyRoadSegments.size() > 0;
+    }
+
+    public String toJson() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+
+    public static TriggerRoad fromJson(String json) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, TriggerRoad.class);
     }
 }

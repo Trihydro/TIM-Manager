@@ -172,6 +172,8 @@ public class TimGenerationHelperTest {
         mps.add(new Milepost());
         doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
 
@@ -206,6 +208,8 @@ public class TimGenerationHelperTest {
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -249,6 +253,8 @@ public class TimGenerationHelperTest {
         doReturn(wydotRsus).when(mockRsuService).getFullRsusTimIsOn(any());
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
 
@@ -280,6 +286,8 @@ public class TimGenerationHelperTest {
         doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         List<WydotRsu> dbRsus = new ArrayList<>();
         var rsu = new WydotRsu();
@@ -336,6 +344,8 @@ public class TimGenerationHelperTest {
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(null);
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
 
@@ -385,6 +395,8 @@ public class TimGenerationHelperTest {
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
         doReturn("exception").when(mockOdeService).sendNewTimToRsu(any());
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -436,6 +448,8 @@ public class TimGenerationHelperTest {
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
 
@@ -474,6 +488,8 @@ public class TimGenerationHelperTest {
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("exception").when(mockOdeService).updateTimOnSdw(any());
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
 
@@ -505,6 +521,8 @@ public class TimGenerationHelperTest {
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -539,6 +557,8 @@ public class TimGenerationHelperTest {
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         // Act
         uut.resetTimStartTimeAndResubmitToOde(activeTimIds);
@@ -578,6 +598,8 @@ public class TimGenerationHelperTest {
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
         doReturn(60).when(mockUtility).getMinutesDurationBetweenTwoDates("2021-01-01T00:00:00.000Z", "2021-01-01T01:00:00.000Z");
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         uut.resubmitToOde(activeTimIds);
 
@@ -614,6 +636,8 @@ public class TimGenerationHelperTest {
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         uut.expireTimAndResubmitToOde(activeTimIds);
 
@@ -648,6 +672,8 @@ public class TimGenerationHelperTest {
         var asdd = new AdvisorySituationDataDeposit();
         asdd.setTimeToLive(TimeToLive.Day);
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
 
@@ -679,6 +705,8 @@ public class TimGenerationHelperTest {
 
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
         doReturn("").when(mockOdeService).updateTimOnSdw(any());
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -755,7 +783,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+                "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d", activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockRegionService, mockRsuService,
                 mockOdeService, mockActiveTimHoldingService, mockSdwService);
@@ -783,6 +811,8 @@ public class TimGenerationHelperTest {
         errors.add(new ActiveTimError(ActiveTimErrorType.endPoint, "timValue", gson.toJson(c)));
         validationResults.get(0).setErrors(errors);
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.updateAndResubmitToOde(validationResults);
 
@@ -790,7 +820,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+                "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d", activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
@@ -816,6 +846,8 @@ public class TimGenerationHelperTest {
         var errors = new ArrayList<ActiveTimError>();
         errors.add(new ActiveTimError(ActiveTimErrorType.endTime, "timValue", "badTimeValue"));
         validationResults.get(0).setErrors(errors);
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         // Act
         var exceptions = uut.updateAndResubmitToOde(validationResults);
@@ -853,6 +885,8 @@ public class TimGenerationHelperTest {
         errors.add(new ActiveTimError(ActiveTimErrorType.startPoint, "timValue", gson.toJson(c)));
         validationResults.get(0).setErrors(errors);
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.updateAndResubmitToOde(validationResults);
 
@@ -860,7 +894,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-                "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d", activeTimId);
+                "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d", activeTimId);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, exMsg), ex);
         verify(mockDataFrameService).getItisCodesForDataFrameId(any());
         verify(mockMilepostService, times(2)).getMilepostsByStartEndPointDirection(any());
@@ -883,6 +917,8 @@ public class TimGenerationHelperTest {
         String[] rsuRoutes = new String[] { "I 80" };
         doReturn(rsuRoutes).when(mockConfig).getRsuRoutes();
         doReturn(new String[] { "1234" }).when(mockDataFrameService).getItisCodesForDataFrameId(any());
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         var validationResults = getValidationResults();
         var errors = new ArrayList<ActiveTimError>();
@@ -949,6 +985,8 @@ public class TimGenerationHelperTest {
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.updateAndResubmitToOde(validationResults);
 
@@ -997,6 +1035,8 @@ public class TimGenerationHelperTest {
         when(mockOdeService.submitTimQuery(isA(WydotRsu.class), isA(Integer.class))).thenReturn(new TimQuery());
         when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
 
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
+
         // Act
         var exceptions = uut.updateAndResubmitToOde(validationResults);
 
@@ -1042,6 +1082,8 @@ public class TimGenerationHelperTest {
         wydotRsuTim.setIndex(-1);
         wydotRsus.add(wydotRsuTim);
         doReturn(wydotRsus).when(mockRsuService).getFullRsusTimIsOn(any());
+
+        doReturn(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2))).when(mockUtility).calculateAnchorCoordinate(any(), any());
 
         // Act
         var exceptions = uut.updateAndResubmitToOde(validationResults);

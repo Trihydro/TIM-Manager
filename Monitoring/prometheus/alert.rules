@@ -1,6 +1,15 @@
 groups:
 - name: service
   rules:
+  #- alert: monitor_service_down
+  # expr: up == 0
+  # for: 30s
+  # labels:
+  #   severity: critical
+  # annotations:
+  #   summary: "Monitor service is down"
+  #   description: "Service {{ $labels.instance }} is down."
+
   # Alert for any instance that is unreachable for >30s.
   - alert: instance_down
     expr: up == 0
@@ -44,180 +53,253 @@ groups:
 - name: containers
   rules:
   - alert: ode_wrapper_down
-    expr: rate(glances_docker_wyocvapplications_ode_wrapper_1_networktime_since_update[5m]) == 0
+    expr: rate(glances_docker_wyocv-ode_wrapper-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
       summary: "ode_wrapper is down"
-      description: "Docker container wyocvapplications_ode_wrapper is down."
+      description: "Docker container wyocv-ode_wrapper-1 is down."
 
   - alert: dn_trac_sender_down
-    expr: rate(glances_docker_wyocvapplications_dn_trac_sender_1_networktime_since_update[5m]) == 0
+    expr: rate(glances_docker_wyocv-dn_trac_sender-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
       summary: "dn_trac_sender is down"
-      description: "docker container wyocvapplications_dn_trac_sender is down."
+      description: "docker container wyocv-dn_trac_sender-1 is down."
 
   - alert: tim_logger_down
-    expr: rate(glances_docker_wyocvapplications_tim_logger_1_networktime_since_update[5m]) == 0
+    expr: rate(glances_docker_wyocv-tim_logger-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
       summary: "tim_logger is down"
-      description: "Docker container wyocvapplications_tim_logger_1 is down."
+      description: "Docker container wyocv-tim_logger-1 is down."
 
   - alert: angular_down
-    expr: rate(glances_docker_wyocvapplications_angular_1_networktime_since_update[5m]) == 0
+    expr: rate(glances_docker_wyocv-angular-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
       summary: "angular is down"
-      description: "Docker container wyocvapplications_angular_1 is down."
+      description: "Docker container wyocv-angular-1 is down."
 
   - alert: cv-data-tasks_down
-    expr: rate(glances_docker_wyocvapplications_cv_data_tasks_1_networktime_since_update[5m]) == 0
+    expr: rate(glances_docker_wyocv-cv-data-tasks-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
       summary: "cv-data-tasks is down"
-      description: "Docker container wyocvapplications_cv-data-tasks_1 is down."
+      description: "Docker container wyocv-cv-data-tasks-1 is down."
 
   - alert: cv-data-controller_down
-    expr: rate(glances_docker_wyocvapplications_cv_data_controller_1_networktime_since_update[5m]) == 0
+    expr: rate(glances_docker_wyocv-cv-data-controller-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
       summary: "cv-data-controller is down"
-      description: "Docker container  wyocvapplications_cv-data-controller_1 is down."
+      description: "Docker container  wyocv-cv-data-controller-1 is down."
 
   - alert: bsm_logger_down
-    expr: rate(glances_docker_wyocvapplications_bsm_logger_1_networktime_since_update[5m]) == 0
+    expr: rate(glances_docker_wyocv-bsm_logger_mongo-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
       summary: "bsm_logger is down"
-      description: "Docker container wyocvapplications_bsm_logger_1 is down."
+      description: "Docker container wyocv-bsm_logger__mongo-1 is down."
 
-  - alert: broadcast_tim_logger_down
-    expr: rate(glances_docker_wyocvapplications_broadcast_tim_logger_1_networktime_since_update[5m]) == 0
+  - alert: driveralert_logger_down
+    expr: rate(glances_docker_wyocv-driveralert_logger_mongo-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "broadcast_tim_logger is down"
-      description: "Docker container wyocvapplications_broadcase_tim_logger_1 is down."
+      summary: "driveralert_logger is down"
+      description: "Docker container wyocv-driveralert_logger_mongo-1 is down."
 
-  - alert: da_logger_down
-    expr: rate(glances_docker_wyocvapplications_da_logger_1_networktime_since_update[5m]) == 0
+  - alert: ode-ode-1_down
+    expr: rate(glances_docker_ode-ode-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "da_logger is down"
-      description: "Docker container wyocvapplications_da_logger_1 is down."
+      summary: "ode-ode-1 is down"
+      description: "Docker container ode-ode-1 is down."
 
-  - alert: jpoode_cvpep_down
-    expr: rate(glances_docker_jpoode_cvpep_bsm_depositor_1_networktime_since_update[5m]) == 0
+  - alert: ode-adm
+    expr: rate(glances_docker_ode-adm-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_cvpep_bsm is down"
-      description: "Docker container jpoode_cvpep_bsm is down."
+      summary: "ode-adm is down"
+      description: "Docker container ode-adm-1 is down."
 
-  - alert: jpoode_rde_bsm_down
-    expr: rate(glances_docker_jpoode_rde_bsm_depositor_1_networktime_since_update[5m]) == 0
+  - alert: ode-aem
+    expr: rate(glances_docker_ode-aem-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_rde_bsm is down"
-      description: "Docker container jpoode_rde_bsm_depositor is down."
+      summary: "ode-aem is down"
+      description: "Docker container ode-aem-1 is down."
 
-  - alert: jpoode_rde_tim_down
-    expr: rate(glances_docker_jpoode_rde_tim_depositor_1_networktime_since_update[5m]) == 0
+  - alert: ode-ppm_bsm_down
+    expr: rate(glances_docker_ode-ppm_bsm-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_rde_tim is down"
-      description: "Docker container jpoode_rde_tim_depositor is down."
+      summary: "ode-ppm_bsm is down"
+      description: "Docker container ode-ppm_bsm-1 is down."
 
-  - alert: jpoode_ode
-    expr: rate(glances_docker_jpoode_ode_1_networktime_since_update[5m]) == 0
+  - alert: ode-kafka_down
+    expr: rate(glances_docker_ode-kafka-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_ode is down"
-      description: "Docker container jpoode_ode_1 is down."
+      summary: "ode-kafka is down"
+      description: "Docker container ode-kafka-1 is down."
 
-  - alert: jpoode_cvpep_bsm_down
-    expr: rate(glances_docker_jpoode_cvpep_bsm_depositor_1_networktime_since_update[5m]) == 0
+  - alert: ode-zookeeper_down
+    expr: rate(glances_docker_ode-zookeeper-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_cvpep_bsm is down"
-      description: "Docker container jpoode_cvpep_bsm_depositor is down."
+      summary: "ode-zookeeper is down"
+      description: "ode-zookeeper-1 is down"
 
-  - alert: jpoode_adm
-    expr: rate(glances_docker_jpoode_adm_1_networktime_since_update[5m]) == 0
+  - alert: ode-sdw_depositor-1_down
+    expr: rate(glances_docker_ode-sdw_depositor-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_adm is down"
-      description: "Docker container jpoode_adm_1 is down."
+      summary: "ode-sdw_depositor-1 is down"
+      description: "ode-sdw_depositor-1 is down"
 
-  - alert: jpoode_aem
-    expr: rate(glances_docker_jpoode_aem_1_networktime_since_update[5m]) == 0
+  - alert: ode-sec-1_down
+    expr: rate(glances_docker_ode-sec-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_aem is down"
-      description: "Docker container jpoode_aem_1 is down."
+      summary: "ode-sec-1 is down"
+      description: "ode-sec-1 is down"
 
-  - alert: jpoode_ppm_bsm_down
-    expr: rate(glances_docker_jpoode_ppm_bsm_1_networktime_since_update[5m]) == 0
+  - alert: wyocv-cert-expiration-1_down
+    expr: rate(glances_docker_wyocv-cert-expiration-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_ppm_bsm is down"
-      description: "Docker container jpoode_ppm_bsm is down."
+      summary: "wyocv-cert-expiration-1 is down"
+      description: "wyocv-cert-expiration-1 is down"
 
-  - alert: jpoode_kafka_down
-    expr: rate(glances_docker_jpoode_kafka_1_networktime_since_update[5m]) == 0
+  - alert: wyocv-logger-kafka-consumer-1_down
+    expr: rate(glances_docker_wyocv-logger-kafka-consumer-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_kafka is down"
-      description: "Docker container jpoode_kafka is down."
+      summary: "wyocv-logger-kafka-consumer-1 is down"
+      description: "wyocv-logger-kafka-consumer-1 is down"
 
-  - alert: jpoode_zookeeper_down
-    expr: rate(glances_docker_jpoode_zookeeper_1_networktime_since_update[5m]) == 0
+  - alert: wyocv-milepost-graph-db-1_down
+    expr: rate(glances_docker_wyocv-milepost-graph-db-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "jpoode_zookeeper is down"
- 
-  - alert: smdm_down
-    expr: rate(glances_docker_wyocvapplications_smdm_1_networktime_since_update[5m]) == 0
+      summary: "wyocv-milepost-graph-db-1 is down"
+      description: "wyocv-milepost-graph-db-1 is down"
+
+  - alert: wyocv-rsu-data-controller-1_down
+    expr: rate(glances_docker_wyocv-rsu-data-controller-1_networktime_since_update[5m]) == 0
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "wyocvapplications_smdm_1 is down"
+      summary: "wyocv-rsu-data-controller-1 is down"
+      description: "wyocv-rsu-data-controller-1 is down"
 
+  - alert: wyocv-tim-refresh-1_down
+    expr: rate(glances_docker_wyocv-tim-refresh-1_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "wyocv-tim-refresh-1 is down"
+      description: "wyocv-tim-refresh-1 is down"
+
+  - alert: wyocv-tim_logger_mongo-1_down
+    expr: rate(glances_docker_wyocv-tim_logger_mongo-1_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "wyocv-tim_logger_mongo-1 is down"
+      description: "wyocv-tim_logger_mongo-1 is down"
+
+  - alert: jpo-cvmanager-cvmanager_api-1_down
+    expr: rate(glances_docker_jpo-cvmanager-cvmanager_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "jpo-cvmanager-cvmanager is down"
+      description: "jpo-cvmanager-cvmanager is down"
+
+  - alert: jpo-cvmanager-cvmanager_keycloak-1_down
+    expr: rate(glances_docker_jpo-cvmanager-cvmanager_keycloak-1_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "jpo-cvmanager-cvmanager_keycloak-1 is down"
+      description: "jpo-cvmanager-cvmanager_keycloak-1 is down"
+
+  - alert: jpo-cvmanager-cvmanager_postgres-1_down
+    expr: rate(glances_docker_jpo-cvmanager-cvmanager_postgres-1_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "jpo-cvmanager-cvmanager_postgres-1 is down"
+      description: "jpo-cvmanager-cvmanager_postgres-1 is down"
+
+  - alert: jpo-cvmanager-cvmanager_webapp-1_down
+    expr: rate(glances_docker_jpo-cvmanager-cvmanager_webapp-1_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "jpo-cvmanager-cvmanager_webapp-1 is down"
+      description: "jpo-cvmanager-cvmanager_webapp-1 is down"
+
+  - alert: jpo-cvmanager-firmware_manager-1_down
+    expr: rate(glances_docker_jpo-cvmanager-firmware_manager-1_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "jpo-cvmanager-firmware_manager-1 is down"
+      description: "jpo-cvmanager-firmware_manager-1 is down"
+
+  - alert: jpo-cvmanager-jpo_bsm_query-1_down
+    expr: rate(glances_docker_jpo-cvmanager-jpo_bsm_query-1_networktime_since_update[5m]) == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "jpo-cvmanager-jpo_bsm_query-1 is down"
+      description: "jpo-cvmanager-jpo_bsm_query-1 is down"

@@ -1,5 +1,6 @@
 package com.trihydro.library.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,14 +30,14 @@ public class CascadeServiceTest extends BaseServiceTest {
     private String baseUrl = "baseUrl";
 
     @Mock
-    private ResponseEntity<TriggerRoad> mockResponseEntityTriggerRoad;
-    private String roadCode = "test";
+    private ResponseEntity<String> mockResponseEntityTriggerRoadJson;
+    private String roadCode = "example road code";
     private TriggerRoad responseTriggerRoad = new TriggerRoad(roadCode, new ArrayList<>());
 
     @Mock
     private ResponseEntity<Milepost[]> mockResponseEntityMileposts;
     private int countyRoadId = 1;
-    private CountyRoadSegment countyRoadSegment = new CountyRoadSegment(countyRoadId, "", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false);
+    private CountyRoadSegment countyRoadSegment = new CountyRoadSegment(countyRoadId, "example common name", 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, true, true, true, true);
     private Milepost[] responseMilepostsEmpty = new Milepost[0];
     private Milepost[] responseMilepostsPopulated = new Milepost[] {
         new Milepost(),
@@ -54,11 +55,12 @@ public class CascadeServiceTest extends BaseServiceTest {
         mockConfig = Mockito.mock(CVRestServiceProps.class);
         mockRestTemplateProvider = Mockito.mock(RestTemplateProvider.class);
         mockRestTemplate = Mockito.mock(RestTemplate.class);
-        mockResponseEntityTriggerRoad = Mockito.mock(ResponseEntity.class);
+        mockResponseEntityTriggerRoadJson = Mockito.mock(ResponseEntity.class);
+        responseTriggerRoad.addCountyRoadSegment(countyRoadSegment);
 
         when(mockConfig.getCvRestService()).thenReturn(baseUrl);
-        when(mockResponseEntityTriggerRoad.getBody()).thenReturn(responseTriggerRoad);
-        when(mockRestTemplate.exchange(url, HttpMethod.GET, null, TriggerRoad.class)).thenReturn(mockResponseEntityTriggerRoad);
+        when(mockResponseEntityTriggerRoadJson.getBody()).thenReturn("{\"roadCode\":\"example road code\",\"countyRoadSegments\":[{\"countyRoadId\":1,\"commonName\":\"example common name\",\"mFrom\":1.0,\"mTo\":2.0,\"xFrom\":3.0,\"yFrom\":4.0,\"xTo\":5.0,\"yTo\":6.0,\"closed\":true,\"c2lhpv\":true,\"loct\":true,\"ntt\":true}]}");
+        when(mockRestTemplate.exchange(url, HttpMethod.GET, null, String.class)).thenReturn(mockResponseEntityTriggerRoadJson);
         when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 
         uut.InjectDependencies(mockConfig, mockRestTemplateProvider);
@@ -69,9 +71,22 @@ public class CascadeServiceTest extends BaseServiceTest {
         // verify
         verify(mockConfig).getCvRestService();
         verify(mockRestTemplateProvider).GetRestTemplate();
-        verify(mockRestTemplate).exchange(url, HttpMethod.GET, null, TriggerRoad.class);
-        verify(mockResponseEntityTriggerRoad).getBody();
-        Assertions.assertEquals(responseTriggerRoad, result);
+        verify(mockRestTemplate).exchange(url, HttpMethod.GET, null, String.class);
+        verify(mockResponseEntityTriggerRoadJson).getBody();
+        assertEquals(responseTriggerRoad.getRoadCode(), result.getRoadCode());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().size(), result.getCountyRoadSegments().size());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getId(), result.getCountyRoadSegments().get(0).getId());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getCommonName(), result.getCountyRoadSegments().get(0).getCommonName());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getMFrom(), result.getCountyRoadSegments().get(0).getMFrom());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getMTo(), result.getCountyRoadSegments().get(0).getMTo());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getXFrom(), result.getCountyRoadSegments().get(0).getXFrom());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getYFrom(), result.getCountyRoadSegments().get(0).getYFrom());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getXTo(), result.getCountyRoadSegments().get(0).getXTo());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).getYTo(), result.getCountyRoadSegments().get(0).getYTo());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).isClosed(), result.getCountyRoadSegments().get(0).isClosed());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).isC2lhpv(), result.getCountyRoadSegments().get(0).isC2lhpv());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).isLoct(), result.getCountyRoadSegments().get(0).isLoct());
+        assertEquals(responseTriggerRoad.getCountyRoadSegments().get(0).isNtt(), result.getCountyRoadSegments().get(0).isNtt());
     }
 
     @Test
@@ -234,6 +249,41 @@ public class CascadeServiceTest extends BaseServiceTest {
         // execute and verify exception occurred
         Assertions.assertThrows(NumberFormatException.class, () -> {
             uut.getAllMilepostsFromCascadeTim(wydotTim);
+        });
+    }
+
+    @Test
+    public void testGetSegmentIdFromClientId_SUCCESS() {
+        // prepare
+        int segmentId = 1;
+        String clientId = "test" + CascadeService.CASCADE_TIM_ID_DELIMITER + segmentId + "-number";
+
+        // execute
+        int result = uut.getSegmentIdFromClientId(clientId);
+
+        // verify
+        Assertions.assertEquals(segmentId, result);
+    }
+
+    @Test
+    public void testGetSegmentIdFromClientId_FAILURE_ArrayOutOfBoundsException() {
+        // prepare
+        String clientId = "test";
+
+        // execute and verify exception occurred
+        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
+            uut.getSegmentIdFromClientId(clientId);
+        });
+    }
+
+    @Test
+    public void testGetSegmentIdFromClientId_FAILURE_NumberFormatException() {
+        // prepare
+        String clientId = "test" + CascadeService.CASCADE_TIM_ID_DELIMITER + "test";
+
+        // execute and verify exception occurred
+        Assertions.assertThrows(NumberFormatException.class, () -> {
+            uut.getSegmentIdFromClientId(clientId);
         });
     }
 }

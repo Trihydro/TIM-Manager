@@ -8,18 +8,18 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "Instance {{ $labels.instance }} down"
+      summary: "Instance {{ $labels.instance }} down on machine 10.145.7.48"
       description: "{{ $labels.instance }} of job {{ $labels.job }} is down."
 
 - name: host
   rules:
   - alert: high_cpu_load
-    expr: node_load1 > 12
+    expr: node_load1 > 25
     for: 1m
     labels:
       severity: warning
     annotations:
-      summary: "Server under high load"
+      summary: "Server under high load on machine 10.145.7.48"
       description: "Docker host is under high load, the avg load 1m is at {{ $value}}. Reported by instance {{ $labels.instance }} of job {{ $labels.job }}."
 
   - alert: high_memory_load
@@ -28,35 +28,44 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "Server memory is almost full"
+      summary: "Server memory is almost full on machine 10.145.7.48"
       description: "Docker host memory usage is {{ humanize $value}}%. Reported by instance {{ $labels.instance }} of job {{ $labels.job }}."
 
   - alert: high_storage_load
-    expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/rootfs/var/lib/docker"}/node_filesystem_size_bytes{mountpoint="/rootfs/var/lib/docker"}) * 100) > 75 
+    expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/rootfs/var/lib/docker"}/node_filesystem_size_bytes{mountpoint="/rootfs/var/lib/docker"}) * 100) > 80 
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "Server storage is almost full"
+      summary: "Server storage is almost full on machine 10.145.7.48"
       description: "Docker host storage usage is {{ humanize $value}}%. Reported by instance {{ $labels.instance }} of job {{ $labels.job }}."
 
 
 - name: containers
   rules:
   - alert: ode_container_down
-    expr: docker_container_running_state{name=~"jpoode.*"} < 1
+    expr: docker_container_running_state{name=~"ode-.*"} < 1
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "ODE container is down"
+      summary: "ODE container is down on machine 10.145.7.48"
       description: "ODE Docker container {{$labels.name}} is down."
 
-  - alert: wyoCV_container_down
-    expr: docker_container_running_state{name=~"wyocv.*"} < 1
+  - alert: wyocv_container_down
+    expr: docker_container_running_state{name=~"wyocv-.*"} < 1
     for: 30s
     labels:
       severity: critical
     annotations:
-      summary: "WyoCV container is down"
+      summary: "WyoCV container is down on machine 10.145.7.48"
       description: "WyoCV Docker container {{$labels.name}} is down."
+
+  - alert: cvmanager_container_down
+    expr: docker_container_running_state{name=~"jpo-cvmanager-.*"} < 1
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "CV Manager container is down on machine 10.145.7.48"
+      description: "CV Manager Docker container {{$labels.name}} is down."

@@ -51,6 +51,7 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
@@ -126,6 +127,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> updateAndResubmitToOde(List<ActiveTimValidationResult> validationResults) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (validationResults == null || validationResults.size() == 0) {
+            utility.logWithDate("No validation results found to update and resubmit to ODE.", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -154,17 +156,19 @@ public class TimGenerationHelper {
                 WydotTim wydotTim = getWydotTimFromTum(tum);
                 List<Milepost> mps = new ArrayList<>();
                 List<Milepost> allMps = getAllMps(wydotTim);
-                if (allMps.size() == 0) {
+                if (allMps.size() < 2) {
                     String exMsg = String.format(
-                            "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                            "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d",
                             tum.getActiveTimId());
                     utility.logWithDate(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, mps, allMps, anchorMp, false);
                 if (tim == null) {
@@ -196,6 +200,9 @@ public class TimGenerationHelper {
                         + gson.toJson(validationResult));
                 ex.printStackTrace();
             }
+        }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -271,17 +278,19 @@ public class TimGenerationHelper {
             WydotTim wydotTim = getWydotTimFromTum(tum);
             List<Milepost> mps = new ArrayList<>();
             List<Milepost> allMps = getAllMps(wydotTim);
-            if (allMps.size() == 0) {
+            if (allMps.size() < 2) {
                 String exMsg = String.format(
-                        "Unable to resubmit TIM, no mileposts found to determine service area for Active_Tim %d",
+                        "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d",
                         tum.getActiveTimId());
                 utility.logWithDate(exMsg);
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
+            Milepost firstPoint = allMps.get(0);
+            Milepost secondPoint = allMps.get(1);
 
             // reduce the mileposts by removing straight away posts
-            var anchorMp = allMps.remove(0);
+            var anchorMp = getAnchorPoint(firstPoint, secondPoint);
             mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
             tim = getTim(tum, mps, allMps, anchorMp, false);
             if (tim == null) {
@@ -300,6 +309,7 @@ public class TimGenerationHelper {
         wydotTim.setDirection(tum.getDirection());
         wydotTim.setStartPoint(tum.getStartPoint());
         wydotTim.setEndPoint(tum.getEndPoint());
+        wydotTim.setClientId(tum.getClientId());
         return wydotTim;
     }
 
@@ -307,6 +317,7 @@ public class TimGenerationHelper {
         List<Milepost> allMps = new ArrayList<>();
 
         if (!CascadeService.isCascadeTim(wydotTim)) {
+            utility.logWithDate("Fetching mileposts for regular TIM with client id: " + wydotTim.getClientId());
             if (wydotTim.getEndPoint() != null) {
                 allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
                 utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
@@ -324,8 +335,11 @@ public class TimGenerationHelper {
             }
         }
         else {
+            utility.logWithDate("Fetching mileposts for cascade TIM with client id: " + wydotTim.getClientId());
             try {
                 allMps = cascadeService.getAllMilepostsFromCascadeTim(wydotTim);
+                utility.logWithDate(String.format("Found %d mileposts for cascade TIM with client id: %s", allMps.size(),
+                        wydotTim.getClientId()));
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException ex) {
                 utility.logWithDate("Failed to get mileposts from cascade tim: " + ex.getMessage());
             }
@@ -343,6 +357,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
+            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -378,9 +393,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, false);
                 if (tim == null) {
@@ -400,6 +417,9 @@ public class TimGenerationHelper {
                 exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
             }
         }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+        }
         return exceptions;
     }
 
@@ -412,6 +432,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> resetTimStartTimeAndResubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
+            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -447,9 +468,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, true, false);
                 if (tim == null) {
@@ -469,6 +492,9 @@ public class TimGenerationHelper {
                 exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
             }
         }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+        }
         return exceptions;
     }
 
@@ -481,6 +507,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> expireTimAndResubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
+            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...", TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -516,9 +543,11 @@ public class TimGenerationHelper {
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
 
                 // reduce the mileposts by removing straight away posts
-                var anchorMp = allMps.remove(0);
+                var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);
                 if (tim == null) {
@@ -537,6 +566,9 @@ public class TimGenerationHelper {
             } catch (Exception ex) {
                 exceptions.add(new ResubmitTimException(activeTimId, ex.getMessage()));
             }
+        }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -615,6 +647,9 @@ public class TimGenerationHelper {
             String exMsg = "active_tim_id " + tum.getActiveTimId()
                     + " not sent to SDX (no SAT_RECORD_ID found in database)";
             utility.logWithDate(exMsg);
+        }
+        if (exceptions.size() > 0) {
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -883,6 +918,7 @@ public class TimGenerationHelper {
                 var wydotRsu = wydotRsus.get(i);
                 // set RSUS
                 rsu = new RSU();
+                rsu.setSnmpProtocol(SnmpProtocol.NTCIP1218);
                 rsu.setRsuIndex(wydotRsu.getIndex());
                 rsu.setRsuTarget(wydotRsu.getRsuTarget());
                 // rsuUsername, rsuPassword will take ODE defaults.
@@ -1046,5 +1082,22 @@ public class TimGenerationHelper {
             System.out.println("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
+    }
+
+    /**
+     * This method returns the anchor point for the given mileposts.
+     * @param firstPoint The first milepost.
+     * @param secondPoint The second milepost.
+     * @return The anchor point as a Milepost.
+     */
+    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint) {
+        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+
+        Milepost anchor = new Milepost();
+        anchor.setLatitude(anchorCoordinate.getLatitude());
+        anchor.setLongitude(anchorCoordinate.getLongitude());
+        anchor.setMilepost(firstPoint.getMilepost());
+        anchor.setDirection(firstPoint.getDirection());
+        return anchor;
     }
 }

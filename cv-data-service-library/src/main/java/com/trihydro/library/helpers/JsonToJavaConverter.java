@@ -31,6 +31,7 @@ import us.dot.its.jpo.ode.model.SerialId;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
+import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.plugin.j2735.J2735BsmCoreData;
 import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
@@ -192,6 +193,7 @@ public class JsonToJavaConverter {
                     timStartDateTime = metaDataNode.get("odeTimStartDateTime").asText();
                 }
                 RSU rsuTemp = new RSU();
+                rsuTemp.setSnmpProtocol(SnmpProtocol.NTCIP1218);
                 var rsu = rsusNode.get("rsus");
                 if (rsu != null) {
                     rsuTarget = rsu.get("rsuTarget").asText();

@@ -60,3 +60,6 @@ Thumbs.db
 *.bak
 
 **/failsafe-summary.xml
+
+jars/*.jar
+wyocv-jars-*.tar.gz

@@ -85,7 +85,7 @@ public class ValidateSdxTest {
     }
 
     @Test
-    public void validateSDX_run_allValid() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
+    public void validateSDX_run_allValid() throws MailException, MessagingException { // note: this test uses reflection, which must be manually allowed via the --add-opens JVM arg
         ActiveTim[] activeTims = importJsonArray("/activeTims_1.json", ActiveTim[].class);
         AdvisorySituationDataDeposit[] asdds = importJsonArray("/asdds_1.json", AdvisorySituationDataDeposit[].class);
 
@@ -158,7 +158,7 @@ public class ValidateSdxTest {
     }
 
     @Test
-    public void validateSDX_noDatabase() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
+    public void validateSDX_noDatabase() throws MailException, MessagingException { // note: this test uses reflection, which must be manually allowed via the --add-opens JVM arg
         // Arrange
         // 0 Active TIMS, 2 SDX.
         ActiveTim[] activeTims = new ActiveTim[0];
@@ -201,7 +201,7 @@ public class ValidateSdxTest {
     }
 
     @Test
-    public void validateSDX_mixSuccess() throws MailException, MessagingException { // TODO: fix this test failing with Java 21
+    public void validateSDX_mixSuccess() throws MailException, MessagingException { // note: this test uses reflection, which must be manually allowed via the --add-opens JVM arg
         // 3 Active TIMs, 3 SDX records.
         // 2 Active TIM and SDX records are aligned. Of those, 1 pair is accurate while
         // another is "stale".

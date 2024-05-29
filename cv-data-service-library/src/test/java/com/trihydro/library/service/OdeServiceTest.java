@@ -39,7 +39,7 @@ public class OdeServiceTest extends BaseServiceTest {
         when(mockOdeProps.getOdeUrl()).thenReturn("url");
         var url = "url/tim/query";
 
-        HttpEntity<String> entity = getEntity("{\"rsuTarget\":\"10.10.10.10\",\"rsuRetries\":3,\"rsuTimeout\":5000,\"rsuIndex\":0,\"snmpProtocol\":\"FOURDOT1\"}", String.class);
+        HttpEntity<String> entity = getEntity("{\"rsuTarget\":\"10.10.10.10\",\"rsuRetries\":3,\"rsuTimeout\":5000,\"rsuIndex\":0,\"snmpProtocol\":\"NTCIP1218\"}", String.class);
         when(mockRestTemplate.postForObject(url, entity, String.class))
         .thenReturn("{\"indicies_set\":\"[]\"}");
 

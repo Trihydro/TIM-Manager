@@ -180,43 +180,47 @@ public class WydotTimService {
     public void sendTimToSDW(WydotTim wydotTim, WydotTravelerInputData timToSend, String regionNamePrev,
             TimType timType, Integer pk, Coordinate endPoint, List<Milepost> reducedMileposts) {
 
+        // find active TIMs by client Id and direction, then filter by SAT TIMs
         List<ActiveTim> activeSatTims = null;
-
-        // find active TIMs by client Id and direction
-        activeSatTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
-                timType.getTimTypeId(), wydotTim.getDirection());
-
-        // filter by SAT TIMs
+        activeSatTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timType.getTimTypeId(), wydotTim.getDirection());
         activeSatTims = activeSatTims.stream().filter(x -> x.getSatRecordId() != null).collect(Collectors.toList());
+        int numberOfSatTims = activeSatTims != null ? activeSatTims.size() : 0;
+        if (numberOfSatTims > 1) {
+            // inform user that there are multiple active SAT TIMs for this client, when we expected zero or one
+            utility.logWithDate("Multiple active SAT TIMs found for client " + wydotTim.getClientId() + " and direction "
+                    + wydotTim.getDirection() + ". Expected zero or one. Using the first one found.");
+        }
 
-        String recordId = activeSatTims != null && activeSatTims.size() > 0 ? activeSatTims.get(0).getSatRecordId()
-                : sdwService.getNewRecordId();
+        // retrieve first record if it exists
+        ActiveTim activeSatTim = numberOfSatTims > 0 ? activeSatTims.get(0) : null;
+
+        // use existing record id if active sat tim exists, otherwise get new record id
+        String recordId = activeSatTim != null ? activeSatTim.getSatRecordId() : sdwService.getNewRecordId();
 
         // save new active_tim_holding record
         ActiveTimHolding activeTimHolding = new ActiveTimHolding(wydotTim, null, recordId, endPoint);
         activeTimHolding.setPacketId(timToSend.getTim().getPacketID());
-
-        // Set projectKey, if this is a RW TIM
         if (wydotTim instanceof WydotTimRw) {
+            // Set projectKey, if this is a RW TIM
             activeTimHolding.setProjectKey(((WydotTimRw) wydotTim).getProjectKey());
         }
-
         activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
 
         // If there is a corresponding Active TIM, reset the expiration date
-        if (activeSatTims.size() > 0) {
-            var activeTimId = activeSatTims.get(0).getActiveTimId();
+        if (activeSatTim != null) {
+            var activeTimId = activeSatTim.getActiveTimId();
             activeTimService.resetActiveTimsExpirationDate(Arrays.asList(activeTimId));
         }
-
+        
+        // set region name
         String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
-        if (wydotTim.getClientId() != null)
+        if (wydotTim.getClientId() != null) {
             regionNameTemp += "_" + wydotTim.getClientId();
-
-        // add on wydot primary key if it exists
-        if (pk != null)
+        }
+        if (pk != null) {
+            // add on wydot primary key if it exists
             regionNameTemp += "_" + pk;
-
+        }
         try {
             regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
         } catch (IllegalArgumentException e) {
@@ -224,12 +228,11 @@ public class WydotTimService {
             return;
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
-
-        if (activeSatTims != null && activeSatTims.size() > 0) {
-
-            WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTims.get(0).getTimId());
-            updateTimOnSdw(timToSend, activeSatTims.get(0).getTimId(), activeSatTims.get(0).getSatRecordId(), tim,
-                    reducedMileposts);
+        
+        // update/create TIM
+        if (activeSatTim != null) {
+            WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTim.getTimId());
+            updateTimOnSdw(timToSend, activeSatTim.getTimId(), recordId, tim, reducedMileposts);
         } else {
             sendNewTimToSdw(timToSend, recordId, reducedMileposts);
         }

@@ -68,35 +68,4 @@ public class TimRsuService extends BaseService {
             }
         }
     }
-
-    public boolean recordExists(Long timId, int rsuId, int rsuIndex) {
-        ResultSet rs = null;
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection
-                    .prepareStatement("SELECT 1 FROM TIM_RSU WHERE TIM_ID = ? AND RSU_ID = ? AND RSU_INDEX = ?");
-            preparedStatement.setLong(1, timId);
-            preparedStatement.setLong(2, rsuId);
-            preparedStatement.setLong(3, rsuIndex);
-
-            rs = preparedStatement.executeQuery();
-            return rs.next();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (preparedStatement != null)
-                    preparedStatement.close();
-
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-        }
-        return false;
-    }
 }

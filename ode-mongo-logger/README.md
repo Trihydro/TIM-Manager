@@ -59,46 +59,46 @@ $ mvn clean compile assembly:single install
 **Step 5**: Run \*Note: this will use a current configuration of localhost:9092 for the bootstrap.servers endpoint and J2735Bsm for the topic.
 
 ```bash
-$ java -jar target/cv-logger-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+$ java -jar target/cv-logger-1.1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 WINDOWS COMMANDS
 
 Desktop
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-core-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-core-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-common-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-common-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-svcs-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-svcs-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
 mvn install:install-file -Dfile="C:\\Users\\kperry\\cv-data-logger-library\\target\\cv-data-logger-library-1.0-SNAPSHOT.jar" -DgroupId="com.trihydro.library.service" -DartifactId=cv-data-logger-library -Dversion="1.0-SNAPSHOT" -Dpackaging=jar
 
 Laptop
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-core-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-core-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-common-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-common-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-svcs-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-svcs-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
 mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\cv-data-logger-library\\target\\cv-data-logger-library-1.0-SNAPSHOT.jar" -DgroupId="com.trihydro.library.service" -DartifactId=cv-data-logger-library -Dversion="1.0-SNAPSHOT" -Dpackaging=jar
 
 //
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-plugins-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-plugins-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-core-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-core-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-common-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-common-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-svcs-1.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-svcs-1.1.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\cv-data-service-library\\target\\cv-data-service-library-1.0.0-SNAPSHOT.jar" -DgroupId="com.wyocv" -DartifactId=cv-data-service-library -Dversion="1.0.0-SNAPSHOT" -Dpackaging=jar
+mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\cv-data-service-library\\target\\cv-data-service-library-1.1.0-SNAPSHOT.jar" -DgroupId="com.wyocv" -DartifactId=cv-data-service-library -Dversion="1.1.0-SNAPSHOT" -Dpackaging=jar
 
 # Configuration Reference
 

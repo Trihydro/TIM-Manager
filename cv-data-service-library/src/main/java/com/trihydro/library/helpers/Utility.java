@@ -60,7 +60,6 @@ public class Utility {
 	}
 
 	public int getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime) {
-
 		int duration = getMinutesDurationWithSimpleDateFormat(startDateTime, endDateTime);
 		if (duration == -1) {
 			duration = getMinutesDurationWithZonedDateTime(startDateTime, endDateTime);
@@ -69,9 +68,27 @@ public class Utility {
 			duration = getMinutesDurationWithYyMmDdFormat(startDateTime, endDateTime);
 		}
 		if (duration == -1) {
-			System.out.println(
-					"Failed to parse dates when getting minutes between: " + startDateTime + " and " + endDateTime);
+			// dates may be in different formats, attempt to identify formats & translate to ZonedDateTime, then calculate
+			String startDateTimeInZonedDateTime;
+			try {
+				startDateTimeInZonedDateTime = translateToZonedDateTime(startDateTime);
+			} catch (UnrecognizedDateFormatException e) {
+				logWithDate("Failed to parse dates when getting minutes between: " + startDateTime + " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
+				return -1;
+			}
+			
+			String endDateTimeInZonedDateTime;
+			try {
+				endDateTimeInZonedDateTime = translateToZonedDateTime(endDateTime);
+			} catch (UnrecognizedDateFormatException e) {
+				logWithDate("Failed to parse dates when getting minutes between: " + startDateTime + " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
+				return -1;
+			}
 
+			duration = getMinutesDurationWithZonedDateTime(startDateTimeInZonedDateTime, endDateTimeInZonedDateTime);
+		}
+		if (duration == -1) {
+			logWithDate("Failed to parse dates when getting minutes between: " + startDateTime + " and " + endDateTime);
 		}
 		return duration;
 	}
@@ -141,6 +158,41 @@ public class Utility {
 		} catch (Exception ex) {
 			return -1;
 		}
+	}
+
+	/**
+	 * Checks the format of the date string and translates it to a ZonedDateTime if possible.
+	 * Throws an UnrecognizedDateFormatException if the date format is not recognized.
+	 * @param dateTimeString The date string to translate
+	 * @return The date string translated to a ZonedDateTime
+	 * @throws UnrecognizedDateFormatException If the date format is not recognized
+	 */
+	private String translateToZonedDateTime(String dateTimeString) throws UnrecognizedDateFormatException {
+		// if already ZonedDateTime, return
+		try {
+			ZonedDateTime.parse(dateTimeString);
+			return dateTimeString;
+		} catch(DateTimeParseException exception) {}
+
+		// if not ZonedDateTime, check for simple date format
+		try {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss");
+			Date startDate = simpleDateFormat.parse(dateTimeString);
+
+			// translate to ZonedDateTime
+			return ZonedDateTime.ofInstant(startDate.toInstant(), java.time.ZoneId.systemDefault()).toString();
+		} catch(Exception e) {}
+
+		// if not ZonedDateTime or SimpleDateFormat, check for YyMmDdFormat
+		try {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date startDate = simpleDateFormat.parse(dateTimeString);
+
+			// translate to ZonedDateTime
+			return ZonedDateTime.ofInstant(startDate.toInstant(), java.time.ZoneId.systemDefault()).toString();
+		} catch (Exception e) {}
+
+		throw new UnrecognizedDateFormatException("Unrecognized date format: " + dateTimeString);
 	}
 
 	/**
@@ -278,4 +330,10 @@ public class Utility {
 		// 9) The anchor coordinate is (anchor latitude, anchor longitude).
         return new Coordinate(anchorLatitude, anchorLongitude);
     }
+
+	private class UnrecognizedDateFormatException extends Exception {
+		public UnrecognizedDateFormatException(String message) {
+			super(message);
+		}
+	}
 }

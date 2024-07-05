@@ -138,4 +138,17 @@ public class CascadeService extends CvDataServiceLibrary {
         countyRoadIdString = countyRoadIdStringSplit[0]; // segmentId
         return Integer.parseInt(countyRoadIdString);
     }
+
+    /**
+     * This method sends a request to the CV Data Controller to get the client IDs associated with a segment.
+     * @param segmentId the id of the segment to get client IDs for
+     * @return a list of client IDs associated with the given segment
+     */
+    public List<String> getClientIdsAssociatedWithSegment(int segmentId) {
+        String cvRestService = config.getCvRestService();
+        String url = String.format("%s/cascade/get-active-tims-for-segment/%s", cvRestService, segmentId);
+        RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
+        ResponseEntity<String[]> response = restTemplate.exchange(url, HttpMethod.GET, null, String[].class);
+        return Arrays.asList(response.getBody());
+    }
 }

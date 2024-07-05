@@ -728,20 +728,21 @@ public abstract class WydotTimBaseController {
      * This method cascades conditions for each associated segment of the given trigger road.
      */
     protected void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, TriggerRoad triggerRoad) {
+        utility.logWithDate("=================== CRC Start (" + triggerRoad.getRoadCode() + ") ===================");
         utility.logWithDate("Handling cascading conditions for trigger road: " + triggerRoad.getRoadCode());
         List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
-        utility.logWithDate("Trigger road has " + countyRoadSegments.size() + " segments associated with it.");
+        utility.logWithDate("Trigger road " + triggerRoad.getRoadCode() + " has " + countyRoadSegments.size() + " segments associated with it.");
         for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
             cascadeConditionsForSegment(countyRoadSegment, timType, startDateTime, endDateTime, pk, content, frameType, wydotTim.getClientId());
         }
+        utility.logWithDate("=================== CRC End (" + triggerRoad.getRoadCode() + ") ===================");
     }
 
     /**
      * This method creates a new WydotTim for the given segment and sends it to RSUs and Satellite.
      */
     private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
-        // clear any conditions previously cascaded for this segment to ensure outdated conditions do not get left behind
-        wydotTimService.clearTimsById(timType.getType(), clientId + CascadeService.CASCADE_TIM_ID_DELIMITER + countyRoadSegment.getId(), null);
+        clearExistingConditionsForSegment(countyRoadSegment.getId());
         
         if (!countyRoadSegment.hasOneOrMoreCondition()) {
             // no conditions associated with the segment, no need to generate any TIMs
@@ -760,6 +761,22 @@ public abstract class WydotTimBaseController {
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
         WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, reducedMileposts.get(0), reducedMileposts.get(reducedMileposts.size() - 1), clientId);
         createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
+    }
+
+    /**
+     * This method clears any existing conditions that were previously cascaded for the given segment to ensure outdated conditions do not get left behind
+     */
+    private void clearExistingConditionsForSegment(int segmentId) {
+        List<String> clientIdsAssociatedWithSegment = cascadeService.getClientIdsAssociatedWithSegment(segmentId);
+        utility.logWithDate("Clearing " + clientIdsAssociatedWithSegment.size() + " previously cascaded conditions for segment " + segmentId + ".");
+        for (String clientIdToClear : clientIdsAssociatedWithSegment) {
+            // trim client id
+            if (clientIdToClear.lastIndexOf("-") != -1) {
+                clientIdToClear = clientIdToClear.substring(0, clientIdToClear.lastIndexOf("-"));
+            }
+            // clear exiting conditions
+            wydotTimService.clearTimsById(timType.getType(), clientIdToClear, null);
+        }
     }
 
     /**

@@ -151,6 +151,56 @@ public class CascadeController extends BaseController {
         return new ResponseEntity<List<Milepost>>(mileposts, HttpStatus.OK);
     }
 
+    /**
+     * Retrieve all active TIMs that are associated with the given segment
+     * @param segmentId the segment id
+     * @return the list of client ids
+     */
+    @RequestMapping(value = "/get-active-tims-for-segment/{segmentId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public ResponseEntity<List<String>> getClientIdsForSegment(@PathVariable int segmentId) {
+        List<String> clientIds = retrieveClientIdsForSegmentFromDatabase(segmentId);
+        return new ResponseEntity<List<String>>(clientIds, HttpStatus.OK);
+    }
+
+    private List<String> retrieveClientIdsForSegmentFromDatabase(int segmentId) {
+        List<String> clientIds = new ArrayList<String>();
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = dbInteractions.getConnectionPool();
+            statement = connection.createStatement();
+
+            // build SQL statement
+            String query = "select client_id from active_tim where client_id like '%_trgd_" + segmentId + "-%'";
+            rs = statement.executeQuery(query);
+
+            while (rs.next()) {
+                String clientId = rs.getString("client_id");
+                clientIds.add(clientId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return clientIds;
+    }
+
     private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) throws SQLException {
         TriggerRoad triggerRoad = null;
         

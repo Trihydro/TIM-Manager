@@ -1,6 +1,5 @@
 package com.trihydro.odewrapper.controller;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -742,7 +741,12 @@ public abstract class WydotTimBaseController {
      * This method creates a new WydotTim for the given segment and sends it to RSUs and Satellite.
      */
     private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
-        clearExistingConditionsForSegment(countyRoadSegment.getId());
+        // if existing condition is identical, return
+        boolean identicalConditionExistsForSegment = performExistenceChecks(countyRoadSegment, timType);
+        if (identicalConditionExistsForSegment) {
+            utility.logWithDate("Identical condition already exists, skipping TIM generation");
+            return;
+        }
         
         if (!countyRoadSegment.hasOneOrMoreCondition()) {
             // no conditions associated with the segment, no need to generate any TIMs
@@ -760,23 +764,99 @@ public abstract class WydotTimBaseController {
         var anchor = getAnchorPoint(firstPoint, secondPoint);
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
         WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, reducedMileposts.get(0), reducedMileposts.get(reducedMileposts.size() - 1), clientId);
+        utility.logWithDate("Generating TIM for segment " + countyRoadSegment.getId() + " with ITIS codes: " + countyRoadSegment.toITISCodes().toString());
         createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
+    }
+
+    /**
+     * This method performs several existence checks.
+     * - If multiple client ids are associated with the segment, all existing conditions are cleared.
+     * - If an identical condition exists for the segment, the method returns true.
+     * - If an existing condition is not identical to the requested condition, the existing condition is cleared.
+     * 
+     * Note: A condition in this context is defined as a collection of ITIS codes.
+     * 
+     * @param countyRoadSegment The CountyRoadSegment to perform existence checks for.
+     * @return True if a single condition exists for the given segment and that condition is identical to the requested condition, otherwise false.
+     */
+    private boolean performExistenceChecks(CountyRoadSegment countyRoadSegment, TimType timType) {
+        int segmentId = countyRoadSegment.getId();
+        List<String> clientIdsAssociatedWithSegment = cascadeService.getClientIdsAssociatedWithSegment(segmentId);
+        int numExistingConditions = clientIdsAssociatedWithSegment.size();
+        if (numExistingConditions == 0) {
+            return false;
+        }
+        else if (numExistingConditions > 1) {
+            utility.logWithDate("Multiple client ids detected for segment " + segmentId + "("+ clientIdsAssociatedWithSegment.toString() + "), clearing existing conditions for all client ids.");
+            clearAllExistingConditionsForSegment(clientIdsAssociatedWithSegment);
+            return false; // no identical condition exists at this point, return false
+        }
+        else if (numExistingConditions == 1) {
+            String existingConditionClientId = clientIdsAssociatedWithSegment.get(0);
+            utility.logWithDate("Single existing condition found for segment " + segmentId + " with client id: " + existingConditionClientId);
+
+            // check if existing condition is identical to requested condition
+            List<Integer> existingITISCodes = getExistingConditionForClientId(existingConditionClientId, timType);
+            if (existingITISCodes != null) {
+                if (existingITISCodes.equals(countyRoadSegment.toITISCodes())) {
+                    return true; // identical condition found, return true
+                }
+            }
+            else {
+                utility.logWithDate("Warning: Null value found for existing ITIS codes; Clearing existing condition.");
+            }
+
+            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(existingConditionClientId), null);
+            return false; // no identical condition exists at this point, return false
+        }
+        else {
+            utility.logWithDate("Warning: Expected positive number of client ids for segment " + segmentId + ", found " + numExistingConditions + ". Treating as zero.");
+            return false;
+        }
+    }
+
+    /**
+     * This method retrieves the existing condition for the given client id and tim type.
+     * @param clientId The client id to retrieve the existing condition for.
+     * @param timType The tim type to retrieve the existing condition for.
+     * @return The existing condition as a list of ITIS codes if it exists, otherwise null.
+     */
+    private List<Integer> getExistingConditionForClientId(String clientId, TimType timType) {
+        List<ActiveTim> allActiveTimsWithItisCodes = activeTimService.getActiveTimsWithItisCodes(true);
+        List<ActiveTim> activeTimsForClientId = new ArrayList<>();
+        for (ActiveTim activeTim : allActiveTimsWithItisCodes) {
+            if (activeTim.getClientId().equals(clientId) && activeTim.getTimType().equals(timType.getType())) {
+                activeTimsForClientId.add(activeTim);
+            }
+        }
+        if (activeTimsForClientId.size() != 1) {
+            utility.logWithDate("Warning: Expected 1 active TIM for client id " + clientId + ", found " + activeTimsForClientId.size() + ". Returning null.");
+            return null;
+        }
+        ActiveTim existingTim = activeTimsForClientId.get(0);
+        return existingTim.getItisCodes();
     }
 
     /**
      * This method clears any existing conditions that were previously cascaded for the given segment to ensure outdated conditions do not get left behind
      */
-    private void clearExistingConditionsForSegment(int segmentId) {
-        List<String> clientIdsAssociatedWithSegment = cascadeService.getClientIdsAssociatedWithSegment(segmentId);
-        utility.logWithDate("Clearing " + clientIdsAssociatedWithSegment.size() + " previously cascaded conditions for segment " + segmentId + ".");
+    private void clearAllExistingConditionsForSegment(List<String> clientIdsAssociatedWithSegment) {
         for (String clientIdToClear : clientIdsAssociatedWithSegment) {
-            // trim client id
-            if (clientIdToClear.lastIndexOf("-") != -1) {
-                clientIdToClear = clientIdToClear.substring(0, clientIdToClear.lastIndexOf("-"));
-            }
             // clear exiting conditions
-            wydotTimService.clearTimsById(timType.getType(), clientIdToClear, null);
+            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(clientIdToClear), null);
         }
+    }
+
+    /**
+     * This method trims the clientId to account for the /client-id-direction query, which adds -0 to the end of the clientId.
+     * Example input: myclientid-0
+     * Example output: myclientid
+     */
+    private String trimClientIdForQuery(String clientIdToTrim) {
+        if (clientIdToTrim.lastIndexOf("-") != -1) {
+            clientIdToTrim = clientIdToTrim.substring(0, clientIdToTrim.lastIndexOf("-"));
+        }
+        return clientIdToTrim;
     }
 
     /**

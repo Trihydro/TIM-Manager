@@ -1,5 +1,10 @@
 package com.trihydro.library.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.trihydro.library.service.CascadeService;
+
 /**
  * A county road segment is a segment of a county road that has a number of conditions associated with it.
  */
@@ -83,5 +88,22 @@ public class CountyRoadSegment {
 
     public boolean hasOneOrMoreCondition() {
         return closed || c2lhpv || loct || ntt;
+    }
+
+    public List<Integer> toITISCodes() {
+        List<Integer> itisCodes = new ArrayList<>();
+        if (closed) {
+            itisCodes.add(Integer.parseInt(CascadeService.closedItisCode));
+        }
+        if (c2lhpv) {
+            itisCodes.add(Integer.parseInt(CascadeService.c2lhpvItisCode));
+        }
+        if (loct) {
+            itisCodes.add(Integer.parseInt(CascadeService.loctItisCode));
+        }
+        if (ntt) {
+            itisCodes.add(Integer.parseInt(CascadeService.nttItisCode));
+        }
+        return itisCodes;
     }
 }

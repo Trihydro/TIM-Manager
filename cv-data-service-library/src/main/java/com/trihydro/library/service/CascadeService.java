@@ -23,10 +23,10 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public static final String CASCADE_TIM_ID_DELIMITER = "_trgd_";
 
-    private static final String closedItisCode = "769";
-    private static final String c2lhpvItisCode = "2569";
-    private static final String loctItisCode = "2567";
-    private static final String nttItisCode = "2568";
+    public static final String closedItisCode = "769";
+    public static final String c2lhpvItisCode = "2569";
+    public static final String loctItisCode = "2567";
+    public static final String nttItisCode = "2568";
 
     /**
      * This method sends a request to the CV Data Controller to get the trigger road for the given road code.

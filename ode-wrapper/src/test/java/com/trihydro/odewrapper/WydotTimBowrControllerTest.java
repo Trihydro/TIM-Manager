@@ -111,7 +111,7 @@ public class WydotTimBowrControllerTest {
 		// Arrange
 		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"notasupportedroute\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54Z\",\"endDateTime\":\"2024-06-05T17:34:54Z\",\"data\":25000}]}";
 		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
-		doReturn(false).when(uut).routeSupported("I 80");
+		doReturn(false).when(uut).routeSupported("notasupportedroute");
 
 		// Act
 		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);

@@ -117,9 +117,19 @@ public class WydotTimBowrController extends WydotTimBaseController {
         // An Async task always executes in new thread
         new Thread(new Runnable() {
             public void run() {
-                var startTime = getStartTime();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
+                    WydotTimBowr wydotTimBowr = (WydotTimBowr) tim;
+
+                    // get start time
+                    String startTime = wydotTimBowr.getStartDateTime();
+                    if (startTime == null) {
+                        startTime = getStartTime();
+                    }
+                    
+                    // get end time
+                    String endTime = wydotTimBowr.getEndDateTime();
+                    
+                    processRequest(tim, getTimType(type), startTime, endTime, null, ContentEnum.advisory,
                             TravelerInfoType.advisory);
                 }
             }

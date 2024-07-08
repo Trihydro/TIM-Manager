@@ -44,7 +44,7 @@ groups:
 - name: containers
   rules:
   - alert: ode_container_down
-    expr: docker_container_running_state{name=~"ode-.*"} < 1
+    expr: docker_container_running_state{name=~"ode-.*",name!~"ode-kafka_init-1"} < 1
     for: 30s
     labels:
       severity: critical

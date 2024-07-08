@@ -296,13 +296,13 @@ public class SetItisCodes {
 
         int weightInPounds = tim.getData();
 
-        itisCodes.add("5127");
-        itisCodes.add("2563");
-        itisCodes.add("2569");
-        itisCodes.add("7682");
-        itisCodes.add("2557");
-        itisCodes.add(translateWeightToItisCode(weightInPounds));
-        itisCodes.add("8739");
+        itisCodes.add("5127"); // Strong winds
+        itisCodes.add("2563"); // Truck restriction
+        itisCodes.add("2569"); // No high profile vehicles
+        itisCodes.add("7682"); // Below
+        itisCodes.add("2557"); // Number
+        itisCodes.add(translateWeightToItisCode(weightInPounds)); // Weight, translated from pounds to ITIS code
+        itisCodes.add("8739"); // Pounds
 
         return itisCodes;
     }

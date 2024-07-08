@@ -530,7 +530,7 @@ public abstract class WydotTimBaseController {
 
         // check direction
         if (tim.getDirection() != null) {
-            toReturn.setDirection(tim.getClientId());
+            toReturn.setDirection(tim.getDirection());
         }
         if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d") && !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
@@ -566,7 +566,7 @@ public abstract class WydotTimBaseController {
         try {
             itisCodes = setItisCodes.setItisCodesBowr(tim);
         } catch (WeightNotSupportedException exception) {
-            resultMessages.add(exception.getMessage());
+            resultMessages.add("Weight not supported");
         }
         toReturn.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);

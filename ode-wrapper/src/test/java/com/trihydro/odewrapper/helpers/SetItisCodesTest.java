@@ -134,7 +134,7 @@ public class SetItisCodesTest {
         String weightAsItisCode = "11589";
         WydotTimBowr tim = new WydotTimBowr();
         tim.setData(weightInPounds);
-        List<String> expectedResult = List.of("5127", "2563", "2569", "7682", "2557", weightAsItisCode, "8739");
+        List<String> expectedResult = List.of("5127", "2563", "2569", "7682", "2577", weightAsItisCode, "8739");
 
         // Act
         List<String> result = uut.setItisCodesBowr(tim);

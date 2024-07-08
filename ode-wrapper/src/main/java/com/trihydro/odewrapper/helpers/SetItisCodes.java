@@ -300,7 +300,7 @@ public class SetItisCodes {
         itisCodes.add("2563"); // Truck restriction
         itisCodes.add("2569"); // No high profile vehicles
         itisCodes.add("7682"); // Below
-        itisCodes.add("2557"); // Number
+        itisCodes.add("2577"); // Gross-Weight-Limit
         itisCodes.add(translateWeightToItisCode(weightInPounds)); // Weight, translated from pounds to ITIS code
         itisCodes.add("8739"); // Pounds
 

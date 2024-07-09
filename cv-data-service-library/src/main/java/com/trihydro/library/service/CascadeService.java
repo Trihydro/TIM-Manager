@@ -149,6 +149,9 @@ public class CascadeService extends CvDataServiceLibrary {
         String url = String.format("%s/cascade/get-active-tims-for-segment/%s", cvRestService, segmentId);
         RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
         ResponseEntity<String[]> response = restTemplate.exchange(url, HttpMethod.GET, null, String[].class);
+        if (response.getBody() == null) {
+            return Arrays.asList();
+        }
         return Arrays.asList(response.getBody());
     }
 }

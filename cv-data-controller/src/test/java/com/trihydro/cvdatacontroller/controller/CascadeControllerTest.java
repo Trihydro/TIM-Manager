@@ -188,4 +188,35 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         Assertions.assertEquals(0, data.getBody().size());
     }
+
+    @Test
+    public void testGetClientIdsForSegment_SUCCESS() throws SQLException {
+        // prepare
+        int countyRoadId = 1;
+        String clientId = "test";
+        doReturn(clientId).when(mockRs).getString("client_id");
+        
+        // execute
+        ResponseEntity<List<String>> data = uut.getClientIdsForSegment(countyRoadId);
+
+        // verify
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertEquals(1, data.getBody().size());
+        List<String> expectedClientIds = List.of(clientId);
+        Assertions.assertEquals(expectedClientIds, data.getBody());
+    }
+
+    @Test
+    public void testGetClientIdsForSegment_SQLException_FAILURE() throws SQLException {
+        // prepare
+        int countyRoadId = 1;
+        doThrow(new SQLException()).when(mockRs).getString("client_id");
+        
+        // execute
+        ResponseEntity<List<String>> data = uut.getClientIdsForSegment(countyRoadId);
+
+        // verify
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(null, data.getBody());
+    }
 }

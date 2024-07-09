@@ -159,6 +159,9 @@ public class CascadeController extends BaseController {
     @RequestMapping(value = "/get-active-tims-for-segment/{segmentId}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<List<String>> getClientIdsForSegment(@PathVariable int segmentId) {
         List<String> clientIds = retrieveClientIdsForSegmentFromDatabase(segmentId);
+        if (clientIds == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
         return new ResponseEntity<List<String>>(clientIds, HttpStatus.OK);
     }
 

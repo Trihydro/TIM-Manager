@@ -140,10 +140,7 @@ public class SetItisCodesTest {
         List<String> result = uut.setItisCodesBowr(tim);
 
         // Assert
-        Assertions.assertEquals(expectedResult.size(), result.size());
-        for (String code : expectedResult) {
-            Assertions.assertTrue(result.contains(code));
-        }
+        Assertions.assertEquals(expectedResult, result);
     }
 
     @Test

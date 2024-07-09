@@ -1,5 +1,21 @@
 # Last updated 1/21/2024
 
+DEBUG=false
+
+# make sure psql is installed
+if ! [ -x "$(command -v psql)" ]; then
+    echo "Installing psql..."
+    sudo apt-get update -y
+    sudo apt-get install -y postgresql-client
+    psql --version
+fi
+
+# if PASSWORD is not set, exit
+if [ -z "$POSTGRES_PASSWORD" ]; then
+    echo "Error: POSTGRES_PASSWORD is not set"
+    exit 1
+fi
+
 # PGSQL info
 db_name="postgres"
 db_user="postgres"
@@ -16,10 +32,11 @@ rsu2xUsb_model_id=2
 
 # rsu credentials
 default_rsu_credential_id=1
-commsignia_rsu_credential_id=3
+wydot_rsu_credential_id=2
 
 # snmp credentials
 default_snmp_credential_id=1
+wydot_snmp_credential_id=2
 
 # snmp versions
 fourDot1_snmp_version_id=1
@@ -28,11 +45,11 @@ twelve18_snmp_version_id=2
 # firmware versions
 y20_0_0_firmware_version_id=1
 y_20_1_0_firmware_version_id=2
-y_20_23_3_b168981_firmware_version_id=3
-y_20_39_4_b205116_firmware_version_id=4
+y_20_23_3_firmware_version_id=3
+y_20_39_4_firmware_version_id=4
 
 # organizations
-wydot_organization_id=2
+wydot_organization_id=1
 
 # read in values from .csv using awk
 echo "Reading in values from .csv file..."
@@ -57,6 +74,8 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     firmware_version=$firmware_version
     target_firmware_version=$target_firmware_version
 
+    echo ""
+
     # if header, skip
     if [ "$latitude" = "latitude" ]; then
         echo "Header detected, skipping..."
@@ -64,14 +83,16 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     fi
 
     # if RSU is already in rsus table, skip it
-    PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "SELECT * FROM public.rsus WHERE serial_number='$serial_number';" | grep -q 0
-    if [ $? -eq 0 ]; then
+    numRecords=`PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -Atc "select COUNT(*) FROM public.rsus WHERE serial_number='$serial_number';"`
+    if [ $numRecords -gt 0 ]; then
         echo "RSU '$serial_number' is already in rsus table, skipping..."
         continue
     fi
 
     # translate values to ids
-    echo "Translating values to ids for model, rsu_credential, snmp_credential, snmp_version, firmware_version, and target_firmware_version..."
+    if $DEBUG; then
+        echo "Translating values to ids for model, rsu_credential, snmp_credential, snmp_version, firmware_version, and target_firmware_version..."
+    fi
     
     # Model
     if [ "$model" = "ITS-RS4-M" ]; then
@@ -86,16 +107,20 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     # RSU Credential
     if [ "$rsu_credential" = "default" ]; then
         rsu_credential_id=$default_rsu_credential_id
+    elif [ "$rsu_credential" = "wydot-rsu" ]; then
+        rsu_credential_id=$wydot_rsu_credential_id
     else
-        echo "Error: invalid rsu_credential '$rsu_credential'"
+        echo "Error: invalid rsu_credential '$rsu_credential' for RSU '$serial_number'"
         exit 1
     fi
 
     # SNMP Credential
     if [ "$snmp_credential" = "default" ]; then
         snmp_credential_id=$default_snmp_credential_id
+    elif [ "$snmp_credential" = "wydot-snmp" ]; then
+        snmp_credential_id=$wydot_snmp_credential_id
     else
-        echo "Error: invalid snmp_credential '$snmp_credential'"
+        echo "Error: invalid snmp_credential '$snmp_credential' for RSU '$serial_number'"
         exit 1
     fi
 
@@ -105,7 +130,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     elif [ "$snmp_version" = "1218" ]; then
         snmp_version_id=$twelve18_snmp_version_id
     else
-        echo "Error: invalid snmp_version '$snmp_version'"
+        echo "Error: invalid snmp_version '$snmp_version' for RSU '$serial_number'"
         exit 1
     fi
 
@@ -114,12 +139,12 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
         firmware_version_id=$y20_0_0_firmware_version_id
     elif [ "$firmware_version" = "y20.1.0" ]; then
         firmware_version_id=$y_20_1_0_firmware_version_id
-    elif [ "$firmware_version" = "y20.23.3-b168981" ]; then
-        firmware_version_id=$y_20_23_3_b168981_firmware_version_id
-    elif [ "$firmware_version" = "y20.39.4-b205116" ]; then
-        firmware_version_id=$y_20_39_4_b205116_firmware_version_id
+    elif [ "$firmware_version" = "y20.23.3" ]; then
+        firmware_version_id=$y_20_23_3_firmware_version_id
+    elif [ "$firmware_version" = "y20.39.4" ]; then
+        firmware_version_id=$y_20_39_4_firmware_version_id
     else
-        echo "Error: invalid firmware_version '$firmware_version'"
+        echo "Error: invalid firmware_version '$firmware_version' for RSU '$serial_number'"
         exit 1
     fi
 
@@ -128,39 +153,41 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
         target_firmware_version_id=$y20_0_0_firmware_version_id
     elif [ "$target_firmware_version" = "y20.1.0" ]; then
         target_firmware_version_id=$y_20_1_0_firmware_version_id
-    elif [ "$target_firmware_version" = "y20.23.3-b168981" ]; then
-        target_firmware_version_id=$y_20_23_3_b168981_firmware_version_id
-    elif [ "$target_firmware_version" = "y20.39.4-b205116" ]; then
-        target_firmware_version_id=$y_20_39_4_b205116_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.23.3" ]; then
+        target_firmware_version_id=$y_20_23_3_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.39.4" ]; then
+        target_firmware_version_id=$y_20_39_4_firmware_version_id
     else
-        echo "Error: invalid target_firmware_version '$target_firmware_version'"
+        echo "Error: invalid target_firmware_version '$target_firmware_version' for RSU '$serial_number'"
         exit 1
     fi
 
-    # print RSU info
-    echo "Printing RSU info..."
-    echo "----------------------------------------"
-    echo "latitude: $latitude"
-    echo "longitude: $longitude"
-    echo "milepost: $milepost"
-    echo "ipv4_address: $ipv4_address"
-    echo "serial_number: $serial_number"
-    echo "iss_scms: $iss_scms"
-    echo "primary_route: $primary_route"
-    echo "model: $model_id"
-    echo "rsu_credential: $rsu_credential_id"
-    echo "snmp_credential: $snmp_credential_id"
-    echo "snmp_version: $snmp_version_id"
-    echo "firmware_version: $firmware_version_id"
-    echo "target_firmware_version: $target_firmware_version_id"
-    echo "----------------------------------------"
+    if $DEBUG; then
+        # print RSU info
+        echo "Printing RSU info..."
+        echo "----------------------------------------"
+        echo "latitude: $latitude"
+        echo "longitude: $longitude"
+        echo "milepost: $milepost"
+        echo "ipv4_address: $ipv4_address"
+        echo "serial_number: $serial_number"
+        echo "iss_scms: $iss_scms"
+        echo "primary_route: $primary_route"
+        echo "model: $model_id"
+        echo "rsu_credential: $rsu_credential_id"
+        echo "snmp_credential: $snmp_credential_id"
+        echo "snmp_version: $snmp_version_id"
+        echo "firmware_version: $firmware_version_id"
+        echo "target_firmware_version: $target_firmware_version_id"
+        echo "----------------------------------------"
+    fi
 
     # add RSU to rsus table
-    echo "Adding RSU to rsus table..."
+    echo "Adding RSU $serial_number to rsus table..."
     PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO public.rsus(geography, milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version) VALUES (ST_GeomFromText('POINT($longitude $latitude)'), $milepost, '$ipv4_address', '$serial_number', '$iss_scms', '$primary_route', $model_id, $rsu_credential_id, $snmp_credential_id, $snmp_version_id, $firmware_version_id, $target_firmware_version_id);"
 
     # associate RSU with organization
-    echo "Associating RSU with organization..."
+    echo "Associating RSU $serial_number with WYDOT organization..."
     PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO public.rsu_organization(rsu_id, organization_id) VALUES ((SELECT rsu_id FROM public.rsus WHERE serial_number='$serial_number'), $wydot_organization_id);"
 
 done < $filename

@@ -29,6 +29,7 @@ twelve18_snmp_version_id=2
 y20_0_0_firmware_version_id=1
 y_20_1_0_firmware_version_id=2
 y_20_23_3_b168981_firmware_version_id=3
+y_20_39_4_b205116_firmware_version_id=4
 
 # organizations
 wydot_organization_id=2
@@ -115,6 +116,8 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
         firmware_version_id=$y_20_1_0_firmware_version_id
     elif [ "$firmware_version" = "y20.23.3-b168981" ]; then
         firmware_version_id=$y_20_23_3_b168981_firmware_version_id
+    elif [ "$firmware_version" = "y20.39.4-b205116" ]; then
+        firmware_version_id=$y_20_39_4_b205116_firmware_version_id
     else
         echo "Error: invalid firmware_version '$firmware_version'"
         exit 1
@@ -127,6 +130,8 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
         target_firmware_version_id=$y_20_1_0_firmware_version_id
     elif [ "$target_firmware_version" = "y20.23.3-b168981" ]; then
         target_firmware_version_id=$y_20_23_3_b168981_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.39.4-b205116" ]; then
+        target_firmware_version_id=$y_20_39_4_b205116_firmware_version_id
     else
         echo "Error: invalid target_firmware_version '$target_firmware_version'"
         exit 1

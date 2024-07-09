@@ -3,9 +3,13 @@ package com.trihydro.library.models;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
 
 import com.trihydro.library.model.CountyRoadSegment;
+import com.trihydro.library.service.CascadeService;
 
 public class CountyRoadSegmentTest {
     private CountyRoadSegment allFalseCountyRoadSegment = new CountyRoadSegment(1, "example common name", 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, false, false, false, false);
@@ -138,5 +142,94 @@ public class CountyRoadSegmentTest {
 
         // verify
         assertEquals(false, hasOneOrMoreCondition);
+    }
+
+    @Test
+    public void testToITISCodes_AllFalse() {
+        // execute
+        List<Integer> itisCodes = allFalseCountyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList();
+        assertEquals(expected, itisCodes);
+    }
+
+    @Test
+    public void testToITISCodes_Closed() {
+        // execute
+        List<Integer> itisCodes = closedCountyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList(Integer.parseInt(CascadeService.closedItisCode));
+        assertEquals(expected, itisCodes);
+    }
+
+    @Test
+    public void testToITISCodes_C2lhpv() {
+        // execute
+        List<Integer> itisCodes = c2lhpvCountyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList(Integer.parseInt(CascadeService.c2lhpvItisCode));
+        assertEquals(expected, itisCodes);
+    }
+
+    @Test
+    public void testToITISCodes_Loct() {
+        // execute
+        List<Integer> itisCodes = loctCountyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList(Integer.parseInt(CascadeService.loctItisCode));
+        assertEquals(expected, itisCodes);
+    }
+
+    @Test
+    public void testToITISCodes_Ntt() {
+        // execute
+        List<Integer> itisCodes = nttCountyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList(Integer.parseInt(CascadeService.nttItisCode));
+        assertEquals(expected, itisCodes);
+    }
+
+    @Test
+    public void testToITISCodes_ClosedAndC2lhpv() {
+        // prepare
+        CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "example common name", 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, true, true, false, false);
+        
+        // execute
+        List<Integer> itisCodes = countyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList(Integer.parseInt(CascadeService.closedItisCode), Integer.parseInt(CascadeService.c2lhpvItisCode));
+        assertEquals(expected, itisCodes);
+    }
+
+    @Test
+    public void testToITISCodes_ClosedAndC2lhpvAndLoct() {
+        // prepare
+        CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "example common name", 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, true, true, true, false);
+        
+        // execute
+        List<Integer> itisCodes = countyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList(Integer.parseInt(CascadeService.closedItisCode), Integer.parseInt(CascadeService.c2lhpvItisCode), Integer.parseInt(CascadeService.loctItisCode));
+        assertEquals(expected, itisCodes);
+    }
+
+    @Test
+    public void testToITISCodes_ClosedAndC2lhpvAndLoctAndNtt() {
+        // prepare
+        CountyRoadSegment countyRoadSegment = new CountyRoadSegment(1, "example common name", 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, true, true, true, true);
+        
+        // execute
+        List<Integer> itisCodes = countyRoadSegment.toITISCodes();
+
+        // verify
+        List<Integer> expected = Arrays.asList(Integer.parseInt(CascadeService.closedItisCode), Integer.parseInt(CascadeService.c2lhpvItisCode), Integer.parseInt(CascadeService.loctItisCode), Integer.parseInt(CascadeService.nttItisCode));
+        assertEquals(expected, itisCodes);
     }
 }

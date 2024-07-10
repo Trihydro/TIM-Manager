@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# This script reads in values from a .csv file and populates the rsus table in the postgres database.
+# Some columns of the rsus table contain foreign references to keys in other tables. This script translates
+# the values in the .csv file to the corresponding ids in the other tables to maintain referential integrity.
+
+# Note: This script can be run on the VM where the CV Manager is deployed or on your local machine.
+
 DEBUG=false
 
 # make sure psql is installed

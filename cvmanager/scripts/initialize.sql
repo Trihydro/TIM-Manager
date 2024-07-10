@@ -1,7 +1,9 @@
 -- Last copied: 7/2/2024
 
 -- Initial data to deploy CV Manager for WYDOT
--- This is only recommended to be used for testing, do not use in a deployed environment
+-- This script is intended to be run manually using pgAdmin4 after the database has been created and the schema has been applied
+
+-- Manufacturers
 INSERT INTO public.manufacturers(name) 
   VALUES ('Commsignia'), ('Yunex');
 

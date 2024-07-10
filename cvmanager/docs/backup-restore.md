@@ -26,4 +26,4 @@ It is expected that the database will need to be restored at some point. This do
 1. Verify that the database has been restored by checking the database in pgAdmin4
 
 ### Note
-The `pg_restore` utility will run into a number of errors during restoration due to Keycloak tables not existing. These errors can be ignored as they do not appear to affect the ability for users to log into the application post-restoration.
+The `pg_restore` utility will run into a number of errors during restoration due to Keycloak tables not existing. These errors can be ignored as they do not appear to affect the ability for users to log into the application post-restoration  and the tables appear to be created nevertheless.

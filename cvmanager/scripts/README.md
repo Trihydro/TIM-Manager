@@ -44,3 +44,13 @@ Some columns in the CSV file reference values in other tables, so their values n
 | `snmp_version` | `4.1`, `1218` |
 | `firmware_version` | `y20.0.0`, `y20.1.0`, `y20.23.3`, `y20.39.4` |
 | `target_firmware_version` | `y20.0.0`, `y20.1.0`, `y20.23.3`, `y20.39.4` |
+
+## create-cvmanager-pgdb-backup.sh
+This script creates a backup of the CV Manager database using the `pg_dump` utility. The script will prompt the user for the password of the database user and create a backup file in the `pgdb-backups` directory.
+
+Instructions for using this script can be found in the [`backup-restore.md`](../docs/backup-restore.md#backup) document.
+
+## restore-cvmanager-pgdb-from-backup.sh
+This script restores the CV Manager database from a backup file using the `pg_restore` utility. The script accepts the path to the backup file as an argument and will prompt the user for the password of the database user. The script will restore the database from the backup file and log any errors that occur during the restoration process. At this time, errors are thrown due to Keycloak tables not existing, but they do not appear to affect the ability for users to log into the application post-restoration and the tables appear to be created nevertheless.
+
+Instructions for using this script can be found in the [`backup-restore.md`](../docs/backup-restore.md#restore) document.

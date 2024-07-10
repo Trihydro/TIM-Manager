@@ -48,8 +48,9 @@ echo "Waiting for the database to start..."
 sleep 5
 
 # Restore the backup by running pg_restore inside a temporary container
-sudo docker run -it -v jpo-cvmanager_pgdb:/cvmanager-pgdb -v $pathToBackup:/pgdb-backup.dump --name temp-pgdb-restore-helper postgis/postgis:15-master pg_restore --clean --exit-on-error --verbose -U postgres -h $db_host -p $db_port -d $db_name /pgdb-backup.dump
+sudo docker run -it -v jpo-cvmanager_pgdb:/cvmanager-pgdb -v $pathToBackup:/pgdb-backup.dump --name temp-pgdb-restore-helper postgis/postgis:15-master pg_restore --clean --verbose -U postgres -h $db_host -p $db_port -d $db_name /pgdb-backup.dump
 if [ $? -ne 0 ]; then
+    sudo docker rm temp-pgdb-restore-helper
     echo "Failed to restore the CV Manager PGSQL database from '$pathToBackup'."
     exit 1
 fi

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.CountyRoadSegment;
 import com.trihydro.library.model.Milepost;
@@ -140,15 +141,15 @@ public class CascadeService extends CvDataServiceLibrary {
     }
 
     /**
-     * This method sends a request to the CV Data Controller to get the client IDs associated with a segment.
-     * @param segmentId the id of the segment to get client IDs for
-     * @return a list of client IDs associated with the given segment
+     * This method sends a request to the CV Data Controller to get the active TIMs with ITIS codes associated with a segment.
+     * @param segmentId the id of the segment to get active TIMs with ITIS codes for
+     * @return a list of active TIMs with ITIS codes associated with the segment
      */
-    public List<String> getClientIdsAssociatedWithSegment(int segmentId) {
+    public List<ActiveTim> getActiveTimsWithItisCodesAssociatedWithSegment(int segmentId) {
         String cvRestService = config.getCvRestService();
-        String url = String.format("%s/cascade/get-active-tims-for-segment/%s", cvRestService, segmentId);
+        String url = String.format("%s/cascade/get-active-tims-with-itis-codes-for-segment/%s", cvRestService, segmentId);
         RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
-        ResponseEntity<String[]> response = restTemplate.exchange(url, HttpMethod.GET, null, String[].class);
+        ResponseEntity<ActiveTim[]> response = restTemplate.exchange(url, HttpMethod.GET, null, ActiveTim[].class);
         if (response.getBody() == null) {
             return Arrays.asList();
         }

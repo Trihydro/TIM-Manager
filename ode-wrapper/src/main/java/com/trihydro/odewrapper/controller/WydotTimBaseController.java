@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.MilepostReduction;
@@ -781,8 +782,9 @@ public abstract class WydotTimBaseController {
      */
     private boolean performExistenceChecks(CountyRoadSegment countyRoadSegment, TimType timType) {
         int segmentId = countyRoadSegment.getId();
-        List<String> clientIdsAssociatedWithSegment = cascadeService.getClientIdsAssociatedWithSegment(segmentId);
-        int numExistingConditions = clientIdsAssociatedWithSegment.size();
+        List<ActiveTim> allActiveTimsWithItisCodesAssociatedWithSegment = cascadeService.getActiveTimsWithItisCodesAssociatedWithSegment(segmentId);
+        List<String> clientIdsAssociatedWithSegment = allActiveTimsWithItisCodesAssociatedWithSegment.stream().map(ActiveTim::getClientId).collect(Collectors.toList());
+        int numExistingConditions = allActiveTimsWithItisCodesAssociatedWithSegment.size();
         if (numExistingConditions == 0) {
             return false;
         }
@@ -792,11 +794,11 @@ public abstract class WydotTimBaseController {
             return false; // no identical condition exists at this point, return false
         }
         else if (numExistingConditions == 1) {
-            String existingConditionClientId = clientIdsAssociatedWithSegment.get(0);
-            utility.logWithDate("Single existing condition found for segment " + segmentId + " with client id: " + existingConditionClientId);
+            ActiveTim existingCondition = allActiveTimsWithItisCodesAssociatedWithSegment.get(0);
+            utility.logWithDate("Single existing condition found for segment " + segmentId + " with client id: " + existingCondition.getClientId());
 
             // check if existing condition is identical to requested condition
-            List<Integer> existingITISCodes = getExistingConditionForClientId(existingConditionClientId, timType);
+            List<Integer> existingITISCodes = existingCondition.getItisCodes();
             if (existingITISCodes != null) {
                 if (existingITISCodes.equals(countyRoadSegment.toITISCodes())) {
                     return true; // identical condition found, return true
@@ -806,35 +808,13 @@ public abstract class WydotTimBaseController {
                 utility.logWithDate("Warning: Null value found for existing ITIS codes; Clearing existing condition.");
             }
 
-            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(existingConditionClientId), null);
+            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(existingCondition.getClientId()), null);
             return false; // no identical condition exists at this point, return false
         }
         else {
             utility.logWithDate("Warning: Expected positive number of client ids for segment " + segmentId + ", found " + numExistingConditions + ". Treating as zero.");
             return false;
         }
-    }
-
-    /**
-     * This method retrieves the existing condition for the given client id and tim type.
-     * @param clientId The client id to retrieve the existing condition for.
-     * @param timType The tim type to retrieve the existing condition for.
-     * @return The existing condition as a list of ITIS codes if it exists, otherwise null.
-     */
-    private List<Integer> getExistingConditionForClientId(String clientId, TimType timType) {
-        List<ActiveTim> allActiveTimsWithItisCodes = activeTimService.getActiveTimsWithItisCodes(true);
-        List<ActiveTim> activeTimsForClientId = new ArrayList<>();
-        for (ActiveTim activeTim : allActiveTimsWithItisCodes) {
-            if (activeTim.getClientId().equals(clientId) && activeTim.getTimType().equals(timType.getType())) {
-                activeTimsForClientId.add(activeTim);
-            }
-        }
-        if (activeTimsForClientId.size() != 1) {
-            utility.logWithDate("Warning: Expected 1 active TIM for client id " + clientId + ", found " + activeTimsForClientId.size() + ". Returning null.");
-            return null;
-        }
-        ActiveTim existingTim = activeTimsForClientId.get(0);
-        return existingTim.getItisCodes();
     }
 
     /**

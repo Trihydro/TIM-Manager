@@ -50,9 +50,12 @@ twelve18_snmp_version_id=2
 
 # firmware versions
 y20_0_0_firmware_version_id=1
-y_20_1_0_firmware_version_id=2
-y_20_23_3_firmware_version_id=3
-y_20_39_4_firmware_version_id=4
+y20_1_0_firmware_version_id=2
+y20_23_3_firmware_version_id=3
+y20_39_2_firmware_version_id=4
+y20_39_4_firmware_version_id=5
+y20_41_3_firmware_version_id=6
+y20_48_2_firmware_version_id=7
 
 # organizations
 wydot_organization_id=1
@@ -96,7 +99,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     fi
 
     # translate values to ids
-    if $DEBUG; then
+    if [ "$DEBUG" = "true" ]; then
         echo "Translating values to ids for model, rsu_credential, snmp_credential, snmp_version, firmware_version, and target_firmware_version..."
     fi
     
@@ -144,11 +147,17 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     if [ "$firmware_version" = "y20.0.0" ]; then
         firmware_version_id=$y20_0_0_firmware_version_id
     elif [ "$firmware_version" = "y20.1.0" ]; then
-        firmware_version_id=$y_20_1_0_firmware_version_id
+        firmware_version_id=$y20_1_0_firmware_version_id
     elif [ "$firmware_version" = "y20.23.3" ]; then
-        firmware_version_id=$y_20_23_3_firmware_version_id
+        firmware_version_id=$y20_23_3_firmware_version_id
+    elif [ "$firmware_version" = "y20.39.2" ]; then
+        firmware_version_id=$y20_39_2_firmware_version_id
     elif [ "$firmware_version" = "y20.39.4" ]; then
-        firmware_version_id=$y_20_39_4_firmware_version_id
+        firmware_version_id=$y20_39_4_firmware_version_id
+    elif [ "$firmware_version" = "y20.41.3" ]; then
+        firmware_version_id=$y20_41_3_firmware_version_id
+    elif [ "$firmware_version" = "y20.48.2" ]; then
+        firmware_version_id=$y20_48_2_firmware_version_id
     else
         echo "Error: invalid firmware_version '$firmware_version' for RSU '$serial_number'"
         exit 1
@@ -158,20 +167,23 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     if [ "$target_firmware_version" = "y20.0.0" ]; then
         target_firmware_version_id=$y20_0_0_firmware_version_id
     elif [ "$target_firmware_version" = "y20.1.0" ]; then
-        target_firmware_version_id=$y_20_1_0_firmware_version_id
+        target_firmware_version_id=$y20_1_0_firmware_version_id
     elif [ "$target_firmware_version" = "y20.23.3" ]; then
-        target_firmware_version_id=$y_20_23_3_firmware_version_id
+        target_firmware_version_id=$y20_23_3_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.39.2" ]; then
+        target_firmware_version_id=$y20_39_2_firmware_version_id
     elif [ "$target_firmware_version" = "y20.39.4" ]; then
-        target_firmware_version_id=$y_20_39_4_firmware_version_id
+        target_firmware_version_id=$y20_39_4_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.41.3" ]; then
+        target_firmware_version_id=$y20_41_3_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.48.2" ]; then
+        target_firmware_version_id=$y20_48_2_firmware_version_id
     else
         echo "Error: invalid target_firmware_version '$target_firmware_version' for RSU '$serial_number'"
         exit 1
     fi
 
-    if $DEBUG; then
-        # print RSU info
-        echo "Printing RSU info..."
-        echo "----------------------------------------"
+    if [ "$DEBUG" = "true" ]; then
         echo "latitude: $latitude"
         echo "longitude: $longitude"
         echo "milepost: $milepost"
@@ -179,21 +191,29 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
         echo "serial_number: $serial_number"
         echo "iss_scms: $iss_scms"
         echo "primary_route: $primary_route"
-        echo "model: $model_id"
-        echo "rsu_credential: $rsu_credential_id"
-        echo "snmp_credential: $snmp_credential_id"
-        echo "snmp_version: $snmp_version_id"
-        echo "firmware_version: $firmware_version_id"
-        echo "target_firmware_version: $target_firmware_version_id"
-        echo "----------------------------------------"
+        echo "make: $make"
+        echo "model_id: $model_id"
+        echo "rsu_credential_id: $rsu_credential_id"
+        echo "snmp_credential_id: $snmp_credential_id"
+        echo "snmp_version_id: $snmp_version_id"
+        echo "firmware_version_id: $firmware_version_id"
+        echo "target_firmware_version_id: $target_firmware_version_id"
     fi
 
     # add RSU to rsus table
     echo "Adding RSU $serial_number to rsus table..."
     PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO public.rsus(geography, milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version) VALUES (ST_GeomFromText('POINT($longitude $latitude)'), $milepost, '$ipv4_address', '$serial_number', '$iss_scms', '$primary_route', $model_id, $rsu_credential_id, $snmp_credential_id, $snmp_version_id, $firmware_version_id, $target_firmware_version_id);"
+    if [ $? -ne 0 ]; then
+        echo "Error: failed to add RSU $serial_number to rsus table"
+        exit 1
+    fi
 
     # associate RSU with organization
     echo "Associating RSU $serial_number with WYDOT organization..."
     PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO public.rsu_organization(rsu_id, organization_id) VALUES ((SELECT rsu_id FROM public.rsus WHERE serial_number='$serial_number'), $wydot_organization_id);"
+    if [ $? -ne 0 ]; then
+        echo "Error: failed to associate RSU $serial_number with WYDOT organization"
+        exit 1
+    fi
 
 done < $filename

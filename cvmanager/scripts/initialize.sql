@@ -17,8 +17,11 @@ INSERT INTO public.firmware_images(
 	name, model, install_package, version)
 	VALUES ('y20.0.0', 1, 'install_y20_0_0.tar', 'y20.0.0'),
 	('y20.1.0', 1, 'install_y20_1_0.tar', 'y20.1.0'),
-	('y20.23.3', 1, 'install_y20_23_3-b168981.tar', 'y20.23.3-b168981'),
-	('y20.39.4', 1, 'rs4-generic-ro-secureboot-y20.39.4-b205116.tar.sig', 'y20.39.4-b205116');
+	('y20.23.3', 1, 'rs4-generic-ro-secureboot-y20.23.3-b168981.tar.sig', 'y20.23.3-b168981'),
+	('y20.39.2', 1, 'rs4-generic-ro-secureboot-y20.39.2-b197756.tar.sig', 'y20.39.2-b197756'),
+	('y20.39.4', 1, 'rs4-generic-ro-secureboot-y20.39.4-b205116.tar.sig', 'y20.39.4-b205116'),
+	('y20.41.3', 1, 'rs4-generic-ro-secureboot-y20.41.3-b214979.tar.sig', 'y20.41.3-b214979'),
+	('y20.48.2', 1, 'rs4-generic-ro-secureboot-y20.48.2-b228647.tar.sig', 'y20.48.2-b228647');
 
 INSERT INTO public.firmware_upgrade_rules(
 	from_id, to_id)

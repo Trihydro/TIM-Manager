@@ -78,6 +78,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
         String responseMessage = gson.toJson(results);
         if (errors.size() > 0) {
             utility.logWithDate("Failed to send TIMs: " + gson.toJson(errors), this.getClass());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }

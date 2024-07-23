@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -571,21 +572,31 @@ public abstract class WydotTimBaseController {
         toReturn.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        Date parsedStartDate = null;
+        Date parsedEndDate = null;
         // check start/end datetimes, which are optional
         if (tim.getStartDateTime() != null) {
             // ensure this is specified in ISO8601-2019
             try {
-                ZonedDateTime.parse(tim.getStartDateTime());
-            } catch (DateTimeParseException e) {
+                parsedStartDate = dateFormat.parse(tim.getStartDateTime());
+            } catch (ParseException e) {
                 resultMessages.add("Invalid startDateTime. Must be in ISO8601-2019 format.");
             }
         }
         if (tim.getEndDateTime() != null) {
             // ensure this is specified in ISO8601-2019
             try {
-                ZonedDateTime.parse(tim.getEndDateTime());
-            } catch (DateTimeParseException e) {
+                parsedEndDate = dateFormat.parse(tim.getEndDateTime());
+            } catch (ParseException e) {
                 resultMessages.add("Invalid endDateTime. Must be in ISO8601-2019 format.");
+            }
+        }
+
+        // check that start time is before end time
+        if (parsedStartDate != null && parsedEndDate != null) {
+            if (parsedStartDate.after(parsedEndDate)) {
+                resultMessages.add("Invalid startDateTime. Start time must be before end time.");
             }
         }
 

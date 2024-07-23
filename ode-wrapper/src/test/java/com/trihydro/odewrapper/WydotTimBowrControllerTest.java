@@ -91,7 +91,7 @@ public class WydotTimBowrControllerTest {
 	@Test
 	public void testCreateOrUpdateBowrTim_success() throws Exception {
 		// Arrange
-		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54Z\",\"endDateTime\":\"2024-06-05T17:34:54Z\",\"data\":25000}]}";
+		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54.835371Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":25000}]}";
 		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
 
 		// Act
@@ -109,7 +109,7 @@ public class WydotTimBowrControllerTest {
 	@Test
 	public void testCreateOrUpdateBowrTim_RouteNotSupported() throws Exception {
 		// Arrange
-		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"notasupportedroute\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54Z\",\"endDateTime\":\"2024-06-05T17:34:54Z\",\"data\":25000}]}";
+		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"notasupportedroute\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54.835371Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":25000}]}";
 		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
 		doReturn(false).when(uut).routeSupported("notasupportedroute");
 
@@ -117,7 +117,7 @@ public class WydotTimBowrControllerTest {
 		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);
 
 		// Assert
-		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		Assertions.assertEquals(1, resultArr.length);
 		Assertions.assertEquals("route not supported", resultArr[0].resultMessages.get(0));
@@ -127,7 +127,7 @@ public class WydotTimBowrControllerTest {
 	@Test
 	public void testCreateOrUpdateBowrTim_WeightNotSupported() throws Exception {
 		// Arrange
-		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54Z\",\"endDateTime\":\"2024-06-05T17:34:54Z\",\"data\":12345}]}";
+		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54.835371Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":12345}]}";
 		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
 		lenient().doThrow(WeightNotSupportedException.class).when(setItisCodes).setItisCodesBowr(any());
 
@@ -135,11 +135,80 @@ public class WydotTimBowrControllerTest {
 		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);
 
 		// Assert
-		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		Assertions.assertEquals(1, resultArr.length);
 		Assertions.assertEquals("Weight not supported", resultArr[0].resultMessages.get(0));
 		Assertions.assertEquals("b", resultArr[0].direction);
+	}
+
+	@Test
+	public void testCreateOrUpdateBowrTim_InvalidStartDateTime() {
+		// Arrange
+		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"20240604T173454Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":25000}]}";
+		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
+
+		// Act
+		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("Invalid startDateTime. Must be in ISO8601-2019 format.", resultArr[0].resultMessages.get(0));
+	}
+
+	@Test
+	public void testCreateOrUpdateBowrTim_InvalidEndDateTime() {
+		// Arrange
+		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54.835371Z\",\"endDateTime\":\"20240605T173454Z\",\"data\":25000}]}";
+		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
+
+		// Act
+		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("Invalid endDateTime. Must be in ISO8601-2019 format.", resultArr[0].resultMessages.get(0));
+	}
+
+	/**
+	 * The ODE expects a format of "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+	 * If milliseconds are not included then the ODE fails to process the message.
+	 */
+	@Test
+	public void testCreateOrUpdateBowrTim_InvalidStartDateTime_MissingMilliseconds() {
+		// Arrange
+		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":25000}]}";
+		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
+
+		// Act
+		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("Invalid startDateTime. Must be in ISO8601-2019 format.", resultArr[0].resultMessages.get(0));
+	}
+
+	@Test
+	public void testCreateOrUpdateBowrTim_InvalidStartDateTime_StartTimeIsAfterEndTime() {
+		// Arrange
+		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-06T17:34:54.835371Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":25000}]}";
+		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
+
+		// Act
+		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("Invalid startDateTime. Start time must be before end time.", resultArr[0].resultMessages.get(0));
+	
 	}
 
 	@Test

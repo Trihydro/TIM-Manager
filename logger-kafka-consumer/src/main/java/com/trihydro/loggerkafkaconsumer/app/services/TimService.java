@@ -161,8 +161,9 @@ public class TimService extends BaseService {
                         WydotRsu rsu = rsuService.getRsus().stream()
                                 .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
                                 .orElse(null);
-                        if (rsu != null)
+                        if (rsu != null) {
                             timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
+                        }
                     }
                 }
 
@@ -280,7 +281,7 @@ public class TimService extends BaseService {
             WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
                     .findFirst().orElse(null);
             if (rsu != null) {
-                timRsuService.AddTimRsu(timId, rsu.getRsuId(), firstRsu.getRsuIndex());
+                timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
             }
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                     activeTim.getRsuTarget());

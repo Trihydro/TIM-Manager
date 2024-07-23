@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: Weight Restrictions API
+  description: >-
+    API for the WTI to send weight restrictions to the ODE TIM Wrapper
+  version: 1.0.0
+servers:
+  - url: https://odedev.wyoroad.info:7777
+    description: DEV ODE Server
+  - url: https://ode.wyoroad.info:7777
+    description: PROD ODE Server
+paths:
+  /create-or-update-bowr-tim:
+    post:
+      summary: Create or update blow over weight restriction TIMs
+      description: Create or update blow over weight restriction TIMs for BOSS segments
+      operationId: createOrUpdateBowrTim
+      requestBody:
+        description: List of blow over weight restriction TIM definitions to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlowOverWeightRestrictionList'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Invalid Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /submit-bowr-clear/{clientId}:
+    delete:
+      summary: Remove blow over weight restriction TIMs
+      description: Remove blow over weight restriction TIMs for BOSS segments
+      operationId: submitBowrClear
+      parameters:
+        - in: path
+          name: clientId
+          schema:
+            type: string
+          required: true
+          description: A unique ID to identify a specific TIM to delete
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Invalid Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+            
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+components:
+  schemas:
+    BlowOverWeightRestrictionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/BlowOverWeightRestriction'
+      minItems: 1
+    BlowOverWeightRestriction:
+      type: object
+      properties:
+        direction:
+          type: string
+          example: B
+        type:
+          type: string
+          example: BlowOverWeightRestriction
+        route:
+          description: The common name of the road
+          type: string
+          example: I80
+        clientId:
+          description: A unique ID to identify a specific TIM to create or update
+          type: string
+          example: I80S2
+        startPoint:
+          $ref: '#/components/schemas/PointLocation'
+        endPoint:
+          $ref: '#/components/schemas/PointLocation'
+        startDateTime:
+          description: The start time specified in ISO8601-2019 format. If not provided, the default will be at the time of creation.
+          type: string
+          example: 2020-07-10T15:00:00.000Z
+        endDateTime:
+          description: The end time specified in ISO8601-2019 format. If not provided, the default will be indefinite.
+          type: string
+          example: 2020-08-10T15:00:00.000Z
+        data:
+          anyOf:
+            - $ref: '#/components/schemas/Weight'
+      required: [ 'direction', 'type', 'route', 'clientId', 'startPoint', 'endPoint', 'data' ]
+    PointLocation:
+      description: A lat/long point location conforming to WGS84 GeoSpatial standard
+      type: object
+      properties:
+        latitude:
+          type: number
+          example: 42.123
+        longitude:
+          type: number
+          example: -105.555
+      required: [ 'latitude', 'longitude' ]
+    Weight:
+      description: The minimum weight in pounds
+      type: integer
+      enum:
+        - 20000
+        - 25000
+        - 30000
+        - 35000
+        - 40000
+        - 45000
+        - 50000
+        - 55000
+        - 60000
+        - 65000
+        - 70000
+        - 75000
+        - 80000
+    Response:
+      description: The response from the API
+      type: object
+      properties:
+        success:
+          description: Whether the call succeeded
+          type: boolean
+        errorMessage:
+          description: Error message if it failed
+          type: string
+      required: [ 'success' ]
+    
+            
+        

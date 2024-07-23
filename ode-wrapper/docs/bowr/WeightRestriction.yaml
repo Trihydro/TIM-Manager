@@ -20,7 +20,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BlowOverWeightRestrictionList'
+              $ref: '#/components/schemas/BlowOverWeightRestrictionListObject'
         required: true
       responses:
         '200':
@@ -75,6 +75,12 @@ paths:
                 $ref: '#/components/schemas/Response'
 components:
   schemas:
+    BlowOverWeightRestrictionListObject:
+      type: object
+      properties:
+        timBowrList:
+          $ref: '#/components/schemas/BlowOverWeightRestrictionList'
+      required: [ 'blowOverWeightRestrictionList' ]
     BlowOverWeightRestrictionList:
       type: array
       items:

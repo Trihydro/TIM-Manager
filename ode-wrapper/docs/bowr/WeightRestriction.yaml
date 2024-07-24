@@ -61,7 +61,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Response'
         '400':
-          description: Invalid Input
+          description: No TIMs found
           content:
             application/json:
               schema:

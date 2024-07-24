@@ -99,6 +99,11 @@ public class WydotTimBowrController extends WydotTimBaseController {
         var timType = getTimType(type);
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
         List<ActiveTim> existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timTypeId, null);
+        if (existingActiveTims.size() == 0) {
+            utility.logWithDate("No active TIMs found for client id: " + clientId, this.getClass());
+            String responseMessage = "No active TIMs found for client id: " + clientId;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
+        }
 
         // get ids from existingActiveTims
         for (ActiveTim existingActiveTim : existingActiveTims) {

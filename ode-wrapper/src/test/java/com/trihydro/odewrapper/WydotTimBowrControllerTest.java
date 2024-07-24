@@ -215,6 +215,8 @@ public class WydotTimBowrControllerTest {
 	public void testSubmitBowrClear_success() throws Exception {
 		// Arrange
 		String clientId = "test";
+		List<ActiveTim> activeTims = getActiveTims(false);
+		when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeTims);
 
 		// Act
 		ResponseEntity<String> data = uut.submitBowrClear(clientId);
@@ -236,5 +238,23 @@ public class WydotTimBowrControllerTest {
 		// Assert
 		verify(mockTimGenerationHelper).expireTimAndResubmitToOde(any());
 		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+	}
+
+	/**
+	 * If no TIMs are found for the client id then a 400 response is returned.
+	 */
+	@Test
+	public void testSubmitBowrClear_400_NoTimsFound() throws Exception {
+		// Arrange
+		String clientId = "test";
+		List<ActiveTim> activeTims = new ArrayList<>();
+		when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeTims);
+
+		// Act
+		ResponseEntity<String> data = uut.submitBowrClear(clientId);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
+		Assertions.assertEquals("No active TIMs found for client id: " + clientId, data.getBody());
 	}
 }

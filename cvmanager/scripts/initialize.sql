@@ -25,7 +25,9 @@ INSERT INTO public.firmware_images(
 
 INSERT INTO public.firmware_upgrade_rules(
 	from_id, to_id)
-	VALUES (1, 2);
+	VALUES (1, 2),
+	(3, 7),
+	(6, 7);
 
 -- RSU Credential
 INSERT INTO public.rsu_credentials(

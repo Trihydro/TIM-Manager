@@ -18,12 +18,14 @@ import org.springframework.http.ResponseEntity;
 import com.trihydro.cvdatacontroller.model.Milepost;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.CountyRoadSegment;
+import com.trihydro.library.model.CountyRoadsProps;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 
 public class CascadeControllerTest extends TestBase<CascadeController> {
 
     private JCSCacheProps mockJCSCacheProps;
+    private CountyRoadsProps mockCountyRoadsProps;
 
     private CountyRoadSegment createCountyRoadSegment() {
         int countyRoadId = 1;
@@ -58,7 +60,9 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         doReturn("true").when(mockJCSCacheProps).getIsSpool();
         doReturn("false").when(mockJCSCacheProps).getIsRemote();
         doReturn("false").when(mockJCSCacheProps).getIsLateral();
-        uut.InjectBaseDependencies(mockUtility, mockJCSCacheProps);
+        
+        mockCountyRoadsProps = mock(CountyRoadsProps.class);
+        uut.InjectBaseDependencies(mockUtility, mockJCSCacheProps, mockCountyRoadsProps);
     }
 
     @Test

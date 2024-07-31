@@ -23,6 +23,7 @@ import com.trihydro.library.helpers.caches.TriggerRoadCache;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.CountyRoadSegment;
+import com.trihydro.library.model.CountyRoadsProps;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.views.CountyRoadsGeometryView;
@@ -37,12 +38,14 @@ import springfox.documentation.annotations.ApiIgnore;
 public class CascadeController extends BaseController {
     private Utility utility;
     private JCSCacheProps jcsCacheProps;
+    private CountyRoadsProps countyRoadsProps;
     private TriggerRoadCache triggerRoadCache;
 
     @Autowired
-    public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps) {
+    public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps, CountyRoadsProps _countyRoadsProps) {
         utility = _utility;
         jcsCacheProps = _jcsCacheProps;
+        countyRoadsProps = _countyRoadsProps;
         triggerRoadCache = new TriggerRoadCache(utility, jcsCacheProps);
     }
 
@@ -291,7 +294,7 @@ public class CascadeController extends BaseController {
             statement = connection.createStatement();
 
             // build SQL statement
-            String viewName = CountyRoadsTriggerView.countyRoadsTriggerViewName;
+            String viewName = countyRoadsProps.getCountyRoadsTriggerViewName();
             String query = "select * from " + viewName + " where road_code = '" + roadCode + "'";
             rs = statement.executeQuery(query);
 

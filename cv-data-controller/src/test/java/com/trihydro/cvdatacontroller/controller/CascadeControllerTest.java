@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.trihydro.cvdatacontroller.model.Milepost;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.CountyRoadSegment;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
@@ -187,5 +189,52 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         // verify
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
         Assertions.assertEquals(0, data.getBody().size());
+    }
+
+    @Test
+    public void testGetActiveTimsWithItisCodesForSegment_SUCCESS() throws SQLException {
+        // prepare
+        int countyRoadId = 1;
+        String clientId = "test";
+        doReturn(1L).when(mockRs).getLong("ACTIVE_TIM_ID");
+        doReturn(1L).when(mockRs).getLong("TIM_ID");
+        doReturn("test").when(mockRs).getString("DIRECTION");
+        doReturn("test").when(mockRs).getString("TIM_START");
+        doReturn("test").when(mockRs).getString("TIM_END");
+        doReturn("test").when(mockRs).getString("EXPIRATION_DATE");
+        doReturn("test").when(mockRs).getString("ROUTE");
+        doReturn(clientId).when(mockRs).getString("CLIENT_ID");
+        doReturn("test").when(mockRs).getString("SAT_RECORD_ID");
+        doReturn(1).when(mockRs).getInt("PK");
+        doReturn(new BigDecimal(1)).when(mockRs).getBigDecimal("START_LATITUDE");
+        doReturn(new BigDecimal(1)).when(mockRs).getBigDecimal("START_LONGITUDE");
+        doReturn(new BigDecimal(1)).when(mockRs).getBigDecimal("END_LATITUDE");
+        doReturn(new BigDecimal(1)).when(mockRs).getBigDecimal("END_LONGITUDE");
+        doReturn(1L).when(mockRs).getLong("TIM_TYPE_ID");
+        doReturn("test").when(mockRs).getString("TYPE");
+        doReturn(1).when(mockRs).getInt("PROJECT_KEY");
+        doReturn(769).when(mockRs).getInt("ITIS_CODE");
+
+        // execute
+        ResponseEntity<List<ActiveTim>> data = uut.getActiveTimsWithItisCodesForSegment(countyRoadId);
+
+        // verify
+        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+        Assertions.assertNotNull(data.getBody());
+        Assertions.assertEquals(1, data.getBody().size());
+    }
+
+    @Test
+    public void testGetActiveTimsWithItisCodesForSegment_SQLException_FAILURE() throws SQLException {
+        // prepare
+        int countyRoadId = 1;
+        doThrow(new SQLException()).when(mockRs).getString("DIRECTION");
+        
+        // execute
+        ResponseEntity<List<ActiveTim>> data = uut.getActiveTimsWithItisCodesForSegment(countyRoadId);
+
+        // verify
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
+        Assertions.assertEquals(null, data.getBody());
     }
 }

@@ -31,13 +31,22 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
+import com.trihydro.library.helpers.RegionNameTrimmer;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.EmailProps;
+import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.OdeProps;
 import com.trihydro.library.model.TimRsu;
+import com.trihydro.library.model.TimType;
+import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.model.WydotRsu;
+import com.trihydro.library.model.WydotTim;
+import com.trihydro.library.model.WydotTravelerInputData;
+
+import us.dot.its.jpo.ode.plugin.ServiceRequest;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
 @ExtendWith(MockitoExtension.class)
 public class WydotTimServiceTest {
@@ -72,6 +81,10 @@ public class WydotTimServiceTest {
     RsuService mockRsuService;
     @Mock
     TimService mockTimService;
+    @Mock
+    ActiveTimHoldingService mockActiveTimHoldingService;
+    @Mock
+    RegionNameTrimmer mockRegionNameTrimmer;
 
     @InjectMocks
     WydotTimService uut;
@@ -105,9 +118,79 @@ public class WydotTimServiceTest {
         return activeTims;
     }
 
+    private OdeTravelerInformationMessage getMockOdeTravelerInformationMessage() {
+        String timJson = "{\"msgCnt\":\"1\",\"timeStamp\":\"2017-08-03T22:25:36.297Z\",\"urlB\":\"null\",\"packetID\":\"EC9C236B0000000000\",\"dataframes\":[{\"startDateTime\":\"2017-08-02T22:25:00.000Z\",\"durationTime\":1,\"sspTimRights\":\"0\",\"frameType\":\"advisory\",\"msgId\":{\"roadSignID\":{\"position\":{\"latitude\":\"41.678473\",\"longitude\":\"-108.782775\",\"elevation\":\"917.1432\"},\"viewAngle\":\"1010101010101010\",\"mutcdCode\":\"warning\",\"crc\":\"0000\"}},\"priority\":\"0\",\"sspLocationRights\":\"3\",\"regions\":[{\"name\":\"Testing TIM\",\"regulatorID\":\"0\",\"segmentID\":\"33\",\"anchorPosition\":{\"latitude\":\"41.2500807\",\"longitude\":\"-111.0093847\",\"elevation\":\"2020.6969900289998\"},\"laneWidth\":\"7\",\"directionality\":\"3\",\"closedPath\":\"false\",\"description\":\"path\",\"path\":{\"scale\":\"0\",\"type\":\"ll\",\"nodes\":[{\"nodeLong\":\"0.0030982\",\"nodeLat\":\"0.0014562\",\"delta\":\"node-LL3\"},{\"nodeLong\":\"-111.0093847\",\"nodeLat\":\"41.2500807\",\"delta\":\"node-LatLon\"}]},\"direction\":\"0000000000001010\"}],\"sspMsgTypes\":\"2\",\"sspMsgContent\":\"3\",\"content\":\"Advisory\",\"items\":[\"125\",\"some text\",\"250\",\"'98765\"],\"url\":\"null\"}]}";
+        Gson gson = new Gson();
+        OdeTravelerInformationMessage mockOdeTravelerInformationMessage = gson.fromJson(timJson, OdeTravelerInformationMessage.class);
+        return mockOdeTravelerInformationMessage;
+    }
+
+    private WydotOdeTravelerInformationMessage getMockWydotOdeTravelerInformationMessage() {
+        OdeTravelerInformationMessage mockOdeTravelerInformationMessage = getMockOdeTravelerInformationMessage();
+        WydotOdeTravelerInformationMessage mockWydotOdeTravelerInformationMessage = new WydotOdeTravelerInformationMessage();
+        mockWydotOdeTravelerInformationMessage.setMsgCnt(mockOdeTravelerInformationMessage.getMsgCnt());
+        mockWydotOdeTravelerInformationMessage.setTimeStamp(mockOdeTravelerInformationMessage.getTimeStamp());
+        mockWydotOdeTravelerInformationMessage.setPacketID(mockOdeTravelerInformationMessage.getPacketID());
+        mockWydotOdeTravelerInformationMessage.setDataframes(mockOdeTravelerInformationMessage.getDataframes());
+        mockWydotOdeTravelerInformationMessage.setUrlB(mockOdeTravelerInformationMessage.getUrlB());
+        mockWydotOdeTravelerInformationMessage.setAsnDataFrames(mockOdeTravelerInformationMessage.getAsnDataFrames());
+        mockWydotOdeTravelerInformationMessage.setRsuIndex(0);
+        return mockWydotOdeTravelerInformationMessage;
+    }
+
+    private List<Milepost> getMockMileposts() {
+        List<Milepost> mileposts = new ArrayList<>();
+        
+        Milepost milepost1 = new Milepost();
+        milepost1.setCommonName("I-80");
+        milepost1.setMilepost(0.0);
+        milepost1.setDirection("D");
+        milepost1.setLatitude(BigDecimal.valueOf(41.678473));
+        milepost1.setLongitude(BigDecimal.valueOf(-108.782775));
+        mileposts.add(milepost1);
+
+        Milepost milepost2 = new Milepost();
+        milepost2.setCommonName("I-80");
+        milepost2.setMilepost(1.0);
+        milepost2.setDirection("D");
+        milepost2.setLatitude(BigDecimal.valueOf(41.678473));
+        milepost2.setLongitude(BigDecimal.valueOf(-108.782775));
+        mileposts.add(milepost2);
+
+        return mileposts;
+    }
 
     public void setupRestTemplate() {
         doReturn(mockRestTemplate).when(mockRestTemplateProvider).GetRestTemplate_NoErrors();
+    }
+
+    @Test
+    public void sendTimToSDW_MultipleActiveSatTimsFound() {
+        // Arrange
+        List<ActiveTim> activeSatTims = getActiveTims(true);
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeSatTims);
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setClientId("testclientid");
+        wydotTim.setDirection("D");
+        WydotTravelerInputData timToSend = new WydotTravelerInputData();
+        timToSend.setTim(getMockOdeTravelerInformationMessage());
+        ServiceRequest serviceRequest = new ServiceRequest();
+        timToSend.setRequest(serviceRequest);
+        String regionNamePrev = "regionNamePrev";
+        TimType timType = new TimType();
+        Integer pk = 0;
+        Coordinate endPoint = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+        List<Milepost> reducedMileposts = getMockMileposts();
+        WydotOdeTravelerInformationMessage mockExistingSatTim = getMockWydotOdeTravelerInformationMessage();
+        when(mockTimService.getTim(any())).thenReturn(mockExistingSatTim);
+        RestTemplate mockRestTemplate = new RestTemplate();
+        when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
+
+        // Act
+        uut.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint, reducedMileposts);
+
+        // Assert
+        verify(mockUtility).logWithDate("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test

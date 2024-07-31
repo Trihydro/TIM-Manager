@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.CountyRoadSegment;
 import com.trihydro.library.model.Milepost;
@@ -23,10 +24,10 @@ public class CascadeService extends CvDataServiceLibrary {
      */
     public static final String CASCADE_TIM_ID_DELIMITER = "_trgd_";
 
-    private static final String closedItisCode = "769";
-    private static final String c2lhpvItisCode = "2569";
-    private static final String loctItisCode = "2567";
-    private static final String nttItisCode = "2568";
+    public static final String closedItisCode = "769";
+    public static final String c2lhpvItisCode = "2569";
+    public static final String loctItisCode = "2567";
+    public static final String nttItisCode = "2568";
 
     /**
      * This method sends a request to the CV Data Controller to get the trigger road for the given road code.
@@ -137,5 +138,21 @@ public class CascadeService extends CvDataServiceLibrary {
         String countyRoadIdStringSplit[] = countyRoadIdString.split("-"); // [segmentId, number]
         countyRoadIdString = countyRoadIdStringSplit[0]; // segmentId
         return Integer.parseInt(countyRoadIdString);
+    }
+
+    /**
+     * This method sends a request to the CV Data Controller to get the active TIMs with ITIS codes associated with a segment.
+     * @param segmentId the id of the segment to get active TIMs with ITIS codes for
+     * @return a list of active TIMs with ITIS codes associated with the segment
+     */
+    public List<ActiveTim> getActiveTimsWithItisCodesAssociatedWithSegment(int segmentId) {
+        String cvRestService = config.getCvRestService();
+        String url = String.format("%s/cascade/get-active-tims-with-itis-codes-for-segment/%s", cvRestService, segmentId);
+        RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
+        ResponseEntity<ActiveTim[]> response = restTemplate.exchange(url, HttpMethod.GET, null, ActiveTim[].class);
+        if (response.getBody() == null) {
+            return Arrays.asList();
+        }
+        return Arrays.asList(response.getBody());
     }
 }

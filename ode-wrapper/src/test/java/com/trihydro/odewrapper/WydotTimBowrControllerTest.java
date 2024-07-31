@@ -107,24 +107,6 @@ public class WydotTimBowrControllerTest {
 	}
 
 	@Test
-	public void testCreateOrUpdateBowrTim_RouteNotSupported() throws Exception {
-		// Arrange
-		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"notasupportedroute\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54.835371Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":25000}]}";
-		TimBowrList timBowrList = gson.fromJson(bowrJson, TimBowrList.class);
-		doReturn(false).when(uut).routeSupported("notasupportedroute");
-
-		// Act
-		ResponseEntity<String> data = uut.createOrUpdateBowrTim(timBowrList);
-
-		// Assert
-		Assertions.assertEquals(HttpStatus.BAD_REQUEST, data.getStatusCode());
-		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
-		Assertions.assertEquals(1, resultArr.length);
-		Assertions.assertEquals("route not supported", resultArr[0].resultMessages.get(0));
-		Assertions.assertEquals("b", resultArr[0].direction);
-	}
-
-	@Test
 	public void testCreateOrUpdateBowrTim_WeightNotSupported() throws Exception {
 		// Arrange
 		String bowrJson = "{\"timBowrList\":[{\"direction\":\"b\",\"type\":\"BlowOverWeightRestriction\",\"route\":\"I 80\",\"clientId\":\"bowrtestid\",\"startPoint\":{\"latitude\":41.295045,\"longitude\":-105.585043,\"valid\":true},\"endPoint\":{\"latitude\":41.291126,\"longitude\":-105.548155,\"valid\":true},\"startDateTime\":\"2024-06-04T17:34:54.835371Z\",\"endDateTime\":\"2024-06-05T17:34:54.835371Z\",\"data\":12345}]}";

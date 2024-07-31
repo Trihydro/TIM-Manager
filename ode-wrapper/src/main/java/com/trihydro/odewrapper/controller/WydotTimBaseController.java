@@ -542,9 +542,6 @@ public abstract class WydotTimBaseController {
         if (tim.getRoute() == null) {
             resultMessages.add("Null value for route");
         }
-        else if (!routeSupported(tim.getRoute())) {
-            resultMessages.add("route not supported");
-        }
         else {
             toReturn.setRoute(tim.getRoute());
         }

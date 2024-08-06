@@ -785,13 +785,13 @@ public abstract class WydotTimBaseController {
     private boolean performExistenceChecks(CountyRoadSegment countyRoadSegment, TimType timType, String endDateTime) {
         int segmentId = countyRoadSegment.getId();
         List<ActiveTim> allActiveTimsWithItisCodesAssociatedWithSegment = cascadeService.getActiveTimsWithItisCodesAssociatedWithSegment(segmentId);
-        List<String> clientIdsAssociatedWithSegment = allActiveTimsWithItisCodesAssociatedWithSegment.stream().map(ActiveTim::getClientId).collect(Collectors.toList());
         int numExistingConditions = allActiveTimsWithItisCodesAssociatedWithSegment.size();
         if (numExistingConditions == 0) {
             return false;
         }
         else if (numExistingConditions > 1) {
-            utility.logWithDate("Multiple client ids detected for segment " + segmentId + "("+ clientIdsAssociatedWithSegment.toString() + "), clearing existing conditions for all client ids.");
+            List<String> clientIdsAssociatedWithSegment = allActiveTimsWithItisCodesAssociatedWithSegment.stream().map(ActiveTim::getClientId).collect(Collectors.toList());
+            utility.logWithDate("Multiple conditions detected for segment " + segmentId + "("+ clientIdsAssociatedWithSegment.toString() + "), clearing existing conditions for all client ids.");
             clearAllExistingConditionsForSegment(clientIdsAssociatedWithSegment);
             return false; // no identical condition exists at this point, return false
         }

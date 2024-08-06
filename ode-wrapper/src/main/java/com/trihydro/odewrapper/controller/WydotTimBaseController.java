@@ -813,8 +813,17 @@ public abstract class WydotTimBaseController {
             }
 
             // check if end_date is identical
-            if (existingCondition.getEndDateTime() != null && existingCondition.getEndDateTime().equals(endDateTime)) {
-                identicalEndDate = true;
+            if (existingCondition.getEndDateTime() != null) {
+                // existing condition has an end date, check if it is identical
+                if (existingCondition.getEndDateTime().equals(endDateTime)) {
+                    identicalEndDate = true;
+                }
+            }
+            else {
+                // existing condition has no end date, check if requested condition has no end date
+                if (endDateTime == null) {
+                    identicalEndDate = true;
+                }
             }
 
             if (identicalITISCodes && identicalEndDate) {

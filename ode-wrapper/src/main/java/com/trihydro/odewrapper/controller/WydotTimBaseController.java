@@ -803,8 +803,10 @@ public abstract class WydotTimBaseController {
             boolean identicalITISCodes = false;
             boolean identicalEndDate = false;
             List<Integer> existingITISCodes = existingCondition.getItisCodes();
-            if (existingITISCodes != null && existingITISCodes.equals(countyRoadSegment.toITISCodes())) {
-                identicalITISCodes = true;
+            if (existingITISCodes != null) {
+                if (existingITISCodes.equals(countyRoadSegment.toITISCodes())) {
+                    identicalITISCodes = true;
+                }
             }
             else {
                 utility.logWithDate("Warning: Null value found for existing ITIS codes.");

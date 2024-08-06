@@ -811,7 +811,7 @@ public abstract class WydotTimBaseController {
             }
 
             // check if end_date is identical
-            if (existingCondition.getEndDate() != null && existingCondition.getEndDate().equals(endDateTime)) {
+            if (existingCondition.getEndDateTime() != null && existingCondition.getEndDateTime().equals(endDateTime)) {
                 identicalEndDate = true;
             }
 

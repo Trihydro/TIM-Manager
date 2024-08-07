@@ -1,4 +1,5 @@
 # WyoCV Applications
+![data-flow-diagram](/images/diagrams/data-flow-diagram.png)
 
 ## Table of Contents
 

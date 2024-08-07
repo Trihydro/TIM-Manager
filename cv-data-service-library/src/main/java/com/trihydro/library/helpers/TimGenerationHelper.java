@@ -560,6 +560,7 @@ public class TimGenerationHelper {
                 WydotTravelerInputData timToSend = new WydotTravelerInputData();
                 timToSend.setTim(tim);
                 var extraEx = sendTim(timToSend, tum, activeTimId, reduced_mps);
+                activeTimService.markForDeletion(activeTimId);
                 if (extraEx.size() > 0) {
                     exceptions.addAll(extraEx);
                 }

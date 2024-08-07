@@ -5,6 +5,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.CountyRoadsProps;
 import com.trihydro.library.model.DbInteractionsProps;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.JCSCacheProps;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("config")
 @Import({ TimDbTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
         JavaMailSenderImplProvider.class, LoggingTables.class, DbInteractions.class })
-public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps, JCSCacheProps {
+public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps, JCSCacheProps, CountyRoadsProps {
     private String dbUrl;
     private String dbUsername;
     private String dbPassword;
@@ -46,6 +47,8 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     private String isSpool;
     private String isRemote;
     private String isLateral;
+
+    private String countyRoadsTriggerViewName;
 
     public String getDbUrl() {
         return dbUrl;
@@ -265,5 +268,15 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     @Override
     public void setIsLateral(String isLateral) {
         this.isLateral = isLateral;
+    }
+
+    @Override
+    public String getCountyRoadsTriggerViewName() {
+        return countyRoadsTriggerViewName;
+    }
+
+    @Override
+    public void setCountyRoadsTriggerViewName(String countyRoadsTriggerViewName) {
+        this.countyRoadsTriggerViewName = countyRoadsTriggerViewName;
     }
 }

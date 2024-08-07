@@ -23,6 +23,7 @@ import com.trihydro.library.helpers.caches.TriggerRoadCache;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.CountyRoadSegment;
+import com.trihydro.library.model.CountyRoadsProps;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.views.CountyRoadsGeometryView;
@@ -37,12 +38,14 @@ import springfox.documentation.annotations.ApiIgnore;
 public class CascadeController extends BaseController {
     private Utility utility;
     private JCSCacheProps jcsCacheProps;
+    private CountyRoadsProps countyRoadsProps;
     private TriggerRoadCache triggerRoadCache;
 
     @Autowired
-    public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps) {
+    public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps, CountyRoadsProps _countyRoadsProps) {
         utility = _utility;
         jcsCacheProps = _jcsCacheProps;
+        countyRoadsProps = _countyRoadsProps;
         triggerRoadCache = new TriggerRoadCache(utility, jcsCacheProps);
     }
 
@@ -168,6 +171,12 @@ public class CascadeController extends BaseController {
         return new ResponseEntity<List<ActiveTim>>(activeTims, HttpStatus.OK);
     }
 
+    /**
+     * Retrieve all active TIMs that are associated with the given segment from the database
+     * @param segmentId the segment id
+     * @return the list of active TIMs (empty if no records found)
+     * @throws SQLException if there is an error retrieving the active TIMs
+     */
     private List<ActiveTim> retrieveActiveTimsWithItisCodesForSegmentFromDatabase(int segmentId) {
         List<ActiveTim> results = new ArrayList<ActiveTim>();
 		ActiveTim activeTim = null;
@@ -184,7 +193,7 @@ public class CascadeController extends BaseController {
 			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
-            query += " where client_id like '%_trgd_" + segmentId + "-%'";
+            query += " where client_id like '%_trgd_" + segmentId + "-%'"; // segmentId is part of the client_id
 			query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
 
 			rs = statement.executeQuery(query);
@@ -248,7 +257,7 @@ public class CascadeController extends BaseController {
 				}
 
 				// Add the ITIS code to the ActiveTim's ITIS codes, if not null
-				var itisCode = rs.getInt("ITIS_CODE");
+				var itisCode = rs.getInt("ITIS_CODE"); // TODO: account for cascade TIMs with multiple ITIS codes
 				if (!rs.wasNull()) {
 					activeTim.getItisCodes().add(itisCode);
 				}
@@ -291,7 +300,7 @@ public class CascadeController extends BaseController {
             statement = connection.createStatement();
 
             // build SQL statement
-            String viewName = CountyRoadsTriggerView.countyRoadsTriggerViewName;
+            String viewName = countyRoadsProps.getCountyRoadsTriggerViewName();
             String query = "select * from " + viewName + " where road_code = '" + roadCode + "'";
             rs = statement.executeQuery(query);
 

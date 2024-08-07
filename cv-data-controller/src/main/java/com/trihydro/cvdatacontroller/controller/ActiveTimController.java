@@ -579,6 +579,8 @@ public class ActiveTimController extends BaseController {
 				query += " and DIRECTION = '" + direction + "'";
 			}
 
+			query += " and MARKED_FOR_DELETION = '0'"; // exclude active tims marked for deletion
+
 			rs = statement.executeQuery(query);
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {

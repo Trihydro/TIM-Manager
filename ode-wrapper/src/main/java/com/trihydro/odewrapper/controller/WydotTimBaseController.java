@@ -12,7 +12,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -538,12 +540,6 @@ public abstract class WydotTimBaseController {
         } else {
             expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
         }
-
-        // if tim is associated with a trigger road, cascade conditions
-        TriggerRoad triggerRoad = getTriggerRoad(wydotTim);
-        if (triggerRoad != null) {
-            handleCascadingConditions(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, triggerRoad);
-        }
     }
 
     public TimType getTimType(String timTypeName) {
@@ -684,58 +680,42 @@ public abstract class WydotTimBaseController {
     }
 
     /**
-     * This method retrieves the trigger road for the given WydotTim.
-     * @param wydotTim The WydotTim to retrieve the trigger road for.
-     * @return The trigger road for the given WydotTim if it exists, otherwise null.
+     * This method cascades conditions for the county road segments associated with the given TIMs.
      */
-    private TriggerRoad getTriggerRoad(WydotTim wydotTim) {
-        // check for road_code by casting WydotTim and only attempt to retrieve TriggerRoad if road_code is present in the class
-        String roadCode = null;
-        if (wydotTim instanceof WydotTimCc) {
-            // Model `WydotTimCc` does not have a road_code field, return
-            return null;
-        }
-        else if (wydotTim instanceof WydotTimIncident) {
-            // Model `WydotTimIncident` does not have a road_code field, return
-            return null;
-        }
-        else if (wydotTim instanceof WydotTimParking) {
-            // Model `WydotTimParking` does not have a road_code field, return
-            return null;
-        }
-        else if (wydotTim instanceof WydotTimRc) {
-            // retrieve road_code from WydotTimRc
-            roadCode = ((WydotTimRc) wydotTim).getRoadCode();
-        }
-        else if (wydotTim instanceof WydotTimRw) {
-            // Model `WydotTimRw` does not have a road_code field, return
-            return null;
-        }
-        else if (wydotTim instanceof WydotTimVsl) {
-            // Model `WydotTimVsl` does not have a road_code field, return
-            return null;
-        }
-        else {
-            utility.logWithDate("Unrecognized model type, unable to generate cascading conditions.");
-            return null;
-        }
+    protected void handleCascadingConditions(List<WydotTimRc> wydotTims, TimType timType, String startDateTime) {
+        utility.logWithDate("=================== CRC Start ===================");
         
-        // retrieve trigger road
-        return cascadeService.getTriggerRoad(roadCode);
-    }
-
-    /**
-     * This method cascades conditions for each associated segment of the given trigger road.
-     */
-    protected void handleCascadingConditions(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, TriggerRoad triggerRoad) {
-        utility.logWithDate("=================== CRC Start (" + triggerRoad.getRoadCode() + ") ===================");
-        utility.logWithDate("Handling cascading conditions for trigger road: " + triggerRoad.getRoadCode());
-        List<CountyRoadSegment> countyRoadSegments = triggerRoad.getCountyRoadSegments();
-        utility.logWithDate("Trigger road " + triggerRoad.getRoadCode() + " has " + countyRoadSegments.size() + " segments associated with it.");
-        for (CountyRoadSegment countyRoadSegment : countyRoadSegments) {
-            cascadeConditionsForSegment(countyRoadSegment, timType, startDateTime, endDateTime, pk, content, frameType, wydotTim.getClientId());
+        // retrieve trigger roads
+        List<TriggerRoad> triggerRoads = new ArrayList<>();
+        for (WydotTimRc wydotTim : wydotTims) {
+            String roadCode = wydotTim.getRoadCode();
+            TriggerRoad triggerRoad = cascadeService.getTriggerRoad(roadCode);
+            if (triggerRoad != null) {
+                triggerRoads.add(triggerRoad);
+            }
         }
-        utility.logWithDate("=================== CRC End (" + triggerRoad.getRoadCode() + ") ===================");
+        utility.logWithDate("Found " + triggerRoads.size() + " trigger roads associated with the given TIMs.");
+
+        // retrieve associated county road segments
+        List<CountyRoadSegment> uniqueSegments = new ArrayList<>();
+        Map<Integer, String> segmentIdsToRoadCodes = new HashMap<>();
+        for (TriggerRoad triggerRoad : triggerRoads) {
+            List<CountyRoadSegment> segments = triggerRoad.getCountyRoadSegments();
+            for (CountyRoadSegment segment : segments) {
+                if (!segmentIdsToRoadCodes.keySet().contains(segment.getId())) {
+                    uniqueSegments.add(segment);
+                    segmentIdsToRoadCodes.put(segment.getId(), triggerRoad.getRoadCode());
+                }
+            }
+        }
+        utility.logWithDate("Found " + uniqueSegments.size() + " unique county road segments associated with the trigger roads.");
+
+        // handle cascading conditions for each segment
+        for (CountyRoadSegment segment : uniqueSegments) {
+            cascadeConditionsForSegment(segment, timType, startDateTime, null, null, ContentEnum.advisory, TravelerInfoType.advisory, segmentIdsToRoadCodes.get(segment.getId()));
+        }
+
+        utility.logWithDate("=================== CRC End ===================");
     }
 
     /**

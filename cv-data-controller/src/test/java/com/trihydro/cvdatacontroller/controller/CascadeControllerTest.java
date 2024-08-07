@@ -204,7 +204,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         doReturn(1L).when(mockRs).getLong("TIM_ID");
         doReturn("test").when(mockRs).getString("DIRECTION");
         doReturn("test").when(mockRs).getString("TIM_START");
-        doReturn("test").when(mockRs).getString("TIM_END");
+        doReturn(null).when(mockRs).getString("TIM_END");
         doReturn("test").when(mockRs).getString("EXPIRATION_DATE");
         doReturn("test").when(mockRs).getString("ROUTE");
         doReturn(clientId).when(mockRs).getString("CLIENT_ID");

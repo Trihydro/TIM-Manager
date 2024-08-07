@@ -743,7 +743,7 @@ public abstract class WydotTimBaseController {
      */
     private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
         // if existing condition is identical, return
-        boolean identicalConditionExistsForSegment = performExistenceChecks(countyRoadSegment, timType);
+        boolean identicalConditionExistsForSegment = performExistenceChecks(countyRoadSegment, timType, endDateTime);
         if (identicalConditionExistsForSegment) {
             utility.logWithDate("Identical condition already exists, skipping TIM generation");
             return;
@@ -771,16 +771,18 @@ public abstract class WydotTimBaseController {
 
     /**
      * This method performs several existence checks.
-     * - If multiple client ids are associated with the segment, all existing conditions are cleared.
+     * - If multiple client ids are associated with the segment, all existing conditions are cleared and the method returns false.
      * - If an identical condition exists for the segment, the method returns true.
-     * - If an existing condition is not identical to the requested condition, the existing condition is cleared.
+     * - If an existing condition is not identical to the requested condition, the existing condition is cleared and the method returns false.
      * 
-     * Note: A condition in this context is defined as a collection of ITIS codes.
+     * Notes: 
+     * - A condition in this context is defined as a collection of ITIS codes.
+     * - An identical condition is defined as a condition with the same ITIS codes and end_date.
      * 
      * @param countyRoadSegment The CountyRoadSegment to perform existence checks for.
      * @return True if a single condition exists for the given segment and that condition is identical to the requested condition, otherwise false.
      */
-    private boolean performExistenceChecks(CountyRoadSegment countyRoadSegment, TimType timType) {
+    private boolean performExistenceChecks(CountyRoadSegment countyRoadSegment, TimType timType, String endDateTime) {
         int segmentId = countyRoadSegment.getId();
         List<ActiveTim> allActiveTimsWithItisCodesAssociatedWithSegment = cascadeService.getActiveTimsWithItisCodesAssociatedWithSegment(segmentId);
         List<String> clientIdsAssociatedWithSegment = allActiveTimsWithItisCodesAssociatedWithSegment.stream().map(ActiveTim::getClientId).collect(Collectors.toList());
@@ -798,14 +800,34 @@ public abstract class WydotTimBaseController {
             utility.logWithDate("Single existing condition found for segment " + segmentId + " with client id: " + existingCondition.getClientId());
 
             // check if existing condition is identical to requested condition
+            boolean identicalITISCodes = false;
+            boolean identicalEndDate = false;
             List<Integer> existingITISCodes = existingCondition.getItisCodes();
             if (existingITISCodes != null) {
                 if (existingITISCodes.equals(countyRoadSegment.toITISCodes())) {
-                    return true; // identical condition found, return true
+                    identicalITISCodes = true;
                 }
             }
             else {
-                utility.logWithDate("Warning: Null value found for existing ITIS codes; Clearing existing condition.");
+                utility.logWithDate("Warning: Null value found for existing ITIS codes.");
+            }
+
+            // check if end_date is identical
+            if (existingCondition.getEndDateTime() != null) {
+                // existing condition has an end date, check if it is identical
+                if (existingCondition.getEndDateTime().equals(endDateTime)) {
+                    identicalEndDate = true;
+                }
+            }
+            else {
+                // existing condition has no end date, check if requested condition has no end date
+                if (endDateTime == null) {
+                    identicalEndDate = true;
+                }
+            }
+
+            if (identicalITISCodes && identicalEndDate) {
+                return true; // identical condition exists, return true
             }
 
             wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(existingCondition.getClientId()), null);

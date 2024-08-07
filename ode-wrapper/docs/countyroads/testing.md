@@ -57,6 +57,9 @@ For each test case, conditions will be cascaded to the county roads associated w
     ```sql
     update mock_triggered_county_roads_v1_vw set <condition>=1 where road_code='<road code>';
     ```
+
+    This should be done for each road code involved in the test case.
+
 1. Send a POST request to the `/create-update-rc-tim` endpoint with the following payload:
     ```json
     {
@@ -102,6 +105,9 @@ For each test case, conditions will be cascaded to the county roads associated w
     ```sql
     update mock_triggered_county_roads_v1_vw set <condition>=0 where road_code='<road code>';
     ```
+
+    This should be done for each road code involved in the test case.
+    
 1. Send a POST request to the `/submit-rc-clear` endpoint with the following payload:
     ```json
     {

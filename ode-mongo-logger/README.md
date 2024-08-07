@@ -1,4 +1,5 @@
 # WYDOT ODE Data Logger
+![ODE Mongo Logger Architecture Diagram](./docs/diagrams/ode-mongo-logger-architecture.drawio.png)
 
 This project inserts BSMs from the ODE into a database running on WYDOT's server 146.166.249.2. CVCOMMS is the Oracle schema that has been created for this located at 10.145.9.172:1521 (ordb-p01-vip). There are currently 4 tables collecting the data:
 

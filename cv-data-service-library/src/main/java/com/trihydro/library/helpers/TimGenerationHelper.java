@@ -549,6 +549,37 @@ public class TimGenerationHelper {
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
+
+                if (CascadeService.isCascadeTim(wydotTim) && reduced_mps.size() > 63) {
+                    try {
+                        // more than 63 mileposts, this is likely a cascade TIM that was split into two
+                        String client_id = wydotTim.getClientId();
+                        // parse the last character of the client id to determine part #
+                        int part = Integer.parseInt(client_id.substring(client_id.length() - 1));
+                        if (part == 0) {
+                            // use first half of reduced mileposts
+                            utility.logWithDate("Cascade TIM has been split into multiple due to more than 63 mileposts. Resubmitting first half.");
+                            reduced_mps = reduced_mps.subList(0, reduced_mps.size() / 2);
+                        }
+                        else if (part == 1) {
+                            // use second half of reduced mileposts
+                            utility.logWithDate("Cascade TIM has been split into multiple due to more than 63 mileposts. Resubmitting second half.");
+                            reduced_mps = reduced_mps.subList(reduced_mps.size() / 2, reduced_mps.size());
+                        }
+                        else {
+                            utility.logWithDate("Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM.");
+                            exceptions.add(new ResubmitTimException(activeTimId, "Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM."));
+                            continue;
+                        }
+                    }
+                    catch (NumberFormatException ex) {
+                        utility.logWithDate("Failed to parse part number from client id: " + ex.getMessage());
+                        exceptions.add(new ResubmitTimException(activeTimId, "Failed to parse part number from client id: " + ex.getMessage()));
+                        continue;
+                    }
+
+                }
+
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",

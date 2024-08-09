@@ -550,7 +550,15 @@ public class TimGenerationHelper {
                 var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
 
+                // account for case where cascade TIM has been split into multiple parts
                 if (CascadeService.isCascadeTim(wydotTim) && reduced_mps.size() > 63) {
+                    int numParts = (int) Math.ceil(reduced_mps.size() / 63.0);
+                    if (numParts > 2) {
+                        utility.logWithDate("Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM.");
+                        exceptions.add(new ResubmitTimException(activeTimId, "Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM."));
+                        continue;
+                    }
+
                     try {
                         // more than 63 mileposts, this is likely a cascade TIM that was split into two
                         String client_id = wydotTim.getClientId();
@@ -567,8 +575,8 @@ public class TimGenerationHelper {
                             reduced_mps = reduced_mps.subList(reduced_mps.size() / 2, reduced_mps.size());
                         }
                         else {
-                            utility.logWithDate("Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM.");
-                            exceptions.add(new ResubmitTimException(activeTimId, "Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM."));
+                            utility.logWithDate("Expected part number to be 0 or 1, but got " + part + ". Unable to resubmit TIM.");
+                            exceptions.add(new ResubmitTimException(activeTimId, "Expected part number to be 0 or 1, but got " + part + ". Unable to resubmit TIM."));
                             continue;
                         }
                     }
@@ -577,7 +585,6 @@ public class TimGenerationHelper {
                         exceptions.add(new ResubmitTimException(activeTimId, "Failed to parse part number from client id: " + ex.getMessage()));
                         continue;
                     }
-
                 }
 
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);

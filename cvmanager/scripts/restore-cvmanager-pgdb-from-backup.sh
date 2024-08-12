@@ -11,7 +11,6 @@ db_user="postgres"
 db_host="10.145.7.48"
 db_port="5432"
 
-backupsDir="/home/wyocvadmin/cvmanager/pgdb-backups"
 cvmanagerSourceDir="/home/wyocvadmin/cvmanager/jpo-cvmanager"
 pathToBackup=$1
 
@@ -34,8 +33,27 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
+# ask the user if they want to create a backup of the current database first
+read -p "Do you want to create a backup of the current database before wiping it? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # run the backup script
+    echo "Running create-cvmanager-pgdb-backup.sh..."
+    ./create-cvmanager-pgdb-backup.sh
+    if [ $? -ne 0 ]; then
+        echo "Something went wrong while creating the backup. Restore cancelled."
+        exit 1
+    fi
+    echo "Backup created."
+elif [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo "Continuing without creating a backup..."
+else
+    echo "Invalid input. Please enter 'y' or 'n'"
+    exit 1
+fi
+
 # Remove the current database
-sudo docker compose -f $cvmanagerSourceDir/docker-compose.yml down
+sudo docker compose -f $cvmanagerSourceDir/docker-compose-addons.yml down
 sudo docker volume rm jpo-cvmanager_pgdb
 if [ $? -ne 0 ]; then
     echo "Error: failed to remove the current CV Manager PGSQL database"
@@ -48,10 +66,11 @@ echo "Waiting for the database to start..."
 sleep 5
 
 # Restore the backup by running pg_restore inside a temporary container
+sudo docker rm temp-pgdb-restore-helper 2> /dev/null
 sudo docker run -it -v jpo-cvmanager_pgdb:/cvmanager-pgdb -v $pathToBackup:/pgdb-backup.dump --name temp-pgdb-restore-helper postgis/postgis:15-master pg_restore --clean --verbose -U postgres -h $db_host -p $db_port -d $db_name /pgdb-backup.dump
 if [ $? -ne 0 ]; then
-    sudo docker rm temp-pgdb-restore-helper
-    echo "Failed to restore the CV Manager PGSQL database from '$pathToBackup'."
+    sudo docker rm temp-pgdb-restore-helper 2> /dev/null
+    echo "The pg_restore command returned an error status code. Please check the state of the database to determine if the restore was successful."
     exit 1
 fi
 

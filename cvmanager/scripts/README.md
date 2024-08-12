@@ -54,3 +54,6 @@ Instructions for using this script can be found in the [`backup-restore.md`](../
 This script restores the CV Manager database from a backup file using the `pg_restore` utility. The script accepts the path to the backup file as an argument and will prompt the user for the password of the database user. The script will restore the database from the backup file and log any errors that occur during the restoration process. At this time, errors are thrown due to Keycloak tables not existing, but they do not appear to affect the ability for users to log into the application post-restoration and the tables appear to be created nevertheless.
 
 Instructions for using this script can be found in the [`backup-restore.md`](../docs/backup-restore.md#restore) document.
+
+## set_foreign_key_reference_ids.sql
+This script retrieves the foreign key reference ids and sets them as environment variables. This script is used by the `populate_rsus_table.sh` script to translate the allowed values in the CSV file to record ids in the database.

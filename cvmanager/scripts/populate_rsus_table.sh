@@ -6,8 +6,6 @@
 
 # Note: This script can be run on the VM where the CV Manager is deployed or on your local machine.
 
-DEBUG=false
-
 # make sure psql is installed
 if ! [ -x "$(command -v psql)" ]; then
     echo "Installing psql..."
@@ -29,33 +27,35 @@ db_password=$POSTGRES_PASSWORD
 db_host="10.145.7.48"
 db_port="5432"
 
-# make
-commsignia_model_id=1
+echo "Retrieving ids for foreign key references..."
+source ./set_foreign_key_reference_ids.sh
+if [[ $? -ne 0 ]]; then
+    echo "Error: failed to retrieve ids for foreign key references"
+    exit 1
+fi
 
-# models
-itsRs4M_model_id=1
-rsu2xUsb_model_id=2
-
-# rsu credentials
-default_rsu_credential_id=1
-wydot_rsu_credential_id=2
-
-# snmp credentials
-default_snmp_credential_id=1
-wydot_snmp_credential_id=2
-
-# snmp versions
-fourDot1_snmp_version_id=1
-twelve18_snmp_version_id=2
-
-# firmware versions
-y20_0_0_firmware_version_id=1
-y_20_1_0_firmware_version_id=2
-y_20_23_3_firmware_version_id=3
-y_20_39_4_firmware_version_id=4
-
-# organizations
-wydot_organization_id=1
+if $DEBUG; then
+    # print foreign key reference ids
+    echo "" 
+    echo "Printing foreign key reference ids..."
+    echo "----------------------------------------"
+    echo "commsignia_manufacturer_id: $commsignia_manufacturer_id"
+    echo "itsRs4M_model_id: $itsRs4M_model_id"
+    echo "rsu2xUsb_model_id: $rsu2xUsb_model_id"
+    echo "default_rsu_credential_id: $default_rsu_credential_id"
+    echo "wydot_rsu_credential_id: $wydot_rsu_credential_id"
+    echo "default_snmp_credential_id: $default_snmp_credential_id"
+    echo "wydot_snmp_credential_id: $wydot_snmp_credential_id"
+    echo "fourDot1_snmp_version_id: $fourDot1_snmp_version_id"
+    echo "twelve18_snmp_version_id: $twelve18_snmp_version_id"
+    echo "y20_0_0_firmware_version_id: $y20_0_0_firmware_version_id"
+    echo "y_20_1_0_firmware_version_id: $y_20_1_0_firmware_version_id"
+    echo "y_20_23_3_firmware_version_id: $y_20_23_3_firmware_version_id"
+    echo "y_20_39_4_firmware_version_id: $y_20_39_4_firmware_version_id"
+    echo "wydot_organization_id: $wydot_organization_id"
+    echo "----------------------------------------"
+    echo ""
+fi
 
 # read in values from .csv using awk
 echo "Reading in values from .csv file..."
@@ -170,6 +170,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
 
     if $DEBUG; then
         # print RSU info
+        echo ""
         echo "Printing RSU info..."
         echo "----------------------------------------"
         echo "latitude: $latitude"
@@ -186,14 +187,23 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
         echo "firmware_version: $firmware_version_id"
         echo "target_firmware_version: $target_firmware_version_id"
         echo "----------------------------------------"
+        echo ""
     fi
 
     # add RSU to rsus table
     echo "Adding RSU $serial_number to rsus table..."
     PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO public.rsus(geography, milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version) VALUES (ST_GeomFromText('POINT($longitude $latitude)'), $milepost, '$ipv4_address', '$serial_number', '$iss_scms', '$primary_route', $model_id, $rsu_credential_id, $snmp_credential_id, $snmp_version_id, $firmware_version_id, $target_firmware_version_id);"
+    if [[ $? -ne 0 ]]; then
+        echo "Error: failed to add RSU $serial_number to rsus table"
+        exit 1
+    fi
 
     # associate RSU with organization
     echo "Associating RSU $serial_number with WYDOT organization..."
     PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO public.rsu_organization(rsu_id, organization_id) VALUES ((SELECT rsu_id FROM public.rsus WHERE serial_number='$serial_number'), $wydot_organization_id);"
+    if [[ $? -ne 0 ]]; then
+        echo "Error: failed to associate RSU $serial_number with WYDOT organization"
+        exit 1
+    fi
 
 done < $filename

@@ -435,6 +435,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
+        selectStatement += " and MARKED_FOR_DELETION = '0'";
 
         // Act
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByClientIdDirection(clientId, timTypeId, direction);
@@ -469,6 +470,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
+        selectStatement += " and MARKED_FOR_DELETION = '0'";
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
 
         // Act

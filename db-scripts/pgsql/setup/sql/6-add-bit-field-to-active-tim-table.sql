@@ -1,0 +1,1 @@
+ALTER TABLE active_tim ADD COLUMN marked_for_deletion BOOLEAN DEFAULT FALSE;

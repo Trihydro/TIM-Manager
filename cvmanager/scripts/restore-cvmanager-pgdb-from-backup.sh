@@ -8,7 +8,7 @@
 # PGSQL info
 db_name="postgres"
 db_user="postgres"
-db_host="10.145.7.48"
+db_host="10.145.7.48" # currently the IP address of the Test VM, which is where the CV Manager PGSQL database is deployed as a Docker container
 db_port="5432"
 
 cvmanagerSourceDir="/home/wyocvadmin/cvmanager/jpo-cvmanager"

@@ -7,8 +7,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CountyRoadsTriggerView {
-    public static final String countyRoadsTriggerViewName = "countyrds.triggered_county_roads_v1_vw";
-
     public static final String countyRoadIdColumnName = "cr_id";
     public static final String commonNameColumnName = "common_name";
     public static final String mFromColumnName = "m_from";

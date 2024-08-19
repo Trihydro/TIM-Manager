@@ -1,2 +1,2 @@
 latitude,longitude,milepost,ipv4_address,serial_number,iss_scms,primary_route,make,model,rsu_credential,snmp_credential,snmp_version,firmware_version,target_firmware_version
-41.60392923,-106.20770732,16.890,10.145.254.58,test-1-16-2024,test-1-16-2024,WY 13,Commsignia,ITS-RS4-M,wydotrsucredential,default,4.1,Y20.0.0,Y20.1.0
+41.60392923,-106.20770732,16.890,8.8.8.8,test-8-12-2024,test-1-16-2024,WY 13,Commsignia,ITS-RS4-M,default,default,4.1,y20.0.0,y20.1.0

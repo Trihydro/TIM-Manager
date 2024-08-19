@@ -86,6 +86,10 @@ public class WydotTimRcController extends WydotTimBaseController {
         }
 
         processRequestAsync(timsToSend);
+
+        // check for trigger roads and cascade conditions if necessary
+        handleCascadingConditionsAsync(timRcList.getTimRcList());
+
         String responseMessage = gson.toJson(resultList);
         if (errList.size() > 0) {
             utility.logWithDate("Failed to send TIMs: " + gson.toJson(errList), this.getClass());
@@ -172,14 +176,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 var startTime = getStartTime();
-                for (WydotTimRc tim : wydotTims) {
-                    // if tim is associated with a trigger road, cascade conditions
-                    TriggerRoad triggerRoad = cascadeService.getTriggerRoad(tim.getRoadCode());
-                    if (triggerRoad != null) {
-                        handleCascadingConditions(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
-                                TravelerInfoType.advisory, triggerRoad);
-                    }
-                }
+                handleCascadingConditions(wydotTims, getTimType(type), startTime);
             }
         }).start();
     }

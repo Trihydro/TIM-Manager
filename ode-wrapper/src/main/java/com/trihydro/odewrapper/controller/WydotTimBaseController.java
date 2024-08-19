@@ -600,7 +600,7 @@ public abstract class WydotTimBaseController {
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
             Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
-            List<Milepost> reducedMileposts, Milepost anchor, IdGenerator idGenerator) {
+            List<Milepost> reducedMileposts, Milepost anchor, IdGenerator idGenerator) { // TODO: move dealing with over 63 mileposts code to CreateBaseTimUtil.buildTim()
 
         if (reducedMileposts.size() > 63) {
             // Even after reducing the mileposts, this TIM requires more nodes than J2735

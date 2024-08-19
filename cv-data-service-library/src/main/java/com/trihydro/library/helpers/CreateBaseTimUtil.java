@@ -68,7 +68,7 @@ public class CreateBaseTimUtil {
         // add itis codes to tim
         dataFrame.setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
 
-        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); // TODO: for each 63 path points, create a new region
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
         region.setName("Temp");
         region.setRegulatorID(0);
@@ -83,7 +83,7 @@ public class CreateBaseTimUtil {
         path.setScale(0);
         path.setType("ll");
 
-        OdePosition3D anchorPosition = new OdePosition3D();
+        OdePosition3D anchorPosition = new OdePosition3D(); // TODO: generate new anchor for each region
         anchorPosition.setLatitude(anchor.getLatitude());
         anchorPosition.setLongitude(anchor.getLongitude());
         region.setAnchorPosition(anchorPosition);

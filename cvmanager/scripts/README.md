@@ -42,8 +42,8 @@ Some columns in the CSV file reference values in other tables, so their values n
 | `rsu_credential` | `default`, `wydot-rsu` |
 | `snmp_credential` | `default`, `wydot-snmp` | 
 | `snmp_version` | `4.1`, `1218` |
-| `firmware_version` | `y20.0.0`, `y20.1.0`, `y20.23.3`, `y20.39.4` |
-| `target_firmware_version` | `y20.0.0`, `y20.1.0`, `y20.23.3`, `y20.39.4` |
+| `firmware_version` | `y20.0.0`, `y20.1.0`, `y20.23.3`, `y20.39.2`, `y20.39.4`, `y20.41.3`, `y20.48.2` |
+| `target_firmware_version` `y20.0.0`, `y20.1.0`, `y20.23.3`, `y20.39.2`, `y20.39.4`, `y20.41.3`, `y20.48.2` |
 
 ## create-cvmanager-pgdb-backup.sh
 This script creates a backup of the CV Manager database using the `pg_dump` utility. The script will prompt the user for the password of the database user and create a backup file in the `pgdb-backups` directory.

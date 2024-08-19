@@ -49,9 +49,12 @@ if $DEBUG; then
     echo "fourDot1_snmp_version_id: $fourDot1_snmp_version_id"
     echo "twelve18_snmp_version_id: $twelve18_snmp_version_id"
     echo "y20_0_0_firmware_version_id: $y20_0_0_firmware_version_id"
-    echo "y_20_1_0_firmware_version_id: $y_20_1_0_firmware_version_id"
-    echo "y_20_23_3_firmware_version_id: $y_20_23_3_firmware_version_id"
-    echo "y_20_39_4_firmware_version_id: $y_20_39_4_firmware_version_id"
+    echo "y20_1_0_firmware_version_id: $y20_1_0_firmware_version_id"
+    echo "y20_23_3_firmware_version_id: $y20_23_3_firmware_version_id"
+    echo "y20_39_2_firmware_version_id: $y20_39_2_firmware_version_id"
+    echo "y20_39_4_firmware_version_id: $y20_39_4_firmware_version_id"
+    echo "y20_41_3_firmware_version_id: $y20_41_3_firmware_version_id"
+    echo "y20_48_2_firmware_version_id: $y20_48_2_firmware_version_id"
     echo "wydot_organization_id: $wydot_organization_id"
     echo "----------------------------------------"
     echo ""
@@ -96,7 +99,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     fi
 
     # translate values to ids
-    if $DEBUG; then
+    if [ "$DEBUG" = "true" ]; then
         echo "Translating values to ids for model, rsu_credential, snmp_credential, snmp_version, firmware_version, and target_firmware_version..."
     fi
     
@@ -144,11 +147,17 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     if [ "$firmware_version" = "y20.0.0" ]; then
         firmware_version_id=$y20_0_0_firmware_version_id
     elif [ "$firmware_version" = "y20.1.0" ]; then
-        firmware_version_id=$y_20_1_0_firmware_version_id
+        firmware_version_id=$y20_1_0_firmware_version_id
     elif [ "$firmware_version" = "y20.23.3" ]; then
-        firmware_version_id=$y_20_23_3_firmware_version_id
+        firmware_version_id=$y20_23_3_firmware_version_id
+    elif [ "$firmware_version" = "y20.39.2" ]; then
+        firmware_version_id=$y20_39_2_firmware_version_id
     elif [ "$firmware_version" = "y20.39.4" ]; then
-        firmware_version_id=$y_20_39_4_firmware_version_id
+        firmware_version_id=$y20_39_4_firmware_version_id
+    elif [ "$firmware_version" = "y20.41.3" ]; then
+        firmware_version_id=$y20_41_3_firmware_version_id
+    elif [ "$firmware_version" = "y20.48.2" ]; then
+        firmware_version_id=$y20_48_2_firmware_version_id
     else
         echo "Error: invalid firmware_version '$firmware_version' for RSU '$serial_number'"
         exit 1
@@ -158,11 +167,17 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     if [ "$target_firmware_version" = "y20.0.0" ]; then
         target_firmware_version_id=$y20_0_0_firmware_version_id
     elif [ "$target_firmware_version" = "y20.1.0" ]; then
-        target_firmware_version_id=$y_20_1_0_firmware_version_id
+        target_firmware_version_id=$y20_1_0_firmware_version_id
     elif [ "$target_firmware_version" = "y20.23.3" ]; then
-        target_firmware_version_id=$y_20_23_3_firmware_version_id
+        target_firmware_version_id=$y20_23_3_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.39.2" ]; then
+        target_firmware_version_id=$y20_39_2_firmware_version_id
     elif [ "$target_firmware_version" = "y20.39.4" ]; then
-        target_firmware_version_id=$y_20_39_4_firmware_version_id
+        target_firmware_version_id=$y20_39_4_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.41.3" ]; then
+        target_firmware_version_id=$y20_41_3_firmware_version_id
+    elif [ "$target_firmware_version" = "y20.48.2" ]; then
+        target_firmware_version_id=$y20_48_2_firmware_version_id
     else
         echo "Error: invalid target_firmware_version '$target_firmware_version' for RSU '$serial_number'"
         exit 1

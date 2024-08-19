@@ -227,6 +227,7 @@ public class WydotTimRcControllerTest {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(true);
 
 		// Act
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
@@ -256,6 +257,7 @@ public class WydotTimRcControllerTest {
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 		List<ActiveTim> activeTims = getActiveTims(false);
 		when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeTims);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(true);
 
 		// Act
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
@@ -273,6 +275,7 @@ public class WydotTimRcControllerTest {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"b\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(true);
 
 		// Act
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);

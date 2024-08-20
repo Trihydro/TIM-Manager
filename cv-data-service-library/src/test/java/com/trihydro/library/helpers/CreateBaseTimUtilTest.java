@@ -38,11 +38,7 @@ public class CreateBaseTimUtilTest {
     private List<Milepost> milepostsReduced;
     private Milepost anchor;
 
-    public void setupSuccessfulTest() {
-        setupMileposts();
-    }
-
-    private void setupMileposts() {
+    private void setupMilepostsSimple() {
         allMileposts = new ArrayList<>();
         milepostsReduced = new ArrayList<>();
         anchor = new Milepost();
@@ -76,10 +72,29 @@ public class CreateBaseTimUtilTest {
         milepostsReduced.add(mp);
     }
 
+    private void setupMilepostsMany() {
+        allMileposts = new ArrayList<>();
+        milepostsReduced = new ArrayList<>();
+        anchor = new Milepost();
+
+        anchor.setCommonName("80");
+        anchor.setLatitude(BigDecimal.valueOf(0));
+        anchor.setLongitude(BigDecimal.valueOf(0));
+
+
+        for (int i = 0; i < 100; i++) {
+            var mp = new Milepost();
+            mp.setLatitude(BigDecimal.valueOf(i));
+            mp.setLongitude(BigDecimal.valueOf(i));
+            allMileposts.add(mp);
+            milepostsReduced.add(mp);
+        }
+    }
+
     @Test
     public void buildTim_EndpointSUCCESS() {
         // Arrange
-        setupSuccessfulTest();
+        setupMilepostsSimple();
         var wydotTim = new WydotTim();
         wydotTim.setStartPoint(new Coordinate());
         wydotTim.setEndPoint(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2)));
@@ -127,7 +142,7 @@ public class CreateBaseTimUtilTest {
     @Test
     public void buildTim_singlePointSUCCESS() {
         // Arrange
-        setupSuccessfulTest();
+        setupMilepostsSimple();
         var wydotTim = new WydotTim();
         wydotTim.setRoute("80");
         wydotTim.setStartPoint(new Coordinate());
@@ -170,5 +185,49 @@ public class CreateBaseTimUtilTest {
             var node = path.getNodes()[i];
             Assertions.assertEquals("node-LL", node.getDelta());
         }
+    }
+
+    @Test
+    public void buildTim_singleRegion_SUCCESS() {
+        // Arrange
+        setupMilepostsSimple();
+        var wydotTim = new WydotTim();
+        wydotTim.setRoute("80");
+        wydotTim.setStartPoint(new Coordinate());
+        var itisCodes = new ArrayList<String>();
+        itisCodes.add("1309");
+        itisCodes.add("8888");
+        wydotTim.setItisCodes(itisCodes);
+
+        var content = ContentEnum.advisory;
+        var frameType = TravelerInfoType.advisory;
+
+        // Act
+        var data = uut.buildTim(wydotTim, genProps, content, frameType, allMileposts, milepostsReduced, anchor);
+
+        // Assert
+        Assertions.assertEquals(1, data.getTim().getDataframes()[0].getRegions().length);
+    }
+
+    @Test
+    public void buildTim_multipleRegions_SUCCESS() {
+        // Arrange
+        setupMilepostsMany();
+        var wydotTim = new WydotTim();
+        wydotTim.setRoute("80");
+        wydotTim.setStartPoint(new Coordinate());
+        var itisCodes = new ArrayList<String>();
+        itisCodes.add("1309");
+        itisCodes.add("8888");
+        wydotTim.setItisCodes(itisCodes);
+
+        var content = ContentEnum.advisory;
+        var frameType = TravelerInfoType.advisory;
+
+        // Act
+        var data = uut.buildTim(wydotTim, genProps, content, frameType, allMileposts, milepostsReduced, anchor);
+
+        // Assert
+        Assertions.assertEquals(2, data.getTim().getDataframes()[0].getRegions().length);
     }
 }

@@ -24,6 +24,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.MsgId;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.RoadSignID;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
@@ -137,47 +138,53 @@ public class CreateBaseTimUtil {
 
         // path
         region.setDescription("path");
-        OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
-        path.setScale(0);
-        path.setType("ll");
         boolean isCascadeTim = wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
         String directionString = buildHeadingSliceFromMileposts(isCascadeTim, allMileposts, anchorPosition);
         region.setDirection(directionString); // heading slice
 
         // set path nodes
         if (reducedMileposts != null && reducedMileposts.size() > 0) {
-            ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-            var previousMp = anchor;
-
-            // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
-            // PER-encode TIM if we supply less than 2. If we only have 1 node for the path,
-            // include a node with an offset of (0, 0) which is effectively a point that's
-            // right on top of the anchor point.
-            if (reducedMileposts.size() == 1) {
-                OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-                node.setNodeLat(BigDecimal.valueOf(0));
-                node.setNodeLong(BigDecimal.valueOf(0));
-                node.setDelta("node-LL");
-                nodes.add(node);
-            }
-
-            for (int i = 0; i < reducedMileposts.size(); i++) {
-                // note that even though we are setting node-LL type here, the ODE only has a
-                // NodeXY object, as the structure is the same.
-                OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-                BigDecimal lat = reducedMileposts.get(i).getLatitude().subtract(previousMp.getLatitude());
-                BigDecimal lon = reducedMileposts.get(i).getLongitude().subtract(previousMp.getLongitude());
-                node.setNodeLat(lat);
-                node.setNodeLong(lon);
-                node.setDelta("node-LL");
-                nodes.add(node);
-                previousMp = reducedMileposts.get(i);
-            }
-            path.setNodes(nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]));
+            OdeTravelerInformationMessage.NodeXY[] nodes = buildNodePathFromMileposts(reducedMileposts, anchor);
+            OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
+            path.setScale(0);
+            path.setType("ll");
+            path.setNodes(nodes);
             region.setPath(path);
         }
 
         return region;
+    }
+
+    public NodeXY[] buildNodePathFromMileposts(List<Milepost> reducedMileposts, Milepost anchor) {
+        ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
+
+        var previousMp = anchor;
+
+        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
+        // PER-encode TIM if we supply less than 2. If we only have 1 node for the path,
+        // include a node with an offset of (0, 0) which is effectively a point that's
+        // right on top of the anchor point.
+        if (reducedMileposts.size() == 1) {
+            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
+            node.setNodeLat(BigDecimal.valueOf(0));
+            node.setNodeLong(BigDecimal.valueOf(0));
+            node.setDelta("node-LL");
+            nodes.add(node);
+        }
+
+        for (int i = 0; i < reducedMileposts.size(); i++) {
+            // note that even though we are setting node-LL type here, the ODE only has a
+            // NodeXY object, as the structure is the same.
+            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
+            BigDecimal lat = reducedMileposts.get(i).getLatitude().subtract(previousMp.getLatitude());
+            BigDecimal lon = reducedMileposts.get(i).getLongitude().subtract(previousMp.getLongitude());
+            node.setNodeLat(lat);
+            node.setNodeLong(lon);
+            node.setDelta("node-LL");
+            nodes.add(node);
+            previousMp = reducedMileposts.get(i);
+        }
+        return nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]);
     }
 
     public String buildHeadingSliceFromMileposts(boolean isCascadeTim, List<Milepost> allMileposts, OdePosition3D anchorPosition) {

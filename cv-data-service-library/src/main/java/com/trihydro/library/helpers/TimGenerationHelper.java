@@ -703,37 +703,6 @@ public class TimGenerationHelper {
             return currentCnt++;
     }
 
-    private NodeXY[] buildNodePathFromMileposts(List<Milepost> mps, Milepost anchor) {
-        ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-        var startMp = anchor;
-
-        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
-        // PER-encode TIM if we supply less than 2. If we only have 1 node for the path,
-        // include a node with an offset of (0, 0) which is effectively a point that's
-        // right on top of the anchor point.
-        if (mps.size() == 1) {
-            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-            node.setNodeLat(BigDecimal.valueOf(0));
-            node.setNodeLong(BigDecimal.valueOf(0));
-            node.setDelta("node-LL");
-            nodes.add(node);
-        }
-
-        for (int i = 0; i < mps.size(); i++) {
-            // note that even though we are setting node-LL type here, the ODE only has a
-            // NodeXY object, as the structure is the same.
-            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-            BigDecimal lat = mps.get(i).getLatitude().subtract(startMp.getLatitude());
-            BigDecimal lon = mps.get(i).getLongitude().subtract(startMp.getLongitude());
-            node.setNodeLat(lat);
-            node.setNodeLong(lon);
-            node.setDelta("node-LL");
-            nodes.add(node);
-            startMp = mps.get(i);
-        }
-        return nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]);
-    }
-
     private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes,
             boolean resetExpirationTime) {
         // RoadSignID
@@ -814,7 +783,7 @@ public class TimGenerationHelper {
         return anchorPosition;
     }
 
-    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps, Milepost anchor) {
+    private Region getRegion(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         // Set region information
         Region region = new Region();
         region.setAnchorPosition(getAnchorPosition(aTim, anchor));
@@ -843,18 +812,7 @@ public class TimGenerationHelper {
         region.setDescription(regionDescrip);
 
         if (aTim.getPathId() != null) {
-            // NodeXY[] nodes = pathNodeLLService.getNodeLLForPath(aTim.getPathId());
-            // // Periodically we see a mismatch in our node-LL# from the database and what
-            // // the ODE thinks it should use. As a result, this errs out if we specify the
-            // // wrong number. To combat this, just reset to node-LL
-            // for (NodeXY node : nodes) {
-            // node.setDelta("node-LL");
-            // }
-            // if (nodes == null || nodes.length == 0) {
-            // }
-            // 3/27/24, nodell doesn't have an order so refreshing is causing major issues
-            // instead, we will just generate the path from the mileposts
-            NodeXY[] nodes = buildNodePathFromMileposts(mps, anchor);
+            NodeXY[] nodes = createBaseTimUtil.buildNodePathFromMileposts(reducedMileposts, anchor);
             Path path = new Path();
             path.setScale(0);
             path.setType("ll");// offset path is now standard

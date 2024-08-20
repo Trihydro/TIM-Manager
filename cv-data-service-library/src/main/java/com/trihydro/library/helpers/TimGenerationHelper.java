@@ -81,13 +81,14 @@ public class TimGenerationHelper {
     private SdwService sdwService;
     private SnmpHelper snmpHelper;
     private RegionNameTrimmer regionNameTrimmer;
+    private CreateBaseTimUtil createBaseTimUtil;
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
             MilepostReduction _milepostReduction, TimGenerationProps _config, RsuService _rsuService,
             OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService, SdwService _sdwService,
-            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer) {
+            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer, CreateBaseTimUtil _createBaseTimUtil) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -103,6 +104,7 @@ public class TimGenerationHelper {
         snmpHelper = _snmpHelper;
         cascadeService = _cascadeService;
         regionNameTrimmer = _regionNameTrimmer;
+        createBaseTimUtil = _createBaseTimUtil;
     }
 
     private String getIsoDateTimeString(ZonedDateTime date) {
@@ -549,7 +551,7 @@ public class TimGenerationHelper {
                 // reduce the mileposts by removing straight away posts
                 var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
-
+                
                 // account for case where cascade TIM has been split into multiple parts
                 if (CascadeService.isCascadeTim(wydotTim) && reduced_mps.size() > 63) {
                     int numParts = (int) Math.ceil(reduced_mps.size() / 63.0);
@@ -732,35 +734,6 @@ public class TimGenerationHelper {
         return nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]);
     }
 
-    private String getHeadingSliceFromMileposts(List<Milepost> mps, OdePosition3D anchor) {
-        int timDirection = 0;
-        // path list - change later
-        if (mps != null && mps.size() > 0) {
-            double startLat = anchor.getLatitude().doubleValue();
-            double startLon = anchor.getLongitude().doubleValue();
-            for (int j = 0; j < mps.size(); j++) {
-                double lat = mps.get(j).getLatitude().doubleValue();
-                double lon = mps.get(j).getLongitude().doubleValue();
-
-                Point standPoint = Point.at(com.grum.geocalc.Coordinate.fromDegrees(startLat),
-                        com.grum.geocalc.Coordinate.fromDegrees(startLon));
-                Point forePoint = Point.at(com.grum.geocalc.Coordinate.fromDegrees(lat),
-                        com.grum.geocalc.Coordinate.fromDegrees(lon));
-
-                timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
-                // reset for next round
-                startLat = lat;
-                startLon = lon;
-            }
-        }
-
-        // set direction based on bearings
-        String dirTest = Integer.toBinaryString(timDirection);
-        dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
-        dirTest = StringUtils.reverse(dirTest);
-        return dirTest; // heading slice
-    }
-
     private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes,
             boolean resetExpirationTime) {
         // RoadSignID
@@ -849,7 +822,8 @@ public class TimGenerationHelper {
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
             // we need to calculate the heading slice from all mileposts and not the subset
-            regionDirection = getHeadingSliceFromMileposts(allMps, region.getAnchorPosition());
+            boolean isCascadeTim = aTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
+            regionDirection = createBaseTimUtil.buildHeadingSliceFromMileposts(isCascadeTim, allMps, region.getAnchorPosition());
         }
         region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
 

@@ -102,6 +102,7 @@ public class CreateBaseTimUtilTest {
         itisCodes.add("1309");
         itisCodes.add("8888");
         wydotTim.setItisCodes(itisCodes);
+        wydotTim.setClientId("testclientid");
 
         var content = ContentEnum.advisory;
         var frameType = TravelerInfoType.advisory;
@@ -150,6 +151,7 @@ public class CreateBaseTimUtilTest {
         itisCodes.add("1309");
         itisCodes.add("8888");
         wydotTim.setItisCodes(itisCodes);
+        wydotTim.setClientId("testclientid");
 
         var content = ContentEnum.advisory;
         var frameType = TravelerInfoType.advisory;
@@ -198,6 +200,7 @@ public class CreateBaseTimUtilTest {
         itisCodes.add("1309");
         itisCodes.add("8888");
         wydotTim.setItisCodes(itisCodes);
+        wydotTim.setClientId("testclientid");
 
         var content = ContentEnum.advisory;
         var frameType = TravelerInfoType.advisory;
@@ -220,6 +223,7 @@ public class CreateBaseTimUtilTest {
         itisCodes.add("1309");
         itisCodes.add("8888");
         wydotTim.setItisCodes(itisCodes);
+        wydotTim.setClientId("testclientid");
 
         var content = ContentEnum.advisory;
         var frameType = TravelerInfoType.advisory;

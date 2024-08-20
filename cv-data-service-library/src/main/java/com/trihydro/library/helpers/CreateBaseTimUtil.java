@@ -140,8 +140,8 @@ public class CreateBaseTimUtil {
         OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
         path.setScale(0);
         path.setType("ll");
-
-        String directionString = buildDirectionString(wydotTim, allMileposts, anchor);
+        boolean isCascadeTim = wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
+        String directionString = buildHeadingSliceFromMileposts(isCascadeTim, allMileposts, anchorPosition);
         region.setDirection(directionString); // heading slice
 
         // set path nodes
@@ -180,15 +180,15 @@ public class CreateBaseTimUtil {
         return region;
     }
 
-    protected String buildDirectionString(WydotTim wydotTim, List<Milepost> allMileposts, Milepost anchor) {
+    public String buildHeadingSliceFromMileposts(boolean isCascadeTim, List<Milepost> allMileposts, OdePosition3D anchorPosition) {
         int timDirection = 0;
-        if (!CascadeService.isCascadeTim(wydotTim)) {
+        if (!isCascadeTim) {
             // this is a regular tim, so we need to set the direction normally
 
             // path list - change later
             if (allMileposts != null && allMileposts.size() > 0) {
-                double startLat = anchor.getLatitude().doubleValue();
-                double startLon = anchor.getLongitude().doubleValue();
+                double startLat = anchorPosition.getLatitude().doubleValue();
+                double startLon = anchorPosition.getLongitude().doubleValue();
                 for (int j = 0; j < allMileposts.size(); j++) {
                     double lat = allMileposts.get(j).getLatitude().doubleValue();
                     double lon = allMileposts.get(j).getLongitude().doubleValue();
@@ -209,10 +209,10 @@ public class CreateBaseTimUtil {
         }
 
         // set direction based on bearings
-        String dirTest = Integer.toBinaryString(timDirection);
-        dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
-        dirTest = StringUtils.reverse(dirTest);
-        return dirTest;
+        String headingSliceString = Integer.toBinaryString(timDirection);
+        headingSliceString = StringUtils.repeat("0", 16 - headingSliceString.length()) + headingSliceString;
+        headingSliceString = StringUtils.reverse(headingSliceString);
+        return headingSliceString;
     }
 
     protected MsgId buildMsgId(OdePosition3D anchorPosition, ContentEnum content, TravelerInfoType frameType) {

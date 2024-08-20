@@ -640,20 +640,18 @@ public class TimGenerationHelper {
     private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,
             Milepost anchor, boolean resetStartTimes, boolean resetExpirationTime) {
         String nowAsISO = Instant.now().toString();
-        DataFrame df = getDataFrame(aTim, anchor, resetStartTimes, resetExpirationTime);
+        DataFrame dataFrame = getDataFrame(aTim, anchor, resetStartTimes, resetExpirationTime);
         // check to see if we have any itis codes
         // if not, just continue on
-        if (df.getItems() == null || df.getItems().length == 0) {
+        if (dataFrame.getItems() == null || dataFrame.getItems().length == 0) {
             utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
-        Region region = buildSingleRegionFromUpdateModel(aTim, mps, allMps, anchor);
-        Region[] regions = new Region[1];
-        regions[0] = region;
-        df.setRegions(regions);
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(aTim, mps, allMps, anchor);
+        dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
 
         DataFrame[] dataframes = new DataFrame[1];
-        dataframes[0] = df;
+        dataframes[0] = dataFrame;
 
         OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
         tim.setDataframes(dataframes);
@@ -664,6 +662,40 @@ public class TimGenerationHelper {
 
         tim.setUrlB(aTim.getUrlB());
         return tim;
+    }
+
+    private List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
+        if (reducedMileposts.size() <= 63) {
+            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
+            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegionFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
+            regions.add(singleRegion);
+            return regions;
+        }
+        else {
+            return buildMultipleRegionsFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
+        }
+    }
+
+    private List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegionsFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); 
+
+        int maxMilepostsPerRegion = 63;
+
+        List<Milepost> milepostsForNextRegion = new ArrayList<Milepost>();
+        Milepost nextAnchor = new Milepost(anchor);
+
+        for (int i = 0; i < reducedMileposts.size(); i++) {
+            milepostsForNextRegion.add(reducedMileposts.get(i));
+            // if we have reached the max number of mileposts per region, or if we are at the end of the list
+            if (milepostsForNextRegion.size() == maxMilepostsPerRegion || i == reducedMileposts.size() - 1) {
+                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegionFromUpdateModel(aTim, milepostsForNextRegion, allMps, nextAnchor);
+                regions.add(region);
+                milepostsForNextRegion.clear();
+                nextAnchor = reducedMileposts.get(i);
+            }
+        }
+
+        return regions;
     }
 
     private List<ResubmitTimException> sendTim(WydotTravelerInputData timToSend, TimUpdateModel tum, Long activeTimId,

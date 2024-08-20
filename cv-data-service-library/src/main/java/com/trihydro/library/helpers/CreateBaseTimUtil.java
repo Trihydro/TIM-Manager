@@ -98,11 +98,11 @@ public class CreateBaseTimUtil {
             regions.add(singleRegion);
             return regions;
         } else {
-            return buildMultipleRegions(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
+            return buildMultipleRegionsFromScratch(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         }
     }
 
-    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegions(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegionsFromScratch(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); 
 
         int maxMilepostsPerRegion = 63;

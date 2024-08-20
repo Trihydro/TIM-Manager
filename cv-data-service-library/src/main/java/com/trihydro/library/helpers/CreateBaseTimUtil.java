@@ -76,7 +76,9 @@ public class CreateBaseTimUtil {
         MsgId msgId = buildMsgId(anchorPosition, content, frameType);
         dataFrame.setMsgId(msgId);
 
-        List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(wydotTim, genProps, allMileposts, reducedMileposts, anchor);
+        boolean isCascadeTim = wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
+        BigDecimal defaultLaneWidth = genProps.getDefaultLaneWidth();
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
 
         OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
@@ -89,18 +91,18 @@ public class CreateBaseTimUtil {
         return timToSend;
     }
 
-    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(WydotTim wydotTim, TimGenerationProps genProps, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
-            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegion(wydotTim, genProps, allMileposts, reducedMileposts, anchor);
+            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegionFromScratch(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
             regions.add(singleRegion);
             return regions;
         } else {
-            return buildMultipleRegions(wydotTim, genProps, allMileposts, reducedMileposts, anchor);
+            return buildMultipleRegions(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         }
     }
 
-    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegions(WydotTim wydotTim, TimGenerationProps genProps, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegions(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); 
 
         int maxMilepostsPerRegion = 63;
@@ -112,7 +114,7 @@ public class CreateBaseTimUtil {
             milepostsForNextRegion.add(reducedMileposts.get(i));
             // if we have reached the max number of mileposts per region, or if we are at the end of the list
             if (milepostsForNextRegion.size() == maxMilepostsPerRegion || i == reducedMileposts.size() - 1) {
-                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegion(wydotTim, genProps, allMileposts, milepostsForNextRegion, nextAnchor);
+                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegionFromScratch(isCascadeTim, defaultLaneWidth, allMileposts, milepostsForNextRegion, nextAnchor);
                 regions.add(region);
                 milepostsForNextRegion.clear();
                 nextAnchor = reducedMileposts.get(i);
@@ -122,23 +124,30 @@ public class CreateBaseTimUtil {
         return regions;
     }
 
-    protected OdeTravelerInformationMessage.DataFrame.Region buildSingleRegion(WydotTim wydotTim, TimGenerationProps genProps, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+    protected OdeTravelerInformationMessage.DataFrame.Region buildSingleRegionFromScratch(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
         region.setName("Temp");
         region.setRegulatorID(0);
 
-        region.setLaneWidth(genProps.getDefaultLaneWidth());
+        // set lane width
+        region.setLaneWidth(defaultLaneWidth);
+
+        // set directionality
         region.setDirectionality("3");
+
+        // set closed path
         region.setClosedPath(false);
 
+        // set anchor position
         OdePosition3D anchorPosition = new OdePosition3D();
         anchorPosition.setLatitude(anchor.getLatitude());
         anchorPosition.setLongitude(anchor.getLongitude());
         region.setAnchorPosition(anchorPosition);
 
-        // path
+        // set description
         region.setDescription("path");
-        boolean isCascadeTim = wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
+
+        // set direction
         String directionString = buildHeadingSliceFromMileposts(isCascadeTim, allMileposts, anchorPosition);
         region.setDirection(directionString); // heading slice
 

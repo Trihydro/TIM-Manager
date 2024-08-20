@@ -647,7 +647,7 @@ public class TimGenerationHelper {
             utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
-        Region region = getRegion(aTim, mps, allMps, anchor);
+        Region region = buildSingleRegionFromUpdateModel(aTim, mps, allMps, anchor);
         Region[] regions = new Region[1];
         regions[0] = region;
         df.setRegions(regions);
@@ -783,34 +783,43 @@ public class TimGenerationHelper {
         return anchorPosition;
     }
 
-    private Region getRegion(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
-        // Set region information
+    private Region buildSingleRegionFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         Region region = new Region();
-        region.setAnchorPosition(getAnchorPosition(aTim, anchor));
+        // TODO: set name?
+        // TODO: set regulator id?
+
+        // set lane width
         region.setLaneWidth(aTim.getLaneWidth());
+
+        // set directionality, default to 3
+        String regionDirectionality = aTim.getDirectionality();
+        if (regionDirectionality == null || regionDirectionality.isEmpty()) {
+            regionDirectionality = "3";
+        }
+        region.setDirectionality(regionDirectionality);
+
+        // set closed path
+        region.setClosedPath(aTim.getClosedPath());
+
+        // set anchor position
+        region.setAnchorPosition(getAnchorPosition(aTim, anchor));
+
+        // set description
+        String regionDescription = aTim.getRegionDescription(); // J2735 - one of path, geometry, oldRegion
+        if (regionDescription == null || regionDescription.isEmpty()) {
+            regionDescription = "path"; // if null, set it to path...we only support path anyway, and only have tables supporting path
+        }
+        region.setDescription(regionDescription);
+        
+        // set direction
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
-            // we need to calculate the heading slice from all mileposts and not the subset
             boolean isCascadeTim = aTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
             regionDirection = createBaseTimUtil.buildHeadingSliceFromMileposts(isCascadeTim, allMps, region.getAnchorPosition());
         }
-        region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
+        region.setDirection(regionDirection); // region direction is a heading slice ie 0001100000000000
 
-        // set directionality, default to 3
-        String directionality = aTim.getDirectionality();
-        if (directionality == null || directionality.isEmpty()) {
-            directionality = "3";
-        }
-        region.setDirectionality(directionality);
-        region.setClosedPath(aTim.getClosedPath());
-
-        String regionDescrip = aTim.getRegionDescription();// J2735 - one of path, geometry, oldRegion
-        if (regionDescrip == null || regionDescrip.isEmpty()) {
-            regionDescrip = "path";// if null, set it to path...we only support path anyway, and only have tables
-                                   // supporting path
-        }
-        region.setDescription(regionDescrip);
-
+        // set path nodes
         if (aTim.getPathId() != null) {
             NodeXY[] nodes = createBaseTimUtil.buildNodePathFromMileposts(reducedMileposts, anchor);
             Path path = new Path();

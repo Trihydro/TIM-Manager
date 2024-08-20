@@ -68,6 +68,13 @@ public class CreateBaseTimUtil {
         // add itis codes to tim
         dataFrame.setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
 
+        OdePosition3D anchorPosition = new OdePosition3D(); // TODO: generate new anchor for each region
+        anchorPosition.setLatitude(anchor.getLatitude());
+        anchorPosition.setLongitude(anchor.getLongitude());
+        
+        MsgId msgId = buildMsgId(anchorPosition, content, frameType);
+        dataFrame.setMsgId(msgId);
+
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); // TODO: for each 63 path points, create a new region
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
         region.setName("Temp");
@@ -77,63 +84,16 @@ public class CreateBaseTimUtil {
         region.setDirectionality("3");
         region.setClosedPath(false);
 
+        region.setAnchorPosition(anchorPosition);
+
         // path
         region.setDescription("path");
         OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
         path.setScale(0);
         path.setType("ll");
 
-        OdePosition3D anchorPosition = new OdePosition3D(); // TODO: generate new anchor for each region
-        anchorPosition.setLatitude(anchor.getLatitude());
-        anchorPosition.setLongitude(anchor.getLongitude());
-        region.setAnchorPosition(anchorPosition);
-
-        MsgId msgId = new MsgId();
-        RoadSignID roadSignID = new RoadSignID();
-        roadSignID.setPosition(anchorPosition);
-        // if we are coming in with content=speedLimit and frameType=roadSignage,
-        // we need to set the mutcdCode to regulatory to display the regulatory signage
-        if (content == ContentEnum.speedLimit && frameType == TravelerInfoType.roadSignage) {
-            roadSignID.setMutcdCode(MutcdCodeEnum.regulatory);
-        } else {
-            roadSignID.setMutcdCode(MutcdCodeEnum.warning);
-        }
-        roadSignID.setViewAngle("1111111111111111");
-        msgId.setRoadSignID(roadSignID);
-        dataFrame.setMsgId(msgId);
-
-        int timDirection = 0;
-        if (!CascadeService.isCascadeTim(wydotTim)) {
-            // this is a regular tim, so we need to set the direction normally
-
-            // path list - change later
-            if (allMileposts != null && allMileposts.size() > 0) {
-                double startLat = anchor.getLatitude().doubleValue();
-                double startLon = anchor.getLongitude().doubleValue();
-                for (int j = 0; j < allMileposts.size(); j++) {
-                    double lat = allMileposts.get(j).getLatitude().doubleValue();
-                    double lon = allMileposts.get(j).getLongitude().doubleValue();
-
-                    Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
-                    Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
-
-                    timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
-                    // reset for next round
-                    startLat = lat;
-                    startLon = lon;
-                }
-            }
-        }
-        else {
-            // this is a triggered tim, so we need to set the direction to 0xFFFF
-            timDirection = 0xFFFF;
-        }
-
-        // set direction based on bearings
-        String dirTest = Integer.toBinaryString(timDirection);
-        dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
-        dirTest = StringUtils.reverse(dirTest);
-        region.setDirection(dirTest); // heading slice
+        String directionString = buildDirectionString(wydotTim, allMileposts, anchor);
+        region.setDirection(directionString); // heading slice
 
         // set path nodes
         if (reducedMileposts != null && reducedMileposts.size() > 0) {
@@ -179,6 +139,57 @@ public class CreateBaseTimUtil {
         timToSend.setRequest(new ServiceRequest());
 
         return timToSend;
+    }
+
+    protected String buildDirectionString(WydotTim wydotTim, List<Milepost> allMileposts, Milepost anchor) {
+        int timDirection = 0;
+        if (!CascadeService.isCascadeTim(wydotTim)) {
+            // this is a regular tim, so we need to set the direction normally
+
+            // path list - change later
+            if (allMileposts != null && allMileposts.size() > 0) {
+                double startLat = anchor.getLatitude().doubleValue();
+                double startLon = anchor.getLongitude().doubleValue();
+                for (int j = 0; j < allMileposts.size(); j++) {
+                    double lat = allMileposts.get(j).getLatitude().doubleValue();
+                    double lon = allMileposts.get(j).getLongitude().doubleValue();
+
+                    Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
+                    Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
+
+                    timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
+                    // reset for next round
+                    startLat = lat;
+                    startLon = lon;
+                }
+            }
+        }
+        else {
+            // this is a triggered tim, so we need to set the direction to 0xFFFF
+            timDirection = 0xFFFF;
+        }
+
+        // set direction based on bearings
+        String dirTest = Integer.toBinaryString(timDirection);
+        dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
+        dirTest = StringUtils.reverse(dirTest);
+        return dirTest;
+    }
+
+    protected MsgId buildMsgId(OdePosition3D anchorPosition, ContentEnum content, TravelerInfoType frameType) {
+        MsgId msgId = new MsgId();
+        RoadSignID roadSignID = new RoadSignID();
+        roadSignID.setPosition(anchorPosition);
+        // if we are coming in with content=speedLimit and frameType=roadSignage,
+        // we need to set the mutcdCode to regulatory to display the regulatory signage
+        if (content == ContentEnum.speedLimit && frameType == TravelerInfoType.roadSignage) {
+            roadSignID.setMutcdCode(MutcdCodeEnum.regulatory);
+        } else {
+            roadSignID.setMutcdCode(MutcdCodeEnum.warning);
+        }
+        roadSignID.setViewAngle("1111111111111111");
+        msgId.setRoadSignID(roadSignID);
+        return msgId;
     }
 
     protected String getDelta(Double distance) {

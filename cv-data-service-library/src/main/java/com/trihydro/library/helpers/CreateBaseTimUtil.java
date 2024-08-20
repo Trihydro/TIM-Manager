@@ -75,6 +75,24 @@ public class CreateBaseTimUtil {
         MsgId msgId = buildMsgId(anchorPosition, content, frameType);
         dataFrame.setMsgId(msgId);
 
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(wydotTim, genProps, allMileposts, reducedMileposts, anchor);
+        dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
+
+        OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
+        dataFrames[0] = dataFrame;
+        tim.setDataframes(dataFrames);
+
+        timToSend.setTim(tim);
+        timToSend.setRequest(new ServiceRequest());
+
+        return timToSend;
+    }
+
+    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(WydotTim wydotTim, TimGenerationProps genProps, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+        return buildRegionsSingle(wydotTim, genProps, allMileposts, reducedMileposts, anchor);
+    }
+
+    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegionsSingle(WydotTim wydotTim, TimGenerationProps genProps, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); // TODO: for each 63 path points, create a new region
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
         region.setName("Temp");
@@ -84,6 +102,9 @@ public class CreateBaseTimUtil {
         region.setDirectionality("3");
         region.setClosedPath(false);
 
+        OdePosition3D anchorPosition = new OdePosition3D(); // TODO: generate new anchor for each region
+        anchorPosition.setLatitude(anchor.getLatitude());
+        anchorPosition.setLongitude(anchor.getLongitude());
         region.setAnchorPosition(anchorPosition);
 
         // path
@@ -129,16 +150,7 @@ public class CreateBaseTimUtil {
         }
 
         regions.add(region);
-        dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
-
-        OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
-        dataFrames[0] = dataFrame;
-        tim.setDataframes(dataFrames);
-
-        timToSend.setTim(tim);
-        timToSend.setRequest(new ServiceRequest());
-
-        return timToSend;
+        return regions;
     }
 
     protected String buildDirectionString(WydotTim wydotTim, List<Milepost> allMileposts, Milepost anchor) {

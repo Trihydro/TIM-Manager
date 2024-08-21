@@ -93,11 +93,13 @@ public class CreateBaseTimUtil {
 
     protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
+            utility.logWithDate("Less than 63 mileposts, building a single region from scratch.", CreateBaseTimUtil.class);
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
             OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegionFromScratch(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
             regions.add(singleRegion);
             return regions;
         } else {
+            utility.logWithDate("More than 63 mileposts, building multiple regions from scratch.", CreateBaseTimUtil.class);
             return buildMultipleRegionsFromScratch(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         }
     }
@@ -121,6 +123,7 @@ public class CreateBaseTimUtil {
             }
         }
 
+        utility.logWithDate("Built " + regions.size() + " regions from scratch.", CreateBaseTimUtil.class);
         return regions;
     }
 

@@ -629,12 +629,14 @@ public class TimGenerationHelper {
 
     private List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
+            utility.logWithDate("Less than 63 mileposts, building a single region from update model.", TimGenerationHelper.class);
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
             OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegionFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
             regions.add(singleRegion);
             return regions;
         }
         else {
+            utility.logWithDate("More than 63 mileposts, building multiple regions from update model.", TimGenerationHelper.class);
             return buildMultipleRegionsFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
         }
     }
@@ -658,6 +660,7 @@ public class TimGenerationHelper {
             }
         }
 
+        utility.logWithDate("Built " + regions.size() + " regions from update model.", TimGenerationHelper.class);
         return regions;
     }
 

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
@@ -18,6 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @ExtendWith(MockitoExtension.class)
@@ -233,5 +237,25 @@ public class CreateBaseTimUtilTest {
 
         // Assert
         Assertions.assertEquals(2, data.getTim().getDataframes()[0].getRegions().length);
+        Region region1 = data.getTim().getDataframes()[0].getRegions()[0];
+        Region region2 = data.getTim().getDataframes()[0].getRegions()[1];
+        
+        // verify nodes
+        Assertions.assertEquals(63, region1.getPath().getNodes().length);
+        for (int i = 0; i < region1.getPath().getNodes().length; i++) {
+            var node = region1.getPath().getNodes()[i];
+            Assertions.assertEquals("node-LL", node.getDelta());
+        }
+        Assertions.assertEquals(37, region2.getPath().getNodes().length);
+        for (int i = 0; i < region2.getPath().getNodes().length; i++) {
+            var node = region2.getPath().getNodes()[i];
+            Assertions.assertEquals("node-LL", node.getDelta());
+        }
+        
+        // verify anchor of second region is last milepost of first region
+        Milepost lastMilepostOfFirstRegion = milepostsReduced.get(62);
+        OdePosition3D anchorOfSecondRegion = region2.getAnchorPosition();
+        Assertions.assertEquals(lastMilepostOfFirstRegion.getLatitude().doubleValue(), anchorOfSecondRegion.getLatitude().doubleValue());
+        Assertions.assertEquals(lastMilepostOfFirstRegion.getLongitude().doubleValue(), anchorOfSecondRegion.getLongitude().doubleValue());
     }
 }

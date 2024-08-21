@@ -760,7 +760,7 @@ public abstract class WydotTimBaseController {
                 return true; // identical condition exists, return true
             }
 
-            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(existingCondition.getClientId()), null);
+            wydotTimService.clearTimsById(timType.getType(), existingCondition.getClientId(), null);
             return false; // no identical condition exists at this point, return false
         }
         else {
@@ -775,20 +775,8 @@ public abstract class WydotTimBaseController {
     private void clearAllExistingConditionsForSegment(List<String> clientIdsAssociatedWithSegment) {
         for (String clientIdToClear : clientIdsAssociatedWithSegment) {
             // clear exiting conditions
-            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(clientIdToClear), null);
+            wydotTimService.clearTimsById(timType.getType(), clientIdToClear, null);
         }
-    }
-
-    /**
-     * This method trims the clientId to account for the /client-id-direction query, which adds -0 to the end of the clientId.
-     * Example input: myclientid-0
-     * Example output: myclientid
-     */
-    private String trimClientIdForQuery(String clientIdToTrim) {
-        if (clientIdToTrim.lastIndexOf("-") != -1) {
-            clientIdToTrim = clientIdToTrim.substring(0, clientIdToTrim.lastIndexOf("-"));
-        }
-        return clientIdToTrim;
     }
 
     /**

@@ -76,7 +76,7 @@ public class CreateBaseTimUtilTest {
         milepostsReduced.add(mp);
     }
 
-    private void setupMilepostsMany() {
+    private void setupMilepostsMany(int numMileposts) {
         allMileposts = new ArrayList<>();
         milepostsReduced = new ArrayList<>();
         anchor = new Milepost();
@@ -86,7 +86,7 @@ public class CreateBaseTimUtilTest {
         anchor.setLongitude(BigDecimal.valueOf(0));
 
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < numMileposts; i++) {
             var mp = new Milepost();
             mp.setLatitude(BigDecimal.valueOf(i));
             mp.setLongitude(BigDecimal.valueOf(i));
@@ -214,12 +214,20 @@ public class CreateBaseTimUtilTest {
 
         // Assert
         Assertions.assertEquals(1, data.getTim().getDataframes()[0].getRegions().length);
+        Region region = data.getTim().getDataframes()[0].getRegions()[0];
+
+        // verify nodes
+        Assertions.assertEquals(3, region.getPath().getNodes().length);
+        for (int i = 0; i < region.getPath().getNodes().length; i++) {
+            var node = region.getPath().getNodes()[i];
+            Assertions.assertEquals("node-LL", node.getDelta());
+        }
     }
 
     @Test
-    public void buildTim_multipleRegions_SUCCESS() {
+    public void buildTim_twoRegions_SUCCESS() {
         // Arrange
-        setupMilepostsMany();
+        setupMilepostsMany(100);
         var wydotTim = new WydotTim();
         wydotTim.setRoute("80");
         wydotTim.setStartPoint(new Coordinate());
@@ -257,5 +265,60 @@ public class CreateBaseTimUtilTest {
         OdePosition3D anchorOfSecondRegion = region2.getAnchorPosition();
         Assertions.assertEquals(lastMilepostOfFirstRegion.getLatitude().doubleValue(), anchorOfSecondRegion.getLatitude().doubleValue());
         Assertions.assertEquals(lastMilepostOfFirstRegion.getLongitude().doubleValue(), anchorOfSecondRegion.getLongitude().doubleValue());
+    }
+
+    @Test
+    public void buildTim_threeRegions_SUCCESS() {
+        // Arrange
+        setupMilepostsMany(150);
+        var wydotTim = new WydotTim();
+        wydotTim.setRoute("80");
+        wydotTim.setStartPoint(new Coordinate());
+        var itisCodes = new ArrayList<String>();
+        itisCodes.add("1309");
+        itisCodes.add("8888");
+        wydotTim.setItisCodes(itisCodes);
+        wydotTim.setClientId("testclientid");
+
+        var content = ContentEnum.advisory;
+        var frameType = TravelerInfoType.advisory;
+
+        // Act
+        var data = uut.buildTim(wydotTim, genProps, content, frameType, allMileposts, milepostsReduced, anchor);
+
+        // Assert
+        Assertions.assertEquals(3, data.getTim().getDataframes()[0].getRegions().length);
+        Region region1 = data.getTim().getDataframes()[0].getRegions()[0];
+        Region region2 = data.getTim().getDataframes()[0].getRegions()[1];
+        Region region3 = data.getTim().getDataframes()[0].getRegions()[2];
+        
+        // verify nodes
+        Assertions.assertEquals(63, region1.getPath().getNodes().length);
+        for (int i = 0; i < region1.getPath().getNodes().length; i++) {
+            var node = region1.getPath().getNodes()[i];
+            Assertions.assertEquals("node-LL", node.getDelta());
+        }
+        Assertions.assertEquals(63, region2.getPath().getNodes().length);
+        for (int i = 0; i < region2.getPath().getNodes().length; i++) {
+            var node = region2.getPath().getNodes()[i];
+            Assertions.assertEquals("node-LL", node.getDelta());
+        }
+        Assertions.assertEquals(24, region3.getPath().getNodes().length);
+        for (int i = 0; i < region3.getPath().getNodes().length; i++) {
+            var node = region3.getPath().getNodes()[i];
+            Assertions.assertEquals("node-LL", node.getDelta());
+        }
+        
+        // verify anchor of second region is last milepost of first region
+        Milepost lastMilepostOfFirstRegion = milepostsReduced.get(62);
+        OdePosition3D anchorOfSecondRegion = region2.getAnchorPosition();
+        Assertions.assertEquals(lastMilepostOfFirstRegion.getLatitude().doubleValue(), anchorOfSecondRegion.getLatitude().doubleValue());
+        Assertions.assertEquals(lastMilepostOfFirstRegion.getLongitude().doubleValue(), anchorOfSecondRegion.getLongitude().doubleValue());
+    
+        // verify anchor of third region is last milepost of second region
+        Milepost lastMilepostOfSecondRegion = milepostsReduced.get(125);
+        OdePosition3D anchorOfThirdRegion = region3.getAnchorPosition();
+        Assertions.assertEquals(lastMilepostOfSecondRegion.getLatitude().doubleValue(), anchorOfThirdRegion.getLatitude().doubleValue());
+        Assertions.assertEquals(lastMilepostOfSecondRegion.getLongitude().doubleValue(), anchorOfThirdRegion.getLongitude().doubleValue());
     }
 }

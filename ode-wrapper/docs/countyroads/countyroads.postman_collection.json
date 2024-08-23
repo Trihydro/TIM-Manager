@@ -433,7 +433,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.743662, \r\n                \"longitude\": -106.921701,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.742333, \r\n                \"longitude\": -106.780561,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"RAWI80ELARD\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.743662, \r\n                \"longitude\": -106.921701,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.742333, \r\n                \"longitude\": -106.780561,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"SARW70BMRSEAB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

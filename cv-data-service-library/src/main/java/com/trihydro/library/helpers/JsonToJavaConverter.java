@@ -40,6 +40,7 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Circle;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.DistanceUnits.DistanceUnitsEnum;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
@@ -236,8 +237,8 @@ public class JsonToJavaConverter {
         return odeTimMetadata;
     }
 
-    private OdeTravelerInformationMessage.DataFrame.Region getRegion(JsonNode geoPath) throws JsonProcessingException {
-        if (geoPath == null) {
+    private OdeTravelerInformationMessage.DataFrame.Region getRegion(JsonNode regionNode) throws JsonProcessingException {
+        if (regionNode == null) {
             return null;
         }
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
@@ -249,13 +250,13 @@ public class JsonToJavaConverter {
         JsonNode regionDirectionNode = null;
         OdeTravelerInformationMessage.DataFrame.Region.Path path = null;
         OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = null;
-        if (geoPath != null) {
-            anchorNode = geoPath.get("anchor");
-            regionNameNode = geoPath.get("name");
-            regionDirectionalityNode = geoPath.get("directionality");
-            regionLaneWidthNode = geoPath.get("laneWidth");
-            regionClosedPathNode = geoPath.get("closedPath");
-            regionDirectionNode = geoPath.get("direction");
+        if (regionNode != null) {
+            anchorNode = regionNode.get("anchor");
+            regionNameNode = regionNode.get("name");
+            regionDirectionalityNode = regionNode.get("directionality");
+            regionLaneWidthNode = regionNode.get("laneWidth");
+            regionClosedPathNode = regionNode.get("closedPath");
+            regionDirectionNode = regionNode.get("direction");
 
             // anchor is an optional property, check for null
             if (anchorNode != null) {
@@ -305,7 +306,7 @@ public class JsonToJavaConverter {
                 region.setDirection(mapper.treeToValue(regionDirectionNode, String.class));
             }
 
-            JsonNode descriptionNode = geoPath.get("description");
+            JsonNode descriptionNode = regionNode.get("description");
             if (descriptionNode != null) {
                 path = GetPathData(descriptionNode.get("path"));
                 geometry = GetGeometryData(descriptionNode.get("geometry"));
@@ -327,13 +328,13 @@ public class JsonToJavaConverter {
         try {
             OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
-            OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
+            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
 
             // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
                     .get("TravelerInformation");
             JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
-            JsonNode geoPath = travelerDataFrame.get("regions").get("GeographicalPath");
+            JsonNode regionsNode = travelerDataFrame.get("regions");
 
             JsonNode sequenceArrNode = null;
             JsonNode contentNode = travelerDataFrame.get("content");
@@ -397,8 +398,27 @@ public class JsonToJavaConverter {
             String[] items = new String[itemsList.size()];
             items = itemsList.toArray(items);
 
-            regions[0] = getRegion(geoPath);
-            dataFrame.setRegions(regions);
+            JsonNode geographicalPathNode = regionsNode.get("GeographicalPath");
+
+            // geographicalPathNode may be an object or an array; if it is an object, treat it as a region
+            if (geographicalPathNode.isObject()) {
+                // single region
+                JsonNode regionNode = geographicalPathNode;
+                Region region = getRegion(regionNode);
+                regions.add(region);
+            }
+            else if (geographicalPathNode.isArray()) {
+                // multiple regions
+                for (final JsonNode regionNode : geographicalPathNode) {
+                    Region region = getRegion(regionNode);
+                    regions.add(region);
+                }
+            }
+            else {
+                System.out.println("warning: geographicalPathNode is not an object or an array");
+            }
+            
+            dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
             dataFrame.setItems(items);
             dataFrames[0] = dataFrame;
             tim.setDataframes(dataFrames);
@@ -515,13 +535,12 @@ public class JsonToJavaConverter {
         try {
             OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
-            OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
+            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
 
             // JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
             //         .get("TravelerInformation");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").findValue("TravelerInformation");
             JsonNode travelerDataFrame = timNode.findValue("TravelerDataFrame");
-            JsonNode geoPath = travelerDataFrame.findValue("GeographicalPath");
 
             JsonNode sequenceArrNode = null;
             JsonNode contentNode = travelerDataFrame.get("content");
@@ -611,8 +630,27 @@ public class JsonToJavaConverter {
             String[] items = new String[itemsList.size()];
             items = itemsList.toArray(items);
 
-            regions[0] = getRegion(geoPath);// region;
-            dataFrame.setRegions(regions);
+            JsonNode geographicalPathNode = travelerDataFrame.findValue("GeographicalPath");
+
+            // geographicalPathNode may be an object or an array; if it is an object, treat it as a region
+            if (geographicalPathNode.isObject()) {
+                // single region
+                JsonNode regionNode = geographicalPathNode;
+                Region region = getRegion(regionNode);
+                regions.add(region);
+            }
+            else if (geographicalPathNode.isArray()) {
+                // multiple regions
+                for (final JsonNode regionNode : geographicalPathNode) {
+                    Region region = getRegion(regionNode);
+                    regions.add(region);
+                }
+            }
+            else {
+                System.out.println("warning: geographicalPathNode is not an object or an array");
+            }
+            
+            dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
             dataFrame.setItems(items);
             dataFrames[0] = dataFrame;
             tim.setDataframes(dataFrames);

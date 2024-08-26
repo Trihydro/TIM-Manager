@@ -38,6 +38,18 @@ public class CreateBaseTimUtil {
         utility = _utility;
     }
 
+    /**
+     * Builds a WydotTravelerInputData object with the provided data.
+     *
+     * @param wydotTim The WydotTim object containing the data for the TIM.
+     * @param genProps The TimGenerationProps object containing the generation properties.
+     * @param content The ContentEnum object representing the content of the TIM.
+     * @param frameType The TravelerInfoType object representing the frame type of the TIM.
+     * @param allMileposts The list of Milepost objects representing all mileposts.
+     * @param reducedMileposts The list of Milepost objects representing reduced mileposts.
+     * @param anchor The Milepost object representing the anchor milepost.
+     * @return The WydotTravelerInputData object containing the built TIM.
+     */
     public WydotTravelerInputData buildTim(WydotTim wydotTim, TimGenerationProps genProps, ContentEnum content,
             TravelerInfoType frameType, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
 
@@ -61,6 +73,7 @@ public class CreateBaseTimUtil {
         // duration time set to 22 days worth of minutes
         dataFrame.setDurationTime(32000);
 
+        // default priority
         dataFrame.setPriority(5);
 
         dataFrame.setContent(content.getStringValue());
@@ -69,18 +82,22 @@ public class CreateBaseTimUtil {
         // add itis codes to tim
         dataFrame.setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
 
+        // create anchor for the msgId
         OdePosition3D anchorPosition = new OdePosition3D();
         anchorPosition.setLatitude(anchor.getLatitude());
         anchorPosition.setLongitude(anchor.getLongitude());
         
+        // build msgId
         MsgId msgId = buildMsgId(anchorPosition, content, frameType);
         dataFrame.setMsgId(msgId);
 
+        // set regions. note that we now support multiple regions in a single TIM package
         boolean isCascadeTim = wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
         BigDecimal defaultLaneWidth = genProps.getDefaultLaneWidth();
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
 
+        // set dataframes, currently assuming a single dataframe
         OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
         dataFrames[0] = dataFrame;
         tim.setDataframes(dataFrames);

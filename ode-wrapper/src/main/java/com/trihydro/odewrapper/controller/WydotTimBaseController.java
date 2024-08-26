@@ -43,7 +43,6 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.helpers.SetItisCodes.WeightNotSupportedException;
 import com.trihydro.odewrapper.model.ControllerResult;
-import com.trihydro.odewrapper.model.IdGenerator;
 import com.trihydro.odewrapper.model.WydotTimBowr;
 import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
@@ -674,62 +673,13 @@ public abstract class WydotTimBaseController {
                 configuration.getPathDistanceLimit());
 
         createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,
-                reducedMileposts, anchor, new IdGenerator());
+                reducedMileposts, anchor);
     }
 
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
             Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
-            List<Milepost> reducedMileposts, Milepost anchor, IdGenerator idGenerator) {
-
-        if (reducedMileposts.size() > 63) {
-            // Even after reducing the mileposts, this TIM requires more nodes than J2735
-            // allows. Split this TIM into half. The first TIM will cover the first half of
-            // reduced nodes, the second TIM will cover the second.
-            var firstTim = wydotTim.copy();
-            var secondTim = wydotTim.copy();
-
-            // Note that the last milepost for firstTim is the same as the first milepost
-            // for secondTim. This ensures the first ends where the second begins, without
-            // any gap in coverage.
-            var firstStartMp = reducedMileposts.get(0);
-            var firstEndMp = reducedMileposts.get(reducedMileposts.size() / 2);
-            var secondStartMp = reducedMileposts.get(reducedMileposts.size() / 2);
-            var secondEndMp = reducedMileposts.get(reducedMileposts.size() - 1);
-
-            firstTim.setStartPoint(new Coordinate(firstStartMp.getLatitude(), firstStartMp.getLongitude()));
-            firstTim.setEndPoint(new Coordinate(firstEndMp.getLatitude(), firstEndMp.getLongitude()));
-            secondTim.setStartPoint(new Coordinate(secondStartMp.getLatitude(), secondStartMp.getLongitude()));
-            secondTim.setEndPoint(new Coordinate(secondEndMp.getLatitude(), secondEndMp.getLongitude()));
-
-            // The anchor point for the second TIM should be the milepost immediately before
-            // the start point. If we were to pull the anchor point from the reducedMilepost
-            // set, it may be much further down the road, which isn't what we want.
-            var firstEndIndex = allMileposts.indexOf(firstEndMp);
-            var secondStartIndex = allMileposts.indexOf(secondStartMp);
-
-            // Get the subset of "all mileposts" that pertains to our new TIM
-            // If we use the full set of mileposts we wouldn't get an accurate
-            // direction/heading slice.
-            // Note that .subList is inclusive of fromIndex, but exclusive of toIndex
-            var firstTimAllMileposts = allMileposts.subList(0, firstEndIndex + 1);
-            var secondTimAllMileposts = new ArrayList<Milepost>(
-                    allMileposts.subList(secondStartIndex, allMileposts.size()));
-            //.remove is removing this from ALL lists, which is inaccurate
-            // var secondAnchor = secondTimAllMileposts.remove(0);
-            var secondAnchor = allMileposts.get(secondStartIndex - 1);
-
-            createSendTims(firstTim, timType, startDateTime, endDateTime, pk, content, frameType, firstTimAllMileposts,
-                    reducedMileposts.subList(0, (reducedMileposts.size() / 2) + 1), anchor, idGenerator);
-            createSendTims(secondTim, timType, startDateTime, endDateTime, pk, content, frameType,
-                    secondTimAllMileposts,
-                    reducedMileposts.subList(reducedMileposts.size() / 2, reducedMileposts.size()), secondAnchor,
-                    idGenerator);
-
-            return;
-        }
-
-        wydotTim.setClientId(wydotTim.getClientId() + "-" + idGenerator.getNextId());
+            List<Milepost> reducedMileposts, Milepost anchor) {
 
         // create TIM
         WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, timType.getType(), startDateTime,
@@ -826,7 +776,7 @@ public abstract class WydotTimBaseController {
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts, configuration.getPathDistanceLimit());
         WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, reducedMileposts.get(0), reducedMileposts.get(reducedMileposts.size() - 1), clientId);
         utility.logWithDate("Generating TIM for segment " + countyRoadSegment.getId() + " with ITIS codes: " + countyRoadSegment.toITISCodes().toString());
-        createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor, new IdGenerator());
+        createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts, reducedMileposts, anchor);
     }
 
     /**
@@ -890,7 +840,7 @@ public abstract class WydotTimBaseController {
                 return true; // identical condition exists, return true
             }
 
-            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(existingCondition.getClientId()), null);
+            wydotTimService.clearTimsById(timType.getType(), existingCondition.getClientId(), null);
             return false; // no identical condition exists at this point, return false
         }
         else {
@@ -905,20 +855,8 @@ public abstract class WydotTimBaseController {
     private void clearAllExistingConditionsForSegment(List<String> clientIdsAssociatedWithSegment) {
         for (String clientIdToClear : clientIdsAssociatedWithSegment) {
             // clear exiting conditions
-            wydotTimService.clearTimsById(timType.getType(), trimClientIdForQuery(clientIdToClear), null);
+            wydotTimService.clearTimsById(timType.getType(), clientIdToClear, null);
         }
-    }
-
-    /**
-     * This method trims the clientId to account for the /client-id-direction query, which adds -0 to the end of the clientId.
-     * Example input: myclientid-0
-     * Example output: myclientid
-     */
-    private String trimClientIdForQuery(String clientIdToTrim) {
-        if (clientIdToTrim.lastIndexOf("-") != -1) {
-            clientIdToTrim = clientIdToTrim.substring(0, clientIdToTrim.lastIndexOf("-"));
-        }
-        return clientIdToTrim;
     }
 
     /**

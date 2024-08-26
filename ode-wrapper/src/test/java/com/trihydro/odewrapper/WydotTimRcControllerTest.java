@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -107,6 +108,7 @@ public class WydotTimRcControllerTest {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578}, \"roadCode\": \"LARI80WQDHLD\", \"direction\": \"b\",\"advisory\": [4871]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(true);
 
 		// Act
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
@@ -119,6 +121,32 @@ public class WydotTimRcControllerTest {
 		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
 		Assertions.assertEquals("b", resultArr[0].direction);
 		Assertions.assertEquals("I80", resultArr[0].route);
+		// Verify that cascading conditions get handled
+		verify(uut).handleCascadingConditionsAsync(timRcList.getTimRcList());
+	}
+
+	@Test
+	public void testCreateRcTim_bothDirections_noCascadeConditions() throws Exception {
+
+		// Arrange
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578}, \"roadCode\": \"LARI80WQDHLD\", \"direction\": \"b\",\"advisory\": [4871]} ]}";
+		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(false);
+
+		// Act
+		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
+
+		// Assert
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("b", resultArr[0].direction);
+		Assertions.assertEquals("I80", resultArr[0].route);
+
+		// Verify that cascading conditions shouldn't be handled when shouldCascadeConditions is set to false
+		verify(uut, times(0)).handleCascadingConditionsAsync(timRcList.getTimRcList());
 	}
 
 	@Test
@@ -227,6 +255,7 @@ public class WydotTimRcControllerTest {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(true);
 
 		// Act
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
@@ -250,12 +279,43 @@ public class WydotTimRcControllerTest {
 	}
 
 	@Test
+	public void testAllClear_NoCascadeCondtions() throws Exception {
+
+		// Arrange
+		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
+		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(false);
+
+		// Act
+		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
+
+		// Assert
+		// The request should be processed normally
+		Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
+		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
+		Assertions.assertNotNull(resultArr);
+		Assertions.assertEquals(1, resultArr.length);
+		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+
+		// Parameters required for AC
+		Assertions.assertEquals("d", resultArr[0].direction);
+		Assertions.assertEquals("LARI80WQDHLD", resultArr[0].clientId);
+
+		// Route isn't required for an AC, so it isn't set in the response.
+		Assertions.assertEquals(null, resultArr[0].route);
+
+		// Verify that cascading conditions shouldn't be handled when shouldCascadeConditions is set to false
+		verify(uut, times(0)).handleCascadingConditionsAsync(timRcList.getTimRcList());
+	}
+
+	@Test
 	public void testAllClear_CallsResubmitToOde_ExpiresExistingTims() throws Exception {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"d\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
 		List<ActiveTim> activeTims = getActiveTims(false);
 		when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeTims);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(true);
 
 		// Act
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);
@@ -273,6 +333,7 @@ public class WydotTimRcControllerTest {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"b\",\"advisory\": [5378]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		when(mockBasicConfiguration.shouldCascadeConditions()).thenReturn(true);
 
 		// Act
 		ResponseEntity<String> data = uut.submitAllClearRoadConditionsTim(timRcList);

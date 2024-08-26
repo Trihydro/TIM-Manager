@@ -572,12 +572,14 @@ public class ActiveTimController extends BaseController {
 			statement = connection.createStatement();
 			// There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1,
 			// CLIENTID_2
-			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
+			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = "
 					+ timTypeId;
 
 			if (direction != null) {
 				query += " and DIRECTION = '" + direction + "'";
 			}
+
+			query += " and MARKED_FOR_DELETION = '0'"; // exclude active tims marked for deletion
 
 			rs = statement.executeQuery(query);
 			activeTims = getActiveTimFromRS(rs, false);
@@ -859,7 +861,7 @@ public class ActiveTimController extends BaseController {
 				wydotTim = wydotTims.get(i);
 
 				// set client id
-				ps.setString(index, wydotTim.getClientId() + "-%");
+				ps.setString(index, wydotTim.getClientId());
 				index++;
 
 				// set direction
@@ -1548,5 +1550,41 @@ public class ActiveTimController extends BaseController {
 		utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
 				packetID, expDate, minStart));
 		return ResponseEntity.ok(minStart);
+	}
+
+	@RequestMapping(value = "/mark-for-deletion/{activeTimId}", method = RequestMethod.PUT)
+	public ResponseEntity<Boolean> MarkForDeletion(@PathVariable Long activeTimId) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		boolean success = false;
+
+		String updateStatement = "UPDATE ACTIVE_TIM SET MARKED_FOR_DELETION = '1' WHERE ACTIVE_TIM_ID = ?";
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			preparedStatement = connection.prepareStatement(updateStatement);
+			preparedStatement.setLong(1, activeTimId);
+
+			// execute update statement
+			success = dbInteractions.updateOrDelete(preparedStatement);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		} finally {
+			try {
+				// close prepared statement
+				if (preparedStatement != null)
+					preparedStatement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		if (!success) {
+			utility.logWithDate(String.format("Failed to mark active tim for deletion with activeTimId: %s", activeTimId));
+		}
+		return ResponseEntity.ok(success);
 	}
 }

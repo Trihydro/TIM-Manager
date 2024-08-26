@@ -172,7 +172,7 @@ public class CascadeController extends BaseController {
     }
 
     /**
-     * Retrieve all active TIMs that are associated with the given segment from the database
+     * Retrieve all active TIMs that are associated with the given segment from the database that are not marked for deletion
      * @param segmentId the segment id
      * @return the list of active TIMs (empty if no records found)
      * @throws SQLException if there is an error retrieving the active TIMs
@@ -193,7 +193,8 @@ public class CascadeController extends BaseController {
 			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
 			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
 			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
-            query += " where client_id like '%_trgd_" + segmentId + "-%'"; // segmentId is part of the client_id
+            query += " where client_id like '%_trgd_" + segmentId + "%'"; // segmentId is part of the client_id
+            query += " and marked_for_deletion = '0'";
 			query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
 
 			rs = statement.executeQuery(query);

@@ -168,6 +168,85 @@ public class JsonToJavaConverterTest {
 
         Assertions.assertEquals(getTim(odeTimPayload).getPacketID(), getTim(odeTimPayloadTest).getPacketID());
         Assertions.assertEquals(getTim(odeTimPayload).getUrlB(), getTim(odeTimPayloadTest).getUrlB());
+
+        // verify number of regions = 1
+        Assertions.assertEquals(1, getTim(odeTimPayloadTest).getDataframes()[0].getRegions().length);
+    }
+
+    @Test
+    public void TestConvertTimPayloadJsonToJava_Path_MultipleRegions() throws IOException, URISyntaxException {
+
+        // create test objects
+        OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
+
+        OdeTimPayload odeTimPayload = new OdeTimPayload();
+
+        OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
+        OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
+        OdeTravelerInformationMessage.DataFrame.Region[] regions = new OdeTravelerInformationMessage.DataFrame.Region[1];
+        OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
+        OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
+
+        tim.setMsgCnt(0);
+        tim.setPacketID("EC9C236B0000000000");
+        tim.setTimeStamp("2017-10-11T21:32");
+
+        OdePosition3D anchorPosition = new OdePosition3D();
+        anchorPosition.setLatitude((BigDecimal.valueOf(263056840)).multiply(new BigDecimal(".0000001")));
+        anchorPosition.setLongitude((BigDecimal.valueOf(-801481510)).multiply(new BigDecimal(".0000001")));
+        // anchorPosition.setElevation(new BigDecimal(20));
+
+        region.setAnchorPosition(anchorPosition);
+
+        OdeTravelerInformationMessage.NodeXY nodeXY0 = new OdeTravelerInformationMessage.NodeXY();
+        nodeXY0.setNodeLat((new BigDecimal("405744807")).multiply(new BigDecimal(".0000001")));
+        nodeXY0.setNodeLong((new BigDecimal("-1050524251")).multiply(new BigDecimal(".0000001")));
+        nodeXY0.setDelta("node-LatLon");
+
+        OdeTravelerInformationMessage.NodeXY[] nodeXYArr = new OdeTravelerInformationMessage.NodeXY[2];
+        nodeXYArr[0] = nodeXY0;
+
+        OdeTravelerInformationMessage.NodeXY nodeXY1 = new OdeTravelerInformationMessage.NodeXY();
+        nodeXY1.setNodeLat((new BigDecimal("405735393")).multiply(new BigDecimal(".0000001")));
+        nodeXY1.setNodeLong((new BigDecimal("-1050500237")).multiply(new BigDecimal(".0000001")));
+        nodeXY1.setDelta("node-LatLon");
+        nodeXYArr[1] = nodeXY1;
+
+        path.setNodes(nodeXYArr);
+        region.setPath(path);
+        regions[0] = region;
+        dataFrame.setRegions(regions);
+        dataFrames[0] = dataFrame;
+        tim.setDataframes(dataFrames);
+
+        odeTimPayload.setData(tim);
+
+        String value = new String(
+                Files.readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput_MultipleRegions.json").toURI())));
+        OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
+        System.out.println("PACKETID: " + getTim(odeTimPayload).getPacketID());
+        for (int i = 0; i < 2; i++) {
+            Assertions.assertEquals(
+                    getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat(),
+                    getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat());
+            Assertions.assertEquals(
+                    getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLong(),
+                    getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath().getNodes()[i]
+                            .getNodeLong());
+            Assertions.assertEquals(
+                    getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta(),
+                    getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getDelta());
+        }
+
+        Assertions.assertEquals(getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getAnchorPosition(),
+                getTim(odeTimPayloadTest).getDataframes()[0].getRegions()[0].getAnchorPosition());
+        Assertions.assertEquals(getTim(odeTimPayload).getMsgCnt(), getTim(odeTimPayloadTest).getMsgCnt());
+
+        Assertions.assertEquals(getTim(odeTimPayload).getPacketID(), getTim(odeTimPayloadTest).getPacketID());
+        Assertions.assertEquals(getTim(odeTimPayload).getUrlB(), getTim(odeTimPayloadTest).getUrlB());
+
+        // verify number of regions = 2
+        Assertions.assertEquals(2, getTim(odeTimPayloadTest).getDataframes()[0].getRegions().length);
     }
 
     @Test
@@ -501,6 +580,27 @@ public class JsonToJavaConverterTest {
         Assertions.assertEquals("speedLimit", getTim(tim_vsl).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "268", "12604", "8720" },
                 getTim(tim_vsl).getDataframes()[0].getItems());
+        
+        // verify number of regions = 1
+        Assertions.assertEquals(1, getTim(tim_vsl).getDataframes()[0].getRegions().length);
+    }
+
+    @Test
+    public void TestConvertTmcTimTopicJsonToJava_HandlesVslContentType_MultipleRegions() throws IOException {
+        // Arrange
+        String tim_vsl_json = new String(Files.readAllBytes(Paths.get("src/test/resources/tim_vsl_MultipleRegions.json")));
+
+        // Act
+        var tim_vsl = jsonToJava.convertTmcTimTopicJsonToJava(tim_vsl_json);
+
+        // Assert
+        Assertions.assertNotNull(tim_vsl);
+        Assertions.assertEquals("speedLimit", getTim(tim_vsl).getDataframes()[0].getContent());
+        Assertions.assertArrayEquals(new String[] { "268", "12604", "8720" },
+                getTim(tim_vsl).getDataframes()[0].getItems());
+        
+        // verify number of regions = 2
+        Assertions.assertEquals(2, getTim(tim_vsl).getDataframes()[0].getRegions().length);
     }
 
     @Test
@@ -516,6 +616,27 @@ public class JsonToJavaConverterTest {
         Assertions.assertEquals("exitService", getTim(tim_parking).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "4104", "11794", "345" },
                 getTim(tim_parking).getDataframes()[0].getItems());
+        
+        // verify number of regions = 1
+        Assertions.assertEquals(1, getTim(tim_parking).getDataframes()[0].getRegions().length);
+    }
+
+    @Test
+    public void TestConvertTmcTimTopicJsonToJava_HandlesParkingContentType_MultipleRegions() throws IOException {
+        // Arrange
+        String tim_parking_json = new String(Files.readAllBytes(Paths.get("src/test/resources/tim_parking_MultipleRegions.json")));
+
+        // Act
+        var tim_parking = jsonToJava.convertTmcTimTopicJsonToJava(tim_parking_json);
+
+        // Assert
+        Assertions.assertNotNull(tim_parking);
+        Assertions.assertEquals("exitService", getTim(tim_parking).getDataframes()[0].getContent());
+        Assertions.assertArrayEquals(new String[] { "4104", "11794", "345" },
+                getTim(tim_parking).getDataframes()[0].getItems());
+        
+        // verify number of regions = 2
+        Assertions.assertEquals(2, getTim(tim_parking).getDataframes()[0].getRegions().length);
     }
 
     @Test
@@ -532,6 +653,28 @@ public class JsonToJavaConverterTest {
         Assertions.assertEquals("workZone", getTim(tim_construction).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "1537", "12554", "8728" },
                 getTim(tim_construction).getDataframes()[0].getItems());
+        
+        // verify number of regions = 1
+        Assertions.assertEquals(1, getTim(tim_construction).getDataframes()[0].getRegions().length);
+    }
+
+    @Test
+    public void TestConvertTmcTimTopicJsonToJava_HandlesConstructionContentType_MultipleRegions() throws IOException {
+        // Arrange
+        String tim_construction_json = new String(
+                Files.readAllBytes(Paths.get("src/test/resources/tim_construction_MultipleRegions.json")));
+
+        // Act
+        var tim_construction = jsonToJava.convertTmcTimTopicJsonToJava(tim_construction_json);
+
+        // Assert
+        Assertions.assertNotNull(tim_construction);
+        Assertions.assertEquals("workZone", getTim(tim_construction).getDataframes()[0].getContent());
+        Assertions.assertArrayEquals(new String[] { "1537", "12554", "8728" },
+                getTim(tim_construction).getDataframes()[0].getItems());
+        
+        // verify number of regions = 2
+        Assertions.assertEquals(2, getTim(tim_construction).getDataframes()[0].getRegions().length);
     }
 
 

@@ -135,7 +135,7 @@ public class TimServiceTest extends TestBase<TimService> {
         doReturn(timId).when(uut).AddTim(odeData.getMetadata(), null, (getTim((OdeTimPayload) odeData.getPayload())),
                 null, null, null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
         doReturn(dataFrameId).when(mockDataFrameService).AddDataFrame(dFrames[0], timId);
-        doNothing().when(uut).addRegion(any(), any());
+        doNothing().when(uut).addRegions(any(), any());
         doNothing().when(uut).addDataFrameItis(any(), any());
         doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getRsuActiveTimHolding(anyString(),
                 anyString(), anyString());
@@ -147,7 +147,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(uut).AddTim(odeData.getMetadata(), null, getTim((OdeTimPayload) odeData.getPayload()), null, null,
                 null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
         verify(mockDataFrameService).AddDataFrame(dFrames[0], timId);
-        verify(uut).addRegion(dFrames[0], dataFrameId);
+        verify(uut).addRegions(dFrames[0], dataFrameId);
         verify(uut).addDataFrameItis(dFrames[0], dataFrameId);
         verify(mockActiveTimHoldingService).getRsuActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
                 aTim.getRsuTarget());
@@ -172,7 +172,7 @@ public class TimServiceTest extends TestBase<TimService> {
         // Assert
         verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verify(mockDataFrameService, never()).AddDataFrame(any(), any());
-        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addRegions(any(), any());
         verify(uut, never()).addDataFrameItis(any(), any());
         verify(mockActiveTimHoldingService).getRsuActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
                 aTim.getRsuTarget());
@@ -204,7 +204,7 @@ public class TimServiceTest extends TestBase<TimService> {
         doReturn(timId).when(uut).AddTim(odeData.getMetadata(), null, getTim((OdeTimPayload) odeData.getPayload()),
                 null, null, null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
         doReturn(dataFrameId).when(mockDataFrameService).AddDataFrame(dFrames[0], timId);
-        doNothing().when(uut).addRegion(any(), any());
+        doNothing().when(uut).addRegions(any(), any());
         doNothing().when(uut).addDataFrameItis(any(), any());
         doReturn(false).when(uut).updateTimSatRecordId(anyLong(), anyString());
         doReturn(getActiveTimHolding()).when(mockActiveTimHoldingService).getSdxActiveTimHolding(anyString(),
@@ -217,7 +217,7 @@ public class TimServiceTest extends TestBase<TimService> {
         verify(uut).AddTim(odeData.getMetadata(), null, getTim((OdeTimPayload) odeData.getPayload()), null, null,
                 null, aTim.getSatRecordId(), dFrames[0].getRegions()[0].getName());
         verify(mockDataFrameService).AddDataFrame(dFrames[0], timId);
-        verify(uut).addRegion(dFrames[0], dataFrameId);
+        verify(uut).addRegions(dFrames[0], dataFrameId);
         verify(uut).addDataFrameItis(dFrames[0], dataFrameId);
         verify(uut).updateTimSatRecordId(anyLong(), anyString());
         verify(mockActiveTimHoldingService).getSdxActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
@@ -248,7 +248,7 @@ public class TimServiceTest extends TestBase<TimService> {
         // Assert
         verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verify(mockDataFrameService, never()).AddDataFrame(any(), any());
-        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addRegions(any(), any());
         verify(uut, never()).addDataFrameItis(any(), any());
         verify(mockActiveTimHoldingService).getSdxActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
                 aTim.getSatRecordId());
@@ -287,7 +287,7 @@ public class TimServiceTest extends TestBase<TimService> {
         // Assert
         verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verify(mockDataFrameService, never()).AddDataFrame(any(), any());
-        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addRegions(any(), any());
         verify(uut, never()).addDataFrameItis(any(), any());
 
         var captor = ArgumentCaptor.forClass(ActiveTim.class);
@@ -329,7 +329,7 @@ public class TimServiceTest extends TestBase<TimService> {
         // Assert
         verify(uut, never()).AddTim(any(), any(), any(), any(), any(), any(), any(), any());
         verify(mockDataFrameService, never()).AddDataFrame(any(), any());
-        verify(uut, never()).addRegion(any(), any());
+        verify(uut, never()).addRegions(any(), any());
         verify(uut, never()).addDataFrameItis(any(), any());
         verify(mockActiveTimHoldingService).getSdxActiveTimHolding(aTim.getClientId(), aTim.getDirection(),
                 aTim.getSatRecordId());
@@ -411,7 +411,7 @@ public class TimServiceTest extends TestBase<TimService> {
         doReturn(nodeXYId).when(mockNodeXYService).AddNodeXY(isA(OdeTravelerInformationMessage.NodeXY.class));
 
         // Act
-        uut.addRegion(dataFrame, dataFrameId);
+        uut.addRegions(dataFrame, dataFrameId);
 
         // Assert
         verify(mockPathService).InsertPath();
@@ -437,7 +437,7 @@ public class TimServiceTest extends TestBase<TimService> {
         doReturn(nodeLLId).when(mockNodeLLService).AddNodeLL(isA(OdeTravelerInformationMessage.NodeXY.class));
 
         // Act
-        uut.addRegion(dataFrame, dataFrameId);
+        uut.addRegions(dataFrame, dataFrameId);
 
         // Assert
         verify(mockPathService).InsertPath();
@@ -456,7 +456,7 @@ public class TimServiceTest extends TestBase<TimService> {
         Long dataFrameId = -1l;
 
         // Act
-        uut.addRegion(dataFrame, dataFrameId);
+        uut.addRegions(dataFrame, dataFrameId);
 
         // Assert
         verify(mockPathService, never()).InsertPath();

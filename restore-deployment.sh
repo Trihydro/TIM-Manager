@@ -1,11 +1,11 @@
 # This script assumes that you have the following directory: /home/wyocvadmin/wyocv
-# which should contain both a currently deployed .jars & Dockerfiles and its backup.
+# which should contain directorys with both a currently deployed .jar & Dockerfile and their backup.
 # This also assumes that the directory name of each "submodule"
 # was extracted from the name of the .jar that was deployed.
 # For example, cv-data-tasks-X.X.X-SNAPSHOT.jar was deployed to cv-data-tasks/
 #
 # This script will:
-# 1. Backup the currently deployed JAR by appending .bak and
+# 1. Backup the currently deployed JAR by appending .bak
 # (e.g. cv-data-tasks-0.0.1-SNAPSHOT.jar.bak becomes cv-data-tasks-0.0.1-SNAPSHOT.jar)
 # 2. Make the backup the currently deployed version by removing the .bak
 # (e.g. cv-data-tasks-0.0.2-SNAPSHOT.jar becomes cv-data-tasks-0.0.2-SNAPSHOT.jar.bak)

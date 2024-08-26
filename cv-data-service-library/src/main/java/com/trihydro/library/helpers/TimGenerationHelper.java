@@ -627,6 +627,17 @@ public class TimGenerationHelper {
         return tim;
     }
 
+    /**
+     * Builds a list of regions based on the given TimUpdateModel, reduced mileposts, all mileposts, and anchor milepost.
+     * If the number of reduced mileposts is less than or equal to 63, a single region is built from the update model.
+     * If the number of reduced mileposts is greater than 63, multiple regions are built from the update model.
+     *
+     * @param aTim The TimUpdateModel object containing the update information.
+     * @param reducedMileposts The list of reduced mileposts.
+     * @param allMps The list of all mileposts.
+     * @param anchor The anchor milepost.
+     * @return The list of regions built from the update model.
+     */
     private List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
             utility.logWithDate("Less than 63 mileposts, building a single region from update model.", TimGenerationHelper.class);
@@ -641,6 +652,15 @@ public class TimGenerationHelper {
         }
     }
 
+    /**
+     * Builds multiple regions from the given update model.
+     *
+     * @param aTim The TimUpdateModel object.
+     * @param reducedMileposts The list of reduced mileposts.
+     * @param allMps The list of all mileposts.
+     * @param anchor The anchor milepost.
+     * @return The list of OdeTravelerInformationMessage.DataFrame.Region objects.
+     */
     private List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegionsFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); 
 
@@ -649,6 +669,7 @@ public class TimGenerationHelper {
         List<Milepost> milepostsForNextRegion = new ArrayList<Milepost>();
         Milepost nextAnchor = new Milepost(anchor);
 
+        // iterate over the reduced mileposts and build multiple regions
         for (int i = 0; i < reducedMileposts.size(); i++) {
             milepostsForNextRegion.add(reducedMileposts.get(i));
             // if we have reached the max number of mileposts per region, or if we are at the end of the list
@@ -763,6 +784,16 @@ public class TimGenerationHelper {
         return df;
     }
 
+    /**
+     * Retrieves the anchor position based on the provided TimUpdateModel and Milepost.
+     * If the anchor latitude and longitude are not null in the TimUpdateModel, the anchor position is set using those values.
+     * If the anchor is not null, the anchor position is set using the latitude and longitude of the anchor.
+     * If both the TimUpdateModel and the anchor are null, the anchor position is set to latitude 0, longitude 0, and elevation 0.
+     * 
+     * @param aTim The TimUpdateModel containing the anchor latitude and longitude.
+     * @param anchor The Milepost representing the anchor.
+     * @return The OdePosition3D object representing the anchor position.
+     */
     private OdePosition3D getAnchorPosition(TimUpdateModel aTim, Milepost anchor) {
         OdePosition3D anchorPosition = new OdePosition3D();
         if (aTim.getAnchorLat() != null && aTim.getAnchorLong() != null) {
@@ -781,6 +812,15 @@ public class TimGenerationHelper {
         return anchorPosition;
     }
 
+    /**
+     * Builds a single Region object from the provided TimUpdateModel, reducedMileposts, allMps, and anchor.
+     *
+     * @param aTim The TimUpdateModel object containing the data for the region.
+     * @param reducedMileposts The list of reduced mileposts.
+     * @param allMps The list of all mileposts.
+     * @param anchor The anchor milepost.
+     * @return The built Region object.
+     */
     private Region buildSingleRegionFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         Region region = new Region();
         // TODO: set name?

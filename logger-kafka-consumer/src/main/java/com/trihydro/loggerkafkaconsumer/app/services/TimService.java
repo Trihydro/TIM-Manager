@@ -124,7 +124,7 @@ public class TimService extends BaseService {
                 return;
             }
             OdeTravelerInformationMessage.DataFrame firstDataFrame = dFrames[0];
-            Long dataFrameId = dataFrameId = dataFrameService.AddDataFrame(firstDataFrame, timId);
+            Long dataFrameId = dataFrameService.AddDataFrame(firstDataFrame, timId);
 
             us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region[] regions = firstDataFrame.getRegions();
             addRegions(firstDataFrame, dataFrameId);
@@ -541,6 +541,12 @@ public class TimService extends BaseService {
         return Long.valueOf(0);
     }
 
+    /**
+     * Adds regions to the database for a given DataFrame.
+     * 
+     * @param dataFrame The DataFrame containing the regions to be added.
+     * @param dataFrameId The ID of the DataFrame.
+     */
     public void addRegions(DataFrame dataFrame, Long dataFrameId) {
         for (Region region : dataFrame.getRegions()) {
             Path path = region.getPath();

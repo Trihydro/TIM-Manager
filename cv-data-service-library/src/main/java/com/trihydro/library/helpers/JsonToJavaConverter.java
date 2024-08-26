@@ -237,7 +237,8 @@ public class JsonToJavaConverter {
         return odeTimMetadata;
     }
 
-    private OdeTravelerInformationMessage.DataFrame.Region getRegion(JsonNode regionNode) throws JsonProcessingException {
+    private OdeTravelerInformationMessage.DataFrame.Region getRegion(JsonNode regionNode)
+            throws JsonProcessingException {
         if (regionNode == null) {
             return null;
         }
@@ -250,72 +251,72 @@ public class JsonToJavaConverter {
         JsonNode regionDirectionNode = null;
         OdeTravelerInformationMessage.DataFrame.Region.Path path = null;
         OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = null;
-        if (regionNode != null) {
-            anchorNode = regionNode.get("anchor");
-            regionNameNode = regionNode.get("name");
-            regionDirectionalityNode = regionNode.get("directionality");
-            regionLaneWidthNode = regionNode.get("laneWidth");
-            regionClosedPathNode = regionNode.get("closedPath");
-            regionDirectionNode = regionNode.get("direction");
 
-            // anchor is an optional property, check for null
-            if (anchorNode != null) {
-                BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
-                BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
-                // set region anchor
-                OdePosition3D anchorPosition = new OdePosition3D();
-                anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(".0000001")));
-                anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(".0000001")));
-                // TODO elevation
+        // get node values
+        anchorNode = regionNode.get("anchor");
+        regionNameNode = regionNode.get("name");
+        regionDirectionalityNode = regionNode.get("directionality");
+        regionLaneWidthNode = regionNode.get("laneWidth");
+        regionClosedPathNode = regionNode.get("closedPath");
+        regionDirectionNode = regionNode.get("direction");
 
-                region.setAnchorPosition(anchorPosition);
-            }
+        // anchor is an optional property, check for null
+        if (anchorNode != null) {
+            BigDecimal anchorLat = mapper.treeToValue(anchorNode.get("lat"), BigDecimal.class);
+            BigDecimal anchorLong = mapper.treeToValue(anchorNode.get("long"), BigDecimal.class);
+            // set region anchor
+            OdePosition3D anchorPosition = new OdePosition3D();
+            anchorPosition.setLatitude(anchorLat.multiply(new BigDecimal(".0000001")));
+            anchorPosition.setLongitude(anchorLong.multiply(new BigDecimal(".0000001")));
+            // TODO elevation
 
-            // name
-            if (regionNameNode != null)
-                region.setName(mapper.treeToValue(regionNameNode, String.class));
+            region.setAnchorPosition(anchorPosition);
+        }
 
-            // Directionality
-            if (regionDirectionalityNode != null) {
-                // J2735 7.31 DirectionOfUse
-                JsonNode unavailable = regionDirectionalityNode.get("unavailable");// 0
-                JsonNode forward = regionDirectionalityNode.get("forward");// 1
-                JsonNode reverse = regionDirectionalityNode.get("reverse");// 2
-                // JsonNode both = regionDirectionalityNode.get("both");// 3
-                if (unavailable != null)
-                    region.setDirectionality("0");
-                else if (forward != null)
-                    region.setDirectionality("1");
-                else if (reverse != null)
-                    region.setDirectionality("2");
-                else
-                    region.setDirectionality("3");
-            }
+        // name
+        if (regionNameNode != null)
+            region.setName(mapper.treeToValue(regionNameNode, String.class));
 
-            // lane width
-            if (regionLaneWidthNode != null) {
-                region.setLaneWidth(mapper.treeToValue(regionLaneWidthNode, BigDecimal.class));
-            }
+        // Directionality
+        if (regionDirectionalityNode != null) {
+            // J2735 7.31 DirectionOfUse
+            JsonNode unavailable = regionDirectionalityNode.get("unavailable");// 0
+            JsonNode forward = regionDirectionalityNode.get("forward");// 1
+            JsonNode reverse = regionDirectionalityNode.get("reverse");// 2
+            // JsonNode both = regionDirectionalityNode.get("both");// 3
+            if (unavailable != null)
+                region.setDirectionality("0");
+            else if (forward != null)
+                region.setDirectionality("1");
+            else if (reverse != null)
+                region.setDirectionality("2");
+            else
+                region.setDirectionality("3");
+        }
 
-            // closed path
-            if (regionClosedPathNode != null) {
-                region.setClosedPath(regionClosedPathNode.get("true") != null);
-            }
+        // lane width
+        if (regionLaneWidthNode != null) {
+            region.setLaneWidth(mapper.treeToValue(regionLaneWidthNode, BigDecimal.class));
+        }
 
-            if (regionDirectionNode != null) {
-                region.setDirection(mapper.treeToValue(regionDirectionNode, String.class));
-            }
+        // closed path
+        if (regionClosedPathNode != null) {
+            region.setClosedPath(regionClosedPathNode.get("true") != null);
+        }
 
-            JsonNode descriptionNode = regionNode.get("description");
-            if (descriptionNode != null) {
-                path = GetPathData(descriptionNode.get("path"));
-                geometry = GetGeometryData(descriptionNode.get("geometry"));
+        if (regionDirectionNode != null) {
+            region.setDirection(mapper.treeToValue(regionDirectionNode, String.class));
+        }
 
-                if (path != null)
-                    region.setPath(path);
-                else if (geometry != null)
-                    region.setGeometry(geometry);
-            }
+        JsonNode descriptionNode = regionNode.get("description");
+        if (descriptionNode != null) {
+            path = GetPathData(descriptionNode.get("path"));
+            geometry = GetGeometryData(descriptionNode.get("geometry"));
+
+            if (path != null)
+                region.setPath(path);
+            else if (geometry != null)
+                region.setGeometry(geometry);
         }
 
         return region;
@@ -400,24 +401,23 @@ public class JsonToJavaConverter {
 
             JsonNode geographicalPathNode = regionsNode.get("GeographicalPath");
 
-            // geographicalPathNode may be an object or an array; if it is an object, treat it as a region
+            // geographicalPathNode may be an object or an array; if it is an object, treat
+            // it as a region
             if (geographicalPathNode.isObject()) {
                 // single region
                 JsonNode regionNode = geographicalPathNode;
                 Region region = getRegion(regionNode);
                 regions.add(region);
-            }
-            else if (geographicalPathNode.isArray()) {
+            } else if (geographicalPathNode.isArray()) {
                 // multiple regions
                 for (final JsonNode regionNode : geographicalPathNode) {
                     Region region = getRegion(regionNode);
                     regions.add(region);
                 }
-            }
-            else {
+            } else {
                 System.out.println("warning: geographicalPathNode is not an object or an array");
             }
-            
+
             dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
             dataFrame.setItems(items);
             dataFrames[0] = dataFrame;
@@ -537,8 +537,9 @@ public class JsonToJavaConverter {
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
 
-            // JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
-            //         .get("TravelerInformation");
+            // JsonNode timNode = JsonUtils.getJsonNode(value,
+            // "payload").get("data").get("MessageFrame").get("value")
+            // .get("TravelerInformation");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").findValue("TravelerInformation");
             JsonNode travelerDataFrame = timNode.findValue("TravelerDataFrame");
 
@@ -632,24 +633,23 @@ public class JsonToJavaConverter {
 
             JsonNode geographicalPathNode = travelerDataFrame.findValue("GeographicalPath");
 
-            // geographicalPathNode may be an object or an array; if it is an object, treat it as a region
+            // geographicalPathNode may be an object or an array; if it is an object, treat
+            // it as a region
             if (geographicalPathNode.isObject()) {
                 // single region
                 JsonNode regionNode = geographicalPathNode;
                 Region region = getRegion(regionNode);
                 regions.add(region);
-            }
-            else if (geographicalPathNode.isArray()) {
+            } else if (geographicalPathNode.isArray()) {
                 // multiple regions
                 for (final JsonNode regionNode : geographicalPathNode) {
                     Region region = getRegion(regionNode);
                     regions.add(region);
                 }
-            }
-            else {
+            } else {
                 System.out.println("warning: geographicalPathNode is not an object or an array");
             }
-            
+
             dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
             dataFrame.setItems(items);
             dataFrames[0] = dataFrame;

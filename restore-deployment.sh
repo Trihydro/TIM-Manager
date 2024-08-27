@@ -1,5 +1,5 @@
 # This script assumes that you have the following directory: /home/wyocvadmin/wyocv
-# which should contain directorys with both a currently deployed .jar & Dockerfile and their backup.
+# which should contain directories with both a currently deployed .jar & Dockerfile and their backup.
 # This also assumes that the directory name of each "submodule"
 # was extracted from the name of the .jar that was deployed.
 # For example, cv-data-tasks-X.X.X-SNAPSHOT.jar was deployed to cv-data-tasks/
@@ -16,6 +16,11 @@ directory=""
 base=/home/wyocvadmin/wyocv
 for path in $base/*; do
     directory=$(basename $path)
+
+    # Skip the docker-compose.yml file
+    if [ "$directory" = "docker-compose.yml" ]; then
+        continue
+    fi
 
     # Get current & backup JARs
     current_deployment_jar=$(ls $base/$directory/$directory-*.jar)

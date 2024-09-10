@@ -105,24 +105,25 @@ services:
         max-file: "5"
     restart: on-failure
 
-  sdw_depositor:
-    image: usdotjpoode/jpo-sdw-depositor:2024-q2
-    environment:
-      DOCKER_HOST_IP: ${DOCKER_HOST_IP}
-      SDW_EMAIL_LIST: test@gmail.com
-      SDW_EMAIL_FROM: test@gmail.com
-      SDW_API_KEY: ${SDW_API_KEY}
-      SDW_DESTINATION_URL: ${SDW_DESTINATION_URL}
-      SPRING_MAIL_HOST: 172.0.0.1
-      SPRING_MAIL_PORT: 123
-      SDW_SUBSCRIPTION_TOPIC: topic.SDWDepositorInput
-    depends_on:
-     - kafka
-     - ode
-    logging:
-      options:
-        max-size: "10m" 
-        max-file: "5"
+  # Note: the SDX does not accept unsigned data, so this is commented out for now
+  # sdw_depositor:
+  #   image: usdotjpoode/jpo-sdw-depositor:2024-q2
+  #   environment:
+  #     DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+  #     SDW_EMAIL_LIST: test@gmail.com
+  #     SDW_EMAIL_FROM: test@gmail.com
+  #     SDW_API_KEY: ${SDW_API_KEY}
+  #     SDW_DESTINATION_URL: ${SDW_REST_URL}
+  #     SPRING_MAIL_HOST: 172.0.0.1
+  #     SPRING_MAIL_PORT: 123
+  #     SDW_SUBSCRIPTION_TOPIC: topic.SDWDepositorInput
+  #   depends_on:
+  #    - kafka
+  #    - ode
+  #   logging:
+  #     options:
+  #       max-size: "10m" 
+  #       max-file: "5"
   
   postgres:
     image: postgis/postgis:15-master
@@ -393,71 +394,74 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  tim_logger_mongo:
-    build: ../ode-mongo-logger
-    restart: always
-    environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeTimJson
-      MONGOLOGGER_DEPOSIT_GROUP: group_tim_mongo_logger
-      MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
-      MONGOLOGGER_MONGO_HOST: http://mongo:27017
-      MONGOLOGGER_MONGO_DATABASE: local
-      MONGOLOGGER_MONGO_AUTH_DATABASE: admin
-      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
-      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
-      MONGOLOGGER_FROM_EMAIL: test@gmail.com
-      MONGOLOGGER_ENVIRONMENT_NAME: local
-      MONGOLOGGER_MAIL_HOST: 172.0.0.1
-      MONGOLOGGER_MAIL_PORT: 123
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
+  # commented out for now, experiencing authentication issues
+  # tim_logger_mongo:
+  #   build: ../ode-mongo-logger
+  #   restart: always
+  #   environment:
+  #     MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeTimJson
+  #     MONGOLOGGER_DEPOSIT_GROUP: group_tim_mongo_logger
+  #     MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
+  #     MONGOLOGGER_MONGO_HOST: mongo
+  #     MONGOLOGGER_MONGO_DATABASE: local
+  #     MONGOLOGGER_MONGO_AUTH_DATABASE: admin
+  #     MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
+  #     MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
+  #     MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
+  #     MONGOLOGGER_FROM_EMAIL: test@gmail.com
+  #     MONGOLOGGER_ENVIRONMENT_NAME: local
+  #     MONGOLOGGER_MAIL_HOST: 172.0.0.1
+  #     MONGOLOGGER_MAIL_PORT: 123
+  #   logging:
+  #     options:
+  #       max-size: "20m"
+  #       max-file: "3"
 
-  bsm_logger_mongo:
-    build: ../ode-mongo-logger
-    restart: always
-    environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeBsmJson
-      MONGOLOGGER_DEPOSIT_GROUP: group_bsm_mongo_logger
-      MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
-      MONGOLOGGER_MONGO_HOST: http://mongo:27017
-      MONGOLOGGER_MONGO_DATABASE: local
-      MONGOLOGGER_MONGO_AUTH_DATABASE: admin
-      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
-      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
-      MONGOLOGGER_FROM_EMAIL: test@gmail.com
-      MONGOLOGGER_ENVIRONMENT_NAME: local
-      MONGOLOGGER_MAIL_HOST: 172.0.0.1
-      MONGOLOGGER_MAIL_PORT: 123
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
+  # commented out for now, experiencing authentication issues
+  # bsm_logger_mongo:
+  #   build: ../ode-mongo-logger
+  #   restart: always
+  #   environment:
+  #     MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeBsmJson
+  #     MONGOLOGGER_DEPOSIT_GROUP: group_bsm_mongo_logger
+  #     MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
+  #     MONGOLOGGER_MONGO_HOST: mongo
+  #     MONGOLOGGER_MONGO_DATABASE: local
+  #     MONGOLOGGER_MONGO_AUTH_DATABASE: admin
+  #     MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
+  #     MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
+  #     MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
+  #     MONGOLOGGER_FROM_EMAIL: test@gmail.com
+  #     MONGOLOGGER_ENVIRONMENT_NAME: local
+  #     MONGOLOGGER_MAIL_HOST: 172.0.0.1
+  #     MONGOLOGGER_MAIL_PORT: 123
+  #   logging:
+  #     options:
+  #       max-size: "20m"
+  #       max-file: "3"
 
-  driveralert_logger_mongo:
-    build: ../ode-mongo-logger
-    restart: always
-    environment:
-      MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeDriverAlertJson
-      MONGOLOGGER_DEPOSIT_GROUP: group_da_mongo_logger
-      MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
-      MONGOLOGGER_MONGO_HOST: http://mongo:27017
-      MONGOLOGGER_MONGO_DATABASE: local
-      MONGOLOGGER_MONGO_AUTH_DATABASE: admin
-      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
-      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
-      MONGOLOGGER_FROM_EMAIL: test@gmail.com
-      MONGOLOGGER_ENVIRONMENT_NAME: local
-      MONGOLOGGER_MAIL_HOST: 172.0.0.1
-      MONGOLOGGER_MAIL_PORT: 123
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
+  # commented out for now, experiencing authentication issues
+  # driveralert_logger_mongo:
+  #   build: ../ode-mongo-logger
+  #   restart: always
+  #   environment:
+  #     MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeDriverAlertJson
+  #     MONGOLOGGER_DEPOSIT_GROUP: group_da_mongo_logger
+  #     MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
+  #     MONGOLOGGER_MONGO_HOST: mongo
+  #     MONGOLOGGER_MONGO_DATABASE: local
+  #     MONGOLOGGER_MONGO_AUTH_DATABASE: admin
+  #     MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
+  #     MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
+  #     MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
+  #     MONGOLOGGER_FROM_EMAIL: test@gmail.com
+  #     MONGOLOGGER_ENVIRONMENT_NAME: local
+  #     MONGOLOGGER_MAIL_HOST: 172.0.0.1
+  #     MONGOLOGGER_MAIL_PORT: 123
+  #   logging:
+  #     options:
+  #       max-size: "20m"
+  #       max-file: "3"
   # end of wyocv apps ---------------------------------------------------------
 
 # volumes ---------------------------------------------------------------------

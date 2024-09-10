@@ -5,7 +5,7 @@ This document describes how to deploy the application suite locally for developm
 ### Postgres Database Setup
 The postgres database service is defined in the `docker-compose.yml` file, but after creation it must be set up and populated manually. The following steps describe how to do this.
 1. Navigate to the `local-deployment` directory.
-1. Copy the `sample.env` file to `.env` and update the values to match your environment.
+1. Copy the `sample.env` file to `.env` and set DOCKER_HOST_IP to the IP address of the host machine.
 1. Spin up the database with the following command:
 
     ```bash
@@ -17,15 +17,15 @@ The postgres database service is defined in the `docker-compose.yml` file, but a
     ```bash
     sudo apt-get install postgresql-client
     ```
-1. Navigate to the `db-scripts\pgsql\setup` directory
-1. Copy the `sample.env` file to `.env` and update the values to match your environment.
+1. Navigate to the `db-scripts/pgsql/setup` directory
+1. Copy the `sample.env` file to `.env` and edit the file to specify the database connection information.
 1. Run the following command to set up the database:
 
     ```bash
     ./setup.sh
     ```
-1. Navigate to the `db-scripts\pgsql\static-data` directory
-1. Copy the `sample.env` file to `.env` and update the values to match your environment.
+1. Navigate to the `db-scripts/pgsql/static-data` directory
+1. Copy the `sample.env` file to `.env` and edit the file to specify the database connection information.
 1. Run the following command to populate the database with static data:
 
     ```bash

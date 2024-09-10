@@ -145,6 +145,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - '27017:27017'
     volumes:
       - mongodb_data_container:/data/db
     logging:
@@ -394,7 +396,7 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  # commented out for now, experiencing authentication issues
+  # # commented out for now, experiencing authentication issues
   # tim_logger_mongo:
   #   build: ../ode-mongo-logger
   #   restart: always
@@ -417,7 +419,7 @@ services:
   #       max-size: "20m"
   #       max-file: "3"
 
-  # commented out for now, experiencing authentication issues
+  # # commented out for now, experiencing authentication issues
   # bsm_logger_mongo:
   #   build: ../ode-mongo-logger
   #   restart: always
@@ -440,7 +442,7 @@ services:
   #       max-size: "20m"
   #       max-file: "3"
 
-  # commented out for now, experiencing authentication issues
+  # # commented out for now, experiencing authentication issues
   # driveralert_logger_mongo:
   #   build: ../ode-mongo-logger
   #   restart: always

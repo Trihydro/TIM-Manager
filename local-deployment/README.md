@@ -4,9 +4,33 @@ This document describes how to deploy the application suite locally for developm
 ## Preparation
 ### Postgres Database Setup
 The postgres database service is defined in the `docker-compose.yml` file, but after creation it must be set up and populated manually. The following steps describe how to do this.
+1. Navigate to the `local-deployment` directory.
+1. Copy the `sample.env` file to `.env` and update the values to match your environment.
+1. Spin up the database with the following command:
 
-1. Run setup scripts in `db-scripts\pgsql\setup\sql`
-2. Run static data scripts in `db-scripts\pgsql\migration\sql\static`
+    ```bash
+    docker compose up -d postgres
+    ```
+1. Open WSL and navigate to the root of the repository.
+1. Make sure that psql is installed on your machine. If it is not, install it using the following command:
+
+    ```bash
+    sudo apt-get install postgresql-client
+    ```
+1. Navigate to the `db-scripts\pgsql\setup` directory
+1. Copy the `sample.env` file to `.env` and update the values to match your environment.
+1. Run the following command to set up the database:
+
+    ```bash
+    ./setup.sh
+    ```
+1. Navigate to the `db-scripts\pgsql\static-data` directory
+1. Copy the `sample.env` file to `.env` and update the values to match your environment.
+1. Run the following command to populate the database with static data:
+
+    ```bash
+    ./insert-static-data.sh
+    ```
 
 ### Preparing JAR Files
 The dockerfiles for the wyocv services expect the JAR files to be in the same directory as the Dockerfile. After compilation, copy the JAR files to the appropriate directories.

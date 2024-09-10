@@ -26,7 +26,7 @@ CREATE TABLE mock_triggered_county_roads_v1_vw (
     c2lhpv integer,
     loct integer,
     ntt integer
-)
+);
 
 -- road codes to account for
 -- EVANI80WUTD

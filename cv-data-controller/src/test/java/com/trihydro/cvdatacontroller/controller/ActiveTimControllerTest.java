@@ -432,9 +432,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String clientId = "clientId";
         Long timTypeId = -1l;
         String direction = "eastward";
-        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
+        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
+        selectStatement += " and MARKED_FOR_DELETION = '0'";
 
         // Act
         ResponseEntity<List<ActiveTim>> data = uut.GetActiveTimsByClientIdDirection(clientId, timTypeId, direction);
@@ -466,9 +467,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String clientId = "clientId";
         Long timTypeId = -1l;
         String direction = "eastward";
-        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
+        String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = "
                 + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
+        selectStatement += " and MARKED_FOR_DELETION = '0'";
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
 
         // Act
@@ -708,7 +710,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(1, data.getBody().size());
         verify(mockConnection).prepareStatement(query);
         verify(mockPreparedStatement).setLong(1, timTypeId);
-        verify(mockPreparedStatement).setString(2, wydotTim.getClientId() + "-%");
+        verify(mockPreparedStatement).setString(2, wydotTim.getClientId());
         verify(mockPreparedStatement).setString(3, wydotTim.getDirection());
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
@@ -746,7 +748,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(1, data.getBody().size());
         verify(mockConnection).prepareStatement(query);
         verify(mockPreparedStatement).setLong(1, timTypeId);
-        verify(mockPreparedStatement).setString(2, wydotTim.getClientId() + "-%");
+        verify(mockPreparedStatement).setString(2, wydotTim.getClientId());
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getString("SAT_RECORD_ID");

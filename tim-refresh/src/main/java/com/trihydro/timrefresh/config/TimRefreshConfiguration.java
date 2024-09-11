@@ -8,6 +8,7 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.RegionNameTrimmer;
 import com.trihydro.library.helpers.SnmpHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
+import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CVRestServiceProps;
 import com.trihydro.library.model.EmailProps;
@@ -38,7 +39,8 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 @Import({ ActiveTimHoldingService.class, ActiveTimService.class, DataFrameService.class, MilepostService.class,
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
         Utility.class, RestTemplateProvider.class, MilepostReduction.class, JavaMailSenderImplProvider.class,
-        EmailHelper.class, TimGenerationHelper.class, PathNodeLLService.class, SnmpHelper.class, CascadeService.class, RegionNameTrimmer.class })
+        EmailHelper.class, TimGenerationHelper.class, PathNodeLLService.class, SnmpHelper.class, CascadeService.class,
+        RegionNameTrimmer.class, CreateBaseTimUtil.class })
 public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, EmailProps, OdeProps, TimGenerationProps {
 
     private TimeToLive sdwTtl;

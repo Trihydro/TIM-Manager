@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.controller;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trihydro.cvdatacontroller.model.Milepost;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.helpers.caches.TriggerRoadCache;
+import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.CountyRoadSegment;
+import com.trihydro.library.model.CountyRoadsProps;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.views.CountyRoadsGeometryView;
@@ -34,12 +38,14 @@ import springfox.documentation.annotations.ApiIgnore;
 public class CascadeController extends BaseController {
     private Utility utility;
     private JCSCacheProps jcsCacheProps;
+    private CountyRoadsProps countyRoadsProps;
     private TriggerRoadCache triggerRoadCache;
 
     @Autowired
-    public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps) {
+    public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps, CountyRoadsProps _countyRoadsProps) {
         utility = _utility;
         jcsCacheProps = _jcsCacheProps;
+        countyRoadsProps = _countyRoadsProps;
         triggerRoadCache = new TriggerRoadCache(utility, jcsCacheProps);
     }
 
@@ -151,6 +157,138 @@ public class CascadeController extends BaseController {
         return new ResponseEntity<List<Milepost>>(mileposts, HttpStatus.OK);
     }
 
+    /**
+     * Retrieve all active TIMs that are associated with the given segment
+     * @param segmentId the segment id
+     * @return the list of active TIMs (empty if no records found)
+     */
+    @RequestMapping(value = "/get-active-tims-with-itis-codes-for-segment/{segmentId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodesForSegment(@PathVariable int segmentId) {
+        List<ActiveTim> activeTims = retrieveActiveTimsWithItisCodesForSegmentFromDatabase(segmentId);
+        if (activeTims == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+        return new ResponseEntity<List<ActiveTim>>(activeTims, HttpStatus.OK);
+    }
+
+    /**
+     * Retrieve all active TIMs that are associated with the given segment from the database that are not marked for deletion
+     * @param segmentId the segment id
+     * @return the list of active TIMs (empty if no records found)
+     * @throws SQLException if there is an error retrieving the active TIMs
+     */
+    private List<ActiveTim> retrieveActiveTimsWithItisCodesForSegmentFromDatabase(int segmentId) {
+        List<ActiveTim> results = new ArrayList<ActiveTim>();
+		ActiveTim activeTim = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		try {
+			connection = dbInteractions.getConnectionPool();
+			statement = connection.createStatement();
+
+			String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
+			query += " left join tim_type on active_tim.tim_type_id = tim_type.tim_type_id";
+			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
+            query += " where client_id like '%_trgd_" + segmentId + "%'"; // segmentId is part of the client_id
+            query += " and marked_for_deletion = '0'";
+			query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
+
+			rs = statement.executeQuery(query);
+
+			// convert to ActiveTim object
+			while (rs.next()) {
+				Long activeTimId = rs.getLong("ACTIVE_TIM_ID");
+
+				// If we're looking at the first record or the record doesn't have
+				// the same ACTIVE_TIM_ID as the record we just processed...
+				if (activeTim == null || !activeTim.getActiveTimId().equals(activeTimId)) {
+					if (activeTim != null) {
+						results.add(activeTim);
+					}
+
+					// Create a new record and set the ActiveTim properties.
+					activeTim = new ActiveTim();
+					activeTim.setActiveTimId(activeTimId);
+					activeTim.setTimId(rs.getLong("TIM_ID"));
+					activeTim.setDirection(rs.getString("DIRECTION"));
+					activeTim.setStartDateTime(rs.getString("TIM_START"));
+					activeTim.setEndDateTime(rs.getString("TIM_END"));
+					activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+					activeTim.setRoute(rs.getString("ROUTE"));
+					activeTim.setClientId(rs.getString("CLIENT_ID"));
+					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+					activeTim.setPk(rs.getInt("PK"));
+					activeTim.setItisCodes(new ArrayList<Integer>());
+
+					Coordinate startPoint = null;
+					Coordinate endPoint = null;
+
+					// Set startPoint
+					BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+					BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
+					if (!rs.wasNull()) {
+						startPoint = new Coordinate(startLat, startLon);
+					}
+					activeTim.setStartPoint(startPoint);
+
+					// Set endPoint
+					BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+					BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
+					if (!rs.wasNull()) {
+						endPoint = new Coordinate(endLat, endLon);
+					}
+					activeTim.setEndPoint(endPoint);
+
+					// Set timType
+					long timTypeId = rs.getLong("TIM_TYPE_ID");
+					if (!rs.wasNull()) {
+						activeTim.setTimTypeId(timTypeId);
+						activeTim.setTimType(rs.getString("TYPE"));
+					}
+
+					// Set projectKey
+					int projectKey = rs.getInt("PROJECT_KEY");
+					if (!rs.wasNull()) {
+						activeTim.setProjectKey(projectKey);
+					}
+				}
+
+				// Add the ITIS code to the ActiveTim's ITIS codes, if not null
+				var itisCode = rs.getInt("ITIS_CODE"); // TODO: account for cascade TIMs with multiple ITIS codes
+				if (!rs.wasNull()) {
+					activeTim.getItisCodes().add(itisCode);
+				}
+			}
+
+			if (activeTim != null) {
+				results.add(activeTim);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			try {
+				// close prepared statement
+				if (statement != null)
+					statement.close();
+				// return connection back to pool
+				if (connection != null)
+					connection.close();
+				// close result set
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return results;
+    }
+
     private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) throws SQLException {
         TriggerRoad triggerRoad = null;
         
@@ -163,7 +301,7 @@ public class CascadeController extends BaseController {
             statement = connection.createStatement();
 
             // build SQL statement
-            String viewName = CountyRoadsTriggerView.countyRoadsTriggerViewName;
+            String viewName = countyRoadsProps.getCountyRoadsTriggerViewName();
             String query = "select * from " + viewName + " where road_code = '" + roadCode + "'";
             rs = statement.executeQuery(query);
 

@@ -1,0 +1,490 @@
+{
+	"info": {
+		"_postman_id": "c95d6854-c324-4198-87cd-e636d185227b",
+		"name": "County Roads Trigger Inputs & Outputs Examples",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19350398"
+	},
+	"item": [
+		{
+			"name": "TC1 Create - EVANI80WUTD / EVANI80WUTI",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.266851, \r\n                \"longitude\": -110.949127,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.258851, \r\n                \"longitude\": -110.962946,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"EVANI80WUTD\",\r\n            \"advisory\": [\"4885\"],\r\n            \r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC1 Clear - EVANI80WUTD / EVANI80WUTI",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.266851, \r\n                \"longitude\": -110.949127,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.258851, \r\n                \"longitude\": -110.962946,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"EVANI80WUTD\",\r\n            \"advisory\": [\"4885\"],\r\n            \r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        },\r\n                {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.266851, \r\n                \"longitude\": -110.949127,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.258851, \r\n                \"longitude\": -110.962946,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"EVANI80WUTI\",\r\n            \"advisory\": [\"4885\"],\r\n            \r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC2 Create - CHEYU85NB",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.361402, \r\n                \"longitude\": -104.587991,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.378278, \r\n                \"longitude\": -104.535463,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"US 85\",\r\n            \"roadCode\": \"CHEYU85NB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC2 Clear - CHEYU85NB",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.361402, \r\n                \"longitude\": -104.587991,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.378278, \r\n                \"longitude\": -104.535463,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"US 85\",\r\n            \"roadCode\": \"CHEYU85NB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC3 Create - ARLI80WD / ARLI80WI",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.742368, \r\n                \"longitude\": -106.799621,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.730765, \r\n                \"longitude\": -106.669576,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"ARLI80WD\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        },\r\n                {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.742368, \r\n                \"longitude\": -106.799621,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.730765, \r\n                \"longitude\": -106.669576,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"ARLI80WI\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC3 Clear - ARLI80WD / ARLI80WI",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.742368, \r\n                \"longitude\": -106.799621,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.730765, \r\n                \"longitude\": -106.669576,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"ARLI80WD\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        },\r\n                {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.742368, \r\n                \"longitude\": -106.799621,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.730765, \r\n                \"longitude\": -106.669576,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"ARLI80WI\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC4 Create - LABUS189NB",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 42.394423, \r\n                \"longitude\": -110.125615,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 42.428001, \r\n                \"longitude\": -110.109123,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"US 189\",\r\n            \"roadCode\": \"LABUS189NB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC4 Clear - LABUS189NB",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 42.394423, \r\n                \"longitude\": -110.125615,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 42.428001, \r\n                \"longitude\": -110.109123,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"US 189\",\r\n            \"roadCode\": \"LABUS189NB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC5 Create - RAWI80ELARI / RAWI80ELARD",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.743662, \r\n                \"longitude\": -106.921701,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.742333, \r\n                \"longitude\": -106.780561,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"RAWI80ELARD\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC5 Clear - RAWI80ELARI / RAWI80ELARD",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.743662, \r\n                \"longitude\": -106.921701,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.742333, \r\n                \"longitude\": -106.780561,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"RAWI80ELARD\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC6 Create - CHEYI80EPBD / CHEYI80EPBI",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.157521, \r\n                \"longitude\": -104.392153,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.158136, \r\n                \"longitude\": -104.334993,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"PBI80WCHEYD\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC6 Clear - CHEYI80EPBD / CHEYI80EPBI",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.157521, \r\n                \"longitude\": -104.392153,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.158136, \r\n                \"longitude\": -104.334993,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"CHEYI80EPBD\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        },\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.157521, \r\n                \"longitude\": -104.392153,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.158136, \r\n                \"longitude\": -104.334993,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"CHEYI80EPBI\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC7 Create - EMI80EI / EMI80ED",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.741768, \r\n                \"longitude\": -106.780608,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.743942, \r\n                \"longitude\": -106.874801,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"ARLI80WB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC7 Clear - EMI80EI / EMI80ED",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.741768, \r\n                \"longitude\": -106.780608,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.743942, \r\n                \"longitude\": -106.874801,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"ARLI80WB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC8 Create - SARW70BMRSEAB",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.743662, \r\n                \"longitude\": -106.921701,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.742333, \r\n                \"longitude\": -106.780561,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"SARW70BMRSEAB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/create-update-rc-tim",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"create-update-rc-tim"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TC8 Clear - SARW70BMRSEAB",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timRcList\": [\r\n        {\r\n            \"direction\": \"B\",\r\n            \"startPoint\": {\r\n                \"latitude\": 41.743662, \r\n                \"longitude\": -106.921701,\r\n                \"valid\": true\r\n            },\r\n            \"endPoint\": {\r\n                \"latitude\": 41.742333, \r\n                \"longitude\": -106.780561,\r\n                \"valid\": true\r\n            },\r\n            \"segment\": \"1\",\r\n            \"route\": \"I 80\",\r\n            \"roadCode\": \"SARW70BMRSEAB\",\r\n            \"advisory\": [\"4885\"],\r\n\r\n            // not needed\r\n            \"clientId\": \"\",\r\n            \"itisCodes\": []\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://odedev.wyoroad.info:7777/submit-rc-ac",
+					"protocol": "https",
+					"host": [
+						"odedev",
+						"wyoroad",
+						"info"
+					],
+					"port": "7777",
+					"path": [
+						"submit-rc-ac"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

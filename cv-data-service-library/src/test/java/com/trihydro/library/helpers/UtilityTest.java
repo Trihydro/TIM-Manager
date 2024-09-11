@@ -117,6 +117,32 @@ public class UtilityTest {
     }
 
     @Test
+    public void getMinutesDurationBetweenTwoDates_SUCCESS_different_formats() {
+        // Arrange
+        String startDateTime = "2024-03-22T07:36:15.711Z";
+        String endDateTime = "2024-03-22 07:41:00";
+
+        // Act
+        var duration = uut.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+
+        // Assert
+        Assertions.assertEquals(4, duration);
+    }
+
+    @Test
+    public void getMinutesDurationBetweenTwoDates_FAILURE_unrecognized_format() {
+        // Arrange
+        String startDateTime = "banana";
+        String endDateTime = "2024-03-22T07:36:15.711Z";
+
+        // Act
+        var duration = uut.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);
+
+        // Assert
+        Assertions.assertEquals(-1, duration);
+    }
+
+    @Test
     public void calculateAnchorCoordinateExample1() {
         // Arrange
         BigDecimal firstLat = new BigDecimal(-29.944604);

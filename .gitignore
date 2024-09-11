@@ -63,3 +63,5 @@ Thumbs.db
 
 jars/*.jar
 wyocv-jars-*.tar.gz
+
+*.bkp

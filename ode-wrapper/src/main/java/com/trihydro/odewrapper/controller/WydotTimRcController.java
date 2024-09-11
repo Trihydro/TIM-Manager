@@ -42,6 +42,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 public class WydotTimRcController extends WydotTimBaseController {
 
     private final String type = "RC";
+    protected static BasicConfiguration configuration;
 
     @Autowired
     public WydotTimRcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
@@ -50,6 +51,7 @@ public class WydotTimRcController extends WydotTimBaseController {
             TimGenerationHelper _timGenerationHelper, CascadeService _cascadeService) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
                 _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper, _cascadeService);
+        configuration = _basicConfiguration;
     }
 
     @RequestMapping(value = "/create-update-rc-tim", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -86,6 +88,12 @@ public class WydotTimRcController extends WydotTimBaseController {
         }
 
         processRequestAsync(timsToSend);
+
+        // check for trigger roads and cascade conditions if necessary
+        if (configuration.shouldCascadeConditions()) {
+            handleCascadingConditionsAsync(timRcList.getTimRcList());
+        }
+
         String responseMessage = gson.toJson(resultList);
         if (errList.size() > 0) {
             utility.logWithDate("Failed to send TIMs: " + gson.toJson(errList), this.getClass());
@@ -148,7 +156,9 @@ public class WydotTimRcController extends WydotTimBaseController {
         }
 
         // check for trigger roads and cascade conditions if necessary
-        handleCascadingConditionsAsync(timRcList.getTimRcList());
+        if (configuration.shouldCascadeConditions()) {
+            handleCascadingConditionsAsync(timRcList.getTimRcList());
+        }
 
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -172,14 +182,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 var startTime = getStartTime();
-                for (WydotTimRc tim : wydotTims) {
-                    // if tim is associated with a trigger road, cascade conditions
-                    TriggerRoad triggerRoad = cascadeService.getTriggerRoad(tim.getRoadCode());
-                    if (triggerRoad != null) {
-                        handleCascadingConditions(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
-                                TravelerInfoType.advisory, triggerRoad);
-                    }
-                }
+                handleCascadingConditions(wydotTims, getTimType(type), startTime);
             }
         }).start();
     }

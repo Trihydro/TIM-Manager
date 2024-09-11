@@ -218,4 +218,13 @@ public class ActiveTimService extends CvDataServiceLibrary {
 				Boolean.class);
 		return response.getBody();
 	}
+
+	public void markForDeletion(Long activeTimId) {
+		String url = String.format("%s/active-tim/mark-for-deletion/%d", config.getCvRestService(), activeTimId);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.PUT, entity,
+				Boolean.class);
+	}
 }

@@ -56,7 +56,7 @@ public class TimRsuControllerTest extends TestBase<TimRsuController> {
     public void AddTimRsu_FAIL() throws SQLException {
         // Arrange
         setupInsertQueryStatement();
-        doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);
+        doThrow(new SQLException("duplicate key value violates unique constraint")).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);
 
         // Act
         ResponseEntity<Long> data = uut.AddTimRsu(-1l, -1, 99);

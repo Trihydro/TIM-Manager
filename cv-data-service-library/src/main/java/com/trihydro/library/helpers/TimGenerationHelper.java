@@ -81,13 +81,14 @@ public class TimGenerationHelper {
     private SdwService sdwService;
     private SnmpHelper snmpHelper;
     private RegionNameTrimmer regionNameTrimmer;
+    private CreateBaseTimUtil createBaseTimUtil;
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
             MilepostReduction _milepostReduction, TimGenerationProps _config, RsuService _rsuService,
             OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService, SdwService _sdwService,
-            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer) {
+            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer, CreateBaseTimUtil _createBaseTimUtil) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -103,6 +104,7 @@ public class TimGenerationHelper {
         snmpHelper = _snmpHelper;
         cascadeService = _cascadeService;
         regionNameTrimmer = _regionNameTrimmer;
+        createBaseTimUtil = _createBaseTimUtil;
     }
 
     private String getIsoDateTimeString(ZonedDateTime date) {
@@ -550,43 +552,6 @@ public class TimGenerationHelper {
                 var anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 reduced_mps = milepostReduction.applyMilepostReductionAlgorithm(allMps, config.getPathDistanceLimit());
 
-                // account for case where cascade TIM has been split into multiple parts
-                if (CascadeService.isCascadeTim(wydotTim) && reduced_mps.size() > 63) {
-                    int numParts = (int) Math.ceil(reduced_mps.size() / 63.0);
-                    if (numParts > 2) {
-                        utility.logWithDate("Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM.");
-                        exceptions.add(new ResubmitTimException(activeTimId, "Cascade TIM has been split into more than 2 parts. Unable to resubmit TIM."));
-                        continue;
-                    }
-
-                    try {
-                        // more than 63 mileposts, this is likely a cascade TIM that was split into two
-                        String client_id = wydotTim.getClientId();
-                        // parse the last character of the client id to determine part #
-                        int part = Integer.parseInt(client_id.substring(client_id.length() - 1));
-                        if (part == 0) {
-                            // use first half of reduced mileposts
-                            utility.logWithDate("Cascade TIM has been split into multiple due to more than 63 mileposts. Resubmitting first half.");
-                            reduced_mps = reduced_mps.subList(0, reduced_mps.size() / 2);
-                        }
-                        else if (part == 1) {
-                            // use second half of reduced mileposts
-                            utility.logWithDate("Cascade TIM has been split into multiple due to more than 63 mileposts. Resubmitting second half.");
-                            reduced_mps = reduced_mps.subList(reduced_mps.size() / 2, reduced_mps.size());
-                        }
-                        else {
-                            utility.logWithDate("Expected part number to be 0 or 1, but got " + part + ". Unable to resubmit TIM.");
-                            exceptions.add(new ResubmitTimException(activeTimId, "Expected part number to be 0 or 1, but got " + part + ". Unable to resubmit TIM."));
-                            continue;
-                        }
-                    }
-                    catch (NumberFormatException ex) {
-                        utility.logWithDate("Failed to parse part number from client id: " + ex.getMessage());
-                        exceptions.add(new ResubmitTimException(activeTimId, "Failed to parse part number from client id: " + ex.getMessage()));
-                        continue;
-                    }
-                }
-
                 OdeTravelerInformationMessage tim = getTim(tum, reduced_mps, allMps, anchorMp, false, true);
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
@@ -638,20 +603,18 @@ public class TimGenerationHelper {
     private OdeTravelerInformationMessage getTim(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps,
             Milepost anchor, boolean resetStartTimes, boolean resetExpirationTime) {
         String nowAsISO = Instant.now().toString();
-        DataFrame df = getDataFrame(aTim, anchor, resetStartTimes, resetExpirationTime);
+        DataFrame dataFrame = getDataFrame(aTim, anchor, resetStartTimes, resetExpirationTime);
         // check to see if we have any itis codes
         // if not, just continue on
-        if (df.getItems() == null || df.getItems().length == 0) {
+        if (dataFrame.getItems() == null || dataFrame.getItems().length == 0) {
             utility.logWithDate("No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
-        Region region = getRegion(aTim, mps, allMps, anchor);
-        Region[] regions = new Region[1];
-        regions[0] = region;
-        df.setRegions(regions);
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(aTim, mps, allMps, anchor);
+        dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
 
         DataFrame[] dataframes = new DataFrame[1];
-        dataframes[0] = df;
+        dataframes[0] = dataFrame;
 
         OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
         tim.setDataframes(dataframes);
@@ -662,6 +625,64 @@ public class TimGenerationHelper {
 
         tim.setUrlB(aTim.getUrlB());
         return tim;
+    }
+
+    /**
+     * Builds a list of regions based on the given TimUpdateModel, reduced mileposts, all mileposts, and anchor milepost.
+     * If the number of reduced mileposts is less than or equal to 63, a single region is built from the update model.
+     * If the number of reduced mileposts is greater than 63, multiple regions are built from the update model.
+     *
+     * @param aTim The TimUpdateModel object containing the update information.
+     * @param reducedMileposts The list of reduced mileposts.
+     * @param allMps The list of all mileposts.
+     * @param anchor The anchor milepost.
+     * @return The list of regions built from the update model.
+     */
+    private List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
+        if (reducedMileposts.size() <= 63) {
+            utility.logWithDate("Less than 63 mileposts, building a single region from update model.", TimGenerationHelper.class);
+            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
+            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegionFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
+            regions.add(singleRegion);
+            return regions;
+        }
+        else {
+            utility.logWithDate("More than 63 mileposts, building multiple regions from update model.", TimGenerationHelper.class);
+            return buildMultipleRegionsFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
+        }
+    }
+
+    /**
+     * Builds multiple regions from the given update model.
+     *
+     * @param aTim The TimUpdateModel object.
+     * @param reducedMileposts The list of reduced mileposts.
+     * @param allMps The list of all mileposts.
+     * @param anchor The anchor milepost.
+     * @return The list of OdeTravelerInformationMessage.DataFrame.Region objects.
+     */
+    private List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegionsFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); 
+
+        int maxMilepostsPerRegion = 63;
+
+        List<Milepost> milepostsForNextRegion = new ArrayList<Milepost>();
+        Milepost nextAnchor = new Milepost(anchor);
+
+        // iterate over the reduced mileposts and build multiple regions
+        for (int i = 0; i < reducedMileposts.size(); i++) {
+            milepostsForNextRegion.add(reducedMileposts.get(i));
+            // if we have reached the max number of mileposts per region, or if we are at the end of the list
+            if (milepostsForNextRegion.size() == maxMilepostsPerRegion || i == reducedMileposts.size() - 1) {
+                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegionFromUpdateModel(aTim, milepostsForNextRegion, allMps, nextAnchor);
+                regions.add(region);
+                milepostsForNextRegion.clear();
+                nextAnchor = reducedMileposts.get(i);
+            }
+        }
+
+        utility.logWithDate("Built " + regions.size() + " regions from update model.", TimGenerationHelper.class);
+        return regions;
     }
 
     private List<ResubmitTimException> sendTim(WydotTravelerInputData timToSend, TimUpdateModel tum, Long activeTimId,
@@ -699,66 +720,6 @@ public class TimGenerationHelper {
         // else increment msgCnt
         else
             return currentCnt++;
-    }
-
-    private NodeXY[] buildNodePathFromMileposts(List<Milepost> mps, Milepost anchor) {
-        ArrayList<OdeTravelerInformationMessage.NodeXY> nodes = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-        var startMp = anchor;
-
-        // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
-        // PER-encode TIM if we supply less than 2. If we only have 1 node for the path,
-        // include a node with an offset of (0, 0) which is effectively a point that's
-        // right on top of the anchor point.
-        if (mps.size() == 1) {
-            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-            node.setNodeLat(BigDecimal.valueOf(0));
-            node.setNodeLong(BigDecimal.valueOf(0));
-            node.setDelta("node-LL");
-            nodes.add(node);
-        }
-
-        for (int i = 0; i < mps.size(); i++) {
-            // note that even though we are setting node-LL type here, the ODE only has a
-            // NodeXY object, as the structure is the same.
-            OdeTravelerInformationMessage.NodeXY node = new OdeTravelerInformationMessage.NodeXY();
-            BigDecimal lat = mps.get(i).getLatitude().subtract(startMp.getLatitude());
-            BigDecimal lon = mps.get(i).getLongitude().subtract(startMp.getLongitude());
-            node.setNodeLat(lat);
-            node.setNodeLong(lon);
-            node.setDelta("node-LL");
-            nodes.add(node);
-            startMp = mps.get(i);
-        }
-        return nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]);
-    }
-
-    private String getHeadingSliceFromMileposts(List<Milepost> mps, OdePosition3D anchor) {
-        int timDirection = 0;
-        // path list - change later
-        if (mps != null && mps.size() > 0) {
-            double startLat = anchor.getLatitude().doubleValue();
-            double startLon = anchor.getLongitude().doubleValue();
-            for (int j = 0; j < mps.size(); j++) {
-                double lat = mps.get(j).getLatitude().doubleValue();
-                double lon = mps.get(j).getLongitude().doubleValue();
-
-                Point standPoint = Point.at(com.grum.geocalc.Coordinate.fromDegrees(startLat),
-                        com.grum.geocalc.Coordinate.fromDegrees(startLon));
-                Point forePoint = Point.at(com.grum.geocalc.Coordinate.fromDegrees(lat),
-                        com.grum.geocalc.Coordinate.fromDegrees(lon));
-
-                timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
-                // reset for next round
-                startLat = lat;
-                startLon = lon;
-            }
-        }
-
-        // set direction based on bearings
-        String dirTest = Integer.toBinaryString(timDirection);
-        dirTest = StringUtils.repeat("0", 16 - dirTest.length()) + dirTest;
-        dirTest = StringUtils.reverse(dirTest);
-        return dirTest; // heading slice
     }
 
     private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes,
@@ -823,6 +784,16 @@ public class TimGenerationHelper {
         return df;
     }
 
+    /**
+     * Retrieves the anchor position based on the provided TimUpdateModel and Milepost.
+     * If the anchor latitude and longitude are not null in the TimUpdateModel, the anchor position is set using those values.
+     * If the anchor is not null, the anchor position is set using the latitude and longitude of the anchor.
+     * If both the TimUpdateModel and the anchor are null, the anchor position is set to latitude 0, longitude 0, and elevation 0.
+     * 
+     * @param aTim The TimUpdateModel containing the anchor latitude and longitude.
+     * @param anchor The Milepost representing the anchor.
+     * @return The OdePosition3D object representing the anchor position.
+     */
     private OdePosition3D getAnchorPosition(TimUpdateModel aTim, Milepost anchor) {
         OdePosition3D anchorPosition = new OdePosition3D();
         if (aTim.getAnchorLat() != null && aTim.getAnchorLong() != null) {
@@ -841,46 +812,54 @@ public class TimGenerationHelper {
         return anchorPosition;
     }
 
-    private Region getRegion(TimUpdateModel aTim, List<Milepost> mps, List<Milepost> allMps, Milepost anchor) {
-        // Set region information
+    /**
+     * Builds a single Region object from the provided TimUpdateModel, reducedMileposts, allMps, and anchor.
+     *
+     * @param aTim The TimUpdateModel object containing the data for the region.
+     * @param reducedMileposts The list of reduced mileposts.
+     * @param allMps The list of all mileposts.
+     * @param anchor The anchor milepost.
+     * @return The built Region object.
+     */
+    private Region buildSingleRegionFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         Region region = new Region();
-        region.setAnchorPosition(getAnchorPosition(aTim, anchor));
+        // TODO: set name?
+        // TODO: set regulator id?
+
+        // set lane width
         region.setLaneWidth(aTim.getLaneWidth());
-        String regionDirection = aTim.getRegionDirection();
-        if (regionDirection == null || regionDirection.isEmpty()) {
-            // we need to calculate the heading slice from all mileposts and not the subset
-            regionDirection = getHeadingSliceFromMileposts(allMps, region.getAnchorPosition());
-        }
-        region.setDirection(regionDirection);// region direction is a heading slice ie 0001100000000000
 
         // set directionality, default to 3
-        String directionality = aTim.getDirectionality();
-        if (directionality == null || directionality.isEmpty()) {
-            directionality = "3";
+        String regionDirectionality = aTim.getDirectionality();
+        if (regionDirectionality == null || regionDirectionality.isEmpty()) {
+            regionDirectionality = "3";
         }
-        region.setDirectionality(directionality);
+        region.setDirectionality(regionDirectionality);
+
+        // set closed path
         region.setClosedPath(aTim.getClosedPath());
 
-        String regionDescrip = aTim.getRegionDescription();// J2735 - one of path, geometry, oldRegion
-        if (regionDescrip == null || regionDescrip.isEmpty()) {
-            regionDescrip = "path";// if null, set it to path...we only support path anyway, and only have tables
-                                   // supporting path
-        }
-        region.setDescription(regionDescrip);
+        // set anchor position
+        region.setAnchorPosition(getAnchorPosition(aTim, anchor));
 
+        // set description
+        String regionDescription = aTim.getRegionDescription(); // J2735 - one of path, geometry, oldRegion
+        if (regionDescription == null || regionDescription.isEmpty()) {
+            regionDescription = "path"; // if null, set it to path...we only support path anyway, and only have tables supporting path
+        }
+        region.setDescription(regionDescription);
+        
+        // set direction
+        String regionDirection = aTim.getRegionDirection();
+        if (regionDirection == null || regionDirection.isEmpty()) {
+            boolean isCascadeTim = aTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
+            regionDirection = createBaseTimUtil.buildHeadingSliceFromMileposts(isCascadeTim, allMps, region.getAnchorPosition());
+        }
+        region.setDirection(regionDirection); // region direction is a heading slice ie 0001100000000000
+
+        // set path nodes
         if (aTim.getPathId() != null) {
-            // NodeXY[] nodes = pathNodeLLService.getNodeLLForPath(aTim.getPathId());
-            // // Periodically we see a mismatch in our node-LL# from the database and what
-            // // the ODE thinks it should use. As a result, this errs out if we specify the
-            // // wrong number. To combat this, just reset to node-LL
-            // for (NodeXY node : nodes) {
-            // node.setDelta("node-LL");
-            // }
-            // if (nodes == null || nodes.length == 0) {
-            // }
-            // 3/27/24, nodell doesn't have an order so refreshing is causing major issues
-            // instead, we will just generate the path from the mileposts
-            NodeXY[] nodes = buildNodePathFromMileposts(mps, anchor);
+            NodeXY[] nodes = createBaseTimUtil.buildNodePathFromMileposts(reducedMileposts, anchor);
             Path path = new Path();
             path.setScale(0);
             path.setType("ll");// offset path is now standard

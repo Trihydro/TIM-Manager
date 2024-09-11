@@ -580,7 +580,7 @@ public class ActiveTimController extends BaseController {
 			statement = connection.createStatement();
 			// There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1,
 			// CLIENTID_2
-			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "-%' and TIM_TYPE_ID = "
+			String query = "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = "
 					+ timTypeId;
 
 			if (direction != null) {
@@ -869,7 +869,7 @@ public class ActiveTimController extends BaseController {
 				wydotTim = wydotTims.get(i);
 
 				// set client id
-				ps.setString(index, wydotTim.getClientId() + "-%");
+				ps.setString(index, wydotTim.getClientId());
 				index++;
 
 				// set direction

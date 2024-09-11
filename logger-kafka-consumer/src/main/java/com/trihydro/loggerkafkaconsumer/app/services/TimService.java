@@ -114,80 +114,49 @@ public class TimService extends BaseService {
                     recType, logFileName, secResCode, null, null);
 
             // return if TIM is not inserted
-            if (timId == null)
+            if (timId == null) {
                 return;
-            Long dataFrameId = null;
-            Path path = null;
-            Geometry geometry = null;
-            OdeTravelerInformationMessage.DataFrame.Region region = null;
+            }
+
             DataFrame[] dFrames = getTim((OdeTimPayload) odeData.getPayload()).getDataframes();
-            if (dFrames.length > 0) {
-                us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0]
-                        .getRegions();
-                if (regions.length > 0) {
-                    region = regions[0];
-                    path = regions[0].getPath();
-                    geometry = regions[0].getGeometry();
+            if (dFrames.length == 0) {
+                utility.logWithDate("addTimToDatabase - No dataframes found in TIM (tim_id: " + timId + ")");
+                return;
+            }
+            OdeTravelerInformationMessage.DataFrame firstDataFrame = dFrames[0];
+            Long dataFrameId = dataFrameService.AddDataFrame(firstDataFrame, timId);
+
+            us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region[] regions = firstDataFrame.getRegions();
+            addRegions(firstDataFrame, dataFrameId);
+
+            String firstRegionName = regions[0].getName(); // all regions have the same name
+            ActiveTim activeTim = setActiveTimByRegionName(firstRegionName);
+
+            // if this is an RSU TIM
+            if (activeTim != null && activeTim.getRsuTarget() != null) {
+                // save TIM RSU in DB
+                WydotRsu rsu = rsuService.getRsus().stream()
+                        .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
+                        .orElse(null);
+                if (rsu != null) {
+                    timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
                 }
-                dataFrameId = dataFrameService.AddDataFrame(dFrames[0], timId);
             }
 
-            if (path != null) {
-                Long pathId = pathService.InsertPath();
-                regionService.AddRegion(dataFrameId, pathId, region);
+            addDataFrameItis(firstDataFrame, dataFrameId);
 
-                Long nodeXYId;
-                for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
-                    nodeXYId = nodeXYService.AddNodeXY(nodeXY);
-                    pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
-                }
-            } else if (geometry != null) {
-                regionService.AddRegion(dataFrameId, null, region);
-            } else {
-                utility.logWithDate(
-                        "addTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
-                                + dataFrameId + ")");
-            }
-
-            if (dFrames.length > 0) {
-                OdeTravelerInformationMessage.DataFrame.Region[] regions = dFrames[0].getRegions();
-                if (regions.length > 0) {
-                    String regionName = regions[0].getName();
-                    ActiveTim activeTim = setActiveTimByRegionName(regionName);
-
-                    // if this is an RSU TIM
-                    if (activeTim != null && activeTim.getRsuTarget() != null) {
-                        // save TIM RSU in DB
-                        WydotRsu rsu = rsuService.getRsus().stream()
-                                .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
-                                .orElse(null);
-                        if (rsu != null) {
-                            timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
-                        }
-                    }
-                }
-
-                var items = dFrames[0].getItems();
-                for (var i = 0; i < items.length; i++) {
-                    String timItisCode = items[i];
-                    if (StringUtils.isNumeric(timItisCode)) {
-                        String itisCodeId = getItisCodeId(timItisCode);
-                        if (itisCodeId != null)
-                            dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
-                    } else
-                        dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
-                }
-            }
         } catch (NullPointerException e) {
             System.out.println("Null pointer exception encountered in TimService.addTimToDatabase() method: " + e.getMessage());
         }
     }
 
-    // only does one TIM at a time ***
+    /**
+     * Adds an active TIM to the database. This only handles a single TIM at a time.
+     */
     public void addActiveTimToDatabase(OdeData odeData) {
 
-        utility.logWithDate("Called addActiveTimToDatabase");
-        // variables
+        utility.logWithDate("Called addActiveTimToDatabase", TimService.class);
+
         ActiveTim activeTim;
 
         OdeTimPayload payload = (OdeTimPayload) odeData.getPayload();
@@ -202,15 +171,15 @@ public class TimService extends BaseService {
         OdeTravelerInformationMessage.DataFrame.Region[] regions = dframes[0].getRegions();
         if (regions == null || regions.length == 0)
             return;
-        String name = regions[0].getName();
-        if (StringUtils.isEmpty(name) || StringUtils.isBlank(name))
+        String firstRegionName = regions[0].getName();
+        if (StringUtils.isEmpty(firstRegionName) || StringUtils.isBlank(firstRegionName))
             return;
         OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
         if (metaData == null)
             return;
 
         // get information from the region name, first check splitname length
-        activeTim = setActiveTimByRegionName(name);
+        activeTim = setActiveTimByRegionName(firstRegionName);
         if (activeTim == null)
             return;
 
@@ -225,12 +194,12 @@ public class TimService extends BaseService {
 
         if (timId == null) {
             // TIM doesn't currently exist. Add it.
-            timId = AddTim(metaData, null, tim, null, null, null, satRecordId, name);
+            timId = AddTim(metaData, null, tim, null, null, null, satRecordId, firstRegionName);
 
             if (timId != null) {
                 // we inserted a new TIM, add additional data
                 Long dataFrameId = dataFrameService.AddDataFrame(dframes[0], timId);
-                addRegion(dframes[0], dataFrameId);
+                addRegions(dframes[0], dataFrameId);
                 addDataFrameItis(dframes[0], dataFrameId);
             } else {
                 // failed to insert new tim and failed to fetch existing, log and return
@@ -572,36 +541,41 @@ public class TimService extends BaseService {
         return Long.valueOf(0);
     }
 
-    public void addRegion(DataFrame dataFrame, Long dataFrameId) {
-        Path path = null;
-        Geometry geometry = null;
-        Region region = dataFrame.getRegions()[0];
-        path = region.getPath();
-        geometry = region.getGeometry();
+    /**
+     * Adds regions to the database for a given DataFrame.
+     * 
+     * @param dataFrame The DataFrame containing the regions to be added.
+     * @param dataFrameId The ID of the DataFrame.
+     */
+    public void addRegions(DataFrame dataFrame, Long dataFrameId) {
+        for (Region region : dataFrame.getRegions()) {
+            Path path = region.getPath();
+            Geometry geometry = region.getGeometry();
 
-        if (path != null) {
-            Long pathId = pathService.InsertPath();
-            regionService.AddRegion(dataFrameId, pathId, region);
+            if (path != null) {
+                Long pathId = pathService.InsertPath();
+                regionService.AddRegion(dataFrameId, pathId, region);
 
-            Long nodeXYId;
-            Long nodeLLId;
-            for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
-                if (nodeXY.getDelta().toLowerCase().contains("xy")) {
-                    nodeXYId = nodeXYService.AddNodeXY(nodeXY);
-                    pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
-                } else {
-                    // node-LL
-                    nodeLLId = nodeLLService.AddNodeLL(nodeXY);
-                    pathNodeLLService.insertPathNodeLL(nodeLLId, pathId);
+                Long nodeXYId;
+                Long nodeLLId;
+                for (OdeTravelerInformationMessage.NodeXY nodeXY : path.getNodes()) {
+                    if (nodeXY.getDelta().toLowerCase().contains("xy")) {
+                        nodeXYId = nodeXYService.AddNodeXY(nodeXY);
+                        pathNodeXYService.insertPathNodeXY(nodeXYId, pathId);
+                    } else {
+                        // node-LL
+                        nodeLLId = nodeLLService.AddNodeLL(nodeXY);
+                        pathNodeLLService.insertPathNodeLL(nodeLLId, pathId);
+                    }
                 }
+            } else if (geometry != null) {
+                regionService.AddRegion(dataFrameId, null, region);
+            } else {
+                utility.logWithDate(
+                        "addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
+                                + dataFrameId + ")");
             }
-        } else if (geometry != null) {
-            regionService.AddRegion(dataFrameId, null, region);
-        } else {
-            utility.logWithDate(
-                    "addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
-                            + dataFrameId + ")");
-        }
+        }  
     }
 
     public void addDataFrameItis(DataFrame dataFrame, Long dataFrameId) {
@@ -616,12 +590,15 @@ public class TimService extends BaseService {
 
             if (StringUtils.isNumeric(timItisCode)) {
                 String itisCodeId = getItisCodeId(timItisCode);
-                if (itisCodeId != null)
+                if (itisCodeId != null) {
                     dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
-                else
+                }
+                else {
                     utility.logWithDate("Could not find corresponding itis code it for " + timItisCode);
-            } else
+                }
+            } else {
                 dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
+            }
         }
     }
 
@@ -661,10 +638,12 @@ public class TimService extends BaseService {
 
         activeTim.setDirection(elements.direction);
 
-        if (elements.route != null)
+        if (elements.route != null) {
             activeTim.setRoute(elements.route);
-        else
+        }
+        else {
             return activeTim;
+        }
         if (elements.rsuOrSat != null) {
             // if this is an RSU TIM
             String[] hyphen_array = elements.rsuOrSat.split("-");

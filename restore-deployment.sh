@@ -30,11 +30,14 @@ for path in $base/*; do
     current_deployment_version=$(echo $current_deployment_jar | grep -oP '(?<=-)\d.*(?=.jar)')
     backup_deployment_version=$(echo $backup_deployment_jar | grep -oP '(?<=-)\d.*(?=.jar)')
 
-    # 1. Create backup of the current JAR
-    mv $current_deployment_jar $current_deployment_jar.bak
+    # 1. Rename current JAR as temp.bak to create a backup of the current JAR that does not conflict with the current backup JAR
+    mv $current_deployment_jar old-deployment.jar
 
     # 2. Make the backup the currently deployed version
     mv $backup_deployment_jar $base/$directory/$directory-$backup_deployment_version.jar
+
+    # 3. Rename the previously deployed JAR (currently named temp.bak) to the current name
+    mv old-deployment.jar $base/$directory/$directory-$current_deployment_version.jar.bak
 
     # 3. Switch the current Dockerfile with the backup Dockerfile
     tempfile_dockerfile=$(mktemp)

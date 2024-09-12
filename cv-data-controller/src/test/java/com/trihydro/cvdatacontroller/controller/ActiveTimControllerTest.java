@@ -74,7 +74,6 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR";
         selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
         selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
-        selectStatement += " AND UPPER(atim.direction) IN ('I', 'D')";
 
         // Act
         ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();

@@ -5,10 +5,10 @@
 # For example, cv-data-tasks-X.X.X-SNAPSHOT.jar was deployed to cv-data-tasks/
 #
 # This script will:
-# 1. Backup the currently deployed JAR by appending .bak
-# (e.g. cv-data-tasks-0.0.1-SNAPSHOT.jar.bak becomes cv-data-tasks-0.0.1-SNAPSHOT.jar)
-# 2. Make the backup the currently deployed version by removing the .bak
+# 1. Make the backup the currently deployed version by removing the .bak
 # (e.g. cv-data-tasks-0.0.2-SNAPSHOT.jar becomes cv-data-tasks-0.0.2-SNAPSHOT.jar.bak)
+# 2. Backup the currently deployed JAR by appending .bak to the original filename
+# (e.g. cv-data-tasks-0.0.1-SNAPSHOT.jar.bak becomes cv-data-tasks-0.0.1-SNAPSHOT.jar)
 # 3. Switch the current Dockerfile with the backup Dockerfile
 # (e.g. Dockerfile.bak -> Dockerfile &  Dockerfile -> Dockerfile.bak)
 
@@ -30,14 +30,14 @@ for path in $base/*; do
     current_deployment_version=$(echo $current_deployment_jar | grep -oP '(?<=-)\d.*(?=.jar)')
     backup_deployment_version=$(echo $backup_deployment_jar | grep -oP '(?<=-)\d.*(?=.jar)')
 
-    # 1. Rename current JAR as temp.bak to create a backup of the current JAR that does not conflict with the current backup JAR
-    mv $current_deployment_jar old-deployment.jar
+    # Backup the current deployment
+    mv $current_deployment_jar current-deployment.jar.bak
 
-    # 2. Make the backup the currently deployed version
+    # 1. Make the backup the currently deployed version
     mv $backup_deployment_jar $base/$directory/$directory-$backup_deployment_version.jar
 
-    # 3. Rename the previously deployed JAR (currently named temp.bak) to the current name
-    mv old-deployment.jar $base/$directory/$directory-$current_deployment_version.jar.bak
+    # 2. Make the current deployment the backup
+    mv current-deployment.jar.bak $base/$directory/$directory-$current_deployment_version.jar.bak
 
     # 3. Switch the current Dockerfile with the backup Dockerfile
     tempfile_dockerfile=$(mktemp)

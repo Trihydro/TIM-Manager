@@ -6,9 +6,9 @@
 #
 # This script will:
 # 1. Make the backup the currently deployed version by removing the .bak
-# (e.g. cv-data-tasks-0.0.2-SNAPSHOT.jar becomes cv-data-tasks-0.0.2-SNAPSHOT.jar.bak)
-# 2. Backup the currently deployed JAR by appending .bak to the original filename
 # (e.g. cv-data-tasks-0.0.1-SNAPSHOT.jar.bak becomes cv-data-tasks-0.0.1-SNAPSHOT.jar)
+# 2. Backup the currently deployed JAR by appending .bak to the original filename
+# (e.g. cv-data-tasks-0.0.2-SNAPSHOT.jar becomes cv-data-tasks-0.0.2-SNAPSHOT.jar.bak)
 # 3. Switch the current Dockerfile with the backup Dockerfile
 # (e.g. Dockerfile.bak -> Dockerfile &  Dockerfile -> Dockerfile.bak)
 

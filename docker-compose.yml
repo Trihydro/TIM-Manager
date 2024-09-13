@@ -32,6 +32,8 @@ services:
       SERVER_SSL_KEY_ALIAS: ${WRAPPER_SERVER_SSL_KEY_ALIAS}
     ports:
       - "7777:7777"
+    volumes:
+      - /home/wyocvadmin/wyocv/ode-wrapper:/keystore
     logging:
       options:
         max-size: "20m"
@@ -140,6 +142,8 @@ services:
       SERVER_SSL_KEY_STORE_PASSWORD: ${CONTROLLER_SERVER_SSL_KEY_STORE_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: ${CONTROLLER_SERVER_SSL_KEY_STORE_TYPE}
       SERVER_SSL_KEY_ALIAS: ${CONTROLLER_SERVER_SSL_KEY_ALIAS}
+    volumes:
+      - /home/wyocvadmin/wyocv/cv-data-controller:/keystore
     logging:
       options:
         max-size: "20m"
@@ -163,15 +167,15 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  # angular:
-  #   build: timBuilder
-  #   restart: always
-  #   ports:
-  #     - "4200:4200"
-  #   logging:
-  #     options:
-  #       max-size: "20m"
-  #       max-file: "3"
+  angular:
+    build: timBuilder
+    restart: always
+    ports:
+      - "4200:4200"
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
 
   tim_logger_mongo:
     build: ode-mongo-logger
@@ -260,111 +264,6 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  tim_logger_2:
-    build: ode-data-logger
-    restart: always
-    environment:
-      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-      TRAC_URL: ${LOGGER_TRAC_URL}
-      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${TIM_TOPIC}
-      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
-      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-      ENV: ${LOGGER_ENV}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  tim_logger_3:
-    build: ode-data-logger
-    restart: always
-    environment:
-      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-      TRAC_URL: ${LOGGER_TRAC_URL}
-      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${TIM_TOPIC}
-      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
-      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-      ENV: ${LOGGER_ENV}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  tim_logger_4:
-    build: ode-data-logger
-    restart: always
-    environment:
-      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-      TRAC_URL: ${LOGGER_TRAC_URL}
-      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${TIM_TOPIC}
-      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
-      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-      ENV: ${LOGGER_ENV}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  tim_logger_5:
-    build: ode-data-logger
-    restart: always
-    environment:
-      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-      TRAC_URL: ${LOGGER_TRAC_URL}
-      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${TIM_TOPIC}
-      DEPOSIT_GROUP: ${TIM_GROUP_ORACLE}
-      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-      ENV: ${LOGGER_ENV}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
-  dn_trac_sender:
-    build: ode-data-logger
-    restart: always
-    environment:
-      KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
-      TRAC_URL: ${LOGGER_TRAC_URL}
-      ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
-      FROM_EMAIL: ${LOGGER_FROM_EMAIL}
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      DEPOSIT_TOPIC: ${DN_TOPIC}
-      DEPOSIT_GROUP: ${DN_GROUP}
-      CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
-      PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
-      ENV: ${LOGGER_ENV}
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
 # not used right now
 #  smdm:
 #    build: smdm
@@ -429,6 +328,7 @@ services:
     restart: always
     environment:
       KAFKA_HOST_SERVER: ${LOGGER_KAFKA_HOST_SERVER}
+      ENV: ${LOGGER_ENV}
       ALERT_ADDRESSES: ${LOGGER_ALERT_ADDRESSES}
       FROM_EMAIL: ${LOGGER_FROM_EMAIL}
       ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}

@@ -93,8 +93,6 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
 			// check that end time isn't within 2hrs
 			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
-			// check that this TIM is capable of being refreshed (direction = I or D)
-			selectStatement += " AND UPPER(atim.direction) IN ('I', 'D')";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -1105,7 +1103,7 @@ public class ActiveTimController extends BaseController {
 
 	/**
 	 * Get all ActiveTims (including RSU address and RSU Index)
-	 * 
+	 *
 	 * @return List of ActiveTims, sorted by RSU and RSU Index
 	 */
 	@RequestMapping(value = "/active-rsu-tims", method = RequestMethod.GET)

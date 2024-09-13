@@ -63,3 +63,5 @@ A sample.env file is provided in this directory. Rename this file to .env and up
 ## ora2pg
 The migration process uses the ora2pg tool via the [georgmoser/ora2pg](https://hub.docker.com/r/georgmoser/ora2pg) docker image to generate the SQL files. The configuration files for ora2pg are located in the 'config' subdirectory of the working directory. The configuration files are named using the following convention: <table_name>.conf. Comments have been removed from the configuration files to reduce the size of the files.
 
+## Note on `mileposts` table
+The `mileposts` table is excluded from the automated migration process, as its data does not change frequently. The data in this table should be manually migrated from the old Oracle database to the new PostgreSQL database using the `mileposts.sql` file located in the 'sql' subdirectory of the working directory.

@@ -131,8 +131,8 @@ public class WydotTimRcController extends WydotTimBaseController {
             List<ActiveTim> existingActiveTims = new ArrayList<>();
             var direction = wydotTim.getDirection().toUpperCase();
 
-            // the database doesn't store the 'B' direction. rather we split it into 'I' and 'D'
-            // so if we are passed the 'B' direction when performing an all-clear, we should ignore it instead
+            // 'B' TIMs are split it into 'I' and 'D' so they should be handled separately so if we are passed the 'B' direction
+            // when performing an all-clear, we should ignore it instead and handle it when cascading conditions
             if (!direction.equals("B")) {
                 existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
                         timTypeId,

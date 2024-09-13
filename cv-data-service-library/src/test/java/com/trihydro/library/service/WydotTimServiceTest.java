@@ -1,7 +1,14 @@
 package com.trihydro.library.service;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -10,8 +17,10 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 
@@ -30,14 +39,20 @@ import org.springframework.mail.MailException;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
+import com.trihydro.library.helpers.CreateBaseTimUtil;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.RegionNameTrimmer;
+import com.trihydro.library.helpers.SnmpHelper;
+import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.Milepost;
+import com.trihydro.library.model.MilepostBuffer;
 import com.trihydro.library.model.OdeProps;
+import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
@@ -47,6 +62,8 @@ import com.trihydro.library.model.WydotTravelerInputData;
 
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
+import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
+import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @ExtendWith(MockitoExtension.class)
 public class WydotTimServiceTest {
@@ -68,6 +85,8 @@ public class WydotTimServiceTest {
     @Mock
     OdeService mockOdeService;
     @Mock
+    CreateBaseTimUtil mockCreateBaseTimUtil;
+    @Mock
     RestTemplate restTemplate;
     @Mock
     ActiveTimService mockActiveTimService;
@@ -84,8 +103,13 @@ public class WydotTimServiceTest {
     @Mock
     ActiveTimHoldingService mockActiveTimHoldingService;
     @Mock
+    MilepostService mockMilepostService;
+    @Mock
+    TimGenerationHelper mockTimGenerationHelper;
+    @Mock
     RegionNameTrimmer mockRegionNameTrimmer;
-
+    @Mock
+    SnmpHelper mockSnmpHelper;
     @InjectMocks
     WydotTimService uut;
 
@@ -140,7 +164,7 @@ public class WydotTimServiceTest {
 
     private List<Milepost> getMockMileposts() {
         List<Milepost> mileposts = new ArrayList<>();
-        
+
         Milepost milepost1 = new Milepost();
         milepost1.setCommonName("I-80");
         milepost1.setMilepost(0.0);
@@ -160,8 +184,198 @@ public class WydotTimServiceTest {
         return mileposts;
     }
 
+    private WydotTim getMockWydotTim() {
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setClientId("testclientid");
+        wydotTim.setDirection("D");
+        return wydotTim;
+    }
+
+    private WydotTravelerInputData getMockWydotTravelerInputDataWithServiceRequest() {
+        WydotTravelerInputData wydotTravelerInputData = new WydotTravelerInputData();
+        wydotTravelerInputData.setTim(getMockOdeTravelerInformationMessage());
+        ServiceRequest serviceRequest = new ServiceRequest();
+        wydotTravelerInputData.setRequest(serviceRequest);
+        return wydotTravelerInputData;
+    }
+
+    private WydotTravelerInputData getMockWydotTravelerInputDataWithDataFrame() {
+        WydotTravelerInputData wydotTravelerInputData = new WydotTravelerInputData();
+        OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
+        DataFrame df = new DataFrame();
+        df.setStartDateTime("2022-01-01T00:00:00.000Z");
+        tim.setDataframes(new DataFrame[]{df});
+        wydotTravelerInputData.setTim(tim);
+        return wydotTravelerInputData;
+    }
+
+    private TimType getMockTimType(String timTypeStr) {
+        TimType timType = new TimType();
+        timType.setType(timTypeStr);
+        timType.setTimTypeId(1L);
+        return timType;
+    }
+
     public void setupRestTemplate() {
         doReturn(mockRestTemplate).when(mockRestTemplateProvider).GetRestTemplate_NoErrors();
+    }
+
+    @Test
+    public void createTim_ReturnsNull_WhenBuildTimReturnsNull() {
+        // Arrange
+        String timTypeStr = "A";
+        String startDateTime = "2023-01-01T00:00:00.000Z";
+        String endDateTime = "2023-01-01T01:00:00.000Z";
+        ContentEnum content = ContentEnum.workZone;
+        TravelerInfoType frameType = TravelerInfoType.advisory;
+        List<Milepost> allMileposts = new ArrayList<>();
+        List<Milepost> reducedMileposts = new ArrayList<>();
+        Milepost anchor = new Milepost();
+
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(null);
+
+        // Act
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    public void createTim_SetsStartDateTime_WhenProvided() {
+        // Arrange
+        String timTypeStr = "A";
+        String startDateTime = "2023-01-01T00:00:00.000Z";
+        String endDateTime = "2023-01-01T01:00:00.000Z";
+        ContentEnum content = ContentEnum.workZone;
+        TravelerInfoType frameType = TravelerInfoType.advisory;
+        List<Milepost> allMileposts = new ArrayList<>();
+        List<Milepost> reducedMileposts = new ArrayList<>();
+        Milepost anchor = new Milepost();
+
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
+
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+
+        // Act
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+
+        // Assert
+        assertEquals(startDateTime, result.getTim().getDataframes()[0].getStartDateTime());
+    }
+
+    @Test
+    public void createTim_SetsDurationTime_WhenEndDateTimeProvided() {
+        // Arrange
+        String timTypeStr = "A";
+        String startDateTime = "2023-01-01T00:00:00.000Z";
+        String endDateTime = "2023-01-01T01:00:00.000Z";
+        ContentEnum content = ContentEnum.workZone;
+        TravelerInfoType frameType = TravelerInfoType.advisory;
+        List<Milepost> allMileposts = new ArrayList<>();
+        List<Milepost> reducedMileposts = new ArrayList<>();
+        Milepost anchor = new Milepost();
+
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
+
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+        when(mockUtility.getMinutesDurationBetweenTwoDates(anyString(), anyString())).thenReturn(60);
+
+        // Act
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+
+        // Assert
+        assertEquals(60, result.getTim().getDataframes()[0].getDurationTime());
+    }
+
+    @Test
+    public void createTim_SetsDurationTimeTo120_ForParkingTim() {
+        // Arrange
+        String timTypeStr = "P";
+        String startDateTime = "2023-01-01T00:00:00.000Z";
+        String endDateTime = "2023-01-01T01:00:00.000Z";
+        ContentEnum content = ContentEnum.workZone;
+        TravelerInfoType frameType = TravelerInfoType.advisory;
+        List<Milepost> allMileposts = new ArrayList<>();
+        List<Milepost> reducedMileposts = new ArrayList<>();
+        Milepost anchor = new Milepost();
+
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
+
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+
+        // Act
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+
+        // Assert
+        assertEquals(120, result.getTim().getDataframes()[0].getDurationTime());
+    }
+
+    @Test
+    public void createTim_SetsRandomPacketId() {
+        // Arrange
+        String timTypeStr = "A";
+        String startDateTime = "2023-01-01T00:00:00.000Z";
+        String endDateTime = "2023-01-01T01:00:00.000Z";
+        ContentEnum content = ContentEnum.workZone;
+        TravelerInfoType frameType = TravelerInfoType.advisory;
+        List<Milepost> allMileposts = new ArrayList<>();
+        List<Milepost> reducedMileposts = new ArrayList<>();
+        Milepost anchor = new Milepost();
+
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
+
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+
+        // Act
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+
+        // Assert
+        assertNotNull(result.getTim().getPacketID());
+        assertEquals(18, result.getTim().getPacketID().length());
+        assertTrue(result.getTim().getPacketID().matches("[0-9A-F]+"));
+    }
+
+    @Test
+    public void getAllMilepostsForTim_EndPointNotNull() {
+        // Arrange
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setEndPoint(new Coordinate(BigDecimal.valueOf(41.678473), BigDecimal.valueOf(-108.782775)));
+        List<Milepost> expectedMileposts = getMockMileposts();
+
+        when(mockMilepostService.getMilepostsByStartEndPointDirection(wydotTim)).thenReturn(expectedMileposts);
+
+        // Act
+        List<Milepost> result = uut.getAllMilepostsForTim(wydotTim);
+
+        // Assert
+        assertEquals(expectedMileposts, result);
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(wydotTim);
+    }
+
+    @Test
+    public void getAllMilepostsForTim_EndPointNull() {
+        // Arrange
+        WydotTim wydotTim = getMockWydotTim();
+        Coordinate startPoint = new Coordinate(BigDecimal.valueOf(41.678473), BigDecimal.valueOf(-108.782775));
+        wydotTim.setStartPoint(startPoint);
+        wydotTim.setRoute("I-80");
+        List<Milepost> expectedMileposts = getMockMileposts();
+
+        MilepostBuffer mpb = new MilepostBuffer();
+        mpb.setBufferMiles(mockGenProps.getPointIncidentBufferMiles());
+        mpb.setCommonName(wydotTim.getRoute());
+        mpb.setDirection(wydotTim.getDirection());
+        mpb.setPoint(wydotTim.getStartPoint());
+
+        when(mockMilepostService.getMilepostsByPointWithBuffer(any())).thenReturn(expectedMileposts);
+
+        // Act
+        List<Milepost> result = uut.getAllMilepostsForTim(wydotTim);
+
+        // Assert
+        assertEquals(expectedMileposts, result);
+        verify(mockMilepostService).getMilepostsByPointWithBuffer(any());
     }
 
     @Test
@@ -169,16 +383,11 @@ public class WydotTimServiceTest {
         // Arrange
         List<ActiveTim> activeSatTims = getActiveTims(true);
         when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeSatTims);
-        WydotTim wydotTim = new WydotTim();
-        wydotTim.setClientId("testclientid");
-        wydotTim.setDirection("D");
-        WydotTravelerInputData timToSend = new WydotTravelerInputData();
-        timToSend.setTim(getMockOdeTravelerInformationMessage());
-        ServiceRequest serviceRequest = new ServiceRequest();
-        timToSend.setRequest(serviceRequest);
+        WydotTim wydotTim = getMockWydotTim();
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithServiceRequest();
         String regionNamePrev = "regionNamePrev";
         TimType timType = new TimType();
-        Integer pk = 0;
+
         Coordinate endPoint = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
         List<Milepost> reducedMileposts = getMockMileposts();
         WydotOdeTravelerInformationMessage mockExistingSatTim = getMockWydotOdeTravelerInformationMessage();
@@ -187,10 +396,152 @@ public class WydotTimServiceTest {
         when(mockRestTemplateProvider.GetRestTemplate()).thenReturn(mockRestTemplate);
 
         // Act
-        uut.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint, reducedMileposts);
+        uut.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, 0, endPoint, reducedMileposts);
 
         // Assert
         verify(mockUtility).logWithDate("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+    }
+
+    @Test
+    public void sendTimToSDW_NoActiveSatTimsFound() {
+        // Arrange
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(new ArrayList<>());
+        WydotTim wydotTim = getMockWydotTim();
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithServiceRequest();
+        String regionNamePrev = "regionNamePrev";
+        TimType timType = new TimType();
+        Coordinate endPoint = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+        List<Milepost> reducedMileposts = getMockMileposts();
+        when(mockSdwService.getNewRecordId()).thenReturn("newRecordId");
+
+        // Act
+        uut.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, 0, endPoint, reducedMileposts);
+
+        // Assert
+        verify(mockSdwService).getNewRecordId();
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
+        verify(mockUtility, never()).logWithDate("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+    }
+
+    @Test
+    public void sendTimToSDW_SingleActiveSatTimFound() {
+        // Arrange
+        List<ActiveTim> activeSatTims = getActiveTims(true).subList(0, 1);
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeSatTims);
+        WydotTim wydotTim = getMockWydotTim();
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithServiceRequest();
+        String regionNamePrev = "regionNamePrev";
+        TimType timType = new TimType();
+        Coordinate endPoint = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+        List<Milepost> reducedMileposts = getMockMileposts();
+        WydotOdeTravelerInformationMessage mockExistingSatTim = getMockWydotOdeTravelerInformationMessage();
+        when(mockTimService.getTim(any())).thenReturn(mockExistingSatTim);
+
+        // Act
+        uut.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, 0, endPoint, reducedMileposts);
+
+        // Assert
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
+        verify(mockActiveTimService).resetActiveTimsExpirationDate(any());
+        verify(mockTimService).getTim(any());
+        verify(mockUtility, never()).logWithDate("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+    }
+
+    @Test
+    public void sendTimToRsus_NoRsusFound() {
+        // Arrange
+        when(mockRsuService.getRsusByLatLong(any(), any(), any(), any())).thenReturn(new ArrayList<>());
+
+        WydotTim wydotTim = getMockWydotTim();
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithServiceRequest();
+        String regionNamePrev = "regionNamePrev";
+        TimType timType = new TimType();
+        String endDateTime = "2024-08-29 14:45:30";
+        Coordinate endPoint = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+
+
+        // Act
+        uut.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, 0, endDateTime, endPoint);
+
+        // Assert
+        verify(mockUtility).logWithDate("No RSUs found to place TIM on, returning");
+    }
+
+    @Test
+    public void sendTimToRsus_RsusFound_NoActiveTIMs() {
+        // Arrange
+        List<WydotRsu> rsus = new ArrayList<>();
+        WydotRsu rsu = new WydotRsu();
+        rsu.setRsuId(1);
+        rsu.setRsuIndex(1);
+        rsu.setRsuTarget("target");
+        rsus.add(rsu);
+        when(mockRsuService.getRsusByLatLong(any(), any(), any(), any())).thenReturn(rsus);
+        when(mockActiveTimService.getActiveRsuTim(any())).thenReturn(null);
+        when(mockOdeService.submitTimQuery(any(), anyInt())).thenReturn(new TimQuery());
+        when(mockActiveTimHoldingService.getActiveTimHoldingForRsu(any())).thenReturn(new ArrayList<>());
+        when(mockRsuService.getActiveRsuTimIndexes(any())).thenReturn(new ArrayList<>());
+        when(mockOdeService.findFirstAvailableIndexWithRsuIndex(any())).thenReturn(1);
+
+        WydotTim wydotTim = getMockWydotTim();
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithServiceRequest();
+        String regionNamePrev = "regionNamePrev";
+        TimType timType = new TimType();
+
+        String endDateTime = "2024-08-29 14:45:30";
+        Coordinate endPoint = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+
+        // Act
+        uut.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, 0, endDateTime, endPoint);
+
+        // Assert
+        verify(mockOdeService).sendNewTimToRsu(any());
+    }
+
+    @Test
+    public void sendTimToRsus_RsusFound_ActiveTIMsExist() {
+        // Arrange
+        List<WydotRsu> rsus = new ArrayList<>();
+        WydotRsu rsu = new WydotRsu();
+        rsu.setRsuId(1);
+        rsu.setRsuIndex(1);
+        rsu.setRsuTarget("target");
+        rsus.add(rsu);
+        when(mockRsuService.getRsusByLatLong(any(), any(), any(), any())).thenReturn(rsus);
+        ActiveTim activeTim = new ActiveTim();
+        activeTim.setActiveTimId(1L);
+        activeTim.setTimId(1L);
+        when(mockActiveTimService.getActiveRsuTim(any())).thenReturn(activeTim);
+        when(mockTimService.getTim(any())).thenReturn(new WydotOdeTravelerInformationMessage());
+
+        WydotTim wydotTim = getMockWydotTim();
+        WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithServiceRequest();
+        String regionNamePrev = "regionNamePrev";
+        TimType timType = new TimType();
+
+        String endDateTime = "2024-08-29 14:45:30";
+        Coordinate endPoint = new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+
+        TimRsu timRsu = new TimRsu();
+        timRsu.setRsuId(1L);
+        timRsu.setRsuIndex(1);
+        when(mockTimRsuService.getTimRsu(any(), any())).thenReturn(timRsu);
+        when(mockRsuService.selectAll()).thenReturn(rsus);
+        ResponseEntity<String> mockResponse = new ResponseEntity<>(HttpStatus.OK);
+        when(mockRestTemplateProvider.GetRestTemplate_NoErrors()).thenReturn(mockRestTemplate);
+        when(mockRestTemplate.exchange(
+                anyString(),
+                eq(HttpMethod.DELETE),
+                any(HttpEntity.class),
+                eq(String.class)
+        )).thenReturn(mockResponse);
+
+        // Act
+        uut.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, 0, endDateTime, endPoint);
+
+        // Assert
+        verify(mockUtility).logWithDate("Deleting TIM on index " + rsu.getRsuIndex() + " from rsu " + rsu.getRsuTarget());
+        verify(mockOdeService).sendNewTimToRsu(any());
     }
 
     @Test
@@ -303,6 +654,166 @@ public class WydotTimServiceTest {
         }
         String jsonVal = String.join(",", timRsuJson);
         Assertions.assertEquals(jsonVal, result.getRsuErrorSummary());
+    }
+
+    @Test
+    public void clearTimsById_NoBuffers() {
+        // Arrange
+        String timTypeStr = "testType";
+        String clientId = "testClient";
+        String direction = "D";
+        TimType timType = getMockTimType(timTypeStr);
+        List<ActiveTim> activeTims = Arrays.asList(new ActiveTim(), new ActiveTim());
+        List<Long> activeTimIds = activeTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
+
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction)).thenReturn(activeTims);
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+        // Act
+        boolean result = uut.clearTimsById(timTypeStr, clientId, direction);
+
+        // Assert
+        assertTrue(result);
+        verify(mockTimGenerationHelper).expireTimAndResubmitToOde(activeTimIds);
+        verify(mockActiveTimService, never()).getBufferTimsByClientId(clientId);
+    }
+
+    @Test
+    public void clearTimsById_WithBuffers() {
+        // Arrange
+        String timTypeStr = "testType";
+        String clientId = "testClient";
+        String direction = "D";
+        TimType timType = getMockTimType(timTypeStr);
+        List<ActiveTim> activeTims = Arrays.asList(new ActiveTim(), new ActiveTim());
+        List<Long> activeTimIds = activeTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
+
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), direction)).thenReturn(activeTims);
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+
+        // Act
+        boolean result = uut.clearTimsById(timTypeStr, clientId, direction, true);
+
+        // Assert
+        assertTrue(result);
+        verify(mockTimGenerationHelper).expireTimAndResubmitToOde(activeTimIds);
+        verify(mockActiveTimService).getBufferTimsByClientId(clientId);
+    }
+
+    @Test
+    public void deleteWydotTimsByType_CallsGetActiveTimsByWydotTim_WithCorrectParameters() {
+        // Arrange
+        List<WydotTim> wydotTims = new ArrayList<>();
+        WydotTim wydotTim = new WydotTim();
+        wydotTims.add(wydotTim);
+        String timTypeStr = "A";
+        TimType timType = getMockTimType(timTypeStr);
+
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+        when(mockActiveTimService.getActiveTimsByWydotTim(anyList(), eq(1L))).thenReturn(new ArrayList<>());
+
+        // Act
+        boolean result = uut.deleteWydotTimsByType(wydotTims, timTypeStr);
+
+        // Assert
+        verify(mockActiveTimService).getActiveTimsByWydotTim(wydotTims, 1L);
+        assertTrue(result);
+    }
+
+    @Test
+    public void deleteWydotTimsByType_CallsDeleteTimsFromRsusAndSdx_WithCorrectParameters() {
+        // Arrange
+        List<WydotTim> wydotTims = new ArrayList<>();
+        WydotTim wydotTim = new WydotTim();
+        wydotTims.add(wydotTim);
+        String timTypeStr = "A";
+        TimType timType = getMockTimType(timTypeStr);
+
+        List<ActiveTim> activeTims = new ArrayList<>();
+        ActiveTim activeTim = new ActiveTim();
+        activeTims.add(activeTim);
+
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+        when(mockActiveTimService.getActiveTimsByWydotTim(anyList(), eq(1L))).thenReturn(activeTims);
+
+        // Act
+        boolean result = uut.deleteWydotTimsByType(wydotTims, timTypeStr);
+
+        // Assert
+        verify(mockActiveTimService).getActiveTimsByWydotTim(wydotTims, 1L);
+        verify(mockActiveTimService).deleteActiveTim(activeTim.getActiveTimId());
+        assertTrue(result);
+    }
+
+    @Test
+    public void selectTimByClientId_ReturnsActiveTims_WhenFound() {
+        // Arrange
+        String timTypeStr = "A";
+        String clientId = "client123";
+        TimType timType = getMockTimType(timTypeStr);
+        List<ActiveTim> expectedActiveTims = Arrays.asList(new ActiveTim(), new ActiveTim());
+
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), null))
+            .thenReturn(expectedActiveTims);
+
+        // Act
+        List<ActiveTim> result = uut.selectTimByClientId(timTypeStr, clientId);
+
+        // Assert
+        assertEquals(expectedActiveTims, result);
+    }
+
+    @Test
+    public void selectTimByClientId_ReturnsEmptyList_WhenNoActiveTimsFound() {
+        // Arrange
+        String timTypeStr = "A";
+        String clientId = "client123";
+        TimType timType = getMockTimType(timTypeStr);
+        List<ActiveTim> expectedActiveTims = new ArrayList<>();
+
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+        when(mockActiveTimService.getActiveTimsByClientIdDirection(clientId, timType.getTimTypeId(), null))
+            .thenReturn(expectedActiveTims);
+
+        // Act
+        List<ActiveTim> result = uut.selectTimByClientId(timTypeStr, clientId);
+
+        // Assert
+        assertEquals(expectedActiveTims, result);
+    }
+
+    @Test
+    public void selectTimsByType_ReturnsActiveTims_WhenFound() {
+        // Arrange
+        String timTypeStr = "A";
+        TimType timType = getMockTimType(timTypeStr);
+        List<ActiveTim> expectedActiveTims = Arrays.asList(new ActiveTim(), new ActiveTim());
+
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+        when(mockActiveTimService.getActivesTimByType(timType.getTimTypeId())).thenReturn(expectedActiveTims);
+
+        // Act
+        List<ActiveTim> result = uut.selectTimsByType(timTypeStr);
+
+        // Assert
+        assertEquals(expectedActiveTims, result);
+    }
+
+    @Test
+    public void selectTimsByType_ReturnsEmptyList_WhenNoActiveTimsFound() {
+        // Arrange
+        String timTypeStr = "A";
+        TimType timType = getMockTimType(timTypeStr);
+        List<ActiveTim> expectedActiveTims = new ArrayList<>();
+
+        when(mockTimTypeService.selectAll()).thenReturn(Arrays.asList(timType));
+        when(mockActiveTimService.getActivesTimByType(timType.getTimTypeId())).thenReturn(expectedActiveTims);
+
+        // Act
+        List<ActiveTim> result = uut.selectTimsByType(timTypeStr);
+
+        // Assert
+        assertEquals(expectedActiveTims, result);
     }
 
     @Test
@@ -439,5 +950,4 @@ public class WydotTimServiceTest {
         // Assert
         Assertions.assertEquals(null, result);
     }
-
 }

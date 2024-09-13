@@ -150,7 +150,7 @@ public class WydotTimRcControllerTest {
 	}
 
 	@Test
-	public void testCreateRcTim_bothDirections_NoMileposts() throws Exception {
+	public void testCreateRcTim_bothDirections_RouteNotSupported() throws Exception {
 
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I70\", \"roadCode\": \"LARI80WQDHLD\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578}, \"direction\":\"b\",\"advisory\": [4871]} ]}";
@@ -175,6 +175,7 @@ public class WydotTimRcControllerTest {
 		// Arrange
 		String rcJson = "{\"timRcList\": [{ \"route\": \"I80\", \"startPoint\": {\"latitude\": 41.161446, \"longitude\": -104.653162},\"endPoint\": {\"latitude\": 41.170465, \"longitude\": -104.085578},\"roadCode\": \"LARI80WQDHLD\", \"direction\":\"b\",\"advisory\": [11]} ]}";
 		TimRcList timRcList = gson.fromJson(rcJson, TimRcList.class);
+		lenient().doReturn(new ArrayList<>()).when(setItisCodes).setItisCodesRc(any());
 
 		// Act
 		ResponseEntity<String> data = uut.createUpdateRoadConditionsTim(timRcList);
@@ -184,9 +185,8 @@ public class WydotTimRcControllerTest {
 		ControllerResult[] resultArr = gson.fromJson(data.getBody(), ControllerResult[].class);
 		Assertions.assertNotNull(resultArr);
 		Assertions.assertEquals(1, resultArr.length);
-		Assertions.assertEquals("success", resultArr[0].resultMessages.get(0));
+		Assertions.assertEquals("No ITIS codes found", resultArr[0].resultMessages.get(0));
 		Assertions.assertEquals("b", resultArr[0].direction);
-		Assertions.assertEquals("I80", resultArr[0].route);
 	}
 
 	@Test

@@ -1,0 +1,2 @@
+# WeightRestrictionEndpoints.yaml
+The `WeightRestrictionEndpoints.yaml` file contains the specification for the create-update-bowr-tim & submit-bowr-clear endpoints of the ODE Wrapper, which can be used to create/update a Blow Over Weight Restriction TIM and submit a Blow Over Weight Restriction Clear request respectively. This file is for documentation purposes only and is not used by the ODE Wrapper.

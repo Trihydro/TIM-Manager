@@ -1,0 +1,1 @@
+drop view if exists milepost_vw_new cascade;

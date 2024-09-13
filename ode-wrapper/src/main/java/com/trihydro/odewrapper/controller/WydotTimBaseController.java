@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +41,9 @@ import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
+import com.trihydro.odewrapper.helpers.SetItisCodes.WeightNotSupportedException;
 import com.trihydro.odewrapper.model.ControllerResult;
+import com.trihydro.odewrapper.model.WydotTimBowr;
 import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
@@ -522,6 +525,83 @@ public abstract class WydotTimBaseController {
             return true;
         }
         return false;
+    }
+
+    protected ControllerResult validateInputBowr(WydotTimBowr tim) {
+        ControllerResult toReturn = new ControllerResult();
+        List<String> resultMessages = new ArrayList<String>();
+
+        // check direction
+        if (tim.getDirection() != null) {
+            toReturn.setDirection(tim.getDirection());
+        }
+        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d") && !tim.getDirection().equalsIgnoreCase("b")) {
+            resultMessages.add("direction not supported");
+        }
+
+        // check route
+        if (tim.getRoute() == null) {
+            resultMessages.add("Null value for route");
+        }
+        else {
+            toReturn.setRoute(tim.getRoute());
+        }
+
+        // check points
+        if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
+            resultMessages.add("Invalid startPoint");
+        }
+        if (tim.getEndPoint() == null || !tim.getEndPoint().isValid()) {
+            resultMessages.add("Invalid endPoint");
+        }
+
+        if (tim.getClientId() == null) {
+            resultMessages.add("Null value for client id");
+        } else {
+            tim.setClientId(tim.getClientId());
+        }
+
+        // set itis codes
+        List<String> itisCodes = new ArrayList<>();
+        try {
+            itisCodes = setItisCodes.setItisCodesBowr(tim);
+        } catch (WeightNotSupportedException exception) {
+            resultMessages.add("Weight not supported");
+        }
+        toReturn.setItisCodes(itisCodes);
+        tim.setItisCodes(itisCodes);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        Date parsedStartDate = null;
+        Date parsedEndDate = null;
+        // check start/end datetimes, which are optional
+        if (tim.getStartDateTime() != null) {
+            // ensure this is specified in ISO8601-2019
+            try {
+                parsedStartDate = dateFormat.parse(tim.getStartDateTime());
+            } catch (ParseException e) {
+                resultMessages.add("Invalid startDateTime. Must be in ISO8601-2019 format.");
+            }
+        }
+        if (tim.getEndDateTime() != null) {
+            // ensure this is specified in ISO8601-2019
+            try {
+                parsedEndDate = dateFormat.parse(tim.getEndDateTime());
+            } catch (ParseException e) {
+                resultMessages.add("Invalid endDateTime. Must be in ISO8601-2019 format.");
+            }
+        }
+
+        // check that start time is before end time
+        if (parsedStartDate != null && parsedEndDate != null) {
+            if (parsedStartDate.after(parsedEndDate)) {
+                resultMessages.add("Invalid startDateTime. Start time must be before end time.");
+            }
+        }
+
+        // return
+        toReturn.setResultMessages(resultMessages);
+        return toReturn;
     }
 
     public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk,

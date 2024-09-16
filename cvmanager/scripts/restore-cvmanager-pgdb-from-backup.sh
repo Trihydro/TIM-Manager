@@ -103,30 +103,16 @@ else
     exit 1
 fi
 
-# Remove the current database
-sudo docker compose -f $CVMANAGER_SOURCE_DIR/docker-compose-addons.yml down
-sudo docker volume rm jpo-cvmanager_pgdb
-if [ $? -ne 0 ]; then
-    echo "Error: failed to remove the current CV Manager PGSQL database"
-    exit 1
-fi
-sudo docker compose -f $CVMANAGER_SOURCE_DIR/docker-compose.yml up -d cvmanager_postgres
-
-# Wait for the database to start
-echo "Waiting for the database to start..."
-sleep 5
-
 # ask if user wants to attempt to create the schemas
 read -p "Do you want to attempt to create the schemas? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # run the create-schemas script
-    sudo docker exec -it jpo-cvmanager-cvmanager_postgres-1 psql -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA IF NOT EXISTS $PRIMARY_SCHEMA_NAME;"
+    sudo psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA IF NOT EXISTS $PRIMARY_SCHEMA_NAME;"
         if [ $? -ne 0 ]; then
         echo "Something went wrong while creating the schemas. Restore cancelled."
         exit 1
     fi
-    sudo docker exec -it jpo-cvmanager-cvmanager_postgres-1 psql -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA IF NOT EXISTS $KEYCLOAK_SCHEMA_NAME;"
+    sudo psql -U $DB_USER -d $DB_NAME -c "CREATE SCHEMA IF NOT EXISTS $KEYCLOAK_SCHEMA_NAME;"
     if [ $? -ne 0 ]; then
         echo "Something went wrong while creating the schemas. Restore cancelled."
         exit 1
@@ -145,8 +131,7 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     # run the create-tables script
     pathToTableScriptFromCvmanagerSourceDir="resources/sql_scripts/CVManager_CreateTables.sql"
-    sudo docker cp $CVMANAGER_SOURCE_DIR/$pathToTableScriptFromCvmanagerSourceDir jpo-cvmanager-cvmanager_postgres-1:/tmp/CVManager_CreateTables.sql
-    sudo docker exec -it jpo-cvmanager-cvmanager_postgres-1 psql -U $DB_USER -d $DB_NAME -f /tmp/CVManager_CreateTables.sql
+    sudo psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f $CVMANAGER_SOURCE_DIR/$pathToTableScriptFromCvmanagerSourceDir
     if [ $? -ne 0 ]; then
         echo "Something went wrong while creating the tables. Restore cancelled."
         exit 1

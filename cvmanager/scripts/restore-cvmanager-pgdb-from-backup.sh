@@ -162,13 +162,13 @@ fi
 # Restore the backup by running pg_restore inside a temporary container
 sudo docker rm temp-pgdb-restore-helper 2> /dev/null
 echo "Enter postgres password to restore the primary schema:"
-sudo docker run -it --rm -v jpo-cvmanager_pgdb:/cvmanager-pgdb -v $pathToPrimaryBackup:/pgdb-backup.dump --name temp-pgdb-restore-helper postgis/postgis:15-master pg_restore -n $PRIMARY_SCHEMA_NAME --clean --verbose -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_NAME /pgdb-backup.dump
+sudo docker run -it --rm -v $pathToPrimaryBackup:/pgdb-backup.dump --name temp-pgdb-restore-helper postgis/postgis:15-master pg_restore -n $PRIMARY_SCHEMA_NAME --clean --verbose -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_NAME /pgdb-backup.dump
 if [ $? -ne 0 ]; then
     sudo docker rm temp-pgdb-restore-helper 2> /dev/null
     echo "The pg_restore command returned an error status code. Please check the state of the database to determine if the restore was successful."
 fi
 echo "Enter postgres password to restore the keycloak schema:"
-sudo docker run -it --rm -v jpo-cvmanager_pgdb:/cvmanager-pgdb -v $pathToKeycloakBackup:/pgdb-backup.dump --name temp-pgdb-restore-helper postgis/postgis:15-master pg_restore -n $KEYCLOAK_SCHEMA_NAME --clean --verbose -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_NAME /pgdb-backup.dump
+sudo docker run -it --rm -v $pathToKeycloakBackup:/pgdb-backup.dump --name temp-pgdb-restore-helper postgis/postgis:15-master pg_restore -n $KEYCLOAK_SCHEMA_NAME --clean --verbose -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_NAME /pgdb-backup.dump
 if [ $? -ne 0 ]; then
     sudo docker rm temp-pgdb-restore-helper 2> /dev/null
     echo "The pg_restore command returned an error status code. Please check the state of the database to determine if the restore was successful."

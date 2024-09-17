@@ -14,3 +14,6 @@ The `docs` directory contains documentation for the CV Manager.
 
 ## Scripts
 The `scripts` directory contains scripts for the CV Manager. These scripts are used to automate tasks related to the CV Manager deployment.
+
+## Note
+Trihydro's CV Manager fork should be used for the WYDOT CV Manager deployment. The fork is available at [Trihydro's GitHub repository](https://github.com/Trihydro/jpo-cvmanager/tree/wydot-deployment).

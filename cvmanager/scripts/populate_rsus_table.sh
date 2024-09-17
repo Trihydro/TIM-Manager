@@ -6,6 +6,37 @@
 
 # Note: This script can be run on the VM where the CV Manager is deployed or on your local machine.
 
+#  use current directory
+working_dir=$(pwd)
+echo "Working directory: $working_dir"
+
+# if .env file exists, load it
+if [ -f "$working_dir/.env" ]
+then
+    # if carriage returns are present, remove them
+    sed -i 's/\r//g' $working_dir/.env
+
+    echo "Loading environment variables from $working_dir/.env"
+    export $(cat $working_dir/.env | sed 's/#.*//g' | xargs)
+fi
+
+if [ -z "$DB_NAME" ]; then
+    echo "DB_NAME is not set. Please set the DB_NAME environment variable in the .env file."
+    exit 1
+fi
+if [ -z "$DB_USER" ]; then
+    echo "DB_USER is not set. Please set the DB_USER environment variable in the .env file."
+    exit 1
+fi
+if [ -z "$DB_HOST" ]; then
+    echo "DB_HOST is not set. Please set the DB_HOST environment variable in the .env file."
+    exit 1
+fi
+if [ -z "$DB_PORT" ]; then
+    echo "DB_PORT is not set. Please set the DB_PORT environment variable in the .env file."
+    exit 1
+fi
+
 # make sure psql is installed
 if ! [ -x "$(command -v psql)" ]; then
     echo "Installing psql..."
@@ -21,11 +52,7 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
 fi
 
 # PGSQL info
-db_name="postgres"
-db_user="postgres"
 db_password=$POSTGRES_PASSWORD
-db_host="10.145.7.48" # currently the IP address of the Test VM, which is where the CV Manager PGSQL database is deployed as a Docker container
-db_port="5432"
 
 echo "Retrieving ids for foreign key references..."
 source ./set_foreign_key_reference_ids.sh
@@ -92,7 +119,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     fi
 
     # if RSU is already in rsus table, skip it
-    numRecords=`PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -Atc "select COUNT(*) FROM cvmanager.rsus WHERE serial_number='$serial_number';"`
+    numRecords=`PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_USER -h $DB_HOST -p $DB_PORT -Atc "select COUNT(*) FROM cvmanager.rsus WHERE serial_number='$serial_number';"`
     if [ $numRecords -gt 0 ]; then
         echo "RSU '$serial_number' is already in rsus table, skipping..."
         continue
@@ -207,7 +234,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
 
     # add RSU to rsus table
     echo "Adding RSU $serial_number to rsus table..."
-    PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO cvmanager.rsus(geography, milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version) VALUES (ST_GeomFromText('POINT($longitude $latitude)'), $milepost, '$ipv4_address', '$serial_number', '$iss_scms', '$primary_route', $model_id, $rsu_credential_id, $snmp_credential_id, $snmp_version_id, $firmware_version_id, $target_firmware_version_id);"
+    PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_USER -h $DB_HOST -p $DB_PORT -c "INSERT INTO cvmanager.rsus(geography, milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version) VALUES (ST_GeomFromText('POINT($longitude $latitude)'), $milepost, '$ipv4_address', '$serial_number', '$iss_scms', '$primary_route', $model_id, $rsu_credential_id, $snmp_credential_id, $snmp_version_id, $firmware_version_id, $target_firmware_version_id);"
     if [[ $? -ne 0 ]]; then
         echo "Error: failed to add RSU $serial_number to rsus table"
         exit 1
@@ -215,7 +242,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
 
     # associate RSU with organization
     echo "Associating RSU $serial_number with WYDOT organization..."
-    PGPASSWORD=$db_password psql -d $db_name -U $db_user -h $db_host -p $db_port -c "INSERT INTO cvmanager.rsu_organization(rsu_id, organization_id) VALUES ((SELECT rsu_id FROM cvmanager.rsus WHERE serial_number='$serial_number'), $wydot_organization_id);"
+    PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_USER -h $DB_HOST -p $DB_PORT -c "INSERT INTO cvmanager.rsu_organization(rsu_id, organization_id) VALUES ((SELECT rsu_id FROM cvmanager.rsus WHERE serial_number='$serial_number'), $wydot_organization_id);"
     if [[ $? -ne 0 ]]; then
         echo "Error: failed to associate RSU $serial_number with WYDOT organization"
         exit 1

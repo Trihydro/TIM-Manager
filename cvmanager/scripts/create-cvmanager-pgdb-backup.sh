@@ -35,10 +35,6 @@ if [ -z "$DB_PORT" ]; then
     echo "DB_PORT is not set. Please set the DB_PORT environment variable in the .env file."
     exit 1
 fi
-if [ -z "$CVMANAGER_SOURCE_DIR" ]; then
-    echo "CVMANAGER_SOURCE_DIR is not set. Please set the CVMANAGER_SOURCE_DIR environment variable in the .env file."
-    exit 1
-fi
 if [ -z "$BACKUPS_DIR" ]; then
     echo "BACKUPS_DIR is not set. Please set the BACKUPS_DIR environment variable in the .env file."
     exit 1

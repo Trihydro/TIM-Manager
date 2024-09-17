@@ -39,10 +39,6 @@ if [ -z "$CVMANAGER_SOURCE_DIR" ]; then
     echo "CVMANAGER_SOURCE_DIR is not set. Please set the CVMANAGER_SOURCE_DIR environment variable in the .env file."
     exit 1
 fi
-if [ -z "$BACKUPS_DIR" ]; then
-    echo "BACKUPS_DIR is not set. Please set the BACKUPS_DIR environment variable in the .env file."
-    exit 1
-fi
 if [ -z "$PRIMARY_SCHEMA_NAME" ]; then
     echo "PRIMARY_SCHEMA_NAME is not set. Please set the PRIMARY_SCHEMA_NAME environment variable in the .env file."
     exit 1

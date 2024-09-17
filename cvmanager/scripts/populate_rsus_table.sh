@@ -24,8 +24,8 @@ if [ -z "$DB_NAME" ]; then
     echo "DB_NAME is not set. Please set the DB_NAME environment variable in the .env file."
     exit 1
 fi
-if [ -z "$DB_USER" ]; then
-    echo "DB_USER is not set. Please set the DB_USER environment variable in the .env file."
+if [ -z "$DB_CVMANAGER_USER" ]; then
+    echo "DB_CVMANAGER_USER is not set. Please set the DB_CVMANAGER_USER environment variable in the .env file."
     exit 1
 fi
 if [ -z "$DB_HOST" ]; then
@@ -119,7 +119,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
     fi
 
     # if RSU is already in rsus table, skip it
-    numRecords=`PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_USER -h $DB_HOST -p $DB_PORT -Atc "select COUNT(*) FROM cvmanager.rsus WHERE serial_number='$serial_number';"`
+    numRecords=`PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_CVMANAGER_USER -h $DB_HOST -p $DB_PORT -Atc "select COUNT(*) FROM cvmanager.rsus WHERE serial_number='$serial_number';"`
     if [ $numRecords -gt 0 ]; then
         echo "RSU '$serial_number' is already in rsus table, skipping..."
         continue
@@ -234,7 +234,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
 
     # add RSU to rsus table
     echo "Adding RSU $serial_number to rsus table..."
-    PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_USER -h $DB_HOST -p $DB_PORT -c "INSERT INTO cvmanager.rsus(geography, milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version) VALUES (ST_GeomFromText('POINT($longitude $latitude)'), $milepost, '$ipv4_address', '$serial_number', '$iss_scms', '$primary_route', $model_id, $rsu_credential_id, $snmp_credential_id, $snmp_version_id, $firmware_version_id, $target_firmware_version_id);"
+    PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_CVMANAGER_USER -h $DB_HOST -p $DB_PORT -c "INSERT INTO cvmanager.rsus(geography, milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version) VALUES (ST_GeomFromText('POINT($longitude $latitude)'), $milepost, '$ipv4_address', '$serial_number', '$iss_scms', '$primary_route', $model_id, $rsu_credential_id, $snmp_credential_id, $snmp_version_id, $firmware_version_id, $target_firmware_version_id);"
     if [[ $? -ne 0 ]]; then
         echo "Error: failed to add RSU $serial_number to rsus table"
         exit 1
@@ -242,7 +242,7 @@ while IFS=, read -r latitude longitude milepost ipv4_address serial_number iss_s
 
     # associate RSU with organization
     echo "Associating RSU $serial_number with WYDOT organization..."
-    PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_USER -h $DB_HOST -p $DB_PORT -c "INSERT INTO cvmanager.rsu_organization(rsu_id, organization_id) VALUES ((SELECT rsu_id FROM cvmanager.rsus WHERE serial_number='$serial_number'), $wydot_organization_id);"
+    PGPASSWORD=$db_password psql -d $DB_NAME -U $DB_CVMANAGER_USER -h $DB_HOST -p $DB_PORT -c "INSERT INTO cvmanager.rsu_organization(rsu_id, organization_id) VALUES ((SELECT rsu_id FROM cvmanager.rsus WHERE serial_number='$serial_number'), $wydot_organization_id);"
     if [[ $? -ne 0 ]]; then
         echo "Error: failed to associate RSU $serial_number with WYDOT organization"
         exit 1

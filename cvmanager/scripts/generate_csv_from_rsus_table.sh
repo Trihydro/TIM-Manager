@@ -72,7 +72,7 @@ stage_one_temp_file=$(mktemp /tmp/stage_one.XXXXXXXXXX)
 echo "Stage one temporary file: $stage_one_temp_file"
 
 # query to get the rsus table
-query="SELECT ST_AsText(geography), milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version FROM rsus"
+query="SELECT ST_AsText(geography), milepost, ipv4_address, serial_number, iss_scms_id, primary_route, model, credential_id, snmp_credential_id, snmp_version_id, firmware_version, target_firmware_version FROM rsus order by milepost asc"
 
 # run the query
 echo "Running query: $query"

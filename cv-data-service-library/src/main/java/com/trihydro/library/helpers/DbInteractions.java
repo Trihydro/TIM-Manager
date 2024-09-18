@@ -41,7 +41,28 @@ public class DbInteractions {
             if (dbConfig.getDbUrl() == null ||
                 dbConfig.getDbUsername() == null ||
                 dbConfig.getDbPassword() == null ||
-                dbConfig.getDbUrlCountyRoads() == null ||
+                dbConfig.getMaximumPoolSize() == 0 ||
+                dbConfig.getConnectionTimeout() == 0) {
+                utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
+                System.exit(1);
+            }
+
+            // initialize connection pools
+            try {
+                initializePrimaryConnectionPool();
+            } catch (Exception e) {
+                utility.logWithDate("DbInteractions: Failed to initialize primary connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
+                // e.printStackTrace();
+                System.exit(1);
+            }
+        }
+
+        if (dataSourceCountyRoads == null) {
+            TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+            TimeZone.setDefault(timeZone);
+
+            // check dbconfig for null values
+            if (dbConfig.getDbUrlCountyRoads() == null ||
                 dbConfig.getDbUsernameCountyRoads() == null ||
                 dbConfig.getDbPasswordCountyRoads() == null ||
                 dbConfig.getMaximumPoolSize() == 0 ||
@@ -52,10 +73,9 @@ public class DbInteractions {
 
             // initialize connection pools
             try {
-                initializePrimaryConnectionPool();
                 initializeCountyRoadsConnectionPool();
             } catch (Exception e) {
-                utility.logWithDate("DbInteractions: Failed to initialize connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
+                utility.logWithDate("DbInteractions: Failed to initialize county roads connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
                 // e.printStackTrace();
                 System.exit(1);
             }
@@ -106,7 +126,9 @@ public class DbInteractions {
 
     public Connection getConnectionPool() throws SQLException {
         // create pool if not already done
-        initializePrimaryConnectionPool();
+        if (dataSource == null) {
+            initializePrimaryConnectionPool();
+        }
 
         // return a connection
         try {
@@ -131,7 +153,9 @@ public class DbInteractions {
 
     public Connection getCountyRoadsConnectionPool() throws SQLException {
         // create pool if not already done
-        initializeCountyRoadsConnectionPool();
+        if (dataSourceCountyRoads == null) {
+            initializeCountyRoadsConnectionPool();
+        }
 
         // return a connection
         try {

@@ -1,6 +1,6 @@
 -- Note: This should only be run on a local deployment database. The actual view is provided by WYDOT.
 
-CREATE TABLE rsu_view (
+CREATE TABLE IF NOT EXISTS rsu_view (
     deviceid numeric(6),
     sitename character varying(255),
     devicename character varying(100),

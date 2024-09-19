@@ -12,7 +12,7 @@
 -- c2lhpv (int)
 -- loct (int)
 -- ntt (int)
-CREATE TABLE mock_triggered_county_roads_v1_vw (
+CREATE TABLE IF NOT EXISTS mock_triggered_county_roads_v1_vw (
     road_code character varying(25),
     cr_id integer,
     common_name text,

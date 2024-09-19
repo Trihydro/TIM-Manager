@@ -130,3 +130,5 @@ To test the integration of the modules, see the [local deployment resources](./l
 
 ## Usage 
 Each module may be developed and ran individually. Instructions for each module can be found in their respective README files. This top-level view is primarily to allow for ease of running the entire suite through docker containers. This can be done by running `docker compose up --build -d` in the same directory as the `docker-compose.yml` file.
+
+Once running, the ODE Wrapper module serves as the primary entry point for interacting with the suite. By default, this module runs on port 7777.

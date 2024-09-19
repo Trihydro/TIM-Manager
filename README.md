@@ -40,15 +40,13 @@ These instructions will get you a copy of the project up and running on your loc
 - VS Code (https://code.visualstudio.com/)
 - Remote - Containers (VS Code Extension: [see here](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers))
 
-### Installing
-1. Clone the repo
-
+### Setup
+1. Clone the repository to your local machine
    ```
    git clone https://trihydro@dev.azure.com/trihydro/CV/_git/WyoCV
    ```
 
 2. Open the `wyocv` workspace in VS Code
-
     ```
     code wyocv.code-workspace
     ```
@@ -70,13 +68,13 @@ These instructions will get you a copy of the project up and running on your loc
 > __Note:__ when developing inside a docker container, the workspace files are mounted from the local file system. So any changes you make in the container will persist to your computer. If you close your connection to the container, you can still open the workspace locally and commit your changes as necessary.
 
 ## Deployment
-This application is deployed using Docker, with the docker-compose tool. The associated [docker-compose.yml](./docker-compose.yml) file is used to spin up containers for each of the modules. The file is set up for the development ODE environment and includes multiple instances of several of the Kafka consumers to allow for efficient consumption.
+This application is deployed using Docker, with the docker compose tool. The associated [docker-compose.yml](./docker-compose.yml) file is used to spin up containers for each of the modules.
 
 To deploy the suite, first build all modules using 
 ```
 mvn clean install
 ```
-This will create the `target` folder under each module. From here, create a new folder structure to deploy using the `docker-compose.yml`, `.env`, and respective `.jar` file and `Dockerfile`. A basic example using the WyoCV applications as seen here follows (note the Docker configuration can be more complex to include additional modules such as the SMDM and TimCreator):
+This will create the `target` folder under each module. From here, create a new folder structure to deploy using the `docker-compose.yml`, `.env`, and respective `.jar` file and `Dockerfile`. A basic example using the WyoCV applications as seen here follows:
 
 ```
 .
@@ -115,14 +113,20 @@ docker compose ps
 ```
 
 ## Configuration
-(TBD)
+Each module has its own configuration, but the suite as a whole can be configured using a copy of the `sample.env` file. This file should be renamed to `.env` and placed in the same directory as the `docker-compose.yml` file.
 
 ## Testing
-Tests are written using various Java testing libraries, but all may be executed in order with
+### Unit Testing
+To run the unit tests, follow these steps:
+1. Reopen the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container"
+1. Open a terminal in the dev container
+1. Run the following command to execute the tests:
+    ```
+    mvn clean test
+    ```
 
-```
-mvn test
-```
+### Integration Testing
+To test the integration of the modules, see the [local deployment resources](./local-deployment/README.md) for instructions on how to deploy the suite locally. This will allow for testing the interaction between some or all of the modules.
 
 ## Usage 
 Each module may be developed and ran individually. Instructions for each module can be found in their respective README files. This top-level view is primarily to allow for ease of running the entire suite through docker containers. This can be done by running `docker compose up --build -d` in the same directory as the `docker-compose.yml` file.

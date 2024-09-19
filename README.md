@@ -3,14 +3,33 @@
 
 The WyoCV Applications are a suite of tools for interacting with the Wyoming DOT ODE, with an emphasis on Traveler Information Messages (TIMs). The tool suite include modules for both sides of interaction, from the ode-wrapper used to simplify interactions with pushing TIMs, to the ode-data-logger used to subscribe to ODE Kafka topics and deposit data into a database. Each module within the project contains its own README file to help understand specific functionality.
 
-> __Note:__ Most of the modules are hosted here, however the SMDM applicaton is hosted in BitBucket as it is owned by WYDOT and USDOT. This application is imported and ran by our docker-compose.yml file, but is not maintained here.
-
 ## Table of Contents
+- [Useful Links](#useful-links)
 - [Installation](#installation)
 - [Deployment](#deployment)
 - [Configuration](#configuration)
 - [Testing](#testing)
 - [Usage](#usage)
+
+## Useful Links
+### Core Library
+- [CV Data Service Library README](./cv-data-service-library/README.md)
+
+### Modules
+- [CV Data Controller](./cv-data-controller/README.md)
+- [CV Data Tasks](./cv-data-tasks/README.md)
+- [Logger Kafka Consumer](./logger-kafka-consumer/README.md)
+- [ODE Data Logger](./ode-data-logger/README.md)
+- [ODE Mongo Logger](./ode-mongo-logger/README.md)
+- [ODE Wrapper](./ode-wrapper/README.md)
+- [RSU Data Controller](./rsu-data-controller/README.md)
+- [TIM Refresh](./tim-refresh/README.md)
+
+### Other
+- [Milepost Graph DB](./milepost-graph-db/README.md)
+- [Local Deployment Resources](./local-deployment/README.md)
+- [Monitoring Resources](./monitoring/README.md)
+- [CV Manager Resources](./cv-manager/README.md)
 
 ## Installation
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [Deployment](#deployment) for notes on how to deploy the project on a live system.
@@ -89,10 +108,10 @@ This will create the `target` folder under each module. From here, create a new 
 
 To run the suite, copy the [clean-build-and-deploy.sh](./docker-scripts/clean-build-and-deploy.sh) script to the deployment root and execute the script. Alternatively, run the following commands in the same directory as the `docker-compose.yml`:
 ```
-docker-compose stop
-docker-compose rm -f -v
-docker-compose up --build -d
-docker-compose ps
+docker compose stop
+docker compose rm -f -v
+docker compose up --build -d
+docker compose ps
 ```
 
 ## Configuration
@@ -106,4 +125,4 @@ mvn test
 ```
 
 ## Usage 
-Each module may be developed and ran individually. Instructions for each module can be found in their respective README files. This top-level view is primarily to allow for ease of running the entire suite through docker containers. 
+Each module may be developed and ran individually. Instructions for each module can be found in their respective README files. This top-level view is primarily to allow for ease of running the entire suite through docker containers. This can be done by running `docker compose up --build -d` in the same directory as the `docker-compose.yml` file.

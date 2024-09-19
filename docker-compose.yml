@@ -264,21 +264,6 @@ services:
         max-size: "20m"
         max-file: "3"
 
-# not used right now
-#  smdm:
-#    build: smdm
-#    restart: always
-#    environment:
-#      DATABASE_URL: jdbc:oracle:thin:@10.145.9.78:1521/tempoda.gisits.local
-#    logging:
-#      options:
-#        max-size: "20m"
-#        max-file: "3"
-#    ports:
-#      - "8081:8081"
-#    volumes:
-#      - /home/wyocvadmin/firmware:/firmware
-
   logger-kafka-consumer:
     build: logger-kafka-consumer
     restart: always

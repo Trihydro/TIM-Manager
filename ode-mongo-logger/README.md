@@ -14,7 +14,7 @@ The `ODE Mongo Logger` module listens for messages on a specified Kafka topic an
 (TBD)
 
 ## Deployment
-(TBD)
+This application is deployed using Docker, and is part of the larger WyoCVApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
 
 ## Configuration
 **SOME OF THESE PROPERTIES ARE SENSITIVE. DO NOT PUBLISH THEM TO VERSION CONTROL**
@@ -50,4 +50,6 @@ You may configure these values in `ode-mongo-logger/src/main/resources/applicati
 This will build the library that the module depends on and run the unit tests for the module (as well as the library).
 
 ## Usage
-(TBD)
+This module requires a Kafka broker and MongoDB server to be running. The module listens for messages on a specified Kafka topic and writes them to a MongoDB database.
+
+Once configured and running, no further action is required.

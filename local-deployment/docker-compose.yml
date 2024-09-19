@@ -1,0 +1,473 @@
+version: "2"
+services:
+  # external dependencies ----------------------------------------------
+  kafka:
+    image: bitnami/kafka:latest
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka:/bitnami
+    environment:
+      KAFKA_ENABLE_KRAFT: "yes"
+      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9094,CONTROLLER://:9093,EXTERNAL://:9092"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9094,EXTERNAL://${DOCKER_HOST_IP}:9092"
+      KAFKA_BROKER_ID: "1"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_CFG_LOG_RETENTION_HOURS: 2
+    logging:
+      options:
+        max-size: "10m"  
+        max-file: "5"
+
+  kafka_init:
+    image: bitnami/kafka:latest
+    depends_on:
+      kafka:
+        condition: service_started
+    volumes:
+      - ./docker-scripts/kafka/kafka_init.sh:/kafka_init.sh
+    entrypoint: ["/bin/sh", "kafka_init.sh"]
+    
+  ode:
+    image: usdotjpoode/jpo-ode:2024-q2
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+      - "46753:46753/udp"
+      - "46800:46800/udp"
+      - "47900:47900/udp"
+      - "44900:44900/udp"
+      - "44910:44910/udp"
+      - "44920:44920/udp"
+      - "44930:44930/udp"
+      - "44940:44940/udp"
+      - "5555:5555/udp"
+      - "6666:6666/udp"
+    environment:
+      DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+      ZK: ${DOCKER_HOST_IP}:2181
+      ODE_SECURITY_SVCS_SIGNATURE_URI: http://notused
+      ODE_RSU_USERNAME: testusername
+      ODE_RSU_PASSWORD: testpassword
+      DATA_SIGNING_ENABLED_RSU: false
+      DATA_SIGNING_ENABLED_SDW: false
+      DEFAULT_SNMP_PROTOCOL: NTCIP1218
+    depends_on:
+      - kafka
+    volumes:
+      - ${DOCKER_SHARED_VOLUME}:/jpo-ode
+      - ${DOCKER_SHARED_VOLUME}/uploads:/home/uploads
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "5"
+    
+  adm:
+    image: usdotjpoode/asn1_codec:2024-q2
+    environment:
+      DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+      ACM_CONFIG_FILE: adm.properties
+      ACM_LOG_TO_CONSOLE: "true"
+      ACM_LOG_TO_FILE: "false"
+      ACM_LOG_LEVEL: ERROR
+    depends_on:
+      - kafka
+    volumes:
+      - ${DOCKER_SHARED_VOLUME}:/asn1_codec_share
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: on-failure
+  
+  aem:
+    image: usdotjpoode/asn1_codec:2024-q2
+    environment:
+      DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+      ACM_CONFIG_FILE: aem.properties
+      ACM_LOG_TO_CONSOLE: "true"
+      ACM_LOG_TO_FILE: "false"
+      ACM_LOG_LEVEL: ERROR
+    depends_on:
+      - kafka
+    volumes:
+      - ${DOCKER_SHARED_VOLUME}:/asn1_codec_share
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: on-failure
+
+  # Note: the SDX does not accept unsigned data, so this is commented out for now
+  # sdw_depositor:
+  #   image: usdotjpoode/jpo-sdw-depositor:2024-q2
+  #   environment:
+  #     DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+  #     SDW_EMAIL_LIST: test@gmail.com
+  #     SDW_EMAIL_FROM: test@gmail.com
+  #     SDW_API_KEY: ${SDW_API_KEY}
+  #     SDW_DESTINATION_URL: ${SDW_REST_URL}
+  #     SPRING_MAIL_HOST: 172.0.0.1
+  #     SPRING_MAIL_PORT: 123
+  #     SDW_SUBSCRIPTION_TOPIC: topic.SDWDepositorInput
+  #   depends_on:
+  #    - kafka
+  #    - ode
+  #   logging:
+  #     options:
+  #       max-size: "10m" 
+  #       max-file: "5"
+  
+  postgres:
+    image: postgis/postgis:15-master
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdb:/var/lib/postgresql/data
+    logging:
+      options:
+        max-size: '10m'
+  
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data_container:/data/db
+    logging:
+      options:
+        max-size: '10m'
+  # end of external dependencies ----------------------------------------------
+
+  # internal dependencies ------------------------------------------------------
+  milepost-graph-db:
+    build: ../milepost-graph-db
+    restart: always
+    ports:
+      - "6474:7474"
+      - "6473:7473"
+      - "6687:7687"
+    volumes:
+      - ../milepost-graph-db/neo-data/plugins:/var/lib/neo4j/plugins
+      - ../milepost-graph-db/neo-data/import:/var/lib/neo4j/import
+      - ../milepost-graph-db/neo-data/conf:/var/lib/neo4j/conf
+      - ../milepost-graph-db/neo-data/data:/var/lib/neo4j/data
+    environment:
+      NEO4J_AUTH: none
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+  # end of internal dependencies ------------------------------------------------
+
+  # wyocv apps --------------------------------------------------------------
+  cv-data-controller:
+    build: ../cv-data-controller
+    restart: always
+    ports:
+      - "8888:8888"
+    environment:
+      SERVER_PORT: 8888
+      CONFIG_DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_USERNAME: ${POSTGRES_USER}
+      CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      CONFIG_MAXIMUM_POOL_SIZE: 7
+      CONFIG_CONNECTION_TIMEOUT: 300000
+      CONFIG_ODE_URL: http://ode:8080
+      CONFIG_ENV: local
+      SPRING_DATA_NEO4J_URI: bolt://milepost-graph-db:7687
+      CONFIG_ALERT_ADDRESSES: test@gmail.com
+      CONFIG_FROM_EMAIL: test@gmail.com
+      CONFIG_ENVIRONMENT_NAME: local
+      CONFIG_MAIL_HOST: 172.0.0.1
+      CONFIG_MAIL_PORT: 123
+      CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME: mock_triggered_county_roads_v1_vw
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  ode_wrapper:
+    build: ../ode-wrapper
+    restart: always
+    environment:
+      SERVER_PORT: 7777
+      CONFIG_ODE_URL: http://ode:8080
+      CONFIG_DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_USERNAME: ${POSTGRES_USER}
+      CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      CONFIG_MAXIMUM_POOL_SIZE: 7
+      CONFIG_CONNECTION_TIMEOUT: 300000
+      CONFIG_ENV: local
+      CONFIG_SDW_TTL: oneday
+      CONFIG_SDW_REST_URL: ${SDW_REST_URL}
+      CONFIG_SDW_API_KEY: ${SDW_API_KEY}
+      CONFIG_ALERT_ADDRESSES: test@gmail.com
+      CONFIG_FROM_EMAIL: test@gmail.com
+      CONFIG_MAIL_HOST: 172.0.0.1
+      CONFIG_MAIL_PORT: 123
+      CONFIG_ENVIRONMENT_NAME: local
+      CONFIG_CASCADE_CONDITIONS: ${CASCADE_CONDITIONS}
+      CONFIG_DEFAULT_LANE_WIDTH: 50
+      CONFIG_CV_REST_SERVICE: http://cv-data-controller:8888
+      CONFIG_HTTP_LOGGING_MAX_SIZE: 2000
+      CONFIG_RSU_ROUTES: ${RSU_ROUTES}
+      CONFIG_POINT_INCIDENT_BUFFER_MILES: 1
+    ports:
+      - "7777:7777"
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  rsu-data-controller:
+    build: ../rsu-data-controller
+    restart: always
+    ports:
+      - "8898:8898"
+    environment:
+      SERVER_PORT: 8898
+      CONFIG_SNMP_RETRIES: 3
+      CONFIG_SNMP_TIMEOUT_SECONDS: 15
+      CONFIG_SNMP_USER_NAME: testusername
+      CONFIG_SNMP_AUTH_PASSPHRASE: testpassword
+      CONFIG_SNMP_AUTH_PROTOCOL: SHA
+      CONFIG_SNMP_SECURITY_LEVEL: authNoPriv
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  cv-data-tasks:
+    build: ../cv-data-tasks
+    restart: always
+    environment:
+      CONFIG_ODE_URL: http://ode:8080
+      CONFIG_CV_REST_SERVICE: http://cv-data-controller:8888
+      CONFIG_CV_REST_SERVICE_DEV: http://cv-data-controller:8888
+      CONFIG_CV_REST_SERVICE_PROD: http://cv-data-controller:8888
+      CONFIG_RSU_DATA_SERVICE_URL: http://rsu-data-controller:8898
+      CONFIG_WRAPPER_URL: http://ode_wrapper:7777
+      CONFIG_MAIL_HOST: 172.0.0.1
+      CONFIG_MAIL_PORT: 123
+      CONFIG_ENVIRONMENT_NAME: local
+      CONFIG_BSM_RETENTION_PERIOD_DAYS: 30
+      CONFIG_SDW_REST_URL: ${SDW_REST_URL}
+      CONFIG_SDW_API_KEY: ${SDW_API_KEY}
+      CONFIG_TMDD_URL: http://testurl
+      CONFIG_TMDD_USER: testusername
+      CONFIG_TMDD_PASSWORD: testpassword
+      CONFIG_ALERT_ADDRESSES: test@gmail.com
+      CONFIG_FROM_EMAIL: test@gmail.com
+      CONFIG_RUN_TMDD_VALIDATION: false
+      CONFIG_RUN_RSU_VALIDATION: false
+      CONFIG_RSU_VALIDATION_DELAY_SECONDS: 60
+      CONFIG_RSU_VAL_THREAD_POOL_SIZE: 4
+      CONFIG_RSU_VAL_TIMEOUT_SECONDS: 300
+      CONFIG_REMOVE_EXPIRED_PERIOD_MINUTES: 240
+      CONFIG_CLEANUP_PERIOD_MINUTES: 240
+      CONFIG_SDX_VALIDATION_PERIOD_MINUTES: 1440
+      CONFIG_RSU_VALIDATION_PERIOD_MINUTES: 240
+      CONFIG_TMDD_VALIDATION_PERIOD_MINUTES: 1440
+      CONFIG_RETENTION_ENFORCEMENT_PERIOD_MINUTES: 1440
+      CONFIG_RETENTION_REMOVE_TIMS: true
+      CONFIG_RETENTION_REMOVE_DA: false
+      CONFIG_RETENTION_REMOVE_HMI: false
+      CONFIG_RETENTION_REMOVE_STATUS_LOGS: false
+      CONFIG_BSM_CLEANUP_PERIOD_MINUTES: 1440
+      CONFIG_HSM_FUNCTIONALITY_MINUTES: 1
+      CONFIG_HSM_URL: http://testurl
+      CONFIG_HSM_ERROR_EMAIL_FREQUENCY_MINUTES: 10
+      CONFIG_RUN_HSM_CHECK: false
+      CONFIG_SDW_TTL: oneyear
+      CONFIG_DEFAULT_LANE_WIDTH: 50
+      CONFIG_RSU_ROUTES: ${RSU_ROUTES}
+      CONFIG_POINT_INCIDENT_BUFFER_MILES: 1
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+    depends_on:
+      - ode_wrapper
+      - cv-data-controller
+      - rsu-data-controller
+  
+  tim_logger:
+    build: ../ode-data-logger
+    restart: always
+    environment:
+      KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
+      TRAC_URL: http://testurl
+      ALERT_ADDRESSES: test@gmail.com
+      FROM_EMAIL: test@gmail.com
+      ENVIRONMENT_NAME: local
+      MAIL_HOST: 172.0.0.1
+      MAIL_PORT: 123
+      DEPOSIT_TOPIC: topic.OdeTimJson
+      DEPOSIT_GROUP: group_tim_logger
+      CV_REST_SERVICE: http://cv-data-controller:8888
+      PRODUCER_TOPIC: topic.OracleDataLogger
+      ENV: local
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  logger-kafka-consumer:
+    build: ../logger-kafka-consumer
+    restart: always
+    environment:
+      DEPOSIT_GROUP: logger_group_deposit
+      DEPOSIT_TOPIC: topic.OracleDataLogger
+      KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
+      MAX_POLL_INTERVAL_MS: 600000
+      MAX_POLL_RECORDS: 25
+      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      MAXIMUM_POOL_SIZE: 13
+      CONNECTION_TIMEOUT: 300000
+      ALERT_ADDRESSES: test@gmail.com
+      FROM_EMAIL: test@gmail.com
+      ENVIRONMENT_NAME: local
+      MAIL_HOST: 172.0.0.1
+      MAIL_PORT: 123
+      ENV: local
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  tim-refresh:
+    build: ../tim-refresh
+    restart: always
+    environment:
+      CONFIG_ODE_URL: http://ode:8080
+      CONFIG_SDW_TTL: oneyear
+      CONFIG_CV_REST_SERVICE: http://cv-data-controller:8888
+      CONFIG_SDW_REST_URL: ${SDW_REST_URL}
+      CONFIG_SDW_API_KEY: ${SDW_API_KEY}
+      CONFIG_DEFAULT_LANE_WIDTH: 50
+      CONFIG_RSU_ROUTES: ${RSU_ROUTES}
+      CONFIG_POINT_INCIDENT_BUFFER_MILES: 1
+      CRON_EXPRESSION: "0 0 * * * ?"
+      CONFIG_ENV: local
+      CONFIG_ALERT_ADDRESSES: test@gmail.com
+      CONFIG_FROM_EMAIL: test@gmail.com
+      CONFIG_ENVIRONMENT_NAME: local
+      CONFIG_MAIL_HOST: 172.0.0.1
+      CONFIG_MAIL_PORT: 123
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  cert-expiration:
+    build: ../cert-expiration
+    restart: always
+    environment:
+      KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
+      ALERT_ADDRESSES: test@gmail.com
+      FROM_EMAIL: test@gmail.com
+      ENVIRONMENT_NAME: local
+      MAIL_HOST: 172.0.0.1
+      MAIL_PORT: 123
+      DEPOSIT_TOPIC: topic.OdeTIMCertExpirationTimeJson
+      DEPOSIT_GROUP: certExpirationGroup
+      CV_REST_SERVICE: http://cv-data-controller:8888
+      PRODUCER_TOPIC: topic.OracleDataLogger
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  tim_logger_mongo:
+    build: ../ode-mongo-logger
+    restart: always
+    environment:
+      MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeTimJson
+      MONGOLOGGER_DEPOSIT_GROUP: group_tim_mongo_logger
+      MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
+      MONGOLOGGER_MONGO_HOST: mongo
+      MONGOLOGGER_MONGO_DATABASE: local
+      MONGOLOGGER_MONGO_AUTH_DATABASE: admin
+      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
+      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
+      MONGOLOGGER_FROM_EMAIL: test@gmail.com
+      MONGOLOGGER_ENVIRONMENT_NAME: local
+      MONGOLOGGER_MAIL_HOST: 172.0.0.1
+      MONGOLOGGER_MAIL_PORT: 123
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  bsm_logger_mongo:
+    build: ../ode-mongo-logger
+    restart: always
+    environment:
+      MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeBsmJson
+      MONGOLOGGER_DEPOSIT_GROUP: group_bsm_mongo_logger
+      MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
+      MONGOLOGGER_MONGO_HOST: mongo
+      MONGOLOGGER_MONGO_DATABASE: local
+      MONGOLOGGER_MONGO_AUTH_DATABASE: admin
+      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
+      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
+      MONGOLOGGER_FROM_EMAIL: test@gmail.com
+      MONGOLOGGER_ENVIRONMENT_NAME: local
+      MONGOLOGGER_MAIL_HOST: 172.0.0.1
+      MONGOLOGGER_MAIL_PORT: 123
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  driveralert_logger_mongo:
+    build: ../ode-mongo-logger
+    restart: always
+    environment:
+      MONGOLOGGER_DEPOSIT_TOPIC: topic.OdeDriverAlertJson
+      MONGOLOGGER_DEPOSIT_GROUP: group_da_mongo_logger
+      MONGOLOGGER_HOSTNAME: ${DOCKER_HOST_IP}
+      MONGOLOGGER_MONGO_HOST: mongo
+      MONGOLOGGER_MONGO_DATABASE: local
+      MONGOLOGGER_MONGO_AUTH_DATABASE: admin
+      MONGOLOGGER_MONGO_USERNAME: ${MONGO_USER}
+      MONGOLOGGER_MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGOLOGGER_ALERT_ADDRESSES: test@gmail.com
+      MONGOLOGGER_FROM_EMAIL: test@gmail.com
+      MONGOLOGGER_ENVIRONMENT_NAME: local
+      MONGOLOGGER_MAIL_HOST: 172.0.0.1
+      MONGOLOGGER_MAIL_PORT: 123
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+  # end of wyocv apps ---------------------------------------------------------
+
+# volumes ---------------------------------------------------------------------
+volumes:
+  kafka:
+    {}
+  pgdb:
+    driver: local
+  mongodb_data_container:
+# end of volumes ---------------------------------------------------------------

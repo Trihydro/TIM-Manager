@@ -1,32 +1,27 @@
 # WyoCV Applications
 ![data-flow-diagram](/images/diagrams/data-flow-diagram.png)
 
-## Table of Contents
-
-- [About](#about)
-- [Getting Started](#getting-started)
-- [Installing](#installing)
-- [Testing](#testing)
-- [Deployment](#deployment)
-
-## About
-
 The WyoCV Applications are a suite of tools for interacting with the Wyoming DOT ODE, with an emphasis on Traveler Information Messages (TIMs). The tool suite include modules for both sides of interaction, from the ode-wrapper used to simplify interactions with pushing TIMs, to the ode-data-logger used to subscribe to ODE Kafka topics and deposit data into a database. Each module within the project contains its own README file to help understand specific functionality.
+
 > __Note:__ Most of the modules are hosted here, however the SMDM applicaton is hosted in BitBucket as it is owned by WYDOT and USDOT. This application is imported and ran by our docker-compose.yml file, but is not maintained here.
 
-## Getting Started
+## Table of Contents
+- [Installation](#installation)
+- [Deployment](#deployment)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Usage](#usage)
 
+## Installation
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [Deployment](#deployment) for notes on how to deploy the project on a live system.
 
 ### Prerequisites
-
 - Git (https://git-scm.com/downloads)
 - Docker Desktop (https://docs.docker.com/install/)
 - VS Code (https://code.visualstudio.com/)
 - Remote - Containers (VS Code Extension: [see here](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers))
 
 ### Installing
-
 1. Clone the repo
 
    ```
@@ -55,20 +50,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 > __Note:__ when developing inside a docker container, the workspace files are mounted from the local file system. So any changes you make in the container will persist to your computer. If you close your connection to the container, you can still open the workspace locally and commit your changes as necessary.
 
-## Usage 
-
-Each module may be developed and ran individually. Instructions for each module can be found in their respective README files. This top-level view is primarily to allow for ease of running the entire suite through docker containers. 
-
-## Testing
-
-Tests are written using various Java testing libraries, but all may be executed in order with
-
-```
-mvn test
-```
-
 ## Deployment
-
 This application is deployed using Docker, with the docker-compose tool. The associated [docker-compose.yml](./docker-compose.yml) file is used to spin up containers for each of the modules. The file is set up for the development ODE environment and includes multiple instances of several of the Kafka consumers to allow for efficient consumption.
 
 To deploy the suite, first build all modules using 
@@ -112,3 +94,16 @@ docker-compose rm -f -v
 docker-compose up --build -d
 docker-compose ps
 ```
+
+## Configuration
+(TBD)
+
+## Testing
+Tests are written using various Java testing libraries, but all may be executed in order with
+
+```
+mvn test
+```
+
+## Usage 
+Each module may be developed and ran individually. Instructions for each module can be found in their respective README files. This top-level view is primarily to allow for ease of running the entire suite through docker containers. 

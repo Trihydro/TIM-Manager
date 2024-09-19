@@ -11,7 +11,80 @@ The `ODE Mongo Logger` module listens for messages on a specified Kafka topic an
 - [Usage](#usage)
 
 ## Installation
-(TBD)
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+
+### Runtime Dependencies
+| Dependency | Direct/Indirect | Link |
+| ---------- | --------------- | ---- |
+| [Kafka](https://kafka.apache.org/) | Direct | [Kafka](https://kafka.apache.org/) |
+| [MongoDB Server](https://www.mongodb.com/) | Direct | [MongoDB](https://www.mongodb.com/) |
+
+### Compile-Time Dependencies
+- Java is provided by the dev container's base image.
+- Maven is provided by the dev container's base image.
+
+### Docker
+The following instructions are intended to be executed from the root directory of the WyoCV project:
+1. Reopen the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container". If Docker isn't running, start it and try again.
+1. Open a terminal in the dev container by clicking on the `Terminal` menu and selecting `New Terminal`
+1. Compile the project by running the following command:
+    ```
+    mvn clean package -DskipTests -pl cv-data-service-library -pl ode-mongo-logger
+    ```
+1. Reopen the project locally by clicking on the blue button in the bottom left corner of the window and selecting "Reopen Folder Locally"
+1. Move the compiled JAR to the root directory of the module:
+
+    Linux:
+    ```bash
+    mv ./ode-mongo-logger/target/ode-mongo-logger-x.x.x-SNAPSHOT.jar ./ode-mongo-logger/
+    ```
+    Windows:
+    ```windows
+    move .\ode-mongo-logger\target\ode-mongo-logger-x.x.x-SNAPSHOT.jar .\ode-mongo-logger\
+    ```
+
+    Replace `x.x.x` with the version number of the JAR file. If a JAR file already exists in the `ode-mongo-logger` directory, you may need to delete it first.
+
+1. Copy the sample.env to .env:
+
+    Linux:
+    ```bash
+    cp sample.env .env
+    ```
+    Windows:
+    ```windows
+    copy sample.env .env
+    ```
+
+1. Update the .env file with the appropriate values. See the [Configuration](#configuration) section for more information.
+1. Verify that the necessary [dependencies](#dependencies) are running and accessible at the addresses specified in the `.env` file.
+1. Build & run the docker container with the following command:
+    ```
+    docker compose up -d --build tim_logger_mongo
+    ```
+1. View the logs with the following command:
+    ```
+    docker compose logs -f tim_logger_mongo
+    ```
+
+    To stop viewing the logs, press `Ctrl+C`.
+
+1. To stop the container, run the following command:
+    ```
+    docker compose down
+    ```
+
+### Launch Configuration
+A basic development environment file has been included (/resource/application-dev.properties) and is used when debugging via the `ODE Mongo Logger (Launch)` configuration. This configuration is intended to be used with the provided dev container.
+
+To run the application using the provided launch configuration, follow these steps:
+1. Update the `application.properties` file with the appropriate values. See the [Configuration](#configuration) section for more information.
+1. Verify that the necessary [dependencies](#dependencies) are running and accessible at the addresses specified in the `application.properties` file.
+1. Open the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container"
+1. Open the Run and Debug sidebar by clicking on the icon on the left side of the window or by pressing `Ctrl+Shift+D`
+1. Click on down arrow next to the gear icon in the top right corner of the sidebar
+1. Select the `ODE Mongo Logger (Launch)` configuration from the dropdown menu
+1. Click the green play button to start the application
 
 ## Deployment
 This application is deployed using Docker, and is part of the larger WyoCVApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.

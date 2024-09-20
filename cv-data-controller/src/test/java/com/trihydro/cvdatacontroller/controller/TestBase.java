@@ -28,6 +28,8 @@ public class TestBase<T extends BaseController> {
         @Mock
         protected Connection mockConnection;
         @Mock
+        protected Connection mockConnectionCountyRoads;
+        @Mock
         protected Statement mockStatement;
         @Mock
         protected PreparedStatement mockPreparedStatement;
@@ -52,11 +54,21 @@ public class TestBase<T extends BaseController> {
                                 .getTypeName();
                 Class<?> clazz = Class.forName(className);
                 uut = spy((T) clazz.getDeclaredConstructor().newInstance());
+
+                // primary connection
                 lenient().when(mockConnection.createStatement()).thenReturn(mockStatement);
                 lenient().when(mockConnection.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
                 lenient().when(mockConnection.prepareStatement(isA(String.class), isA(String[].class)))
                                 .thenReturn(mockPreparedStatement);
                 lenient().doReturn(mockConnection).when(mockDbInteractions).getConnectionPool();
+
+                // county roads connection
+                lenient().when(mockConnectionCountyRoads.createStatement()).thenReturn(mockStatement);
+                lenient().when(mockConnectionCountyRoads.prepareStatement(isA(String.class))).thenReturn(mockPreparedStatement);
+                lenient().when(mockConnectionCountyRoads.prepareStatement(isA(String.class), isA(String[].class)))
+                                .thenReturn(mockPreparedStatement);
+                lenient().doReturn(mockConnectionCountyRoads).when(mockDbInteractions).getCountyRoadsConnectionPool();
+
                 lenient().doReturn(-1l).when(mockDbInteractions).executeAndLog(isA(PreparedStatement.class),
                                 isA(String.class));
                 lenient().doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);

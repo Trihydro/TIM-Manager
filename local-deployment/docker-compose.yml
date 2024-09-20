@@ -201,6 +201,8 @@ services:
       CONFIG_MAIL_PORT: 123
       CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME: mock_triggered_county_roads_v1_vw
       CONFIG_COUNTY_ROADS_GEOMETRY_VIEW_NAME: countyrds.county_road_geometry_v1_mv
+      CONFIG_COUNTY_ROADS_REPORT_VIEW_NAME: countyrds.county_roads_report_v1_vw
+      CONFIG_COUNTY_ROADS_WTI_SECTIONS_VIEW_NAME: countyrds.county_roads_wti_sections_v1_vw
     logging:
       options:
         max-size: "20m"

@@ -200,6 +200,7 @@ services:
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
       CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME: mock_triggered_county_roads_v1_vw
+      CONFIG_COUNTY_ROADS_GEOMETRY_VIEW_NAME: countyrds.county_road_geometry_v1_mv
     logging:
       options:
         max-size: "20m"

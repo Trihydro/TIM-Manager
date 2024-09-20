@@ -211,7 +211,7 @@ public class WydotTimService {
             var activeTimId = activeSatTim.getActiveTimId();
             activeTimService.resetActiveTimsExpirationDate(Arrays.asList(activeTimId));
         }
-        
+
         // set region name
         String regionNameTemp = regionNamePrev + "_SAT-" + recordId + "_" + timType.getType();
         if (wydotTim.getClientId() != null) {
@@ -228,7 +228,7 @@ public class WydotTimService {
             return;
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
-        
+
         // update/create TIM
         if (activeSatTim != null) {
             WydotOdeTravelerInformationMessage tim = timService.getTim(activeSatTim.getTimId());
@@ -517,7 +517,7 @@ public class WydotTimService {
         }
     }
 
-    public WydotRsu getRsu(Long rsuId) {
+    private WydotRsu getRsu(Long rsuId) {
 
         WydotRsu wydotRsu = null;
         try {
@@ -529,7 +529,7 @@ public class WydotTimService {
         return wydotRsu;
     }
 
-    public void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> reducedMileposts) {
+    private void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> reducedMileposts) {
 
         // set msgCnt to 1 and create new packetId
         timToSend.getTim().setMsgCnt(1);
@@ -574,7 +574,7 @@ public class WydotTimService {
 
         try {
             var rsu = getRsu(timRsu.getRsuId());
-            utility.logWithDate("Preparing to submit updated TIM. Clearing index " + timRsu.getRsuIndex() + "on RSU "
+            utility.logWithDate("Preparing to submit updated TIM. Clearing index " + timRsu.getRsuIndex() + " on RSU "
                     + timRsu.getRsuId());
             // The ODE response code is misleading. If there is a failure in this step or
             // the next, the issue should get addressed when the RSU Validation task is
@@ -751,7 +751,7 @@ public class WydotTimService {
 
     /**
      * Get's appropriate SDX TTL based on duration
-     * 
+     *
      * @param duration DataFrame duration (minutes), up to 32000 per J2735
      */
     private TimeToLive getTimeToLive(int duration) {

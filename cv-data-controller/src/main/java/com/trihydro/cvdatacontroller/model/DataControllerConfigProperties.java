@@ -54,6 +54,17 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     private String isLateral;
 
     private String countyRoadsTriggerViewName;
+    private String countyRoadsGeometryViewName;
+    private String countyRoadsReportViewName;
+    private String countyRoadsWtiSectionsViewName;
+
+    private String countyRoadsAdhocClosuresCurrentViewName;
+    private String countyRoadsAdhocLoctCurrentViewName;
+    private String countyRoadsAdhocNttCurrentViewName;
+    private String countyRoadsPlannedClosuresCurrentViewName;
+    private String countyRoadsPlannedClosuresEViewName;
+    private String countyRoadsPlannedLoctCurrentViewName;
+    private String countyRoadsPlannedLoctEViewName;
 
     public String getDbUrl() {
         return dbUrl;
@@ -307,5 +318,100 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     @Override
     public void setCountyRoadsTriggerViewName(String countyRoadsTriggerViewName) {
         this.countyRoadsTriggerViewName = countyRoadsTriggerViewName;
+    }
+
+    @Override
+    public String getCountyRoadsGeometryViewName() {
+        return countyRoadsGeometryViewName;
+    }
+
+    @Override
+    public void setCountyRoadsGeometryViewName(String countyRoadsGeometryViewName) {
+        this.countyRoadsGeometryViewName = countyRoadsGeometryViewName;
+    }
+
+    @Override
+    public String getCountyRoadsReportViewName() {
+        return countyRoadsReportViewName;
+    }
+
+    @Override
+    public void setCountyRoadsReportViewName(String countyRoadsReportViewName) {
+        this.countyRoadsReportViewName = countyRoadsReportViewName;
+    }
+
+    @Override
+    public String getCountyRoadsWtiSectionsViewName() {
+        return countyRoadsWtiSectionsViewName;
+    }
+
+    @Override
+    public String getCountyRoadsAdhocClosuresCurrentViewName() {
+        return countyRoadsAdhocClosuresCurrentViewName;
+    }
+
+    @Override
+    public void setCountyRoadsAdhocClosuresCurrentViewName(String countyRoadsAdhocClosuresCurrentViewName) {
+        this.countyRoadsAdhocClosuresCurrentViewName = countyRoadsAdhocClosuresCurrentViewName;
+    }
+
+    @Override
+    public String getCountyRoadsAdhocLoctCurrentViewName() {
+        return countyRoadsAdhocLoctCurrentViewName;
+    }
+
+    @Override
+    public void setCountyRoadsAdhocLoctCurrentViewName(String countyRoadsAdhocLoctCurrentViewName) {
+        this.countyRoadsAdhocLoctCurrentViewName = countyRoadsAdhocLoctCurrentViewName;
+    }
+
+    @Override
+    public String getCountyRoadsAdhocNttCurrentViewName() {
+        return countyRoadsAdhocNttCurrentViewName;
+    }
+
+    @Override
+    public void setCountyRoadsAdhocNttCurrentViewName(String countyRoadsAdhocNttCurrentViewName) {
+        this.countyRoadsAdhocNttCurrentViewName = countyRoadsAdhocNttCurrentViewName;
+    }
+
+    @Override
+    public String getCountyRoadsPlannedClosuresCurrentViewName() {
+        return countyRoadsPlannedClosuresCurrentViewName;
+    }
+
+    @Override
+    public void setCountyRoadsPlannedClosuresCurrentViewName(String countyRoadsPlannedClosuresCurrentViewName) {
+        this.countyRoadsPlannedClosuresCurrentViewName = countyRoadsPlannedClosuresCurrentViewName;
+    }
+
+    @Override
+    public String getCountyRoadsPlannedClosuresEViewName() {
+        return countyRoadsPlannedClosuresEViewName;
+    }
+
+    @Override
+    public void setCountyRoadsPlannedClosuresEViewName(String countyRoadsPlannedClosuresEViewName) {
+        this.countyRoadsPlannedClosuresEViewName = countyRoadsPlannedClosuresEViewName;
+    }
+
+    @Override
+    public String getCountyRoadsPlannedLoctCurrentViewName() {
+        return countyRoadsPlannedLoctCurrentViewName;
+    }
+
+    @Override
+    public void setCountyRoadsPlannedLoctCurrentViewName(String countyRoadsPlannedLoctCurrentViewName) {
+        this.countyRoadsPlannedLoctCurrentViewName = countyRoadsPlannedLoctCurrentViewName;
+    }
+
+    @Override
+    public String getCountyRoadsPlannedLoctEViewName() {
+        return countyRoadsPlannedLoctEViewName;
+    }
+
+    @Override
+    public void setCountyRoadsPlannedLoctEViewName(String countyRoadsPlannedLoctEViewName) {
+        this.countyRoadsPlannedLoctEViewName = countyRoadsPlannedLoctEViewName;
     }
 }

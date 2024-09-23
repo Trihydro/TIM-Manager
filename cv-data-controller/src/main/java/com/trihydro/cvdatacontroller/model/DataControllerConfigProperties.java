@@ -303,16 +303,6 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     }
 
     @Override
-    public String getCountyRoadsTriggerViewName() {
-        return countyRoadsTriggerViewName;
-    }
-
-    @Override
-    public void setCountyRoadsTriggerViewName(String countyRoadsTriggerViewName) {
-        this.countyRoadsTriggerViewName = countyRoadsTriggerViewName;
-    }
-
-    @Override
     public String getCountyRoadsGeometryViewName() {
         return countyRoadsGeometryViewName;
     }

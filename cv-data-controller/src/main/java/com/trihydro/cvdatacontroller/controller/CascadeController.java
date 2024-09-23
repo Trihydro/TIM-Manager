@@ -114,7 +114,7 @@ public class CascadeController extends BaseController {
             statement = connection.createStatement();
 
             // build SQL statement
-            String viewName = CountyRoadsGeometryView.countyRoadsGeometryViewName;
+            String viewName = countyRoadsProps.getCountyRoadsGeometryViewName();
             String query = String.format("select %s, %s, %s, %s, %s from %s where %s = %d order by %s asc",
                     CountyRoadsGeometryView.commonNameColumnName,
                     CountyRoadsGeometryView.directionColumnName,

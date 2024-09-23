@@ -1,7 +1,7 @@
 -- Note: This should only be run on a local deployment database. The actual view is provided by WYDOT.
 
 CREATE SCHEMA IF NOT EXISTS countyrds;
-CREATE TABLE IF NOT EXISTS countyrds.county_road_geometry_v1_mv (
+CREATE TABLE IF NOT EXISTS mock_county_road_geometry_v1_mv (
     pt_id bigint,
     cr_id integer,
     common_name text,

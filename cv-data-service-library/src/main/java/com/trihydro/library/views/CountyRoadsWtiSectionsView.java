@@ -7,5 +7,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CountyRoadsWtiSectionsView {
-    // TODO: Add column names for the county roads report view
+    public static final String crIdColumnName = "cr_id";
+    public static final String roadCodeColumnName = "road_code";
 }

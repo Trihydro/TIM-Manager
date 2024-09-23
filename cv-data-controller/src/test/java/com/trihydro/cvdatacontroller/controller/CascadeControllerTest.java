@@ -74,7 +74,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         countyRoadSegments.add(countyRoadSegment);
         TriggerRoad triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
         uut.addToCache(triggerRoad); // add to cache to ensure cache hit
-        doReturn("test").when(mockRs).getString("common_name");
+        doReturn("test").when(mockRs).getString("name");
 
         // execute
         ResponseEntity<String> responseJson = uut.getTriggerRoad(roadCode);
@@ -110,7 +110,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         CountyRoadSegment countyRoadSegment = createCountyRoadSegment();
         List<CountyRoadSegment> countyRoadSegments = new ArrayList<>();
         countyRoadSegments.add(countyRoadSegment);
-        doReturn("test").when(mockRs).getString("common_name");
+        doReturn("test").when(mockRs).getString("name");
         uut.clearCache(); // clear cache to ensure cache miss
         
         // execute
@@ -143,7 +143,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
     public void testGetTriggerRoad_CacheMiss_SQLException_FAILURE() throws SQLException {
         // prepare
         String roadCode = "test";
-        doThrow(new SQLException()).when(mockRs).getString("common_name");
+        doThrow(new SQLException()).when(mockRs).getString("name");
         uut.clearCache(); // clear cache to ensure cache miss
 
         // execute

@@ -8,4 +8,5 @@ public interface CountyRoadsProps {
     String getCountyRoadsReportViewName();
     void setCountyRoadsReportViewName(String countyRoadsReportViewName);
     String getCountyRoadsWtiSectionsViewName();
+    void setCountyRoadsWtiSectionsViewName(String countyRoadsWtiSectionsViewName);
 }

@@ -63,7 +63,7 @@ For more instructions on adding new models, credentials, SNMP versions, and firm
 1. Open pgAdmin4 and sign in to the database.
 1. Add the new model to the `rsu_models` table in the database by running the following query:
     ```sql
-    INSERT INTO public.rsu_models(
+    INSERT INTO cvmanager.rsu_models(
         name, supported_radio, manufacturer)
         VALUES ('<modelname>', '<supportedradiolist>', <manufacturerid>);
     ```
@@ -75,7 +75,7 @@ For more instructions on adding new models, credentials, SNMP versions, and firm
 1. Open pgAdmin4 and sign in to the database.
 1. Add the new rsu_credential to the `rsu_credentials` table in the database by running the following query:
     ```sql
-    INSERT INTO public.rsu_credentials(
+    INSERT INTO cvmanager.rsu_credentials(
         username, password, snmp_version)
         VALUES ('<username>', '<password>', '<nickname>');
     ```
@@ -87,7 +87,7 @@ For more instructions on adding new models, credentials, SNMP versions, and firm
 1. Open pgAdmin4 and sign in to the database.
 1. Add the new snmp_credential to the `snmp_credentials` table in the database by running the following query:
     ```sql
-    INSERT INTO public.snmp_credentials(
+    INSERT INTO cvmanager.snmp_credentials(
 	    username, password, encrypt_password, nickname)
 	    VALUES ('<username>', '<password>', '<encryptionpassword>', '<nickname>');
     ```
@@ -99,7 +99,7 @@ For more instructions on adding new models, credentials, SNMP versions, and firm
 1. Open pgAdmin4 and sign in to the database.
 1. Add the new firmware_version to the `firmware_versions` table in the database by running the following query:
     ```sql
-    INSERT INTO public.firmware_images(
+    INSERT INTO cvmanager.firmware_images(
 	    name, model, install_package, version)
 	    VALUES ('<nickname>', <modelid>, '<filename>', '<fullversion>');
     ```
@@ -111,7 +111,7 @@ For more instructions on adding new models, credentials, SNMP versions, and firm
 1. Open pgAdmin4 and sign in to the database.
 1. Add the new snmp_version to the `snmp_versions` table in the database by running the following query:
     ```sql
-    INSERT INTO public.snmp_versions(
+    INSERT INTO cvmanager.snmp_versions(
         version_code, nickname)
         VALUES ('<versioncode>', '<nickname>');
     ```

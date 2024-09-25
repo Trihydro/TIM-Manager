@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DbInteractions {
     private static HikariDataSource dataSource;
+    private static HikariDataSource dataSourceCountyRoads;
 
     protected DbInteractionsProps dbConfig;
     protected Utility utility;
@@ -28,10 +29,10 @@ public class DbInteractions {
         utility = _utility;
         emailHelper = _emailHelper;
         utility.logWithDate("DbInteractions: Injecting dependencies");
-        initDataSource();
+        initDataSources();
     }   
 
-    private void initDataSource() {
+    private void initDataSources() {
         if (dataSource == null) {
             TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
             TimeZone.setDefault(timeZone);
@@ -46,37 +47,88 @@ public class DbInteractions {
                 System.exit(1);
             }
 
-            // initialize connection pool
+            // initialize connection pools
             try {
-                HikariConfig config = new HikariConfig();
-                config.setDriverClassName("org.postgresql.Driver");
-                config.setJdbcUrl(dbConfig.getDbUrl());
-                config.setUsername(dbConfig.getDbUsername());
-                config.setPassword(dbConfig.getDbPassword());
-                config.setConnectionTimeout(dbConfig.getConnectionTimeout());
-                config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
-
-                // log the configuration of the connection pool
-                utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
-                utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
-                utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
-                utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
-                utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
-                utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
-
-                dataSource = new HikariDataSource(config);
-                utility.logWithDate("DbInteractions: Successfully initialized connection pool");
+                initializePrimaryConnectionPool();
             } catch (Exception e) {
-                utility.logWithDate("DbInteractions: Failed to initialize connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
+                utility.logWithDate("DbInteractions: Failed to initialize primary connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
+                // e.printStackTrace();
+                System.exit(1);
+            }
+        }
+
+        if (dataSourceCountyRoads == null) {
+            TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+            TimeZone.setDefault(timeZone);
+
+            // check dbconfig for null values
+            if (dbConfig.getDbUrlCountyRoads() == null ||
+                dbConfig.getDbUsernameCountyRoads() == null ||
+                dbConfig.getDbPasswordCountyRoads() == null ||
+                dbConfig.getMaximumPoolSize() == 0 ||
+                dbConfig.getConnectionTimeout() == 0) {
+                utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
+                System.exit(1);
+            }
+
+            // initialize connection pools
+            try {
+                initializeCountyRoadsConnectionPool();
+            } catch (Exception e) {
+                utility.logWithDate("DbInteractions: Failed to initialize county roads connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
                 // e.printStackTrace();
                 System.exit(1);
             }
         }
     }
 
+    private void initializePrimaryConnectionPool() {
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName("org.postgresql.Driver");
+        config.setJdbcUrl(dbConfig.getDbUrl());
+        config.setUsername(dbConfig.getDbUsername());
+        config.setPassword(dbConfig.getDbPassword());
+        config.setConnectionTimeout(dbConfig.getConnectionTimeout());
+        config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
+
+        // log the configuration of the connection pool
+        utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
+        utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
+        utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
+        utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
+        utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
+        utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
+
+        dataSource = new HikariDataSource(config);
+        utility.logWithDate("DbInteractions: Successfully initialized connection pool");
+    }
+
+    private void initializeCountyRoadsConnectionPool() {
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName("org.postgresql.Driver");
+        config.setJdbcUrl(dbConfig.getDbUrlCountyRoads());
+        config.setUsername(dbConfig.getDbUsernameCountyRoads());
+        config.setPassword(dbConfig.getDbPasswordCountyRoads());
+        config.setConnectionTimeout(dbConfig.getConnectionTimeout());
+        config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
+
+        // log the configuration of the connection pool
+        utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
+        utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
+        utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrlCountyRoads());
+        utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsernameCountyRoads());
+        utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
+        utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
+
+        dataSourceCountyRoads = new HikariDataSource(config);
+        utility.logWithDate("DbInteractions: Successfully initialized connection pool");
+    }
+
     public Connection getConnectionPool() throws SQLException {
         // create pool if not already done
-        initDataSource();
+        if (dataSource == null) {
+            initializePrimaryConnectionPool();
+        }
 
         // return a connection
         try {
@@ -92,6 +144,33 @@ public class DbInteractions {
                 emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
             } catch (Exception exception) {
                 utility.logWithDate("Failed to open connection to " + dbConfig.getDbUrl()
+                        + ", then failed to send email");
+                exception.printStackTrace();
+            }
+            throw ex;
+        }
+    }
+
+    public Connection getCountyRoadsConnectionPool() throws SQLException {
+        // create pool if not already done
+        if (dataSourceCountyRoads == null) {
+            initializeCountyRoadsConnectionPool();
+        }
+
+        // return a connection
+        try {
+            return dataSourceCountyRoads.getConnection();
+        } catch (SQLException ex) {
+            String body = "Failed attempting to open a connection to ";
+            body += dbConfig.getDbUrlCountyRoads();
+            body += ". <br/>Exception message: ";
+            body += ex.getMessage();
+            body += "<br/>Stacktrace: ";
+            body += ExceptionUtils.getStackTrace(ex);
+            try {
+                emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
+            } catch (Exception exception) {
+                utility.logWithDate("Failed to open connection to " + dbConfig.getDbUrlCountyRoads()
                         + ", then failed to send email");
                 exception.printStackTrace();
             }

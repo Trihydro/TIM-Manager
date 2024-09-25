@@ -110,11 +110,11 @@ public class CascadeController extends BaseController {
         ResultSet rs = null;
 
         try {
-            connection = dbInteractions.getConnectionPool();
+            connection = dbInteractions.getCountyRoadsConnectionPool(); // target county roads database
             statement = connection.createStatement();
 
             // build SQL statement
-            String viewName = CountyRoadsGeometryView.countyRoadsGeometryViewName;
+            String viewName = countyRoadsProps.getCountyRoadsGeometryViewName();
             String query = String.format("select %s, %s, %s, %s, %s from %s where %s = %d order by %s asc",
                     CountyRoadsGeometryView.commonNameColumnName,
                     CountyRoadsGeometryView.directionColumnName,
@@ -185,7 +185,7 @@ public class CascadeController extends BaseController {
 		ResultSet rs = null;
 
 		try {
-			connection = dbInteractions.getConnectionPool();
+			connection = dbInteractions.getConnectionPool(); // target primary database
 			statement = connection.createStatement();
 
 			String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
@@ -297,7 +297,7 @@ public class CascadeController extends BaseController {
         ResultSet rs = null;
 
         try {
-            connection = dbInteractions.getConnectionPool();
+            connection = dbInteractions.getCountyRoadsConnectionPool(); // target county roads database
             statement = connection.createStatement();
 
             // build SQL statement

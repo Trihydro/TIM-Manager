@@ -54,6 +54,9 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     private String isLateral;
 
     private String countyRoadsTriggerViewName;
+    private String countyRoadsGeometryViewName;
+    private String countyRoadsReportViewName;
+    private String countyRoadsWtiSectionsViewName;
 
     public String getDbUrl() {
         return dbUrl;
@@ -307,5 +310,35 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     @Override
     public void setCountyRoadsTriggerViewName(String countyRoadsTriggerViewName) {
         this.countyRoadsTriggerViewName = countyRoadsTriggerViewName;
+    }
+
+    @Override
+    public String getCountyRoadsGeometryViewName() {
+        return countyRoadsGeometryViewName;
+    }
+
+    @Override
+    public void setCountyRoadsGeometryViewName(String countyRoadsGeometryViewName) {
+        this.countyRoadsGeometryViewName = countyRoadsGeometryViewName;
+    }
+
+    @Override
+    public String getCountyRoadsReportViewName() {
+        return countyRoadsReportViewName;
+    }
+
+    @Override
+    public void setCountyRoadsReportViewName(String countyRoadsReportViewName) {
+        this.countyRoadsReportViewName = countyRoadsReportViewName;
+    }
+
+    @Override
+    public String getCountyRoadsWtiSectionsViewName() {
+        return countyRoadsWtiSectionsViewName;
+    }
+
+    @Override
+    public void setCountyRoadsWtiSectionsViewName(String countyRoadsWtiSectionsViewName) {
+        this.countyRoadsWtiSectionsViewName = countyRoadsWtiSectionsViewName;
     }
 }

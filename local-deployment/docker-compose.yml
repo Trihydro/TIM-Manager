@@ -173,6 +173,18 @@ services:
       options:
         max-size: "20m"
         max-file: "3"
+
+  kafka-connect:
+    image: quay.io/debezium/connect:2.7
+    restart: always
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9094
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      STATUS_STORAGE_TOPIC: my_connect_statuses
   # end of internal dependencies ------------------------------------------------
 
   # wyocv apps --------------------------------------------------------------

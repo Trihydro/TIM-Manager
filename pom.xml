@@ -31,6 +31,7 @@
     <module>tim-refresh</module>
     <module>logger-kafka-consumer</module>
     <module>cert-expiration</module>
+    <module>adhoc-listener</module>
   </modules>
 
   <dependencies>

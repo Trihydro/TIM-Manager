@@ -495,21 +495,25 @@ services:
       KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
       MAX_POLL_INTERVAL_MS: 600000
       MAX_POLL_RECORDS: 25
-      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=postgres
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=username
+      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=postgres
       DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
       DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
       MAXIMUM_POOL_SIZE: 13
       CONNECTION_TIMEOUT: 300000
+      ALERT_ADDRESSES: test@gmail.com
+      FROM_EMAIL: test@gmail.com
+      ENVIRONMENT_NAME: local
+      MAIL_HOST: 172.0.0.1
+      MAIL_PORT: 123
+      ENV: local
       LISTENER_TYPE: ${ADHOC_LISTENER_TYPE}
     logging:
       options:
         max-size: "20m"
         max-file: "3"
-    depends_on:
-      - kafka-connect
   # end of wyocv apps ---------------------------------------------------------
 
 # volumes ---------------------------------------------------------------------

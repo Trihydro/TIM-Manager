@@ -6,13 +6,19 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.library.factory.KafkaFactory;
+import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.adhoclistener.config.AdhocListenerConfiguration;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.postgresql.PGConnection;
+import org.postgresql.PGNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +27,16 @@ public class AdhocListener {
     private ObjectMapper mapper;
     private AdhocListenerConfiguration loggerConfig;
     private KafkaFactory kafkaFactory;
+    private DbInteractions dbInteractions;
     private Utility utility;
     private boolean isRunning = true;
 
     @Autowired
-    public AdhocListener(AdhocListenerConfiguration loggerConfig, KafkaFactory kafkaFactory, Utility utility) {
+    public AdhocListener(AdhocListenerConfiguration loggerConfig, KafkaFactory kafkaFactory, Utility utility, DbInteractions dbInteractions) {
         this.loggerConfig = loggerConfig;
         this.kafkaFactory = kafkaFactory;
         this.utility = utility;
+        this.dbInteractions = dbInteractions;
         
         mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -37,8 +45,12 @@ public class AdhocListener {
             startKafkaConsumer();
         }
         else if (loggerConfig.getListenerType().equals("listen-notify")) {
-            // not supported yet
-            throw new UnsupportedOperationException("Listen-Notify not supported yet");
+            try {
+                startListenNotify();
+            } catch (SQLException e) {
+                utility.logWithDate("Error: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
         else {
             throw new UnsupportedOperationException("Unknown listener type");
@@ -62,10 +74,56 @@ public class AdhocListener {
                 processRecords(records);
 
             }
-        } catch (Exception ex) {
-            utility.logWithDate("Error: " + ex.getMessage());
+        } catch (Exception e) {
+            utility.logWithDate("Error: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             stringConsumer.close();
+        }
+    }
+
+    public void startListenNotify() throws SQLException {
+        // listen to the 'adhoc_listener_channel' channel in postgres
+        utility.logWithDate("Starting Listen Notify");
+        
+        // connect to db
+        Connection connection = null;
+        Statement statement = null;
+
+        connection = dbInteractions.getConnectionPool();
+        statement = connection.createStatement();
+        statement.execute("LISTEN adhoc_listener_channel");
+        
+        // listen for notifications
+        while (isRunning) {
+            PGNotification[] notifications = null;
+            PGConnection pgConnection = connection.unwrap(PGConnection.class);
+            notifications = pgConnection.getNotifications();
+            if (notifications != null) {
+                for (PGNotification notification : notifications) {
+                    // print notification details
+                    utility.logWithDate("Notification: " + notification.getName());
+                    utility.logWithDate("Parameter: " + notification.getParameter());
+                    utility.logWithDate("PID: " + notification.getPID());
+
+                    JsonNode payloadObject = null;
+                    try {
+                        payloadObject = mapper.readTree(notification.getParameter());
+                    } catch (JsonMappingException e) {
+                        utility.logWithDate("Error: " + e.getMessage());
+                        e.printStackTrace();
+                    } catch (JsonProcessingException e) {
+                        utility.logWithDate("Error: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                    if (payloadObject == null) {
+                        continue;
+                    }
+                    
+                    processJson(payloadObject);
+                }
+            }
         }
     }
 
@@ -76,8 +134,10 @@ public class AdhocListener {
                 jsonObject = mapper.readTree(record.value());
             } catch (JsonMappingException e) {
                 utility.logWithDate("Error: " + e.getMessage());
+                e.printStackTrace();
             } catch (JsonProcessingException e) {
                 utility.logWithDate("Error: " + e.getMessage());
+                e.printStackTrace();
             }
             if (jsonObject == null) {
                 continue;
@@ -88,6 +148,12 @@ public class AdhocListener {
     }
 
     private void processJson(JsonNode payloadObject) {
+        // verify that payload contains before & after elements
+        if (payloadObject.get("before") == null || payloadObject.get("after") == null) {
+            utility.logWithDate("Payload does not contain before and after elements");
+            return;
+        }
+
         utility.logWithDate("=========== Adhoc Listener Event ===========");        
         if (wasRecordCreated(payloadObject)) {
             handleRecordCreated(payloadObject);

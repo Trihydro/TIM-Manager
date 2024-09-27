@@ -1,11 +1,12 @@
 package com.trihydro.adhoclistener.config;
 
 import com.trihydro.library.model.DbInteractionsProps;
+import com.trihydro.library.model.EmailProps;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties
-public class AdhocListenerConfiguration implements DbInteractionsProps {
+public class AdhocListenerConfiguration implements DbInteractionsProps, EmailProps {
     private String depositGroup;
     private String depositTopic;
     private String kafkaHostServer;
@@ -22,6 +23,12 @@ public class AdhocListenerConfiguration implements DbInteractionsProps {
 
     private int maximumPoolSize;
     private int connectionTimeout;
+
+    private String[] alertAddresses;
+    private String fromEmail;
+    private String environmentName;
+    private String mailHost;
+    private int mailPort;
 
     private String listenerType;
 
@@ -129,28 +136,44 @@ public class AdhocListenerConfiguration implements DbInteractionsProps {
         this.connectionTimeout = connectionTimeout;
     }
 
-    @Override
     public String[] getAlertAddresses() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAlertAddresses'");
+        return alertAddresses;
     }
 
-    @Override
+    public void setAlertAddresses(String[] alertAddresses) {
+        this.alertAddresses = alertAddresses;
+    }
+
     public String getFromEmail() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getFromEmail'");
+        return fromEmail;
     }
 
-    @Override
+    public void setFromEmail(String fromEmail) {
+        this.fromEmail = fromEmail;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
+
     public String getMailHost() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMailHost'");
+        return mailHost;
     }
 
-    @Override
+    public void setMailHost(String mailHost) {
+        this.mailHost = mailHost;
+    }
+
     public int getMailPort() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMailPort'");
+        return mailPort;
+    }
+
+    public void setMailPort(int mailPort) {
+        this.mailPort = mailPort;
     }
 
     public String getListenerType() {

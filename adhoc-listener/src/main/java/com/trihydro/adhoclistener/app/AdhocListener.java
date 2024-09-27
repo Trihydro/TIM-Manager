@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AdhocListener {
-
     private ObjectMapper mapper;
     private AdhocListenerConfiguration loggerConfig;
     private KafkaFactory kafkaFactory;
@@ -34,7 +33,16 @@ public class AdhocListener {
         mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        startKafkaConsumer();
+        if (loggerConfig.getListenerType().equals("kafka")) {
+            startKafkaConsumer();
+        }
+        else if (loggerConfig.getListenerType().equals("listen-notify")) {
+            // not supported yet
+            throw new UnsupportedOperationException("Listen-Notify not supported yet");
+        }
+        else {
+            throw new UnsupportedOperationException("Unknown listener type");
+        }
     }
 
     public void startKafkaConsumer() {

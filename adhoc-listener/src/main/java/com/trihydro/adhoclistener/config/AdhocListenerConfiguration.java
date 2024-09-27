@@ -23,6 +23,8 @@ public class AdhocListenerConfiguration implements DbInteractionsProps {
     private int maximumPoolSize;
     private int connectionTimeout;
 
+    private String listenerType;
+
     public String getDepositGroup() {
         return depositGroup;
     }
@@ -149,5 +151,13 @@ public class AdhocListenerConfiguration implements DbInteractionsProps {
     public int getMailPort() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getMailPort'");
+    }
+
+    public String getListenerType() {
+        return listenerType;
+    }
+
+    public void setListenerType(String listenerType) {
+        this.listenerType = listenerType;
     }
 }

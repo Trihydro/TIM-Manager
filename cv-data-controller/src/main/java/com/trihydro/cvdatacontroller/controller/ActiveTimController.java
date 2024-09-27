@@ -63,6 +63,14 @@ public class ActiveTimController extends BaseController {
 		sqlNullHandler = _sqlNullHandler;
 	}
 
+	/**
+	 * Retrieve active TIMs that are expiring within 24 hours.
+	 * 
+	 * Note: TIMs with a start time more than 24 hours in the future 
+	 * or an end time less than 24 hours in the future are excluded.
+	 * 
+	 * @return List of ActiveTim objects
+	 */
 	@RequestMapping(value = "/expiring", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<TimUpdateModel>> GetExpiringActiveTims() {
 		TimUpdateModel activeTim = null;
@@ -87,14 +95,12 @@ public class ActiveTimController extends BaseController {
 			selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
 			selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
 			selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
-			// where starting less than 2 hours away
-			selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR";
-			// and expiration_date within 2hrs
-			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
-			// check that end time isn't within 2hrs
-			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '2' HOUR)";
-			// check that this TIM is capable of being refreshed (direction = I or D)
-			selectStatement += " AND UPPER(atim.direction) IN ('I', 'D')";
+			// where starting less than 24 hours away
+			selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR";
+			// and expiration_date within 24hrs
+			selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR)";
+			// check that end time isn't within 24hrs
+			selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR)";
 
 			rs = statement.executeQuery(selectStatement);
 
@@ -1105,7 +1111,7 @@ public class ActiveTimController extends BaseController {
 
 	/**
 	 * Get all ActiveTims (including RSU address and RSU Index)
-	 * 
+	 *
 	 * @return List of ActiveTims, sorted by RSU and RSU Index
 	 */
 	@RequestMapping(value = "/active-rsu-tims", method = RequestMethod.GET)

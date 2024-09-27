@@ -35,3 +35,8 @@ config="{\"connector.class\":\"$config_connector_class\",\"database.hostname\":\
 data="{\"name\":\"$name\",\"config\":$config}"
 
 curl -X POST $headers $endpoint -d $data
+if [ $? -ne 0 ]; then
+  echo "Failed to create connector"
+  exit 1
+fi
+exit 0

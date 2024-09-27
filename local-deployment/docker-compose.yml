@@ -199,7 +199,6 @@ services:
       CONFIG_ENVIRONMENT_NAME: local
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
-      CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME: mock_triggered_county_roads_v1_vw
       CONFIG_COUNTY_ROADS_GEOMETRY_VIEW_NAME: mock_county_road_geometry_v1_mv
       CONFIG_COUNTY_ROADS_REPORT_VIEW_NAME: mock_county_roads_report_v1_vw
       CONFIG_COUNTY_ROADS_WTI_SECTIONS_VIEW_NAME: mock_county_roads_wti_sections_v1_vw

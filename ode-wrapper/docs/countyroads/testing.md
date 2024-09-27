@@ -41,7 +41,8 @@ To prepare for testing, the following steps should be taken:
 1. SSH into the Test VM.
 1. Navigate to /home/wyocvadmin/wyocv.
 1. Run `nano .env` to open the environment file.
-1. Set `CONTROLLER_CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME=mock_triggered_county_roads_v1_vw` in the environment file.
+1. Set `CONTROLLER_CONFIG_COUNTY_ROADS_REPORT_VIEW_NAME=mock_county_roads_report_v1_vw` in the environment file.
+1. Set `CONTROLLER_CONFIG_COUNTY_ROADS_WTI_SECTIONS_VIEW_NAME=mock_county_roads_wti_sections_v1_vw` in the environment file.
 1. Save and exit the file.
 1. Run `./clean-build-and-deploy.sh` to re-deploy the wyocv apps with the new configuration.
 1. Run `docker compose logs -f ode_wrapper` to monitor the logs of the ODE Wrapper.
@@ -55,7 +56,7 @@ For each test case, conditions will be cascaded to the county roads associated w
 #### Part 1: Cascade Condition
 1. Modify road conditions in the database to match the condition to be cascaded with the following query:
     ```sql
-    update mock_triggered_county_roads_v1_vw set <condition>=1 where road_code='<road code>';
+    update mock_county_roads_report_v1_vw set <condition>=1 where road_code='<road code>';
     ```
 
     This should be done for each road code involved in the test case.
@@ -103,7 +104,7 @@ For each test case, conditions will be cascaded to the county roads associated w
 #### Part 2: Clear Condition
 1. Modify road conditions in the database so that no conditions are present with the following query:
     ```sql
-    update mock_triggered_county_roads_v1_vw set <condition>=0 where road_code='<road code>';
+    update mock_county_roads_report_v1_vw set <condition>=0 where road_code='<road code>';
     ```
 
     This should be done for each road code involved in the test case.
@@ -159,7 +160,8 @@ After testing is complete, the system should be cleaned up by following these st
 1. SSH into the Test VM.
 1. Navigate to /home/wyocvadmin/wyocv.
 1. Run `nano .env` to open the environment file.
-1. Set `CONTROLLER_CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME=countyrds.triggered_county_roads_v1_vw` in the environment file.
+1. Set `CONTROLLER_CONFIG_COUNTY_ROADS_REPORT_VIEW_NAME=countyrds.county_roads_report_v1_vw` in the environment file.
+1. Set `CONTROLLER_CONFIG_COUNTY_ROADS_WTI_SECTIONS_VIEW_NAME=countyrds.county_roads_wti_sections_v1_vw` in the environment file.
 1. Save and exit the file.
 1. Run `./clean-build-and-deploy.sh` to re-deploy the wyocv apps with the new configuration.
 1. Run `docker compose logs -f ode_wrapper` to monitor the logs of the ODE Wrapper until the service is up and running.

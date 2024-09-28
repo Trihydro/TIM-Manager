@@ -71,3 +71,6 @@ DROP TRIGGER IF EXISTS notify_county_roads_v1_h ON countyrds.county_roads_v1_h;
 CREATE TRIGGER notify_county_roads_v1_h
 AFTER INSERT OR UPDATE OR DELETE ON countyrds.county_roads_v1_h
 FOR EACH ROW EXECUTE FUNCTION notify_county_roads_v1_h();
+
+-- alter table to set replica identity to allow deletions from the table
+ALTER TABLE countyrds.county_roads_v1_h REPLICA IDENTITY FULL;

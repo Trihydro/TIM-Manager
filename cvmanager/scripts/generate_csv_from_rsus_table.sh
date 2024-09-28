@@ -128,7 +128,8 @@ do
 done < $stage_one_temp_file
 
 # create a .csv file
-csv_file="rsus_table.csv"
+date=$(date +"%Y-%m-%d")
+csv_file="rsus_table_$date.csv"
 echo "Creating $csv_file"
 mv $stage_two_temp_file $csv_file
 

@@ -22,7 +22,7 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2).select()
                 .apis(RequestHandlerSelectors.basePackage("com.trihydro.odewrapper.controller"))
-                .paths(PathSelectors.any()).build().apiInfo(metaData());
+                .paths(PathSelectors.any()).build().pathMapping("/").apiInfo(metaData());
     }
 
     private ApiInfo metaData() {

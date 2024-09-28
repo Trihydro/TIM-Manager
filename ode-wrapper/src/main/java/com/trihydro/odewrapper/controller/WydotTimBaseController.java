@@ -751,7 +751,7 @@ public abstract class WydotTimBaseController {
     /**
      * This method creates a new WydotTim for the given segment and sends it to RSUs and Satellite.
      */
-    private void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
+    protected void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
         // if existing condition is identical, return
         boolean identicalConditionExistsForSegment = performExistenceChecks(countyRoadSegment, timType, endDateTime);
         if (identicalConditionExistsForSegment) {

@@ -155,4 +155,17 @@ public class CascadeService extends CvDataServiceLibrary {
         }
         return Arrays.asList(response.getBody());
     }
+
+    /**
+     * This method sends a request to the CV Data Controller to get the county road segment with the given id.
+     * @param segmentId the id of the county road segment to retrieve
+     * @return the county road segment with the given id
+     */
+    public CountyRoadSegment retrieveCountyRoadSegment(int segmentId) {
+        String cvRestService = config.getCvRestService();
+        String url = String.format("%s/cascade/get-county-road-segment/%s", cvRestService, segmentId);
+        RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
+        ResponseEntity<CountyRoadSegment> response = restTemplate.exchange(url, HttpMethod.GET, null, CountyRoadSegment.class);
+        return response.getBody();
+    }
 }

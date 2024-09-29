@@ -209,9 +209,9 @@ public class AdhocListener {
         utility.logWithDate("A database record has been deleted");
         utility.logWithDate("Deleted record: " + payloadObject.get("before").toString());
 
-        JsonNode newRecord = payloadObject.get("after");
-        int crId = newRecord.get("cr_id").asInt();
-        int active = newRecord.get("active").asInt();
+        JsonNode deletedRecord = payloadObject.get("before");
+        int crId = deletedRecord.get("cr_id").asInt();
+        int active = deletedRecord.get("active").asInt();
         cascadeConditions(crId, active);
     }
 
@@ -220,9 +220,9 @@ public class AdhocListener {
         utility.logWithDate("Before: " + payloadObject.get("before").toString());
         utility.logWithDate("After: " + payloadObject.get("after").toString());
 
-        JsonNode newRecord = payloadObject.get("after");
-        int crId = newRecord.get("cr_id").asInt();
-        int active = newRecord.get("active").asInt();
+        JsonNode updatedRecord = payloadObject.get("after");
+        int crId = updatedRecord.get("cr_id").asInt();
+        int active = updatedRecord.get("active").asInt();
         cascadeConditions(crId, active);
     }
 

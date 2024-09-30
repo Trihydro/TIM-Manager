@@ -229,7 +229,8 @@ public class AdhocListener {
 
     private void updateConditionsForSegment(int crId, int active) {
         if (active == 0) {
-            utility.logWithDate("Relevant county road with cr_id=" + crId + " is not active. Skipping cascade conditions.");
+            utility.logWithDate("Relevant county road with cr_id=" + crId + " is not active. Clearing conditions for segment.");
+            clearAllConditionsForSegment(crId);
             return;
         }
 
@@ -244,5 +245,14 @@ public class AdhocListener {
             utility.logWithDate("County Road Segment not found. Skipping update of conditions.");
             return;
         }
+    }
+
+    private void clearAllConditionsForSegment(int crId) {
+        utility.logWithDate("Clearing conditions for segment with cr_id=" + crId);
+        
+        String odeWrapperRestService = config.getOdeWrapperRestService();
+        String url = String.format("%s/clear-conditions-for-segment/%s", odeWrapperRestService, crId);
+        RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
+        restTemplate.exchange(url, HttpMethod.PUT, null, String.class);
     }
 }

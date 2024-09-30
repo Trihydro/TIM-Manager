@@ -3,6 +3,7 @@ package com.trihydro.odewrapper.controller;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.CountyRoadSegment;
 import com.trihydro.library.model.TimType;
@@ -13,6 +14,10 @@ import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +55,7 @@ public class WydotCountyRoadsController extends WydotTimBaseController {
         }
 
         // need CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId
-        TimType timType = getTimType("rc");
+        TimType timType = getTimType("RC");
         String startDateTime = getStartTime();
         String endDateTime = null;
         Integer pk = 0;
@@ -64,7 +69,18 @@ public class WydotCountyRoadsController extends WydotTimBaseController {
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
-    
+
+    @RequestMapping(value = "/clear-conditions-for-segment/{segmentId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    public void clearConditionsAssociatedWithCountyRoadSegment(@PathVariable int segmentId) {
+        List<ActiveTim> allActiveTimsWithItisCodesAssociatedWithSegment = cascadeService.getActiveTimsWithItisCodesAssociatedWithSegment(segmentId);
+        List<String> clientIdsAssociatedWithSegment = allActiveTimsWithItisCodesAssociatedWithSegment.stream().map(ActiveTim::getClientId).collect(Collectors.toList());
+        TimType timType = getTimType("RC");
+        for (String clientIdToClear : clientIdsAssociatedWithSegment) {
+            // clear exiting conditions
+            wydotTimService.clearTimsById(timType.getType(), clientIdToClear, null);
+        }
+    }
+
     private void cascadeConditionsForSegmentAsync(CountyRoadSegment countyRoadSegment, TimType timType, String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType, String clientId) {
         // An Async task always executes in new thread
         new Thread(new Runnable() {

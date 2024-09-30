@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trihydro.library.factory.KafkaFactory;
 import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.adhoclistener.config.AdhocListenerConfiguration;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,31 +20,36 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class AdhocListener {
     private ObjectMapper mapper;
-    private AdhocListenerConfiguration loggerConfig;
+    private AdhocListenerConfiguration config;
     private KafkaFactory kafkaFactory;
-    private DbInteractions dbInteractions;
     private Utility utility;
+    private DbInteractions dbInteractions;    
+    private RestTemplateProvider restTemplateProvider;
     private boolean isRunning = true;
 
     @Autowired
-    public AdhocListener(AdhocListenerConfiguration loggerConfig, KafkaFactory kafkaFactory, Utility utility, DbInteractions dbInteractions) {
-        this.loggerConfig = loggerConfig;
+    public AdhocListener(AdhocListenerConfiguration config, KafkaFactory kafkaFactory, Utility utility, DbInteractions dbInteractions, RestTemplateProvider restTemplateProvider) {
+        this.config = config;
         this.kafkaFactory = kafkaFactory;
         this.utility = utility;
         this.dbInteractions = dbInteractions;
+        this.restTemplateProvider = restTemplateProvider;
         
         mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        if (loggerConfig.getListenerType().equals("kafka")) {
+        if (config.getListenerType().equals("kafka")) {
             startKafkaConsumer();
         }
-        else if (loggerConfig.getListenerType().equals("listen-notify")) {
+        else if (config.getListenerType().equals("listen-notify")) {
             try {
                 startListenNotify();
             } catch (SQLException e) {
@@ -59,9 +64,9 @@ public class AdhocListener {
 
     public void startKafkaConsumer() {
         utility.logWithDate("Starting Kafka Consumer");
-        String endpoint = loggerConfig.getKafkaHostServer() + ":9092";
+        String endpoint = config.getKafkaHostServer() + ":9092";
         var stringConsumer = createConsumer(endpoint);
-        utility.logWithDate("Listening for messages on topic: " + loggerConfig.getDepositTopic());
+        utility.logWithDate("Listening for messages on topic: " + config.getDepositTopic());
 
         try {
             var recordCount = 0;
@@ -92,7 +97,7 @@ public class AdhocListener {
 
         connection = dbInteractions.getConnectionPool();
         statement = connection.createStatement();
-        String channelName = loggerConfig.getChannelName();
+        String channelName = config.getChannelName();
         statement.execute("LISTEN " + channelName);
         
         // listen for notifications
@@ -173,9 +178,9 @@ public class AdhocListener {
     }
 
     private Consumer<String, String> createConsumer(String endpoint) {
-        return kafkaFactory.createStringConsumer(endpoint, loggerConfig.getDepositGroup(),
-                loggerConfig.getDepositTopic(), Integer.valueOf(loggerConfig.getMaxPollIntervalMs()),
-                Integer.valueOf(loggerConfig.getMaxPollRecords()));
+        return kafkaFactory.createStringConsumer(endpoint, config.getDepositGroup(),
+                config.getDepositTopic(), Integer.valueOf(config.getMaxPollIntervalMs()),
+                Integer.valueOf(config.getMaxPollRecords()));
     }
 
     private boolean wasRecordCreated(JsonNode payloadObject) {
@@ -195,14 +200,20 @@ public class AdhocListener {
         utility.logWithDate("A new database record has been created");
         utility.logWithDate("New record: " + payloadObject.get("after").toString());
 
-        // TODO: create new adhoc condition
+        JsonNode newRecord = payloadObject.get("after");
+        int crId = newRecord.get("cr_id").asInt();
+        int active = newRecord.get("active").asInt();
+        updateConditionsForSegment(crId, active);
     }
 
     private void handleRecordDeleted(JsonNode payloadObject) {
         utility.logWithDate("A database record has been deleted");
         utility.logWithDate("Deleted record: " + payloadObject.get("before").toString());
 
-        // TODO: delete adhoc condition
+        JsonNode deletedRecord = payloadObject.get("before");
+        int crId = deletedRecord.get("cr_id").asInt();
+        int active = deletedRecord.get("active").asInt();
+        updateConditionsForSegment(crId, active);
     }
 
     private void handleRecordUpdated(JsonNode payloadObject) {
@@ -210,6 +221,38 @@ public class AdhocListener {
         utility.logWithDate("Before: " + payloadObject.get("before").toString());
         utility.logWithDate("After: " + payloadObject.get("after").toString());
 
-        // TODO: update adhoc condition
+        JsonNode updatedRecord = payloadObject.get("after");
+        int crId = updatedRecord.get("cr_id").asInt();
+        int active = updatedRecord.get("active").asInt();
+        updateConditionsForSegment(crId, active);
+    }
+
+    private void updateConditionsForSegment(int crId, int active) {
+        if (active == 0) {
+            utility.logWithDate("Relevant county road with cr_id=" + crId + " is not active. Clearing conditions for segment.");
+            clearAllConditionsForSegment(crId);
+            return;
+        }
+
+        utility.logWithDate("Updating conditions for segment with cr_id=" + crId);
+        
+        String odeWrapperRestService = config.getOdeWrapperRestService();
+        String url = String.format("%s/cascade-conditions-for-segment/%s", odeWrapperRestService, crId);
+        RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, null, String.class);
+
+        if (response.getBody() == "County Road Segment not found") {
+            utility.logWithDate("County Road Segment not found. Skipping update of conditions.");
+            return;
+        }
+    }
+
+    private void clearAllConditionsForSegment(int crId) {
+        utility.logWithDate("Clearing conditions for segment with cr_id=" + crId);
+        
+        String odeWrapperRestService = config.getOdeWrapperRestService();
+        String url = String.format("%s/clear-conditions-for-segment/%s", odeWrapperRestService, crId);
+        RestTemplate restTemplate = restTemplateProvider.GetRestTemplate();
+        restTemplate.exchange(url, HttpMethod.PUT, null, String.class);
     }
 }

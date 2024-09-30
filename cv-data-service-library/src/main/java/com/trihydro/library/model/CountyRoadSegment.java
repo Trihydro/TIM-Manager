@@ -22,6 +22,10 @@ public class CountyRoadSegment {
     private boolean loct;
     private boolean ntt;
 
+    public CountyRoadSegment() {
+        
+    }
+
     public CountyRoadSegment(int countyRoadId, String commonName, Double mFrom, Double mTo, Double xFrom, 
                        Double yFrom, Double xTo, Double yTo, boolean closed, boolean c2lhpv, boolean loct, boolean ntt) {
         this.countyRoadId = countyRoadId;

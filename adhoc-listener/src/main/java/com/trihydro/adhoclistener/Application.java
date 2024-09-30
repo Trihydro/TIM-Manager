@@ -8,6 +8,8 @@ import com.trihydro.library.helpers.JsonToJavaConverter;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.RegionNameElementCollection;
+import com.trihydro.library.service.CascadeService;
+import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.tables.BsmDbTables;
 import com.trihydro.library.tables.DriverAlertDbTables;
 import com.trihydro.library.tables.TimDbTables;
@@ -20,7 +22,7 @@ import org.springframework.context.annotation.Import;
 
 @Import({ Utility.class, DbInteractions.class, JsonToJavaConverter.class, TimDbTables.class, BsmDbTables.class,
 		SQLNullHandler.class, DriverAlertDbTables.class, EmailHelper.class, JavaMailSenderImplProvider.class,
-		KafkaFactory.class, RegionNameElementCollection.class })
+		KafkaFactory.class, RegionNameElementCollection.class, CascadeService.class, AdhocListenerConfiguration.class, RestTemplateProvider.class })
 @SpringBootApplication
 @EnableConfigurationProperties(AdhocListenerConfiguration.class)
 public class Application {

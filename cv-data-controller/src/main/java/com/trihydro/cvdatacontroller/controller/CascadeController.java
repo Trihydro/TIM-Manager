@@ -173,6 +173,25 @@ public class CascadeController extends BaseController {
     }
 
     /**
+     * Retrieve county road segment given cr_id
+     * @param segmentId the segment id
+     * @return the county road segment
+     */
+    @RequestMapping(value = "/get-county-road-segment/{segmentId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public ResponseEntity<CountyRoadSegment> getCountyRoadSegment(@PathVariable int segmentId) {
+        CountyRoadSegment countyRoadSegment = null;
+        try {
+            countyRoadSegment = retrieveCountyRoadSegmentFromDatabase(segmentId);
+        } catch (RecordNotFoundException e) {
+            utility.logWithDate("No record found for segmentId: " + segmentId);
+        } catch (SQLException e) {
+            utility.logWithDate("Error retrieving county road segment for segmentId: " + segmentId);
+            e.printStackTrace();
+        }
+        return new ResponseEntity<CountyRoadSegment>(countyRoadSegment, HttpStatus.OK);
+    }
+
+    /**
      * Retrieve all active TIMs that are associated with the given segment from the database that are not marked for deletion
      * @param segmentId the segment id
      * @return the list of active TIMs (empty if no records found)
@@ -336,6 +355,47 @@ public class CascadeController extends BaseController {
             }
         }
         return triggerRoad;
+    }
+
+    private CountyRoadSegment retrieveCountyRoadSegmentFromDatabase(int segmentId) throws RecordNotFoundException, SQLException {
+        CountyRoadSegment countyRoadSegment;
+        
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = dbInteractions.getCountyRoadsConnectionPool(); // target county roads database
+            statement = connection.createStatement();
+
+            // build SQL statement
+            String countyRoadsReportViewName = countyRoadsProps.getCountyRoadsReportViewName();
+            String query = "select * from " + countyRoadsReportViewName + " where " + CountyRoadsReportView.crIdColumnName + "=" + segmentId + ";";
+            rs = statement.executeQuery(query);
+            if (!rs.next()) {
+                throw new RecordNotFoundException("No record found");
+            }
+            countyRoadSegment = buildCountyRoadSegment(rs);
+            
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return countyRoadSegment;
     }
 
     /**

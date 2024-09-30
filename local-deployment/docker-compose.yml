@@ -222,7 +222,7 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  ode_wrapper:
+  ode-wrapper:
     build: ../ode-wrapper
     restart: always
     environment:
@@ -282,7 +282,7 @@ services:
       CONFIG_CV_REST_SERVICE_DEV: http://cv-data-controller:8888
       CONFIG_CV_REST_SERVICE_PROD: http://cv-data-controller:8888
       CONFIG_RSU_DATA_SERVICE_URL: http://rsu-data-controller:8898
-      CONFIG_WRAPPER_URL: http://ode_wrapper:7777
+      CONFIG_WRAPPER_URL: "http://ode-wrapper:7777"
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
       CONFIG_ENVIRONMENT_NAME: local
@@ -323,7 +323,7 @@ services:
         max-size: "20m"
         max-file: "3"
     depends_on:
-      - ode_wrapper
+      - ode-wrapper
       - cv-data-controller
       - rsu-data-controller
   
@@ -494,10 +494,10 @@ services:
       KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
       MAX_POLL_INTERVAL_MS: 600000
       MAX_POLL_RECORDS: 25
-      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=postgres
+      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=${POSTGRES_USER}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=postgres
+      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=${POSTGRES_USER}
       DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
       DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
       MAXIMUM_POOL_SIZE: 13
@@ -510,6 +510,7 @@ services:
       ENV: local
       LISTENER_TYPE: ${ADHOC_LISTENER_TYPE}
       CHANNEL_NAME: ${ADHOC_CHANNEL_NAME}
+      ODE_WRAPPER_REST_SERVICE: "http://ode-wrapper:7777"
     logging:
       options:
         max-size: "20m"

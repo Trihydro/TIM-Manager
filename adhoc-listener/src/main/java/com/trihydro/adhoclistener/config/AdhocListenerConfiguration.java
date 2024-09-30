@@ -32,6 +32,7 @@ public class AdhocListenerConfiguration implements DbInteractionsProps, EmailPro
 
     private String listenerType;
     private String channelName;
+    private String odeWrapperRestService;
 
     public String getDepositGroup() {
         return depositGroup;
@@ -191,5 +192,13 @@ public class AdhocListenerConfiguration implements DbInteractionsProps, EmailPro
 
     public void setChannelName(String channelName) {
         this.channelName = channelName;
+    }
+
+    public String getOdeWrapperRestService() {
+        return odeWrapperRestService;
+    }
+
+    public void setOdeWrapperRestService(String odeWrapperRestService) {
+        this.odeWrapperRestService = odeWrapperRestService;
     }
 }

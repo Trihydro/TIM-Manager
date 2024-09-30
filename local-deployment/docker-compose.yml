@@ -185,6 +185,9 @@ services:
       CONFIG_STORAGE_TOPIC: my_connect_configs
       OFFSET_STORAGE_TOPIC: my_connect_offsets
       STATUS_STORAGE_TOPIC: my_connect_statuses
+    depends_on:
+      - kafka
+      - postgres
   # end of internal dependencies ------------------------------------------------
 
   # wyocv apps --------------------------------------------------------------
@@ -477,6 +480,36 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  adhoc-listener:
+    build: ../adhoc-listener
+    restart: always
+    environment:
+      DEPOSIT_GROUP: adhoc_conditions_monitor
+      DEPOSIT_TOPIC: adhoc_conditions_monitor.countyrds.county_roads_v1_h
+      KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
+      MAX_POLL_INTERVAL_MS: 600000
+      MAX_POLL_RECORDS: 25
+      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=postgres
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=postgres
+      DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
+      DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
+      MAXIMUM_POOL_SIZE: 13
+      CONNECTION_TIMEOUT: 300000
+      ALERT_ADDRESSES: test@gmail.com
+      FROM_EMAIL: test@gmail.com
+      ENVIRONMENT_NAME: local
+      MAIL_HOST: 172.0.0.1
+      MAIL_PORT: 123
+      ENV: local
+      LISTENER_TYPE: ${ADHOC_LISTENER_TYPE}
+      CHANNEL_NAME: ${ADHOC_CHANNEL_NAME}
     logging:
       options:
         max-size: "20m"

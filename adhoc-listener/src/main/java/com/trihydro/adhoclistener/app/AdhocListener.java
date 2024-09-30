@@ -97,7 +97,7 @@ public class AdhocListener {
 
         connection = dbInteractions.getConnectionPool();
         statement = connection.createStatement();
-        String channelName = loggerConfig.getChannelName();
+        String channelName = config.getChannelName();
         statement.execute("LISTEN " + channelName);
         
         // listen for notifications
@@ -203,7 +203,7 @@ public class AdhocListener {
         JsonNode newRecord = payloadObject.get("after");
         int crId = newRecord.get("cr_id").asInt();
         int active = newRecord.get("active").asInt();
-        cascadeConditions(crId, active);
+        updateConditionsForSegment(crId, active);
     }
 
     private void handleRecordDeleted(JsonNode payloadObject) {
@@ -213,7 +213,7 @@ public class AdhocListener {
         JsonNode deletedRecord = payloadObject.get("before");
         int crId = deletedRecord.get("cr_id").asInt();
         int active = deletedRecord.get("active").asInt();
-        cascadeConditions(crId, active);
+        updateConditionsForSegment(crId, active);
     }
 
     private void handleRecordUpdated(JsonNode payloadObject) {
@@ -224,16 +224,16 @@ public class AdhocListener {
         JsonNode updatedRecord = payloadObject.get("after");
         int crId = updatedRecord.get("cr_id").asInt();
         int active = updatedRecord.get("active").asInt();
-        cascadeConditions(crId, active);
+        updateConditionsForSegment(crId, active);
     }
 
-    private void cascadeConditions(int crId, int active) {
+    private void updateConditionsForSegment(int crId, int active) {
         if (active == 0) {
             utility.logWithDate("Relevant county road with cr_id=" + crId + " is not active. Skipping cascade conditions.");
             return;
         }
 
-        utility.logWithDate("Cascading conditions for segment with cr_id=" + crId);
+        utility.logWithDate("Updating conditions for segment with cr_id=" + crId);
         
         String odeWrapperRestService = config.getOdeWrapperRestService();
         String url = String.format("%s/cascade-conditions-for-segment/%s", odeWrapperRestService, crId);
@@ -241,7 +241,7 @@ public class AdhocListener {
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, null, String.class);
 
         if (response.getBody() == "County Road Segment not found") {
-            utility.logWithDate("County Road Segment not found. Skipping cascade conditions.");
+            utility.logWithDate("County Road Segment not found. Skipping update of conditions.");
             return;
         }
     }

@@ -22,12 +22,45 @@ if [ -z "$table" ]; then
   exit 1
 fi
 
+# if .env file exists, load it
+working_dir=$(dirname $0)
+if [ -f "$working_dir/.env" ]
+then
+    # if carriage returns are present, remove them
+    sed -i 's/\r//g' $working_dir/.env
+
+    echo "Loading environment variables from $working_dir/.env"
+    # ignore RSU_ROUTES env variable
+    eval $(grep -v '^RSU_ROUTES' $working_dir/.env | sed 's/#.*//g' | xargs)
+fi
+
+# verify required environment variables
+if [ -z "$POSTGRES_DB_HOSTNAME" ]; then
+  echo "POSTGRES_DB_HOSTNAME is required"
+  exit 1
+fi
+
+if [ -z "$POSTGRES_USER" ]; then
+  echo "POSTGRES_USER is required"
+  exit 1
+fi
+
+if [ -z "$POSTGRES_PASSWORD" ]; then
+  echo "POSTGRES_PASSWORD is required"
+  exit 1
+fi
+
+if [ -z "$POSTGRES_DB_NAME" ]; then
+  echo "POSTGRES_DB_NAME is required"
+  exit 1
+fi
+
 config_connector_class="io.debezium.connector.postgresql.PostgresConnector"
-config_database_hostname="postgres"
+config_database_hostname=$POSTGRES_DB_HOSTNAME
 config_database_port="5432"
-config_database_user="postgres"
-config_database_password="password"
-config_database_dbname="postgres"
+config_database_user=$POSTGRES_USER
+config_database_password=$POSTGRES_PASSWORD
+config_database_dbname=$POSTGRES_DB_NAME
 config_topic_prefix=$name
 config_table_include_list="$schema.$table"
 config_plugin_name="pgoutput"

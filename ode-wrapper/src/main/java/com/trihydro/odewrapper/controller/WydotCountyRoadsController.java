@@ -27,11 +27,11 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
-@Api(description = "Cascading Road Conditions")
-public class WydotCascadingController extends WydotTimBaseController {
+@Api(description = "County Roads")
+public class WydotCountyRoadsController extends WydotTimBaseController {
 
     @Autowired
-    public WydotCascadingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
+    public WydotCountyRoadsController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility,
             TimGenerationHelper _timGenerationHelper, CascadeService _cascadeService) {

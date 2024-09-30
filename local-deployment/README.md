@@ -32,6 +32,17 @@ The postgres database service is defined in the `docker-compose.yml` file, but a
     ./insert-static-data.sh
     ```
 
+1. Set wal_level to 'logical' by executing the following query:
+    
+        ```sql
+        ALTER SYSTEM SET wal_level = 'logical';
+        ```
+1. Restart the database service:
+    
+        ```bash
+        docker compose restart postgres
+        ```
+
 ### Preparing JAR Files
 The dockerfiles for the wyocv services expect the JAR files to be in the same directory as the Dockerfile. After compilation, copy the JAR files to the appropriate directories.
 

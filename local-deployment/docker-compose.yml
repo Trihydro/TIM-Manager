@@ -509,6 +509,7 @@ services:
       MAIL_PORT: 123
       ENV: local
       LISTENER_TYPE: ${ADHOC_LISTENER_TYPE}
+      CHANNEL_NAME: ${ADHOC_CHANNEL_NAME}
     logging:
       options:
         max-size: "20m"

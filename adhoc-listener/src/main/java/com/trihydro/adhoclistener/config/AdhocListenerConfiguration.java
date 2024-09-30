@@ -31,6 +31,7 @@ public class AdhocListenerConfiguration implements DbInteractionsProps, EmailPro
     private int mailPort;
 
     private String listenerType;
+    private String channelName;
 
     public String getDepositGroup() {
         return depositGroup;
@@ -182,5 +183,13 @@ public class AdhocListenerConfiguration implements DbInteractionsProps, EmailPro
 
     public void setListenerType(String listenerType) {
         this.listenerType = listenerType;
+    }
+
+    public String getChannelName() {
+        return channelName;
+    }
+
+    public void setChannelName(String channelName) {
+        this.channelName = channelName;
     }
 }

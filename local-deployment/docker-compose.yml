@@ -195,10 +195,10 @@ services:
       - "8888:8888"
     environment:
       SERVER_PORT: 8888
-      CONFIG_DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_URL: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       CONFIG_DB_USERNAME: ${POSTGRES_USER}
       CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      CONFIG_DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_URL_COUNTY_ROADS: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       CONFIG_DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
       CONFIG_DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
       CONFIG_MAXIMUM_POOL_SIZE: 7
@@ -211,7 +211,6 @@ services:
       CONFIG_ENVIRONMENT_NAME: local
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
-      CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME: mock_triggered_county_roads_v1_vw
       CONFIG_COUNTY_ROADS_GEOMETRY_VIEW_NAME: mock_county_road_geometry_v1_mv
       CONFIG_COUNTY_ROADS_REPORT_VIEW_NAME: mock_county_roads_report_v1_vw
       CONFIG_COUNTY_ROADS_WTI_SECTIONS_VIEW_NAME: mock_county_roads_wti_sections_v1_vw
@@ -226,7 +225,7 @@ services:
     environment:
       SERVER_PORT: 7777
       CONFIG_ODE_URL: http://ode:8080
-      CONFIG_DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_URL: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       CONFIG_DB_USERNAME: ${POSTGRES_USER}
       CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
       CONFIG_MAXIMUM_POOL_SIZE: 7
@@ -355,10 +354,10 @@ services:
       KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
       MAX_POLL_INTERVAL_MS: 600000
       MAX_POLL_RECORDS: 25
-      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      DB_URL: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=username
+      DB_URL_COUNTY_ROADS: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
       DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
       MAXIMUM_POOL_SIZE: 13

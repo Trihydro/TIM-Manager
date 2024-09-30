@@ -1,5 +1,7 @@
 # Adhoc Listener
-The `adhoc-listener` module is responsible for consuming messages representing changes to adhoc conditions and creating, updating or deleting adhoc conditions represented by Traveler Information Messages (TIMs). The module listens for messages on a Kafka topic or PostgreSQL channel and processes them accordingly.
+The `adhoc-listener` module is responsible for consuming messages representing changes to adhoc conditions for county roads and creating, updating or deleting those conditions represented by Traveler Information Messages (TIMs). The module listens for messages on a Kafka topic or PostgreSQL channel and processes them accordingly.
+
+It should be noted that pg notifications are not used in the management of regular TIMs. The listener is only used for cascade TIMs which are specific to county roads.
 
 ## Listener Types
 ### Kafka

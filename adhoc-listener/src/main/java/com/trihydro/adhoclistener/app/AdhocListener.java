@@ -97,7 +97,8 @@ public class AdhocListener {
 
         connection = dbInteractions.getConnectionPool();
         statement = connection.createStatement();
-        statement.execute("LISTEN adhoc_listener_channel");
+        String channelName = loggerConfig.getChannelName();
+        statement.execute("LISTEN " + channelName);
         
         // listen for notifications
         while (isRunning) {

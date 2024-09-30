@@ -79,3 +79,12 @@ docker compose down -v
 ```
 
 This will remove the database volume, effectively resetting the database.
+
+## Adhoc Conditions Monitor
+The adhoc conditions monitor can be run by executing the following command in the `local-deployment` directory:
+
+```bash
+./create_adhoc_conditions_monitor.sh
+```
+
+This requires the `kafka-connect` service to be running. Once created, changes to the adhoc conditions table will be monitored and sent to the `adhoc_conditions_monitor.countyrds.county_roads_v1_h` topic.

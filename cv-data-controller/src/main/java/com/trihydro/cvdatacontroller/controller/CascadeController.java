@@ -259,7 +259,7 @@ public class CascadeController extends BaseController {
 				}
 
 				// Add the ITIS code to the ActiveTim's ITIS codes, if not null
-				var itisCode = rs.getInt("ITIS_CODE"); // TODO: account for cascade TIMs with multiple ITIS codes
+				var itisCode = rs.getInt("ITIS_CODE");
 				if (!rs.wasNull()) {
 					activeTim.getItisCodes().add(itisCode);
 				}
@@ -292,7 +292,7 @@ public class CascadeController extends BaseController {
 
     private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) throws SQLException {
         TriggerRoad triggerRoad = null;
-        
+
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;

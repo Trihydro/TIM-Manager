@@ -44,73 +44,74 @@ public class TimRefreshController {
     public void performTaskUsingCron() {
         utility.logWithDate("Regular task performed using Cron at " + dateFormat.format(new Date()));
 
-        // fetch Active_TIM that are expiring within 24 hrs
-        List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
+        return;
+        // // fetch Active_TIM that are expiring within 24 hrs
+        // List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
-        utility.logWithDate(expiringTims.size() + " expiring TIMs found");
-        List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
-        List<ResubmitTimException> exceptionTims = new ArrayList<>();
-        List<TimUpdateModel> timsToRefresh = new ArrayList<TimUpdateModel>();
+        // utility.logWithDate(expiringTims.size() + " expiring TIMs found");
+        // List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
+        // List<ResubmitTimException> exceptionTims = new ArrayList<>();
+        // List<TimUpdateModel> timsToRefresh = new ArrayList<TimUpdateModel>();
 
-        // loop through and issue new TIM to ODE
-        for (TimUpdateModel aTim : expiringTims) {
-            // find the bad and report them.
-            // the rest can call out to TimGenerationHelper to finish
+        // // loop through and issue new TIM to ODE
+        // for (TimUpdateModel aTim : expiringTims) {
+        //     // find the bad and report them.
+        //     // the rest can call out to TimGenerationHelper to finish
 
-            // Validation
-            if (!timGenerationHelper.isValidTim(aTim)) {
-                invalidTims.add(new Logging_TimUpdateModel(aTim));
-            } else {
-                timsToRefresh.add(aTim);
-            }
-        }
+        //     // Validation
+        //     if (!timGenerationHelper.isValidTim(aTim)) {
+        //         invalidTims.add(new Logging_TimUpdateModel(aTim));
+        //     } else {
+        //         timsToRefresh.add(aTim);
+        //     }
+        // }
 
-        var resetSuccessful = true;
+        // var resetSuccessful = true;
 
-        // attempt to refresh TIMs and collect any exceptions
-        if (timsToRefresh.size() > 0) {
-            var activeTimIds = timsToRefresh.stream().map(x -> x.getActiveTimId()).collect(Collectors.toList());
-            // Reset expiration dates so they'll be updated after messages are processed.
-            // Success isn't critical to proceed. We'll just end up with redundant resubmissions later on.
-            resetSuccessful = activeTimService.resetActiveTimsExpirationDate(activeTimIds);
-            exceptionTims = timGenerationHelper.resetTimStartTimeAndResubmitToOde(activeTimIds);
-        }
+        // // attempt to refresh TIMs and collect any exceptions
+        // if (timsToRefresh.size() > 0) {
+        //     var activeTimIds = timsToRefresh.stream().map(x -> x.getActiveTimId()).collect(Collectors.toList());
+        //     // Reset expiration dates so they'll be updated after messages are processed.
+        //     // Success isn't critical to proceed. We'll just end up with redundant resubmissions later on.
+        //     resetSuccessful = activeTimService.resetActiveTimsExpirationDate(activeTimIds);
+        //     exceptionTims = timGenerationHelper.resetTimStartTimeAndResubmitToOde(activeTimIds);
+        // }
 
-        if (invalidTims.size() > 0 || exceptionTims.size() > 0 || !resetSuccessful) {
-            String body = "";
+        // if (invalidTims.size() > 0 || exceptionTims.size() > 0 || !resetSuccessful) {
+        //     String body = "";
 
-            if(!resetSuccessful) {
-                body += "An error occurred while resetting the expiration date(s) for the Active TIM(s)";
-                body += "<br/><br/>";
-            }
+        //     if(!resetSuccessful) {
+        //         body += "An error occurred while resetting the expiration date(s) for the Active TIM(s)";
+        //         body += "<br/><br/>";
+        //     }
 
-            if (invalidTims.size() > 0) {
-                body += "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
-                body += "<br/>";
-                body += "The associated ActiveTim records are: <br/>";
-                for (Logging_TimUpdateModel timUpdateModel : invalidTims) {
-                    body += gson.toJson(timUpdateModel);
-                    body += "<br/><br/>";
-                }
-            }
+        //     if (invalidTims.size() > 0) {
+        //         body += "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
+        //         body += "<br/>";
+        //         body += "The associated ActiveTim records are: <br/>";
+        //         for (Logging_TimUpdateModel timUpdateModel : invalidTims) {
+        //             body += gson.toJson(timUpdateModel);
+        //             body += "<br/><br/>";
+        //         }
+        //     }
 
-            if (exceptionTims.size() > 0) {
-                body += "The TIM Refresh application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
-                body += "<br/>";
-                for (ResubmitTimException rte : exceptionTims) {
-                    body += gson.toJson(rte);
-                    body += "<br/>";
-                }
-            }
+        //     if (exceptionTims.size() > 0) {
+        //         body += "The TIM Refresh application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
+        //         body += "<br/>";
+        //         for (ResubmitTimException rte : exceptionTims) {
+        //             body += gson.toJson(rte);
+        //             body += "<br/>";
+        //         }
+        //     }
 
-            try {
-                utility.logWithDate(
-                        "Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
-                emailHelper.SendEmail(configuration.getAlertAddresses(), "TIM Refresh Exceptions", body);
-            } catch (Exception e) {
-                utility.logWithDate("Exception attempting to send email for invalid TIM:");
-                e.printStackTrace();
-            }
-        }
+        //     try {
+        //         utility.logWithDate(
+        //                 "Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
+        //         emailHelper.SendEmail(configuration.getAlertAddresses(), "TIM Refresh Exceptions", body);
+        //     } catch (Exception e) {
+        //         utility.logWithDate("Exception attempting to send email for invalid TIM:");
+        //         e.printStackTrace();
+        //     }
+        // }
     }
 }

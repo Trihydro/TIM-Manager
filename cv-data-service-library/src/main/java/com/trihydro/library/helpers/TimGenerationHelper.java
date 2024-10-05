@@ -88,7 +88,8 @@ public class TimGenerationHelper {
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
             MilepostReduction _milepostReduction, TimGenerationProps _config, RsuService _rsuService,
             OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService, SdwService _sdwService,
-            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer, CreateBaseTimUtil _createBaseTimUtil) {
+            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer,
+            CreateBaseTimUtil _createBaseTimUtil) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -129,7 +130,8 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> updateAndResubmitToOde(List<ActiveTimValidationResult> validationResults) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (validationResults == null || validationResults.size() == 0) {
-            utility.logWithDate("No validation results found to update and resubmit to ODE.", TimGenerationHelper.class);
+            utility.logWithDate("No validation results found to update and resubmit to ODE.",
+                    TimGenerationHelper.class);
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -204,7 +206,8 @@ public class TimGenerationHelper {
             }
         }
         if (exceptions.size() > 0) {
-            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
+                    TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -335,13 +338,13 @@ public class TimGenerationHelper {
                 utility.logWithDate(String.format("Found %d mileposts for point %s", allMps.size(),
                         gson.toJson(wydotTim.getStartPoint())));
             }
-        }
-        else {
+        } else {
             utility.logWithDate("Fetching mileposts for cascade TIM with client id: " + wydotTim.getClientId());
             try {
                 allMps = cascadeService.getAllMilepostsFromCascadeTim(wydotTim);
-                utility.logWithDate(String.format("Found %d mileposts for cascade TIM with client id: %s", allMps.size(),
-                        wydotTim.getClientId()));
+                utility.logWithDate(
+                        String.format("Found %d mileposts for cascade TIM with client id: %s", allMps.size(),
+                                wydotTim.getClientId()));
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException ex) {
                 utility.logWithDate("Failed to get mileposts from cascade tim: " + ex.getMessage());
             }
@@ -420,7 +423,8 @@ public class TimGenerationHelper {
             }
         }
         if (exceptions.size() > 0) {
-            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
+                    TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -495,7 +499,8 @@ public class TimGenerationHelper {
             }
         }
         if (exceptions.size() > 0) {
-            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
+                    TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -572,7 +577,8 @@ public class TimGenerationHelper {
             }
         }
         if (exceptions.size() > 0) {
-            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
+                    TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -628,26 +634,33 @@ public class TimGenerationHelper {
     }
 
     /**
-     * Builds a list of regions based on the given TimUpdateModel, reduced mileposts, all mileposts, and anchor milepost.
-     * If the number of reduced mileposts is less than or equal to 63, a single region is built from the update model.
-     * If the number of reduced mileposts is greater than 63, multiple regions are built from the update model.
+     * Builds a list of regions based on the given TimUpdateModel, reduced
+     * mileposts, all mileposts, and anchor milepost.
+     * If the number of reduced mileposts is less than or equal to 63, a single
+     * region is built from the update model.
+     * If the number of reduced mileposts is greater than 63, multiple regions are
+     * built from the update model.
      *
-     * @param aTim The TimUpdateModel object containing the update information.
+     * @param aTim             The TimUpdateModel object containing the update
+     *                         information.
      * @param reducedMileposts The list of reduced mileposts.
-     * @param allMps The list of all mileposts.
-     * @param anchor The anchor milepost.
+     * @param allMps           The list of all mileposts.
+     * @param anchor           The anchor milepost.
      * @return The list of regions built from the update model.
      */
-    private List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
+    private List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(TimUpdateModel aTim,
+            List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
-            utility.logWithDate("Less than 63 mileposts, building a single region from update model.", TimGenerationHelper.class);
+            utility.logWithDate("Less than 63 mileposts, building a single region from update model.",
+                    TimGenerationHelper.class);
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
-            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegionFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
+            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegionFromUpdateModel(aTim,
+                    reducedMileposts, allMps, anchor);
             regions.add(singleRegion);
             return regions;
-        }
-        else {
-            utility.logWithDate("More than 63 mileposts, building multiple regions from update model.", TimGenerationHelper.class);
+        } else {
+            utility.logWithDate("More than 63 mileposts, building multiple regions from update model.",
+                    TimGenerationHelper.class);
             return buildMultipleRegionsFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
         }
     }
@@ -655,14 +668,15 @@ public class TimGenerationHelper {
     /**
      * Builds multiple regions from the given update model.
      *
-     * @param aTim The TimUpdateModel object.
+     * @param aTim             The TimUpdateModel object.
      * @param reducedMileposts The list of reduced mileposts.
-     * @param allMps The list of all mileposts.
-     * @param anchor The anchor milepost.
+     * @param allMps           The list of all mileposts.
+     * @param anchor           The anchor milepost.
      * @return The list of OdeTravelerInformationMessage.DataFrame.Region objects.
      */
-    private List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegionsFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
-        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); 
+    private List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegionsFromUpdateModel(
+            TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
 
         int maxMilepostsPerRegion = 63;
 
@@ -672,9 +686,11 @@ public class TimGenerationHelper {
         // iterate over the reduced mileposts and build multiple regions
         for (int i = 0; i < reducedMileposts.size(); i++) {
             milepostsForNextRegion.add(reducedMileposts.get(i));
-            // if we have reached the max number of mileposts per region, or if we are at the end of the list
+            // if we have reached the max number of mileposts per region, or if we are at
+            // the end of the list
             if (milepostsForNextRegion.size() == maxMilepostsPerRegion || i == reducedMileposts.size() - 1) {
-                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegionFromUpdateModel(aTim, milepostsForNextRegion, allMps, nextAnchor);
+                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegionFromUpdateModel(aTim,
+                        milepostsForNextRegion, allMps, nextAnchor);
                 regions.add(region);
                 milepostsForNextRegion.clear();
                 nextAnchor = reducedMileposts.get(i);
@@ -709,7 +725,8 @@ public class TimGenerationHelper {
             utility.logWithDate(exMsg);
         }
         if (exceptions.size() > 0) {
-            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions), TimGenerationHelper.class);
+            utility.logWithDate("Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
+                    TimGenerationHelper.class);
         }
         return exceptions;
     }
@@ -726,7 +743,7 @@ public class TimGenerationHelper {
             boolean resetExpirationTime) {
         // RoadSignID
         RoadSignID rsid = new RoadSignID();
-        rsid.setPosition(getAnchorPosition(aTim, anchor));
+        rsid.setPosition(getAnchorPosition(anchor));
         rsid.setViewAngle("1111111111111111");
 
         // if we are coming in with content=speedLimit and frameType=roadSignage,
@@ -785,43 +802,47 @@ public class TimGenerationHelper {
     }
 
     /**
-     * Retrieves the anchor position based on the provided TimUpdateModel and Milepost.
-     * If the anchor latitude and longitude are not null in the TimUpdateModel, the anchor position is set using those values.
-     * If the anchor is not null, the anchor position is set using the latitude and longitude of the anchor.
-     * If both the TimUpdateModel and the anchor are null, the anchor position is set to latitude 0, longitude 0, and elevation 0.
+     * Retrieves the anchor position based on the provided TimUpdateModel and
+     * Milepost.
+     * If the anchor latitude and longitude are not null in the TimUpdateModel, the
+     * anchor position is set using those values.
+     * If the anchor is not null, the anchor position is set using the latitude and
+     * longitude of the anchor.
+     * If both the TimUpdateModel and the anchor are null, the anchor position is
+     * set to latitude 0, longitude 0, and elevation 0.
      * 
-     * @param aTim The TimUpdateModel containing the anchor latitude and longitude.
+     * @param aTim   The TimUpdateModel containing the anchor latitude and
+     *               longitude.
      * @param anchor The Milepost representing the anchor.
      * @return The OdePosition3D object representing the anchor position.
      */
-    private OdePosition3D getAnchorPosition(TimUpdateModel aTim, Milepost anchor) {
+    private OdePosition3D getAnchorPosition(Milepost anchor) {
         OdePosition3D anchorPosition = new OdePosition3D();
-        if (aTim.getAnchorLat() != null && aTim.getAnchorLong() != null) {
-            anchorPosition.setLatitude(aTim.getAnchorLat());
-            anchorPosition.setLongitude(aTim.getAnchorLong());
+        if (anchor != null) {
+            anchorPosition.setLatitude(anchor.getLatitude());
+            anchorPosition.setLongitude(anchor.getLongitude());
         } else {
-            if (anchor != null) {
-                anchorPosition.setLatitude(anchor.getLatitude());
-                anchorPosition.setLongitude(anchor.getLongitude());
-            } else {
-                anchorPosition.setLatitude(BigDecimal.valueOf(0));
-                anchorPosition.setLongitude(BigDecimal.valueOf(0));
-                anchorPosition.setElevation(BigDecimal.valueOf(0));
-            }
+            anchorPosition.setLatitude(BigDecimal.valueOf(0));
+            anchorPosition.setLongitude(BigDecimal.valueOf(0));
+            anchorPosition.setElevation(BigDecimal.valueOf(0));
         }
+
         return anchorPosition;
     }
 
     /**
-     * Builds a single Region object from the provided TimUpdateModel, reducedMileposts, allMps, and anchor.
+     * Builds a single Region object from the provided TimUpdateModel,
+     * reducedMileposts, allMps, and anchor.
      *
-     * @param aTim The TimUpdateModel object containing the data for the region.
+     * @param aTim             The TimUpdateModel object containing the data for the
+     *                         region.
      * @param reducedMileposts The list of reduced mileposts.
-     * @param allMps The list of all mileposts.
-     * @param anchor The anchor milepost.
+     * @param allMps           The list of all mileposts.
+     * @param anchor           The anchor milepost.
      * @return The built Region object.
      */
-    private Region buildSingleRegionFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps, Milepost anchor) {
+    private Region buildSingleRegionFromUpdateModel(TimUpdateModel aTim, List<Milepost> reducedMileposts,
+            List<Milepost> allMps, Milepost anchor) {
         Region region = new Region();
         // TODO: set name?
         // TODO: set regulator id?
@@ -840,20 +861,22 @@ public class TimGenerationHelper {
         region.setClosedPath(aTim.getClosedPath());
 
         // set anchor position
-        region.setAnchorPosition(getAnchorPosition(aTim, anchor));
+        region.setAnchorPosition(getAnchorPosition(anchor));
 
         // set description
         String regionDescription = aTim.getRegionDescription(); // J2735 - one of path, geometry, oldRegion
         if (regionDescription == null || regionDescription.isEmpty()) {
-            regionDescription = "path"; // if null, set it to path...we only support path anyway, and only have tables supporting path
+            regionDescription = "path"; // if null, set it to path...we only support path anyway, and only have tables
+                                        // supporting path
         }
         region.setDescription(regionDescription);
-        
+
         // set direction
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
             boolean isCascadeTim = aTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
-            regionDirection = createBaseTimUtil.buildHeadingSliceFromMileposts(isCascadeTim, allMps, region.getAnchorPosition());
+            regionDirection = createBaseTimUtil.buildHeadingSliceFromMileposts(isCascadeTim, allMps,
+                    region.getAnchorPosition());
         }
         region.setDirection(regionDirection); // region direction is a heading slice ie 0001100000000000
 
@@ -1104,7 +1127,8 @@ public class TimGenerationHelper {
 
     /**
      * This method returns the anchor point for the given mileposts.
-     * @param firstPoint The first milepost.
+     * 
+     * @param firstPoint  The first milepost.
      * @param secondPoint The second milepost.
      * @return The anchor point as a Milepost.
      */

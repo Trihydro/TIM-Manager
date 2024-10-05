@@ -811,8 +811,6 @@ public class TimGenerationHelper {
      * If both the TimUpdateModel and the anchor are null, the anchor position is
      * set to latitude 0, longitude 0, and elevation 0.
      * 
-     * @param aTim   The TimUpdateModel containing the anchor latitude and
-     *               longitude.
      * @param anchor The Milepost representing the anchor.
      * @return The OdePosition3D object representing the anchor position.
      */

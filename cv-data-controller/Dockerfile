@@ -2,4 +2,4 @@ FROM maven:3.8-eclipse-temurin-21-alpine
 
 ADD . /home/wyocv/wyocv_applications/cv-data-controller
 
-CMD java --add-opens java.base/java.lang=ALL-UNNAMED -jar /home/wyocv/wyocv_applications/cv-data-controller/cv-data-controller-1.2.0-SNAPSHOT.jar
+CMD java --add-opens java.base/java.lang=ALL-UNNAMED -jar /home/wyocv/wyocv_applications/cv-data-controller/cv-data-controller-1.2.1-SNAPSHOT.jar

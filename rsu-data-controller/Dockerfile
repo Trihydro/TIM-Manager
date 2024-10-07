@@ -10,6 +10,6 @@ RUN apt-get install -y snmp
 RUN apt-get autoremove -y \
     && apt-get clean -y
 
-ADD rsu-data-controller-1.2.0-SNAPSHOT.jar /app/
+ADD rsu-data-controller-1.2.1-SNAPSHOT.jar /app/
 
-CMD java -jar /app/rsu-data-controller-1.2.0-SNAPSHOT.jar
+CMD java -jar /app/rsu-data-controller-1.2.1-SNAPSHOT.jar

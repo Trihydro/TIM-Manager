@@ -1,0 +1,456 @@
+{
+    "request": {
+        "sdw": {
+            "serviceRegion": {
+                "nwCorner": {
+                    "latitude": 44.86728775,
+                    "longitude": -107.37136486
+                },
+                "seCorner": {
+                    "latitude": 44.78977965,
+                    "longitude": -107.27129278
+                }
+            },
+            "ttl": "oneyear",
+            "recordId": "D99EEE98"
+        }
+    },
+    "tim": {
+        "msgCnt": 1,
+        "timeStamp": "2024-10-02T11:00:50.814821131Z",
+        "packetID": "24BE29D8A92FDF0930",
+        "dataframes": [
+            {
+                "notUsed": 0,
+                "frameType": "advisory",
+                "msgId": {
+                    "roadSignID": {
+                        "position": {
+                            "latitude": 44.8062595,
+                            "longitude": -107.3203401
+                        },
+                        "viewAngle": "1111111111111111",
+                        "mutcdCode": "warning"
+                    }
+                },
+                "startDateTime": "2024-10-02T11:00:50.814Z",
+                "durationTime": 32000,
+                "priority": 5,
+                "notUsed1": 0,
+                "regions": [
+                    {
+                        "name": "D_US 14_SAT-D99EEE98_RC_BJUS14EB",
+                        "regulatorID": 0,
+                        "segmentID": 0,
+                        "anchorPosition": {
+                            "latitude": 44.8062595,
+                            "longitude": -107.3203401
+                        },
+                        "laneWidth": 50,
+                        "directionality": "3",
+                        "closedPath": false,
+                        "direction": "1101111111111111",
+                        "description": "path",
+                        "path": {
+                            "scale": 0,
+                            "type": "ll",
+                            "nodes": [
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00010245,
+                                    "nodeLong": -0.00012378
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00553312,
+                                    "nodeLong": -0.00800511
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00410489,
+                                    "nodeLong": -0.00342335
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.02345232,
+                                    "nodeLong": -0.00621674
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00317607,
+                                    "nodeLong": -0.00021093
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00282452,
+                                    "nodeLong": -0.00196553
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00178881,
+                                    "nodeLong": -0.00364195
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00067402,
+                                    "nodeLong": -0.00199401
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00308182,
+                                    "nodeLong": -0.00014911
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00144770,
+                                    "nodeLong": -0.00087275
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00195859,
+                                    "nodeLong": -0.00348460
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00154838,
+                                    "nodeLong": -0.00015402
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00099968,
+                                    "nodeLong": -0.00134744
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00165379,
+                                    "nodeLong": -0.00344477
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00276510,
+                                    "nodeLong": -0.00025171
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00102138,
+                                    "nodeLong": -0.00133143
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00154048,
+                                    "nodeLong": -0.00056731
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00086486,
+                                    "nodeLong": -0.00152560
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00128736,
+                                    "nodeLong": -0.00115458
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00088595,
+                                    "nodeLong": -0.00165969
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00194947,
+                                    "nodeLong": -0.00326965
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00113602,
+                                    "nodeLong": -0.00116101
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00053787,
+                                    "nodeLong": -0.00189883
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00143782,
+                                    "nodeLong": 0.00089478
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00086562,
+                                    "nodeLong": -0.00123048
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00160444,
+                                    "nodeLong": -0.00381995
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00121883,
+                                    "nodeLong": -0.00092655
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00151963,
+                                    "nodeLong": 0.00064601
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00060619,
+                                    "nodeLong": -0.00138978
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00090952,
+                                    "nodeLong": -0.00426934
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00048374,
+                                    "nodeLong": -0.00185202
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00232115,
+                                    "nodeLong": 0.00285107
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00157511,
+                                    "nodeLong": 0.00028086
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00037519,
+                                    "nodeLong": -0.00123798
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00154648,
+                                    "nodeLong": -0.00035327
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00284531,
+                                    "nodeLong": -0.00532219
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00122909,
+                                    "nodeLong": -0.00130198
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00045557,
+                                    "nodeLong": 0.00187132
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00009791,
+                                    "nodeLong": 0.00223004
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00069572,
+                                    "nodeLong": 0.00179713
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00131606,
+                                    "nodeLong": -0.00114073
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00449143,
+                                    "nodeLong": -0.00210839
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00091601,
+                                    "nodeLong": 0.00119190
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00060088,
+                                    "nodeLong": 0.00207011
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00014566,
+                                    "nodeLong": 0.00196516
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00148752,
+                                    "nodeLong": 0.00077770
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00103363,
+                                    "nodeLong": 0.00155881
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00152378,
+                                    "nodeLong": -0.00019100
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00052542,
+                                    "nodeLong": 0.00205220
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00140120,
+                                    "nodeLong": 0.00100969
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00100705,
+                                    "nodeLong": 0.00171560
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00284633,
+                                    "nodeLong": 0.00142356
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00016095,
+                                    "nodeLong": -0.00208304
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00047992,
+                                    "nodeLong": -0.00213131
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00092744,
+                                    "nodeLong": -0.00176238
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00010488,
+                                    "nodeLong": -0.00220010
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00105981,
+                                    "nodeLong": -0.00407414
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00031684,
+                                    "nodeLong": -0.00217720
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00354548,
+                                    "nodeLong": -0.00736382
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00027668,
+                                    "nodeLong": -0.00218549
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00352846,
+                                    "nodeLong": -0.00818777
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00212001,
+                                    "nodeLong": -0.00217923
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00066093,
+                                    "nodeLong": -0.00157353
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "regulatorID": 0,
+                        "segmentID": 0,
+                        "anchorPosition": {
+                            "latitude": 44.8062595,
+                            "longitude": -107.3203401
+                        },
+                        "laneWidth": 50,
+                        "directionality": "3",
+                        "closedPath": false,
+                        "direction": "1101111111111111",
+                        "description": "path",
+                        "path": {
+                            "scale": 0,
+                            "type": "ll",
+                            "nodes": [
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": 0.00035967,
+                                    "nodeLong": -0.00554964
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00029583,
+                                    "nodeLong": -0.00179983
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00082716,
+                                    "nodeLong": -0.00144058
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00116560,
+                                    "nodeLong": -0.00086081
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00263212,
+                                    "nodeLong": 0.00004855
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00373911,
+                                    "nodeLong": 0.00180928
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00128025,
+                                    "nodeLong": -0.00043406
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00282005,
+                                    "nodeLong": -0.00390468
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00060703,
+                                    "nodeLong": -0.00164628
+                                },
+                                {
+                                    "delta": "node-LL",
+                                    "nodeLat": -0.00016871,
+                                    "nodeLong": -0.00183818
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "notUsed2": 0,
+                "notUsed3": 0,
+                "content": "advisory",
+                "items": [
+                    "770",
+                    "3200"
+                ]
+            }
+        ]
+    }
+}

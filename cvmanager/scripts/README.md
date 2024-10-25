@@ -55,5 +55,14 @@ This script restores the CV Manager database from a backup file using the `pg_re
 
 Instructions for using this script can be found in the [`backup-restore.md`](../docs/backup-restore.md#restore) document.
 
-## set_foreign_key_reference_ids.sql
+## set_foreign_key_reference_ids.sh
 This script retrieves the foreign key reference ids and sets them as environment variables. This script is used by the `populate_rsus_table.sh` script to translate the allowed values in the CSV file to record ids in the database.
+
+## generate_csv_from_rsus_table.sh
+This script generates a CSV file from the RSUs table in the CV Manager database. The script will output the CSV file to the `rsus_table.csv` file in the current directory. The CSV file will contain the following columns:
+
+```csv
+latitude,longitude,milepost,ipv4_address,serial_number,iss_scms,primary_route,make,model,rsu_credential,snmp_credential,snmp_version,firmware_version,target_firmware_version
+```
+
+The format of the CSV file is the same as the format expected by the `populate_rsus_table.sh` script.

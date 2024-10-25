@@ -179,4 +179,31 @@ public class ActiveTim {
     public void setProjectKey(Integer projectKey) {
         this.projectKey = projectKey;
     }
+
+    public boolean isIdenticalConditions(List<Integer> itisCodes, String endDateTime) {
+        // check if existing condition is identical to requested condition
+        boolean identicalITISCodes = false;
+        boolean identicalEndDate = false;
+        List<Integer> existingITISCodes = getItisCodes();
+        if (existingITISCodes != null) {
+            if (existingITISCodes.equals(itisCodes)) {
+                identicalITISCodes = true;
+            }
+        }
+
+        // check if end_date is identical
+        if (getEndDateTime() != null) {
+            // existing condition has an end date, check if it is identical
+            if (getEndDateTime().equals(endDateTime)) {
+                identicalEndDate = true;
+            }
+        } else {
+            // existing condition has no end date, check if requested condition has no end
+            // date
+            if (endDateTime == null) {
+                identicalEndDate = true;
+            }
+        }
+        return identicalITISCodes && identicalEndDate;
+    }
 }

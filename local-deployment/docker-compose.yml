@@ -173,6 +173,21 @@ services:
       options:
         max-size: "20m"
         max-file: "3"
+
+  kafka-connect:
+    image: quay.io/debezium/connect:2.7
+    restart: always
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9094
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      STATUS_STORAGE_TOPIC: my_connect_statuses
+    depends_on:
+      - kafka
+      - postgres
   # end of internal dependencies ------------------------------------------------
 
   # wyocv apps --------------------------------------------------------------
@@ -183,10 +198,10 @@ services:
       - "8888:8888"
     environment:
       SERVER_PORT: 8888
-      CONFIG_DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_URL: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       CONFIG_DB_USERNAME: ${POSTGRES_USER}
       CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      CONFIG_DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_URL_COUNTY_ROADS: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       CONFIG_DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
       CONFIG_DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
       CONFIG_MAXIMUM_POOL_SIZE: 7
@@ -199,19 +214,21 @@ services:
       CONFIG_ENVIRONMENT_NAME: local
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
-      CONFIG_COUNTY_ROADS_TRIGGER_VIEW_NAME: mock_triggered_county_roads_v1_vw
+      CONFIG_COUNTY_ROADS_GEOMETRY_VIEW_NAME: mock_county_road_geometry_v1_mv
+      CONFIG_COUNTY_ROADS_REPORT_VIEW_NAME: mock_county_roads_report_v1_vw
+      CONFIG_COUNTY_ROADS_WTI_SECTIONS_VIEW_NAME: mock_county_roads_wti_sections_v1_vw
     logging:
       options:
         max-size: "20m"
         max-file: "3"
 
-  ode_wrapper:
+  ode-wrapper:
     build: ../ode-wrapper
     restart: always
     environment:
       SERVER_PORT: 7777
       CONFIG_ODE_URL: http://ode:8080
-      CONFIG_DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      CONFIG_DB_URL: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       CONFIG_DB_USERNAME: ${POSTGRES_USER}
       CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
       CONFIG_MAXIMUM_POOL_SIZE: 7
@@ -265,7 +282,7 @@ services:
       CONFIG_CV_REST_SERVICE_DEV: http://cv-data-controller:8888
       CONFIG_CV_REST_SERVICE_PROD: http://cv-data-controller:8888
       CONFIG_RSU_DATA_SERVICE_URL: http://rsu-data-controller:8898
-      CONFIG_WRAPPER_URL: http://ode_wrapper:7777
+      CONFIG_WRAPPER_URL: "http://ode-wrapper:7777"
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
       CONFIG_ENVIRONMENT_NAME: local
@@ -306,7 +323,7 @@ services:
         max-size: "20m"
         max-file: "3"
     depends_on:
-      - ode_wrapper
+      - ode-wrapper
       - cv-data-controller
       - rsu-data-controller
   
@@ -340,10 +357,10 @@ services:
       KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
       MAX_POLL_INTERVAL_MS: 600000
       MAX_POLL_RECORDS: 25
-      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=username
+      DB_URL: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=username
+      DB_URL_COUNTY_ROADS: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
       DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
       MAXIMUM_POOL_SIZE: 13
@@ -463,6 +480,37 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  adhoc-listener:
+    build: ../adhoc-listener
+    restart: always
+    environment:
+      DEPOSIT_GROUP: adhoc_conditions_monitor
+      DEPOSIT_TOPIC: adhoc_conditions_monitor.countyrds.county_roads_v1_h
+      KAFKA_HOST_SERVER: ${DOCKER_HOST_IP}
+      MAX_POLL_INTERVAL_MS: 600000
+      MAX_POLL_RECORDS: 25
+      DB_URL: jdbc:postgresql://postgres:5432/postgres?user=${POSTGRES_USER}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL_COUNTY_ROADS: jdbc:postgresql://postgres:5432/postgres?user=${POSTGRES_USER}
+      DB_USERNAME_COUNTY_ROADS: ${POSTGRES_USER}
+      DB_PASSWORD_COUNTY_ROADS: ${POSTGRES_PASSWORD}
+      MAXIMUM_POOL_SIZE: 13
+      CONNECTION_TIMEOUT: 300000
+      ALERT_ADDRESSES: test@gmail.com
+      FROM_EMAIL: test@gmail.com
+      ENVIRONMENT_NAME: local
+      MAIL_HOST: 172.0.0.1
+      MAIL_PORT: 123
+      ENV: local
+      LISTENER_TYPE: ${ADHOC_LISTENER_TYPE}
+      CHANNEL_NAME: ${ADHOC_CHANNEL_NAME}
+      ODE_WRAPPER_REST_SERVICE: "http://ode-wrapper:7777"
     logging:
       options:
         max-size: "20m"

@@ -27,7 +27,8 @@ import com.trihydro.library.model.CountyRoadsProps;
 import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.views.CountyRoadsGeometryView;
-import com.trihydro.library.views.CountyRoadsTriggerView;
+import com.trihydro.library.views.CountyRoadsReportView;
+import com.trihydro.library.views.CountyRoadsWtiSectionsView;
 
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -114,7 +115,7 @@ public class CascadeController extends BaseController {
             statement = connection.createStatement();
 
             // build SQL statement
-            String viewName = CountyRoadsGeometryView.countyRoadsGeometryViewName;
+            String viewName = countyRoadsProps.getCountyRoadsGeometryViewName();
             String query = String.format("select %s, %s, %s, %s, %s from %s where %s = %d order by %s asc",
                     CountyRoadsGeometryView.commonNameColumnName,
                     CountyRoadsGeometryView.directionColumnName,
@@ -169,6 +170,25 @@ public class CascadeController extends BaseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
         return new ResponseEntity<List<ActiveTim>>(activeTims, HttpStatus.OK);
+    }
+
+    /**
+     * Retrieve county road segment given cr_id
+     * @param segmentId the segment id
+     * @return the county road segment
+     */
+    @RequestMapping(value = "/get-county-road-segment/{segmentId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public ResponseEntity<CountyRoadSegment> getCountyRoadSegment(@PathVariable int segmentId) {
+        CountyRoadSegment countyRoadSegment = null;
+        try {
+            countyRoadSegment = retrieveCountyRoadSegmentFromDatabase(segmentId);
+        } catch (RecordNotFoundException e) {
+            utility.logWithDate("No record found for segmentId: " + segmentId);
+        } catch (SQLException e) {
+            utility.logWithDate("Error retrieving county road segment for segmentId: " + segmentId);
+            e.printStackTrace();
+        }
+        return new ResponseEntity<CountyRoadSegment>(countyRoadSegment, HttpStatus.OK);
     }
 
     /**
@@ -258,7 +278,7 @@ public class CascadeController extends BaseController {
 				}
 
 				// Add the ITIS code to the ActiveTim's ITIS codes, if not null
-				var itisCode = rs.getInt("ITIS_CODE"); // TODO: account for cascade TIMs with multiple ITIS codes
+				var itisCode = rs.getInt("ITIS_CODE");
 				if (!rs.wasNull()) {
 					activeTim.getItisCodes().add(itisCode);
 				}
@@ -291,7 +311,7 @@ public class CascadeController extends BaseController {
 
     private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) throws SQLException {
         TriggerRoad triggerRoad = null;
-        
+
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
@@ -301,8 +321,9 @@ public class CascadeController extends BaseController {
             statement = connection.createStatement();
 
             // build SQL statement
-            String viewName = countyRoadsProps.getCountyRoadsTriggerViewName();
-            String query = "select * from " + viewName + " where road_code = '" + roadCode + "'";
+            String countyRoadsReportViewName = countyRoadsProps.getCountyRoadsReportViewName();
+            String countyRoadsWtiSectionsViewName = countyRoadsProps.getCountyRoadsWtiSectionsViewName();
+            String query = "select * from " + countyRoadsReportViewName + " where " + CountyRoadsReportView.crIdColumnName + " in (select " + CountyRoadsWtiSectionsView.crIdColumnName + " from " + countyRoadsWtiSectionsViewName + " where " + CountyRoadsWtiSectionsView.roadCodeColumnName + "='" + roadCode + "');";
             rs = statement.executeQuery(query);
 
             List<CountyRoadSegment> countyRoadSegments = new ArrayList<CountyRoadSegment>();
@@ -336,6 +357,47 @@ public class CascadeController extends BaseController {
         return triggerRoad;
     }
 
+    private CountyRoadSegment retrieveCountyRoadSegmentFromDatabase(int segmentId) throws RecordNotFoundException, SQLException {
+        CountyRoadSegment countyRoadSegment;
+        
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = dbInteractions.getCountyRoadsConnectionPool(); // target county roads database
+            statement = connection.createStatement();
+
+            // build SQL statement
+            String countyRoadsReportViewName = countyRoadsProps.getCountyRoadsReportViewName();
+            String query = "select * from " + countyRoadsReportViewName + " where " + CountyRoadsReportView.crIdColumnName + "=" + segmentId + ";";
+            rs = statement.executeQuery(query);
+            if (!rs.next()) {
+                throw new RecordNotFoundException("No record found");
+            }
+            countyRoadSegment = buildCountyRoadSegment(rs);
+            
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return countyRoadSegment;
+    }
+
     /**
      * Build a county road segment from the given result set
      * @param rs the result set
@@ -344,24 +406,43 @@ public class CascadeController extends BaseController {
      * @throws RecordNotFoundException if no record found
      */
     private CountyRoadSegment buildCountyRoadSegment(ResultSet rs) throws SQLException, RecordNotFoundException {
-        int countyRoadId = rs.getInt(CountyRoadsTriggerView.countyRoadIdColumnName);
-        String commonName = rs.getString(CountyRoadsTriggerView.commonNameColumnName);
+        int countyRoadId = rs.getInt(CountyRoadsReportView.crIdColumnName);
+        String name = rs.getString(CountyRoadsReportView.nameColumnName);
 
-        if (commonName == null) {
+        if (name == null) {
             throw new RecordNotFoundException("No record found");
         }
 
-        Double mFrom = rs.getDouble(CountyRoadsTriggerView.mFromColumnName);
-        Double mTo = rs.getDouble(CountyRoadsTriggerView.mToColumnName);
-        Double xFrom = rs.getDouble(CountyRoadsTriggerView.xFromColumnName);
-        Double yFrom = rs.getDouble(CountyRoadsTriggerView.yFromColumnName);
-        Double xTo = rs.getDouble(CountyRoadsTriggerView.xToColumnName);
-        Double yTo = rs.getDouble(CountyRoadsTriggerView.yToColumnName);
-        boolean closed = (rs.getInt(CountyRoadsTriggerView.closedColumnName) == 0) ? false : true;
-        boolean c2lhpv = (rs.getInt(CountyRoadsTriggerView.c2lhpvColumnName) == 0) ? false : true;
-        boolean loct = (rs.getInt(CountyRoadsTriggerView.loctColumnName) == 0) ? false : true;
-        boolean ntt = (rs.getInt(CountyRoadsTriggerView.nttColumnName) == 0) ? false : true;
-        return new CountyRoadSegment(countyRoadId, commonName, mFrom, mTo, xFrom, yFrom, xTo, yTo, closed, c2lhpv, loct, ntt);
+        Double mFrom = rs.getDouble(CountyRoadsReportView.mFromColumnName);
+        Double mTo = rs.getDouble(CountyRoadsReportView.mToColumnName);
+        Double xFrom = rs.getDouble(CountyRoadsReportView.xFromColumnName);
+        Double yFrom = rs.getDouble(CountyRoadsReportView.yFromColumnName);
+        Double xTo = rs.getDouble(CountyRoadsReportView.xToColumnName);
+        Double yTo = rs.getDouble(CountyRoadsReportView.yToColumnName);
+
+        // identify if closed
+        boolean triggered_closed = (rs.getInt(CountyRoadsReportView.triggeredClosedColumnName) == 0) ? false : true;
+        boolean planned_closure = (rs.getInt(CountyRoadsReportView.plannedClosureColumnName) == 0) ? false : true;
+        boolean adhoc_closed = (rs.getInt(CountyRoadsReportView.adhocClosedColumnName) == 0) ? false : true;
+        boolean isCountyRoadClosed = triggered_closed || planned_closure || adhoc_closed;
+
+        // identify if c2lhpv
+        boolean triggered_c2lhpv = (rs.getInt(CountyRoadsReportView.triggeredC2lhpvColumnName) == 0) ? false : true;
+        boolean adhoc_c2lhpv = (rs.getInt(CountyRoadsReportView.adhocC2lhpvColumnName) == 0) ? false : true;
+        boolean isC2lhpv = triggered_c2lhpv || adhoc_c2lhpv;
+
+        // identify if loct
+        boolean triggered_loct = (rs.getInt(CountyRoadsReportView.triggeredLoctColumnName) == 0) ? false : true;
+        boolean planned_loct = (rs.getInt(CountyRoadsReportView.plannedLoctColumnName) == 0) ? false : true;
+        boolean loct = (rs.getInt(CountyRoadsReportView.loctColumnName) == 0) ? false : true; // not sure if this differs from triggered_loct
+        boolean isLoct = triggered_loct || planned_loct || loct;
+
+        // identify if ntt
+        boolean triggered_ntt = (rs.getInt(CountyRoadsReportView.triggeredNttColumnName) == 0) ? false : true;
+        boolean adhoc_ntt = (rs.getInt(CountyRoadsReportView.adhocNttColumnName) == 0) ? false : true;
+        boolean isNtt = triggered_ntt || adhoc_ntt;
+
+        return new CountyRoadSegment(countyRoadId, name, mFrom, mTo, xFrom, yFrom, xTo, yTo, isCountyRoadClosed, isC2lhpv, isLoct, isNtt);
     }
 
     /**

@@ -65,3 +65,6 @@ The migration process uses the ora2pg tool via the [georgmoser/ora2pg](https://h
 
 ## Note on `mileposts` table
 The `mileposts` table is excluded from the automated migration process, as its data does not change frequently. The data in this table should be manually migrated from the old Oracle database to the new PostgreSQL database using the `mileposts.sql` file located in the 'sql/static' subdirectory of the working directory.
+
+## Note on triggers
+A number of triggers should be disabled during the migration process and enabled after. The `disable_triggers.sql` file is provided in the 'sql' subdirectory of the working directory. This file will disable all necessary triggers in the database. The `enable_triggers.sql` file is also provided in the 'sql' subdirectory of the working directory. This file will enable all necessary triggers in the database.

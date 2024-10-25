@@ -1,126 +1,128 @@
 # WYDOT ODE Data Logger
 ![ODE Mongo Logger Architecture Diagram](./docs/diagrams/ode-mongo-logger-architecture.drawio.png)
 
-This project inserts BSMs from the ODE into a database running on WYDOT's server 146.166.249.2. CVCOMMS is the Oracle schema that has been created for this located at 10.145.9.172:1521 (ordb-p01-vip). There are currently 4 tables collecting the data:
+The `ODE Mongo Logger` module listens for messages on a specified Kafka topic and writes them to a MongoDB database. The module is designed to be deployed as a Docker container and is part of the WyoCV Suite of applications.
 
-- bsm_core_data - records the "core" data of the bsm
-- bsm_part2_vse - records the data encapsulated in objects J2735VehicleSafetyExtensions associated with the bsm
-- bsm_part2_spve - records the data encapsulated in objects J2735SpecialVehicleExtensions associated with the bsm
-- bsm_part2_suve - records the data encapsulated in objects J2735SupplementalVehicleExtensions associated with the bsm
+## Table of Contents
+- [Installation](#installation)
+- [Deployment](#deployment)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Usage](#usage)
 
-### Usage
+## Installation
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
 
-To use a running version of the ODE Data Logger, upload any .uper or .hex into the ODE through the web interface. Alternatively files can be dropped into /jpo-ode-svcs/target/uploads/bsm. Data will then be decoded by the ODE and then inserted into the CVCOMMS tables via the ODE Data Logger.
+### Runtime Dependencies
+| Dependency | Direct/Indirect | Link |
+| ---------- | --------------- | ---- |
+| [Kafka](https://kafka.apache.org/) | Direct | [Kafka](https://kafka.apache.org/) |
+| [MongoDB Server](https://www.mongodb.com/) | Direct | [MongoDB](https://www.mongodb.com/) |
 
-### Oracle Schema Access (deprecated)
+### Compile-Time Dependencies
+- Java is provided by the dev container's base image.
+- Maven is provided by the dev container's base image.
 
-**Step 1**: Log onto WYDOT server 10.145.9.204
+### Docker
+The following instructions are intended to be executed from the root directory of the WyoCV project:
+1. Reopen the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container". If Docker isn't running, start it and try again.
+1. Open a terminal in the dev container by clicking on the `Terminal` menu and selecting `New Terminal`
+1. Compile the project by running the following command:
+    ```
+    mvn clean package -DskipTests -pl cv-data-service-library -pl ode-mongo-logger
+    ```
+1. Reopen the project locally by clicking on the blue button in the bottom left corner of the window and selecting "Reopen Folder Locally"
+1. Move the compiled JAR to the root directory of the module:
 
-**Step 2**: Open sql plus with the Oracle client:
+    Linux:
+    ```bash
+    mv ./ode-mongo-logger/target/ode-mongo-logger-x.x.x-SNAPSHOT.jar ./ode-mongo-logger/
+    ```
+    Windows:
+    ```windows
+    move .\ode-mongo-logger\target\ode-mongo-logger-x.x.x-SNAPSHOT.jar .\ode-mongo-logger\
+    ```
 
-```bash
-$ cd /opt/oracle/instantclient_12_2
-$ ./sqlplus cvcomms/C0ll1s10n@cvlogger_dev
-```
+    Replace `x.x.x` with the version number of the JAR file. If a JAR file already exists in the `ode-mongo-logger` directory, you may need to delete it first.
 
-PLSQL commands will now work on the CVCOMMS schema.
+1. Copy the sample.env to .env:
 
-**Note**: The column names are very long and feature multiple abbreviations. We will be adding a dictionary to help keep track of these fields
+    Linux:
+    ```bash
+    cp sample.env .env
+    ```
+    Windows:
+    ```windows
+    copy sample.env .env
+    ```
 
-### Installation Instructions
+1. Update the .env file with the appropriate values. See the [Configuration](#configuration) section for more information.
+1. Verify that the necessary [dependencies](#dependencies) are running and accessible at the addresses specified in the `.env` file.
+1. Build & run the docker container with the following command:
+    ```
+    docker compose up -d --build tim_logger_mongo
+    ```
+1. View the logs with the following command:
+    ```
+    docker compose logs -f tim_logger_mongo
+    ```
 
-The follwing instructions describe the process to run the ODE Data Logger.
+    To stop viewing the logs, press `Ctrl+C`.
 
-#### Downloading the source code
+1. To stop the container, run the following command:
+    ```
+    docker compose down
+    ```
 
-**Step 1**: Clone the solution from BitBucket using:
+### Launch Configuration
+A basic development environment file has been included (/resource/application-dev.properties) and is used when debugging via the `ODE Mongo Logger (Launch)` configuration. This configuration is intended to be used with the provided dev container.
 
-```bash
-git clone https://<username>@bitbucket.org/szumpf/ode-data-logger.git
-```
+To run the application using the provided launch configuration, follow these steps:
+1. Update the `application.properties` file with the appropriate values. See the [Configuration](#configuration) section for more information.
+1. Verify that the necessary [dependencies](#dependencies) are running and accessible at the addresses specified in the `application.properties` file.
+1. Open the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container"
+1. Open the Run and Debug sidebar by clicking on the icon on the left side of the window or by pressing `Ctrl+Shift+D`
+1. Click on down arrow next to the gear icon in the top right corner of the sidebar
+1. Select the `ODE Mongo Logger (Launch)` configuration from the dropdown menu
+1. Click the green play button to start the application
 
-**Step 2**: Change into the repository directory
+## Deployment
+This application is deployed using Docker, and is part of the larger WyoCVApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
 
-```bash
-$ cd ode-data-logger
-```
-
-**Step 3**: Change into the project directory
-
-```bash
-$ cd ode-data-logger
-```
-
-**Step 4**: Compile the project
-
-```bash
-$ mvn clean compile assembly:single install
-```
-
-**Step 5**: Run \*Note: this will use a current configuration of localhost:9092 for the bootstrap.servers endpoint and J2735Bsm for the topic.
-
-```bash
-$ java -jar target/cv-logger-1.2.1-SNAPSHOT-jar-with-dependencies.jar
-```
-
-WINDOWS COMMANDS
-
-Desktop
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-core-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-common-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-svcs-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\cv-data-logger-library\\target\\cv-data-logger-library-1.0-SNAPSHOT.jar" -DgroupId="com.trihydro.library.service" -DartifactId=cv-data-logger-library -Dversion="1.0-SNAPSHOT" -Dpackaging=jar
-
-Laptop
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-plugins-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-core-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-common-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\ode-data-logger\\ode-data-logger\\resources\\jpo-ode-svcs-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\Trihydro\\cv-data-logger-library\\target\\cv-data-logger-library-1.0-SNAPSHOT.jar" -DgroupId="com.trihydro.library.service" -DartifactId=cv-data-logger-library -Dversion="1.0-SNAPSHOT" -Dpackaging=jar
-
-//
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-plugins-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-core-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-core -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-common-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-common -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\resources\\jpo-ode-svcs-1.2.1-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-svcs -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-mvn install:install-file -Dfile="C:\\Users\\kperry\\wyocv\\cv-data-service-library\\target\\cv-data-service-library-1.2.1-SNAPSHOT.jar" -DgroupId="com.wyocv" -DartifactId=cv-data-service-library -Dversion="1.2.1-SNAPSHOT" -Dpackaging=jar
-
-# Configuration Reference
-
+## Configuration
 **SOME OF THESE PROPERTIES ARE SENSITIVE. DO NOT PUBLISH THEM TO VERSION CONTROL**
 
 You may configure these values in `ode-mongo-logger/src/main/resources/application.properties` or by editing them in the `sample.env` file at the project root.
 
-**IMPORTANT** When using the env file method, you must You must rename or duplicate the `sample.env` file to `.env`. If using the application.properties method, you must pass in the name of the environment to use with the `--spring.profiles.active` parameter.
+**IMPORTANT** When using the env file method, you must rename or duplicate the `sample.env` file to `.env`. If using the application.properties method, you must pass in the name of the environment to use with the `--spring.profiles.active` parameter.
 
-| Value in `application.properties` | Value as env var (in sample.env) | Description                               | Example Value                                                  |
-| --------------------------------- | -------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| mongologger.hostname              | MONGO_HOSTNAME                   | IP address of the kafka host              | 0.0.0.0                                                        |
-| mongologger.mongoHost             | MONGO_HOST                       | Mongo server (IP or DNS)                  | 0.0.0.0                                                        |
-| mongologger.mongoDatabase         | MONGO_DATABASE                   | Name of Mongo database to deposit into                    | cvtest                                                         |
-| mongologger.mongoAuthDatabase         | MONGO_AUTH_DATABASE                   | Name of Mongo database the user is defined in                    | cvtest                                                         |
-| mongologger.mongoUsername         | MONGO_USER_NAME                  | Username accessing Mongo                  | uname                                                          |
-| mongologger.mongoPassword         | MONGO_PASSWORD                   | Password to access Mongo                  | pass                                                           |
-| mongologger.alertAddresses        | MONGO_ALERT_ADDRESSES            | List of email addresses to send alerts to | bpayne@trihydro.com,szumpf@trihydro.com |
-| mongologger.fromEmail             | MONGO_FROM_EMAIL                 | Email to send alerts from                 | support@trihydro.com                                           |
-| mongologger.environmentName       | ENVIRONMENT_NAME                 | Name of environment (for email subject)   | DEV                                                            |
-| mongologger.mailHost              | MAIL_HOST                        | IP of mail host                           | 0.0.0.0                                                        |
-| mongologger.mailPort              | MAIL_PORT                        | Port for mail host                        | 25                                                             |
-| mongologger.depositTopic          | (only set in docker-compose.yml) | Kafka topic for logger to subscribe to    | topic.OdeDNMsgJson                                             |
-| mongologger.depositGroup          | (only set in docker-compose.yml) | Kafka group name for subscriptions        | logger_group_tim_dev                                           |
+| Environment Variable | Variable name(s) in `sample.env` | Property name in `application.properties` | Description                               | Example Value                                                  |
+| -------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
+| MONGOLOGGER_DEPOSIT_TOPIC | TIM_TOPIC, BSM_TOPIC, DA_TOPIC | mongologger.depositTopic                  | The Kafka topic to listen for messages on | topic.OdeTimJson                                            |
+| MONGOLOGGER_DEPOSIT_GROUP | TIM_GROUP_MONGO, BSM_GROUP_MONGO, DA_GROUP_MONGO | mongologger.depositGroup                  | The Kafka consumer group to use           | logger_group_tim_dev_local                                            |
+| MONGOLOGGER_HOSTNAME | MONGO_HOSTNAME | mongologger.hostname                       | The hostname of the machine that the mongo logger is running on         | localhost                                                    |
+| MONGOLOGGER_MONGO_HOST | MONGO_HOST | mongologger.mongoHost                      | The hostname of the MongoDB server         | localhost                                                    |
+| MONGOLOGGER_MONGO_DATABASE | MONGO_DATABASE | mongologger.mongoDatabase                       | The name of the MongoDB database to write to | wyo_cv                                                      |
+| MONGOLOGGER_MONGO_AUTH_DATABASE | MONGO_AUTH_DATABASE | mongologger.mongoAuthDatabase             | The name of the MongoDB authentication database | admin                                                      |
+| MONGOLOGGER_MONGO_USERNAME | MONGO_USERNAME | mongologger.mongoUsername                 | The username to use to connect to MongoDB  | admin                                                       |
+| MONGOLOGGER_MONGO_PASSWORD | MONGO_PASSWORD | mongologger.mongoPassword                 | The password to use to connect to MongoDB  | password                                                    |
+| MONGOLOGGER_ALERT_ADDRESSES | MONGO_ALERT_ADDRESSES | mongologger.alertAddresses                | The email addresses to send alerts to      | test@gmail.com                                               |
+| MONGOLOGGER_FROM_EMAIL | MONGO_FROM_EMAIL | mongologger.fromEmail                      | The email address to send alerts from      | test@gmail.com                                               |
+| MONGOLOGGER_ENVIRONMENT_NAME | ENVIRONMENT_NAME | mongologger.environmentName              | The name of the environment the logger is running in | dev                                                      |
+| MONGOLOGGER_MAIL_HOST | MAIL_HOST | mongologger.mailHost                      | The hostname of the SMTP server to use for sending alerts | smtp.gmail.com                                            |
+| MONGOLOGGER_MAIL_PORT | MAIL_PORT | mongologger.mailPort                      | The port of the SMTP server to use for sending alerts | 587                                                        |
+
+## Testing
+### Unit Tests
+1. Reopen project in provided dev container
+1. Run the following command to execute unit tests:
+    ```bash
+    mvn clean test -p cv-data-service-library -p ode-mongo-logger
+    ```
+
+This will build the library that the module depends on and run the unit tests for the module (as well as the library).
+
+## Usage
+This module requires a Kafka broker and MongoDB server to be running. The module listens for messages on a specified Kafka topic and writes them to a MongoDB database.
+
+Once configured and running, no further action is required.

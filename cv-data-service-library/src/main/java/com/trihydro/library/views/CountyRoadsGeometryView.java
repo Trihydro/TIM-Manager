@@ -7,8 +7,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CountyRoadsGeometryView {
-    public static final String countyRoadsGeometryViewName = "countyrds.county_road_geometry_v1_mv";
-
     public static final String commonNameColumnName = "common_name";
     public static final String directionColumnName = "direction";
     public static final String milepostColumnName = "milepost";

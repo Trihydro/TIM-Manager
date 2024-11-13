@@ -95,7 +95,7 @@ public class AdhocListener {
         Connection connection = null;
         Statement statement = null;
 
-        connection = dbInteractions.getConnectionPool();
+        connection = dbInteractions.getCountyRoadsConnectionPool();
         statement = connection.createStatement();
         String channelName = config.getChannelName();
         statement.execute("LISTEN " + channelName);

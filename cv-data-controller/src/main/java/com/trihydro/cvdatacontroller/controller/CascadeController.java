@@ -38,16 +38,14 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("cascade")
 public class CascadeController extends BaseController {
     private Utility utility;
-    private JCSCacheProps jcsCacheProps;
     private CountyRoadsProps countyRoadsProps;
     private TriggerRoadCache triggerRoadCache;
 
     @Autowired
     public void InjectBaseDependencies(Utility _utility, JCSCacheProps _jcsCacheProps, CountyRoadsProps _countyRoadsProps) {
         utility = _utility;
-        jcsCacheProps = _jcsCacheProps;
         countyRoadsProps = _countyRoadsProps;
-        triggerRoadCache = new TriggerRoadCache(utility, jcsCacheProps);
+        triggerRoadCache = new TriggerRoadCache(utility, _jcsCacheProps);
     }
 
     /**
@@ -72,30 +70,27 @@ public class CascadeController extends BaseController {
      */
     @RequestMapping(value = "/trigger-road/{roadCode}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<String> getTriggerRoad(@PathVariable String roadCode) {
-        TriggerRoad triggerRoad = null;
         boolean cached = false;
 
+        // avoid hitting the database if we know there are no segments associated with this road code
         List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
         if (countyRoadIds != null) {
             cached = true;
-            if (countyRoadIds.size() == 0) {
-                // avoid hitting the database if we know there are no segments associated with this road code
+            if (countyRoadIds.isEmpty()) {
                 String json = new TriggerRoad(roadCode).toJson();
-                return new ResponseEntity<String>(json, HttpStatus.OK);
+                return new ResponseEntity<>(json, HttpStatus.OK);
             }
         }
 
-        try {
-            triggerRoad = retrieveTriggerRoadFromDatabase(roadCode);
-            if (!cached) {
-                addToCache(triggerRoad);
-            }
-        } catch(SQLException sqlException) {
-            sqlException.printStackTrace();
+        // otherwise, try to retrieve from cache to get latest data
+        TriggerRoad triggerRoad = retrieveTriggerRoadFromDatabase(roadCode);
+        if (triggerRoad == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        String json = triggerRoad.toJson();
-        return new ResponseEntity<String>(json, HttpStatus.OK);
+        if (!cached) {
+            addToCache(triggerRoad);
+        }
+        return new ResponseEntity<>(triggerRoad.toJson(), HttpStatus.OK);
     }
 
     /**
@@ -105,7 +100,8 @@ public class CascadeController extends BaseController {
      */
     @RequestMapping(value = "/mileposts/{countyRoadId}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<List<Milepost>> getMileposts(@PathVariable int countyRoadId) {
-        List<Milepost> mileposts = new ArrayList<Milepost>();
+        ResponseEntity<List<Milepost>> responseToReturn;
+        List<Milepost> mileposts = new ArrayList<>();
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
@@ -137,9 +133,10 @@ public class CascadeController extends BaseController {
                 }
                 mileposts.add(milepostObj);
             }
+            responseToReturn = new ResponseEntity<>(mileposts, HttpStatus.OK);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
+            utility.logWithDate("Error retrieving mileposts for county road id " + countyRoadId + " from database: " + e.getMessage());
+            responseToReturn = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
         } finally {
             try {
                 // close prepared statement
@@ -152,10 +149,10 @@ public class CascadeController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                utility.logWithDate("Error closing resources: " + e.getMessage());
             }
         }
-        return new ResponseEntity<List<Milepost>>(mileposts, HttpStatus.OK);
+        return responseToReturn;
     }
 
     /**
@@ -169,7 +166,7 @@ public class CascadeController extends BaseController {
         if (activeTims == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return new ResponseEntity<List<ActiveTim>>(activeTims, HttpStatus.OK);
+        return new ResponseEntity<>(activeTims, HttpStatus.OK);
     }
 
     /**
@@ -179,137 +176,136 @@ public class CascadeController extends BaseController {
      */
     @RequestMapping(value = "/get-county-road-segment/{segmentId}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<CountyRoadSegment> getCountyRoadSegment(@PathVariable int segmentId) {
-        CountyRoadSegment countyRoadSegment = null;
-        try {
-            countyRoadSegment = retrieveCountyRoadSegmentFromDatabase(segmentId);
-        } catch (RecordNotFoundException e) {
-            utility.logWithDate("No record found for segmentId: " + segmentId);
-        } catch (SQLException e) {
-            utility.logWithDate("Error retrieving county road segment for segmentId: " + segmentId);
-            e.printStackTrace();
+        CountyRoadSegment countyRoadSegment = retrieveCountyRoadSegmentFromDatabase(segmentId);
+        if (countyRoadSegment == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return new ResponseEntity<CountyRoadSegment>(countyRoadSegment, HttpStatus.OK);
+        return new ResponseEntity<>(countyRoadSegment, HttpStatus.OK);
     }
 
     /**
      * Retrieve all active TIMs that are associated with the given segment from the database that are not marked for deletion
      * @param segmentId the segment id
      * @return the list of active TIMs (empty if no records found)
-     * @throws SQLException if there is an error retrieving the active TIMs
      */
     private List<ActiveTim> retrieveActiveTimsWithItisCodesForSegmentFromDatabase(int segmentId) {
         List<ActiveTim> results = new ArrayList<ActiveTim>();
-		ActiveTim activeTim = null;
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
+        ActiveTim activeTim = null;
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
 
-		try {
-			connection = dbInteractions.getConnectionPool(); // target primary database
-			statement = connection.createStatement();
+        try {
+            connection = dbInteractions.getConnectionPool(); // target primary database
+            statement = connection.createStatement();
 
-			String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
-			query += " left join tim_type on active_tim.tim_type_id = tim_type.tim_type_id";
-			query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
-			query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
-			query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
-            query += " where client_id like '%_trgd_" + segmentId + "%'"; // segmentId is part of the client_id
-            query += " and marked_for_deletion = '0'";
-			query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
+            String query = prepareQueryToRetrieveActiveTimsWithItisCodesForSegmentFromDatabase(segmentId);
 
-			rs = statement.executeQuery(query);
+            rs = statement.executeQuery(query);
 
-			// convert to ActiveTim object
-			while (rs.next()) {
-				Long activeTimId = rs.getLong("ACTIVE_TIM_ID");
+            // convert to ActiveTim object
+            while (rs.next()) {
+                Long activeTimId = rs.getLong("ACTIVE_TIM_ID");
 
-				// If we're looking at the first record or the record doesn't have
-				// the same ACTIVE_TIM_ID as the record we just processed...
-				if (activeTim == null || !activeTim.getActiveTimId().equals(activeTimId)) {
-					if (activeTim != null) {
-						results.add(activeTim);
-					}
+                // If we're looking at the first record or the record doesn't have
+                // the same ACTIVE_TIM_ID as the record we just processed...
+                if (activeTim == null || !activeTim.getActiveTimId().equals(activeTimId)) {
+                    if (activeTim != null) {
+                        results.add(activeTim);
+                    }
 
-					// Create a new record and set the ActiveTim properties.
-					activeTim = new ActiveTim();
-					activeTim.setActiveTimId(activeTimId);
-					activeTim.setTimId(rs.getLong("TIM_ID"));
-					activeTim.setDirection(rs.getString("DIRECTION"));
-					activeTim.setStartDateTime(rs.getString("TIM_START"));
-					activeTim.setEndDateTime(rs.getString("TIM_END"));
-					activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
-					activeTim.setRoute(rs.getString("ROUTE"));
-					activeTim.setClientId(rs.getString("CLIENT_ID"));
-					activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-					activeTim.setPk(rs.getInt("PK"));
-					activeTim.setItisCodes(new ArrayList<Integer>());
+                    // Create a new record and set the ActiveTim properties.
+                    activeTim = new ActiveTim();
+                    activeTim.setActiveTimId(activeTimId);
+                    activeTim.setTimId(rs.getLong("TIM_ID"));
+                    activeTim.setDirection(rs.getString("DIRECTION"));
+                    activeTim.setStartDateTime(rs.getString("TIM_START"));
+                    activeTim.setEndDateTime(rs.getString("TIM_END"));
+                    activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+                    activeTim.setRoute(rs.getString("ROUTE"));
+                    activeTim.setClientId(rs.getString("CLIENT_ID"));
+                    activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+                    activeTim.setPk(rs.getInt("PK"));
+                    activeTim.setItisCodes(new ArrayList<Integer>());
 
-					Coordinate startPoint = null;
-					Coordinate endPoint = null;
+                    Coordinate startPoint = null;
+                    Coordinate endPoint = null;
 
-					// Set startPoint
-					BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
-					BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
-					if (!rs.wasNull()) {
-						startPoint = new Coordinate(startLat, startLon);
-					}
-					activeTim.setStartPoint(startPoint);
+                    // Set startPoint
+                    BigDecimal startLat = rs.getBigDecimal("START_LATITUDE");
+                    BigDecimal startLon = rs.getBigDecimal("START_LONGITUDE");
+                    if (!rs.wasNull()) {
+                        startPoint = new Coordinate(startLat, startLon);
+                    }
+                    activeTim.setStartPoint(startPoint);
 
-					// Set endPoint
-					BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
-					BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
-					if (!rs.wasNull()) {
-						endPoint = new Coordinate(endLat, endLon);
-					}
-					activeTim.setEndPoint(endPoint);
+                    // Set endPoint
+                    BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
+                    BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
+                    if (!rs.wasNull()) {
+                        endPoint = new Coordinate(endLat, endLon);
+                    }
+                    activeTim.setEndPoint(endPoint);
 
-					// Set timType
-					long timTypeId = rs.getLong("TIM_TYPE_ID");
-					if (!rs.wasNull()) {
-						activeTim.setTimTypeId(timTypeId);
-						activeTim.setTimType(rs.getString("TYPE"));
-					}
+                    // Set timType
+                    long timTypeId = rs.getLong("TIM_TYPE_ID");
+                    if (!rs.wasNull()) {
+                        activeTim.setTimTypeId(timTypeId);
+                        activeTim.setTimType(rs.getString("TYPE"));
+                    }
 
-					// Set projectKey
-					int projectKey = rs.getInt("PROJECT_KEY");
-					if (!rs.wasNull()) {
-						activeTim.setProjectKey(projectKey);
-					}
-				}
+                    // Set projectKey
+                    int projectKey = rs.getInt("PROJECT_KEY");
+                    if (!rs.wasNull()) {
+                        activeTim.setProjectKey(projectKey);
+                    }
+                }
 
-				// Add the ITIS code to the ActiveTim's ITIS codes, if not null
-				var itisCode = rs.getInt("ITIS_CODE");
-				if (!rs.wasNull()) {
-					activeTim.getItisCodes().add(itisCode);
-				}
-			}
+                // Add the ITIS code to the ActiveTim's ITIS codes, if not null
+                var itisCode = rs.getInt("ITIS_CODE");
+                if (!rs.wasNull()) {
+                    activeTim.getItisCodes().add(itisCode);
+                }
+            }
 
-			if (activeTim != null) {
-				results.add(activeTim);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
+            if (activeTim != null) {
+                results.add(activeTim);
+            }
+        } catch (SQLException e) {
+            utility.logWithDate("Error retrieving active TIMs with ITIS codes for segmentId '" + segmentId + "' from database: " + e.getMessage());
+            return null;
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null)
+                    statement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+                // close result set
+                if (rs != null)
+                    rs.close();
+            } catch (SQLException e) {
+                utility.logWithDate("Error closing resources: " + e.getMessage());
+            }
+        }
 
-		return results;
+        return results;
     }
 
-    private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) throws SQLException {
+    private static String prepareQueryToRetrieveActiveTimsWithItisCodesForSegmentFromDatabase(int segmentId) {
+        String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
+        query += " left join tim_type on active_tim.tim_type_id = tim_type.tim_type_id";
+        query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
+        query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
+        query += " where client_id like '%_trgd_" + segmentId + "%'"; // segmentId is part of the client_id
+        query += " and marked_for_deletion = '0'";
+        query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
+        return query;
+    }
+
+    private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) {
         TriggerRoad triggerRoad = null;
 
         Connection connection = null;
@@ -326,19 +322,14 @@ public class CascadeController extends BaseController {
             String query = "select * from " + countyRoadsReportViewName + " where " + CountyRoadsReportView.crIdColumnName + " in (select " + CountyRoadsWtiSectionsView.crIdColumnName + " from " + countyRoadsWtiSectionsViewName + " where " + CountyRoadsWtiSectionsView.roadCodeColumnName + "='" + roadCode + "');";
             rs = statement.executeQuery(query);
 
-            List<CountyRoadSegment> countyRoadSegments = new ArrayList<CountyRoadSegment>();
+            List<CountyRoadSegment> countyRoadSegments = new ArrayList<>();
             while (rs.next()) {
-                CountyRoadSegment countyRoadSegment;
-                try {
-                    countyRoadSegment = buildCountyRoadSegment(rs);
-                } catch (RecordNotFoundException e) {
-                    continue;
-                }
+                CountyRoadSegment countyRoadSegment = buildCountyRoadSegment(rs);
                 countyRoadSegments.add(countyRoadSegment);
             }
             triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
         } catch (SQLException e) {
-            throw e;
+            utility.logWithDate("Error retrieving trigger road for road code: " + roadCode + " from database: " + e.getMessage());
         } finally {
             try {
                 // close prepared statement
@@ -351,15 +342,15 @@ public class CascadeController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                utility.logWithDate("Error closing resources: " + e.getMessage());
             }
         }
         return triggerRoad;
     }
 
-    private CountyRoadSegment retrieveCountyRoadSegmentFromDatabase(int segmentId) throws RecordNotFoundException, SQLException {
-        CountyRoadSegment countyRoadSegment;
-        
+    private CountyRoadSegment retrieveCountyRoadSegmentFromDatabase(int segmentId) {
+        CountyRoadSegment countyRoadSegment = null;
+
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
@@ -373,12 +364,13 @@ public class CascadeController extends BaseController {
             String query = "select * from " + countyRoadsReportViewName + " where " + CountyRoadsReportView.crIdColumnName + "=" + segmentId + ";";
             rs = statement.executeQuery(query);
             if (!rs.next()) {
-                throw new RecordNotFoundException("No record found");
+                utility.logWithDate("No record found for segmentId '" + segmentId + "', result set is empty");
             }
-            countyRoadSegment = buildCountyRoadSegment(rs);
-            
+            else {
+                countyRoadSegment = buildCountyRoadSegment(rs);
+            }
         } catch (SQLException e) {
-            throw e;
+            utility.logWithDate("Error retrieving county road segment for segmentId '" + segmentId + "' from database: " + e.getMessage());
         } finally {
             try {
                 // close prepared statement
@@ -391,10 +383,9 @@ public class CascadeController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                utility.logWithDate("Error closing resources: " + e.getMessage());
             }
         }
-
         return countyRoadSegment;
     }
 
@@ -403,14 +394,13 @@ public class CascadeController extends BaseController {
      * @param rs the result set
      * @return the county road segment
      * @throws SQLException if there is an error reading the result set
-     * @throws RecordNotFoundException if no record found
      */
-    private CountyRoadSegment buildCountyRoadSegment(ResultSet rs) throws SQLException, RecordNotFoundException {
+    private CountyRoadSegment buildCountyRoadSegment(ResultSet rs) throws SQLException {
         int countyRoadId = rs.getInt(CountyRoadsReportView.crIdColumnName);
         String name = rs.getString(CountyRoadsReportView.nameColumnName);
 
         if (name == null) {
-            throw new RecordNotFoundException("No record found");
+            utility.logWithDate("No name found for segmentId '" + countyRoadId + "'");
         }
 
         Double mFrom = rs.getDouble(CountyRoadsReportView.mFromColumnName);
@@ -421,25 +411,25 @@ public class CascadeController extends BaseController {
         Double yTo = rs.getDouble(CountyRoadsReportView.yToColumnName);
 
         // identify if closed
-        boolean triggered_closed = (rs.getInt(CountyRoadsReportView.triggeredClosedColumnName) == 0) ? false : true;
-        boolean planned_closure = (rs.getInt(CountyRoadsReportView.plannedClosureColumnName) == 0) ? false : true;
-        boolean adhoc_closed = (rs.getInt(CountyRoadsReportView.adhocClosedColumnName) == 0) ? false : true;
+        boolean triggered_closed = rs.getInt(CountyRoadsReportView.triggeredClosedColumnName) != 0;
+        boolean planned_closure = rs.getInt(CountyRoadsReportView.plannedClosureColumnName) != 0;
+        boolean adhoc_closed = rs.getInt(CountyRoadsReportView.adhocClosedColumnName) != 0;
         boolean isCountyRoadClosed = triggered_closed || planned_closure || adhoc_closed;
 
         // identify if c2lhpv
-        boolean triggered_c2lhpv = (rs.getInt(CountyRoadsReportView.triggeredC2lhpvColumnName) == 0) ? false : true;
-        boolean adhoc_c2lhpv = (rs.getInt(CountyRoadsReportView.adhocC2lhpvColumnName) == 0) ? false : true;
+        boolean triggered_c2lhpv = rs.getInt(CountyRoadsReportView.triggeredC2lhpvColumnName) != 0;
+        boolean adhoc_c2lhpv = rs.getInt(CountyRoadsReportView.adhocC2lhpvColumnName) != 0;
         boolean isC2lhpv = triggered_c2lhpv || adhoc_c2lhpv;
 
         // identify if loct
-        boolean triggered_loct = (rs.getInt(CountyRoadsReportView.triggeredLoctColumnName) == 0) ? false : true;
-        boolean planned_loct = (rs.getInt(CountyRoadsReportView.plannedLoctColumnName) == 0) ? false : true;
-        boolean loct = (rs.getInt(CountyRoadsReportView.loctColumnName) == 0) ? false : true; // not sure if this differs from triggered_loct
+        boolean triggered_loct = rs.getInt(CountyRoadsReportView.triggeredLoctColumnName) != 0;
+        boolean planned_loct = rs.getInt(CountyRoadsReportView.plannedLoctColumnName) != 0;
+        boolean loct = rs.getInt(CountyRoadsReportView.loctColumnName) != 0; // not sure if this differs from triggered_loct
         boolean isLoct = triggered_loct || planned_loct || loct;
 
         // identify if ntt
-        boolean triggered_ntt = (rs.getInt(CountyRoadsReportView.triggeredNttColumnName) == 0) ? false : true;
-        boolean adhoc_ntt = (rs.getInt(CountyRoadsReportView.adhocNttColumnName) == 0) ? false : true;
+        boolean triggered_ntt = rs.getInt(CountyRoadsReportView.triggeredNttColumnName) != 0;
+        boolean adhoc_ntt = rs.getInt(CountyRoadsReportView.adhocNttColumnName) != 0;
         boolean isNtt = triggered_ntt || adhoc_ntt;
 
         return new CountyRoadSegment(countyRoadId, name, mFrom, mTo, xFrom, yFrom, xTo, yTo, isCountyRoadClosed, isC2lhpv, isLoct, isNtt);
@@ -473,7 +463,7 @@ public class CascadeController extends BaseController {
         return milepostObj;
     }
 
-    public class RecordNotFoundException extends Exception {
+    public static class RecordNotFoundException extends Exception {
         public RecordNotFoundException(String errorMessage) {
             super(errorMessage);
         }

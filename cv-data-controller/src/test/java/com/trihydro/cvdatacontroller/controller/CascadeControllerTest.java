@@ -131,6 +131,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
     public void testGetTriggerRoad_CacheMiss_NoSegmentsFound_SUCCESS() throws SQLException {
         // prepare
         String roadCode = "test";
+        doReturn(false).when(mockRs).next();
         uut.clearCache(); // clear cache to ensure cache miss
         
         // execute

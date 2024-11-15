@@ -70,29 +70,27 @@ public class CascadeController extends BaseController {
      */
     @RequestMapping(value = "/trigger-road/{roadCode}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<String> getTriggerRoad(@PathVariable String roadCode) {
-        ResponseEntity<String> responseToReturn;
-
-        TriggerRoad triggerRoad;
         boolean cached = false;
 
         // avoid hitting the database if we know there are no segments associated with this road code
-        if (isCachedAndNoSegmentsAssociated(roadCode)) {
-            String json = new TriggerRoad(roadCode).toJson();
-            return new ResponseEntity<>(json, HttpStatus.OK);
+        List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
+        if (countyRoadIds != null) {
+            cached = true;
+            if (countyRoadIds.isEmpty()) {
+                String json = new TriggerRoad(roadCode).toJson();
+                return new ResponseEntity<>(json, HttpStatus.OK);
+            }
         }
 
         // otherwise, try to retrieve from cache to get latest data
-        try {
-            triggerRoad = retrieveTriggerRoadFromDatabase(roadCode);
-            if (!cached) {
-                addToCache(triggerRoad);
-            }
-            responseToReturn = new ResponseEntity<>(triggerRoad.toJson(), HttpStatus.OK);
-        } catch(SQLException sqlException) {
-            utility.logWithDate("Error retrieving trigger road for road code '" + roadCode + "' from database: " + sqlException.getMessage());
-            responseToReturn = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        TriggerRoad triggerRoad = retrieveTriggerRoadFromDatabase(roadCode);
+        if (triggerRoad == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return responseToReturn;
+        if (!cached) {
+            addToCache(triggerRoad);
+        }
+        return new ResponseEntity<>(triggerRoad.toJson(), HttpStatus.OK);
     }
 
     /**
@@ -178,23 +176,11 @@ public class CascadeController extends BaseController {
      */
     @RequestMapping(value = "/get-county-road-segment/{segmentId}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<CountyRoadSegment> getCountyRoadSegment(@PathVariable int segmentId) {
-        CountyRoadSegment countyRoadSegment = null;
-        try {
-            countyRoadSegment = retrieveCountyRoadSegmentFromDatabase(segmentId);
-        } catch (RecordNotFoundException e) {
-            utility.logWithDate("No record found for segmentId: " + segmentId);
-        } catch (SQLException e) {
-            utility.logWithDate("Error retrieving county road segment for segmentId '" + segmentId + "' from database: " + e.getMessage());
+        CountyRoadSegment countyRoadSegment = retrieveCountyRoadSegmentFromDatabase(segmentId);
+        if (countyRoadSegment == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
         return new ResponseEntity<>(countyRoadSegment, HttpStatus.OK);
-    }
-
-    private boolean isCachedAndNoSegmentsAssociated(String roadCode) {
-        List<Integer> countyRoadIds = triggerRoadCache.getSegmentIdsAssociatedWithTriggerRoad(roadCode);
-        if (countyRoadIds != null) {
-            return countyRoadIds.isEmpty();
-        }
-        return false;
     }
 
     /**
@@ -319,14 +305,12 @@ public class CascadeController extends BaseController {
         return query;
     }
 
-    private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) throws SQLException {
+    private TriggerRoad retrieveTriggerRoadFromDatabase(String roadCode) {
         TriggerRoad triggerRoad = null;
 
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
-
-        Exception exception = null;
 
         try {
             connection = dbInteractions.getCountyRoadsConnectionPool(); // target county roads database
@@ -338,19 +322,14 @@ public class CascadeController extends BaseController {
             String query = "select * from " + countyRoadsReportViewName + " where " + CountyRoadsReportView.crIdColumnName + " in (select " + CountyRoadsWtiSectionsView.crIdColumnName + " from " + countyRoadsWtiSectionsViewName + " where " + CountyRoadsWtiSectionsView.roadCodeColumnName + "='" + roadCode + "');";
             rs = statement.executeQuery(query);
 
-            List<CountyRoadSegment> countyRoadSegments = new ArrayList<CountyRoadSegment>();
+            List<CountyRoadSegment> countyRoadSegments = new ArrayList<>();
             while (rs.next()) {
-                CountyRoadSegment countyRoadSegment;
-                try {
-                    countyRoadSegment = buildCountyRoadSegment(rs);
-                } catch (RecordNotFoundException e) {
-                    continue;
-                }
+                CountyRoadSegment countyRoadSegment = buildCountyRoadSegment(rs);
                 countyRoadSegments.add(countyRoadSegment);
             }
             triggerRoad = new TriggerRoad(roadCode, countyRoadSegments);
         } catch (SQLException e) {
-            exception = e;
+            utility.logWithDate("Error retrieving trigger road for road code: " + roadCode + " from database: " + e.getMessage());
         } finally {
             try {
                 // close prepared statement
@@ -366,20 +345,15 @@ public class CascadeController extends BaseController {
                 utility.logWithDate("Error closing resources: " + e.getMessage());
             }
         }
-        if (exception != null) {
-            throw new SQLException("Error retrieving trigger road for road code: " + roadCode, exception);
-        }
         return triggerRoad;
     }
 
-    private CountyRoadSegment retrieveCountyRoadSegmentFromDatabase(int segmentId) throws RecordNotFoundException, SQLException {
+    private CountyRoadSegment retrieveCountyRoadSegmentFromDatabase(int segmentId) {
         CountyRoadSegment countyRoadSegment = null;
 
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
-
-        Exception exception = null;
 
         try {
             connection = dbInteractions.getCountyRoadsConnectionPool(); // target county roads database
@@ -390,12 +364,13 @@ public class CascadeController extends BaseController {
             String query = "select * from " + countyRoadsReportViewName + " where " + CountyRoadsReportView.crIdColumnName + "=" + segmentId + ";";
             rs = statement.executeQuery(query);
             if (!rs.next()) {
-                exception = new RecordNotFoundException("No record found, result set is empty");
+                utility.logWithDate("No record found for segmentId '" + segmentId + "', result set is empty");
             }
-            countyRoadSegment = buildCountyRoadSegment(rs);
-
+            else {
+                countyRoadSegment = buildCountyRoadSegment(rs);
+            }
         } catch (SQLException e) {
-            exception = e;
+            utility.logWithDate("Error retrieving county road segment for segmentId '" + segmentId + "' from database: " + e.getMessage());
         } finally {
             try {
                 // close prepared statement
@@ -411,9 +386,6 @@ public class CascadeController extends BaseController {
                 utility.logWithDate("Error closing resources: " + e.getMessage());
             }
         }
-        if (exception != null) {
-            throw new SQLException("Error retrieving county road segment for segmentId: " + segmentId, exception);
-        }
         return countyRoadSegment;
     }
 
@@ -422,14 +394,13 @@ public class CascadeController extends BaseController {
      * @param rs the result set
      * @return the county road segment
      * @throws SQLException if there is an error reading the result set
-     * @throws RecordNotFoundException if no record found
      */
-    private CountyRoadSegment buildCountyRoadSegment(ResultSet rs) throws SQLException, RecordNotFoundException {
+    private CountyRoadSegment buildCountyRoadSegment(ResultSet rs) throws SQLException {
         int countyRoadId = rs.getInt(CountyRoadsReportView.crIdColumnName);
         String name = rs.getString(CountyRoadsReportView.nameColumnName);
 
         if (name == null) {
-            throw new RecordNotFoundException("No record found");
+            utility.logWithDate("No name found for segmentId '" + countyRoadId + "'");
         }
 
         Double mFrom = rs.getDouble(CountyRoadsReportView.mFromColumnName);

@@ -8,10 +8,12 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -23,9 +25,6 @@ import com.trihydro.library.model.JCSCacheProps;
 import com.trihydro.library.model.TriggerRoad;
 
 public class CascadeControllerTest extends TestBase<CascadeController> {
-
-    private JCSCacheProps mockJCSCacheProps;
-    private CountyRoadsProps mockCountyRoadsProps;
 
     private CountyRoadSegment createCountyRoadSegment() {
         int countyRoadId = 1;
@@ -45,7 +44,7 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
 
     @BeforeEach
     public void setupSubTest() throws SQLException {
-        mockJCSCacheProps = mock(JCSCacheProps.class);
+        JCSCacheProps mockJCSCacheProps = mock(JCSCacheProps.class);
         doReturn("").when(mockJCSCacheProps).getJcsDefault();
         doReturn("org.apache.commons.jcs3.engine.CompositeCacheAttributes").when(mockJCSCacheProps).getCacheAttributes();
         doReturn("1000").when(mockJCSCacheProps).getMaxObjects();
@@ -60,8 +59,8 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         doReturn("true").when(mockJCSCacheProps).getIsSpool();
         doReturn("false").when(mockJCSCacheProps).getIsRemote();
         doReturn("false").when(mockJCSCacheProps).getIsLateral();
-        
-        mockCountyRoadsProps = mock(CountyRoadsProps.class);
+
+        CountyRoadsProps mockCountyRoadsProps = mock(CountyRoadsProps.class);
         uut.InjectBaseDependencies(mockUtility, mockJCSCacheProps, mockCountyRoadsProps);
     }
 
@@ -84,10 +83,13 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
         Assertions.assertEquals(1, result.getCountyRoadSegments().size());
         Assertions.assertEquals(roadCode, result.getRoadCode());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions).getCountyRoadsConnectionPool();
+        Mockito.verify(mockConnectionCountyRoads).close();
     }
 
     @Test
-    public void testGetTriggerRoad_CacheHit_NoSegmentsFound_SUCCESS() {
+    public void testGetTriggerRoad_CacheHit_NoSegmentsFound_SUCCESS() throws SQLException {
         // prepare
         String roadCode = "test";
         TriggerRoad triggerRoad = new TriggerRoad(roadCode, new ArrayList<>());
@@ -101,15 +103,14 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
         Assertions.assertEquals(0, result.getCountyRoadSegments().size());
         Assertions.assertEquals(roadCode, result.getRoadCode());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions, Mockito.never()).getCountyRoadsConnectionPool();
     }
 
     @Test
     public void testGetTriggerRoad_CacheMiss_SegmentsFound_SUCCESS() throws SQLException {
         // prepare
         String roadCode = "test";
-        CountyRoadSegment countyRoadSegment = createCountyRoadSegment();
-        List<CountyRoadSegment> countyRoadSegments = new ArrayList<>();
-        countyRoadSegments.add(countyRoadSegment);
         doReturn("test").when(mockRs).getString("name");
         uut.clearCache(); // clear cache to ensure cache miss
         
@@ -121,6 +122,9 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
         Assertions.assertEquals(1, result.getCountyRoadSegments().size());
         Assertions.assertEquals(roadCode, result.getRoadCode());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions).getCountyRoadsConnectionPool();
+        Mockito.verify(mockConnectionCountyRoads).close();
     }
 
     @Test
@@ -137,6 +141,9 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         Assertions.assertEquals(HttpStatus.OK, responseJson.getStatusCode());
         Assertions.assertEquals(0, result.getCountyRoadSegments().size());
         Assertions.assertEquals(roadCode, result.getRoadCode());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions).getCountyRoadsConnectionPool();
+        Mockito.verify(mockConnectionCountyRoads).close();
     }
 
     @Test
@@ -152,10 +159,13 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         // verify
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseJson.getStatusCode());
         Assertions.assertNull(responseJson.getBody());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions).getCountyRoadsConnectionPool();
+        Mockito.verify(mockConnectionCountyRoads).close();
     }
 
     @Test
-    public void testGetMileposts_NoMileposts_SUCCESS() {
+    public void testGetMileposts_NoMileposts_SUCCESS() throws SQLException {
         // prepare
         int countyRoadId = 1;
 
@@ -164,7 +174,10 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
 
         // verify
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        Assertions.assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(0, Objects.requireNonNull(data.getBody()).size());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions).getCountyRoadsConnectionPool();
+        Mockito.verify(mockConnectionCountyRoads).close();
     }
 
     @Test
@@ -178,7 +191,10 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
 
         // verify
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        Assertions.assertEquals(1, data.getBody().size());
+        Assertions.assertEquals(1, Objects.requireNonNull(data.getBody()).size());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions).getCountyRoadsConnectionPool();
+        Mockito.verify(mockConnectionCountyRoads).close();
     }
 
     @Test
@@ -192,7 +208,10 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
 
         // verify
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        Assertions.assertEquals(0, data.getBody().size());
+        Assertions.assertEquals(0, Objects.requireNonNull(data.getBody()).size());
+        Mockito.verify(mockDbInteractions, Mockito.never()).getConnectionPool();
+        Mockito.verify(mockDbInteractions).getCountyRoadsConnectionPool();
+        Mockito.verify(mockConnectionCountyRoads).close();
     }
 
     @Test
@@ -226,6 +245,9 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         Assertions.assertNotNull(data.getBody());
         Assertions.assertEquals(1, data.getBody().size());
+        Mockito.verify(mockDbInteractions).getConnectionPool();
+        Mockito.verify(mockConnection).close();
+        Mockito.verify(mockDbInteractions, Mockito.never()).getCountyRoadsConnectionPool();
     }
 
     @Test
@@ -239,6 +261,9 @@ public class CascadeControllerTest extends TestBase<CascadeController> {
 
         // verify
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, data.getStatusCode());
-        Assertions.assertEquals(null, data.getBody());
+        Assertions.assertNull(data.getBody());
+        Mockito.verify(mockDbInteractions).getConnectionPool();
+        Mockito.verify(mockConnection).close();
+        Mockito.verify(mockDbInteractions, Mockito.never()).getCountyRoadsConnectionPool();
     }
 }

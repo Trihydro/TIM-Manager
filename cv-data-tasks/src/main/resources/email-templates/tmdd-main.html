@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      th,
+      td {
+        padding-left: 0.5em;
+      }
+      th {
+        color: hsl(0, 0%, 50%);
+        font-size: small;
+        font-weight: normal;
+      }
+      li {
+        margin-bottom: 1em;
+      }
+      li > table {
+        margin-top: 0.25em;
+      }
+      .indent {
+        padding-left: 40px;
+      }
+      h4 {
+        margin-bottom: 0;
+      }
+      ul {
+        margin-top: 0.5em;
+        margin-bottom: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>TMDD Validation Summary</h2>
+    <p>Unable to validate the following Active TIMs:</p>
+    <div class="indent"><p>{notVerified}</p></div>
+    <h3>Inconsistencies</h3>
+    {content}
+    <br/>
+    <br/>
+    <h3>Exceptions while attempting automatic cleanup</h3>
+    <br />
+    {exception-summary}
+  </body>
+</html>

@@ -1,0 +1,72 @@
+ode-data-logger/target
+ode-mongo-logger/target
+tim-refresh/target
+cv-data-service-library/target
+ode-wrapper/target
+cv-data-controller/target
+rsu-data-controller/target
+cv-data-tasks/target
+logger-kafka-consumer/target
+cert-expiration/target
+
+ode-data-logger/**/*.class
+ode-mongo-logger/**/*.class
+tim-refresh/**/*.class
+cv-data-service-library/**/*.class
+ode-wrapper/**/*.class
+cv-data-controller/**/*.class
+cv-data-tasks/**/*.class
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.factorypath
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+testem.log
+/typings
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db
+
+*.log
+
+# Package Files
+**/.sts4-cache/*
+
+.env
+*.bak
+
+**/failsafe-summary.xml
+
+jars/*.jar
+wyocv-jars-*.tar.gz
+
+*.bkp
+
+# Certs
+*.jks
+*.cer
+*.p12

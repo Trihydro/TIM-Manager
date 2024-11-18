@@ -1,0 +1,9 @@
+{
+  "ipv4Address": "0.0.0.0",
+  "rsuActiveTims": [
+    { "rsuTarget": "0.0.0.0", "rsuIndex": 1, "activeTimId": 10 },
+    { "rsuTarget": "0.0.0.0", "rsuIndex": 1, "activeTimId": 11 },
+    { "rsuTarget": "0.0.0.0", "rsuIndex": 2, "activeTimId": 12 },
+    { "rsuTarget": "0.0.0.0", "rsuIndex": 2, "activeTimId": 13 }
+  ]
+}

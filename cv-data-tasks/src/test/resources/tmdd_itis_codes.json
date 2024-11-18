@@ -1,0 +1,699 @@
+[
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "abandoned vehicle",
+    "itisCode": 533
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident",
+    "itisCode": 513
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident cleared",
+    "itisCode": 638
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident investigation work",
+    "itisCode": 530
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving a bicycle",
+    "itisCode": 519
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving a bus",
+    "itisCode": 520
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving a motorcycle",
+    "itisCode": 521
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving a pedestrian",
+    "itisCode": 522
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving a semi trailer",
+    "itisCode": 562
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving a train",
+    "itisCode": 523
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving a truck",
+    "itisCode": 524
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "accident involving hazardous materials",
+    "itisCode": 525
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "acid spill",
+    "itisCode": 547
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "bus stuck under bridge",
+    "itisCode": 561
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "chemical spill",
+    "itisCode": 548
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "derailed train",
+    "itisCode": 558
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "disabled bus",
+    "itisCode": 537
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "disabled semi trailer",
+    "itisCode": 536
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "disabled train",
+    "itisCode": 538
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "disabled truck",
+    "itisCode": 535
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "disabled vehicle",
+    "itisCode": 534
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "earlier accident",
+    "itisCode": 526
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "fuel spill",
+    "itisCode": 549
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "hazard",
+    "itisCode": 640
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "hazardous materials spill",
+    "itisCode": 550
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "incident",
+    "itisCode": 531
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "incident cleared",
+    "itisCode": 639
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "injury accident",
+    "itisCode": 515
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "jackknifed semi trailer",
+    "itisCode": 543
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "jackknifed trailer",
+    "itisCode": 544
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "jackknifed trailer home",
+    "itisCode": 544
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "medical emergency",
+    "itisCode": 527
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "minor accident",
+    "itisCode": 516
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "motorist assist",
+    "itisCode": 641
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "multi vehicle accident",
+    "itisCode": 517
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "numerous accidents",
+    "itisCode": 518
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "oil spill",
+    "itisCode": 551
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "overturned bus",
+    "itisCode": 557
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "overturned semi trailer",
+    "itisCode": 556
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "overturned truck",
+    "itisCode": 555
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "overturned vehicle",
+    "itisCode": 554
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "rescue and recovery work REMOVED",
+    "itisCode": 529
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "secondary accident",
+    "itisCode": 528
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "serious accident",
+    "itisCode": 514
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "spillage occurring from moving vehicle",
+    "itisCode": 546
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "spilled load",
+    "itisCode": 552
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "stalled vehicle",
+    "itisCode": 532
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "stuck vehicle",
+    "itisCode": 559
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "toxic spill",
+    "itisCode": 553
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "truck stuck under bridge",
+    "itisCode": 560
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "vehicle in water",
+    "itisCode": 541
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "vehicle on fire",
+    "itisCode": 540
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "vehicle spun out",
+    "itisCode": 539
+  },
+  {
+    "elementType": "AccidentsAndIncidents",
+    "elementValue": "vehicles slowing to look at accident",
+    "itisCode": 542
+  },
+  {
+    "elementType": "AdviceInstructionsMandatory",
+    "elementValue": "traffic being diverted onto interchange ramps",
+    "itisCode": 7552
+  },
+  {
+    "elementType": "AdviceInstructionsMandatory",
+    "elementValue": "traffic being diverted onto shoulder",
+    "itisCode": 7553
+  },
+  {
+    "elementType": "AdviceInstructionsMandatory",
+    "elementValue": "use left lane",
+    "itisCode": 7428
+  },
+  {
+    "elementType": "AdviceInstructionsMandatory",
+    "elementValue": "use right lane",
+    "itisCode": 7427
+  },
+  {
+    "elementType": "AdviceInstructionsRecommendations",
+    "elementValue": "be prepared to stop",
+    "itisCode": 7201
+  },
+  {
+    "elementType": "AdviceInstructionsRecommendations",
+    "elementValue": "expect delays",
+    "itisCode": 7299
+  },
+  {
+    "elementType": "AdviceInstructionsRecommendations",
+    "elementValue": "only travel if absolutely necessary",
+    "itisCode": 7189
+  },
+  {
+    "elementType": "AdviceInstructionsRecommendations",
+    "elementValue": "prepare to slow down",
+    "itisCode": 7298
+  },
+  {
+    "elementType": "AdviceInstructionsRecommendations",
+    "elementValue": "proceed with caution",
+    "itisCode": 7297
+  },
+  {
+    "elementType": "AdviceInstructionsRecommendations",
+    "elementValue": "watch for falling rock",
+    "itisCode": 7296
+  },
+  {
+    "elementType": "AlternateRoute",
+    "elementValue": "use alternate route",
+    "itisCode": 8576
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "all lanes closed",
+    "itisCode": 908
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "center lane blocked",
+    "itisCode": 906
+  },
+  { "elementType": "Closures", "elementValue": "closed", "itisCode": 770 },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to border state request from Colorado",
+    "itisCode": 896
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to border state request from Idaho",
+    "itisCode": 897
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to border state request from Montana",
+    "itisCode": 898
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to border state request from Multiple States",
+    "itisCode": 902
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to border state request from Nebraska",
+    "itisCode": 899
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to border state request from South Dakota",
+    "itisCode": 900
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to border state request from Utah",
+    "itisCode": 901
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to law enforcement request",
+    "itisCode": 903
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed due to local authority request",
+    "itisCode": 904
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "closed for the season",
+    "itisCode": 774
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "left lane blocked",
+    "itisCode": 905
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "right lane blocked",
+    "itisCode": 907
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "rolling closure",
+    "itisCode": 912
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "shoulder closed",
+    "itisCode": 909
+  },
+  {
+    "elementType": "Closures",
+    "elementValue": "travel lane blocked",
+    "itisCode": 910
+  },
+  {
+    "elementType": "DelayStatusCancellation",
+    "elementValue": "delays",
+    "itisCode": 1537
+  },
+  { "elementType": "Disasters", "elementValue": "fire", "itisCode": 3200 },
+  {
+    "elementType": "Disasters",
+    "elementValue": "rail crash",
+    "itisCode": 3095
+  },
+  {
+    "elementType": "Disasters",
+    "elementValue": "weather emergency",
+    "itisCode": 3201
+  },
+  { "elementType": "Disasters", "elementValue": "wildfire", "itisCode": 3084 },
+  {
+    "elementType": "IncidentResponseStatus",
+    "elementValue": "hazardous material clean-up",
+    "itisCode": 2944
+  },
+  {
+    "elementType": "MobileSituation",
+    "elementValue": "slow, oversize load",
+    "itisCode": 2176
+  },
+  {
+    "elementType": "MobileSituation",
+    "elementValue": "wide load",
+    "itisCode": 2050
+  },
+  {
+    "elementType": "Obstruction",
+    "elementValue": "avalanche",
+    "itisCode": 1308
+  },
+  {
+    "elementType": "Obstruction",
+    "elementValue": "downed power lines",
+    "itisCode": 1295
+  },
+  {
+    "elementType": "Obstruction",
+    "elementValue": "flooding",
+    "itisCode": 1301
+  },
+  {
+    "elementType": "Obstruction",
+    "elementValue": "herd of animals on roadway",
+    "itisCode": 1292
+  },
+  {
+    "elementType": "Obstruction",
+    "elementValue": "landslide",
+    "itisCode": 1310
+  },
+  {
+    "elementType": "Obstruction",
+    "elementValue": "mudslide",
+    "itisCode": 1307
+  },
+  {
+    "elementType": "Obstruction",
+    "elementValue": "rockfall",
+    "itisCode": 1309
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "black ice",
+    "itisCode": 5908
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "dirt",
+    "itisCode": 6016
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "dry pavement",
+    "itisCode": 6011
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "gravel",
+    "itisCode": 5933
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "ice",
+    "itisCode": 5906
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "icy patches",
+    "itisCode": 5907
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "milled",
+    "itisCode": 6017
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "paved",
+    "itisCode": 5934
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "road surface in poor condition",
+    "itisCode": 5904
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "slush",
+    "itisCode": 5914
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "snow drifts",
+    "itisCode": 5927
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "wet pavement",
+    "itisCode": 5895
+  },
+  {
+    "elementType": "PavementConditions",
+    "elementValue": "winter conditions",
+    "itisCode": 6018
+  },
+  { "elementType": "Precipitation", "elementValue": "hail", "itisCode": 4880 },
+  { "elementType": "Precipitation", "elementValue": "rain", "itisCode": 4885 },
+  { "elementType": "Precipitation", "elementValue": "snow", "itisCode": 4868 },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "advise no light trailers",
+    "itisCode": 2688
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "closed to light, high profile vehicles",
+    "itisCode": 2689
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "closed to light, high-profile vehicles due to active blowovers in the area",
+    "itisCode": 2690
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "closed to light, high-profile vehicles due to gusting winds",
+    "itisCode": 2691
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "closed to light, high-profile vehicles due to gusting winds and slick conditions",
+    "itisCode": 2692
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "gross weight limit",
+    "itisCode": 2577
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "height limit",
+    "itisCode": 2574
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "length limit",
+    "itisCode": 2575
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "local access only",
+    "itisCode": 2567
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "no trailers",
+    "itisCode": 2568
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "restrictions",
+    "itisCode": 2561
+  },
+  {
+    "elementType": "RestrictionClass",
+    "elementValue": "width limit",
+    "itisCode": 2573
+  },
+  {
+    "elementType": "Roadwork",
+    "elementValue": "avalanche control activities",
+    "itisCode": 1042
+  },
+  {
+    "elementType": "Roadwork",
+    "elementValue": "mowing operations",
+    "itisCode": 1153
+  },
+  {
+    "elementType": "Roadwork",
+    "elementValue": "road construction",
+    "itisCode": 1025
+  },
+  {
+    "elementType": "Roadwork",
+    "elementValue": "sign installation",
+    "itisCode": 1152
+  },
+  {
+    "elementType": "SpecialEvents",
+    "elementValue": "local celebration",
+    "itisCode": 3968
+  },
+  {
+    "elementType": "SystemInformation",
+    "elementValue": "travel information",
+    "itisCode": 4480
+  },
+  {
+    "elementType": "TrafficConditions",
+    "elementValue": "slow traffic",
+    "itisCode": 259
+  },
+  {
+    "elementType": "TrafficConditions",
+    "elementValue": "stopped traffic",
+    "itisCode": 257
+  },
+  {
+    "elementType": "UnusualDriving",
+    "elementValue": "emergency vehicles on roadway",
+    "itisCode": 1796
+  },
+  {
+    "elementType": "VisibilityAndAirQuality",
+    "elementValue": "blowing snow",
+    "itisCode": 5385
+  },
+  {
+    "elementType": "VisibilityAndAirQuality",
+    "elementValue": "fog",
+    "itisCode": 5378
+  },
+  {
+    "elementType": "VisibilityAndAirQuality",
+    "elementValue": "visibility reduced",
+    "itisCode": 5383
+  },
+  {
+    "elementType": "WarningAdvice",
+    "elementValue": "extreme blow over risk",
+    "itisCode": 7040
+  },
+  {
+    "elementType": "WarningAdvice",
+    "elementValue": "law enforcement activity",
+    "itisCode": 7041
+  },
+  {
+    "elementType": "WarningAdvice",
+    "elementValue": "look out for workers",
+    "itisCode": 6952
+  },
+  {
+    "elementType": "WarningAdvice",
+    "elementValue": "pilot car in operation",
+    "itisCode": 6930
+  },
+  { "elementType": "Winds", "elementValue": "strong winds", "itisCode": 5127 },
+  {
+    "elementType": "WinterDrivingRestrictions",
+    "elementValue": "chains or all wheel drive with snow tires required",
+    "itisCode": 6272
+  },
+  {
+    "elementType": "WinterDrivingRestrictions",
+    "elementValue": "snow tires or chains required",
+    "itisCode": 6156
+  }
+]

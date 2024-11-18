@@ -1,0 +1,19 @@
+[
+  {
+    "activeTimId": 1,
+    "clientId": "AFTNUS89NB",
+    "startDateTime": "2020-04-27 10:00:00",
+    "endDateTime": "2020-04-27 11:00:00",
+    "timType": "RC",
+    "projectKey": null,
+    "startPoint": {
+      "latitude": 42.75,
+      "longitude": -110.94
+    },
+    "endPoint": {
+      "latitude": 43.18,
+      "longitude": -111.01
+    },
+    "itisCodes": [5906]
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "activeTimId": 1,
+    "rsuTarget": "0.0.0.0",
+    "rsuIndex": 1
+  },
+  {
+    "activeTimId": 2,
+    "rsuTarget": "0.0.0.0",
+    "rsuIndex": 2
+  },
+  {
+    "activeTimId": 3,
+    "rsuTarget": "0.0.0.1",
+    "rsuIndex": 1
+  },
+  {
+    "activeTimId": 4,
+    "rsuTarget": "0.0.0.1",
+    "rsuIndex": 2
+  }
+]

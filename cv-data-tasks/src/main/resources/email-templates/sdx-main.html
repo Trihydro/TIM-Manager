@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      th,
+      td {
+        padding-left: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>SDX Validation Summary</h3>
+    <table>
+      <tr>
+        <td>Number of stale records on SDX (different ITIS codes than ActiveTim):</td>
+        <td>{num-stale}</td>
+      </tr>
+      <tr>
+        <td>Number of messages on SDX without corresponding Database record:</td>
+        <td>{num-sdx-orphaned}</td>
+      </tr>
+      <tr>
+        <td>Number of Database records without corresponding message in SDX:</td>
+        <td>{num-not-present-sdx}</td>
+      </tr>
+      <tr>
+        <td>Number of invalid records in Database:</td>
+        <td>{num-inv-database}</td>
+      </tr>
+    </table>
+
+    <br />
+    <br />
+    {summary-tables}
+    <br />
+    <br />
+    <h4>Exceptions while attempting automatic cleanup</h4>
+    <br />
+    {exception-summary}
+  </body>
+</html>

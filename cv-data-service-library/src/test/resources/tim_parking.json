@@ -1,0 +1,112 @@
+{
+    "metadata": {
+        "request": {
+            "ode": { "verb": "POST", "version": 3 },
+            "sdw": {
+                "recordId": "1AF9F730",
+                "serviceRegion": {
+                    "nwCorner": { "latitude": 41.09852308, "longitude": -105.13317609 },
+                    "seCorner": { "latitude": 41.09795279, "longitude": -105.11411777 }
+                },
+                "ttl": "oneday"
+            }
+        },
+        "recordGeneratedBy": "TMC",
+        "schemaVersion": 6,
+        "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
+        "odePacketID": "AE394DB5A033905B26",
+        "serialId": {
+            "recordId": 0,
+            "serialNumber": 922,
+            "streamId": "9fa59341-9cab-403e-8306-6876238e9fda",
+            "bundleSize": 1,
+            "bundleId": 922
+        },
+        "sanitized": false,
+        "recordGeneratedAt": "2021-03-23T19:20:48.130840Z",
+        "maxDurationTime": 120,
+        "odeTimStartDateTime": "2021-03-23T19:20:47.118Z",
+        "odeReceivedAt": "2021-03-23T19:20:48.177Z"
+    },
+    "payload": {
+        "data": {
+            "MessageFrame": {
+                "messageId": 31,
+                "value": {
+                    "TravelerInformation": {
+                        "timeStamp": 117800,
+                        "packetID": "AE394DB5A033905B26",
+                        "urlB": null,
+                        "dataFrames": {
+                            "TravelerDataFrame": {
+                                "regions": {
+                                    "GeographicalPath": {
+                                        "closedPath": { "false": "" },
+                                        "anchor": { "lat": 410985067, "long": -1051331761 },
+                                        "name": "I_I 80_SAT-1AF9F730_P_68-0",
+                                        "laneWidth": 5000,
+                                        "directionality": { "both": "" },
+                                        "description": {
+                                            "path": {
+                                                "offset": {
+                                                    "ll": {
+                                                        "nodes": {
+                                                            "NodeLL": [
+                                                                { "delta": { "node-LL1": { "lon": 0, "lat": 0 } } },
+                                                                {
+                                                                    "delta": {
+                                                                        "node-LL5": { "lon": 133699, "lat": 163 }
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "delta": {
+                                                                        "node-LL4": { "lon": 56885, "lat": -5703 }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "scale": 0
+                                            }
+                                        },
+                                        "id": { "id": 0, "region": 0 },
+                                        "direction": "0001100000000000"
+                                    }
+                                },
+                                "durationTime": 120,
+                                "notUsed2": 1,
+                                "notUsed3": 1,
+                                "startYear": 2021,
+                                "msgId": {
+                                    "roadSignID": {
+                                        "viewAngle": 1111111111111111,
+                                        "mutcdCode": { "warning": "" },
+                                        "position": { "lat": 410985067, "long": -1051331761 }
+                                    }
+                                },
+                                "priority": 5,
+                                "content": {
+                                    "exitService": {
+                                        "SEQUENCE": [
+                                            { "item": { "itis": 4104 } },
+                                            { "item": { "itis": 11794 } },
+                                            { "item": { "text": 345 } }
+                                        ]
+                                    }
+                                },
+                                "url": null,
+                                "notUsed": 1,
+                                "notUsed1": 1,
+                                "frameType": { "advisory": "" },
+                                "startTime": 117800
+                            }
+                        },
+                        "msgCnt": 1
+                    }
+                }
+            }
+        },
+        "dataType": "TravelerInformation"
+    }
+}

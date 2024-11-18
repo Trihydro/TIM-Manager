@@ -1,0 +1,17 @@
+{
+  "ipv4Address": "0.0.0.0",
+  "rsuActiveTims": [
+    {
+      "rsuTarget": "0.0.0.0",
+      "rsuIndex": 1,
+      "activeTimId": 10,
+      "startDateTime": "2020-01-01 01:00:00"
+    },
+    {
+      "rsuTarget": "0.0.0.0",
+      "rsuIndex": 2,
+      "activeTimId": 11,
+      "startDateTime": "2020-01-01 12:00:00"
+    }
+  ]
+}

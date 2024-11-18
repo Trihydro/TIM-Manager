@@ -1,0 +1,17 @@
+[
+  {
+    "activeTimId": 0,
+    "satRecordId": "00000000",
+    "itisCodes": [6, 7, 8]
+  },
+  {
+    "activeTimId": 10,
+    "satRecordId": "FFFFFFFF",
+    "itisCodes": [16, 17, 18]
+  },
+  {
+    "activeTimId": 0,
+    "satRecordId": "00000001",
+    "itisCodes": [6, 7, 8]
+  }
+]

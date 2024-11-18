@@ -1,0 +1,54 @@
+<ul>
+    <li>
+      Populated indexes without record
+      <table>
+        <tr>
+          <td>{unaccountedIndexes}</td>
+        </tr>
+      </table>
+    </li>
+    <li>
+      Active TIMs missing from RSU
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Expected Index</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rowsMissingTims}
+        </tbody>
+      </table>
+    </li>
+    <li>
+      Stale TIMs on RSU
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Index</th>
+            <th>Start (Expected by ActiveTim)</th>
+            <th>Start (Actual seen on RSU)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rowsStaleTims}
+        </tbody>
+      </table>
+    </li>
+    <li>
+      Active TIM index collisions
+      <table>
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Ids</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rowsCollisions}
+        </tbody>
+      </table>
+    </li>
+  </ul>

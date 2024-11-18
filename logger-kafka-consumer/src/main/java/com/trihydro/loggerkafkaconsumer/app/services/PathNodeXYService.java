@@ -1,0 +1,64 @@
+package com.trihydro.loggerkafkaconsumer.app.services;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimDbTables;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PathNodeXYService extends BaseService {
+
+    private TimDbTables timDbTables;
+    private SQLNullHandler sqlNullHandler;
+
+    @Autowired
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+        timDbTables = _timDbTables;
+        sqlNullHandler = _sqlNullHandler;
+    }
+
+    public Long insertPathNodeXY(Long nodeXYId, Long pathId) {
+        PreparedStatement preparedStatement = null;
+        Connection connection = null;
+
+        try {
+
+            connection = dbInteractions.getConnectionPool();
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("path_node_xy",
+                    timDbTables.getPathNodeXYTable());
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "path_node_xy_id" });
+            int fieldNum = 1;
+
+            for (String col : timDbTables.getPathNodeXYTable()) {
+                if (col.equals("NODE_XY_ID"))
+                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, nodeXYId);
+                else if (col.equals("PATH_ID"))
+                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, pathId);
+                fieldNum++;
+            }
+            // execute insert statement
+            Long pathNodeXYId = dbInteractions.executeAndLog(preparedStatement, "pathnodexyid");
+            return pathNodeXYId;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                // return connection back to pool
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return Long.valueOf(0);
+    }
+}

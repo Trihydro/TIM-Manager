@@ -1,0 +1,195 @@
+{
+    "metadata": {
+      "payloadType": "us.dot.its.jpo.ode.model.OdeMsgPayload",
+      "serialId": {
+        "streamId": "ed32ac12-697e-45f7-a807-8c5ef5238605",
+        "bundleSize": 1,
+        "bundleId": 0,
+        "recordId": 0,
+        "serialNumber": 0
+      },
+      "odeReceivedAt": "2018-03-15T21:18:50.779Z[UTC]",
+      "schemaVersion": 4,
+      "sanitized": false
+    },
+    "payload": {
+      "dataType": "us.dot.its.jpo.ode.plugin.j2735.J2735TravelerInformationMessage",
+      "data": {
+        "msgCnt": 1,
+        "index": 1,
+        "timeStamp": "2018-03-15T21:18:46.719-07:00",
+        "packetID": "17e610000000000000",
+        "urlB": "null",
+        "dataframes": [
+          {
+            "notUsed": 1,
+            "frameType": "advisory",
+            "msgId": {
+              "furtherInfoID": "CDEF"
+            },
+            "startDateTime": "2018-03-15T21:18:46.719-07:00",
+            "durationTime": 32000,
+            "priority": 5,
+            "notUsed1": 1,
+            "regions": [
+              {
+                "name": "westbound_I80_370.0_365.0_RSU-10.145.1.100_VSL",
+                "regulatorID": 0,
+                "segmentID": 0,
+                "anchorPosition": {
+                  "latitude": 41.15553559,
+                  "longitude": -104.66273376,
+                  "elevation": 1830.26604977808
+                },
+                "laneWidth": 327,
+                "directionality": 3,
+                "closedPath": false,
+                "direction": "1111111111111111",
+                "description": "path",
+                "path": {
+                  "scale": 0,
+                  "type": "xy",
+                  "nodes": [
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.15439303,
+                      "nodeLong": -104.66626423
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.15308685,
+                      "nodeLong": -104.66969365
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.15162799,
+                      "nodeLong": -104.67301361
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.15002899,
+                      "nodeLong": -104.67621924
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.14839394,
+                      "nodeLong": -104.67939317
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.14676709,
+                      "nodeLong": -104.68255684
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.14513596,
+                      "nodeLong": -104.68571657
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.1435066,
+                      "nodeLong": -104.68887784
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.14188015,
+                      "nodeLong": -104.69204162
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.14025202,
+                      "nodeLong": -104.6952038
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.13861955,
+                      "nodeLong": -104.69837023
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.13698581,
+                      "nodeLong": -104.70153546
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.13535539,
+                      "nodeLong": -104.70470362
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.133775,
+                      "nodeLong": -104.70791415
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.13248781,
+                      "nodeLong": -104.71134591
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.13125834,
+                      "nodeLong": -104.71481071
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.13003056,
+                      "nodeLong": -104.7182765
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12880151,
+                      "nodeLong": -104.72174141
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12757448,
+                      "nodeLong": -104.7252075
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12646866,
+                      "nodeLong": -104.72874234
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12561854,
+                      "nodeLong": -104.73236291
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12502071,
+                      "nodeLong": -104.73607065
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12468399,
+                      "nodeLong": -104.73983543
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12457967,
+                      "nodeLong": -104.74362466
+                    },
+                    {
+                      "delta": "node-LatLon",
+                      "nodeLat": 41.12451739,
+                      "nodeLong": -104.74741597
+                    }
+                  ]
+                }
+              }
+            ],
+            "notUsed3": 0,
+            "notUsed2": 1,
+            "content": "Advisory",
+            "items": [
+              "268",
+              "12599",
+              "8720"
+            ],
+            "url": "null"
+          }
+        ]
+      }
+    }
+  }

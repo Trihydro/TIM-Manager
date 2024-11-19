@@ -1,7 +1,10 @@
 # Please note that the following must be set to the name of the
 # repository for the devcontainer to build and run correctly
-REPO_NAME=Trihydro-WyoCV
+REPO_PATH=$(dirname $(dirname $(realpath $0)))
+REPO_NAME=$(basename ${REPO_PATH})
 WYOCV_RES_DIR=/workspaces/${REPO_NAME}/resources
+
+echo "WYOCV_RES_DIR: ${WYOCV_RES_DIR}"
 
 # Install jpo-ode JARs to maven repository
 mvn install:install-file -Dfile="${WYOCV_RES_DIR}/jpo-ode-plugins-2.0.0-SNAPSHOT.jar" -DgroupId="us.dot.jpo.ode" -DartifactId=jpo-ode-plugins -Dversion="2.0.0-SNAPSHOT" -Dpackaging=jar

@@ -40,26 +40,6 @@
       <version>2.8.1</version>
     </dependency>
     <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-core</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-plugins</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-common</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>us.dot.jpo.ode</groupId>
-      <artifactId>jpo-ode-svcs</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>1.4.194</version>
@@ -74,6 +54,26 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>42.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>usdot.jpo.ode</groupId>
+      <artifactId>jpo-ode-core</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>usdot.jpo.ode</groupId>
+      <artifactId>jpo-ode-common</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>usdot.jpo.ode</groupId>
+      <artifactId>jpo-ode-plugins</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>usdot.jpo.ode</groupId>
+      <artifactId>jpo-ode-svcs</artifactId>
+      <version>3.0.0</version>
     </dependency>
   </dependencies>
 

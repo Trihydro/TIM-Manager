@@ -59,6 +59,25 @@ These instructions will get you a copy of the project up and running on your loc
 
     > __Note:__ the first time you do this, it will take a few minutes to build the container. Subsequent connections will be much faster.
 
+4. Generate a GitHub Access Token
+    - Create a new [Github Classic Token](https://github.com/settings/tokens) with the read:packages scope
+    - Copy the resulting token
+
+5. Create Maven settings.xml
+    - The [usdot jpo-ode packages](https://github.com/orgs/usdot-jpo-ode/packages?repo_name=jpo-ode) required by the Tim Manager require a settings.xml file used by Maven
+    - There is an [example settings file](example-settings.xml) provided for you
+    - Navigate to the .m2 directory and create the settings.xml file by running the following:
+        ```
+        cd ~/.m2
+        touch settings.xml
+        ```
+    - Copy the contents of example-settings.xml to the settings.xml file, replacing username with your github username and password with your generated access token
+    - This can be done with any installed text editor such as [Nano](https://www.nano-editor.org/docs.php) or [Vim](https://www.vim.org/docs.php)
+        ```
+        nano settings.xml
+        ```
+    - Navigate back to the project working directory
+
 4. Once you've connected to the development container, you should be able to build the project by running the following command:
     ```
     mvn clean install

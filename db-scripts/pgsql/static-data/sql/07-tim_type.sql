@@ -11,6 +11,7 @@ INSERT INTO tim_type (type,description,tim_type_id) VALUES (E'I',E'Incident',3);
 INSERT INTO tim_type (type,description,tim_type_id) VALUES (E'RW',E'Road Construction',4);
 INSERT INTO tim_type (type,description,tim_type_id) VALUES (E'CC',E'Chain Controls',5);
 INSERT INTO tim_type (type,description,tim_type_id) VALUES (E'P',E'Parking',6);
+INSERT INTO tim_type (type,description,tim_type_id) VALUES (E'BOWR',E'Blow Over Weight Restriction',7);
 
 COMMIT;
 

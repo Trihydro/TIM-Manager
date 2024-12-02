@@ -1,0 +1,42 @@
+name: ci-tim-manager
+
+on: [pull_request, push]
+
+jobs:
+  build_java:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.8.2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+      - uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: >
+            [
+              {
+                  "id": "github",
+                  "url": "https://maven.pkg.github.com/usdot-jpo-ode/jpo-ode"
+              }
+            ]
+          servers: >
+            [
+              {
+                "id":"github",
+                "username":"${{ github.actor }}",
+                "password":"${{ github.token }}"
+              }
+            ]
+
+      - name: Build and Test with Maven
+        run: mvn -B -q clean install

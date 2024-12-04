@@ -119,8 +119,8 @@ public class UtilityTest {
     @Test
     public void getMinutesDurationBetweenTwoDates_SUCCESS_different_formats() {
         // Arrange
-        String startDateTime = "2024-03-22T07:36:15.711Z";
-        String endDateTime = "2024-03-22 07:41:00";
+        String startDateTime = "2024-03-22T07:36:15.711Z[UTC]";
+        String endDateTime = "2024-03-22T07:41:00.000Z";
 
         // Act
         var duration = uut.getMinutesDurationBetweenTwoDates(startDateTime, endDateTime);

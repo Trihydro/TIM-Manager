@@ -1,8 +1,7 @@
 package com.trihydro.library.helpers;
 
-import static java.lang.Math.toIntExact;
-
 import java.io.IOException;
+import static java.lang.Math.toIntExact;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,12 +13,13 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.TimeZone;
+
+import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
-
-import org.springframework.stereotype.Component;
 
 @Component
 public class Utility {
@@ -35,14 +35,22 @@ public class Utility {
 		Date convertedDate = null;
 		try {
 			if (incomingDate != null) {
-				if (incomingDate.contains("UTC"))
+				if (incomingDate.contains("UTC")) {
+					utcTextFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 					convertedDate = utcTextFormat.parse(incomingDate);
-				else if (incomingDate.contains("."))
+				}
+				else if (incomingDate.contains(".")) {
+					utcFormatMilliSec.setTimeZone(TimeZone.getTimeZone("UTC"));
 					convertedDate = utcFormatMilliSec.parse(incomingDate);
-				else if (incomingDate.length() == 17)
+				}
+				else if (incomingDate.length() == 17) {
+					utcFormatMin.setTimeZone(TimeZone.getTimeZone("UTC"));
 					convertedDate = utcFormatMin.parse(incomingDate);
-				else
+				}
+				else {
+					utcFormatSec.setTimeZone(TimeZone.getTimeZone("UTC"));
 					convertedDate = utcFormatSec.parse(incomingDate);
+				}
 			}
 		} catch (ParseException e1) {
 			e1.printStackTrace();

@@ -47,7 +47,7 @@ The postgres database service is defined in the `docker-compose.yml` file, but a
 The dockerfiles for the wyocv services expect the JAR files to be in the same directory as the Dockerfile. After compilation, copy the JAR files to the appropriate directories.
 
 ### Certificates
-The `resdf.wyoroad.info.cer` file, found in resources, must be present in the same directory as the Dockerfile for the `cv-data-tasks` service.
+The certificate file that is being used must be present in the same directory as the Dockerfile for the `cv-data-tasks` service.
 
 ### Mocking
 Several database objects are mocked and can be created using the scripts in `db-scripts\pgsql\mocking\sql`. Depending on what is being tested, these may or may not be necessary.
@@ -79,12 +79,3 @@ docker compose down -v
 ```
 
 This will remove the database volume, effectively resetting the database.
-
-## Adhoc Conditions Monitor
-The adhoc conditions monitor can be run by executing the following command in the `local-deployment` directory:
-
-```bash
-./create_adhoc_conditions_monitor.sh
-```
-
-This requires the `kafka-connect` service to be running. Once created, changes to the adhoc conditions table will be monitored and sent to the `adhoc_conditions_monitor.countyrds.county_roads_v1_h` topic.

@@ -1,8 +1,6 @@
 package com.trihydro.tasks.actions;
 
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.service.DriverAlertService;
-import com.trihydro.library.service.HmiLogService;
 import com.trihydro.library.service.StatusLogService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
@@ -13,19 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class RetentionPolicyEnforcement implements Runnable {
     private Utility utility;
-    private DriverAlertService driverAlertService;
-    private HmiLogService hmiLogService;
     private StatusLogService statusLogService;
     private TimService timService;
     private DataTasksConfiguration config;
 
     @Autowired
-    public void InjectDependencies(Utility _utility, DriverAlertService _driverAlertService,
-            HmiLogService _hmiLogService, StatusLogService _statusLogService, TimService _timService,
-            DataTasksConfiguration _config) {
+    public void InjectDependencies(Utility _utility, StatusLogService _statusLogService, 
+            TimService _timService, DataTasksConfiguration _config) {
         this.utility = _utility;
-        this.driverAlertService = _driverAlertService;
-        this.hmiLogService = _hmiLogService;
         this.statusLogService = _statusLogService;
         this.timService = _timService;
         this.config = _config;
@@ -39,16 +32,6 @@ public class RetentionPolicyEnforcement implements Runnable {
             if (config.getRetention_removeTims()) {
                 // TIM
                 timService.deleteOldTim();
-            }
-
-            if (config.getRetention_removeDa()) {
-                // Driver Alerts
-                driverAlertService.deleteOldDriverAlerts();
-            }
-
-            if (config.getRetention_removeHmi()) {
-                // HMI Logs
-                hmiLogService.deleteOldHmiLogs();
             }
 
             if (config.getRetention_removeStatusLogs()) {

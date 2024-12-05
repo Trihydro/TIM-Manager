@@ -5,7 +5,6 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.JavaMailSenderImplProvider;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.model.CountyRoadsProps;
 import com.trihydro.library.model.DbInteractionsProps;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.JCSCacheProps;
@@ -20,14 +19,10 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("config")
 @Import({ TimDbTables.class, SQLNullHandler.class, Utility.class, EmailHelper.class,
         JavaMailSenderImplProvider.class, LoggingTables.class, DbInteractions.class })
-public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps, JCSCacheProps, CountyRoadsProps {
+public class DataControllerConfigProperties implements DbInteractionsProps, EmailProps, JCSCacheProps {
     private String dbUrl;
     private String dbUsername;
     private String dbPassword;
-
-    private String dbUrlCountyRoads;
-    private String dbUsernameCountyRoads;
-    private String dbPasswordCountyRoads;
 
     private int maximumPoolSize;
     private int connectionTimeout;
@@ -53,11 +48,6 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     private String isRemote;
     private String isLateral;
 
-    private String countyRoadsTriggerViewName;
-    private String countyRoadsGeometryViewName;
-    private String countyRoadsReportViewName;
-    private String countyRoadsWtiSectionsViewName;
-
     public String getDbUrl() {
         return dbUrl;
     }
@@ -80,30 +70,6 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
 
     public void setDbPassword(String dbPassword) {
         this.dbPassword = dbPassword;
-    }
-
-    public String getDbUrlCountyRoads() {
-        return dbUrlCountyRoads;
-    }
-
-    public void setDbUrlCountyRoads(String dbUrlCountyRoads) {
-        this.dbUrlCountyRoads = dbUrlCountyRoads;
-    }
-
-    public String getDbUsernameCountyRoads() {
-        return dbUsernameCountyRoads;
-    }
-
-    public void setDbUsernameCountyRoads(String dbUsernameCountyRoads) {
-        this.dbUsernameCountyRoads = dbUsernameCountyRoads;
-    }
-
-    public String getDbPasswordCountyRoads() {
-        return dbPasswordCountyRoads;
-    }
-
-    public void setDbPasswordCountyRoads(String dbPasswordCountyRoads) {
-        this.dbPasswordCountyRoads = dbPasswordCountyRoads;
     }
 
     public int getMaximumPoolSize() {
@@ -300,35 +266,5 @@ public class DataControllerConfigProperties implements DbInteractionsProps, Emai
     @Override
     public void setIsLateral(String isLateral) {
         this.isLateral = isLateral;
-    }
-
-    @Override
-    public String getCountyRoadsGeometryViewName() {
-        return countyRoadsGeometryViewName;
-    }
-
-    @Override
-    public void setCountyRoadsGeometryViewName(String countyRoadsGeometryViewName) {
-        this.countyRoadsGeometryViewName = countyRoadsGeometryViewName;
-    }
-
-    @Override
-    public String getCountyRoadsReportViewName() {
-        return countyRoadsReportViewName;
-    }
-
-    @Override
-    public void setCountyRoadsReportViewName(String countyRoadsReportViewName) {
-        this.countyRoadsReportViewName = countyRoadsReportViewName;
-    }
-
-    @Override
-    public String getCountyRoadsWtiSectionsViewName() {
-        return countyRoadsWtiSectionsViewName;
-    }
-
-    @Override
-    public void setCountyRoadsWtiSectionsViewName(String countyRoadsWtiSectionsViewName) {
-        this.countyRoadsWtiSectionsViewName = countyRoadsWtiSectionsViewName;
     }
 }

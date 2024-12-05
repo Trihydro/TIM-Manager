@@ -11,8 +11,8 @@ mvn install:install-file -Dfile="${WYOCV_RES_DIR}/postgresql-42.6.0.jar" -Dgroup
 # Workaround until https://github.com/microsoft/vscode-remote-release/issues/2340 is resolved:
 ln -s "$(ls ~/.vscode-server/bin/* -dt | head -1)/node" /usr/local/bin
 
-# Install resdf.wyoroad.info's SSL certificate
-keytool -import -alias resdf -storepass changeit -noprompt -trustcacerts -keystore /usr/lib/jvm/java-11-openjdk-amd64/jre/lib/security/cacerts -file ${WYOCV_RES_DIR}/resdf.wyoroad.info.cer
+# Uncomment and modify the certificate name on the following line to import a certificate into the Java keystore
+# keytool -import -alias resdf -storepass changeit -noprompt -trustcacerts -keystore /usr/lib/jvm/java-11-openjdk-amd64/jre/lib/security/cacerts -file ${WYOCV_RES_DIR}/<certificate-name>.cer
 
 # Run maven
 # todo

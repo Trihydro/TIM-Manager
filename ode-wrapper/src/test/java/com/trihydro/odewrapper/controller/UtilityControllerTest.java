@@ -15,7 +15,6 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.trihydro.library.helpers.TimGenerationHelper;
-import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;

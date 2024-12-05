@@ -13,7 +13,6 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
@@ -47,9 +46,9 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public WydotTimParkingController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility,
-            TimGenerationHelper _timGenerationHelper, CascadeService _cascadeService) {
+            TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper, _cascadeService);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
     }
 
     @RequestMapping(value = "/parking-tim", method = RequestMethod.POST, headers = "Accept=application/json")

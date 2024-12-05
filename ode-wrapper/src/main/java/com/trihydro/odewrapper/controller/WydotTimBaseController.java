@@ -13,11 +13,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.MilepostReduction;
@@ -27,15 +24,12 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Buffer;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
-import com.trihydro.library.model.CountyRoadSegment;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.TimType;
-import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTimRw;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
@@ -44,14 +38,12 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.helpers.SetItisCodes.WeightNotSupportedException;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.WydotTimBowr;
-import com.trihydro.odewrapper.model.WydotTimCc;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
@@ -69,16 +61,14 @@ public abstract class WydotTimBaseController {
     MilepostReduction milepostReduction;
     protected Utility utility;
     protected TimGenerationHelper timGenerationHelper;
-    protected CascadeService cascadeService;
 
-    private List<String> routes = new ArrayList<>();
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
 
     public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility,
-            TimGenerationHelper _timGenerationHelper, CascadeService _cascadeService) {
+            TimGenerationHelper _timGenerationHelper) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
@@ -88,7 +78,6 @@ public abstract class WydotTimBaseController {
         milepostReduction = _milepostReduction;
         utility = _utility;
         timGenerationHelper = _timGenerationHelper;
-        cascadeService = _cascadeService;
     }
 
     protected String getStartTime() {
@@ -300,13 +289,16 @@ public abstract class WydotTimBaseController {
 
     public boolean routeSupported(String route) {
         // call out to REST service to get all routes once, then use that
-        if (routes.size() == 0) {
-            String url = String.format("%s/routes", configuration.getCvRestService());
-            ResponseEntity<String[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
-                    String[].class);
-            routes = Arrays.asList(response.getBody());
-        }
-        return routes.contains(route);
+        // if (routes.size() == 0) {
+        //     String url = String.format("%s/routes", configuration.getCvRestService());
+        //     ResponseEntity<String[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url,
+        //             String[].class);
+        //     routes = Arrays.asList(response.getBody());
+        // }
+        // return routes.contains(route);
+
+        // Since routes are not loaded, assume all route are supported.
+        return !route.isEmpty() && route.length() > 0;
     }
 
     protected ControllerResult validateInputRc(WydotTimRc tim) {
@@ -708,117 +700,6 @@ public abstract class WydotTimBaseController {
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
         wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint, reducedMileposts);
-    }
-
-    /**
-     * This method cascades conditions for the county road segments associated with
-     * the given TIMs.
-     */
-    protected void handleCascadingConditions(List<WydotTimRc> wydotTims, TimType timType, String startDateTime) {
-        utility.logWithDate("=================== CRC Start ===================");
-
-        // retrieve trigger roads
-        List<TriggerRoad> triggerRoads = new ArrayList<>();
-        for (WydotTimRc wydotTim : wydotTims) {
-            String roadCode = wydotTim.getRoadCode();
-            TriggerRoad triggerRoad = cascadeService.getTriggerRoad(roadCode);
-            if (triggerRoad != null) {
-                triggerRoads.add(triggerRoad);
-            }
-        }
-        utility.logWithDate("Found " + triggerRoads.size() + " trigger roads associated with the given TIMs.");
-
-        // retrieve associated county road segments
-        List<CountyRoadSegment> uniqueSegments = new ArrayList<>();
-        Map<Integer, String> segmentIdsToRoadCodes = new HashMap<>();
-        for (TriggerRoad triggerRoad : triggerRoads) {
-            List<CountyRoadSegment> segments = triggerRoad.getCountyRoadSegments();
-            for (CountyRoadSegment segment : segments) {
-                if (!segmentIdsToRoadCodes.keySet().contains(segment.getId())) {
-                    uniqueSegments.add(segment);
-                    segmentIdsToRoadCodes.put(segment.getId(), triggerRoad.getRoadCode());
-                }
-            }
-        }
-        utility.logWithDate(
-                "Found " + uniqueSegments.size() + " unique county road segments associated with the trigger roads.");
-
-        // handle cascading conditions for each segment
-        for (CountyRoadSegment segment : uniqueSegments) {
-            cascadeConditionsForSegment(segment, timType, startDateTime, null, null, ContentEnum.advisory,
-                    TravelerInfoType.advisory, segmentIdsToRoadCodes.get(segment.getId()));
-        }
-
-        utility.logWithDate("=================== CRC End ===================");
-    }
-
-    /**
-     * This method creates a new WydotTim for the given segment and sends it to RSUs
-     * and Satellite.
-     */
-    protected void cascadeConditionsForSegment(CountyRoadSegment countyRoadSegment, TimType timType,
-            String startDateTime, String endDateTime, Integer pk, ContentEnum content, TravelerInfoType frameType,
-            String clientId) {
-        // check for multiple conditions, clear if found
-        // check for identical condition, if found, we can stop
-        // check for existing condition, if found, clear and continue
-
-        // get all active TIMs with ITIS codes associated with segment
-        int segmentId = countyRoadSegment.getId();
-        List<ActiveTim> allActiveTimsWithItisCodesAssociatedWithSegment = cascadeService
-                .getActiveTimsWithItisCodesAssociatedWithSegment(segmentId);
-
-        if(isIdenticalConditions(allActiveTimsWithItisCodesAssociatedWithSegment, countyRoadSegment.toITISCodes(), endDateTime)){
-            return;
-        }
-        List<String> clientIdsAssociatedWithSegment = allActiveTimsWithItisCodesAssociatedWithSegment.stream()
-                     .map(ActiveTim::getClientId).collect(Collectors.toList());
-        clearAllExistingConditionsForSegment(clientIdsAssociatedWithSegment);
-        
-        if (!countyRoadSegment.hasOneOrMoreCondition()) {
-            // no conditions associated with the segment, no need to generate any TIMs
-            utility.logWithDate("No conditions associated with segment " + countyRoadSegment.getId()
-                    + ", skipping TIM generation.");
-            return;
-        }
-
-        List<Milepost> cascadeMileposts = cascadeService.getMilepostsForSegment(countyRoadSegment);
-        if (cascadeMileposts.size() < 2) { // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
-                                           // PER-encode TIM if we supply less than 2.
-            utility.logWithDate(
-                    "Found less than 2 mileposts while attempting to cascade condition, unable to generate TIM.");
-            return;
-        }
-        Milepost firstPoint = cascadeMileposts.get(0);
-        Milepost secondPoint = cascadeMileposts.get(1);
-        var anchor = getAnchorPoint(firstPoint, secondPoint);
-        var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(cascadeMileposts,
-                configuration.getPathDistanceLimit());
-        WydotTim cascadeTim = cascadeService.buildCascadeTim(countyRoadSegment, reducedMileposts.get(0),
-                reducedMileposts.get(reducedMileposts.size() - 1), clientId);
-        utility.logWithDate("Generating TIM for segment " + countyRoadSegment.getId() + " with ITIS codes: "
-                + countyRoadSegment.toITISCodes().toString());
-        createSendTims(cascadeTim, timType, startDateTime, endDateTime, pk, content, frameType, cascadeMileposts,
-                reducedMileposts, anchor);
-    }
-
-    private boolean isIdenticalConditions(List<ActiveTim> existingConditions, List<Integer> itisCodes,
-            String endDateTime) {
-        if (existingConditions.size() != 1) {
-            return false;
-        }
-        return existingConditions.get(0).isIdenticalConditions(itisCodes, endDateTime);
-    }
-
-    /**
-     * This method clears any existing conditions that were previously cascaded for
-     * the given segment to ensure outdated conditions do not get left behind
-     */
-    private void clearAllExistingConditionsForSegment(List<String> clientIdsAssociatedWithSegment) {
-        for (String clientIdToClear : clientIdsAssociatedWithSegment) {
-            // clear exiting conditions
-            wydotTimService.clearTimsById(timType.getType(), clientIdToClear, null);
-        }
     }
 
     /**

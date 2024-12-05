@@ -1,7 +1,7 @@
 # PGSQL Database Setup
 To populate the database with static data, run each of the sql files in this directory in the order they are numbered. This can be done with the following script:
 ```bash
-./insert-static-data
+./insert-static-data.sh
 ```
 
 ## Environment Variables

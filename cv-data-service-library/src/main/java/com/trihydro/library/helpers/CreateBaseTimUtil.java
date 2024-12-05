@@ -12,7 +12,6 @@ import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
-import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.TimGenerationProps;
 
 import org.apache.commons.lang3.StringUtils;
@@ -92,9 +91,8 @@ public class CreateBaseTimUtil {
         dataFrame.setMsgId(msgId);
 
         // set regions. note that we now support multiple regions in a single TIM package
-        boolean isCascadeTim = wydotTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
         BigDecimal defaultLaneWidth = genProps.getDefaultLaneWidth();
-        List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = buildRegions(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
 
         // set dataframes, currently assuming a single dataframe
@@ -113,37 +111,35 @@ public class CreateBaseTimUtil {
      * If the number of reduced mileposts is less than or equal to 63, a single region is built.
      * If the number of reduced mileposts is greater than 63, multiple regions are built.
      *
-     * @param isCascadeTim       a boolean indicating whether the TIM is cascade or not
      * @param defaultLaneWidth   the default lane width
      * @param allMileposts       a list of all mileposts
      * @param reducedMileposts   a list of reduced mileposts
      * @param anchor             the anchor milepost
      * @return a list of regions
      */
-    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
             utility.logWithDate("Less than 63 mileposts, building a single region.", CreateBaseTimUtil.class);
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
-            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegion(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
+            OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegion(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
             regions.add(singleRegion);
             return regions;
         } else {
             utility.logWithDate("More than 63 mileposts, building multiple regions.", CreateBaseTimUtil.class);
-            return buildMultipleRegions(isCascadeTim, defaultLaneWidth, allMileposts, reducedMileposts, anchor);
+            return buildMultipleRegions(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         }
     }
 
     /**
      * Builds multiple regions based on the given parameters.
      * 
-     * @param isCascadeTim        a boolean indicating whether the TIM is cascade or not
      * @param defaultLaneWidth    the default lane width
      * @param allMileposts        a list of all mileposts
      * @param reducedMileposts    a list of reduced mileposts
      * @param anchor              the anchor milepost
      * @return                    a list of OdeTravelerInformationMessage.DataFrame.Region objects representing the built regions
      */
-    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegions(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+    protected List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegions(BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>(); 
 
         int maxMilepostsPerRegion = 63;
@@ -155,7 +151,7 @@ public class CreateBaseTimUtil {
             milepostsForNextRegion.add(reducedMileposts.get(i));
             // if we have reached the max number of mileposts per region, or if we are at the end of the list
             if (milepostsForNextRegion.size() == maxMilepostsPerRegion || i == reducedMileposts.size() - 1) {
-                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegion(isCascadeTim, defaultLaneWidth, allMileposts, milepostsForNextRegion, nextAnchor);
+                OdeTravelerInformationMessage.DataFrame.Region region = buildSingleRegion(defaultLaneWidth, allMileposts, milepostsForNextRegion, nextAnchor);
                 regions.add(region);
                 milepostsForNextRegion.clear();
                 nextAnchor = reducedMileposts.get(i);
@@ -169,14 +165,13 @@ public class CreateBaseTimUtil {
     /**
      * Builds a single region.
      *
-     * @param isCascadeTim        Flag indicating whether the region is a cascade TIM.
      * @param defaultLaneWidth    The default lane width for the region.
      * @param allMileposts        The list of all mileposts.
      * @param reducedMileposts    The list of reduced mileposts.
      * @param anchor              The anchor milepost.
      * @return                    The built region.
      */
-    protected OdeTravelerInformationMessage.DataFrame.Region buildSingleRegion(boolean isCascadeTim, BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+    protected OdeTravelerInformationMessage.DataFrame.Region buildSingleRegion(BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         OdeTravelerInformationMessage.DataFrame.Region region = new OdeTravelerInformationMessage.DataFrame.Region();
         region.setName("Temp");
         region.setRegulatorID(0);
@@ -200,7 +195,7 @@ public class CreateBaseTimUtil {
         region.setDescription("path");
 
         // set direction
-        String directionString = buildHeadingSliceFromMileposts(isCascadeTim, allMileposts, anchorPosition);
+        String directionString = buildHeadingSliceFromMileposts(allMileposts, anchorPosition);
         region.setDirection(directionString); // heading slice
 
         // set path nodes
@@ -248,32 +243,25 @@ public class CreateBaseTimUtil {
         return nodes.toArray(new OdeTravelerInformationMessage.NodeXY[nodes.size()]);
     }
 
-    public String buildHeadingSliceFromMileposts(boolean isCascadeTim, List<Milepost> allMileposts, OdePosition3D anchorPosition) {
+    public String buildHeadingSliceFromMileposts(List<Milepost> allMileposts, OdePosition3D anchorPosition) {
         int timDirection = 0;
-        if (!isCascadeTim) {
-            // this is a regular tim, so we need to set the direction normally
+        // this is a regular tim, so we need to set the direction normally
+        // path list - change later
+        if (allMileposts != null && allMileposts.size() > 0) {
+            double startLat = anchorPosition.getLatitude().doubleValue();
+            double startLon = anchorPosition.getLongitude().doubleValue();
+            for (int j = 0; j < allMileposts.size(); j++) {
+                double lat = allMileposts.get(j).getLatitude().doubleValue();
+                double lon = allMileposts.get(j).getLongitude().doubleValue();
 
-            // path list - change later
-            if (allMileposts != null && allMileposts.size() > 0) {
-                double startLat = anchorPosition.getLatitude().doubleValue();
-                double startLon = anchorPosition.getLongitude().doubleValue();
-                for (int j = 0; j < allMileposts.size(); j++) {
-                    double lat = allMileposts.get(j).getLatitude().doubleValue();
-                    double lon = allMileposts.get(j).getLongitude().doubleValue();
+                Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
+                Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
 
-                    Point standPoint = Point.at(Coordinate.fromDegrees(startLat), Coordinate.fromDegrees(startLon));
-                    Point forePoint = Point.at(Coordinate.fromDegrees(lat), Coordinate.fromDegrees(lon));
-
-                    timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
-                    // reset for next round
-                    startLat = lat;
-                    startLon = lon;
-                }
+                timDirection |= utility.getDirection(EarthCalc.bearing(standPoint, forePoint));
+                // reset for next round
+                startLat = lat;
+                startLon = lon;
             }
-        }
-        else {
-            // this is a triggered tim, so we need to set the direction to 0xFFFF
-            timDirection = 0xFFFF;
         }
 
         // set direction based on bearings

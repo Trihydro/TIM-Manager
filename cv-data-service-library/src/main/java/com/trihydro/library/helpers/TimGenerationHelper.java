@@ -16,8 +16,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.grum.geocalc.EarthCalc;
-import com.grum.geocalc.Point;
 import com.trihydro.library.model.ActiveTimError;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.ActiveTimValidationResult;
@@ -34,7 +32,6 @@ import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.OdeService;
@@ -68,17 +65,14 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 public class TimGenerationHelper {
     private Utility utility;
     private DataFrameService dataFrameService;
-    private PathNodeLLService pathNodeLLService;
     private ActiveTimService activeTimService;
     private MilepostService milepostService;
-    private CascadeService cascadeService;
     private Gson gson;
     private MilepostReduction milepostReduction;
     private RsuService rsuService;
     private TimGenerationProps config;
     private OdeService odeService;
     private ActiveTimHoldingService activeTimHoldingService;
-    private SdwService sdwService;
     private SnmpHelper snmpHelper;
     private RegionNameTrimmer regionNameTrimmer;
     private CreateBaseTimUtil createBaseTimUtil;
@@ -88,12 +82,11 @@ public class TimGenerationHelper {
             PathNodeLLService _pathNodeLLService, ActiveTimService _activeTimService, MilepostService _milepostService,
             MilepostReduction _milepostReduction, TimGenerationProps _config, RsuService _rsuService,
             OdeService _odeService, ActiveTimHoldingService _activeTimHoldingService, SdwService _sdwService,
-            SnmpHelper _snmpHelper, CascadeService _cascadeService, RegionNameTrimmer _regionNameTrimmer,
+            SnmpHelper _snmpHelper, RegionNameTrimmer _regionNameTrimmer,
             CreateBaseTimUtil _createBaseTimUtil) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
-        pathNodeLLService = _pathNodeLLService;
         activeTimService = _activeTimService;
         milepostService = _milepostService;
         milepostReduction = _milepostReduction;
@@ -101,9 +94,7 @@ public class TimGenerationHelper {
         rsuService = _rsuService;
         odeService = _odeService;
         activeTimHoldingService = _activeTimHoldingService;
-        sdwService = _sdwService;
         snmpHelper = _snmpHelper;
-        cascadeService = _cascadeService;
         regionNameTrimmer = _regionNameTrimmer;
         createBaseTimUtil = _createBaseTimUtil;
     }
@@ -321,33 +312,21 @@ public class TimGenerationHelper {
     private List<Milepost> getAllMps(WydotTim wydotTim) {
         List<Milepost> allMps = new ArrayList<>();
 
-        if (!CascadeService.isCascadeTim(wydotTim)) {
-            utility.logWithDate("Fetching mileposts for regular TIM with client id: " + wydotTim.getClientId());
-            if (wydotTim.getEndPoint() != null) {
-                allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
-                utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
-                        gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
-            } else {
-                // point incident
-                MilepostBuffer mpb = new MilepostBuffer();
-                mpb.setBufferMiles(config.getPointIncidentBufferMiles());
-                mpb.setCommonName(wydotTim.getRoute());
-                mpb.setDirection(wydotTim.getDirection());
-                mpb.setPoint(wydotTim.getStartPoint());
-                allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
-                utility.logWithDate(String.format("Found %d mileposts for point %s", allMps.size(),
-                        gson.toJson(wydotTim.getStartPoint())));
-            }
+        utility.logWithDate("Fetching mileposts for regular TIM with client id: " + wydotTim.getClientId());
+        if (wydotTim.getEndPoint() != null) {
+            allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
+            utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
+                    gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
         } else {
-            utility.logWithDate("Fetching mileposts for cascade TIM with client id: " + wydotTim.getClientId());
-            try {
-                allMps = cascadeService.getAllMilepostsFromCascadeTim(wydotTim);
-                utility.logWithDate(
-                        String.format("Found %d mileposts for cascade TIM with client id: %s", allMps.size(),
-                                wydotTim.getClientId()));
-            } catch (ArrayIndexOutOfBoundsException | NumberFormatException ex) {
-                utility.logWithDate("Failed to get mileposts from cascade tim: " + ex.getMessage());
-            }
+            // point incident
+            MilepostBuffer mpb = new MilepostBuffer();
+            mpb.setBufferMiles(config.getPointIncidentBufferMiles());
+            mpb.setCommonName(wydotTim.getRoute());
+            mpb.setDirection(wydotTim.getDirection());
+            mpb.setPoint(wydotTim.getStartPoint());
+            allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
+            utility.logWithDate(String.format("Found %d mileposts for point %s", allMps.size(),
+                    gson.toJson(wydotTim.getStartPoint())));
         }
 
         return allMps;
@@ -872,8 +851,7 @@ public class TimGenerationHelper {
         // set direction
         String regionDirection = aTim.getRegionDirection();
         if (regionDirection == null || regionDirection.isEmpty()) {
-            boolean isCascadeTim = aTim.getClientId().contains(CascadeService.CASCADE_TIM_ID_DELIMITER);
-            regionDirection = createBaseTimUtil.buildHeadingSliceFromMileposts(isCascadeTim, allMps,
+            regionDirection = createBaseTimUtil.buildHeadingSliceFromMileposts(allMps,
                     region.getAnchorPosition());
         }
         region.setDirection(regionDirection); // region direction is a heading slice ie 0001100000000000

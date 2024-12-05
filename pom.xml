@@ -12,7 +12,7 @@
 
   <groupId>com.wyocv</groupId>
   <artifactId>wyo-cv</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>1.4.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -31,7 +31,6 @@
     <module>tim-refresh</module>
     <module>logger-kafka-consumer</module>
     <module>cert-expiration</module>
-    <module>adhoc-listener</module>
   </modules>
 
   <dependencies>

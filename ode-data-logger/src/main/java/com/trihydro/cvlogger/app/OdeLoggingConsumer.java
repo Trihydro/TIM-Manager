@@ -11,7 +11,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import com.google.gson.Gson;
-import com.trihydro.cvlogger.app.services.TracManager;
 import com.trihydro.cvlogger.config.DataLoggerConfiguration;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
@@ -33,15 +32,13 @@ public class OdeLoggingConsumer {
 	static PreparedStatement preparedStatement = null;
 	static Statement statement = null;
 	private DataLoggerConfiguration configProperties;
-	private TracManager tracManager;
 	private Utility utility;
 	private EmailHelper emailHelper;
 
 	@Autowired
-	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, TracManager _tracManager, Utility _utility,
+	public OdeLoggingConsumer(DataLoggerConfiguration configProperties, Utility _utility,
 			EmailHelper _emailHelper) throws IOException, Exception {
 		this.configProperties = configProperties;
-		tracManager = _tracManager;
 		utility = _utility;
 		emailHelper = _emailHelper;
 		System.out.println("starting..............");
@@ -112,20 +109,15 @@ public class OdeLoggingConsumer {
 				Duration polTime = Duration.ofMillis(100);
 				ConsumerRecords<String, String> records = stringConsumer.poll(polTime);
 				for (ConsumerRecord<String, String> record : records) {
-					if (consumerTopic.equals("topic.OdeDNMsgJson")) {
-						utility.logWithDate("Found DNMsgJson, submitting to Trac");
-						tracManager.submitDNMsgToTrac(record.value(), configProperties);
-					} else {
-						String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
-								record.topic(), producerTopic);
-						utility.logWithDate(logTxt);
-						TopicDataWrapper tdw = new TopicDataWrapper();
-						tdw.setTopic(record.topic());
-						tdw.setData(record.value());
-						ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(
-								producerTopic, gson.toJson(tdw));
-						stringProducer.send(producerRecord);
-					}
+					String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
+							record.topic(), producerTopic);
+					utility.logWithDate(logTxt);
+					TopicDataWrapper tdw = new TopicDataWrapper();
+					tdw.setTopic(record.topic());
+					tdw.setData(record.value());
+					ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(
+							producerTopic, gson.toJson(tdw));
+					stringProducer.send(producerRecord);
 				}
 			}
 		} catch (Exception ex) {

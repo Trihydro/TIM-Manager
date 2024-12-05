@@ -8,7 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties
 public class DataLoggerConfiguration implements CVRestServiceProps, EmailProps {
     private String kafkaHostServer;
-    private String tracUrl;
 
     private String mailHost;
     private int mailPort;
@@ -22,10 +21,6 @@ public class DataLoggerConfiguration implements CVRestServiceProps, EmailProps {
     private String cvRestService;
 
     private String producerTopic;
-
-    public String getTracUrl() {
-        return tracUrl;
-    }
 
     public String getProducerTopic() {
         return producerTopic;
@@ -105,9 +100,5 @@ public class DataLoggerConfiguration implements CVRestServiceProps, EmailProps {
 
     public void setDepositTopic(String depositTopic) {
         this.depositTopic = depositTopic;
-    }
-
-    public void setTracUrl(String tracUrl) {
-        this.tracUrl = tracUrl;
     }
 }

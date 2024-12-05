@@ -12,13 +12,9 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.CertExpirationModel;
 import com.trihydro.library.model.TopicDataWrapper;
-import com.trihydro.loggerkafkaconsumer.app.dataConverters.BsmDataConverter;
-import com.trihydro.loggerkafkaconsumer.app.dataConverters.DriverAlertDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.dataConverters.TimDataConverter;
 import com.trihydro.loggerkafkaconsumer.app.services.ActiveTimHoldingService;
 import com.trihydro.loggerkafkaconsumer.app.services.ActiveTimService;
-import com.trihydro.loggerkafkaconsumer.app.services.BsmService;
-import com.trihydro.loggerkafkaconsumer.app.services.DriverAlertService;
 import com.trihydro.loggerkafkaconsumer.app.services.TimService;
 import com.trihydro.loggerkafkaconsumer.config.LoggerConfiguration;
 
@@ -35,32 +31,23 @@ public class LoggerKafkaConsumer {
     private ObjectMapper mapper;
     private LoggerConfiguration loggerConfig;
     private KafkaFactory kafkaFactory;
-    private BsmService bsmService;
     private ActiveTimService activeTimService;
     private ActiveTimHoldingService activeTimHoldingService;
     private TimService timService;
-    private DriverAlertService driverAlertService;
     private TimDataConverter timDataConverter;
-    private BsmDataConverter bsmDataConverter;
-    private DriverAlertDataConverter daConverter;
     private Utility utility;
     private EmailHelper emailHelper;
 
     @Autowired
-    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, KafkaFactory _kafkaFactory, BsmService _bsmService,
-            ActiveTimService _activeTimService, TimService _timService, DriverAlertService _driverAlertService,
-            TimDataConverter _timDataConverter, BsmDataConverter _bsmDataConverter,
-            DriverAlertDataConverter _daConverter, Utility _utility, EmailHelper _emailHelper,
+    public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, KafkaFactory _kafkaFactory,
+            ActiveTimService _activeTimService, TimService _timService,
+            TimDataConverter _timDataConverter, Utility _utility, EmailHelper _emailHelper,
             ActiveTimHoldingService _activeTimHoldingService) throws IOException, Exception {
         loggerConfig = _loggerConfig;
         kafkaFactory = _kafkaFactory;
-        bsmService = _bsmService;
         activeTimService = _activeTimService;
         timService = _timService;
-        driverAlertService = _driverAlertService;
         timDataConverter = _timDataConverter;
-        bsmDataConverter = _bsmDataConverter;
-        daConverter = _daConverter;
         utility = _utility;
         emailHelper = _emailHelper;
         activeTimHoldingService = _activeTimHoldingService;
@@ -117,26 +104,6 @@ public class LoggerKafkaConsumer {
                                 }
                             } else {
                                 utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
-                            }
-                            break;
-
-                        case "topic.OdeBsmJson":
-                            // commenting for now to prevent calling. this may be updated in the future so
-                            // logic has been left in
-                            // odeData = bsmDataConverter.processBsmJson(tdw.getData());
-                            // if (odeData != null) {
-                            // bsmService.addBSMToDatabase(odeData, tdw.getData());
-                            // } else {
-                            // utility.logWithDate("Failed to parse topic.OdeBsmJson, insert fails");
-                            // }
-                            break;
-
-                        case "topic.OdeDriverAlertJson":
-                            odeData = daConverter.processDriverAlertJson(tdw.getData());
-                            if (odeData != null) {
-                                driverAlertService.addDriverAlertToDatabase(odeData);
-                            } else {
-                                utility.logWithDate("Failed to parse topic.OdeDriverAlertJson, insert fails");
                             }
                             break;
 

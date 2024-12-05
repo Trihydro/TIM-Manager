@@ -667,21 +667,15 @@ public class TimService extends BaseService {
         }
 
         if (elements.timId != null) {
-            if (containsCascadeTimIdDelimiter(regionName)) {
-                activeTim.setClientId(elements.timId + "_trgd_" + elements.cascadeTimId);
-            }
-            else {
-                activeTim.setClientId(elements.timId);
-            }
+            activeTim.setClientId(elements.timId);
         }
         else {
             return activeTim;
         }
 
-        if (!containsCascadeTimIdDelimiter(regionName) && elements.cascadeTimIdDelimiter != null) {
-            // elements.cascadeTimIdDelimiter will actually be pk
+        if (elements.pk != null) {
             try {
-                Integer pk = Integer.valueOf(elements.cascadeTimIdDelimiter);
+                Integer pk = Integer.valueOf(elements.pk);
                 activeTim.setPk(pk);
             } catch (NumberFormatException ex) {
                 // the pk won't get set here
@@ -720,10 +714,6 @@ public class TimService extends BaseService {
         var minExp = activeTimService.getMinExpiration(cem.getPacketID(), cem.getExpirationDate());
 
         return activeTimService.updateActiveTimExpiration(cem.getPacketID(), minExp);
-    }
-
-    private boolean containsCascadeTimIdDelimiter(String regionName) {
-        return regionName.contains("_trgd_");
     }
 
     /**

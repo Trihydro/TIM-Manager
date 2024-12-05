@@ -43,7 +43,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Setup
 1. Clone the repository to your local machine
    ```
-   git clone https://trihydro@dev.azure.com/trihydro/CV/_git/WyoCV
+   git clone https://github.com/Trihydro/TIM-Manager.git
    ```
 
 2. Open the `wyocv` workspace in VS Code
@@ -78,11 +78,11 @@ These instructions will get you a copy of the project up and running on your loc
         ```
     - Navigate back to the project working directory
 
-4. Once you've connected to the development container, you should be able to build the project by running the following command:
+6. Once you've connected to the development container, you should be able to build the project by running the following command:
     ```
     mvn clean install
     ```
-5. To debug the project, select and run the relevant profile from the _VS Code Debug_ window (see [launch.json](./.vscode/launch.json)).
+7. To debug the project, select and run the relevant profile from the _VS Code Debug_ window (see [launch.json](./.vscode/launch.json)).
 
 > __Note:__ when developing inside a docker container, the workspace files are mounted from the local file system. So any changes you make in the container will persist to your computer. If you close your connection to the container, you can still open the workspace locally and commit your changes as necessary.
 

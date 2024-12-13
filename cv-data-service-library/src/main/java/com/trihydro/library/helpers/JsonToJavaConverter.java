@@ -48,18 +48,6 @@ public class JsonToJavaConverter {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    public J2735VehicleSafetyExtensions convertJ2735VehicleSafetyExtensionsJsonToJava(String value, int i) {
-
-        JsonNode part2Node = getPart2Node(value, i);
-        J2735VehicleSafetyExtensions vse = null;
-        try {
-            vse = mapper.treeToValue(part2Node, J2735VehicleSafetyExtensions.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return vse;
-    }
-
     public J2735SpecialVehicleExtensions convertJ2735SpecialVehicleExtensionsJsonToJava(String value, int i) {
 
         JsonNode part2Node = getPart2Node(value, i);

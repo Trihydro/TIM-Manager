@@ -6,7 +6,7 @@ WYOCV_RES_DIR=/workspaces/${REPO_NAME}/resources
 
 echo "WYOCV_RES_DIR: ${WYOCV_RES_DIR}"
 
-# Install jpo-ode JARs to maven repository
+# Install UCP and Postgres to the local Maven repository
 mvn install:install-file -Dfile="${WYOCV_RES_DIR}/ucp.jar" -DgroupId="com.oracle" -DartifactId=ucp -Dversion="12.2.0.1.0" -Dpackaging=jar
 mvn install:install-file -Dfile="${WYOCV_RES_DIR}/postgresql-42.6.0.jar" -DgroupId="org.postgresql" -DartifactId=postgresql -Dversion="42.6.0" -Dpackaging=jar
 

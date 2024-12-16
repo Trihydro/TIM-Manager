@@ -21,7 +21,6 @@ public class TimDbTables extends DbTables {
     private List<String> activeTimHoldingTable;
     private List<String> timRsuTable;
     private List<String> dataFrameItisCodeTable;
-    private List<String> driverAlertItisCodeTable;
 
     public List<String> getTimTable() {
         if (timTable != null)
@@ -260,17 +259,6 @@ public class TimDbTables extends DbTables {
             dataFrameItisCodeTable.add("TEXT");
             dataFrameItisCodeTable.add("POSITION");
             return dataFrameItisCodeTable;
-        }
-    }
-
-    public List<String> getDriverAlertItisCodeTable() {
-        if (driverAlertItisCodeTable != null)
-            return driverAlertItisCodeTable;
-        else {
-            driverAlertItisCodeTable = new ArrayList<String>();
-            driverAlertItisCodeTable.add("ITIS_CODE_ID");
-            driverAlertItisCodeTable.add("DRIVER_ALERT_ID");
-            return driverAlertItisCodeTable;
         }
     }
 

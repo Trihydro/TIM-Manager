@@ -17,10 +17,6 @@ public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
     private String dbUsername;
     private String dbPassword;
 
-    private String dbUrlCountyRoads;
-    private String dbUsernameCountyRoads;
-    private String dbPasswordCountyRoads;
-
     private int maximumPoolSize;
     private int connectionTimeout;
 
@@ -92,30 +88,6 @@ public class LoggerConfiguration implements DbInteractionsProps, EmailProps {
 
     public void setDbPassword(String dbPassword) {
         this.dbPassword = dbPassword;
-    }
-
-    public String getDbUrlCountyRoads() {
-        return dbUrlCountyRoads;
-    }
-
-    public void setDbUrlCountyRoads(String dbUrlCountyRoads) {
-        this.dbUrlCountyRoads = dbUrlCountyRoads;
-    }
-
-    public String getDbUsernameCountyRoads() {
-        return dbUsernameCountyRoads;
-    }
-
-    public void setDbUsernameCountyRoads(String dbUsernameCountyRoads) {
-        this.dbUsernameCountyRoads = dbUsernameCountyRoads;
-    }
-
-    public String getDbPasswordCountyRoads() {
-        return dbPasswordCountyRoads;
-    }
-
-    public void setDbPasswordCountyRoads(String dbPasswordCountyRoads) {
-        this.dbPasswordCountyRoads = dbPasswordCountyRoads;
     }
 
     public int getMaximumPoolSize() {

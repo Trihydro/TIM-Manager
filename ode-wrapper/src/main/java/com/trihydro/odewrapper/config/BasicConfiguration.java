@@ -35,7 +35,6 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
     private String tmddUrl;
     private String tmddUser;
     private String tmddPassword;
-    private boolean cascadeConditions;
 
     private Double pointIncidentBufferMiles;
     private TimeToLive sdwTtl;
@@ -155,14 +154,6 @@ public class BasicConfiguration implements SdwProps, RsuDataServiceProps, TmddPr
 
     public void setTmddPassword(String tmddPassword) {
         this.tmddPassword = tmddPassword;
-    }
-
-    public boolean shouldCascadeConditions() {
-        return cascadeConditions;
-    }
-
-    public void setCascadeConditions(boolean cascadeConditions) {
-        this.cascadeConditions = cascadeConditions;
     }
 
     public Integer getHttpLoggingMaxSize() {

@@ -1,6 +1,5 @@
 package com.trihydro.odewrapper.model;
 
-import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.WydotTim;
 
 import io.swagger.annotations.ApiModelProperty;

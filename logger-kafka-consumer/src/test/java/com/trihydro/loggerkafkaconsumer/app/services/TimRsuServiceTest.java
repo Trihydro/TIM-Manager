@@ -1,25 +1,17 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimDbTables;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import org.mockito.Spy;
+
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimDbTables;
 
 public class TimRsuServiceTest extends TestBase<TimRsuService> {
 

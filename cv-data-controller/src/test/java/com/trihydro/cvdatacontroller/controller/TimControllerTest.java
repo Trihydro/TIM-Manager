@@ -9,11 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.trihydro.library.helpers.SQLNullHandler;
@@ -284,7 +281,7 @@ public class TimControllerTest extends TestBase<TimController> {
 
         private ReceivedMessageDetails getRxMsg() {
                 ReceivedMessageDetails rxMsg = new ReceivedMessageDetails();
-                
+
                 OdeLogMsgMetadataLocation locationData = new OdeLogMsgMetadataLocation();
                 locationData.setElevation("1.0");
                 locationData.setHeading("2.0");

@@ -1,4 +1,4 @@
--- Note: This should only be run on a local deployment database. The actual view is provided by WYDOT.
+-- Note: This should only be run on a local deployment database.
 
 CREATE TABLE IF NOT EXISTS rsu_view (
     deviceid numeric(6),

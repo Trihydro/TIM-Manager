@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +21,6 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimError;
 import com.trihydro.library.model.ActiveTimValidationResult;
-import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.model.TmddItisCode;

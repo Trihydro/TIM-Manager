@@ -65,3 +65,8 @@ jars/*.jar
 wyocv-jars-*.tar.gz
 
 *.bkp
+
+# Certs
+*.jks
+*.cer
+*.p12

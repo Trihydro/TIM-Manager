@@ -43,7 +43,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Setup
 1. Clone the repository to your local machine
    ```
-   git clone https://trihydro@dev.azure.com/trihydro/CV/_git/WyoCV
+   git clone https://github.com/Trihydro/TIM-Manager.git
    ```
 
 2. Open the `wyocv` workspace in VS Code
@@ -59,11 +59,30 @@ These instructions will get you a copy of the project up and running on your loc
 
     > __Note:__ the first time you do this, it will take a few minutes to build the container. Subsequent connections will be much faster.
 
-4. Once you've connected to the development container, you should be able to build the project by running the following command:
+4. Generate a GitHub Access Token
+    - Create a new [Github Classic Token](https://github.com/settings/tokens) with the read:packages scope
+    - Copy the resulting token
+
+5. Create Maven settings.xml
+    - The [usdot jpo-ode packages](https://github.com/orgs/usdot-jpo-ode/packages?repo_name=jpo-ode) required by the Tim Manager require a settings.xml file used by Maven
+    - There is an [example settings file](example-settings.xml) provided for you
+    - Navigate to the .m2 directory and create the settings.xml file by running the following:
+        ```
+        cd ~/.m2
+        touch settings.xml
+        ```
+    - Copy the contents of example-settings.xml to the settings.xml file, replacing username with your github username and password with your generated access token
+    - This can be done with any installed text editor such as [Nano](https://www.nano-editor.org/docs.php) or [Vim](https://www.vim.org/docs.php)
+        ```
+        nano settings.xml
+        ```
+    - Navigate back to the project working directory
+
+6. Once you've connected to the development container, you should be able to build the project by running the following command:
     ```
     mvn clean install
     ```
-5. To debug the project, select and run the relevant profile from the _VS Code Debug_ window (see [launch.json](./.vscode/launch.json)).
+7. To debug the project, select and run the relevant profile from the _VS Code Debug_ window (see [launch.json](./.vscode/launch.json)).
 
 > __Note:__ when developing inside a docker container, the workspace files are mounted from the local file system. So any changes you make in the container will persist to your computer. If you close your connection to the container, you can still open the workspace locally and commit your changes as necessary.
 
@@ -79,28 +98,28 @@ This will create the `target` folder under each module. From here, create a new 
 ```
 .
 ├── cv-data-controller
-│   ├── cv-data-controller-1.3.0-SNAPSHOT.jar
-│   ├── Dockerfile
+│   ├── cv-data-controller-1.4.0-SNAPSHOT.jar
+│   ├── Dockerfile
 ├── cv-data-tasks
-│   ├── cv-data-tasks-1.3.0-SNAPSHOT.jar
-│   ├── Dockerfile
+│   ├── cv-data-tasks-1.4.0-SNAPSHOT.jar
+│   ├── Dockerfile
 ├── docker-compose.yml
 ├── ode-data-logger
-│   ├── Dockerfile
-│   ├── ode-data-logger-1.3.0-SNAPSHOT.jar
+│   ├── Dockerfile
+│   ├── ode-data-logger-1.4.0-SNAPSHOT.jar
 ├── ode-mongo-logger
-│   ├── Dockerfile
-│   ├── ode-mongo-logger-1.3.0-SNAPSHOT.jar
+│   ├── Dockerfile
+│   ├── ode-mongo-logger-1.4.0-SNAPSHOT.jar
 ├── ode-wrapper
-│   ├── Dockerfile
-│   ├── ode-wrapper-1.3.0-SNAPSHOT.jar
+│   ├── Dockerfile
+│   ├── ode-wrapper-1.4.0-SNAPSHOT.jar
 ├── ode-wrapper-docs
-│   └── swagger-ui-master
-│       ├── Dockerfile
-│       ├── (swagger folder structure)
+│   └── swagger-ui-master
+│       ├── Dockerfile
+│       ├── (swagger folder structure)
 └── tim-refresh
     ├── Dockerfile   
-    ├── tim-refresh-1.3.0-SNAPSHOT.jar
+    ├── tim-refresh-1.4.0-SNAPSHOT.jar
 
 ```
 

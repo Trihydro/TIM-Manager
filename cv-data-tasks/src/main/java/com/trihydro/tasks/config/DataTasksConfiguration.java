@@ -34,7 +34,6 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private String environmentName;
     private String mailHost;
     private int mailPort;
-    private int bsmRetentionPeriodDays;
     private boolean runTmddValidation;
     private boolean runRsuValidation;
     private int rsuValidationDelaySeconds = 60;
@@ -44,15 +43,12 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     private int removeExpiredPeriodMinutes = 1440;
     private boolean retention_removeTims = true;
-    private boolean retention_removeDa = true;
-    private boolean retention_removeHmi = true;
     private boolean retention_removeStatusLogs = true;
     private int cleanupPeriodMinutes = 1440;
     private int sdxValidationPeriodMinutes = 1440;
     private int rsuValidationPeriodMinutes = 1440;
     private int tmddValidationPeriodMinutes = 1440;
     private int retentionEnforcementPeriodMinutes = 1440;// run once a day by default
-    private int bsmCleanupPeriodMinutes = 1440;
     private int hsmFunctionalityMinutes = 1;// run once a minute by default
     private String hsmUrl = "http://10.145.9.74:55443/tmc";
     private int hsmErrorEmailFrequencyMinutes = 10;// send an email every 10 minutes the system is down
@@ -78,22 +74,6 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setRetention_removeStatusLogs(boolean retention_removeStatusLogs) {
         this.retention_removeStatusLogs = retention_removeStatusLogs;
-    }
-
-    public boolean getRetention_removeHmi() {
-        return retention_removeHmi;
-    }
-
-    public void setRetention_removeHmi(boolean retention_removeHmi) {
-        this.retention_removeHmi = retention_removeHmi;
-    }
-
-    public boolean getRetention_removeDa() {
-        return retention_removeDa;
-    }
-
-    public void setRetention_removeDa(boolean retention_removeDa) {
-        this.retention_removeDa = retention_removeDa;
     }
 
     public boolean getRetention_removeTims() {
@@ -232,14 +212,6 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
         this.mailPort = mailPort;
     }
 
-    public int getBsmRetentionPeriodDays() {
-        return bsmRetentionPeriodDays;
-    }
-
-    public void setBsmRetentionPeriodDays(int bsmRetentionPeriodDays) {
-        this.bsmRetentionPeriodDays = bsmRetentionPeriodDays;
-    }
-
     public boolean getRunTmddValidation() {
         return runTmddValidation;
     }
@@ -354,14 +326,6 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setTmddValidationPeriodMinutes(int tmddValidationPeriodMinutes) {
         this.tmddValidationPeriodMinutes = tmddValidationPeriodMinutes;
-    }
-
-    public int getBsmCleanupPeriodMinutes() {
-        return bsmCleanupPeriodMinutes;
-    }
-
-    public void setBsmCleanupPeriodMinutes(int bsmCleanupPeriodMinutes) {
-        this.bsmCleanupPeriodMinutes = bsmCleanupPeriodMinutes;
     }
 
     public int getHsmFunctionalityMinutes() {

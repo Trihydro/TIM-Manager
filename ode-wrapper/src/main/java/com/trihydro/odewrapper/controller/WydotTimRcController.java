@@ -11,10 +11,8 @@ import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ContentEnum;
-import com.trihydro.library.model.TriggerRoad;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
 import com.trihydro.library.service.WydotTimService;
@@ -48,9 +46,9 @@ public class WydotTimRcController extends WydotTimBaseController {
     public WydotTimRcController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility,
-            TimGenerationHelper _timGenerationHelper, CascadeService _cascadeService) {
+            TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper, _cascadeService);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
         configuration = _basicConfiguration;
     }
 
@@ -88,11 +86,6 @@ public class WydotTimRcController extends WydotTimBaseController {
         }
 
         processRequestAsync(timsToSend);
-
-        // check for trigger roads and cascade conditions if necessary
-        if (configuration.shouldCascadeConditions()) {
-            handleCascadingConditionsAsync(timRcList.getTimRcList());
-        }
 
         String responseMessage = gson.toJson(resultList);
         if (errList.size() > 0) {
@@ -132,7 +125,6 @@ public class WydotTimRcController extends WydotTimBaseController {
             var direction = wydotTim.getDirection().toUpperCase();
 
             // 'B' TIMs are split it into 'I' and 'D' so they should be handled separately so if we are passed the 'B' direction
-            // when performing an all-clear, we should ignore it instead and handle it when cascading conditions
             if (!direction.equals("B")) {
                 existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(),
                         timTypeId,
@@ -155,11 +147,6 @@ public class WydotTimRcController extends WydotTimBaseController {
             timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
         }
 
-        // check for trigger roads and cascade conditions if necessary
-        if (configuration.shouldCascadeConditions()) {
-            handleCascadingConditionsAsync(timRcList.getTimRcList());
-        }
-
         String responseMessage = gson.toJson(resultList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
@@ -173,16 +160,6 @@ public class WydotTimRcController extends WydotTimBaseController {
                     processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
                             TravelerInfoType.advisory);
                 }
-            }
-        }).start();
-    }
-
-    public void handleCascadingConditionsAsync(List<WydotTimRc> wydotTims) {
-        // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                var startTime = getStartTime();
-                handleCascadingConditions(wydotTims, getTimType(type), startTime);
             }
         }).start();
     }

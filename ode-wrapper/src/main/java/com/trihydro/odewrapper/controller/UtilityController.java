@@ -14,7 +14,6 @@ import com.trihydro.library.model.TimDeleteSummary;
 import com.trihydro.library.model.TimQuery;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.service.ActiveTimService;
-import com.trihydro.library.service.CascadeService;
 import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
@@ -58,9 +57,9 @@ public class UtilityController extends WydotTimBaseController {
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             OdeService _odeService, RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction,
-            Utility _utility, TimGenerationHelper _timGenerationHelper, CascadeService _cascadeService) {
+            Utility _utility, TimGenerationHelper _timGenerationHelper) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper, _cascadeService);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
         this.odeService = _odeService;
     }
 

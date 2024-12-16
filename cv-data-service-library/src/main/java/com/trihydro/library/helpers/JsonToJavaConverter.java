@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,9 +19,6 @@ import com.trihydro.library.model.ContentEnum;
 
 import org.springframework.stereotype.Component;
 
-import us.dot.its.jpo.ode.model.OdeBsmMetadata;
-import us.dot.its.jpo.ode.model.OdeBsmPayload;
-import us.dot.its.jpo.ode.model.OdeDriverAlertPayload;
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
 import us.dot.its.jpo.ode.model.OdeRequestMsgMetadata;
@@ -32,9 +28,6 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SnmpProtocol;
-import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
-import us.dot.its.jpo.ode.plugin.j2735.J2735BsmCoreData;
-import us.dot.its.jpo.ode.plugin.j2735.J2735BsmPart2Content;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
@@ -53,62 +46,6 @@ public class JsonToJavaConverter {
 
     public JsonToJavaConverter() {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
-    public OdeBsmMetadata convertBsmMetadataJsonToJava(String value) {
-
-        JsonNode metaDataNode = null;
-        OdeBsmMetadata odeBsmMetadata = null;
-
-        try {
-            metaDataNode = JsonUtils.getJsonNode(value, "metadata");
-            odeBsmMetadata = mapper.treeToValue(metaDataNode, OdeBsmMetadata.class);
-        } catch (NullPointerException e) {
-            System.out.println(e.getMessage());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return odeBsmMetadata;
-    }
-
-    public OdeBsmPayload convertBsmPayloadJsonToJava(String value) {
-
-        JsonNode bsmCoreDataNode = null;
-        JsonNode part2Node = null;
-        OdeBsmPayload odeBsmPayload = null;
-        J2735Bsm bsm = new J2735Bsm();
-
-        try {
-            bsmCoreDataNode = JsonUtils.getJsonNode(value, "payload").get("data").get("coreData");
-            part2Node = JsonUtils.getJsonNode(value, "payload").get("data").get("partII");
-            J2735BsmCoreData bsmCoreData = mapper.treeToValue(bsmCoreDataNode, J2735BsmCoreData.class);
-            if (part2Node != null) {
-                J2735BsmPart2Content[] part2List = mapper.treeToValue(part2Node, J2735BsmPart2Content[].class);
-                bsm.setPartII(Arrays.asList(part2List));
-            }
-
-            bsm.setCoreData(bsmCoreData);
-            odeBsmPayload = new OdeBsmPayload(bsm);
-        } catch (NullPointerException e) {
-            System.out.println(e.getMessage());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return odeBsmPayload;
-    }
-
-    public J2735VehicleSafetyExtensions convertJ2735VehicleSafetyExtensionsJsonToJava(String value, int i) {
-
-        JsonNode part2Node = getPart2Node(value, i);
-        J2735VehicleSafetyExtensions vse = null;
-        try {
-            vse = mapper.treeToValue(part2Node, J2735VehicleSafetyExtensions.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return vse;
     }
 
     public J2735SpecialVehicleExtensions convertJ2735SpecialVehicleExtensionsJsonToJava(String value, int i) {
@@ -681,36 +618,4 @@ public class JsonToJavaConverter {
         return odeTim;
     }
 
-    public OdeLogMetadata convertDriverAlertMetadataJsonToJava(String value) {
-        OdeLogMetadata odeDriverAlertMetadata = null;
-        JsonNode metaDataNode = JsonUtils.getJsonNode(value, "metadata");
-        try {
-            odeDriverAlertMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadata.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            System.out.println(e.getMessage());
-        }
-        return odeDriverAlertMetadata;
-    }
-
-    public OdeDriverAlertPayload convertDriverAlertPayloadJsonToJava(String value) {
-        OdeDriverAlertPayload odeDriverAlertPayload = null;
-        var payloadNode = JsonUtils.getJsonNode(value, "payload");
-        if (payloadNode == null) {
-            return null;
-        }
-        JsonNode alertNode = payloadNode.get("alert");
-
-        try {
-            String alert = mapper.treeToValue(alertNode, String.class);
-            odeDriverAlertPayload = new OdeDriverAlertPayload(alert);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return odeDriverAlertPayload;
-    }
 }

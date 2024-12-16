@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.Milepost;
@@ -21,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
-import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @ExtendWith(MockitoExtension.class)
@@ -321,4 +319,4 @@ public class CreateBaseTimUtilTest {
         Assertions.assertEquals(lastMilepostOfSecondRegion.getLatitude().doubleValue(), anchorOfThirdRegion.getLatitude().doubleValue());
         Assertions.assertEquals(lastMilepostOfSecondRegion.getLongitude().doubleValue(), anchorOfThirdRegion.getLongitude().doubleValue());
     }
-}
+} 

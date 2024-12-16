@@ -6,8 +6,7 @@ public class RegionNameElementCollection {
     public String rsuOrSat;
     public String timType;
     public String timId;
-    public String cascadeTimIdDelimiter;
-    public String cascadeTimId;
+    public String pk;
 
     public RegionNameElementCollection() {
 
@@ -49,28 +48,18 @@ public class RegionNameElementCollection {
         }
 
         if (splitName.length > 5) {
-            // note: may be pk value, but we will assume it is the cascade tim id delimiter
-            this.cascadeTimIdDelimiter = splitName[5];
-        }
-        else {
-            return;
-        }
-
-        if (splitName.length > 6) {
-            this.cascadeTimId = splitName[6];
+            this.pk = splitName[5];
         }
         else {
             return;
         }
     }
-    
-    public RegionNameElementCollection(String direction, String route, String rsuOrSat, String timType, String timId, String cascadeTimIdDelimiter, String cascadeTimId) {
+
+    public RegionNameElementCollection (String direction, String route, String rsuOrSat, String timType, String timId) {
         this.direction = direction;
         this.route = route;
         this.rsuOrSat = rsuOrSat;
         this.timType = timType;
         this.timId = timId;
-        this.cascadeTimIdDelimiter = cascadeTimIdDelimiter;
-        this.cascadeTimId = cascadeTimId;
     }
 }

@@ -5,10 +5,6 @@ public interface DbInteractionsProps {
     String getDbUsername();
     String getDbPassword();
 
-    String getDbUrlCountyRoads();
-    String getDbUsernameCountyRoads();
-    String getDbPasswordCountyRoads();
-    
     int getMaximumPoolSize();
     int getConnectionTimeout();
 

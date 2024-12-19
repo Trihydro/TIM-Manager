@@ -65,7 +65,6 @@ INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (2
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (23,E'Snow',2,4868);
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (24,E'Winter storm',2,4871);
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (25,E'Rain',2,4885);
-INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (26,E'Strong winds',2,5127);
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (28,E'Visibility reduced',2,5383);
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (29,E'Blowing snow',2,5385);
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (30,E'Black ice',2,5908);
@@ -94,6 +93,33 @@ INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (4
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (414,E'25',1,12569);
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (415,E'30',1,12574);
 INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (426,E'10',1,12554);
+
+-- BOWR ITIS CODES (5127, 2563, 2569, 7682, 2577, 8739 and 11589-11607)
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (26,E'Strong winds',2,5127);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (428,E'Truck restriction',2,2563);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (429,E'No high profile vehicles',2,2569);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (430,E'Below',2,7682);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (431,E'Gross-Weight-Limit',2,2577);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (432,E'Pounds',2,8739);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (433,E'20000',1,11589);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (434,E'21000',1,11590);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (435,E'22000',1,11591);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (436,E'23000',1,11592);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (437,E'24000',1,11593);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (438,E'25000',1,11594);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (439,E'26000',1,11595);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (440,E'27000',1,11596);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (441,E'28000',1,11597);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (442,E'29000',1,11598);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (443,E'30000',1,11599);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (444,E'35000',1,11600);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (445,E'40000',1,11601);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (446,E'45000',1,11602);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (447,E'50000',1,11603);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (448,E'55000',1,11604);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (449,E'60000',1,11605);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (450,E'65000',1,11606);
+INSERT INTO itis_code (itis_code_id,description,category_id,itis_code) VALUES (451,E'70000',1,11607);
 
 COMMIT;
 

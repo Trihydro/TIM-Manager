@@ -1,7 +1,7 @@
 # TIM Manager
 ![data-flow-diagram](/images/diagrams/data-flow-diagram.png)
 
-The TIM Manager is a suite of tools for interacting with the Wyoming DOT ODE, with an emphasis on Traveler Information Messages (TIMs). The tool suite include modules for both sides of interaction, from the ode-wrapper used to simplify interactions with pushing TIMs, to the ode-data-logger used to subscribe to ODE Kafka topics and deposit data into a database. Each module within the project contains its own README file to help understand specific functionality.
+The TIM Manager (TIMM) is a suite of tools for interacting with the Operational Data Environment (ODE), with an emphasis on Traveler Information Messages (TIMs). The tool suite include modules for both sides of interaction, from the ode-wrapper used to simplify interactions with pushing TIMs, to the ode-data-logger used to subscribe to ODE Kafka topics and deposit data into a database. Each module within the project contains its own README file to help understand specific functionality.
 
 ## Table of Contents
 - [Useful Links](#useful-links)

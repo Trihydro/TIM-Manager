@@ -1,5 +1,5 @@
 # Load Testing Resources
-This folder contains assets to help us understand how the WyoCV applications perform under load. These tests are executed locally using an open source load testing application, k6.
+This folder contains assets to help us understand how the TIMM applications perform under load. These tests are executed locally using an open source load testing application, k6.
 ## How to use
 1. Install k6 ([see here](https://k6.io/docs/getting-started/installation))
 2. View k6 documentation for authoring new test scripts ([see here](https://k6.io/docs/getting-started/running-k6))

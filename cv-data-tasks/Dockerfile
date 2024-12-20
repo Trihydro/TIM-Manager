@@ -3,7 +3,7 @@
 
 FROM maven:3.8-eclipse-temurin-21-alpine
 
-ENV install_dir /home/wyocv/wyocv_applications/cv-data-tasks
+ENV install_dir /home/timm/timm_applications/cv-data-tasks
 
 ADD . $install_dir
 

@@ -44,7 +44,7 @@ The postgres database service is defined in the `docker-compose.yml` file, but a
         ```
 
 ### Preparing JAR Files
-The dockerfiles for the wyocv services expect the JAR files to be in the same directory as the Dockerfile. After compilation, copy the JAR files to the appropriate directories.
+The dockerfiles for the TIMM services expect the JAR files to be in the same directory as the Dockerfile. After compilation, copy the JAR files to the appropriate directories.
 
 ### Certificates
 The certificate file that is being used must be present in the same directory as the Dockerfile for the `cv-data-tasks` service.

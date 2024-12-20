@@ -32,7 +32,7 @@ services:
     ports:
       - "7777:7777"
     volumes:
-      - /home/wyocvadmin/wyocv/ode-wrapper:/keystore
+      - /home/timmadmin/timm/ode-wrapper:/keystore
     logging:
       options:
         max-size: "20m"
@@ -137,7 +137,7 @@ services:
       SERVER_SSL_KEY_STORE_TYPE: ${CONTROLLER_SERVER_SSL_KEY_STORE_TYPE}
       SERVER_SSL_KEY_ALIAS: ${CONTROLLER_SERVER_SSL_KEY_ALIAS}
     volumes:
-      - /home/wyocvadmin/wyocv/cv-data-controller:/keystore
+      - /home/timmadmin/timm/cv-data-controller:/keystore
     logging:
       options:
         max-size: "20m"

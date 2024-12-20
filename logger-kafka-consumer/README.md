@@ -46,7 +46,7 @@ The following instructions are intended to be executed from the root directory o
     ```
 
 ## Deployment
-This application is deployed using Docker, and is part of the larger TIMMApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
+This application is deployed using Docker, and is part of the larger TIM Manager. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
 
 ## Configuration
 The following table describes the configurable environment variables for the module:

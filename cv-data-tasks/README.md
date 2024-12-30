@@ -87,7 +87,7 @@ mvn test
 
 ## Deployment
 
-This application is deployed using Docker, and is part of the larger WyoCVApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
+This application is deployed using Docker, and is part of the larger TIM Manager. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
 
 # Configuration Reference
 

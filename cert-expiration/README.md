@@ -15,7 +15,7 @@ Traveler Information Messages (TIMs) are signed by a Hardware Security Module (H
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
 
 ### Docker
-The following instructions are intended to be executed from the root directory of the WyoCV project:
+The following instructions are intended to be executed from the root directory of the TIMM project:
 1. Reopen the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container"
 1. Open a terminal in the dev container by clicking on the `Terminal` menu and selecting `New Terminal`
 1. Compile the project by running the following command:
@@ -49,7 +49,7 @@ The following instructions are intended to be executed from the root directory o
 
 1. Update the .env file with the appropriate values. See the [Configuration](#configuration) section for more information.
 1. Verify that Kafka is running and accessible at the address specified in the .env file.
-1. If running integration tests, verify that the CV Data Controller, WyoCV database & ODE service is running and accessible at the address specified in the .env file.
+1. If running integration tests, verify that the CV Data Controller, TIMM database & ODE service is running and accessible at the address specified in the .env file.
 1. Build & run the docker container with the following command:
     ```
     docker compose up -d --build cert-expiration
@@ -75,11 +75,11 @@ To run the application using the provided launch configuration:
 1. Click on the `Run and Debug` button at the top of the `Run` tab
 1. Select the `Cert Expiration (Launch)` configuration from the dropdown menu
 1. Verify that Kafka is running and accessible at the address specified in the .env file.
-1. If running integration tests, verify that the CV Data Controller, WyoCV database & ODE service is running and accessible at the address specified in the .env file.
+1. If running integration tests, verify that the CV Data Controller, TIMM database & ODE service is running and accessible at the address specified in the .env file.
 1. Click the green play button to start the application
 
 ## Deployment
-This application is deployed using Docker, and is part of the larger WyoCVApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
+This application is deployed using Docker, and is part of the larger TIM Manager. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
 
 ## Configuration
 **SOME OF THESE PROPERTIES ARE SENSITIVE. DO NOT PUBLISH THEM TO VERSION CONTROL**

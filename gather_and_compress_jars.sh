@@ -9,7 +9,7 @@ mv ./*/target/*.jar ./jars
 # compress jars
 echo "Compressing JARs"
 date=$(date '+%Y%m%dT%H.%M')
-tar -czvf wyocv-jars-$date.tar.gz ./jars
+tar -czvf timm-jars-$date.tar.gz ./jars
 
 # done
 echo "Done"

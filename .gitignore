@@ -62,7 +62,7 @@ Thumbs.db
 **/failsafe-summary.xml
 
 jars/*.jar
-wyocv-jars-*.tar.gz
+timm-jars-*.tar.gz
 
 *.bkp
 

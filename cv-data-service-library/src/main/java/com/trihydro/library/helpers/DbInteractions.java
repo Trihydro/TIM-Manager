@@ -20,62 +20,15 @@ public class DbInteractions {
 
     protected DbInteractionsProps dbConfig;
     protected Utility utility;
-    private EmailHelper emailHelper;
+    protected EmailHelper emailHelper;
 
     @Autowired
     public void InjectDependencies(DbInteractionsProps props, Utility _utility, EmailHelper _emailHelper) {
         dbConfig = props;
         utility = _utility;
         emailHelper = _emailHelper;
-        utility.logWithDate("DbInteractions: Injecting dependencies");
-        initDataSources();
-    }   
-
-    private void initDataSources() {
-        if (dataSource == null) {
-            TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
-            TimeZone.setDefault(timeZone);
-
-            // check dbconfig for null values
-            if (dbConfig.getDbUrl() == null ||
-                dbConfig.getDbUsername() == null ||
-                dbConfig.getDbPassword() == null ||
-                dbConfig.getMaximumPoolSize() == 0 ||
-                dbConfig.getConnectionTimeout() == 0) {
-                utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
-                System.exit(1);
-            }
-
-            // initialize connection pools
-            try {
-                initializePrimaryConnectionPool();
-            } catch (Exception e) {
-                utility.logWithDate("DbInteractions: Failed to initialize primary connection pool due to unexpected exception:\n\n\"" + e.getMessage() + "\"\n");
-                // e.printStackTrace();
-                System.exit(1);
-            }
-        }
-    }
-
-    private void initializePrimaryConnectionPool() {
-        HikariConfig config = new HikariConfig();
-        config.setDriverClassName("org.postgresql.Driver");
-        config.setJdbcUrl(dbConfig.getDbUrl());
-        config.setUsername(dbConfig.getDbUsername());
-        config.setPassword(dbConfig.getDbPassword());
-        config.setConnectionTimeout(dbConfig.getConnectionTimeout());
-        config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
-
-        // log the configuration of the connection pool
-        utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
-        utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
-        utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
-        utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
-        utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
-        utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
-
-        dataSource = new HikariDataSource(config);
-        utility.logWithDate("DbInteractions: Successfully initialized connection pool");
+        utility.logWithDate("A new DbInteractions instance has been created.", this.getClass());
+        validateDbConfig();
     }
 
     public Connection getConnectionPool() throws SQLException {
@@ -98,7 +51,7 @@ public class DbInteractions {
                 emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
             } catch (Exception exception) {
                 utility.logWithDate("Failed to open connection to " + dbConfig.getDbUrl()
-                        + ", then failed to send email");
+                    + ", then failed to send email");
                 exception.printStackTrace();
             }
             throw ex;
@@ -154,5 +107,43 @@ public class DbInteractions {
             e.printStackTrace();
         }
         return id;
+    }
+
+    private void validateDbConfig() {
+        if (dataSource == null) {
+            TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+            TimeZone.setDefault(timeZone);
+
+            // check dbconfig for null values
+            if (dbConfig.getDbUrl() == null ||
+                dbConfig.getDbUsername() == null ||
+                dbConfig.getDbPassword() == null ||
+                dbConfig.getMaximumPoolSize() == 0 ||
+                dbConfig.getConnectionTimeout() == 0) {
+                utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
+                System.exit(1);
+            }
+        }
+    }
+
+    private void initializePrimaryConnectionPool() {
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName("org.postgresql.Driver");
+        config.setJdbcUrl(dbConfig.getDbUrl());
+        config.setUsername(dbConfig.getDbUsername());
+        config.setPassword(dbConfig.getDbPassword());
+        config.setConnectionTimeout(dbConfig.getConnectionTimeout());
+        config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
+
+        // log the configuration of the connection pool
+        utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
+        utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
+        utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
+        utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
+        utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
+        utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
+
+        dataSource = new HikariDataSource(config);
+        utility.logWithDate("DbInteractions: Successfully initialized connection pool");
     }
 }

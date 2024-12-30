@@ -4,9 +4,9 @@
 Traveler Information Messages (TIMs) have varying lifespans; some, like Variable Speed Limits (VSLs), can remain active for long periods. However, the signature that validates a TIM expires after two weeks. The `tim-refresh` module is designed to refresh TIMs that are still valid but have reached the two-week signature expiration limit.
 
 Each time the refresh task runs, the following steps are taken:
-1. Active TIMs that are expiring within 24 hours are retrieved from the WyoCV database. The query excludes TIMs with a start time more than 24 hours in the future and TIMs with an end time less than 24 hours in the future.
+1. Active TIMs that are expiring within 24 hours are retrieved from the TIMM database. The query excludes TIMs with a start time more than 24 hours in the future and TIMs with an end time less than 24 hours in the future.
 1. The retrieved TIMs are validated. This check considers TIMs invalid if they are missing a start point, direction or route.
-1. The expiration date for each TIM is reset to 'null' in the WyoCV database.
+1. The expiration date for each TIM is reset to 'null' in the TIMM database.
 1. Each TIM gets their TIM start time updated and is re-submitted to the ODE.
 1. If any errors, invalid TIMs or exceptions are encountered, an email is sent to the configured alert addresses.
 
@@ -23,7 +23,7 @@ By default, the refresh task runs once a day at 1 AM.
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
 
 ### Docker
-The following instructions are intended to be executed from the root directory of the WyoCV project:
+The following instructions are intended to be executed from the root directory of the TIMM project:
 1. Reopen the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container"
 1. Open a terminal in the dev container by clicking on the `Terminal` menu and selecting `New Terminal`
 1. Compile the project by running the following command:
@@ -81,12 +81,12 @@ To run the application using the provided launch configuration, follow these ste
 1. Open the Run and Debug sidebar by clicking on the icon on the left side of the window or by pressing `Ctrl+Shift+D`
 1. Click on the gear icon in the top right corner of the sidebar
 1. Select the `TIM Refresh (Launch)` configuration from the dropdown menu
-1. If running integration tests, verify that the CV Data Controller and the WyoCV database are running and accessible at the addresses specified in the .env file
+1. If running integration tests, verify that the CV Data Controller and the TIMM database are running and accessible at the addresses specified in the .env file
 1. If running integration tests, verify that the ODE is running and accessible at the address specified in the .env file
 1. Click the green play button to start the application
 
 ## Deployment
-This application is deployed using Docker, and is part of the larger WyoCVApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
+This application is deployed using Docker, and is part of the larger TIM Manager. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
 
 ## Configuration
 **SOME OF THESE PROPERTIES ARE SENSITIVE. DO NOT PUBLISH THEM TO VERSION CONTROL**

@@ -64,7 +64,7 @@ The initial check-in includes the base set of data to avoid having to run the sc
 
 ## 🚀 Deployment <a name = "deployment"></a>
 
-Deployment should be very similar to running this locally since everything will be handled in docker. This application can be added to the main docker-compose file in the wyocv applications folder for simplicity. If a different location is desired to store data, specify those locations in the docker-compose.yml file and copy the following folders to the appropriate locations:
+Deployment should be very similar to running this locally since everything will be handled in docker. This application can be added to the main docker-compose file in the TIMM applications folder for simplicity. If a different location is desired to store data, specify those locations in the docker-compose.yml file and copy the following folders to the appropriate locations:
 
 - [conf](./neo-data/conf) - holds custom configuration
 - [data/databases](./neo-data/data/databases) - houses the data

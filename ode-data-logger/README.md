@@ -25,7 +25,7 @@ These instructions will get you a copy of the project up and running on your loc
 - Maven is provided by the dev container's base image.
 
 ### Docker
-The following instructions are intended to be executed from the root directory of the WyoCV project:
+The following instructions are intended to be executed from the root directory of the TIMM project:
 1. Reopen the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container". If Docker isn't running, start it and try again.
 1. Open a terminal in the dev container by clicking on the `Terminal` menu and selecting `New Terminal`
 1. Compile the project by running the following command:
@@ -89,7 +89,7 @@ To run the application using the provided launch configuration, follow these ste
 1. Click the green play button to start the application
 
 ## Deployment
-This application is deployed using Docker, and is part of the larger WyoCVApplication suite. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
+This application is deployed using Docker, and is part of the larger TIM Manager. The associated Dockerfile is configured for the development ODE environment. See the main [README](../README.md) for the project and associated [docker-compose](../docker-compose.yml), and [sample.env](../sample.env) file for further deployment configurations.
 
 ## Configuration
 **SOME OF THESE PROPERTIES ARE SENSITIVE. DO NOT PUBLISH THEM TO VERSION CONTROL**

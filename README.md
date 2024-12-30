@@ -1,7 +1,7 @@
-# WyoCV Applications
+# TIM Manager
 ![data-flow-diagram](/images/diagrams/data-flow-diagram.png)
 
-The WyoCV Applications are a suite of tools for interacting with the Wyoming DOT ODE, with an emphasis on Traveler Information Messages (TIMs). The tool suite include modules for both sides of interaction, from the ode-wrapper used to simplify interactions with pushing TIMs, to the ode-data-logger used to subscribe to ODE Kafka topics and deposit data into a database. Each module within the project contains its own README file to help understand specific functionality.
+The TIM Manager (TIMM) is a suite of tools for interacting with the Operational Data Environment (ODE), with an emphasis on Traveler Information Messages (TIMs). The tool suite include modules for both sides of interaction, from the ode-wrapper used to simplify interactions with pushing TIMs, to the ode-data-logger used to subscribe to ODE Kafka topics and deposit data into a database. Each module within the project contains its own README file to help understand specific functionality.
 
 ## Table of Contents
 - [Useful Links](#useful-links)
@@ -46,9 +46,9 @@ These instructions will get you a copy of the project up and running on your loc
    git clone https://github.com/Trihydro/TIM-Manager.git
    ```
 
-2. Open the `wyocv` workspace in VS Code
+2. Open the `timm` workspace in VS Code
     ```
-    code wyocv.code-workspace
+    code timm.code-workspace
     ```
 
 3. Open the project in a development container
@@ -93,7 +93,7 @@ To deploy the suite, first build all modules using
 ```
 mvn clean install
 ```
-This will create the `target` folder under each module. From here, create a new folder structure to deploy using the `docker-compose.yml`, `.env`, and respective `.jar` file and `Dockerfile`. A basic example using the WyoCV applications as seen here follows:
+This will create the `target` folder under each module. From here, create a new folder structure to deploy using the `docker-compose.yml`, `.env`, and respective `.jar` file and `Dockerfile`. A basic example using the TIMM applications as seen here follows:
 
 ```
 .

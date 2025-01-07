@@ -45,7 +45,7 @@ public class DataFrameController extends BaseController {
 		sqlNullHandler = _sqlNullHandler;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/itis-for-data-frame/{dataFrameId}")
+	@RequestMapping(method = RequestMethod.GET, produces = "application/json", value = "/itis-for-data-frame/{dataFrameId}")
 	public ResponseEntity<String[]> GetItisCodesForDataFrameId(@PathVariable Integer dataFrameId) {
 		Connection connection = null;
 		Statement statement = null;

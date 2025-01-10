@@ -188,7 +188,7 @@ services:
       CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
       CONFIG_MAXIMUM_POOL_SIZE: 7
       CONFIG_CONNECTION_TIMEOUT: 300000
-      CONFIG_ODE_URL: http://${DOCKER_HOST_IP}:8080
+      CONFIG_ODE_URL: http://ode:8080
       CONFIG_ENV: local
       SPRING_DATA_NEO4J_URI: bolt://milepost-graph-db:7687
       CONFIG_ALERT_ADDRESSES: test@gmail.com
@@ -206,7 +206,7 @@ services:
     restart: always
     environment:
       SERVER_PORT: 7777
-      CONFIG_ODE_URL: http://${DOCKER_HOST_IP}:8080
+      CONFIG_ODE_URL: http://ode:8080
       CONFIG_DB_URL: jdbc:postgresql://${POSTGRES_DB_HOSTNAME}:5432/${POSTGRES_DB_NAME}?user=${POSTGRES_USER}
       CONFIG_DB_USERNAME: ${POSTGRES_USER}
       CONFIG_DB_PASSWORD: ${POSTGRES_PASSWORD}
@@ -256,7 +256,7 @@ services:
     build: ../cv-data-tasks
     restart: always
     environment:
-      CONFIG_ODE_URL: http://${DOCKER_HOST_IP}:8080
+      CONFIG_ODE_URL: http://ode:8080
       CONFIG_CV_REST_SERVICE: http://cv-data-controller:8888
       CONFIG_CV_REST_SERVICE_DEV: http://cv-data-controller:8888
       CONFIG_CV_REST_SERVICE_PROD: http://cv-data-controller:8888
@@ -352,7 +352,7 @@ services:
     build: ../tim-refresh
     restart: always
     environment:
-      CONFIG_ODE_URL: http://${DOCKER_HOST_IP}:8080
+      CONFIG_ODE_URL: http://ode:8080
       CONFIG_SDW_TTL: oneyear
       CONFIG_CV_REST_SERVICE: http://cv-data-controller:8888
       CONFIG_SDW_REST_URL: ${SDW_REST_URL}

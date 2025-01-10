@@ -243,8 +243,8 @@
                                     }
                                 },
                                 "durationTime": 32000,
-                                "notUsed2": 1,
-                                "notUsed3": 1,
+                                "doNotUse3": 1,
+                                "doNotUse4": 1,
                                 "startYear": 2020,
                                 "msgId": {
                                     "roadSignID": {
@@ -276,8 +276,8 @@
                                     }
                                 },
                                 "url": null,
-                                "notUsed": 1,
-                                "notUsed1": 1,
+                                "doNotUse1": 1,
+                                "doNotUse2": 1,
                                 "frameType": {
                                     "advisory": ""
                                 },

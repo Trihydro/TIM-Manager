@@ -536,8 +536,8 @@ public class JsonToJavaConverter {
             JsonNode startTimeNode = travelerDataFrame.get("startTime");
             JsonNode durationNode = travelerDataFrame.get("durationTime");
             JsonNode priorityNode = travelerDataFrame.get("priority");
-            JsonNode notUsed1Node = travelerDataFrame.get("notUsed1");
-            JsonNode notUsedNode = travelerDataFrame.get("notUsed");
+            JsonNode doNotUse2Node = travelerDataFrame.get("doNotUse2");
+            JsonNode doNotUse1Node = travelerDataFrame.get("doNotUse1");
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
@@ -555,8 +555,8 @@ public class JsonToJavaConverter {
             dataFrame.setStartDateTime(startDate.toString() + "Z");
             dataFrame.setDurationTime(durationNode.asInt());
             dataFrame.setPriority(priorityNode.asInt());
-            dataFrame.setNotUsed1((short) notUsed1Node.asInt());
-            dataFrame.setNotUsed((short) notUsedNode.asInt());
+            dataFrame.setDoNotUse2((short) doNotUse2Node.asInt());
+            dataFrame.setDoNotUse1((short) doNotUse1Node.asInt());
 
             tim.setMsgCnt(timNode.get("msgCnt").asInt());
 

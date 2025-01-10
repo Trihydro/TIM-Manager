@@ -821,13 +821,13 @@ public class TimGenerationHelper {
 
         // DataFrame
         DataFrame df = new DataFrame();
-        df.setNotUsed(aTim.getNotUsed());
+        df.setDoNotUse1(aTim.getDoNotUse1());
         df.setFrameType(aTim.getFrameType());
         df.setMsgId(msgId);
         df.setPriority(5);// 0-7, 0 being least important, 7 being most
-        df.setNotUsed1(aTim.getNotUsed1());
-        df.setNotUsed3(aTim.getNotUsed3());
-        df.setNotUsed2(aTim.getNotUsed2());
+        df.setDoNotUse2(aTim.getDoNotUse2());
+        df.setDoNotUse4(aTim.getDoNotUse4());
+        df.setDoNotUse3(aTim.getDoNotUse3());
         if (aTim.getDfContent() != null) {
             df.setContent(aTim.getDfContent().getStringValue());
         }

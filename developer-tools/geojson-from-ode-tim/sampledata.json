@@ -21,7 +21,7 @@
         "packetID": "24BE29D8A92FDF0930",
         "dataframes": [
             {
-                "notUsed": 0,
+                "doNotUse1": 0,
                 "frameType": "advisory",
                 "msgId": {
                     "roadSignID": {
@@ -36,7 +36,7 @@
                 "startDateTime": "2024-10-02T11:00:50.814Z",
                 "durationTime": 32000,
                 "priority": 5,
-                "notUsed1": 0,
+                "doNotUse2": 0,
                 "regions": [
                     {
                         "name": "D_US 14_SAT-D99EEE98_RC_BJUS14EB",
@@ -443,8 +443,8 @@
                         }
                     }
                 ],
-                "notUsed2": 0,
-                "notUsed3": 0,
+                "doNotUse3": 0,
+                "doNotUse4": 0,
                 "content": "advisory",
                 "items": [
                     "770",

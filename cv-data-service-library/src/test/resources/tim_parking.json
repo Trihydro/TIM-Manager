@@ -75,8 +75,8 @@
                                     }
                                 },
                                 "durationTime": 120,
-                                "notUsed2": 1,
-                                "notUsed3": 1,
+                                "doNotUse3": 1,
+                                "doNotUse4": 1,
                                 "startYear": 2021,
                                 "msgId": {
                                     "roadSignID": {
@@ -96,8 +96,8 @@
                                     }
                                 },
                                 "url": null,
-                                "notUsed": 1,
-                                "notUsed1": 1,
+                                "doNotUse1": 1,
+                                "doNotUse2": 1,
                                 "frameType": { "advisory": "" },
                                 "startTime": 117800
                             }

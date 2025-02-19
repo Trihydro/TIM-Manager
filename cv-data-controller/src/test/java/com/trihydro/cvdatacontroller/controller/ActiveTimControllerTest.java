@@ -34,6 +34,7 @@ import org.mockito.Spy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.web.client.HttpServerErrorException;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType;
 
 public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
@@ -337,15 +338,17 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetExpiredActiveTims_SUCCESS() throws SQLException {
         // Arrange
-        String statementStr = "select * from ACTIVE_TIM";
-        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
+        String statementStr = "SELECT * FROM ACTIVE_TIM";
+        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC') LIMIT ?";
 
         // Act
-        ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
+        ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims(500);
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, aTims.getStatusCode());
-        verify(mockStatement).executeQuery(statementStr);
+        verify(mockConnection).prepareStatement(statementStr);
+        verify(mockPreparedStatement).setInt(1, 500);
+        verify(mockPreparedStatement).executeQuery();
         verify(mockRs).getLong("ACTIVE_TIM_ID");
         verify(mockRs).getLong("TIM_ID");
         verify(mockRs).getString("SAT_RECORD_ID");
@@ -356,7 +359,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockRs).getString("CLIENT_ID");
         verify(mockRs).getString("ROUTE");
         verify(mockRs).getString("DIRECTION");
-        verify(mockStatement).close();
+        verify(mockPreparedStatement).close();
         verify(mockConnection).close();
         Assertions.assertEquals(1, aTims.getBody().size());
     }
@@ -364,19 +367,18 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetExpiredActiveTims_FAIL() throws SQLException {
         // Arrange
-        String statementStr = "select * from ACTIVE_TIM";
-        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
-        when(mockStatement.executeQuery(isA(String.class))).thenThrow(new SQLException());
+        String statementStr = "SELECT * FROM ACTIVE_TIM";
+        statementStr += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC') LIMIT ?";
+        when(mockPreparedStatement.executeQuery()).thenThrow(new SQLException());
 
         // Act
-        ResponseEntity<List<ActiveTim>> aTims = uut.GetExpiredActiveTims();
+        Assertions.assertThrows(HttpServerErrorException.class, () -> uut.GetExpiredActiveTims(500));
 
         // Assert
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, aTims.getStatusCode());
-        verify(mockStatement).executeQuery(statementStr);
-        verify(mockStatement).close();
+        verify(mockConnection).prepareStatement(statementStr);
+        verify(mockPreparedStatement).executeQuery();
+        verify(mockPreparedStatement).close();
         verify(mockConnection).close();
-        Assertions.assertEquals(0, aTims.getBody().size());
     }
 
     @Test

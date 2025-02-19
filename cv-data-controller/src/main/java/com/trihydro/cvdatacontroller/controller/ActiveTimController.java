@@ -478,13 +478,13 @@ public class ActiveTimController extends BaseController {
 	}
 
 	@RequestMapping(value = "/expired", method = RequestMethod.GET)
-	public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims() {
-		String query = "SELECT * FROM ACTIVE_TIM WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
-		try (Connection connection = dbInteractions.getConnectionPool();
-			 PreparedStatement preparedStatement = connection.prepareStatement(query);
-			 ResultSet rs = preparedStatement.executeQuery()) {
-			 var activeTims = getActiveTimFromRS(rs, false);
-			 return ResponseEntity.ok(activeTims);
+	public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims(@RequestParam(required = false, defaultValue = "100") Integer limit) {
+		String query = "SELECT * FROM ACTIVE_TIM WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC') LIMIT ?";
+		try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+			preparedStatement.setInt(1, limit);
+			try (ResultSet rs = preparedStatement.executeQuery()) {
+				return ResponseEntity.ok(getActiveTimFromRS(rs, false));
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving expired active tims");

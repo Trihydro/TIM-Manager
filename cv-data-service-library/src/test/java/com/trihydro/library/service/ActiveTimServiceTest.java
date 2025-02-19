@@ -257,11 +257,11 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void getExpiredActiveTims() {
         // Arrange
         setupActiveTimArrayReturn();
-        String url = String.format("%s/active-tim/expired", baseUrl);
+        String url = String.format("%s/active-tim/expired/500", baseUrl);
         when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
-        List<ActiveTim> data = uut.getExpiredActiveTims();
+        List<ActiveTim> data = uut.getExpiredActiveTims(500);
 
         // Assert
         verify(mockRestTemplate).getForEntity(url, ActiveTim[].class);

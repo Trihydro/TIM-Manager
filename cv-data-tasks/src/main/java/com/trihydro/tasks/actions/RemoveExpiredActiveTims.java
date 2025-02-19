@@ -77,15 +77,16 @@ public class RemoveExpiredActiveTims implements Runnable {
                             HttpMethod.DELETE, entity, String.class);
                 }
             } catch (ResourceAccessException e) {
-                log.error("Error accessing resource. This indicates that the ODE Wrapper or CV Data Controller is not reachable.", e);
+                log.error("Error accessing resource. This indicates that the ODE Wrapper or CV Data Controller is not reachable. No more batches will be processed until the next run.", e);
                 // the error should not be rethrown, or else the task will not run until the service is restarted
+                break;
             } catch (Exception e) {
                 log.error("Unexpected error occurred while processing expired Active TIMs", e);
                 // the error should not be rethrown, or else the task will not run until the service is restarted
             }
             batchCount++;
             if (batchCount >= maxBatchCount) {
-                log.warn("Maximum batches reached. No more batches will be processed until the next run. This indicates either A) repeated failures to delete expired Active TIMs or B) a large number of expired Active TIMs (more than {})", maxBatchCount * batchSize);
+                log.warn("Maximum batches reached.  This indicates either A) repeated failures to delete expired Active TIMs or B) a large number of expired Active TIMs (more than {}). No more batches will be processed until the next run.", maxBatchCount * batchSize);
                 break;
             }
         }

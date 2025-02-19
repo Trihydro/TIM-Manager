@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 
 @Component
 public class RemoveExpiredActiveTims implements Runnable {
@@ -40,7 +41,9 @@ public class RemoveExpiredActiveTims implements Runnable {
             try {
                 // select active tims
                 List<ActiveTim> activeTims = activeTimService.getExpiredActiveTims(500);
-                utility.logWithDate("Retrieved a batch of " + activeTims.size() + " expired Active TIMs", this.getClass());
+                utility.logWithDate(
+                    "Retrieved a batch of " + activeTims.size() + " expired Active TIMs",
+                    this.getClass());
                 if (activeTims.isEmpty()) {
                     break;
                 }
@@ -58,17 +61,22 @@ public class RemoveExpiredActiveTims implements Runnable {
                     activeTimJson = gson.toJson(activeTim);
                     entity = new HttpEntity<String>(activeTimJson, headers);
 
-                    utility.logWithDate("Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }",
-                            this.getClass());
-                    restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
+                    utility.logWithDate(
+                        "Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }",
+                        this.getClass());
+                    restTemplateProvider.GetRestTemplate()
+                        .exchange(configuration.getWrapperUrl() + "/delete-tim/",
                             HttpMethod.DELETE, entity, String.class);
                     activeTimsDeleted++;
                 }
-            } catch (Exception e) {
-                utility.logWithDate("Error deleting batch of Active TIMs: ");
+            } catch (ResourceAccessException e) {
+                utility.logWithDate("Breaking loop due to error accessing resource:", this.getClass());
                 e.printStackTrace();
-                // don't rethrow error, or the task won't be reran until the service is
-                // restarted.
+                break;
+            } catch (Exception e) {
+                utility.logWithDate("Retrying due to unexpected error:", this.getClass());
+                e.printStackTrace();
+                // the error should not be rethrown, or else the task will not run until the service is restarted
             }
         }
         utility.logWithDate("Deleted a total of " + activeTimsDeleted + " Active TIMs", this.getClass());

@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.client.HttpServerErrorException;
 import springfox.documentation.annotations.ApiIgnore;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
@@ -478,41 +479,16 @@ public class ActiveTimController extends BaseController {
 
 	@RequestMapping(value = "/expired", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims() {
-		List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
-
-		try {
-			connection = dbInteractions.getConnectionPool();
-
-			statement = connection.createStatement();
-
-			String selectStatement = "select * from ACTIVE_TIM";
-			selectStatement += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
-
-			rs = statement.executeQuery(selectStatement);
-			activeTims = getActiveTimFromRS(rs, false);
+		String query = "SELECT * FROM ACTIVE_TIM WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
+		try (Connection connection = dbInteractions.getConnectionPool();
+			 PreparedStatement preparedStatement = connection.prepareStatement(query);
+			 ResultSet rs = preparedStatement.executeQuery()) {
+			 var activeTims = getActiveTimFromRS(rs, false);
+			 return ResponseEntity.ok(activeTims);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
-		} finally {
-			try {
-				// close prepared statement
-				if (statement != null)
-					statement.close();
-				// return connection back to pool
-				if (connection != null)
-					connection.close();
-				// close result set
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving expired active tims");
 		}
-
-		return ResponseEntity.ok(activeTims);
 	}
 
 	@RequestMapping(value = "/indices-rsu/{rsuTarget}", method = RequestMethod.GET)

@@ -257,7 +257,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void getExpiredActiveTims() {
         // Arrange
         setupActiveTimArrayReturn();
-        String url = String.format("%s/active-tim/expired/500", baseUrl);
+        String url = String.format("%s/active-tim/expired?limit=500", baseUrl);
         when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act

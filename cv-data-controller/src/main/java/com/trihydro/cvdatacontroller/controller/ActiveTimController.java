@@ -477,7 +477,7 @@ public class ActiveTimController extends BaseController {
 		return ResponseEntity.ok(activeTims);
 	}
 
-	@RequestMapping(value = "/expired/{limit}", method = RequestMethod.GET)
+	@RequestMapping(value = "/expired", method = RequestMethod.GET)
 	public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims(@RequestParam(required = false, defaultValue = "100") Integer limit) {
 		String query = "SELECT * FROM ACTIVE_TIM WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC') LIMIT ?";
 		try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {

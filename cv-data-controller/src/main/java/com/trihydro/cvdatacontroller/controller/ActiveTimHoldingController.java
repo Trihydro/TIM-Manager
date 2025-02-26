@@ -40,7 +40,7 @@ public class ActiveTimHoldingController extends BaseController {
         sqlNullHandler = _sqlNullHandler;
     }
 
-    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    @RequestMapping(value = "/add", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<Long> InsertActiveTimHolding(@RequestBody ActiveTimHolding activeTimHolding) {
 
         Connection connection = null;
@@ -168,7 +168,7 @@ public class ActiveTimHoldingController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/get-rsu/{ipv4Address}", method = RequestMethod.GET)
+    @RequestMapping(value = "/get-rsu/{ipv4Address}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<List<ActiveTimHolding>> getActiveTimHoldingForRsu(@PathVariable String ipv4Address) {
         ActiveTimHolding activeTimHolding = null;
         Connection connection = null;

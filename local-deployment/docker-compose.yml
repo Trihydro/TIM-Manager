@@ -36,7 +36,7 @@ services:
     entrypoint: ["/bin/sh", "kafka_init.sh"]
     
   ode:
-    image: usdotjpoode/jpo-ode:2024-q2
+    image: usdotjpoode/jpo-ode:2025-q1
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -70,7 +70,7 @@ services:
         max-file: "5"
     
   adm:
-    image: usdotjpoode/asn1_codec:2024-q2
+    image: usdotjpoode/asn1_codec:2025-q1
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       ACM_CONFIG_FILE: adm.properties
@@ -88,7 +88,7 @@ services:
     restart: on-failure
   
   aem:
-    image: usdotjpoode/asn1_codec:2024-q2
+    image: usdotjpoode/asn1_codec:2025-q1
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       ACM_CONFIG_FILE: aem.properties
@@ -107,7 +107,7 @@ services:
 
   # Note: the SDX does not accept unsigned data, so this is commented out for now
   # sdw_depositor:
-  #   image: usdotjpoode/jpo-sdw-depositor:2024-q2
+  #   image: usdotjpoode/jpo-sdw-depositor:2025-q1
   #   environment:
   #     DOCKER_HOST_IP: ${DOCKER_HOST_IP}
   #     SDW_EMAIL_LIST: test@gmail.com

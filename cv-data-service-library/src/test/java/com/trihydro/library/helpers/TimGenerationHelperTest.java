@@ -798,7 +798,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         String exMsg = String.format(
-            "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+            "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
             activeTimId);
         Assertions.assertEquals(activeTimId, ex.getActiveTimId());
         Assertions.assertEquals(exMsg, ex.getExceptionMessage());
@@ -808,8 +808,7 @@ public class TimGenerationHelperTest {
         verifyNoMoreInteractions(mockMilepostService);
         verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockMilepostReduction,
             mockRegionService, mockRsuService, mockConfig, mockOdeService,
-            mockActiveTimHoldingService,
-            mockSdwService);
+            mockActiveTimHoldingService, mockSdwService);
     }
 
     @Test

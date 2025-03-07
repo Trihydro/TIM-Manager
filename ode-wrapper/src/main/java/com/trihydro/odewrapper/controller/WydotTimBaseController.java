@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import com.trihydro.library.model.ResubmitTimException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -701,9 +702,15 @@ public abstract class WydotTimBaseController {
             utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
             return;
         }
+        Milepost firstPoint = milepostsAll.get(0);
+        Milepost secondPoint = milepostsAll.get(1);
 
-        var anchor = attemptToCalculateAnchorPoint(wydotTim.getClientId(), milepostsAll);
-        if (anchor == null) {
+        Milepost anchor;
+        try {
+            anchor = getAnchorPoint(firstPoint, secondPoint);
+        } catch (Utility.IdenticalPointsException e) {
+            utility.logWithDate(
+                "Identical points found during anchor point calculation, unable to generate TIM.");
             return;
         }
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
@@ -748,37 +755,6 @@ public abstract class WydotTimBaseController {
         timToSend.getRequest().setRsus(null);
         wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint,
             reducedMileposts);
-    }
-
-    private Milepost attemptToCalculateAnchorPoint(String clientId, List<Milepost> allMps) {
-        Milepost firstPoint = allMps.get(0);
-        Milepost secondPoint = allMps.get(1);
-
-        try {
-            return getAnchorPoint(firstPoint, secondPoint);
-        } catch (Utility.IdenticalPointsException e) {
-            utility.logWithDate(
-                "Identical points found, attempting to use next two points for anchor");
-
-            if (allMps.size() < 3) {
-                utility.logWithDate(String.format(
-                    "Unable to resubmit TIM, first two mileposts are identical and less than 3 mileposts, unable to determine anchor for active TIM with client id %s",
-                    clientId));
-                return null;
-            }
-
-            firstPoint = allMps.get(1);
-            secondPoint = allMps.get(2);
-
-            try {
-                return getAnchorPoint(firstPoint, secondPoint);
-            } catch (Utility.IdenticalPointsException e2) {
-                utility.logWithDate(String.format(
-                    "First three mileposts are identical, unable to determine anchor for Active_Tim %s",
-                    clientId));
-                return null;
-            }
-        }
     }
 
     /**

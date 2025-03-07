@@ -165,10 +165,15 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
-                if (anchorMp == null) {
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
+
+                Milepost anchorMp;
+                try {
+                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                } catch (Utility.IdenticalPointsException e) {
                     String exMsg = String.format(
-                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
                     utility.logWithDate(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
@@ -300,10 +305,15 @@ public class TimGenerationHelper {
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
-            Milepost anchorMp = attemptToCalculateAnchorPoint(tum.getActiveTimId(), allMps);
-            if (anchorMp == null) {
+            Milepost firstPoint = allMps.get(0);
+            Milepost secondPoint = allMps.get(1);
+
+            Milepost anchorMp;
+            try {
+                anchorMp = getAnchorPoint(firstPoint, secondPoint);
+            } catch (Utility.IdenticalPointsException e) {
                 String exMsg = String.format(
-                    "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                    "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                     tum.getActiveTimId());
                 utility.logWithDate(exMsg);
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
@@ -405,13 +415,18 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
-                if (anchorMp == null) {
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
+
+                Milepost anchorMp;
+                try {
+                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                } catch (Utility.IdenticalPointsException e) {
                     String exMsg = String.format(
-                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
                     utility.logWithDate(exMsg);
-                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     continue;
                 }
 
@@ -493,13 +508,18 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
-                if (anchorMp == null) {
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
+
+                Milepost anchorMp;
+                try {
+                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                } catch (Utility.IdenticalPointsException e) {
                     String exMsg = String.format(
-                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
                     utility.logWithDate(exMsg);
-                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     continue;
                 }
 
@@ -580,13 +600,18 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
-                if (anchorMp == null) {
+                Milepost firstPoint = allMps.get(0);
+                Milepost secondPoint = allMps.get(1);
+
+                Milepost anchorMp;
+                try {
+                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                } catch (Utility.IdenticalPointsException e) {
                     String exMsg = String.format(
-                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
                     utility.logWithDate(exMsg);
-                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     continue;
                 }
 
@@ -1192,37 +1217,6 @@ public class TimGenerationHelper {
             System.out.println("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
-    }
-
-    private Milepost attemptToCalculateAnchorPoint(Long activeTimId, List<Milepost> allMps) {
-        Milepost firstPoint = allMps.get(0);
-        Milepost secondPoint = allMps.get(1);
-
-        try {
-            return getAnchorPoint(firstPoint, secondPoint);
-        } catch (Utility.IdenticalPointsException e) {
-            utility.logWithDate(
-                "Identical points found, attempting to use next two points for anchor");
-
-            if (allMps.size() < 3) {
-                utility.logWithDate(String.format(
-                    "Unable to resubmit TIM, first two mileposts are identical for Active_Tim %d",
-                    activeTimId));
-                return null;
-            }
-
-            firstPoint = allMps.get(1);
-            secondPoint = allMps.get(2);
-
-            try {
-                return getAnchorPoint(firstPoint, secondPoint);
-            } catch (Utility.IdenticalPointsException e2) {
-                utility.logWithDate(String.format(
-                    "First three mileposts are identical, unable to determine anchor for Active_Tim %d",
-                    activeTimId));
-                return null;
-            }
-        }
     }
 
     /**

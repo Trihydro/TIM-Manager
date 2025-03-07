@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -770,6 +771,45 @@ public class TimGenerationHelperTest {
         verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService,
             mockRsuService, mockOdeService, mockActiveTimHoldingService);
+    }
+
+    @Test
+    public void resubmitToOde_TwoIdenticalMileposts() throws Utility.IdenticalPointsException {
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+
+        List<Milepost> mps = new ArrayList<>();
+        Milepost mp = new Milepost();
+        mp.setLatitude(BigDecimal.valueOf(1));
+        mp.setLongitude(BigDecimal.valueOf(2));
+        mps.add(mp);
+        mps.add(mp); // identical milepost
+        doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+
+        doThrow(new Utility.IdenticalPointsException()).when(mockUtility)
+            .calculateAnchorCoordinate(any(), any());
+
+        // Act
+        var exceptions = uut.resubmitToOde(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(1, exceptions.size());
+        var ex = exceptions.get(0);
+        String exMsg = String.format(
+            "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+            activeTimId);
+        Assertions.assertEquals(activeTimId, ex.getActiveTimId());
+        Assertions.assertEquals(exMsg, ex.getExceptionMessage());
+
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockUtility).calculateAnchorCoordinate(any(), any());
+        verifyNoMoreInteractions(mockMilepostService);
+        verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockMilepostReduction,
+            mockRegionService, mockRsuService, mockConfig, mockOdeService,
+            mockActiveTimHoldingService,
+            mockSdwService);
     }
 
     @Test

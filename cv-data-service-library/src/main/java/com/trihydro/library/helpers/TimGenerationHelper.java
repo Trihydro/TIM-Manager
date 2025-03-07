@@ -154,7 +154,7 @@ public class TimGenerationHelper {
                 }
 
                 WydotTim wydotTim = getWydotTimFromTum(tum);
-                List<Milepost> mps = new ArrayList<>();
+                List<Milepost> mps;
                 List<Milepost> allMps = getAllMps(wydotTim);
                 if (allMps.size() < 2) {
                     String exMsg = String.format(
@@ -165,9 +165,14 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(tum, exceptions, allMps);
+                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
                 if (anchorMp == null) {
-                    return null;
+                    String exMsg = String.format(
+                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -295,8 +300,13 @@ public class TimGenerationHelper {
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
-            Milepost anchorMp = attemptToCalculateAnchorPoint(tum, exceptions, allMps);
+            Milepost anchorMp = attemptToCalculateAnchorPoint(tum.getActiveTimId(), allMps);
             if (anchorMp == null) {
+                String exMsg = String.format(
+                    "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                    tum.getActiveTimId());
+                utility.logWithDate(exMsg);
+                exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
             List<Milepost> mps = milepostReduction.applyMilepostReductionAlgorithm(allMps,
@@ -324,7 +334,7 @@ public class TimGenerationHelper {
     }
 
     private List<Milepost> getAllMps(WydotTim wydotTim) {
-        List<Milepost> allMps = new ArrayList<>();
+        List<Milepost> allMps;
 
         utility.logWithDate(
             "Fetching mileposts for regular TIM with client id: " + wydotTim.getClientId());
@@ -395,9 +405,14 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(tum, exceptions, allMps);
+                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
                 if (anchorMp == null) {
-                    return null;
+                    String exMsg = String.format(
+                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -478,9 +493,14 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(tum, exceptions, allMps);
+                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
                 if (anchorMp == null) {
-                    return null;
+                    String exMsg = String.format(
+                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -560,9 +580,14 @@ public class TimGenerationHelper {
                     continue;
                 }
 
-                Milepost anchorMp = attemptToCalculateAnchorPoint(tum, exceptions, allMps);
+                Milepost anchorMp = attemptToCalculateAnchorPoint(activeTimId, allMps);
                 if (anchorMp == null) {
-                    return;
+                    String exMsg = String.format(
+                        "Unable to resubmit TIM, failed to calculate anchor point for Active_Tim %d",
+                        tum.getActiveTimId());
+                    utility.logWithDate(exMsg);
+                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
+                    continue;
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -678,8 +703,7 @@ public class TimGenerationHelper {
             utility.logWithDate(
                 "Less than 63 mileposts, building a single region from update model.",
                 TimGenerationHelper.class);
-            List<OdeTravelerInformationMessage.DataFrame.Region> regions =
-                new ArrayList<>();
+            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<>();
             OdeTravelerInformationMessage.DataFrame.Region singleRegion =
                 buildSingleRegionFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
             regions.add(singleRegion);
@@ -704,8 +728,7 @@ public class TimGenerationHelper {
     private List<OdeTravelerInformationMessage.DataFrame.Region> buildMultipleRegionsFromUpdateModel(
         TimUpdateModel aTim, List<Milepost> reducedMileposts, List<Milepost> allMps,
         Milepost anchor) {
-        List<OdeTravelerInformationMessage.DataFrame.Region> regions =
-            new ArrayList<>();
+        List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<>();
 
         int maxMilepostsPerRegion = 63;
 
@@ -1171,9 +1194,7 @@ public class TimGenerationHelper {
         return serviceRegion;
     }
 
-    private Milepost attemptToCalculateAnchorPoint(TimUpdateModel tum,
-                                                   List<ResubmitTimException> exceptions,
-                                                   List<Milepost> allMps) {
+    private Milepost attemptToCalculateAnchorPoint(Long activeTimId, List<Milepost> allMps) {
         Milepost firstPoint = allMps.get(0);
         Milepost secondPoint = allMps.get(1);
 
@@ -1184,11 +1205,9 @@ public class TimGenerationHelper {
                 "Identical points found, attempting to use next two points for anchor");
 
             if (allMps.size() < 3) {
-                String exMsg = String.format(
-                    "Unable to resubmit TIM, first two mileposts are identical for Active_Tim %d and less than 3 mileposts found",
-                    tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                utility.logWithDate(String.format(
+                    "Unable to resubmit TIM, first two mileposts are identical for Active_Tim %d",
+                    activeTimId));
                 return null;
             }
 
@@ -1198,11 +1217,9 @@ public class TimGenerationHelper {
             try {
                 return getAnchorPoint(firstPoint, secondPoint);
             } catch (Utility.IdenticalPointsException e2) {
-                String exMsg = String.format(
+                utility.logWithDate(String.format(
                     "First three mileposts are identical, unable to determine anchor for Active_Tim %d",
-                    tum.getActiveTimId());
-                utility.logWithDate(exMsg);
-                exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                    activeTimId));
                 return null;
             }
         }

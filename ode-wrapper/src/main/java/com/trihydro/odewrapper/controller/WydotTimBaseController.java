@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import com.google.gson.Gson;
@@ -55,7 +56,7 @@ public abstract class WydotTimBaseController {
     protected WydotTimService wydotTimService;
     protected TimTypeService timTypeService;
     private TimType timType = null;
-    private SetItisCodes setItisCodes;
+    private final SetItisCodes setItisCodes;
     protected ActiveTimService activeTimService;
     protected RestTemplateProvider restTemplateProvider;
     MilepostReduction milepostReduction;
@@ -65,10 +66,12 @@ public abstract class WydotTimBaseController {
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
 
-    public WydotTimBaseController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
-            TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
-            RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction, Utility _utility,
-            TimGenerationHelper _timGenerationHelper) {
+    public WydotTimBaseController(BasicConfiguration _basicConfiguration,
+                                  WydotTimService _wydotTimService, TimTypeService _timTypeService,
+                                  SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
+                                  RestTemplateProvider _restTemplateProvider,
+                                  MilepostReduction _milepostReduction, Utility _utility,
+                                  TimGenerationHelper _timGenerationHelper) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
@@ -107,8 +110,9 @@ public abstract class WydotTimBaseController {
         List<String> resultMessages = new ArrayList<String>();
 
         // get route number
-        if (tim.getDirection() != null)
+        if (tim.getDirection() != null) {
             result.setDirection(tim.getDirection());
+        }
 
         result.setClientId(tim.getClientId());
 
@@ -118,8 +122,9 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
-                && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") &&
+            !tim.getDirection().equalsIgnoreCase("d") &&
+            !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getMileMarker() != null && tim.getMileMarker() < 0) {
@@ -134,8 +139,9 @@ public abstract class WydotTimBaseController {
 
         // set itis codes
         List<String> itisCodes = setItisCodes.setItisCodesParking(tim);
-        if (itisCodes.size() == 0)
+        if (itisCodes.isEmpty()) {
             resultMessages.add("No ITIS codes found");
+        }
         result.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
@@ -149,8 +155,9 @@ public abstract class WydotTimBaseController {
         List<String> resultMessages = new ArrayList<String>();
 
         // get route number
-        if (tim.getDirection() != null)
+        if (tim.getDirection() != null) {
             result.setDirection(tim.getDirection());
+        }
         if (tim.getIncidentId() != null) {
             result.setClientId(tim.getIncidentId());
             tim.setClientId(tim.getIncidentId());
@@ -164,8 +171,9 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
-                && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") &&
+            !tim.getDirection().equalsIgnoreCase("d") &&
+            !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getIncidentId() == null) {
@@ -181,8 +189,9 @@ public abstract class WydotTimBaseController {
 
         // set itis codes
         List<String> itisCodes = setItisCodes.setItisCodesIncident(tim);
-        if (itisCodes.size() == 0)
+        if (itisCodes.isEmpty()) {
             resultMessages.add("No ITIS codes found");
+        }
         result.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
@@ -196,8 +205,9 @@ public abstract class WydotTimBaseController {
         List<String> resultMessages = new ArrayList<String>();
 
         // get route number
-        if (tim.getDirection() != null)
+        if (tim.getDirection() != null) {
             result.setDirection(tim.getDirection());
+        }
         if (tim.getId() != null) {
             result.setClientId(tim.getId());
             tim.setClientId(tim.getId());
@@ -211,8 +221,9 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
-                && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") &&
+            !tim.getDirection().equalsIgnoreCase("d") &&
+            !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -234,23 +245,28 @@ public abstract class WydotTimBaseController {
             resultMessages.add("Null value for schedStart");
         } else {
             try {
-                var convertedDate = LocalDate.parse(tim.getSchedStart(), DateTimeFormatter.ISO_LOCAL_DATE);
+                var convertedDate =
+                    LocalDate.parse(tim.getSchedStart(), DateTimeFormatter.ISO_LOCAL_DATE);
                 var startOfDay = convertedDate.atStartOfDay(ZoneId.systemDefault());
                 tim.setSchedStart(getIsoDateTimeString(startOfDay));
             } catch (DateTimeParseException e) {
-                resultMessages.add("Bad value supplied for schedStart. Should follow the format: yyyy-MM-dd");
+                resultMessages.add(
+                    "Bad value supplied for schedStart. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
         }
         if (tim.getSchedEnd() != null) {
             try {
-                var convertedDate = LocalDate.parse(tim.getSchedEnd(), DateTimeFormatter.ISO_LOCAL_DATE);
+                var convertedDate =
+                    LocalDate.parse(tim.getSchedEnd(), DateTimeFormatter.ISO_LOCAL_DATE);
                 // LocalTime.MAX sets the time to 11:59 PM. This is especially important when
                 // construction is only scheduled for a day (ex. 5-12 to 5-12)
-                var endOfDay = ZonedDateTime.of(LocalDateTime.of(convertedDate, LocalTime.MAX), ZoneId.systemDefault());
+                var endOfDay = ZonedDateTime.of(LocalDateTime.of(convertedDate, LocalTime.MAX),
+                    ZoneId.systemDefault());
                 tim.setSchedEnd(getIsoDateTimeString(endOfDay));
             } catch (DateTimeParseException e) {
-                resultMessages.add("Bad value supplied for schedEnd. Should follow the format: yyyy-MM-dd");
+                resultMessages.add(
+                    "Bad value supplied for schedEnd. Should follow the format: yyyy-MM-dd");
                 e.printStackTrace();
             }
         }
@@ -278,8 +294,9 @@ public abstract class WydotTimBaseController {
 
         // set itis codes
         List<String> itisCodes = setItisCodes.setItisCodesRw(tim);
-        if (itisCodes.size() == 0)
+        if (itisCodes.isEmpty()) {
             resultMessages.add("No ITIS codes found");
+        }
         result.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
@@ -298,17 +315,18 @@ public abstract class WydotTimBaseController {
         // return routes.contains(route);
 
         // Since routes are not loaded, assume all route are supported.
-        return !route.isEmpty() && route.length() > 0;
+        return !route.isEmpty();
     }
 
     protected ControllerResult validateInputRc(WydotTimRc tim) {
 
         ControllerResult result = new ControllerResult();
-        List<String> resultMessages = new ArrayList<String>();
+        List<String> resultMessages = new ArrayList<>();
 
         // get route number
-        if (tim.getDirection() != null)
+        if (tim.getDirection() != null) {
             result.setDirection(tim.getDirection());
+        }
 
         if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
@@ -316,8 +334,9 @@ public abstract class WydotTimBaseController {
             result.setRoute(tim.getRoute());
         }
         // if direction is not i/d/b fail
-        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i")
-                && !tim.getDirection().equalsIgnoreCase("d") && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i") &&
+            !tim.getDirection().equalsIgnoreCase("d") &&
+            !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -340,8 +359,9 @@ public abstract class WydotTimBaseController {
 
         // set itis codes
         List<String> itisCodes = setItisCodes.setItisCodesRc(tim);
-        if (itisCodes.size() == 0)
+        if (itisCodes.isEmpty()) {
             resultMessages.add("No ITIS codes found");
+        }
         result.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
@@ -351,7 +371,7 @@ public abstract class WydotTimBaseController {
 
     protected ControllerResult validateRcAc(WydotTimRc allClear) {
         ControllerResult result = new ControllerResult();
-        List<String> resultMessages = new ArrayList<String>();
+        List<String> resultMessages = new ArrayList<>();
 
         // All Clear must have a valid CLIENT_ID and DIRECTION
         if (StringUtils.isBlank(allClear.getRoadCode())) {
@@ -363,8 +383,9 @@ public abstract class WydotTimBaseController {
 
         if (allClear.getDirection() == null) {
             resultMessages.add("Null value for direction");
-        } else if (!allClear.getDirection().equalsIgnoreCase("i") && !allClear.getDirection().equalsIgnoreCase("d")
-                && !allClear.getDirection().equalsIgnoreCase("b")) {
+        } else if (!allClear.getDirection().equalsIgnoreCase("i") &&
+            !allClear.getDirection().equalsIgnoreCase("d") &&
+            !allClear.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         } else {
             result.setDirection(allClear.getDirection());
@@ -377,11 +398,12 @@ public abstract class WydotTimBaseController {
     protected ControllerResult validateInputVsl(WydotTimVsl tim) {
 
         ControllerResult result = new ControllerResult();
-        List<String> resultMessages = new ArrayList<String>();
+        List<String> resultMessages = new ArrayList<>();
 
         // get route number
-        if (tim.getDirection() != null)
+        if (tim.getDirection() != null) {
             result.setDirection(tim.getDirection());
+        }
 
         if (tim.getRoute() == null || !routeSupported(tim.getRoute())) {
             resultMessages.add("route not supported");
@@ -390,8 +412,9 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
-                && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") &&
+            !tim.getDirection().equalsIgnoreCase("d") &&
+            !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -414,8 +437,9 @@ public abstract class WydotTimBaseController {
 
         // set itis codes
         List<String> itisCodes = setItisCodes.setItisCodesVsl(tim);
-        if (itisCodes.size() == 0)
+        if (itisCodes.isEmpty()) {
             resultMessages.add("No ITIS codes found");
+        }
         result.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
@@ -426,11 +450,12 @@ public abstract class WydotTimBaseController {
     protected ControllerResult validateInputCc(WydotTimRc tim) {
 
         ControllerResult result = new ControllerResult();
-        List<String> resultMessages = new ArrayList<String>();
+        List<String> resultMessages = new ArrayList<>();
 
         // get route number
-        if (tim.getDirection() != null)
+        if (tim.getDirection() != null) {
             result.setDirection(tim.getDirection());
+        }
 
         if (tim.getSegment() != null) {
             result.setClientId(tim.getSegment());
@@ -446,8 +471,9 @@ public abstract class WydotTimBaseController {
         }
 
         // if direction is not i/d/b fail
-        if (!tim.getDirection().equalsIgnoreCase("i") && !tim.getDirection().equalsIgnoreCase("d")
-                && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (!tim.getDirection().equalsIgnoreCase("i") &&
+            !tim.getDirection().equalsIgnoreCase("d") &&
+            !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
         if (tim.getStartPoint() == null || !tim.getStartPoint().isValid()) {
@@ -468,8 +494,9 @@ public abstract class WydotTimBaseController {
 
         // set itis codes
         List<String> itisCodes = setItisCodes.setItisCodesFromAdvisoryArray(tim);
-        if (itisCodes.size() == 0)
+        if (itisCodes.isEmpty()) {
             resultMessages.add("No ITIS codes found");
+        }
         result.setItisCodes(itisCodes);
         tim.setItisCodes(itisCodes);
 
@@ -493,27 +520,35 @@ public abstract class WydotTimBaseController {
             return true;
         } else if (action.contains("delay_")) {
             String[] actionSplit = action.split("_");
-            if (actionSplit.length < 2)
+            if (actionSplit.length < 2) {
                 return false;
-            if (!actionSplit[0].equals("delay"))
+            }
+            if (!actionSplit[0].equals("delay")) {
                 return false;
-            if (!StringUtils.isNumeric(actionSplit[1]))
+            }
+            if (!StringUtils.isNumeric(actionSplit[1])) {
                 return false;
-            if (Float.parseFloat(actionSplit[1]) < 0)
+            }
+            if (Float.parseFloat(actionSplit[1]) < 0) {
                 return false;
+            }
             return true;
         } else if (action.equals("prepareStop")) {
             return true;
         } else if (action.contains("reduceSpeed_")) {
             String[] actionSplit = action.split("_");
-            if (actionSplit.length < 2)
+            if (actionSplit.length < 2) {
                 return false;
-            if (!actionSplit[0].equals("reduceSpeed"))
+            }
+            if (!actionSplit[0].equals("reduceSpeed")) {
                 return false;
-            if (!StringUtils.isNumeric(actionSplit[1]))
+            }
+            if (!StringUtils.isNumeric(actionSplit[1])) {
                 return false;
-            if (Float.parseFloat(actionSplit[1]) < 0)
+            }
+            if (Float.parseFloat(actionSplit[1]) < 0) {
                 return false;
+            }
             return true;
         }
         return false;
@@ -521,14 +556,15 @@ public abstract class WydotTimBaseController {
 
     protected ControllerResult validateInputBowr(WydotTimBowr tim) {
         ControllerResult toReturn = new ControllerResult();
-        List<String> resultMessages = new ArrayList<String>();
+        List<String> resultMessages = new ArrayList<>();
 
         // check direction
         if (tim.getDirection() != null) {
             toReturn.setDirection(tim.getDirection());
         }
-        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i")
-                && !tim.getDirection().equalsIgnoreCase("d") && !tim.getDirection().equalsIgnoreCase("b")) {
+        if (tim.getDirection() != null && !tim.getDirection().equalsIgnoreCase("i") &&
+            !tim.getDirection().equalsIgnoreCase("d") &&
+            !tim.getDirection().equalsIgnoreCase("b")) {
             resultMessages.add("direction not supported");
         }
 
@@ -596,8 +632,9 @@ public abstract class WydotTimBaseController {
         return toReturn;
     }
 
-    public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime, Integer pk,
-            ContentEnum content, TravelerInfoType frameType) {
+    public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime,
+                               String endDateTime, Integer pk, ContentEnum content,
+                               TravelerInfoType frameType) {
 
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
             var iTim = wydotTim.copy();
@@ -605,45 +642,51 @@ public abstract class WydotTimBaseController {
             iTim.setDirection("I");
             dTim.setDirection("D");
             // I
-            expireReduceCreateSendTims(iTim, timType, startDateTime, endDateTime, pk, content, frameType);
+            expireReduceCreateSendTims(iTim, timType, startDateTime, endDateTime, pk, content,
+                frameType);
             // D
-            expireReduceCreateSendTims(dTim, timType, startDateTime, endDateTime, pk, content, frameType);
+            expireReduceCreateSendTims(dTim, timType, startDateTime, endDateTime, pk, content,
+                frameType);
         } else {
-            expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType);
+            expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content,
+                frameType);
         }
     }
 
     public TimType getTimType(String timTypeName) {
 
-        if (timType != null && timType.getType() == timTypeName) {
+        if (timType != null && Objects.equals(timType.getType(), timTypeName)) {
             return timType;
         } else {
             // get tim type
-            timType = getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst().orElse(null);
+            timType =
+                getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst()
+                    .orElse(null);
 
             return timType;
         }
     }
 
     public List<TimType> getTimTypes() {
-        if (timTypes != null)
+        if (timTypes != null) {
             return timTypes;
-        else {
+        } else {
             timTypes = timTypeService.selectAll();
             return timTypes;
         }
     }
 
-    protected void expireReduceCreateSendTims(WydotTim wydotTim, TimType timType, String startDateTime,
-            String endDateTime,
-            Integer pk, ContentEnum content, TravelerInfoType frameType) {
+    protected void expireReduceCreateSendTims(WydotTim wydotTim, TimType timType,
+                                              String startDateTime, String endDateTime, Integer pk,
+                                              ContentEnum content, TravelerInfoType frameType) {
         // Clear any existing TIMs with the same client id
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
-        var existingTims = activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
+        var existingTims =
+            activeTimService.getActiveTimsByClientIdDirection(wydotTim.getClientId(), timTypeId,
                 wydotTim.getDirection());
 
         // Expire existing tims
-        List<Long> existingTimIds = new ArrayList<Long>();
+        List<Long> existingTimIds = new ArrayList<>();
         for (ActiveTim existingTim : existingTims) {
             existingTimIds.add(existingTim.getActiveTimId());
         }
@@ -658,25 +701,28 @@ public abstract class WydotTimBaseController {
             utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
             return;
         }
-        Milepost firstPoint = milepostsAll.get(0);
-        Milepost secondPoint = milepostsAll.get(1);
 
-        var anchor = getAnchorPoint(firstPoint, secondPoint);
+        var anchor = attemptToCalculateAnchorPoint(wydotTim.getClientId(), milepostsAll);
+        if (anchor == null) {
+            return;
+        }
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
-                configuration.getPathDistanceLimit());
+            configuration.getPathDistanceLimit());
 
-        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType, milepostsAll,
-                reducedMileposts, anchor);
+        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, content, frameType,
+            milepostsAll, reducedMileposts, anchor);
     }
 
     // creates a TIM and sends it to RSUs and Satellite
-    protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime, String endDateTime,
-            Integer pk, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
-            List<Milepost> reducedMileposts, Milepost anchor) {
+    protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime,
+                                  String endDateTime, Integer pk, ContentEnum content,
+                                  TravelerInfoType frameType, List<Milepost> allMileposts,
+                                  List<Milepost> reducedMileposts, Milepost anchor) {
 
         // create TIM
-        WydotTravelerInputData timToSend = wydotTimService.createTim(wydotTim, timType.getType(), startDateTime,
-                endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+        WydotTravelerInputData timToSend =
+            wydotTimService.createTim(wydotTim, timType.getType(), startDateTime, endDateTime,
+                content, frameType, allMileposts, reducedMileposts, anchor);
 
         if (timToSend == null) {
             return;
@@ -694,22 +740,56 @@ public abstract class WydotTimBaseController {
 
         if (Arrays.asList(configuration.getRsuRoutes()).contains(wydotTim.getRoute())) {
             // send TIM to RSUs
-            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, pk, endDateTime, endPoint);
+            wydotTimService.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, pk,
+                endDateTime, endPoint);
         }
         // send TIM to SDW
         // remove rsus from TIM
         timToSend.getRequest().setRsus(null);
-        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint, reducedMileposts);
+        wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint,
+            reducedMileposts);
+    }
+
+    private Milepost attemptToCalculateAnchorPoint(String clientId, List<Milepost> allMps) {
+        Milepost firstPoint = allMps.get(0);
+        Milepost secondPoint = allMps.get(1);
+
+        try {
+            return getAnchorPoint(firstPoint, secondPoint);
+        } catch (Utility.IdenticalPointsException e) {
+            utility.logWithDate(
+                "Identical points found, attempting to use next two points for anchor");
+
+            if (allMps.size() < 3) {
+                utility.logWithDate(String.format(
+                    "Unable to resubmit TIM, first two mileposts are identical and less than 3 mileposts, unable to determine anchor for active TIM with client id %s",
+                    clientId));
+                return null;
+            }
+
+            firstPoint = allMps.get(1);
+            secondPoint = allMps.get(2);
+
+            try {
+                return getAnchorPoint(firstPoint, secondPoint);
+            } catch (Utility.IdenticalPointsException e2) {
+                utility.logWithDate(String.format(
+                    "First three mileposts are identical, unable to determine anchor for Active_Tim %s",
+                    clientId));
+                return null;
+            }
+        }
     }
 
     /**
      * This method returns the anchor point for the given mileposts.
-     * 
+     *
      * @param firstPoint  The first milepost.
      * @param secondPoint The second milepost.
      * @return The anchor point as a Milepost.
      */
-    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint) {
+    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint)
+        throws Utility.IdenticalPointsException {
         Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
 
         Milepost anchor = new Milepost();

@@ -38,6 +38,7 @@ import com.trihydro.library.service.OdeService;
 import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.TimGenerationProps;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,6 +61,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 @Component
+@Slf4j
 public class TimGenerationHelper {
     private final Utility utility;
     private final DataFrameService dataFrameService;
@@ -81,8 +83,7 @@ public class TimGenerationHelper {
                                MilepostReduction _milepostReduction, TimGenerationProps _config,
                                RsuService _rsuService, OdeService _odeService,
                                ActiveTimHoldingService _activeTimHoldingService,
-                               SnmpHelper _snmpHelper,
-                               RegionNameTrimmer _regionNameTrimmer,
+                               SnmpHelper _snmpHelper, RegionNameTrimmer _regionNameTrimmer,
                                CreateBaseTimUtil _createBaseTimUtil) {
         gson = new Gson();
         utility = _utility;
@@ -122,8 +123,7 @@ public class TimGenerationHelper {
         List<ActiveTimValidationResult> validationResults) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (validationResults == null || validationResults.isEmpty()) {
-            utility.logWithDate("No validation results found to update and resubmit to ODE.",
-                TimGenerationHelper.class);
+            log.info("No validation results found to update and resubmit to ODE.");
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -157,7 +157,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -172,7 +172,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -184,7 +184,7 @@ public class TimGenerationHelper {
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -194,9 +194,9 @@ public class TimGenerationHelper {
 
                 // check for any exceptions while updating TIM
                 if (tim == null || !exceptions.isEmpty()) {
-                    utility.logWithDate(
-                        "Unable to update TIM (active_tim_id " + tum.getActiveTimId() +
-                            ") with validationResult: " + gson.toJson(validationResult));
+                    log.error(
+                        "Failed to update TIM for active_tim_id {} with ActiveTimValidationResult: {}",
+                        tum.getActiveTimId(), gson.toJson(validationResult));
                     continue;
                 }
                 WydotTravelerInputData timToSend = new WydotTravelerInputData();
@@ -206,16 +206,14 @@ public class TimGenerationHelper {
                     exceptions.addAll(extraEx);
                 }
             } catch (Exception ex) {
-                utility.logWithDate("Failed attempting to update TIM (active_tim_id " +
-                    validationResult.getActiveTim().getActiveTimId() +
-                    ") with ActiveTimValidationResult: " + gson.toJson(validationResult));
-                ex.printStackTrace();
+                log.error(
+                    "Failed attempting to update TIM (active_tim_id {}) with ActiveTimValidationResult: {}",
+                    validationResult.getActiveTim().getActiveTimId(), gson.toJson(validationResult),
+                    ex);
             }
         }
         if (!exceptions.isEmpty()) {
-            utility.logWithDate(
-                "Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
-                TimGenerationHelper.class);
+            log.error("Errors occurred while resubmitting TIMs: {}", gson.toJson(exceptions));
         }
         return exceptions;
     }
@@ -257,7 +255,7 @@ public class TimGenerationHelper {
                     } catch (ParseException e) {
                         String exMsg = String.format("Failed to parse associated FEU date: %s",
                             ate.getTmddValue());
-                        utility.logWithDate(exMsg);
+                        log.error(exMsg, e);
                         exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     }
                     break;
@@ -298,7 +296,7 @@ public class TimGenerationHelper {
                 String exMsg = String.format(
                     "Unable to resubmit TIM, less than 2 mileposts found to determine service area for Active_Tim %d",
                     tum.getActiveTimId());
-                utility.logWithDate(exMsg);
+                log.error(exMsg);
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
@@ -312,7 +310,7 @@ public class TimGenerationHelper {
                 String exMsg = String.format(
                     "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                     tum.getActiveTimId());
-                utility.logWithDate(exMsg);
+                log.error(exMsg, e);
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
@@ -322,7 +320,7 @@ public class TimGenerationHelper {
             if (tim == null) {
                 String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                     tum.getActiveTimId());
-                utility.logWithDate(exMsg);
+                log.error(exMsg);
                 exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                 return null;
             }
@@ -343,12 +341,11 @@ public class TimGenerationHelper {
     private List<Milepost> getAllMps(WydotTim wydotTim) {
         List<Milepost> allMps;
 
-        utility.logWithDate(
-            "Fetching mileposts for regular TIM with client id: " + wydotTim.getClientId());
+        log.info("Fetching mileposts for regular TIM with client id: {}", wydotTim.getClientId());
         if (wydotTim.getEndPoint() != null) {
             allMps = milepostService.getMilepostsByStartEndPointDirection(wydotTim);
-            utility.logWithDate(String.format("Found %d mileposts between %s and %s", allMps.size(),
-                gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint())));
+            log.info("Found {} mileposts between {} and {}", allMps.size(),
+                gson.toJson(wydotTim.getStartPoint()), gson.toJson(wydotTim.getEndPoint()));
         } else {
             // point incident
             MilepostBuffer mpb = new MilepostBuffer();
@@ -357,8 +354,8 @@ public class TimGenerationHelper {
             mpb.setDirection(wydotTim.getDirection());
             mpb.setPoint(wydotTim.getStartPoint());
             allMps = milepostService.getMilepostsByPointWithBuffer(mpb);
-            utility.logWithDate(String.format("Found %d mileposts for point %s", allMps.size(),
-                gson.toJson(wydotTim.getStartPoint())));
+            log.info("Found {} mileposts for point {}", allMps.size(),
+                gson.toJson(wydotTim.getStartPoint()));
         }
 
         return allMps;
@@ -373,8 +370,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> resubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
-            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...",
-                TimGenerationHelper.class);
+            log.info("No active TIMs found to resubmit to ODE. Returning...");
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -407,7 +403,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, less than 2 mileposts found for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -422,7 +418,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg, e);
                     exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     continue;
                 }
@@ -435,7 +431,7 @@ public class TimGenerationHelper {
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -450,9 +446,7 @@ public class TimGenerationHelper {
             }
         }
         if (!exceptions.isEmpty()) {
-            utility.logWithDate(
-                "Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
-                TimGenerationHelper.class);
+            log.error("Errors occurred while resubmitting TIMs: {}", gson.toJson(exceptions));
         }
         return exceptions;
     }
@@ -466,8 +460,7 @@ public class TimGenerationHelper {
     public List<ResubmitTimException> resetTimStartTimeAndResubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
-            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...",
-                TimGenerationHelper.class);
+            log.info("No active TIMs found to resubmit to ODE. Returning...");
             return exceptions;
         }
         // iterate over tims, fetch, and push out
@@ -500,7 +493,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, less than 2 mileposts found for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -515,7 +508,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg, e);
                     exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     continue;
                 }
@@ -528,7 +521,7 @@ public class TimGenerationHelper {
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -543,9 +536,7 @@ public class TimGenerationHelper {
             }
         }
         if (!exceptions.isEmpty()) {
-            utility.logWithDate(
-                "Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
-                TimGenerationHelper.class);
+            log.error("Errors occurred while resubmitting TIMs: {}", gson.toJson(exceptions));
         }
         return exceptions;
     }
@@ -558,8 +549,7 @@ public class TimGenerationHelper {
     public void expireTimAndResubmitToOde(List<Long> activeTimIds) {
         List<ResubmitTimException> exceptions = new ArrayList<>();
         if (activeTimIds == null) {
-            utility.logWithDate("No active TIMs found to resubmit to ODE. Returning...",
-                TimGenerationHelper.class);
+            log.info("No active TIMs found to resubmit to ODE. Returning...");
             return;
         }
         // iterate over tims, fetch, and push out
@@ -592,7 +582,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, less than 2 mileposts found for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -607,7 +597,7 @@ public class TimGenerationHelper {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg, e);
                     exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
                     continue;
                 }
@@ -621,7 +611,7 @@ public class TimGenerationHelper {
                 if (tim == null) {
                     String exMsg = String.format("Failed to instantiate TIM for active_tim_id %d",
                         tum.getActiveTimId());
-                    utility.logWithDate(exMsg);
+                    log.error(exMsg);
                     exceptions.add(new ResubmitTimException(activeTimId, exMsg));
                     continue;
                 }
@@ -637,9 +627,7 @@ public class TimGenerationHelper {
             }
         }
         if (!exceptions.isEmpty()) {
-            utility.logWithDate(
-                "Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
-                TimGenerationHelper.class);
+            log.error("Errors occurred while resubmitting TIMs: {}", gson.toJson(exceptions));
         }
     }
 
@@ -679,7 +667,7 @@ public class TimGenerationHelper {
         // check to see if we have any itis codes
         // if not, just continue on
         if (dataFrame.getItems() == null || dataFrame.getItems().length == 0) {
-            utility.logWithDate(
+            log.info(
                 "No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
             return null;
         }
@@ -722,18 +710,14 @@ public class TimGenerationHelper {
                                                                               List<Milepost> allMps,
                                                                               Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
-            utility.logWithDate(
-                "Less than 63 mileposts, building a single region from update model.",
-                TimGenerationHelper.class);
+            log.info("Less than 63 mileposts, building a single region from update model.");
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<>();
             OdeTravelerInformationMessage.DataFrame.Region singleRegion =
                 buildSingleRegionFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
             regions.add(singleRegion);
             return regions;
         } else {
-            utility.logWithDate(
-                "More than 63 mileposts, building multiple regions from update model.",
-                TimGenerationHelper.class);
+            log.info("More than 63 mileposts, building multiple regions from update model.");
             return buildMultipleRegionsFromUpdateModel(aTim, reducedMileposts, allMps, anchor);
         }
     }
@@ -772,9 +756,7 @@ public class TimGenerationHelper {
                 nextAnchor = reducedMileposts.get(i);
             }
         }
-
-        utility.logWithDate("Built " + regions.size() + " regions from update model.",
-            TimGenerationHelper.class);
+        log.info("Built {} regions from update model.", regions.size());
         return regions;
     }
 
@@ -799,12 +781,10 @@ public class TimGenerationHelper {
         } else {
             String exMsg = "active_tim_id " + tum.getActiveTimId() +
                 " not sent to SDX (no SAT_RECORD_ID found in database)";
-            utility.logWithDate(exMsg);
+            log.error(exMsg);
         }
         if (!exceptions.isEmpty()) {
-            utility.logWithDate(
-                "Errors occurred while resubmitting TIMs: " + gson.toJson(exceptions),
-                TimGenerationHelper.class);
+            log.error("Errors occurred while resubmitting TIMs: {}", gson.toJson(exceptions));
         }
         return exceptions;
     }
@@ -1014,8 +994,7 @@ public class TimGenerationHelper {
         List<WydotRsuTim> wydotRsus = rsuService.getFullRsusTimIsOn(aTim.getTimId());
         List<WydotRsu> dbRsus = new ArrayList<WydotRsu>();
         if (wydotRsus == null || wydotRsus.size() <= 0) {
-            utility.logWithDate(
-                "RSUs not found to update db for active_tim_id " + aTim.getActiveTimId());
+            log.info("No RSUs found for active_tim_id {}", aTim.getActiveTimId());
 
             dbRsus = rsuService.getRsusByLatLong(aTim.getDirection(), aTim.getStartPoint(),
                 aTim.getEndPoint(), aTim.getRoute());
@@ -1023,7 +1002,7 @@ public class TimGenerationHelper {
             // if no RSUs found
             if (dbRsus.isEmpty()) {
                 exMsg = "No possible RSUs found for active_tim_id " + aTim.getActiveTimId();
-                utility.logWithDate(exMsg);
+                log.error(exMsg);
                 return exMsg;
             }
         }
@@ -1056,10 +1035,10 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                    log.error("Failed to trim region name", e);
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
-                utility.logWithDate("Sending TIM to RSU for refresh: " + gson.toJson(timToSend));
+                log.info("Sending TIM to RSU for refresh: {}", gson.toJson(timToSend));
 
                 var rsuClearExMsg =
                     odeService.deleteTimFromRsu(rsu, Integer.valueOf(wydotRsu.getIndex()));
@@ -1081,7 +1060,7 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                    log.error("Failed to trim region name", e);
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = dbRsus.get(i);
@@ -1098,7 +1077,7 @@ public class TimGenerationHelper {
                         "Returning without sending TIM to RSU. submitTimQuery failed for RSU " +
                             gson.toJson(wydotRsu);
                     exMsg += tmpErrMsg + "\n";
-                    utility.logWithDate(tmpErrMsg);
+                    log.error(tmpErrMsg);
                     continue;
                 }
                 // Fetch existing active_tim_holding records. If other TIMs are en route to this
@@ -1124,7 +1103,7 @@ public class TimGenerationHelper {
                     var tmpErrMsg =
                         "Unable to find an available index for RSU " + gson.toJson(wydotRsu);
                     exMsg += tmpErrMsg + "\n";
-                    utility.logWithDate(tmpErrMsg);
+                    log.error(tmpErrMsg);
                     continue;
                 }
 
@@ -1164,7 +1143,7 @@ public class TimGenerationHelper {
         try {
             regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
         } catch (IllegalArgumentException e) {
-            utility.logWithDate("Failed to trim region name: " + e.getMessage());
+            log.error("Failed to trim region name", e);
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
@@ -1175,7 +1154,7 @@ public class TimGenerationHelper {
         createNewActiveTimHoldingRecord(timToSend.getTim().getPacketID(), aTim, null, null,
             aTim.getSatRecordId());
 
-        utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
+        log.info("Sending TIM to SDW for refresh: {}", gson.toJson(timToSend));
         return odeService.updateTimOnSdw(timToSend);
     }
 

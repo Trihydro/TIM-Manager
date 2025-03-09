@@ -1055,19 +1055,19 @@ public class TimGenerationHelper {
         } else {
             // we don't have any existing RSUs, but some fall within the boundary so send
             // new ones there. We need to update requestName in this case
-            for (int i = 0; i < dbRsus.size(); i++) {
-                String regionName = getRsuRegionName(aTim, dbRsus.get(i));
+            for (WydotRsu rsu : dbRsus) {
+                String regionName = getRsuRegionName(aTim, rsu);
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
                     log.error("Failed to trim region name", e);
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
-                rsus[0] = dbRsus.get(i);
+                rsus[0] = rsu;
                 timToSend.getRequest().setRsus(rsus);
 
                 // get next index
-                TimQuery timQuery = odeService.submitTimQuery(dbRsus.get(i), 0);
+                TimQuery timQuery = odeService.submitTimQuery(rsu, 0);
 
                 // query failed, don't send TIM
                 // log the error and continue
@@ -1083,14 +1083,14 @@ public class TimGenerationHelper {
                 // Fetch existing active_tim_holding records. If other TIMs are en route to this
                 // RSU, make sure we don't overwrite their claimed indexes
                 List<ActiveTimHolding> existingHoldingRecords =
-                    activeTimHoldingService.getActiveTimHoldingForRsu(dbRsus.get(i).getRsuTarget());
+                    activeTimHoldingService.getActiveTimHoldingForRsu(rsu.getRsuTarget());
                 existingHoldingRecords.forEach(x -> timQuery.appendIndex(x.getRsuIndex()));
 
                 // Finally, fetch all active_tims that are supposed to be on this RSU. Some may
                 // not be there, due to network or RSU issues. Make sure we don't claim an index
                 // that's already been claimed.
                 List<Integer> claimedIndexes =
-                    rsuService.getActiveRsuTimIndexes(dbRsus.get(i).getRsuId());
+                    rsuService.getActiveRsuTimIndexes(rsu.getRsuId());
                 claimedIndexes.forEach(x -> timQuery.appendIndex(x));
 
                 Integer nextRsuIndex =
@@ -1109,7 +1109,7 @@ public class TimGenerationHelper {
 
                 // create new active_tim_holding record, to account for any index changes
                 createNewActiveTimHoldingRecord(timToSend.getTim().getPacketID(), aTim,
-                    dbRsus.get(i).getRsuTarget(), nextRsuIndex, null);
+                    rsu.getRsuTarget(), nextRsuIndex, null);
 
                 // set msgCnt to 1 and create new packetId
                 timToSend.getTim().setMsgCnt(1);
@@ -1119,7 +1119,7 @@ public class TimGenerationHelper {
                 if (!StringUtils.isEmpty(newRsuEx)) {
                     exMsg += newRsuEx + "\n";
                 }
-                rsus[0] = dbRsus.get(i);
+                rsus[0] = rsu;
                 timToSend.getRequest().setRsus(rsus);
             }
         }

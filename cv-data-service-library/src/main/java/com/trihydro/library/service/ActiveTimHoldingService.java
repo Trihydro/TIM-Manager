@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ActiveTimHoldingService extends CvDataServiceLibrary {
 
-    public long insertActiveTimHolding(ActiveTimHolding activeTimHolding) {
+    public void insertActiveTimHolding(ActiveTimHolding activeTimHolding) {
         String url = String.format("%s/active-tim-holding/add", config.getCvRestService());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -23,7 +23,6 @@ public class ActiveTimHoldingService extends CvDataServiceLibrary {
             new HttpEntity<>(activeTimHolding, headers);
         ResponseEntity<Long> response = restTemplateProvider.GetRestTemplate()
             .exchange(url, HttpMethod.POST, entity, Long.class);
-        return response.getBody();
     }
 
     public List<ActiveTimHolding> getActiveTimHoldingForRsu(String ipv4Address) {

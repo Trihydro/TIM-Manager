@@ -1132,17 +1132,8 @@ public class TimGenerationHelper {
                 }
 
                 // create new active_tim_holding record, to account for any index changes
-                WydotTim wydotTim = new WydotTim();
-                wydotTim.setClientId(aTim.getClientId());
-                wydotTim.setDirection(aTim.getDirection());
-                wydotTim.setStartPoint(aTim.getStartPoint());
-                wydotTim.setEndPoint(aTim.getEndPoint());
-                ActiveTimHolding activeTimHolding =
-                    new ActiveTimHolding(wydotTim, dbRsus.get(i).getRsuTarget(), null,
-                        aTim.getEndPoint());
-                activeTimHolding.setRsuIndex(nextRsuIndex);
-                activeTimHolding.setPacketId(timToSend.getTim().getPacketID());
-                activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
+                createNewActiveTimHoldingRecord(timToSend.getTim().getPacketID(), aTim,
+                    dbRsus.get(i).getRsuTarget(), nextRsuIndex, null);
 
                 // set msgCnt to 1 and create new packetId
                 timToSend.getTim().setMsgCnt(1);
@@ -1182,6 +1173,10 @@ public class TimGenerationHelper {
 
         // set sdw block in TIM
         timToSend.getRequest().setSdw(sdw);
+
+        // create new active_tim_holding record
+        createNewActiveTimHoldingRecord(timToSend.getTim().getPacketID(), aTim, null, null,
+            aTim.getSatRecordId());
 
         utility.logWithDate("Sending TIM to SDW for refresh: " + gson.toJson(timToSend));
         return odeService.updateTimOnSdw(timToSend);
@@ -1236,5 +1231,36 @@ public class TimGenerationHelper {
         anchor.setMilepost(firstPoint.getMilepost());
         anchor.setDirection(firstPoint.getDirection());
         return anchor;
+    }
+
+    /**
+     * Creates a new ActiveTimHolding record and inserts it into the database.
+     *
+     * @param packetId     The packet ID associated with the TIM.
+     * @param aTim         The TimUpdateModel containing the TIM update information.
+     * @param rsuTarget    The target RSU (Road Side Unit) for the TIM.
+     * @param nextRsuIndex The next available RSU index.
+     * @param satRecordId  The satellite record ID, if applicable.
+     */
+    private void createNewActiveTimHoldingRecord(String packetId, TimUpdateModel aTim,
+                                                 String rsuTarget, Integer nextRsuIndex,
+                                                 String satRecordId) {
+        // Create a new WydotTim object and set its properties from the TimUpdateModel
+        WydotTim wydotTim = new WydotTim();
+        wydotTim.setClientId(aTim.getClientId());
+        wydotTim.setDirection(aTim.getDirection());
+        wydotTim.setStartPoint(aTim.getStartPoint());
+        wydotTim.setEndPoint(aTim.getEndPoint());
+
+        // Create a new ActiveTimHolding object with the WydotTim, RSU target, satellite record ID, and end point
+        ActiveTimHolding activeTimHolding =
+            new ActiveTimHolding(wydotTim, rsuTarget, satRecordId, aTim.getEndPoint());
+
+        // Set the RSU index and packet ID for the ActiveTimHolding
+        activeTimHolding.setRsuIndex(nextRsuIndex);
+        activeTimHolding.setPacketId(packetId);
+
+        // Insert the ActiveTimHolding record into the database
+        activeTimHoldingService.insertActiveTimHolding(activeTimHolding);
     }
 }

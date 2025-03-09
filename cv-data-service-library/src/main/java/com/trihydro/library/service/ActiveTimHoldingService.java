@@ -19,10 +19,8 @@ public class ActiveTimHoldingService extends CvDataServiceLibrary {
         String url = String.format("%s/active-tim-holding/add", config.getCvRestService());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<ActiveTimHolding> entity =
-            new HttpEntity<>(activeTimHolding, headers);
-        ResponseEntity<Long> response = restTemplateProvider.GetRestTemplate()
-            .exchange(url, HttpMethod.POST, entity, Long.class);
+        HttpEntity<ActiveTimHolding> entity = new HttpEntity<>(activeTimHolding, headers);
+        restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.POST, entity, Long.class);
     }
 
     public List<ActiveTimHolding> getActiveTimHoldingForRsu(String ipv4Address) {

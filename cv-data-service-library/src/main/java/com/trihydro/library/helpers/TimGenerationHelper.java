@@ -35,9 +35,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.DataFrameService;
 import com.trihydro.library.service.MilepostService;
 import com.trihydro.library.service.OdeService;
-import com.trihydro.library.service.PathNodeLLService;
 import com.trihydro.library.service.RsuService;
-import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimGenerationProps;
 
 import org.apache.commons.lang3.StringUtils;
@@ -79,12 +77,11 @@ public class TimGenerationHelper {
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
-                               PathNodeLLService _pathNodeLLService,
                                ActiveTimService _activeTimService, MilepostService _milepostService,
                                MilepostReduction _milepostReduction, TimGenerationProps _config,
                                RsuService _rsuService, OdeService _odeService,
                                ActiveTimHoldingService _activeTimHoldingService,
-                               SdwService _sdwService, SnmpHelper _snmpHelper,
+                               SnmpHelper _snmpHelper,
                                RegionNameTrimmer _regionNameTrimmer,
                                CreateBaseTimUtil _createBaseTimUtil) {
         gson = new Gson();

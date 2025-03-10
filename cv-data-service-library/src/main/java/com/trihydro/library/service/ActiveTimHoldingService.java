@@ -32,12 +32,20 @@ public class ActiveTimHoldingService extends CvDataServiceLibrary {
     }
 
     public List<ActiveTimHolding> getAllRecords() {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Not implemented yet");
+        String url = String.format("%s/active-tim-holding/get-all", config.getCvRestService());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<ActiveTimHolding[]> response = restTemplateProvider.GetRestTemplate()
+            .exchange(url, HttpMethod.GET, entity, ActiveTimHolding[].class);
+        return Arrays.asList(response.getBody());
     }
 
     public boolean deleteActiveTimHolding(Long activeTimHoldingId) {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Not implemented yet");
+        String url = String.format("%s/active-tim-holding/delete/%d", config.getCvRestService(),
+            activeTimHoldingId);
+        ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url,
+            HttpMethod.DELETE, null, Boolean.class);
+        return response.getBody();
     }
 }

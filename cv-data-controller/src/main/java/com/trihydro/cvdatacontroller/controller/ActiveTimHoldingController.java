@@ -248,4 +248,16 @@ public class ActiveTimHoldingController extends BaseController {
             }
         }
     }
+
+    @RequestMapping(value = "/get-all", produces = "application/json", method = RequestMethod.GET)
+    public ResponseEntity<List<ActiveTimHolding>> getAllRecords() {
+        // TODO: Implement this method
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    @RequestMapping(value = "/delete/{activeTimHoldingId}", produces = "application/json", method = RequestMethod.DELETE)
+    public ResponseEntity<Boolean> deleteActiveTimHolding(@PathVariable Long activeTimHoldingId) {
+        // TODO: Implement this method
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }

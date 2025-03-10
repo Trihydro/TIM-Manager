@@ -251,7 +251,12 @@ public class ActiveTimService extends CvDataServiceLibrary {
     }
 
     public List<ActiveTim> getAllRecords() {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        String url = String.format("%s/active-tim/get-all", config.getCvRestService());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<ActiveTim[]> response = restTemplateProvider.GetRestTemplate()
+            .exchange(url, HttpMethod.GET, entity, ActiveTim[].class);
+        return Arrays.asList(response.getBody());
     }
 }

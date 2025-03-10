@@ -1723,4 +1723,10 @@ public class ActiveTimController extends BaseController {
         }
         return ResponseEntity.ok(success);
     }
+
+    @RequestMapping(value = "/get-all", method = RequestMethod.GET)
+    public ResponseEntity<List<ActiveTim>> getAllRecords() {
+        // TODO: Implement this method
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }

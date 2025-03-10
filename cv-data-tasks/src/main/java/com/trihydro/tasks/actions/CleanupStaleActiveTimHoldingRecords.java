@@ -30,15 +30,18 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
     public void run() {
         log.info("Running...");
 
-        // If no stale records identified last run, this could be the first time the task runs, skip the process
-        if (staleRecordsIdentifiedLastRun.isEmpty()) {
-            log.info("No stale records identified last run. This could be the first time the task runs. Skipping...");
-            return;
-        }
-
         // Retrieve all active_tim_holding records
         log.info("Retrieving all active_tim_holding records...");
         List<ActiveTimHolding> currentRecords = retrieveAllActiveTimHoldingRecords();
+
+        // If no stale records identified last run, this could be the first time the task runs, so add all active_tim_holding records to staleRecords set
+        if (staleRecordsIdentifiedLastRun.isEmpty()) {
+            log.info("No stale records identified last run. Adding all active_tim_holding records to staleRecords set...");
+            for (ActiveTimHolding record : currentRecords) {
+                staleRecordsIdentifiedLastRun.add(record.getActiveTimHoldingId());
+            }
+            return;
+        }
 
         // Separate likely stale active_tim_holding records
         log.info("Identifying likely stale active_tim_holding records...");

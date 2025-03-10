@@ -251,13 +251,89 @@ public class ActiveTimHoldingController extends BaseController {
 
     @RequestMapping(value = "/get-all", produces = "application/json", method = RequestMethod.GET)
     public ResponseEntity<List<ActiveTimHolding>> getAllRecords() {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        List<ActiveTimHolding> holdings = new ArrayList<>();
+
+        try {
+            connection = dbInteractions.getConnectionPool();
+            statement = connection.createStatement();
+            String query = "select * from active_tim_holding";
+            rs = statement.executeQuery(query);
+
+            // convert to ActiveTim object
+            while (rs.next()) {
+                ActiveTimHolding activeTimHolding = new ActiveTimHolding();
+                activeTimHolding.setActiveTimHoldingId(rs.getLong("ACTIVE_TIM_HOLDING_ID"));
+                activeTimHolding.setClientId(rs.getString("CLIENT_ID"));
+                activeTimHolding.setDirection(rs.getString("DIRECTION"));
+                activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
+                activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+                activeTimHolding.setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"),
+                    rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"),
+                    rs.getBigDecimal("END_LONGITUDE")));
+                activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
+                int rsu_index = rs.getInt("RSU_INDEX");
+                if (!rs.wasNull()) {
+                    activeTimHolding.setRsuIndex(rsu_index);
+                }
+                activeTimHolding.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+                activeTimHolding.setPacketId(rs.getString("PACKET_ID"));
+                holdings.add(activeTimHolding);
+            }
+            return ResponseEntity.ok(holdings);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null) {
+                    statement.close();
+                }
+                // return connection back to pool
+                if (connection != null) {
+                    connection.close();
+                }
+                // close result set
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @RequestMapping(value = "/delete/{activeTimHoldingId}", produces = "application/json", method = RequestMethod.DELETE)
     public ResponseEntity<Boolean> deleteActiveTimHolding(@PathVariable Long activeTimHoldingId) {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            String deleteQueryStatement = "delete from active_tim_holding where active_tim_holding_id = ?";
+            connection = dbInteractions.getConnectionPool();
+            preparedStatement = connection.prepareStatement(deleteQueryStatement);
+            preparedStatement.setLong(1, activeTimHoldingId);
+            dbInteractions.executeAndLog(preparedStatement, "active tim holding");
+            return ResponseEntity.ok(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        } finally {
+            try {
+                // close prepared statement
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                // return connection back to pool
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

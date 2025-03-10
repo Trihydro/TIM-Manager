@@ -1726,7 +1726,38 @@ public class ActiveTimController extends BaseController {
 
     @RequestMapping(value = "/get-all", method = RequestMethod.GET)
     public ResponseEntity<List<ActiveTim>> getAllRecords() {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Not implemented yet.");
+        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+
+        try {
+            connection = dbInteractions.getConnectionPool();
+            statement = connection.createStatement();
+            rs = statement.executeQuery("select * from active_tim");
+            activeTims = getActiveTimFromRS(rs, false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
+        } finally {
+            try {
+                // close prepared statement
+                if (statement != null) {
+                    statement.close();
+                }
+                // return connection back to pool
+                if (connection != null) {
+                    connection.close();
+                }
+                // close result set
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return ResponseEntity.ok(activeTims);
     }
 }

@@ -152,8 +152,9 @@ public class Application {
             config.getRetentionEnforcementPeriodMinutes(), TimeUnit.MINUTES);
 
         // Cleanup Stale Active Tim Holding Records
-        log.info("Scheduling Cleanup Stale Active Tim Holding Records...");
-        scheduledExecutorService.scheduleAtFixedRate(cleanupStaleActiveTimHoldingRecords, 0, 1, // TODO: make period configurable
-            TimeUnit.HOURS);
+        log.info("Scheduling Cleanup Stale Active Tim Holding Records to run every {} minutes...",
+            config.getCleanupStaleActiveTimHoldingRecordsPeriodMinutes());
+        scheduledExecutorService.scheduleAtFixedRate(cleanupStaleActiveTimHoldingRecords, 0,
+            config.getCleanupStaleActiveTimHoldingRecordsPeriodMinutes(), TimeUnit.MINUTES);
     }
 }

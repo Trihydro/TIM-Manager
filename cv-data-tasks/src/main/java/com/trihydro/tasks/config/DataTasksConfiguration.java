@@ -59,6 +59,8 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private String[] rsuRoutes;
     private Double pointIncidentBufferMiles;
 
+    private long cleanupStaleActiveTimHoldingRecordsPeriodMinutes = 60; // cleanup stale active tim holding records every hour
+
     /**
      * Returns the defaultLaneWidth / 2
      *
@@ -358,5 +360,13 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setRunHsmCheck(boolean runHsmCheck) {
         this.runHsmCheck = runHsmCheck;
+    }
+
+    public long getCleanupStaleActiveTimHoldingRecordsPeriodMinutes() {
+        return cleanupStaleActiveTimHoldingRecordsPeriodMinutes;
+    }
+
+    public void setCleanupStaleActiveTimHoldingRecordsPeriodMinutes(long cleanupStaleActiveTimHoldingRecordsPeriodMinutes) {
+        this.cleanupStaleActiveTimHoldingRecordsPeriodMinutes = cleanupStaleActiveTimHoldingRecordsPeriodMinutes;
     }
 }

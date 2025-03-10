@@ -30,4 +30,14 @@ public class ActiveTimHoldingService extends CvDataServiceLibrary {
             restTemplateProvider.GetRestTemplate().getForEntity(url, ActiveTimHolding[].class);
         return Arrays.asList(response.getBody());
     }
+
+    public List<ActiveTimHolding> getAllRecords() {
+        // TODO: Implement this method
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    public boolean deleteActiveTimHolding(Long activeTimHoldingId) {
+        // TODO: Implement this method
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }

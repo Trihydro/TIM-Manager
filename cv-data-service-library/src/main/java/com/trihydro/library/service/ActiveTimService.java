@@ -249,4 +249,9 @@ public class ActiveTimService extends CvDataServiceLibrary {
         ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate()
             .exchange(url, HttpMethod.PUT, entity, Boolean.class);
     }
+
+    public List<ActiveTim> getAllRecords() {
+        // TODO: Implement this method
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }

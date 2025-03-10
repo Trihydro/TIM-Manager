@@ -2,19 +2,32 @@ package com.trihydro.tasks.actions;
 
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.service.ActiveTimHoldingService;
+import com.trihydro.library.service.ActiveTimService;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class CleanupStaleActiveTimHoldingRecords implements Runnable {
 
+    private final ActiveTimHoldingService activeTimHoldingService;
+    private final ActiveTimService activeTimService;
+
     // Set of likely stale records identified by active tim holding id (this will be updated at the end of each run)
     private final Set<Long> staleRecordsIdentifiedLastRun = new HashSet<>();
+
+    @Autowired
+    public CleanupStaleActiveTimHoldingRecords(ActiveTimHoldingService activeTimHoldingService,
+        ActiveTimService activeTimService) {
+        this.activeTimHoldingService = activeTimHoldingService;
+        this.activeTimService = activeTimService;
+    }
 
     /**
      * The run method is executed periodically to clean up stale ActiveTimHolding records.
@@ -87,22 +100,24 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
     }
 
     private List<ActiveTimHolding> retrieveAllActiveTimHoldingRecords() {
-        // TODO: retrieve all active_tim_holding records from the database
-        throw new UnsupportedOperationException("Not implemented yet");
+        return activeTimHoldingService.getAllRecords();
     }
 
     private List<ActiveTim> retrieveAllActiveTimRecords() {
-        // TODO: retrieve all active_tim records from the database
-        throw new UnsupportedOperationException("Not implemented yet");
+        return activeTimService.getAllRecords();
     }
 
     private void removeActiveTimRecord(ActiveTim activeTim) {
-        // TODO: delete active_tim record from the database
-        throw new UnsupportedOperationException("Not implemented yet");
+        boolean success = activeTimService.deleteActiveTim(activeTim.getActiveTimId());
+        if (!success) {
+            log.error("Failed to delete active_tim record with id: {}", activeTim.getActiveTimId());
+        }
     }
 
     private void removeActiveTimHoldingRecord(ActiveTimHolding record) {
-        // TODO: delete active_tim_holding record from the database
-        throw new UnsupportedOperationException("Not implemented yet");
+        boolean success = activeTimHoldingService.deleteActiveTimHolding(record.getActiveTimHoldingId());
+        if (!success) {
+            log.error("Failed to delete active_tim_holding record with id: {}", record.getActiveTimHoldingId());
+        }
     }
 }

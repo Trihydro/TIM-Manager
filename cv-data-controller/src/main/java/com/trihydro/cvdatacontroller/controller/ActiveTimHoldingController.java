@@ -41,77 +41,91 @@ public class ActiveTimHoldingController extends BaseController {
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseEntity<Long> InsertActiveTimHolding(@RequestBody ActiveTimHolding activeTimHolding) {
+    public ResponseEntity<Long> InsertActiveTimHolding(
+        @RequestBody ActiveTimHolding activeTimHolding) {
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         Long activeTimHoldingId = 0l;
         try {
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim_holding",
+            String insertQueryStatement =
+                timDbTables.buildInsertQueryStatement("active_tim_holding",
                     timDbTables.getActiveTimHoldingTable());
 
             // get connection
             connection = dbInteractions.getConnectionPool();
 
             preparedStatement = connection.prepareStatement(insertQueryStatement,
-                    new String[] { "active_tim_holding_id" });
+                new String[] {"active_tim_holding_id"});
             int fieldNum = 1;
 
             for (String col : timDbTables.getActiveTimHoldingTable()) {
                 if (col.equals("ACTIVE_TIM_HOLDING_ID")) {
-                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTimHolding.getActiveTimHoldingId());
+                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getActiveTimHoldingId());
                 } else if (col.equals("CLIENT_ID")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getClientId());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getClientId());
                 } else if (col.equals("DIRECTION")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getDirection());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getDirection());
                 } else if (col.equals("RSU_TARGET")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuTarget());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getRsuTarget());
                 } else if (col.equals("SAT_RECORD_ID")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getSatRecordId());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getSatRecordId());
                 } else if (col.equals("START_LATITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getStartPoint().getLatitude());
+                            activeTimHolding.getStartPoint().getLatitude());
                     }
                 } else if (col.equals("START_LONGITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getStartPoint().getLongitude());
+                            activeTimHolding.getStartPoint().getLongitude());
                     }
                 } else if (col.equals("END_LATITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getEndPoint().getLatitude());
+                            activeTimHolding.getEndPoint().getLatitude());
                     }
                 } else if (col.equals("END_LONGITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getEndPoint().getLongitude());
+                            activeTimHolding.getEndPoint().getLongitude());
                     }
                 } else if (col.equals("RSU_INDEX")) {
-                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getRsuIndex());
                 } else if (col.equals("DATE_CREATED")) {
-                    java.util.Date dateCreated = utility.convertDate(activeTimHolding.getDateCreated());
+                    java.util.Date dateCreated =
+                        utility.convertDate(activeTimHolding.getDateCreated());
                     Timestamp dateCreatedTimestamp = new Timestamp(dateCreated.getTime());
-                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, dateCreatedTimestamp);
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
+                        dateCreatedTimestamp);
                 } else if (col.equals("PROJECT_KEY")) {
-                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getProjectKey());
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getProjectKey());
                 } else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTimHolding.getExpirationDateTime() != null) {
-                        java.util.Date tim_exp_date = utility.convertDate(activeTimHolding.getExpirationDateTime());
+                        java.util.Date tim_exp_date =
+                            utility.convertDate(activeTimHolding.getExpirationDateTime());
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                utility.timestampFormat.format(tim_exp_date));
+                            utility.timestampFormat.format(tim_exp_date));
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
                 } else if (col.equals("PACKET_ID")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getPacketId());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
+                        activeTimHolding.getPacketId());
                 }
 
                 fieldNum++;
             }
 
-            activeTimHoldingId = dbInteractions.executeAndLog(preparedStatement, "active tim holding");
+            activeTimHoldingId =
+                dbInteractions.executeAndLog(preparedStatement, "active tim holding");
 
             if (activeTimHoldingId == null) {
                 // this already exists, fetch it and return the id
@@ -120,16 +134,17 @@ public class ActiveTimHoldingController extends BaseController {
                 try {
                     statement = connection.createStatement();
                     String query = "select active_tim_holding_id from active_tim_holding";
-                    if (activeTimHolding.getSatRecordId() != null && activeTimHolding.getSatRecordId() != "") {
+                    if (activeTimHolding.getSatRecordId() != null &&
+                        activeTimHolding.getSatRecordId() != "") {
                         // sat tim
-                        query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() + "' and client_id = '"
-                                + activeTimHolding.getClientId() + "' and direction = '"
-                                + activeTimHolding.getDirection() + "'";
+                        query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() +
+                            "' and client_id = '" + activeTimHolding.getClientId() +
+                            "' and direction = '" + activeTimHolding.getDirection() + "'";
                     } else {
                         // rsu tim
-                        query += " where rsu_target = '" + activeTimHolding.getRsuTarget() + "' and client_id = '"
-                                + activeTimHolding.getClientId() + "' and direction = '"
-                                + activeTimHolding.getDirection() + "'";
+                        query += " where rsu_target = '" + activeTimHolding.getRsuTarget() +
+                            "' and client_id = '" + activeTimHolding.getClientId() +
+                            "' and direction = '" + activeTimHolding.getDirection() + "'";
                     }
 
                     rs = statement.executeQuery(query);
@@ -138,13 +153,16 @@ public class ActiveTimHoldingController extends BaseController {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(activeTimHoldingId);
                 } finally {
                     try {
-                        if (statement != null)
+                        if (statement != null) {
                             statement.close();
-                        if (rs != null)
+                        }
+                        if (rs != null) {
                             rs.close();
+                        }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -157,11 +175,13 @@ public class ActiveTimHoldingController extends BaseController {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -169,7 +189,8 @@ public class ActiveTimHoldingController extends BaseController {
     }
 
     @RequestMapping(value = "/get-rsu/{ipv4Address}", method = RequestMethod.GET)
-    public ResponseEntity<List<ActiveTimHolding>> getActiveTimHoldingForRsu(@PathVariable String ipv4Address) {
+    public ResponseEntity<List<ActiveTimHolding>> getActiveTimHoldingForRsu(
+        @PathVariable String ipv4Address) {
         ActiveTimHolding activeTimHolding = null;
         Connection connection = null;
         Statement statement = null;
@@ -191,10 +212,10 @@ public class ActiveTimHoldingController extends BaseController {
                 activeTimHolding.setDirection(rs.getString("DIRECTION"));
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-                activeTimHolding.setStartPoint(
-                        new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
-                activeTimHolding.setEndPoint(
-                        new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                activeTimHolding.setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"),
+                    rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"),
+                    rs.getBigDecimal("END_LONGITUDE")));
                 activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
                 int rsu_index = rs.getInt("RSU_INDEX");
                 if (!rs.wasNull()) {
@@ -211,14 +232,17 @@ public class ActiveTimHoldingController extends BaseController {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }

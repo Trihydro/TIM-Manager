@@ -61,26 +61,26 @@ import org.springframework.context.annotation.Import;
 public class Application {
     protected static DataTasksConfiguration config;
 
-    private RemoveExpiredActiveTims removeExpiredActiveTims;
-    private CleanupActiveTims cleanupActiveTims;
-    private ValidateSdx sdxValidator;
-    private ValidateRsus rsuValidator;
-    private ValidateTmdd tmddValidator;
-    private VerifyHSMFunctional hsmFunctional;
-    RetentionPolicyEnforcement retentionEnforcement;
-    private CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords;
+    private final RemoveExpiredActiveTims removeExpiredActiveTims;
+    private final CleanupActiveTims cleanupActiveTims;
+    private final ValidateSdx sdxValidator;
+    private final ValidateRsus rsuValidator;
+    private final ValidateTmdd tmddValidator;
+    private final VerifyHSMFunctional hsmFunctional;
+    private final RetentionPolicyEnforcement retentionEnforcement;
+    private final CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords;
 
-    private Utility utility;
+    private final Utility utility;
 
     @Autowired
-    public void InjectDependencies(DataTasksConfiguration _config,
-                                   RemoveExpiredActiveTims _removeExpiredActiveTims,
-                                   CleanupActiveTims _cleanupActiveTims, ValidateSdx _sdxValidator,
-                                   ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
-                                   RetentionPolicyEnforcement _retentionEnforcement,
-                                   VerifyHSMFunctional _hsmFunctional,
-                                   CleanupStaleActiveTimHoldingRecords _cleanupStaleActiveTimHoldingRecords,
-                                   Utility _utility) {
+    public Application(DataTasksConfiguration _config,
+                       RemoveExpiredActiveTims _removeExpiredActiveTims,
+                       CleanupActiveTims _cleanupActiveTims, ValidateSdx _sdxValidator,
+                       ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
+                       RetentionPolicyEnforcement _retentionEnforcement,
+                       VerifyHSMFunctional _hsmFunctional,
+                       CleanupStaleActiveTimHoldingRecords _cleanupStaleActiveTimHoldingRecords,
+                       Utility _utility) {
         config = _config;
         removeExpiredActiveTims = _removeExpiredActiveTims;
         cleanupActiveTims = _cleanupActiveTims;

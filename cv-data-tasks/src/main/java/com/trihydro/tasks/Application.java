@@ -73,22 +73,22 @@ public class Application {
     private final CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords;
 
     @Autowired
-    public Application(DataTasksConfiguration _config,
-                       RemoveExpiredActiveTims _removeExpiredActiveTims,
-                       CleanupActiveTims _cleanupActiveTims, ValidateSdx _sdxValidator,
-                       ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
-                       RetentionPolicyEnforcement _retentionEnforcement,
-                       VerifyHSMFunctional _hsmFunctional,
-                       CleanupStaleActiveTimHoldingRecords _cleanupStaleActiveTimHoldingRecords) {
-        config = _config;
-        removeExpiredActiveTims = _removeExpiredActiveTims;
-        cleanupActiveTims = _cleanupActiveTims;
-        sdxValidator = _sdxValidator;
-        rsuValidator = _rsuValidator;
-        tmddValidator = _tmddValidator;
-        retentionEnforcement = _retentionEnforcement;
-        hsmFunctional = _hsmFunctional;
-        cleanupStaleActiveTimHoldingRecords = _cleanupStaleActiveTimHoldingRecords;
+    public Application(DataTasksConfiguration config,
+                       RemoveExpiredActiveTims removeExpiredActiveTims,
+                       CleanupActiveTims cleanupActiveTims, ValidateSdx sdxValidator,
+                       ValidateRsus rsuValidator, ValidateTmdd tmddValidator,
+                       RetentionPolicyEnforcement retentionEnforcement,
+                       VerifyHSMFunctional hsmFunctional,
+                       CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords) {
+        Application.config = config;
+        this.removeExpiredActiveTims = removeExpiredActiveTims;
+        this.cleanupActiveTims = cleanupActiveTims;
+        this.sdxValidator = sdxValidator;
+        this.rsuValidator = rsuValidator;
+        this.tmddValidator = tmddValidator;
+        this.retentionEnforcement = retentionEnforcement;
+        this.hsmFunctional = hsmFunctional;
+        this.cleanupStaleActiveTimHoldingRecords = cleanupStaleActiveTimHoldingRecords;
     }
 
     public static void main(String[] args) {

@@ -765,8 +765,12 @@ public class ActiveTimController extends BaseController {
 
             // execute delete SQL stetement
             deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
-
-            System.out.println("Active Tim (active_tim_id " + activeTimId + ") is deleted!");
+            if (deleteActiveTimResult) {
+                utility.logWithDate("Active Tim (active_tim_id " + activeTimId + ") is deleted!", ActiveTimController.class);
+            }
+            else {
+                utility.logWithDate("Failed to delete Active Tim (active_tim_id " + activeTimId + "). It may not exist.", ActiveTimController.class);
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

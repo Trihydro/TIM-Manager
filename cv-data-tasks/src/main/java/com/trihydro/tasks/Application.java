@@ -1,5 +1,6 @@
 package com.trihydro.tasks;
 
+import com.trihydro.tasks.actions.CleanupStaleActiveTimHoldingRecords;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,6 +68,8 @@ public class Application {
     private ValidateTmdd tmddValidator;
     private VerifyHSMFunctional hsmFunctional;
     RetentionPolicyEnforcement retentionEnforcement;
+    private CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords;
+
     private Utility utility;
 
     @Autowired
@@ -75,7 +78,9 @@ public class Application {
                                    CleanupActiveTims _cleanupActiveTims, ValidateSdx _sdxValidator,
                                    ValidateRsus _rsuValidator, ValidateTmdd _tmddValidator,
                                    RetentionPolicyEnforcement _retentionEnforcement,
-                                   VerifyHSMFunctional _hsmFunctional, Utility _utility) {
+                                   VerifyHSMFunctional _hsmFunctional,
+                                   CleanupStaleActiveTimHoldingRecords _cleanupStaleActiveTimHoldingRecords,
+                                   Utility _utility) {
         config = _config;
         removeExpiredActiveTims = _removeExpiredActiveTims;
         cleanupActiveTims = _cleanupActiveTims;
@@ -84,6 +89,7 @@ public class Application {
         tmddValidator = _tmddValidator;
         retentionEnforcement = _retentionEnforcement;
         hsmFunctional = _hsmFunctional;
+        cleanupStaleActiveTimHoldingRecords = _cleanupStaleActiveTimHoldingRecords;
         utility = _utility;
     }
 
@@ -136,5 +142,9 @@ public class Application {
         // Retention Policy Enforcement
         scheduledExecutorService.scheduleAtFixedRate(retentionEnforcement, 30,
             config.getRetentionEnforcementPeriodMinutes(), TimeUnit.MINUTES);
+
+        // Cleanup Stale Active Tim Holding Records
+        scheduledExecutorService.scheduleAtFixedRate(cleanupStaleActiveTimHoldingRecords, 0, 1,
+            TimeUnit.HOURS);
     }
 }

@@ -49,10 +49,7 @@ public class WydotTim {
         setDirection(aTim.getDirection());
         setStartPoint(aTim.getStartPoint());
         setEndPoint(aTim.getEndPoint());
-        setRoute(aTim.getRoute());
-        for (Integer itisCode : aTim.getItisCodes()) {
-            this.itisCodes.add(itisCode.toString());
-        }
+        // note: route and itisCodes are not set in this constructor
     }
 
     public WydotTim copy() {

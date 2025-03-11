@@ -427,7 +427,7 @@ public class ActiveTimController extends BaseController {
     @RequestMapping(value = "/indices-rsu/{rsuTarget}", method = RequestMethod.GET)
     public ResponseEntity<List<Integer>> GetActiveTimIndicesByRsu(@PathVariable String rsuTarget) {
 
-        List<Integer> indices = new ArrayList<Integer>();
+        List<Integer> indices = new ArrayList<>();
 
         String selectStatement = "select tim_rsu.rsu_index from active_tim";
         selectStatement += " inner join tim on active_tim.tim_id = tim.tim_id";
@@ -456,7 +456,7 @@ public class ActiveTimController extends BaseController {
     public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(
         @PathVariable String clientId, @PathVariable Long timTypeId,
         @PathVariable(required = false) String direction) {
-        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+        List<ActiveTim> activeTims = new ArrayList<>();
 
         // There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1,
         // CLIENTID_2
@@ -484,7 +484,7 @@ public class ActiveTimController extends BaseController {
 
     @RequestMapping(value = {"/buffer-tims/{clientId}"}, method = RequestMethod.GET)
     public ResponseEntity<List<ActiveTim>> GetBufferTimsByClientId(@PathVariable String clientId) {
-        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+        List<ActiveTim> activeTims = new ArrayList<>();
 
         String query = "select * from active_tim where CLIENT_ID like '" + clientId +
             "\\%BUFF_-%' ESCAPE '\\'";
@@ -539,7 +539,7 @@ public class ActiveTimController extends BaseController {
              PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL)) {
             preparedStatement.setLong(1, activeTimId);
 
-            // execute delete SQL stetement
+            // execute delete SQL statement
             deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
             if (deleteActiveTimResult) {
                 log.info("Active Tim (active_tim_id {}) is deleted!", activeTimId);
@@ -561,15 +561,16 @@ public class ActiveTimController extends BaseController {
     public ResponseEntity<Boolean> DeleteActiveTimsById(@RequestBody List<Long> activeTimIds) {
         boolean deleteActiveTimResult = false;
 
-        String deleteSQL = "DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (";
+        StringBuilder deleteSQL =
+            new StringBuilder("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (");
         for (int i = 0; i < activeTimIds.size(); i++) {
-            deleteSQL += "?,";
+            deleteSQL.append("?,");
         }
-        deleteSQL = deleteSQL.substring(0, deleteSQL.length() - 1);
-        deleteSQL += ")";
+        deleteSQL = new StringBuilder(deleteSQL.substring(0, deleteSQL.length() - 1));
+        deleteSQL.append(")");
 
         try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL.toString())) {
             for (int i = 0; i < activeTimIds.size(); i++) {
                 preparedStatement.setLong(i + 1, activeTimIds.get(i));
             }
@@ -597,20 +598,21 @@ public class ActiveTimController extends BaseController {
     @RequestMapping(value = "/get-by-ids", method = RequestMethod.POST)
     public ResponseEntity<List<ActiveTim>> GetActiveTimsByIds(@RequestBody List<Long> ids) {
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
-        if (ids == null || ids.size() == 0) {
+        if (ids == null || ids.isEmpty()) {
             return ResponseEntity.badRequest().body(activeTims);
         }
 
-        String query = "select * from active_tim where active_tim_id in (";
+        StringBuilder query =
+            new StringBuilder("select * from active_tim where active_tim_id in (");
 
         for (int i = 0; i < ids.size(); i++) {
-            query += "?, ";
+            query.append("?, ");
         }
-        query = query.substring(0, query.length() - 2);// subtract ', '
-        query += ")";
+        query = new StringBuilder(query.substring(0, query.length() - 2));// subtract ', '
+        query.append(")");
 
         try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement ps = connection.prepareStatement(query)) {
+             PreparedStatement ps = connection.prepareStatement(query.toString())) {
             for (int i = 0; i < ids.size(); i++) {
                 // set active_tim_id
                 ps.setLong(i + 1, ids.get(i));
@@ -629,40 +631,40 @@ public class ActiveTimController extends BaseController {
     @RequestMapping(value = "/get-by-wydot-tim/{timTypeId}", method = RequestMethod.POST)
     public ResponseEntity<List<ActiveTim>> GetActiveTimsByWydotTim(
         @RequestBody List<? extends WydotTim> wydotTims, @PathVariable Long timTypeId) {
-        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
+        List<ActiveTim> activeTims = new ArrayList<>();
 
-        WydotTim wydotTim = null;
+        WydotTim wydotTim;
 
-        String query = "select * from active_tim where ";
+        StringBuilder query = new StringBuilder("select * from active_tim where ");
         if (timTypeId != null) {
-            query += "TIM_TYPE_ID = ? and (";
+            query.append("TIM_TYPE_ID = ? and (");
         }
 
         for (int i = 0; i < wydotTims.size(); i++) {
             if (i > 0) {
-                query += " OR ";
+                query.append(" OR ");
             }
-            query += "(CLIENT_ID like ?";
+            query.append("(CLIENT_ID like ?");
             wydotTim = wydotTims.get(i);
             if (wydotTim.getDirection() != null && !wydotTim.getDirection().equalsIgnoreCase("B")) {
-                query += " and DIRECTION = ?";
+                query.append(" and DIRECTION = ?");
             }
-            query += ")";
+            query.append(")");
         }
         if (timTypeId != null) {
-            query += ")";
+            query.append(")");
         }
 
         try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement ps = connection.prepareStatement(query)) {
+             PreparedStatement ps = connection.prepareStatement(query.toString())) {
 
             int index = 1;
             if (timTypeId != null) {
                 ps.setLong(index, timTypeId);
                 index++;
             }
-            for (int i = 0; i < wydotTims.size(); i++) {
-                wydotTim = wydotTims.get(i);
+            for (WydotTim tim : wydotTims) {
+                wydotTim = tim;
 
                 // set client id
                 ps.setString(index, wydotTim.getClientId());
@@ -922,7 +924,7 @@ public class ActiveTimController extends BaseController {
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery(query)) {
             List<ActiveTim> activeTims = getActiveTimFromRS(rs, false);
-            if (activeTims.size() > 0) {
+            if (!activeTims.isEmpty()) {
                 activeTim = activeTims.get(activeTims.size() - 1);
             }
         } catch (SQLException e) {
@@ -935,7 +937,7 @@ public class ActiveTimController extends BaseController {
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public ResponseEntity<Long> InsertActiveTim(@RequestBody ActiveTim activeTim) {
-        Long activeTimId = 0l;
+        Long activeTimId = 0L;
 
         String insertQueryStatement =
             timDbTables.buildInsertQueryStatement("active_tim", timDbTables.getActiveTimTable());
@@ -1116,16 +1118,18 @@ public class ActiveTimController extends BaseController {
             for (int splitTimsIndex = 0; splitTimsIndex < splitActiveTims.size();
                  splitTimsIndex++) {
                 List<Long> splitTims = splitActiveTims.get(splitTimsIndex);
-                String updateSql =
-                    "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (";
+                StringBuilder updateSql =
+                    new StringBuilder(
+                        "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (");
 
                 for (int i = 0; i < splitTims.size(); i++) {
-                    updateSql += "?,";
+                    updateSql.append("?,");
                 }
-                updateSql = updateSql.substring(0, updateSql.length() - 1);
-                updateSql += ")";
+                updateSql = new StringBuilder(updateSql.substring(0, updateSql.length() - 1));
+                updateSql.append(")");
 
-                try (PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    updateSql.toString())) {
                     for (int i = 0; i < splitTims.size(); i++) {
                         preparedStatement.setLong(i + 1, splitTims.get(i));
                     }

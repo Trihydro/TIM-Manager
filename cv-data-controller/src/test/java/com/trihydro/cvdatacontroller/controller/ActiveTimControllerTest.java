@@ -1261,4 +1261,9 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
+
+    @Test
+    void getAllRecords_Success() {
+        // TODO: Implement test logic
+    }
 }

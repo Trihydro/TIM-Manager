@@ -27,6 +27,7 @@ import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @RestController
 @RequestMapping("active-tim")
 @ApiIgnore
+@Slf4j
 public class ActiveTimController extends BaseController {
 
     private TimDbTables timDbTables;
@@ -766,10 +768,10 @@ public class ActiveTimController extends BaseController {
             // execute delete SQL stetement
             deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
             if (deleteActiveTimResult) {
-                utility.logWithDate("Active Tim (active_tim_id " + activeTimId + ") is deleted!", ActiveTimController.class);
-            }
-            else {
-                utility.logWithDate("Failed to delete Active Tim (active_tim_id " + activeTimId + "). It may not exist.", ActiveTimController.class);
+                log.info("Active Tim (active_tim_id {}) is deleted!", activeTimId);
+            } else {
+                log.warn("Failed to delete Active Tim (active_tim_id {}). It may not exist.",
+                    activeTimId);
             }
 
         } catch (SQLException e) {
@@ -820,14 +822,11 @@ public class ActiveTimController extends BaseController {
             deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
 
             if (deleteActiveTimResult) {
-                utility.logWithDate("Active Tims (active_tim_ids " +
-                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) +
-                    ") are deleted!", ActiveTimController.class);
-            }
-            else {
-                utility.logWithDate("Failed to delete Active Tims (active_tim_ids " +
-                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) +
-                    "). They may not exist.", ActiveTimController.class);
+                log.info("Active Tims (active_tim_ids {}) are deleted!",
+                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
+            } else {
+                log.warn("Failed to delete Active Tims (active_tim_ids {}). They may not exist.",
+                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
             }
 
         } catch (SQLException e) {
@@ -1558,8 +1557,8 @@ public class ActiveTimController extends BaseController {
                 result &= dbInteractions.updateOrDelete(preparedStatement);
             }
 
-            System.out.println("Reset expiration date for Active Tims (active_tim_ids " +
-                activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+            log.info("Reset expiration date for Active Tims (active_tim_ids {})",
+                activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -1627,9 +1626,8 @@ public class ActiveTimController extends BaseController {
                 e.printStackTrace();
             }
         }
-        utility.logWithDate(
-            String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
-                packetID, expDate, success));
+        log.info("Called UpdateExpiration with packetID: {}, expDate: {}. Successful: {}", packetID,
+            expDate, success);
         return ResponseEntity.ok(success);
     }
 
@@ -1688,9 +1686,8 @@ public class ActiveTimController extends BaseController {
                 e.printStackTrace();
             }
         }
-        utility.logWithDate(String.format(
-            "Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s", packetID,
-            expDate, minStart));
+        log.info("Called GetMinExpiration with packetID: {}, expDate: {}. Min start date: {}",
+            packetID, expDate, minStart);
         return ResponseEntity.ok(minStart);
     }
 
@@ -1728,9 +1725,7 @@ public class ActiveTimController extends BaseController {
             }
         }
         if (!success) {
-            utility.logWithDate(
-                String.format("Failed to mark active tim for deletion with activeTimId: %s",
-                    activeTimId));
+            log.warn("Failed to mark active tim for deletion with activeTimId: {}", activeTimId);
         }
         return ResponseEntity.ok(success);
     }

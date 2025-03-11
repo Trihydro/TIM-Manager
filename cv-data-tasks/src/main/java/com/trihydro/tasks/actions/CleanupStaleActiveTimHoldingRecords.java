@@ -24,7 +24,7 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
 
     @Autowired
     public CleanupStaleActiveTimHoldingRecords(ActiveTimHoldingService activeTimHoldingService,
-        ActiveTimService activeTimService) {
+                                               ActiveTimService activeTimService) {
         this.activeTimHoldingService = activeTimHoldingService;
         this.activeTimService = activeTimService;
     }
@@ -49,7 +49,9 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
 
         // If no stale records identified last run, this could be the first time the task runs, so add all active_tim_holding records to staleRecords set
         if (staleRecordsIdentifiedLastRun.isEmpty()) {
-            log.info("No stale records identified last run. Adding {} active_tim_holding records to staleRecords set for next run", currentRecords.size());
+            log.info(
+                "No stale records identified last run. Adding {} active_tim_holding records to staleRecords set for next run",
+                currentRecords.size());
             for (ActiveTimHolding record : currentRecords) {
                 staleRecordsIdentifiedLastRun.add(record.getActiveTimHoldingId());
             }
@@ -66,20 +68,24 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
                 newRecords.add(record);
             }
         }
-        log.info("Identified {} likely stale active_tim_holding records", likelyStaleRecords.size());
+        log.info("Identified {} likely stale active_tim_holding records",
+            likelyStaleRecords.size());
 
         // Check for active_tim records
         List<ActiveTim> activeTims = retrieveAllActiveTimRecords();
         Set<Long> deletedActiveTimIds = new HashSet<>();
         for (ActiveTimHolding record : likelyStaleRecords) {
             for (ActiveTim activeTim : activeTims) {
-                if (record.getClientId().equals(activeTim.getClientId()) && !deletedActiveTimIds.contains(activeTim.getActiveTimId())) {
+                if (record.getClientId().equals(activeTim.getClientId()) &&
+                    !deletedActiveTimIds.contains(activeTim.getActiveTimId())) {
                     removeActiveTimRecord(activeTim);
                     deletedActiveTimIds.add(activeTim.getActiveTimId());
                 }
             }
         }
-        log.info("Deleted active_tim records with ids: {}", deletedActiveTimIds);
+        log.info(
+            "Deleted corresponding active_tim records with ids: ({}), which were outdated (the presence of stale active_tim_holding records indicates a failure to update).",
+            deletedActiveTimIds);
 
         // Delete likely stale active_tim_holding records
         for (ActiveTimHolding record : likelyStaleRecords) {
@@ -95,14 +101,17 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
         for (ActiveTimHolding record : newRecords) {
             staleRecordsIdentifiedLastRun.add(record.getActiveTimHoldingId());
         }
-        log.info("Added {} active_tim_holding records to staleRecords set for next run", newRecords.size());
+        log.info("Added {} active_tim_holding records to staleRecords set for next run",
+            newRecords.size());
     }
 
     private List<ActiveTimHolding> retrieveAllActiveTimHoldingRecords() {
         try {
             return activeTimHoldingService.getAllRecords();
         } catch (Exception e) {
-            log.error("Failed to retrieve all active_tim_holding records. Is the cv-data-controller service running?", e);
+            log.error(
+                "Failed to retrieve all active_tim_holding records. Is the cv-data-controller service running?",
+                e);
         }
         return new ArrayList<>();
     }
@@ -111,7 +120,9 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
         try {
             return activeTimService.getAllRecords();
         } catch (Exception e) {
-            log.error("Failed to retrieve all active_tim records. Is the cv-data-controller service running?", e);
+            log.error(
+                "Failed to retrieve all active_tim records. Is the cv-data-controller service running?",
+                e);
         }
         return new ArrayList<>();
     }
@@ -120,21 +131,27 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
         try {
             boolean success = activeTimService.deleteActiveTim(activeTim.getActiveTimId());
             if (!success) {
-                log.error("Failed to delete active_tim record with id: {}", activeTim.getActiveTimId());
+                log.error("Failed to delete active_tim record with id: {}",
+                    activeTim.getActiveTimId());
             }
         } catch (Exception e) {
-            log.error("Failed to delete active_tim record with id: {}", activeTim.getActiveTimId(), e);
+            log.error("Failed to delete active_tim record with id: {}", activeTim.getActiveTimId(),
+                e);
         }
     }
 
     private void removeActiveTimHoldingRecord(ActiveTimHolding record) {
         try {
-            boolean success = activeTimHoldingService.deleteActiveTimHolding(record.getActiveTimHoldingId());
+            boolean success =
+                activeTimHoldingService.deleteActiveTimHolding(record.getActiveTimHoldingId());
             if (!success) {
-                log.error("Failed to delete active_tim_holding record with id: {}", record.getActiveTimHoldingId());
+                log.error("Failed to delete active_tim_holding record with id: {}",
+                    record.getActiveTimHoldingId());
             }
         } catch (Exception e) {
-            log.error("Failed to delete active_tim_holding record with id: {}. Is the cv-data-controller service running?", record.getActiveTimHoldingId(), e);
+            log.error(
+                "Failed to delete active_tim_holding record with id: {}. Is the cv-data-controller service running?",
+                record.getActiveTimHoldingId(), e);
         }
     }
 

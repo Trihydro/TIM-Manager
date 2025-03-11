@@ -816,12 +816,19 @@ public class ActiveTimController extends BaseController {
                 preparedStatement.setLong(i + 1, activeTimIds.get(i));
             }
 
-            // execute delete SQL stetement
+            // execute delete SQL statement
             deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
 
-            System.out.println("Active Tims (active_tim_ids " +
-                activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) +
-                ") deleted!");
+            if (deleteActiveTimResult) {
+                utility.logWithDate("Active Tims (active_tim_ids " +
+                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) +
+                    ") are deleted!", ActiveTimController.class);
+            }
+            else {
+                utility.logWithDate("Failed to delete Active Tims (active_tim_ids " +
+                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) +
+                    "). They may not exist.", ActiveTimController.class);
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

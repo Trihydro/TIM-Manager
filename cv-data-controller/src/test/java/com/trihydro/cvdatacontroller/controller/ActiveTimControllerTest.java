@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -1283,7 +1284,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         for (int i = 500; i < 600; i++) {
             verify(mockPreparedStatement).setLong(i - 499, (Long.valueOf(i)));
         }
-        verify(mockPreparedStatement).close();
+        verify(mockPreparedStatement, times(2)).close();
         verify(mockConnection).close();
     }
 

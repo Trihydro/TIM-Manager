@@ -78,8 +78,10 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
             for (ActiveTim activeTim : activeTims) {
                 if (record.getClientId().equals(activeTim.getClientId()) &&
                     !deletedActiveTimIds.contains(activeTim.getActiveTimId())) {
-                    removeActiveTimRecord(activeTim);
+                    removeActiveTimRecord(activeTim); // active_tim record is no longer up-to-date
                     deletedActiveTimIds.add(activeTim.getActiveTimId());
+                    // TODO: Delete only if the failed update was to expire the active TIM.
+                    // TODO: Consider re-submitting the active TIM if the failed update was not meant to expire it.
                 }
             }
         }

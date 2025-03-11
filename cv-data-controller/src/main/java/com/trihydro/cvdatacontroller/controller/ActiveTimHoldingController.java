@@ -14,6 +14,7 @@ import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimDbTables;
 
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,14 +47,14 @@ public class ActiveTimHoldingController extends BaseController {
     public ResponseEntity<Long> InsertActiveTimHolding(
         @RequestBody ActiveTimHolding activeTimHolding) {
 
-        Long activeTimHoldingId = 0l;
+        Long activeTimHoldingId = 0L;
 
         String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim_holding",
             timDbTables.getActiveTimHoldingTable());
 
         try (Connection connection = dbInteractions.getConnectionPool();
              PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement,
-                 new String[] {"active_tim_holding_id"});) {
+                 new String[] {"active_tim_holding_id"})) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getActiveTimHoldingTable()) {
@@ -129,7 +130,7 @@ public class ActiveTimHoldingController extends BaseController {
 
                 String query = "select active_tim_holding_id from active_tim_holding";
                 if (activeTimHolding.getSatRecordId() != null &&
-                    activeTimHolding.getSatRecordId() != "") {
+                    !Objects.equals(activeTimHolding.getSatRecordId(), "")) {
                     // sat tim
                     query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() +
                         "' and client_id = '" + activeTimHolding.getClientId() +
@@ -142,7 +143,7 @@ public class ActiveTimHoldingController extends BaseController {
                 }
 
                 try (Statement statement = connection.createStatement();
-                     ResultSet rs = statement.executeQuery(query);) {
+                     ResultSet rs = statement.executeQuery(query)) {
 
                     while (rs.next()) {
                         activeTimHoldingId = rs.getLong("ACTIVE_TIM_HOLDING_ID");
@@ -172,7 +173,7 @@ public class ActiveTimHoldingController extends BaseController {
 
         try (Connection connection = dbInteractions.getConnectionPool();
              Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query);) {
+             ResultSet rs = statement.executeQuery(query)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTimHolding = new ActiveTimHolding();
@@ -209,7 +210,7 @@ public class ActiveTimHoldingController extends BaseController {
 
         try (Connection connection = dbInteractions.getConnectionPool();
              Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query);) {
+             ResultSet rs = statement.executeQuery(query)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
@@ -245,7 +246,7 @@ public class ActiveTimHoldingController extends BaseController {
 
         try (Connection connection = dbInteractions.getConnectionPool();
              PreparedStatement preparedStatement = connection.prepareStatement(
-                 deleteQueryStatement);) {
+                 deleteQueryStatement)) {
             preparedStatement.setLong(1, activeTimHoldingId);
             dbInteractions.executeAndLog(preparedStatement, "active tim holding");
             return ResponseEntity.ok(true);

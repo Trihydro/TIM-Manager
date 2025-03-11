@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class WydotTim {
 
     @ApiModelProperty(value = "Expected values are I, D, B", required = true)
@@ -56,4 +52,51 @@ public class WydotTim {
         return new WydotTim(this);
     }
 
+    public String getClientId() {
+        return this.clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public List<String> getItisCodes() {
+        return this.itisCodes;
+    }
+
+    public void setItisCodes(List<String> itisCodes) {
+        this.itisCodes = itisCodes;
+    }
+
+    public String getDirection() {
+        return this.direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
+    public Coordinate getStartPoint() {
+        return this.startPoint;
+    }
+
+    public void setStartPoint(Coordinate startPoint) {
+        this.startPoint = startPoint;
+    }
+
+    public Coordinate getEndPoint() {
+        return this.endPoint;
+    }
+
+    public void setEndPoint(Coordinate endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public String getRoute() {
+        return this.route;
+    }
+
+    public void setRoute(String route) {
+        this.route = route;
+    }
 }

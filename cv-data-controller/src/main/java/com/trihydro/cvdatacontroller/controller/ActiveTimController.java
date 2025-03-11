@@ -194,7 +194,7 @@ public class ActiveTimController extends BaseController {
                 activeTims.add(activeTim);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error getting expiring active tims", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -313,7 +313,7 @@ public class ActiveTimController extends BaseController {
                 activeTim.setDfContent(contentType);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error getting active tim", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
         }
 
@@ -334,7 +334,7 @@ public class ActiveTimController extends BaseController {
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error updating active tim", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
         return ResponseEntity.ok(success);
@@ -379,7 +379,7 @@ public class ActiveTimController extends BaseController {
              ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims missing itis codes", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
         return ResponseEntity.ok(activeTims);
@@ -399,7 +399,7 @@ public class ActiveTimController extends BaseController {
              ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims not sent", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
         return ResponseEntity.ok(activeTims);
@@ -417,7 +417,7 @@ public class ActiveTimController extends BaseController {
              ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting expired active tims", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -444,7 +444,7 @@ public class ActiveTimController extends BaseController {
                 indices.add(rs.getInt("RSU_INDEX"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tim indices by rsu", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(indices);
         }
 
@@ -475,7 +475,7 @@ public class ActiveTimController extends BaseController {
              ResultSet rs = statement.executeQuery(query)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims by client id and direction", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -494,7 +494,7 @@ public class ActiveTimController extends BaseController {
              ResultSet rs = statement.executeQuery(query)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting buffer tims by client id", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -523,7 +523,7 @@ public class ActiveTimController extends BaseController {
                 itisCodes.add(rs.getInt("ITIS_CODE"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting itis codes for active tim", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(itisCodes);
         }
         return ResponseEntity.ok(itisCodes);
@@ -549,7 +549,7 @@ public class ActiveTimController extends BaseController {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error deleting active tim", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(deleteActiveTimResult);
         }
@@ -586,7 +586,7 @@ public class ActiveTimController extends BaseController {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error deleting active tims", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(deleteActiveTimResult);
         }
@@ -619,7 +619,7 @@ public class ActiveTimController extends BaseController {
                 activeTims = getActiveTimFromRS(rs, false);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims by ids", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -679,7 +679,7 @@ public class ActiveTimController extends BaseController {
                 activeTims = getActiveTimFromRS(rs, false);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims by wydot tim", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -696,7 +696,7 @@ public class ActiveTimController extends BaseController {
                  "select * from active_tim where TIM_TYPE_ID = " + timTypeId)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims by type", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -714,7 +714,7 @@ public class ActiveTimController extends BaseController {
              ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting all active tims", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 
@@ -836,7 +836,7 @@ public class ActiveTimController extends BaseController {
                 results.add(activeTim);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims with itis codes", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
@@ -899,7 +899,7 @@ public class ActiveTimController extends BaseController {
                 results.add(activeTim);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims with rsu", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
@@ -926,7 +926,7 @@ public class ActiveTimController extends BaseController {
                 activeTim = activeTims.get(activeTims.size() - 1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tims with rsu", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
         }
 
@@ -1026,7 +1026,7 @@ public class ActiveTimController extends BaseController {
             activeTimId = dbInteractions.executeAndLog(preparedStatement, "active tim");
             return ResponseEntity.ok(activeTimId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error inserting active tim", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimId);
         }
     }
@@ -1133,7 +1133,7 @@ public class ActiveTimController extends BaseController {
                     // execute delete SQL statement
                     result &= dbInteractions.updateOrDelete(preparedStatement);
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    log.error("Error resetting expiration date for active tims", e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
                 }
             }
@@ -1142,7 +1142,7 @@ public class ActiveTimController extends BaseController {
                 activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error resetting expiration date for active tims", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
 
@@ -1175,7 +1175,8 @@ public class ActiveTimController extends BaseController {
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error updating expiration date for packetID: {}, expDate: {}",
+                packetID, expDate, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
         log.info("Called UpdateExpiration with packetID: {}, expDate: {}. Successful: {}", packetID,
@@ -1215,7 +1216,8 @@ public class ActiveTimController extends BaseController {
                 minStart = utility.timestampFormat.format(tmpTs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting min expiration date for packetID: {}, expDate: {}",
+                packetID, expDate, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(minStart);
         }
         log.info("Called GetMinExpiration with packetID: {}, expDate: {}. Min start date: {}",
@@ -1237,7 +1239,8 @@ public class ActiveTimController extends BaseController {
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error marking active tim for deletion with activeTimId: {}",
+                activeTimId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
         if (!success) {
@@ -1255,7 +1258,7 @@ public class ActiveTimController extends BaseController {
              ResultSet rs = statement.executeQuery("select * from active_tim")) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting all active tims", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
         }
 

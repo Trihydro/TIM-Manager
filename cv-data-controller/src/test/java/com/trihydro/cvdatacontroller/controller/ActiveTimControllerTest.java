@@ -1306,32 +1306,4 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
-
-    @Test
-    void getAllRecords_Success() throws SQLException {
-        // Arrange
-        String query = "select * from active_tim";
-
-        // Act
-        ResponseEntity<List<ActiveTim>> data = uut.getAllRecords();
-
-        // Assert
-        Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
-        verify(mockStatement).executeQuery(query);
-        verify(mockRs).getLong("ACTIVE_TIM_ID");
-        verify(mockRs).getLong("TIM_ID");
-        verify(mockRs).getString("SAT_RECORD_ID");
-        verify(mockRs).getString("CLIENT_ID");
-        verify(mockRs).getString("DIRECTION");
-        verify(mockRs).getString("TIM_END");
-        verify(mockRs).getString("TIM_START");
-        verify(mockRs).getBigDecimal("START_LATITUDE");
-        verify(mockRs).getBigDecimal("START_LONGITUDE");
-        verify(mockRs).getBigDecimal("END_LATITUDE");
-        verify(mockRs).getBigDecimal("END_LONGITUDE");
-        verify(mockRs).getString("ROUTE");
-        verify(mockStatement).close();
-        verify(mockConnection).close();
-        verify(mockRs).close();
-    }
 }

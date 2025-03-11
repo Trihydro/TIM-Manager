@@ -1252,20 +1252,4 @@ public class ActiveTimController extends BaseController {
         }
         return ResponseEntity.ok(success);
     }
-
-    @RequestMapping(value = "/get-all", method = RequestMethod.GET)
-    public ResponseEntity<List<ActiveTim>> getAllRecords() {
-        List<ActiveTim> activeTims = new ArrayList<>();
-
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery("select * from active_tim")) {
-            activeTims = getActiveTimFromRS(rs, false);
-        } catch (SQLException e) {
-            log.error("Error getting all active tims", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
-        }
-
-        return ResponseEntity.ok(activeTims);
-    }
 }

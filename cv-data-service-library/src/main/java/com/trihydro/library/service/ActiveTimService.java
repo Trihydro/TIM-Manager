@@ -251,7 +251,7 @@ public class ActiveTimService extends CvDataServiceLibrary {
     }
 
     public List<ActiveTim> getAllRecords() {
-        String url = String.format("%s/active-tim/get-all", config.getCvRestService());
+        String url = String.format("%s/active-tim/all", config.getCvRestService());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);

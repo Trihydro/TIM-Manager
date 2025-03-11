@@ -2,7 +2,9 @@ package com.trihydro.library.service;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -499,6 +501,19 @@ public class ActiveTimServiceTest extends BaseServiceTest {
 
     @Test
     void getAllRecords_SuccessfulRetrieval_ShouldReturnRecords() {
-        // TODO: Implement test logic
+        // prepare
+        ActiveTim[] mockActiveTims = new ActiveTim[1];
+        ActiveTim mockActiveTim = new ActiveTim();
+        mockActiveTims[0] = mockActiveTim;
+        ResponseEntity<ActiveTim[]> mockResponseEntity = mock(ResponseEntity.class);
+        when(mockResponseEntity.getBody()).thenReturn(mockActiveTims);
+        when(mockRestTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class),
+                eq(ActiveTim[].class))).thenReturn(mockResponseEntity);
+
+        // execute
+        List<ActiveTim> records = uut.getAllRecords();
+
+        // verify
+        Assertions.assertEquals(mockActiveTims[0], records.get(0));
     }
 }

@@ -14,6 +14,7 @@ import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("active-tim-holding")
 @ApiIgnore
+@Slf4j
 public class ActiveTimHoldingController extends BaseController {
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -146,14 +148,14 @@ public class ActiveTimHoldingController extends BaseController {
                         activeTimHoldingId = rs.getLong("ACTIVE_TIM_HOLDING_ID");
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Error getting active tim holding id", e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(activeTimHoldingId);
                 }
             }
             return ResponseEntity.ok(activeTimHoldingId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error inserting active tim holding", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
         }
     }
@@ -194,7 +196,7 @@ public class ActiveTimHoldingController extends BaseController {
             }
             return ResponseEntity.ok(holdings);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tim holding for rsu", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
         }
     }
@@ -231,7 +233,7 @@ public class ActiveTimHoldingController extends BaseController {
             }
             return ResponseEntity.ok(holdings);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting all active tim holdings", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
         }
     }
@@ -248,7 +250,7 @@ public class ActiveTimHoldingController extends BaseController {
             dbInteractions.executeAndLog(preparedStatement, "active tim holding");
             return ResponseEntity.ok(true);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error deleting active tim holding", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
     }

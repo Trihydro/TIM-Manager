@@ -253,4 +253,14 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
                 verify(mockConnection).close();
                 verify(mockRs).close();
         }
+
+        @Test
+        void getAllRecords_SuccessfulRetrieval_ShouldReturnRecords() {
+                // TODO: Implement test logic
+        }
+
+        @Test
+        void deleteActiveTimHolding_SuccessfulDelete_ShouldReturnTrue() {
+                // TODO: Implement test logic
+        }
 }

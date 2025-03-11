@@ -496,4 +496,9 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         verify(mockRestTemplate).getForEntity(url, String.class);
         Assertions.assertEquals(minDate, data);
     }
+
+    @Test
+    void getAllRecords_SuccessfulRetrieval_ShouldReturnRecords() {
+        // TODO: Implement test logic
+    }
 }

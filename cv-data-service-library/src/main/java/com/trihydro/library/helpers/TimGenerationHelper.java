@@ -207,7 +207,7 @@ public class TimGenerationHelper {
                 }
             } catch (Exception ex) {
                 log.error(
-                    "Failed attempting to update TIM (active_tim_id {}) with ActiveTimValidationResult: {}",
+                    "Failed to update TIM (active_tim_id {}) with ActiveTimValidationResult: {}",
                     validationResult.getActiveTim().getActiveTimId(), gson.toJson(validationResult),
                     ex);
             }

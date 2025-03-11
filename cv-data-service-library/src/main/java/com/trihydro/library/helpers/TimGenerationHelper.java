@@ -207,7 +207,7 @@ public class TimGenerationHelper {
                 }
             } catch (Exception ex) {
                 log.error(
-                    "Failed attempting to update TIM (active_tim_id {}) with ActiveTimValidationResult: {}",
+                    "Failed to update TIM (active_tim_id {}) with ActiveTimValidationResult: {}",
                     validationResult.getActiveTim().getActiveTimId(), gson.toJson(validationResult),
                     ex);
             }
@@ -1035,7 +1035,7 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    log.error("Failed to trim region name", e);
+                    log.error("Failed to trim region name: {}", e.getMessage());
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 log.info("Sending TIM to RSU for refresh: {}", gson.toJson(timToSend));
@@ -1060,7 +1060,7 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    log.error("Failed to trim region name", e);
+                    log.error("Failed to trim region name: {}", e.getMessage());
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = rsu;
@@ -1089,8 +1089,7 @@ public class TimGenerationHelper {
                 // Finally, fetch all active_tims that are supposed to be on this RSU. Some may
                 // not be there, due to network or RSU issues. Make sure we don't claim an index
                 // that's already been claimed.
-                List<Integer> claimedIndexes =
-                    rsuService.getActiveRsuTimIndexes(rsu.getRsuId());
+                List<Integer> claimedIndexes = rsuService.getActiveRsuTimIndexes(rsu.getRsuId());
                 claimedIndexes.forEach(x -> timQuery.appendIndex(x));
 
                 Integer nextRsuIndex =
@@ -1143,7 +1142,7 @@ public class TimGenerationHelper {
         try {
             regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
         } catch (IllegalArgumentException e) {
-            log.error("Failed to trim region name", e);
+            log.error("Failed to trim region name: {}", e.getMessage());
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
@@ -1222,11 +1221,7 @@ public class TimGenerationHelper {
                                                  String rsuTarget, Integer nextRsuIndex,
                                                  String satRecordId) {
         // Create a new WydotTim object and set its properties from the TimUpdateModel
-        WydotTim wydotTim = new WydotTim();
-        wydotTim.setClientId(aTim.getClientId());
-        wydotTim.setDirection(aTim.getDirection());
-        wydotTim.setStartPoint(aTim.getStartPoint());
-        wydotTim.setEndPoint(aTim.getEndPoint());
+        WydotTim wydotTim = new WydotTim(aTim);
 
         // Create a new ActiveTimHolding object with the WydotTim, RSU target, satellite record ID, and end point
         ActiveTimHolding activeTimHolding =

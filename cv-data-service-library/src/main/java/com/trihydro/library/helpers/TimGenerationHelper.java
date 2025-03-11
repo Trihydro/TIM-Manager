@@ -1089,8 +1089,7 @@ public class TimGenerationHelper {
                 // Finally, fetch all active_tims that are supposed to be on this RSU. Some may
                 // not be there, due to network or RSU issues. Make sure we don't claim an index
                 // that's already been claimed.
-                List<Integer> claimedIndexes =
-                    rsuService.getActiveRsuTimIndexes(rsu.getRsuId());
+                List<Integer> claimedIndexes = rsuService.getActiveRsuTimIndexes(rsu.getRsuId());
                 claimedIndexes.forEach(x -> timQuery.appendIndex(x));
 
                 Integer nextRsuIndex =
@@ -1222,11 +1221,7 @@ public class TimGenerationHelper {
                                                  String rsuTarget, Integer nextRsuIndex,
                                                  String satRecordId) {
         // Create a new WydotTim object and set its properties from the TimUpdateModel
-        WydotTim wydotTim = new WydotTim();
-        wydotTim.setClientId(aTim.getClientId());
-        wydotTim.setDirection(aTim.getDirection());
-        wydotTim.setStartPoint(aTim.getStartPoint());
-        wydotTim.setEndPoint(aTim.getEndPoint());
+        WydotTim wydotTim = new WydotTim(aTim);
 
         // Create a new ActiveTimHolding object with the WydotTim, RSU target, satellite record ID, and end point
         ActiveTimHolding activeTimHolding =

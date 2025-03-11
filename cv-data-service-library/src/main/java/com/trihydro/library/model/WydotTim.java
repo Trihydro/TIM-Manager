@@ -36,6 +36,17 @@ public class WydotTim {
 		this.clientId = o.clientId;
 	}
 
+	public WydotTim(TimUpdateModel aTim) {
+		setClientId(aTim.getClientId());
+		setDirection(aTim.getDirection());
+		setStartPoint(aTim.getStartPoint());
+		setEndPoint(aTim.getEndPoint());
+		setRoute(aTim.getRoute());
+		for (Integer itisCode : aTim.getItisCodes()) {
+			this.itisCodes.add(itisCode.toString());
+		}
+	}
+
 	public WydotTim copy() {
 		return new WydotTim(this);
 	}

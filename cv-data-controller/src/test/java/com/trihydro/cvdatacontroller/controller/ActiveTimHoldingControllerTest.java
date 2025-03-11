@@ -255,12 +255,37 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
         }
 
         @Test
-        void getAllRecords_SuccessfulRetrieval_ShouldReturnRecords() {
-                // TODO: Implement test logic
+        void getAllRecords_SuccessfulRetrieval_ShouldReturnRecords() throws SQLException {
+                // execute
+                ResponseEntity<List<ActiveTimHolding>> response = uut.getAllRecords();
+
+                // verify
+                Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+                Assertions.assertNotNull(response.getBody());
+                Assertions.assertEquals(1, response.getBody().size());
+                verify(mockRs).getLong("ACTIVE_TIM_HOLDING_ID");
+                verify(mockRs).getString("CLIENT_ID");
+                verify(mockRs).getString("DIRECTION");
+                verify(mockRs).getString("RSU_TARGET");
+                verify(mockRs).getString("SAT_RECORD_ID");
+                verify(mockRs).getBigDecimal("START_LATITUDE");
+                verify(mockRs).getBigDecimal("START_LONGITUDE");
+                verify(mockRs).getBigDecimal("END_LATITUDE");
+                verify(mockRs).getBigDecimal("END_LONGITUDE");
+                verify(mockRs).getString("DATE_CREATED");
+                verify(mockRs).getInt("RSU_INDEX");
+                verify(mockStatement).close();
+                verify(mockConnection).close();
+                verify(mockRs).close();
         }
 
         @Test
-        void deleteActiveTimHolding_SuccessfulDelete_ShouldReturnTrue() {
-                // TODO: Implement test logic
+        void deleteActiveTimHolding_SuccessfulExecution_ShouldReturnTrue() {
+                // execute
+                ResponseEntity<Boolean> response = uut.deleteActiveTimHolding(137L);
+
+                // verify
+                Assertions.assertNotNull(response.getBody());
+                Assertions.assertTrue(response.getBody());
         }
 }

@@ -116,9 +116,10 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         Long activeTimId = -1l;
         String satRecordId = "asdf";
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("%s/active-tim/update-sat-record-id/%d/%s", baseUrl, activeTimId, satRecordId);
-        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
-                .thenReturn(mockResponseEntityBoolean);
+        String url = String.format("%s/active-tim/update-sat-record-id/%d/%s", baseUrl, activeTimId,
+            satRecordId);
+        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class)).thenReturn(
+            mockResponseEntityBoolean);
 
         // Act
         Boolean data = uut.updateActiveTim_SatRecordId(activeTimId, satRecordId);
@@ -134,8 +135,10 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         setupIntegerArrayReturn();
         ActiveTim activeTim = new ActiveTim();
         activeTim.setActiveTimId(-1l);
-        String url = String.format("%s/active-tim/itis-codes/%d", baseUrl, activeTim.getActiveTimId());
-        when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(mockResponseEntityIntegerArray);
+        String url =
+            String.format("%s/active-tim/itis-codes/%d", baseUrl, activeTim.getActiveTimId());
+        when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(
+            mockResponseEntityIntegerArray);
 
         // Act
         uut.addItisCodesToActiveTim(activeTim);
@@ -155,8 +158,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         Long activeTimId = -1l;
         String url = String.format("%s/active-tim/delete-id/%d", baseUrl, activeTimId);
         HttpEntity<String> entity = getEntity(null, String.class);
-        when(mockRestTemplate.exchange(url, HttpMethod.DELETE, entity, Boolean.class))
-                .thenReturn(mockResponseEntityBoolean);
+        when(mockRestTemplate.exchange(url, HttpMethod.DELETE, entity, Boolean.class)).thenReturn(
+            mockResponseEntityBoolean);
 
         // Act
         boolean data = uut.deleteActiveTim(activeTimId);
@@ -173,9 +176,11 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         List<Long> activeTimIds = new ArrayList<Long>();
         activeTimIds.add(-1l);
         activeTimIds.add(-2l);
-        HttpEntity<List<Long>> entity = new HttpEntity<List<Long>>(activeTimIds, getDefaultHeaders());
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim/delete-ids", HttpMethod.DELETE, entity, Boolean.class))
-                .thenReturn(mockResponseEntityBoolean);
+        HttpEntity<List<Long>> entity =
+            new HttpEntity<List<Long>>(activeTimIds, getDefaultHeaders());
+        when(
+            mockRestTemplate.exchange(baseUrl + "/active-tim/delete-ids", HttpMethod.DELETE, entity,
+                Boolean.class)).thenReturn(mockResponseEntityBoolean);
 
         // Act
         boolean success = uut.deleteActiveTimsById(activeTimIds);
@@ -190,7 +195,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         setupIntegerArrayReturn();
         String rsuTarget = "10.10.10.10";
         String url = String.format("%s/active-tim/indices-rsu/%s", baseUrl, rsuTarget);
-        when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(mockResponseEntityIntegerArray);
+        when(mockRestTemplate.getForEntity(url, Integer[].class)).thenReturn(
+            mockResponseEntityIntegerArray);
 
         // Act
         List<Integer> data = uut.getActiveTimIndicesByRsu(rsuTarget);
@@ -208,9 +214,10 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         setupWydotTims();
         setupActiveTimArrayReturn();
-        HttpEntity<List<WydotTim>> entity = new HttpEntity<List<WydotTim>>(wydotTims, getDefaultHeaders());
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim/get-by-wydot-tim/" + timTypeId, HttpMethod.POST, entity,
-                ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+        HttpEntity<List<WydotTim>> entity =
+            new HttpEntity<List<WydotTim>>(wydotTims, getDefaultHeaders());
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim/get-by-wydot-tim/" + timTypeId,
+            HttpMethod.POST, entity, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> data = uut.getActiveTimsByWydotTim(wydotTims, timTypeId);
@@ -227,9 +234,10 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         setupActiveTimArrayReturn();
         String clientId = "clientId";
         String direction = "westward";
-        String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", baseUrl, clientId, timTypeId,
-                direction);
-        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+        String url = String.format("%s/active-tim/client-id-direction/%s/%d/%s", baseUrl, clientId,
+            timTypeId, direction);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(
+            mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> data = uut.getActiveTimsByClientIdDirection(clientId, timTypeId, direction);
@@ -245,7 +253,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         setupActiveTimArrayReturn();
         String clientId = "clientId";
         String url = String.format("%s/active-tim/buffer-tims/%s", baseUrl, clientId);
-        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(
+            mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> data = uut.getBufferTimsByClientId(clientId);
@@ -260,7 +269,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         setupActiveTimArrayReturn();
         String url = String.format("%s/active-tim/expired", baseUrl);
-        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(
+            mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> data = uut.getExpiredActiveTims();
@@ -276,7 +286,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         setupActiveTimArrayReturn();
         String url = String.format("%s/active-tim/tim-type-id/%d", baseUrl, timTypeId);
-        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(url, ActiveTim[].class)).thenReturn(
+            mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> data = uut.getActivesTimByType(timTypeId);
@@ -296,8 +307,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         String url = String.format("%s/active-tim/active-rsu-tim", baseUrl);
         ActiveRsuTimQueryModel artqm = new ActiveRsuTimQueryModel(direction, clientId, ipv4Address);
         HttpEntity<ActiveRsuTimQueryModel> entity = getEntity(artqm, ActiveRsuTimQueryModel.class);
-        when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, ActiveTim.class))
-                .thenReturn(mockResponseEntityActiveTim);
+        when(mockRestTemplate.exchange(url, HttpMethod.POST, entity, ActiveTim.class)).thenReturn(
+            mockResponseEntityActiveTim);
 
         // Act
         ActiveTim data = uut.getActiveRsuTim(artqm);
@@ -312,8 +323,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         // Arrange
         setupTUMReturn();
         String url = String.format("%s/active-tim/expiring", baseUrl);
-        when(mockRestTemplate.getForEntity(url, TimUpdateModel[].class))
-                .thenReturn(mockResponseEntityTimUpdateModelArray);
+        when(mockRestTemplate.getForEntity(url, TimUpdateModel[].class)).thenReturn(
+            mockResponseEntityTimUpdateModelArray);
 
         // Act
         List<TimUpdateModel> data = uut.getExpiringActiveTims();
@@ -337,8 +348,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         tum.setActiveTimId(1l);
         tums[0] = tum;
 
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/missing-itis", TimUpdateModel[].class))
-                .thenReturn(mockResponseEntity);
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/missing-itis",
+            TimUpdateModel[].class)).thenReturn(mockResponseEntity);
         when(mockResponseEntity.getBody()).thenReturn(tums);
         // Act
         List<ActiveTim> ats = uut.getActiveTimsMissingItisCodes();
@@ -361,8 +372,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         tum.setSatRecordId("HEX");
         tum.setActiveTimId(1l);
         tums[0] = tum;
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/not-sent", TimUpdateModel[].class))
-                .thenReturn(mockResponseEntity);
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/not-sent",
+            TimUpdateModel[].class)).thenReturn(mockResponseEntity);
         when(mockResponseEntity.getBody()).thenReturn(tums);
 
         // Act
@@ -378,8 +389,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void getActiveTimsForSDX_success() {
         // Arrange
         setupActiveTimArrayReturn();
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx", ActiveTim[].class))
-                .thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx",
+            ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> result = uut.getActiveTimsForSDX();
@@ -392,8 +403,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     @Test
     public void getActiveTimsForSDX_throwsError() {
         // Arrange
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx", ActiveTim[].class))
-                .thenThrow(new RestClientException("timeout"));
+        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-sdx",
+            ActiveTim[].class)).thenThrow(new RestClientException("timeout"));
 
         // Act
         Assertions.assertThrows(RestClientException.class, () -> {
@@ -405,8 +416,9 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void getActiveTimsWithItisCodesWithExclusions_success() {
         // Arrange
         setupActiveTimArrayReturn();
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=true",
-                ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(
+            baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=true",
+            ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> result = uut.getActiveTimsWithItisCodes(true);
@@ -420,8 +432,9 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     public void getActiveTimsWithItisCodes_success() {
         // Arrange
         setupActiveTimArrayReturn();
-        when(mockRestTemplate.getForEntity(baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=false",
-                ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
+        when(mockRestTemplate.getForEntity(
+            baseUrl + "/active-tim/all-with-itis?excludeVslAndParking=false",
+            ActiveTim[].class)).thenReturn(mockResponseEntityActiveTims);
 
         // Act
         List<ActiveTim> result = uut.getActiveTimsWithItisCodes(false);
@@ -434,8 +447,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
     @Test
     public void getActiveTimsWithItisCodes_throwsError() {
         // Arrange
-        when(mockRestTemplate.getForEntity(anyString(), eq(ActiveTim[].class)))
-                .thenThrow(new RestClientException("timeout"));
+        when(mockRestTemplate.getForEntity(anyString(), eq(ActiveTim[].class))).thenThrow(
+            new RestClientException("timeout"));
 
         // Act
         Assertions.assertThrows(RestClientException.class, () -> {
@@ -450,9 +463,10 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         String packetID = "3C8E8DF2470B1A772E";
         String expDate = "2020-10-20T16:26:07.000Z";
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("%s/active-tim/update-expiration/%s/%s", baseUrl, packetID, expDate);
-        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
-                .thenReturn(mockResponseEntityBoolean);
+        String url =
+            String.format("%s/active-tim/update-expiration/%s/%s", baseUrl, packetID, expDate);
+        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class)).thenReturn(
+            mockResponseEntityBoolean);
 
         // Act
         Boolean data = uut.updateActiveTimExpiration(packetID, expDate);
@@ -469,9 +483,10 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         String packetID = "3C8E8DF2470B1A772E";
         String expDate = "2020-10-20T16:26:07.000Z";
         HttpEntity<String> entity = getEntity(null, String.class);
-        String url = String.format("%s/active-tim/update-expiration/%s/%s", baseUrl, packetID, expDate);
-        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class))
-                .thenReturn(mockResponseEntityBoolean);
+        String url =
+            String.format("%s/active-tim/update-expiration/%s/%s", baseUrl, packetID, expDate);
+        when(mockRestTemplate.exchange(url, HttpMethod.PUT, entity, Boolean.class)).thenReturn(
+            mockResponseEntityBoolean);
 
         // Act
         Boolean data = uut.updateActiveTimExpiration(packetID, expDate);
@@ -487,7 +502,8 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         String packetID = "3C8E8DF2470B1A772E";
         String expDate = "2020-10-20T16:26:07.000Z";
         String minDate = "27-OCT-20 06.21.00.000 PM";
-        String url = String.format("%s/active-tim/get-min-expiration/%s/%s", baseUrl, packetID, expDate);
+        String url =
+            String.format("%s/active-tim/get-min-expiration/%s/%s", baseUrl, packetID, expDate);
         doReturn(minDate).when(mockResponseEntityString).getBody();
         when(mockRestTemplate.getForEntity(url, String.class)).thenReturn(mockResponseEntityString);
 
@@ -508,7 +524,7 @@ public class ActiveTimServiceTest extends BaseServiceTest {
         ResponseEntity<ActiveTim[]> mockResponseEntity = mock(ResponseEntity.class);
         when(mockResponseEntity.getBody()).thenReturn(mockActiveTims);
         when(mockRestTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class),
-                eq(ActiveTim[].class))).thenReturn(mockResponseEntity);
+            eq(ActiveTim[].class))).thenReturn(mockResponseEntity);
 
         // execute
         List<ActiveTim> records = uut.getAllRecords();

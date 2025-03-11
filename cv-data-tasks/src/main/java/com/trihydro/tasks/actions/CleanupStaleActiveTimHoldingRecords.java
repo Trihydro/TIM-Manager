@@ -137,4 +137,19 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
             log.error("Failed to delete active_tim_holding record with id: {}. Is the cv-data-controller service running?", record.getActiveTimHoldingId(), e);
         }
     }
+
+    /**
+     * For testing purposes, this method returns the staleRecordsIdentifiedLastRun set.
+     */
+    protected Set<Long> getStaleRecordsIdentifiedLastRun() {
+        return staleRecordsIdentifiedLastRun;
+    }
+
+    /**
+     * For testing purposes, this method sets the staleRecordsIdentifiedLastRun set.
+     */
+    protected void setStaleRecordsIdentifiedLastRun(Set<Long> staleRecordsIdentifiedLastRun) {
+        this.staleRecordsIdentifiedLastRun.clear();
+        this.staleRecordsIdentifiedLastRun.addAll(staleRecordsIdentifiedLastRun);
+    }
 }

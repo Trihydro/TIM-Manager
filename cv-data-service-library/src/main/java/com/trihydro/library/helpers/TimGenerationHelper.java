@@ -1035,7 +1035,7 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    log.error("Failed to trim region name", e);
+                    log.error("Failed to trim region name: {}", e.getMessage());
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 log.info("Sending TIM to RSU for refresh: {}", gson.toJson(timToSend));
@@ -1060,7 +1060,7 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    log.error("Failed to trim region name", e);
+                    log.error("Failed to trim region name: {}", e.getMessage());
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = rsu;
@@ -1143,7 +1143,7 @@ public class TimGenerationHelper {
         try {
             regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
         } catch (IllegalArgumentException e) {
-            log.error("Failed to trim region name", e);
+            log.error("Failed to trim region name: {}", e.getMessage());
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 

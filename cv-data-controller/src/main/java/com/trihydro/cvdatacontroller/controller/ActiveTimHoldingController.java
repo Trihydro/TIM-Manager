@@ -44,19 +44,14 @@ public class ActiveTimHoldingController extends BaseController {
     public ResponseEntity<Long> InsertActiveTimHolding(
         @RequestBody ActiveTimHolding activeTimHolding) {
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
         Long activeTimHoldingId = 0l;
-        try {
-            String insertQueryStatement =
-                timDbTables.buildInsertQueryStatement("active_tim_holding",
-                    timDbTables.getActiveTimHoldingTable());
 
-            // get connection
-            connection = dbInteractions.getConnectionPool();
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim_holding",
+            timDbTables.getActiveTimHoldingTable());
 
-            preparedStatement = connection.prepareStatement(insertQueryStatement,
-                new String[] {"active_tim_holding_id"});
+        try (Connection connection = dbInteractions.getConnectionPool();
+             PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement,
+                 new String[] {"active_tim_holding_id"});) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getActiveTimHoldingTable()) {
@@ -129,25 +124,24 @@ public class ActiveTimHoldingController extends BaseController {
 
             if (activeTimHoldingId == null) {
                 // this already exists, fetch it and return the id
-                Statement statement = null;
-                ResultSet rs = null;
-                try {
-                    statement = connection.createStatement();
-                    String query = "select active_tim_holding_id from active_tim_holding";
-                    if (activeTimHolding.getSatRecordId() != null &&
-                        activeTimHolding.getSatRecordId() != "") {
-                        // sat tim
-                        query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() +
-                            "' and client_id = '" + activeTimHolding.getClientId() +
-                            "' and direction = '" + activeTimHolding.getDirection() + "'";
-                    } else {
-                        // rsu tim
-                        query += " where rsu_target = '" + activeTimHolding.getRsuTarget() +
-                            "' and client_id = '" + activeTimHolding.getClientId() +
-                            "' and direction = '" + activeTimHolding.getDirection() + "'";
-                    }
 
-                    rs = statement.executeQuery(query);
+                String query = "select active_tim_holding_id from active_tim_holding";
+                if (activeTimHolding.getSatRecordId() != null &&
+                    activeTimHolding.getSatRecordId() != "") {
+                    // sat tim
+                    query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() +
+                        "' and client_id = '" + activeTimHolding.getClientId() +
+                        "' and direction = '" + activeTimHolding.getDirection() + "'";
+                } else {
+                    // rsu tim
+                    query += " where rsu_target = '" + activeTimHolding.getRsuTarget() +
+                        "' and client_id = '" + activeTimHolding.getClientId() +
+                        "' and direction = '" + activeTimHolding.getDirection() + "'";
+                }
+
+                try (Statement statement = connection.createStatement();
+                     ResultSet rs = statement.executeQuery(query);) {
+
                     while (rs.next()) {
                         activeTimHoldingId = rs.getLong("ACTIVE_TIM_HOLDING_ID");
                     }
@@ -155,55 +149,28 @@ public class ActiveTimHoldingController extends BaseController {
                     e.printStackTrace();
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(activeTimHoldingId);
-                } finally {
-                    try {
-                        if (statement != null) {
-                            statement.close();
-                        }
-                        if (rs != null) {
-                            rs.close();
-                        }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
             return ResponseEntity.ok(activeTimHoldingId);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     @RequestMapping(value = "/get-rsu/{ipv4Address}", method = RequestMethod.GET)
     public ResponseEntity<List<ActiveTimHolding>> getActiveTimHoldingForRsu(
         @PathVariable String ipv4Address) {
-        ActiveTimHolding activeTimHolding = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
+        ActiveTimHolding activeTimHolding;
+
         List<ActiveTimHolding> holdings = new ArrayList<>();
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "select * from active_tim_holding ";
-            query += " where rsu_target = '" + ipv4Address + "'";
-            rs = statement.executeQuery(query);
+        String query = "select * from active_tim_holding ";
+        query += " where rsu_target = '" + ipv4Address + "'";
 
+        try (Connection connection = dbInteractions.getConnectionPool();
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(query);) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTimHolding = new ActiveTimHolding();
@@ -229,39 +196,18 @@ public class ActiveTimHoldingController extends BaseController {
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null) {
-                    statement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-                // close result set
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     @RequestMapping(value = "/get-all", produces = "application/json", method = RequestMethod.GET)
     public ResponseEntity<List<ActiveTimHolding>> getAllRecords() {
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
         List<ActiveTimHolding> holdings = new ArrayList<>();
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "select * from active_tim_holding";
-            rs = statement.executeQuery(query);
+        String query = "select * from active_tim_holding";
 
+        try (Connection connection = dbInteractions.getConnectionPool();
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(query);) {
             // convert to ActiveTim object
             while (rs.next()) {
                 ActiveTimHolding activeTimHolding = new ActiveTimHolding();
@@ -287,53 +233,23 @@ public class ActiveTimHoldingController extends BaseController {
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null) {
-                    statement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-                // close result set
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     @RequestMapping(value = "/delete/{activeTimHoldingId}", produces = "application/json", method = RequestMethod.DELETE)
     public ResponseEntity<Boolean> deleteActiveTimHolding(@PathVariable Long activeTimHoldingId) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            String deleteQueryStatement = "delete from active_tim_holding where active_tim_holding_id = ?";
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement(deleteQueryStatement);
+        String deleteQueryStatement =
+            "delete from active_tim_holding where active_tim_holding_id = ?";
+
+        try (Connection connection = dbInteractions.getConnectionPool();
+             PreparedStatement preparedStatement = connection.prepareStatement(
+                 deleteQueryStatement);) {
             preparedStatement.setLong(1, activeTimHoldingId);
             dbInteractions.executeAndLog(preparedStatement, "active tim holding");
             return ResponseEntity.ok(true);
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

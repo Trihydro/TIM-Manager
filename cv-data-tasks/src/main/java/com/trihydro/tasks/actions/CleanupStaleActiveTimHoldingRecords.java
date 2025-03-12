@@ -5,6 +5,7 @@ import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.service.ActiveTimHoldingService;
 import com.trihydro.library.service.ActiveTimService;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,18 +70,19 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
 
         // Check for active_tim records
         List<ActiveTim> activeTims = retrieveAllActiveTimRecords();
-        Set<Long> deletedActiveTimIds = new HashSet<>();
+        HashMap<String, List<Long>> activeTimIdsByClientId = mapActiveTimIdsByClientId(activeTims);
+        List<Long> activeTimIdsToDelete = new ArrayList<>();
         for (ActiveTimHolding record : likelyStaleRecords) {
-            for (ActiveTim activeTim : activeTims) {
-                if (record.getClientId().equals(activeTim.getClientId()) && !deletedActiveTimIds.contains(activeTim.getActiveTimId())) {
-                    removeActiveTimRecord(activeTim); // active_tim record is no longer up-to-date
-                    deletedActiveTimIds.add(activeTim.getActiveTimId());
-                    // TODO: Delete only if the failed update was to expire the active TIM.
-                    // TODO: Consider re-submitting the active TIM if the failed update was not meant to expire it.
-                }
+            List<Long> activeTimIds = activeTimIdsByClientId.get(record.getClientId());
+            if (activeTimIds == null) {
+                continue;
             }
+            activeTimIdsToDelete.addAll(activeTimIds);
+            // TODO: Delete only if the failed update was to expire the active TIM.
+            // TODO: Consider re-submitting the active TIM if the failed update was not meant to expire it.
         }
-        log.info("Deleted corresponding active_tim records with ids: ({}), which were outdated (the presence of stale active_tim_holding records indicates a failure to update).", deletedActiveTimIds);
+        removeActiveTimRecords(activeTimIdsToDelete); // active_tim records are no longer up-to-date
+        log.info("Deleted corresponding active_tim records with ids: ({}), which were outdated (the presence of stale active_tim_holding records indicates a failure to update).", activeTimIdsToDelete);
 
         // Delete likely stale active_tim_holding records
         for (ActiveTimHolding record : likelyStaleRecords) {
@@ -97,6 +99,17 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
             staleRecordsIdentifiedLastRun.add(record.getActiveTimHoldingId());
         }
         log.info("Added {} active_tim_holding records to staleRecords set for next run", newRecords.size());
+    }
+
+    private static HashMap<String, List<Long>> mapActiveTimIdsByClientId(List<ActiveTim> activeTims) {
+        HashMap<String, List<Long>> activeTimIdsByClientId = new HashMap<>();
+        for (ActiveTim activeTim : activeTims) {
+            if (!activeTimIdsByClientId.containsKey(activeTim.getClientId())) {
+                activeTimIdsByClientId.put(activeTim.getClientId(), new ArrayList<>());
+            }
+            activeTimIdsByClientId.get(activeTim.getClientId()).add(activeTim.getActiveTimId());
+        }
+        return activeTimIdsByClientId;
     }
 
     private List<ActiveTimHolding> retrieveAllActiveTimHoldingRecords() {
@@ -117,14 +130,14 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
         return new ArrayList<>();
     }
 
-    private void removeActiveTimRecord(ActiveTim activeTim) {
+    private void removeActiveTimRecords(List<Long> activeTimIds) {
         try {
-            boolean success = activeTimService.deleteActiveTim(activeTim.getActiveTimId());
+            boolean success = activeTimService.deleteActiveTimsById(activeTimIds);
             if (!success) {
-                log.error("Failed to delete active_tim record with id: {}", activeTim.getActiveTimId());
+                log.error("Failed to delete active_tim records with ids: {}", activeTimIds);
             }
         } catch (Exception e) {
-            log.error("Failed to delete active_tim record with id: {}", activeTim.getActiveTimId(), e);
+            log.error("Failed to delete active_tim record with ids: {}. Is the cv-data-controller service running?", activeTimIds, e);
         }
     }
 

@@ -107,7 +107,7 @@ class CleanupStaleActiveTimHoldingRecordsTest {
         verify(activeTimService).getAllRecords();
         verify(activeTimHoldingService).deleteActiveTimHolding(1L);
         verify(activeTimHoldingService).deleteActiveTimHolding(2L);
-        verify(activeTimService).deleteActiveTim(37L);
+        verify(activeTimService).deleteActiveTimsById(List.of(37L));
     }
 
     /**

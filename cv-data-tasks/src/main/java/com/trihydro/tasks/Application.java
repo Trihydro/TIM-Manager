@@ -1,3 +1,4 @@
+
 package com.trihydro.tasks;
 
 import com.trihydro.tasks.actions.CleanupStaleActiveTimHoldingRecords;
@@ -51,13 +52,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import({SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class,
-    ActiveTimService.class, ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
-    TmddService.class, GsonFactory.class, StatusLogService.class, TimService.class,
-    DataFrameService.class, TimGenerationHelper.class, PathNodeLLService.class,
-    MilepostService.class, MilepostReduction.class, RegionService.class, RsuService.class,
-    OdeService.class, ActiveTimHoldingService.class, WydotTimService.class, TimTypeService.class,
-    CreateBaseTimUtil.class, TimRsuService.class, SnmpHelper.class, RegionNameTrimmer.class})
+@Import({SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class, ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
+    TmddService.class, GsonFactory.class, StatusLogService.class, TimService.class, DataFrameService.class, TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class,
+    MilepostReduction.class, RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class, WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class,
+    TimRsuService.class, SnmpHelper.class, RegionNameTrimmer.class})
 
 @Slf4j
 public class Application {
@@ -73,12 +71,8 @@ public class Application {
     private final CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords;
 
     @Autowired
-    public Application(DataTasksConfiguration config,
-                       RemoveExpiredActiveTims removeExpiredActiveTims,
-                       CleanupActiveTims cleanupActiveTims, ValidateSdx sdxValidator,
-                       ValidateRsus rsuValidator, ValidateTmdd tmddValidator,
-                       RetentionPolicyEnforcement retentionEnforcement,
-                       VerifyHSMFunctional hsmFunctional,
+    public Application(DataTasksConfiguration config, RemoveExpiredActiveTims removeExpiredActiveTims, CleanupActiveTims cleanupActiveTims, ValidateSdx sdxValidator, ValidateRsus rsuValidator,
+                       ValidateTmdd tmddValidator, RetentionPolicyEnforcement retentionEnforcement, VerifyHSMFunctional hsmFunctional,
                        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords) {
         Application.config = config;
         this.removeExpiredActiveTims = removeExpiredActiveTims;
@@ -101,24 +95,20 @@ public class Application {
 
         // Remove Expired Active Tims
         log.info("Scheduling Remove Expired Active Tims...");
-        scheduledExecutorService.scheduleAtFixedRate(removeExpiredActiveTims, 0,
-            config.getRemoveExpiredPeriodMinutes(), TimeUnit.MINUTES);
+        scheduledExecutorService.scheduleAtFixedRate(removeExpiredActiveTims, 0, config.getRemoveExpiredPeriodMinutes(), TimeUnit.MINUTES);
 
         // Cleanup Active Tims
         log.info("Scheduling Cleanup Active Tims...");
-        scheduledExecutorService.scheduleAtFixedRate(cleanupActiveTims, 5,
-            config.getCleanupPeriodMinutes(), TimeUnit.MINUTES);
+        scheduledExecutorService.scheduleAtFixedRate(cleanupActiveTims, 5, config.getCleanupPeriodMinutes(), TimeUnit.MINUTES);
 
         // SDX Validator
         log.info("Scheduling SDX Validator...");
-        scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 15,
-            config.getSdxValidationPeriodMinutes(), TimeUnit.MINUTES);
+        scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 15, config.getSdxValidationPeriodMinutes(), TimeUnit.MINUTES);
 
         // HSM Check
         if (config.getRunHsmCheck()) {
             log.info("HSM check configured, scheduling...");
-            scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
-                config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
+            scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0, config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
         } else {
             log.info("HSM check not configured, skipping...");
         }
@@ -129,8 +119,7 @@ public class Application {
         // emails
         if (config.getRunRsuValidation()) {
             log.info("Scheduling RSU Validator...");
-            scheduledExecutorService.scheduleAtFixedRate(rsuValidator, 20,
-                config.getRsuValidationPeriodMinutes(), TimeUnit.MINUTES);
+            scheduledExecutorService.scheduleAtFixedRate(rsuValidator, 20, config.getRsuValidationPeriodMinutes(), TimeUnit.MINUTES);
         } else {
             log.info("RSU Validation not configured, skipping...");
         }
@@ -140,21 +129,17 @@ public class Application {
         // we should only be running the TMDD validation in prod.
         if (config.getRunTmddValidation()) {
             log.info("Scheduling TMDD Validator...");
-            scheduledExecutorService.scheduleAtFixedRate(tmddValidator, 25,
-                config.getTmddValidationPeriodMinutes(), TimeUnit.MINUTES);
+            scheduledExecutorService.scheduleAtFixedRate(tmddValidator, 25, config.getTmddValidationPeriodMinutes(), TimeUnit.MINUTES);
         } else {
             log.info("TMDD Validation not configured, skipping...");
         }
 
         // Retention Policy Enforcement
         log.info("Scheduling Retention Policy Enforcement...");
-        scheduledExecutorService.scheduleAtFixedRate(retentionEnforcement, 30,
-            config.getRetentionEnforcementPeriodMinutes(), TimeUnit.MINUTES);
+        scheduledExecutorService.scheduleAtFixedRate(retentionEnforcement, 30, config.getRetentionEnforcementPeriodMinutes(), TimeUnit.MINUTES);
 
         // Cleanup Stale Active Tim Holding Records
-        log.info("Scheduling Cleanup Stale Active Tim Holding Records to run every {} minutes...",
-            config.getCleanupStaleActiveTimHoldingRecordsPeriodMinutes());
-        scheduledExecutorService.scheduleAtFixedRate(cleanupStaleActiveTimHoldingRecords, 0,
-            config.getCleanupStaleActiveTimHoldingRecordsPeriodMinutes(), TimeUnit.MINUTES);
+        log.info("Scheduling Cleanup Stale Active Tim Holding Records to run every {} minutes...", config.getCleanupStaleActiveTimHoldingRecordsPeriodMinutes());
+        scheduledExecutorService.scheduleAtFixedRate(cleanupStaleActiveTimHoldingRecords, 0, config.getCleanupStaleActiveTimHoldingRecordsPeriodMinutes(), TimeUnit.MINUTES);
     }
 }

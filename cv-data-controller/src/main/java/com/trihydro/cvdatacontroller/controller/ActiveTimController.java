@@ -78,13 +78,10 @@ public class ActiveTimController extends BaseController {
         TimUpdateModel activeTim;
         List<TimUpdateModel> activeTims = new ArrayList<TimUpdateModel>();
 
-        String selectStatement =
-            "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
+        String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
         selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
-        selectStatement +=
-            ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
-        selectStatement +=
-            ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
+        selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
+        selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
         selectStatement += ", r.region_id, r.anchor_lat, r.anchor_long, r.lane_width";
         selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
         selectStatement += ", r.directionality, r.direction AS region_direction";
@@ -94,18 +91,13 @@ public class ActiveTimController extends BaseController {
         selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
         selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
         // where starting less than 24 hours away
-        selectStatement +=
-            " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR";
+        selectStatement += " WHERE atim.tim_start <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR";
         // and expiration_date within 24hrs
-        selectStatement +=
-            " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR)";
+        selectStatement += " AND (atim.expiration_date is null OR atim.expiration_date <= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR)";
         // check that end time isn't within 24hrs
-        selectStatement +=
-            " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR)";
+        selectStatement += " AND (atim.tim_end is null OR atim.tim_end >= (NOW() AT TIME ZONE 'UTC') + INTERVAL '24' HOUR)";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTim = new TimUpdateModel();
@@ -164,19 +156,14 @@ public class ActiveTimController extends BaseController {
                 // DataFrame properties
                 activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
                 activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-                activeTim.setNotUsed1(
-                    (short) 0); // as of J2735 this should be set to 0 and is ignored
-                activeTim.setNotUsed(
-                    (short) 0); // as of J2735 this should be set to 0 and is ignored
-                activeTim.setNotUsed3(
-                    (short) 0); // as of J2735 this should be set to 0 and is ignored
-                activeTim.setNotUsed2(
-                    (short) 0); // as of J2735 this should be set to 0 and is ignored
+                activeTim.setNotUsed1((short) 0); // as of J2735 this should be set to 0 and is ignored
+                activeTim.setNotUsed((short) 0); // as of J2735 this should be set to 0 and is ignored
+                activeTim.setNotUsed3((short) 0); // as of J2735 this should be set to 0 and is ignored
+                activeTim.setNotUsed2((short) 0); // as of J2735 this should be set to 0 and is ignored
                 activeTim.setUrl(rs.getString("URL"));
 
                 int frameTypeValue = rs.getInt("FRAME_TYPE");
-                if (!rs.wasNull() && frameTypeValue >= 0 &&
-                    frameTypeValue < TravelerInfoType.values().length) {
+                if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
                     activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
                 }
 
@@ -202,17 +189,13 @@ public class ActiveTimController extends BaseController {
     }
 
     @RequestMapping(value = "/update-model/{activeTimId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    public ResponseEntity<TimUpdateModel> GetUpdateModelFromActiveTimId(
-        @PathVariable Long activeTimId) {
+    public ResponseEntity<TimUpdateModel> GetUpdateModelFromActiveTimId(@PathVariable Long activeTimId) {
         TimUpdateModel activeTim = null;
 
-        String selectStatement =
-            "SELECT atim.*, tt.type AS tim_type_name, tt.description AS tim_type_description";
+        String selectStatement = "SELECT atim.*, tt.type AS tim_type_name, tt.description AS tim_type_description";
         selectStatement += ", t.msg_cnt, t.url_b, t.is_satellite, t.sat_record_id, t.packet_id";
-        selectStatement +=
-            ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
-        selectStatement +=
-            ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
+        selectStatement += ", df.data_frame_id, df.frame_type, df.duration_time, df.ssp_tim_rights, df.ssp_location_rights";
+        selectStatement += ", df.ssp_msg_types, df.ssp_msg_content, df.content AS df_Content, df.url";
         selectStatement += ", r.region_id, r.anchor_lat, r.anchor_long, r.lane_width";
         selectStatement += ", r.path_id, r.closed_path, r.description AS region_description";
         selectStatement += ", r.directionality, r.direction AS region_direction";
@@ -224,9 +207,7 @@ public class ActiveTimController extends BaseController {
         // where active_tim_id is provided
         selectStatement += " WHERE atim.active_tim_id = " + activeTimId;
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTim = new TimUpdateModel();
@@ -285,19 +266,14 @@ public class ActiveTimController extends BaseController {
                 // DataFrame properties
                 activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
                 activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-                activeTim.setNotUsed1(
-                    (short) 0); // as of J2735 2020 this should be set to 0 and is ignored
-                activeTim.setNotUsed(
-                    (short) 0); // as of J2735 2020 this should be set to 0 and is ignored
-                activeTim.setNotUsed3(
-                    (short) 0); // as of J2735 2020 this should be set to 0 and is ignored
-                activeTim.setNotUsed2(
-                    (short) 0); // as of J2735 2020 this should be set to 0 and is ignored
+                activeTim.setNotUsed1((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
+                activeTim.setNotUsed((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
+                activeTim.setNotUsed3((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
+                activeTim.setNotUsed2((short) 0); // as of J2735 2020 this should be set to 0 and is ignored
                 activeTim.setUrl(rs.getString("URL"));
 
                 int frameTypeValue = rs.getInt("FRAME_TYPE");
-                if (!rs.wasNull() && frameTypeValue >= 0 &&
-                    frameTypeValue < TravelerInfoType.values().length) {
+                if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
                     activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
                 }
 
@@ -321,16 +297,14 @@ public class ActiveTimController extends BaseController {
     }
 
     @RequestMapping(value = "/update-sat-record-id/{activeTimId}/{satRecordId}", method = RequestMethod.PUT)
-    public ResponseEntity<Boolean> updateActiveTim_SatRecordId(@PathVariable Long activeTimId,
-                                                               @PathVariable String satRecordId) {
+    public ResponseEntity<Boolean> updateActiveTim_SatRecordId(@PathVariable Long activeTimId, @PathVariable String satRecordId) {
 
         List<Pair<String, Object>> cols = new ArrayList<>();
         cols.add(new ImmutablePair<>("SAT_RECORD_ID", satRecordId));
         boolean success;
 
         try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement preparedStatement = timDbTables.buildUpdateStatement(activeTimId,
-                 "ACTIVE_TIM", "ACTIVE_TIM_ID", cols, connection)) {
+             PreparedStatement preparedStatement = timDbTables.buildUpdateStatement(activeTimId, "ACTIVE_TIM", "ACTIVE_TIM_ID", cols, connection)) {
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
@@ -355,16 +329,14 @@ public class ActiveTimController extends BaseController {
         // tim_id
         selectStatement += " (select active_tim.tim_id from active_tim";
         selectStatement += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
-        selectStatement +=
-            " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        selectStatement += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
         selectStatement += " where active_tim.tim_id in";
 
         // Inner subquery: Get tim_ids of active_tims that _might_ not have an
         // associated itis code
         selectStatement += " (select active_tim.tim_id from active_tim";
         selectStatement += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
-        selectStatement +=
-            " left join data_frame_itis_code ON data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        selectStatement += " left join data_frame_itis_code ON data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
         selectStatement += " where data_frame_itis_code.itis_code_id is null)";
 
         // Outer subquery (cont'd): Group by tim_id and filter out any records that have
@@ -374,9 +346,7 @@ public class ActiveTimController extends BaseController {
         selectStatement += " group by active_tim.tim_id";
         selectStatement += " having max(data_frame_itis_code.itis_code_id) is null)";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
             log.error("Error getting active tims missing itis codes", e);
@@ -394,9 +364,7 @@ public class ActiveTimController extends BaseController {
         selectStatement += " where active_tim.sat_record_id is null";
         selectStatement += " and tim_rsu.rsu_id is null";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
             log.error("Error getting active tims not sent", e);
@@ -412,9 +380,7 @@ public class ActiveTimController extends BaseController {
         String selectStatement = "select * from ACTIVE_TIM";
         selectStatement += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
             log.error("Error getting expired active tims", e);
@@ -436,9 +402,7 @@ public class ActiveTimController extends BaseController {
         selectStatement += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
         selectStatement += " where rsu_view.ipv4_address = '" + rsuTarget + "'";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 indices.add(rs.getInt("RSU_INDEX"));
@@ -451,18 +415,13 @@ public class ActiveTimController extends BaseController {
         return ResponseEntity.ok(indices);
     }
 
-    @RequestMapping(value = {"/client-id-direction/{clientId}/{timTypeId}",
-        "/client-id-direction/{clientId}/{timTypeId}/{direction}"}, method = RequestMethod.GET)
-    public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(
-        @PathVariable String clientId, @PathVariable Long timTypeId,
-        @PathVariable(required = false) String direction) {
+    @RequestMapping(value = {"/client-id-direction/{clientId}/{timTypeId}", "/client-id-direction/{clientId}/{timTypeId}/{direction}"}, method = RequestMethod.GET)
+    public ResponseEntity<List<ActiveTim>> GetActiveTimsByClientIdDirection(@PathVariable String clientId, @PathVariable Long timTypeId, @PathVariable(required = false) String direction) {
         List<ActiveTim> activeTims = new ArrayList<>();
 
         // There may be multiple TIMs grouped together by client_id. ex. CLIENTID_1,
         // CLIENTID_2
-        String query =
-            "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = " +
-                timTypeId;
+        String query = "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = " + timTypeId;
 
         if (direction != null) {
             query += " and DIRECTION = '" + direction + "'";
@@ -470,9 +429,7 @@ public class ActiveTimController extends BaseController {
 
         query += " and MARKED_FOR_DELETION = '0'"; // exclude active tims marked for deletion
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
             log.error("Error getting active tims by client id and direction", e);
@@ -486,12 +443,9 @@ public class ActiveTimController extends BaseController {
     public ResponseEntity<List<ActiveTim>> GetBufferTimsByClientId(@PathVariable String clientId) {
         List<ActiveTim> activeTims = new ArrayList<>();
 
-        String query = "select * from active_tim where CLIENT_ID like '" + clientId +
-            "\\%BUFF_-%' ESCAPE '\\'";
+        String query = "select * from active_tim where CLIENT_ID like '" + clientId + "\\%BUFF_-%' ESCAPE '\\'";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
             log.error("Error getting buffer tims by client id", e);
@@ -508,16 +462,12 @@ public class ActiveTimController extends BaseController {
         String selectStatement = "select itis_code from active_tim ";
         selectStatement += "inner join tim on tim.tim_id = active_tim.tim_id ";
         selectStatement += "inner join data_frame on tim.tim_id = data_frame.tim_id ";
-        selectStatement +=
-            "inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id ";
-        selectStatement +=
-            "inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id ";
+        selectStatement += "inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id ";
+        selectStatement += "inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id ";
         selectStatement += "where active_tim_id = " + activeTimId;
         selectStatement += " order by data_frame_itis_code.position asc";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 itisCodes.add(rs.getInt("ITIS_CODE"));
@@ -535,8 +485,7 @@ public class ActiveTimController extends BaseController {
 
         String deleteSQL = "DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID = ?";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL)) {
             preparedStatement.setLong(1, activeTimId);
 
             // execute delete SQL statement
@@ -544,14 +493,12 @@ public class ActiveTimController extends BaseController {
             if (deleteActiveTimResult) {
                 log.info("Active Tim (active_tim_id {}) is deleted!", activeTimId);
             } else {
-                log.warn("Failed to delete Active Tim (active_tim_id {}). It may not exist.",
-                    activeTimId);
+                log.warn("Failed to delete Active Tim (active_tim_id {}). It may not exist.", activeTimId);
             }
 
         } catch (SQLException e) {
             log.error("Error deleting active tim", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(deleteActiveTimResult);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(deleteActiveTimResult);
         }
 
         return ResponseEntity.ok(deleteActiveTimResult);
@@ -561,16 +508,14 @@ public class ActiveTimController extends BaseController {
     public ResponseEntity<Boolean> DeleteActiveTimsById(@RequestBody List<Long> activeTimIds) {
         boolean deleteActiveTimResult = false;
 
-        StringBuilder deleteSQL =
-            new StringBuilder("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (");
+        StringBuilder deleteSQL = new StringBuilder("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (");
         for (int i = 0; i < activeTimIds.size(); i++) {
             deleteSQL.append("?,");
         }
         deleteSQL = new StringBuilder(deleteSQL.substring(0, deleteSQL.length() - 1));
         deleteSQL.append(")");
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL.toString())) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL.toString())) {
             for (int i = 0; i < activeTimIds.size(); i++) {
                 preparedStatement.setLong(i + 1, activeTimIds.get(i));
             }
@@ -579,17 +524,14 @@ public class ActiveTimController extends BaseController {
             deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
 
             if (deleteActiveTimResult) {
-                log.info("Active Tims (active_tim_ids {}) are deleted!",
-                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
+                log.info("Active Tims (active_tim_ids {}) are deleted!", activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
             } else {
-                log.warn("Failed to delete Active Tims (active_tim_ids {}). They may not exist.",
-                    activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
+                log.warn("Failed to delete Active Tims (active_tim_ids {}). They may not exist.", activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
             }
 
         } catch (SQLException e) {
             log.error("Error deleting active tims", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(deleteActiveTimResult);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(deleteActiveTimResult);
         }
 
         return ResponseEntity.ok(deleteActiveTimResult);
@@ -602,8 +544,7 @@ public class ActiveTimController extends BaseController {
             return ResponseEntity.badRequest().body(activeTims);
         }
 
-        StringBuilder query =
-            new StringBuilder("select * from active_tim where active_tim_id in (");
+        StringBuilder query = new StringBuilder("select * from active_tim where active_tim_id in (");
 
         for (int i = 0; i < ids.size(); i++) {
             query.append("?, ");
@@ -611,8 +552,7 @@ public class ActiveTimController extends BaseController {
         query = new StringBuilder(query.substring(0, query.length() - 2));// subtract ', '
         query.append(")");
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement ps = connection.prepareStatement(query.toString())) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement ps = connection.prepareStatement(query.toString())) {
             for (int i = 0; i < ids.size(); i++) {
                 // set active_tim_id
                 ps.setLong(i + 1, ids.get(i));
@@ -629,8 +569,7 @@ public class ActiveTimController extends BaseController {
     }
 
     @RequestMapping(value = "/get-by-wydot-tim/{timTypeId}", method = RequestMethod.POST)
-    public ResponseEntity<List<ActiveTim>> GetActiveTimsByWydotTim(
-        @RequestBody List<? extends WydotTim> wydotTims, @PathVariable Long timTypeId) {
+    public ResponseEntity<List<ActiveTim>> GetActiveTimsByWydotTim(@RequestBody List<? extends WydotTim> wydotTims, @PathVariable Long timTypeId) {
         List<ActiveTim> activeTims = new ArrayList<>();
 
         WydotTim wydotTim;
@@ -655,8 +594,7 @@ public class ActiveTimController extends BaseController {
             query.append(")");
         }
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement ps = connection.prepareStatement(query.toString())) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement ps = connection.prepareStatement(query.toString())) {
 
             int index = 1;
             if (timTypeId != null) {
@@ -671,8 +609,7 @@ public class ActiveTimController extends BaseController {
                 index++;
 
                 // set direction
-                if (wydotTim.getDirection() != null &&
-                    !wydotTim.getDirection().equalsIgnoreCase("B")) {
+                if (wydotTim.getDirection() != null && !wydotTim.getDirection().equalsIgnoreCase("B")) {
                     ps.setString(index, wydotTim.getDirection());
                     index++;
                 }
@@ -692,10 +629,8 @@ public class ActiveTimController extends BaseController {
     public ResponseEntity<List<ActiveTim>> GetActiveTimsByType(@PathVariable Long timTypeId) {
         List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(
-                 "select * from active_tim where TIM_TYPE_ID = " + timTypeId)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery("select * from active_tim where TIM_TYPE_ID = " + timTypeId)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
             log.error("Error getting active tims by type", e);
@@ -711,9 +646,7 @@ public class ActiveTimController extends BaseController {
 
         String selectStatement = "select * from active_tim";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(selectStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             activeTims = getActiveTimFromRS(rs, false);
         } catch (SQLException e) {
             log.error("Error getting all active tims", e);
@@ -729,8 +662,7 @@ public class ActiveTimController extends BaseController {
     }
 
     @RequestMapping(value = "/all-with-itis", method = RequestMethod.GET)
-    public ResponseEntity<List<ActiveTim>> GetAllActiveTimsWithItis(
-        @RequestParam(required = false) Boolean excludeVslAndParking) {
+    public ResponseEntity<List<ActiveTim>> GetAllActiveTimsWithItis(@RequestParam(required = false) Boolean excludeVslAndParking) {
         // Configure default value
         if (excludeVslAndParking == null) {
             excludeVslAndParking = false;
@@ -739,18 +671,15 @@ public class ActiveTimController extends BaseController {
         return getActiveTimsWithItisCodes(false, excludeVslAndParking);
     }
 
-    private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly,
-                                                                       boolean excludeVslAndParking) {
+    private ResponseEntity<List<ActiveTim>> getActiveTimsWithItisCodes(boolean sdxOnly, boolean excludeVslAndParking) {
         List<ActiveTim> results = new ArrayList<ActiveTim>();
         ActiveTim activeTim = null;
 
         String query = "select active_tim.*, tim_type.type, itis_code.itis_code from active_tim";
         query += " left join tim_type on active_tim.tim_type_id = tim_type.tim_type_id";
         query += " left join data_frame on active_tim.tim_id = data_frame.tim_id";
-        query +=
-            " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
-        query +=
-            " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
+        query += " left join data_frame_itis_code on data_frame.data_frame_id = data_frame_itis_code.data_frame_id";
+        query += " left join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id";
 
         if (sdxOnly) {
             query += " where sat_record_id is not null";
@@ -766,9 +695,7 @@ public class ActiveTimController extends BaseController {
 
         query += " order by active_tim.active_tim_id, data_frame_itis_code.position asc";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 Long activeTimId = rs.getLong("ACTIVE_TIM_ID");
@@ -855,17 +782,14 @@ public class ActiveTimController extends BaseController {
         List<ActiveTim> results = new ArrayList<ActiveTim>();
         ActiveTim activeTim = null;
 
-        String query =
-            "select active_tim.*, rsu_view.ipv4_address, tim_rsu.rsu_index from active_tim";
+        String query = "select active_tim.*, rsu_view.ipv4_address, tim_rsu.rsu_index from active_tim";
         query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
         query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
         query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
         query += " where sat_record_id is null";
         query += " order by rsu_view.ipv4_address, tim_rsu.rsu_index"; // Required by ValidateRsus
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 // Create ActiveTim record
@@ -917,12 +841,9 @@ public class ActiveTimController extends BaseController {
         query += " inner join tim_rsu on active_tim.tim_id = tim_rsu.tim_id";
         query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
         query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
-        query += " where ipv4_address = '" + artqm.getIpv4() + "' and client_id = '" +
-            artqm.getClientId() + "' and active_tim.direction = '" + artqm.getDirection() + "'";
+        query += " where ipv4_address = '" + artqm.getIpv4() + "' and client_id = '" + artqm.getClientId() + "' and active_tim.direction = '" + artqm.getDirection() + "'";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             List<ActiveTim> activeTims = getActiveTimFromRS(rs, false);
             if (!activeTims.isEmpty()) {
                 activeTim = activeTims.get(activeTims.size() - 1);
@@ -939,58 +860,44 @@ public class ActiveTimController extends BaseController {
     public ResponseEntity<Long> InsertActiveTim(@RequestBody ActiveTim activeTim) {
         Long activeTimId = 0L;
 
-        String insertQueryStatement =
-            timDbTables.buildInsertQueryStatement("active_tim", timDbTables.getActiveTimTable());
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim", timDbTables.getActiveTimTable());
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement,
-                 new String[] {"active_tim_id"})) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"active_tim_id"})) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getActiveTimTable()) {
                 if (col.equals("TIM_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
                 } else if (col.equals("DIRECTION")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                        activeTim.getDirection());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
                 } else if (col.equals("TIM_START")) {
-                    java.util.Date tim_start_date =
-                        utility.convertDate(activeTim.getStartDateTime());
+                    java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
                     Timestamp tim_start_timestamp = new Timestamp(tim_start_date.getTime());
-                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-                        tim_start_timestamp);
+                    sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_start_timestamp);
                 } else if (col.equals("TIM_END")) {
                     if (activeTim.getEndDateTime() != null) {
-                        java.util.Date tim_end_date =
-                            utility.convertDate(activeTim.getEndDateTime());
+                        java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
                         Timestamp tim_end_timestamp = new Timestamp(tim_end_date.getTime());
-                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-                            tim_end_timestamp);
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_end_timestamp);
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
                 } else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTim.getExpirationDateTime() != null) {
-                        java.util.Date tim_exp_date =
-                            utility.convertDate(activeTim.getExpirationDateTime());
+                        java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
                         Timestamp tim_exp_timestamp = new Timestamp(tim_exp_date.getTime());
-                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum,
-                            tim_exp_timestamp);
+                        sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, tim_exp_timestamp);
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
                 } else if (col.equals("TIM_TYPE_ID")) {
-                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum,
-                        activeTim.getTimTypeId());
+                    sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimTypeId());
                 } else if (col.equals("ROUTE")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                        activeTim.getRoute());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getRoute());
                 } else if (col.equals("CLIENT_ID")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                        activeTim.getClientId());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getClientId());
                 } else if (col.equals("SAT_RECORD_ID")) {
-                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                        activeTim.getSatRecordId());
+                    sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getSatRecordId());
                 } else if (col.equals("PK")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
                 } else if (col.equals("START_LATITUDE")) {
@@ -1018,8 +925,7 @@ public class ActiveTimController extends BaseController {
                     }
                     sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lon);
                 } else if (col.equals("PROJECT_KEY")) {
-                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-                        activeTim.getProjectKey());
+                    sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getProjectKey());
                 }
 
                 fieldNum++;
@@ -1033,8 +939,7 @@ public class ActiveTimController extends BaseController {
         }
     }
 
-    private List<ActiveTim> getActiveTimFromRS(ResultSet rs, boolean includeType)
-        throws SQLException {
+    private List<ActiveTim> getActiveTimFromRS(ResultSet rs, boolean includeType) throws SQLException {
         List<ActiveTim> activeTims = new ArrayList<>();
         ActiveTim activeTim;
 
@@ -1115,12 +1020,9 @@ public class ActiveTimController extends BaseController {
 
         try (Connection connection = dbInteractions.getConnectionPool()) {
 
-            for (int splitTimsIndex = 0; splitTimsIndex < splitActiveTims.size();
-                 splitTimsIndex++) {
+            for (int splitTimsIndex = 0; splitTimsIndex < splitActiveTims.size(); splitTimsIndex++) {
                 List<Long> splitTims = splitActiveTims.get(splitTimsIndex);
-                StringBuilder updateSql =
-                    new StringBuilder(
-                        "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (");
+                StringBuilder updateSql = new StringBuilder("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (");
 
                 for (int i = 0; i < splitTims.size(); i++) {
                     updateSql.append("?,");
@@ -1128,8 +1030,7 @@ public class ActiveTimController extends BaseController {
                 updateSql = new StringBuilder(updateSql.substring(0, updateSql.length() - 1));
                 updateSql.append(")");
 
-                try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    updateSql.toString())) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(updateSql.toString())) {
                     for (int i = 0; i < splitTims.size(); i++) {
                         preparedStatement.setLong(i + 1, splitTims.get(i));
                     }
@@ -1142,8 +1043,7 @@ public class ActiveTimController extends BaseController {
                 }
             }
 
-            log.info("Reset expiration date for Active Tims (active_tim_ids {})",
-                activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
+            log.info("Reset expiration date for Active Tims (active_tim_ids {})", activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
 
         } catch (SQLException e) {
             log.error("Error resetting expiration date for active tims", e);
@@ -1154,44 +1054,36 @@ public class ActiveTimController extends BaseController {
     }
 
     @RequestMapping(value = "/update-expiration/{packetID}/{expDate}", method = RequestMethod.PUT)
-    public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID,
-                                                    @PathVariable String expDate) {
+    public ResponseEntity<Boolean> UpdateExpiration(@PathVariable String packetID, @PathVariable String expDate) {
         boolean success;
 
         String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         query += " WHERE TIM.PACKET_ID = ?";
 
-        String updateStatement =
-            "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
+        String updateStatement = "UPDATE ACTIVE_TIM SET EXPIRATION_DATE = ? WHERE ACTIVE_TIM_ID IN (";
         updateStatement += query;
         updateStatement += ")";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement preparedStatement = connection.prepareStatement(updateStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(updateStatement)) {
             Date date = utility.convertDate(expDate);
             Timestamp expDateTimestamp = new Timestamp(date.getTime());
-            preparedStatement.setTimestamp(1,
-                expDateTimestamp);// expDate comes in as MST from previously called function
+            preparedStatement.setTimestamp(1, expDateTimestamp);// expDate comes in as MST from previously called function
             // (GetMinExpiration)
             preparedStatement.setObject(2, packetID);
 
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            log.error("Error updating expiration date for packetID: {}, expDate: {}",
-                packetID, expDate, e);
+            log.error("Error updating expiration date for packetID: {}, expDate: {}", packetID, expDate, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
-        log.info("Called UpdateExpiration with packetID: {}, expDate: {}. Successful: {}", packetID,
-            expDate, success);
+        log.info("Called UpdateExpiration with packetID: {}, expDate: {}. Successful: {}", packetID, expDate, success);
         return ResponseEntity.ok(success);
     }
 
     @RequestMapping(value = "/get-min-expiration/{packetID}/{expDate}")
-    public ResponseEntity<String> GetMinExpiration(@PathVariable String packetID,
-                                                   @PathVariable String expDate)
-        throws ParseException {
+    public ResponseEntity<String> GetMinExpiration(@PathVariable String packetID, @PathVariable String expDate) throws ParseException {
         String minStart = "";
 
         // Fetch the minimum of passed in expDate and database held
@@ -1200,32 +1092,25 @@ public class ActiveTimController extends BaseController {
         // Also, there are some null values in the db. To get around these, we use the
         // coalesce function with the expDate passed in value.
         String targetFormat = "DD-MON-YYYY HH12.MI.SS a";
-        String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
-            translateIso8601ToTimestampFormat(expDate), targetFormat);
+        String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')", translateIso8601ToTimestampFormat(expDate), targetFormat);
 
 
         String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
         minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
         minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
 
-        String query =
-            String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart", selectTimestamp,
-                minExpDate, selectTimestamp);
+        String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart", selectTimestamp, minExpDate, selectTimestamp);
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             while (rs.next()) {
                 var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);
                 minStart = utility.timestampFormat.format(tmpTs);
             }
         } catch (SQLException e) {
-            log.error("Error getting min expiration date for packetID: {}, expDate: {}",
-                packetID, expDate, e);
+            log.error("Error getting min expiration date for packetID: {}, expDate: {}", packetID, expDate, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(minStart);
         }
-        log.info("Called GetMinExpiration with packetID: {}, expDate: {}. Min start date: {}",
-            packetID, expDate, minStart);
+        log.info("Called GetMinExpiration with packetID: {}, expDate: {}. Min start date: {}", packetID, expDate, minStart);
         return ResponseEntity.ok(minStart);
     }
 
@@ -1233,18 +1118,15 @@ public class ActiveTimController extends BaseController {
     public ResponseEntity<Boolean> MarkForDeletion(@PathVariable Long activeTimId) {
         boolean success;
 
-        String updateStatement =
-            "UPDATE ACTIVE_TIM SET MARKED_FOR_DELETION = '1' WHERE ACTIVE_TIM_ID = ?";
+        String updateStatement = "UPDATE ACTIVE_TIM SET MARKED_FOR_DELETION = '1' WHERE ACTIVE_TIM_ID = ?";
 
-        try (Connection connection = dbInteractions.getConnectionPool();
-             PreparedStatement preparedStatement = connection.prepareStatement(updateStatement)) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(updateStatement)) {
             preparedStatement.setLong(1, activeTimId);
 
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            log.error("Error marking active tim for deletion with activeTimId: {}",
-                activeTimId, e);
+            log.error("Error marking active tim for deletion with activeTimId: {}", activeTimId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
         if (!success) {

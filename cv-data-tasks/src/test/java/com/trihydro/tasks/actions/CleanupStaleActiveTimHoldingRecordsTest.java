@@ -42,15 +42,13 @@ class CleanupStaleActiveTimHoldingRecordsTest {
         ActiveTimHolding ath2 = new ActiveTimHolding();
         ath2.setActiveTimHoldingId(2L);
         when(activeTimHoldingService.getAllRecords()).thenReturn(Arrays.asList(ath1, ath2));
-        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords =
-            new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
+        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords = new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
 
         // execute
         cleanupStaleActiveTimHoldingRecords.run();
 
         // verify
-        assertEquals(2,
-            cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
+        assertEquals(2, cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
         verifyNoInteractions(activeTimService);
     }
 
@@ -68,17 +66,14 @@ class CleanupStaleActiveTimHoldingRecordsTest {
         ath3.setActiveTimHoldingId(3L);
         when(activeTimHoldingService.getAllRecords()).thenReturn(Arrays.asList(ath1, ath2, ath3));
         when(activeTimService.getAllRecords()).thenReturn(List.of());
-        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords =
-            new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
-        cleanupStaleActiveTimHoldingRecords.setStaleRecordsIdentifiedLastRun(
-            Set.of(1L, 2L)); // set stale records from previous run
+        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords = new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
+        cleanupStaleActiveTimHoldingRecords.setStaleRecordsIdentifiedLastRun(Set.of(1L, 2L)); // set stale records from previous run
 
         // execute
         cleanupStaleActiveTimHoldingRecords.run();
 
         // verify
-        assertEquals(1,
-            cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
+        assertEquals(1, cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
         verify(activeTimService).getAllRecords();
         verify(activeTimHoldingService).deleteActiveTimHolding(1L);
         verify(activeTimHoldingService).deleteActiveTimHolding(2L);
@@ -101,17 +96,14 @@ class CleanupStaleActiveTimHoldingRecordsTest {
         activeTim.setActiveTimId(37L);
         activeTim.setClientId("test1");
         when(activeTimService.getAllRecords()).thenReturn(List.of(activeTim));
-        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords =
-            new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
-        cleanupStaleActiveTimHoldingRecords.setStaleRecordsIdentifiedLastRun(
-            Set.of(1L, 2L)); // set stale records from previous run
+        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords = new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
+        cleanupStaleActiveTimHoldingRecords.setStaleRecordsIdentifiedLastRun(Set.of(1L, 2L)); // set stale records from previous run
 
         // execute
         cleanupStaleActiveTimHoldingRecords.run();
 
         // verify
-        assertEquals(0,
-            cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
+        assertEquals(0, cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
         verify(activeTimService).getAllRecords();
         verify(activeTimHoldingService).deleteActiveTimHolding(1L);
         verify(activeTimHoldingService).deleteActiveTimHolding(2L);
@@ -125,8 +117,7 @@ class CleanupStaleActiveTimHoldingRecordsTest {
     void run_WhenDatabaseConnectionFails_ShouldHandleGracefully() {
         // prepare
         when(activeTimHoldingService.getAllRecords()).thenThrow(new RuntimeException());
-        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords =
-            new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
+        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords = new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
 
         // execute
         cleanupStaleActiveTimHoldingRecords.run();
@@ -142,8 +133,7 @@ class CleanupStaleActiveTimHoldingRecordsTest {
     void run_WhenDatabaseIsEmpty_ShouldHandleGracefully() {
         // prepare
         when(activeTimHoldingService.getAllRecords()).thenReturn(List.of());
-        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords =
-            new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
+        CleanupStaleActiveTimHoldingRecords cleanupStaleActiveTimHoldingRecords = new CleanupStaleActiveTimHoldingRecords(activeTimHoldingService, activeTimService);
 
         // execute
         cleanupStaleActiveTimHoldingRecords.run();

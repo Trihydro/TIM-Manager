@@ -43,8 +43,7 @@ class ActiveTimHoldingServiceTest extends BaseServiceTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/get-all", HttpMethod.GET,
-            requestEntity, ActiveTimHolding[].class)).thenReturn(mockResponse);
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/get-all", HttpMethod.GET, requestEntity, ActiveTimHolding[].class)).thenReturn(mockResponse);
 
         // Act
         List<ActiveTimHolding> result = uut.getAllRecords();
@@ -59,8 +58,7 @@ class ActiveTimHoldingServiceTest extends BaseServiceTest {
         // Arrange
         Long mockId = 1L;
         ResponseEntity<Boolean> mockResponse = ResponseEntity.ok(true);
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId,
-            HttpMethod.DELETE, null, Boolean.class)).thenReturn(mockResponse);
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId, HttpMethod.DELETE, null, Boolean.class)).thenReturn(mockResponse);
 
         // Act
         boolean result = uut.deleteActiveTimHolding(mockId);
@@ -74,8 +72,7 @@ class ActiveTimHoldingServiceTest extends BaseServiceTest {
         // Arrange
         Long mockId = 1L;
         ResponseEntity<Boolean> mockResponse = ResponseEntity.ok(false);
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId,
-            HttpMethod.DELETE, null, Boolean.class)).thenReturn(mockResponse);
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId, HttpMethod.DELETE, null, Boolean.class)).thenReturn(mockResponse);
 
         // Act
         boolean result = uut.deleteActiveTimHolding(mockId);
@@ -88,9 +85,7 @@ class ActiveTimHoldingServiceTest extends BaseServiceTest {
     void deleteActiveTimHolding_WhenDatabaseConnectionFails_ShouldThrowException() {
         // Arrange
         Long mockId = 1L;
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId,
-            HttpMethod.DELETE, null, Boolean.class)).thenThrow(
-            new RuntimeException("Database error"));
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId, HttpMethod.DELETE, null, Boolean.class)).thenThrow(new RuntimeException("Database error"));
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> uut.deleteActiveTimHolding(mockId));

@@ -111,8 +111,6 @@ public class DataFrameController extends BaseController {
 			for (String col : timDbTables.getDataFrameTable()) {
 				if (col.equals("TIM_ID")) {
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
-				} else if (col.equals("SSP_TIM_RIGHTS")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse1());
 				} else if (col.equals("FRAME_TYPE")) {
 					Integer ordinal = null;
 					if (dFrame.getFrameType() != null) {
@@ -123,12 +121,6 @@ public class DataFrameController extends BaseController {
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getDurationTime());
 				} else if (col.equals("PRIORITY")) {
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getPriority());
-				} else if (col.equals("SSP_LOCATION_RIGHTS")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse2());
-				} else if (col.equals("SSP_MSG_TYPES")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse4());
-				} else if (col.equals("SSP_MSG_CONTENT")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse3());
 				} else if (col.equals("CONTENT")) {
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getContent());
 				} else if (col.equals("URL")) {

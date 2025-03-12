@@ -82,7 +82,8 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
             // TODO: Consider re-submitting the active TIM if the failed update was not meant to expire it.
         }
         removeActiveTimRecords(activeTimIdsToDelete); // active_tim records are no longer up-to-date
-        log.info("Deleted corresponding active_tim records with ids: ({}), which were outdated (the presence of stale active_tim_holding records indicates a failure to update).", activeTimIdsToDelete);
+        log.info("Deleted corresponding active_tim records with ids: ({}), which were outdated (the presence of stale active_tim_holding records indicates a failure to update).",
+            activeTimIdsToDelete);
 
         // Delete likely stale active_tim_holding records
         for (ActiveTimHolding record : likelyStaleRecords) {

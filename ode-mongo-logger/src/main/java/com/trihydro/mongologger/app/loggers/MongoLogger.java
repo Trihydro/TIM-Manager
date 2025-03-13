@@ -14,6 +14,7 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.mongologger.app.MongoLoggerConfiguration;
 
+import java.util.List;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,7 @@ import org.springframework.stereotype.Component;
 public class MongoLogger {
 
     private String serverAddress;
-    private String username;
-    private String password;
     private String databaseName;
-    private String authDatabaseName;
     private MongoCredential credential;
     private Utility utility;
     private EmailHelper emailHelper;
@@ -35,10 +33,10 @@ public class MongoLogger {
     @Autowired
     public void InjectDependencies(MongoLoggerConfiguration _config, Utility _utility, EmailHelper _emailHelper) {
         config = _config;
-        username = config.getMongoUsername(); // the user name
+        String username = config.getMongoUsername(); // the user name
         databaseName = config.getMongoDatabase(); // the name of the database to deposit records into
-        authDatabaseName = config.getMongoAuthDatabase(); // the name of the database in which the user is defined
-        password = config.getMongoPassword(); // the password as a character array
+        String authDatabaseName = config.getMongoAuthDatabase(); // the name of the database in which the user is defined
+        String password = config.getMongoPassword(); // the password as a character array
         serverAddress = config.getMongoHost();
         credential = MongoCredential.createCredential(username, authDatabaseName, password.toCharArray());
         utility = _utility;
@@ -48,7 +46,7 @@ public class MongoLogger {
 
     private void configureMongoClient() {
         _mongoClient =
-            MongoClients.create(MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(Arrays.asList(new ServerAddress(serverAddress, 27017)))).credential(credential).build());
+            MongoClients.create(MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(List.of(new ServerAddress(serverAddress, 27017)))).credential(credential).build());
     }
 
     public void logTim(String[] timRecord) {
@@ -70,7 +68,7 @@ public class MongoLogger {
             docs.add(Document.parse(rec));
         }
 
-        if (docs.size() > 0) {
+        if (!docs.isEmpty()) {
             try {
                 MongoDatabase database = _mongoClient.getDatabase(databaseName);
                 MongoCollection<Document> collection = database.getCollection(collectionName);

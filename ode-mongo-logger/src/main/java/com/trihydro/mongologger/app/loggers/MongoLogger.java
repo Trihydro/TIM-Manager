@@ -57,7 +57,7 @@ public class MongoLogger {
     }
 
     public void logMultipleToCollection(String[] records, String collectionName) {
-        ArrayList<Document> docs = new ArrayList<Document>();
+        ArrayList<Document> docs = new ArrayList<>();
 
         for (String rec : records) {
             docs.add(Document.parse(rec));

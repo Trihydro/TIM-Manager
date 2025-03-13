@@ -46,11 +46,9 @@ public class MongoLogger {
         configureMongoClient();
     }
 
-    private void configureMongoClient(){
-        _mongoClient = MongoClients.create(MongoClientSettings.builder()
-            .applyToClusterSettings(
-                builder -> builder.hosts(Arrays.asList(new ServerAddress(serverAddress, 27017))))
-            .credential(credential).build());
+    private void configureMongoClient() {
+        _mongoClient =
+            MongoClients.create(MongoClientSettings.builder().applyToClusterSettings(builder -> builder.hosts(Arrays.asList(new ServerAddress(serverAddress, 27017)))).credential(credential).build());
     }
 
     public void logTim(String[] timRecord) {

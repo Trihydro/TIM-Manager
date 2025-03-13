@@ -30,6 +30,7 @@ public class MongoLogger {
     private Utility utility;
     private EmailHelper emailHelper;
     private MongoLoggerConfiguration config;
+    private MongoClient _mongoClient;
 
     @Autowired
     public void InjectDependencies(MongoLoggerConfiguration _config, Utility _utility, EmailHelper _emailHelper) {
@@ -42,6 +43,14 @@ public class MongoLogger {
         credential = MongoCredential.createCredential(username, authDatabaseName, password.toCharArray());
         utility = _utility;
         emailHelper = _emailHelper;
+        configureMongoClient();
+    }
+
+    private void configureMongoClient(){
+        _mongoClient = MongoClients.create(MongoClientSettings.builder()
+            .applyToClusterSettings(
+                builder -> builder.hosts(Arrays.asList(new ServerAddress(serverAddress, 27017))))
+            .credential(credential).build());
     }
 
     public void logTim(String[] timRecord) {
@@ -64,14 +73,8 @@ public class MongoLogger {
         }
 
         if (docs.size() > 0) {
-            MongoClient mongoClient = null;
             try {
-                mongoClient = MongoClients.create(MongoClientSettings.builder()
-                        .applyToClusterSettings(
-                                builder -> builder.hosts(Arrays.asList(new ServerAddress(serverAddress, 27017))))
-                        .credential(credential).build());
-
-                MongoDatabase database = mongoClient.getDatabase(databaseName);
+                MongoDatabase database = _mongoClient.getDatabase(databaseName);
                 MongoCollection<Document> collection = database.getCollection(collectionName);
                 collection.insertMany(docs);
             } catch (Exception ex) {
@@ -86,10 +89,6 @@ public class MongoLogger {
                     emailHelper.SendEmail(config.getAlertAddresses(), "MongoLogger Failed to Connect to MongoDB", body);
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
-            } finally {
-                if (mongoClient != null) {
-                    mongoClient.close();
                 }
             }
         }

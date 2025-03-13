@@ -1,14 +1,17 @@
 package com.trihydro.library.helpers;
 
-import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -16,8 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.trihydro.library.model.ContentEnum;
-
-import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy;
@@ -30,7 +31,6 @@ import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
-import us.dot.its.jpo.ode.plugin.j2735.J2735VehicleSafetyExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
@@ -242,7 +242,17 @@ public class JsonToJavaConverter {
         }
 
         if (regionDirectionNode != null) {
-            region.setDirection(mapper.treeToValue(regionDirectionNode, String.class));
+            var direction = "";
+            Iterator<Map.Entry<String, JsonNode>> fields = regionDirectionNode.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                var directionBool = field.getValue().toString();
+                if ("true".equals(directionBool))
+                    direction += "1";
+                else
+                    direction += "0";
+            }
+            region.setDirection(direction);
         }
 
         JsonNode descriptionNode = regionNode.get("description");
@@ -266,7 +276,7 @@ public class JsonToJavaConverter {
         try {
             OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
-            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
+            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<>();
 
             // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
@@ -390,10 +400,10 @@ public class JsonToJavaConverter {
             if (nodesNode == null)
                 return null;
 
-            JsonNode nodeXYArrNode = isXy ? nodesNode.get("NodeXY") : nodesNode.get("NodeLL");
+            JsonNode nodeXYArrNode = isXy ? nodesNode.get("NodeXY") : nodesNode;
             OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
-            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<OdeTravelerInformationMessage.NodeXY>();
-            OdeTravelerInformationMessage.NodeXY nodeXY = new OdeTravelerInformationMessage.NodeXY();
+            List<OdeTravelerInformationMessage.NodeXY> nodeXYs = new ArrayList<>();
+            OdeTravelerInformationMessage.NodeXY nodeXY;
 
             if (nodeXYArrNode.isArray()) {
                 for (final JsonNode objNode : nodeXYArrNode) {
@@ -470,77 +480,20 @@ public class JsonToJavaConverter {
         OdeTimPayload odeTimPayload = null;
 
         try {
-            OdeTravelerInformationMessage.DataFrame[] dataFrames = new OdeTravelerInformationMessage.DataFrame[1];
+            List<OdeTravelerInformationMessage.DataFrame> dataFrames = new ArrayList<>();
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
-            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
+            List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<>();
 
-            // JsonNode timNode = JsonUtils.getJsonNode(value,
-            // "payload").get("data").get("MessageFrame").get("value")
-            // .get("TravelerInformation");
-            JsonNode timNode = JsonUtils.getJsonNode(value, "payload").findValue("TravelerInformation");
-            JsonNode travelerDataFrame = timNode.findValue("TravelerDataFrame");
-
-            JsonNode sequenceArrNode = null;
-            JsonNode contentNode = travelerDataFrame.get("content");
-            if (contentNode.has(ContentEnum.advisory.getStringValue())) {
-                sequenceArrNode = contentNode.get(ContentEnum.advisory.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.advisory.getStringValue());
-            } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
-                sequenceArrNode = contentNode.get(ContentEnum.speedLimit.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
-            } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
-                sequenceArrNode = contentNode.get(ContentEnum.exitService.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.exitService.getStringValue());
-            } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
-                sequenceArrNode = contentNode.get(ContentEnum.genericSign.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.genericSign.getStringValue());
-            } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
-                sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.workZone.getStringValue());
+            OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
+            JsonNode timNode = JsonUtils.getJsonNode(value, "payload").findValue("data");
+            tim.setMsgCnt(timNode.get("msgCnt").asInt());
+            JsonNode packetIDNode = timNode.get("packetID");
+            if (packetIDNode != null) {
+                tim.setPacketID(packetIDNode.asText());
             }
-
-            List<String> itemsList = new ArrayList<String>();
-            String item = null;
-            if (sequenceArrNode != null && sequenceArrNode.isArray()) {
-                for (final JsonNode objNode : sequenceArrNode) {
-                    if (objNode.get("item").get("itis") != null)
-                        item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
-                    else if (objNode.get("item").get("text") != null)
-                        item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
-
-                    itemsList.add(item);
-                }
-            }
-
-            // ADD NON ARRAY ELEMENT
-            if (sequenceArrNode != null && !sequenceArrNode.isArray()) {
-                if (sequenceArrNode.get("item").get("itis") != null)
-                    item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
-                else if (sequenceArrNode.get("item").get("text") != null)
-                    item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
-
-                itemsList.add(item);
-            }
-
-            // TravelerInfoType.valueOf();
-            JsonNode frameTypeNode = travelerDataFrame.get("frameType");
-            if (frameTypeNode != null) {
-                if (frameTypeNode.fieldNames().hasNext()) {
-                    TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
-                    if (frameType != null) {
-                        dataFrame.setFrameType(frameType);
-                    }
-                }
-            }
-
-            JsonNode startTimeNode = travelerDataFrame.get("startTime");
-            JsonNode durationNode = travelerDataFrame.get("durationTime");
-            JsonNode priorityNode = travelerDataFrame.get("priority");
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
-
-            OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
 
             JsonNode timeStampNode = timNode.get("timeStamp");
             if (timeStampNode != null) {
@@ -548,45 +501,98 @@ public class JsonToJavaConverter {
                 tim.setTimeStamp(timeStampDate.toString() + "Z");
             }
 
-            LocalDateTime startDate = firstDay.atStartOfDay().plus(startTimeNode.asInt(), ChronoUnit.MINUTES);
+            JsonNode travelerDataFrameArray = timNode.findValue("dataFrames");
+            for (final JsonNode travelerDataFrame : travelerDataFrameArray) {
+                JsonNode sequenceArrNode = null;
+                JsonNode contentNode = travelerDataFrame.get("content");
+                if (contentNode.has(ContentEnum.advisory.getStringValue())) {
+                    sequenceArrNode = contentNode.get("advisory");
+                    dataFrame.setContent(ContentEnum.advisory.getStringValue());
+                } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
+                    sequenceArrNode = contentNode.get("speedLimit");
+                    dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
+                } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
+                    sequenceArrNode = contentNode.get("exitService");
+                    dataFrame.setContent(ContentEnum.exitService.getStringValue());
+                } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
+                    sequenceArrNode = contentNode.get("genericSign");
+                    dataFrame.setContent(ContentEnum.genericSign.getStringValue());
+                } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
+                    sequenceArrNode = contentNode.get("workZone");
+                    dataFrame.setContent(ContentEnum.workZone.getStringValue());
+                }
 
-            dataFrame.setStartDateTime(startDate.toString() + "Z");
-            dataFrame.setDurationTime(durationNode.asInt());
-            dataFrame.setPriority(priorityNode.asInt());
+                List<String> itemsList = new ArrayList<>();
+                String item = null;
+                if (sequenceArrNode != null && sequenceArrNode.isArray()) {
+                    for (final JsonNode objNode : sequenceArrNode) {
+                        if (objNode.get("item").get("itis") != null)
+                            item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
+                        else if (objNode.get("item").get("text") != null)
+                            item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
+                        if (!itemsList.contains(item))
+                            itemsList.add(item);
+                    }
+                }
 
-            tim.setMsgCnt(timNode.get("msgCnt").asInt());
+                // ADD NON ARRAY ELEMENT
+                if (sequenceArrNode != null && !sequenceArrNode.isArray()) {
+                    if (sequenceArrNode.get("item").get("itis") != null)
+                        item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
+                    else if (sequenceArrNode.get("item").get("text") != null)
+                        item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
 
-            JsonNode packetIDNode = timNode.get("packetID");
-            if (packetIDNode != null) {
-                tim.setPacketID(packetIDNode.asText());
-            }
+                    itemsList.add(item);
+                }
 
-            String[] items = new String[itemsList.size()];
-            items = itemsList.toArray(items);
+                // TravelerInfoType.valueOf();
+                JsonNode frameTypeNode = travelerDataFrame.get("frameType");
+                if (frameTypeNode != null) {
+                    if (frameTypeNode.fieldNames().hasNext()) {
+                        TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
+                        if (frameType != null) {
+                            dataFrame.setFrameType(frameType);
+                        }
+                    }
+                }
 
-            JsonNode geographicalPathNode = travelerDataFrame.findValue("GeographicalPath");
+                JsonNode startTimeNode = travelerDataFrame.get("startTime");
+                JsonNode durationNode = travelerDataFrame.get("durationTime");
+                JsonNode priorityNode = travelerDataFrame.get("priority");
 
-            // geographicalPathNode may be an object or an array; if it is an object, treat
-            // it as a region
-            if (geographicalPathNode.isObject()) {
-                // single region
-                JsonNode regionNode = geographicalPathNode;
-                Region region = getRegion(regionNode);
-                regions.add(region);
-            } else if (geographicalPathNode.isArray()) {
-                // multiple regions
-                for (final JsonNode regionNode : geographicalPathNode) {
+                LocalDateTime startDate = firstDay.atStartOfDay().plus(startTimeNode.asInt(), ChronoUnit.MINUTES);
+
+                dataFrame.setStartDateTime(startDate.toString() + "Z");
+                dataFrame.setDurationTime(durationNode.asInt());
+                dataFrame.setPriority(priorityNode.asInt());
+
+                String[] items = new String[itemsList.size()];
+                items = itemsList.toArray(items);
+
+                JsonNode geographicalPathNode = travelerDataFrame.findValue("regions");
+
+                // geographicalPathNode may be an object or an array; if it is an object, treat
+                // it as a region
+                if (geographicalPathNode.isObject()) {
+                    // single region
+                    JsonNode regionNode = geographicalPathNode;
                     Region region = getRegion(regionNode);
                     regions.add(region);
+                } else if (geographicalPathNode.isArray()) {
+                    // multiple regions
+                    for (final JsonNode regionNode : geographicalPathNode) {
+                        Region region = getRegion(regionNode);
+                        regions.add(region);
+                    }
+                } else {
+                    System.out.println("warning: geographicalPathNode is not an object or an array");
                 }
-            } else {
-                System.out.println("warning: geographicalPathNode is not an object or an array");
-            }
 
-            dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
-            dataFrame.setItems(items);
-            dataFrames[0] = dataFrame;
-            tim.setDataframes(dataFrames);
+                dataFrame.setRegions(regions.toArray(OdeTravelerInformationMessage.DataFrame.Region[]::new));
+                dataFrame.setItems(items);
+                dataFrames.add(dataFrame);
+            }
+            tim.setDataframes(dataFrames.toArray(OdeTravelerInformationMessage.DataFrame[]::new));
             odeTimPayload = new OdeTimPayload();
             odeTimPayload.setData(tim);
         } catch (IOException e) {

@@ -1,147 +1,187 @@
 {
-    "metadata": {
-        "request": {
-            "ode": { "verb": "POST", "version": 3 },
-            "sdw": {
-                "recordId": "1AF9F730",
-                "serviceRegion": {
-                    "nwCorner": { "latitude": 41.09852308, "longitude": -105.13317609 },
-                    "seCorner": { "latitude": 41.09795279, "longitude": -105.11411777 }
-                },
-                "ttl": "oneday"
-            }
+  "metadata": {
+    "request": {
+      "ode": { "verb": "POST", "version": 3 },
+      "sdw": {
+        "recordId": "1AF9F730",
+        "serviceRegion": {
+          "nwCorner": { "latitude": 41.09852308, "longitude": -105.13317609 },
+          "seCorner": { "latitude": 41.09795279, "longitude": -105.11411777 }
         },
-        "recordGeneratedBy": "TMC",
-        "schemaVersion": 6,
-        "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
-        "odePacketID": "AE394DB5A033905B26",
-        "serialId": {
-            "recordId": 0,
-            "serialNumber": 922,
-            "streamId": "9fa59341-9cab-403e-8306-6876238e9fda",
-            "bundleSize": 1,
-            "bundleId": 922
-        },
-        "sanitized": false,
-        "recordGeneratedAt": "2021-03-23T19:20:48.130840Z",
-        "maxDurationTime": 120,
-        "odeTimStartDateTime": "2021-03-23T19:20:47.118Z",
-        "odeReceivedAt": "2021-03-23T19:20:48.177Z"
+        "ttl": "oneday"
+      }
     },
-    "payload": {
-        "data": {
-            "MessageFrame": {
-                "messageId": 31,
-                "value": {
-                    "TravelerInformation": {
-                        "timeStamp": 117800,
-                        "packetID": "AE394DB5A033905B26",
-                        "urlB": null,
-                        "dataFrames": {
-                            "TravelerDataFrame": {
-                                "regions": {
-                                    "GeographicalPath": [
-                                        {
-                                            "closedPath": { "false": "" },
-                                            "anchor": { "lat": 410985067, "long": -1051331761 },
-                                            "name": "I_I 80_SAT-1AF9F730_P_68-0",
-                                            "laneWidth": 5000,
-                                            "directionality": { "both": "" },
-                                            "description": {
-                                                "path": {
-                                                    "offset": {
-                                                        "ll": {
-                                                            "nodes": {
-                                                                "NodeLL": [
-                                                                    { "delta": { "node-LL1": { "lon": 0, "lat": 0 } } },
-                                                                    {
-                                                                        "delta": {
-                                                                            "node-LL5": { "lon": 133699, "lat": 163 }
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "delta": {
-                                                                            "node-LL4": { "lon": 56885, "lat": -5703 }
-                                                                        }
-                                                                    }
-                                                                ]
-                                                            }
-                                                        }
-                                                    },
-                                                    "scale": 0
-                                                }
-                                            },
-                                            "id": { "id": 0, "region": 0 },
-                                            "direction": "0001100000000000"
-                                        },
-                                        {
-                                            "closedPath": { "false": "" },
-                                            "anchor": { "lat": 410985067, "long": -1051331761 },
-                                            "name": "I_I 80_SAT-1AF9F730_P_68-0",
-                                            "laneWidth": 5000,
-                                            "directionality": { "both": "" },
-                                            "description": {
-                                                "path": {
-                                                    "offset": {
-                                                        "ll": {
-                                                            "nodes": {
-                                                                "NodeLL": [
-                                                                    { "delta": { "node-LL1": { "lon": 0, "lat": 0 } } },
-                                                                    {
-                                                                        "delta": {
-                                                                            "node-LL5": { "lon": 133699, "lat": 163 }
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "delta": {
-                                                                            "node-LL4": { "lon": 56885, "lat": -5703 }
-                                                                        }
-                                                                    }
-                                                                ]
-                                                            }
-                                                        }
-                                                    },
-                                                    "scale": 0
-                                                }
-                                            },
-                                            "id": { "id": 0, "region": 0 },
-                                            "direction": "0001100000000000"
-                                        }
-                                    ]
-                                },
-                                "durationTime": 120,
-                                "doNotUse3": 1,
-                                "doNotUse4": 1,
-                                "startYear": 2021,
-                                "msgId": {
-                                    "roadSignID": {
-                                        "viewAngle": 1111111111111111,
-                                        "mutcdCode": { "warning": "" },
-                                        "position": { "lat": 410985067, "long": -1051331761 }
-                                    }
-                                },
-                                "priority": 5,
-                                "content": {
-                                    "exitService": {
-                                        "SEQUENCE": [
-                                            { "item": { "itis": 4104 } },
-                                            { "item": { "itis": 11794 } },
-                                            { "item": { "text": 345 } }
-                                        ]
-                                    }
-                                },
-                                "url": null,
-                                "doNotUse1": 1,
-                                "doNotUse2": 1,
-                                "frameType": { "advisory": "" },
-                                "startTime": 117800
-                            }
-                        },
-                        "msgCnt": 1
+    "recordGeneratedBy": "TMC",
+    "schemaVersion": 6,
+    "payloadType": "us.dot.its.jpo.ode.model.OdeTimPayload",
+    "odePacketID": "AE394DB5A033905B26",
+    "serialId": {
+      "recordId": 0,
+      "serialNumber": 922,
+      "streamId": "9fa59341-9cab-403e-8306-6876238e9fda",
+      "bundleSize": 1,
+      "bundleId": 922
+    },
+    "sanitized": false,
+    "recordGeneratedAt": "2021-03-23T19:20:48.130840Z",
+    "maxDurationTime": 120,
+    "odeTimStartDateTime": "2021-03-23T19:20:47.118Z",
+    "odeReceivedAt": "2021-03-23T19:20:48.177Z"
+  },
+  "payload": {
+    "data": {
+        "timeStamp": 117800,
+        "packetID": "AE394DB5A033905B26",
+        "urlB": null,
+        "dataFrames": [
+            {
+            "regions": [
+                {
+                  "closedPath": false,
+                  "anchor": { "lat": 410985067, "long": -1051331761 },
+                  "name": "I_I 80_SAT-1AF9F730_P_68-0",
+                  "laneWidth": 5000,
+                  "directionality": "both",
+                  "description": {
+                    "path": {
+                      "offset": {
+                        "ll": {
+                          "nodes": [
+                              {
+                                "delta": { "node-LL1": { "lon": 0, "lat": 0 } }
+                              },
+                              {
+                                "delta": {
+                                  "node-LL5": { "lon": 133699, "lat": 163 }
+                                }
+                              },
+                              {
+                                "delta": {
+                                  "node-LL4": { "lon": 56885, "lat": -5703 }
+                                }
+                              }
+                        ]
+                        }
+                      },
+                      "scale": 0
                     }
+                  },
+                  "id": { "id": 0, "region": 0 },
+                  "direction": {
+                    "from000-0to022-5degrees": false,
+                    "from022-5to045-0degrees": false,
+                    "from045-0to067-5degrees": false,
+                    "from067-5to090-0degrees": true,
+                    "from090-0to112-5degrees": true,
+                    "from112-5to135-0degrees": false,
+                    "from135-0to157-5degrees": false,
+                    "from157-5to180-0degrees": false,
+                    "from180-0to202-5degrees": false,
+                    "from202-5to225-0degrees": false,
+                    "from225-0to247-5degrees": false,
+                    "from247-5to270-0degrees": false,
+                    "from270-0to292-5degrees": false,
+                    "from292-5to315-0degrees": false,
+                    "from315-0to337-5degrees": false,
+                    "from337-5to360-0degrees": false
                 }
-            }
-        },
-        "dataType": "TravelerInformation"
-    }
+                },
+                {
+                  "closedPath": "false",
+                  "anchor": { "lat": 410985067, "long": -1051331761 },
+                  "name": "I_I 80_SAT-1AF9F730_P_68-0",
+                  "laneWidth": 5000,
+                  "directionality": "both",
+                  "description": {
+                    "path": {
+                      "offset": {
+                        "ll": {
+                          "nodes": [
+                              {
+                                "delta": { "node-LL1": { "lon": 0, "lat": 0 } }
+                              },
+                              {
+                                "delta": {
+                                  "node-LL5": { "lon": 133699, "lat": 163 }
+                                }
+                              },
+                              {
+                                "delta": {
+                                  "node-LL4": { "lon": 56885, "lat": -5703 }
+                                }
+                              }
+                            ]
+                        }
+                      },
+                      "scale": 0
+                    }
+                  },
+                  "id": { "id": 0, "region": 0 },
+                  "direction": {
+                    "from000-0to022-5degrees": false,
+                    "from022-5to045-0degrees": false,
+                    "from045-0to067-5degrees": false,
+                    "from067-5to090-0degrees": true,
+                    "from090-0to112-5degrees": true,
+                    "from112-5to135-0degrees": false,
+                    "from135-0to157-5degrees": false,
+                    "from157-5to180-0degrees": false,
+                    "from180-0to202-5degrees": false,
+                    "from202-5to225-0degrees": false,
+                    "from225-0to247-5degrees": false,
+                    "from247-5to270-0degrees": false,
+                    "from270-0to292-5degrees": false,
+                    "from292-5to315-0degrees": false,
+                    "from315-0to337-5degrees": false,
+                    "from337-5to360-0degrees": false
+                }
+                }
+              ],
+            "durationTime": 120,
+            "doNotUse3": 0,
+            "doNotUse4": 0,
+            "startYear": 2021,
+            "msgId": {
+              "roadSignID": {
+                "viewAngle": {
+                    "from000-0to022-5degrees": true,
+                    "from022-5to045-0degrees": true,
+                    "from045-0to067-5degrees": true,
+                    "from067-5to090-0degrees": true,
+                    "from090-0to112-5degrees": true,
+                    "from112-5to135-0degrees": true,
+                    "from135-0to157-5degrees": true,
+                    "from157-5to180-0degrees": true,
+                    "from180-0to202-5degrees": true,
+                    "from202-5to225-0degrees": true,
+                    "from225-0to247-5degrees": true,
+                    "from247-5to270-0degrees": true,
+                    "from270-0to292-5degrees": true,
+                    "from292-5to315-0degrees": true,
+                    "from315-0to337-5degrees": true,
+                    "from337-5to360-0degrees": true
+                },
+                "mutcdCode": "warning",
+                "position": { "lat": 410985067, "long": -1051331761 }
+              }
+            },
+            "priority": 5,
+            "content": {
+              "exitService": [
+                  { "item": { "itis": 4104 } },
+                  { "item": { "itis": 11794 } },
+                  { "item": { "text": 345 } }
+              ]
+            },
+            "url": "null",
+            "doNotUse1": 0,
+            "doNotUse2": 0,
+            "frameType": "advisory",
+            "startTime": 117800
+          }
+        ],
+        "msgCnt": 1
+    },
+    "dataType": "TravelerInformation"
+  }
 }

@@ -84,6 +84,7 @@ public class MongoLogger {
                 try {
                     emailHelper.SendEmail(config.getAlertAddresses(), "MongoLogger Failed to Connect to MongoDB", body);
                 } catch (Exception e) {
+                    utility.logWithDate("Error sending email: " + e.getMessage());
                     e.printStackTrace();
                 }
             }

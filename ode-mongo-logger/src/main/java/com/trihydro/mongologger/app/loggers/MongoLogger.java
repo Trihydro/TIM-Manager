@@ -1,7 +1,6 @@
 package com.trihydro.mongologger.app.loggers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -21,34 +20,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MongoLogger {
-
-    private String serverAddress;
-    private String databaseName;
-    private MongoCredential credential;
-    private Utility utility;
-    private EmailHelper emailHelper;
-    private MongoLoggerConfiguration config;
-    private MongoClient _mongoClient;
+    private final Utility utility;
+    private final EmailHelper emailHelper;
+    private final String databaseName;
+    private final String[] alertAddresses;
+    private final MongoClient mongoClient;
 
     @Autowired
-    public void InjectDependencies(MongoLoggerConfiguration _config, Utility _utility, EmailHelper _emailHelper) {
-        config = _config;
-        String username = config.getMongoUsername(); // the user name
-        databaseName = config.getMongoDatabase(); // the name of the database to deposit records into
-        String authDatabaseName = config.getMongoAuthDatabase(); // the name of the database in which the user is defined
-        String password = config.getMongoPassword(); // the password as a character array
-        serverAddress = config.getMongoHost();
-        credential = MongoCredential.createCredential(username, authDatabaseName, password.toCharArray());
-        utility = _utility;
-        emailHelper = _emailHelper;
-        configureMongoClient();
+    public MongoLogger(MongoLoggerConfiguration config, Utility utility, EmailHelper emailHelper) {
+        this.emailHelper = emailHelper;
+        this.utility = utility;
+        this.mongoClient = configureMongoClient(config);
+        this.databaseName = config.getMongoDatabase(); // the name of the database to deposit records into
+        this.alertAddresses = config.getAlertAddresses(); // the email addresses to send alerts to
     }
 
-    private MongoClient configureMongoClient() {
-        var hosts = List.of(new ServerAddress(serverAddress, 27017));
+    private MongoClient configureMongoClient(MongoLoggerConfiguration config) {
+        MongoCredential credential = MongoCredential.createCredential(config.getMongoUsername(), config.getMongoAuthDatabase(), config.getMongoPassword().toCharArray());
+        var hosts = List.of(new ServerAddress(config.getMongoHost(), 27017));
         var settings = MongoClientSettings.builder()
-                .applyToClusterSettings(builder -> builder.hosts(hosts)).credential(credential)
-                .build();
+            .applyToClusterSettings(builder -> builder.hosts(hosts)).credential(credential)
+            .build();
         return MongoClients.create(settings);
     }
 
@@ -73,7 +65,7 @@ public class MongoLogger {
 
         if (!docs.isEmpty()) {
             try {
-                MongoDatabase database = _mongoClient.getDatabase(databaseName);
+                MongoDatabase database = mongoClient.getDatabase(databaseName);
                 MongoCollection<Document> collection = database.getCollection(collectionName);
                 collection.insertMany(docs);
             } catch (Exception ex) {
@@ -85,7 +77,7 @@ public class MongoLogger {
                 body += "Exception: <br/>";
                 body += ex.getMessage();
                 try {
-                    emailHelper.SendEmail(config.getAlertAddresses(), "MongoLogger Failed to Connect to MongoDB", body);
+                    emailHelper.SendEmail(alertAddresses, "MongoLogger Failed to Connect to MongoDB", body);
                 } catch (Exception e) {
                     utility.logWithDate("Error sending email: " + e.getMessage());
                     e.printStackTrace();

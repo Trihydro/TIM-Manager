@@ -24,14 +24,9 @@ public class TimRsuService extends BaseService {
     }
 
     public Long AddTimRsu(Long timId, Integer rsuId, Integer rsuIndex) {
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim_rsu", timDbTables.getTimRsuTable());
 
-        PreparedStatement preparedStatement = null;
-        Connection connection = null;
-
-        try {
-            connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim_rsu", timDbTables.getTimRsuTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_rsu_id"});
+        try(Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_rsu_id"})) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getTimRsuTable()) {
@@ -53,19 +48,6 @@ public class TimRsuService extends BaseService {
             }
 
             return Long.valueOf(0);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

@@ -15,20 +15,19 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class TimRsuService extends BaseService {
-
-    private TimDbTables timDbTables;
-    private SQLNullHandler sqlNullHandler;
+    private final TimDbTables timDbTables;
+    private final SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
-        timDbTables = _timDbTables;
-        sqlNullHandler = _sqlNullHandler;
+    public TimRsuService(TimDbTables timDbTables, SQLNullHandler sqlNullHandler) {
+        this.timDbTables = timDbTables;
+        this.sqlNullHandler = sqlNullHandler;
     }
 
     public Long AddTimRsu(Long timId, Integer rsuId, Integer rsuIndex) {
         String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim_rsu", timDbTables.getTimRsuTable());
 
-        try(Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_rsu_id"})) {
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_rsu_id"})) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getTimRsuTable()) {

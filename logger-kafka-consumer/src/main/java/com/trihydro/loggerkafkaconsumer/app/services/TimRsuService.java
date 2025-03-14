@@ -8,10 +8,12 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class TimRsuService extends BaseService {
 
     private TimDbTables timDbTables;
@@ -39,14 +41,15 @@ public class TimRsuService extends BaseService {
                 }
                 fieldNum++;
             }
-            Long timRsuId = dbInteractions.executeAndLog(preparedStatement, "tim rsu");
-            return timRsuId;
+            return dbInteractions.executeAndLog(preparedStatement, "tim rsu");
         } catch (SQLException e) {
-            // java.sql.SQLIntegrityConstraintViolationException: ORA-00001: unique constraint (CVCOMMS.TIM_RSU_U) violated 
-            if (!(e instanceof SQLIntegrityConstraintViolationException)) {
-                e.printStackTrace();
+            if (e.getMessage() != null && e.getMessage().contains("unique constraint")) {
+                // Avoid logging the common error when trying to insert a duplicate record
+                return Long.valueOf(0);
             }
 
+            // Log the exception if it's not a unique constraint violation
+            log.error("SQL Exception while adding TIM RSU: {}", e.getMessage(), e);
             return Long.valueOf(0);
         }
     }

@@ -45,12 +45,12 @@ public class TimRsuService extends BaseService {
         } catch (SQLException e) {
             if (e.getMessage() != null && e.getMessage().contains("unique constraint")) {
                 // Avoid logging the common error when trying to insert a duplicate record
-                return Long.valueOf(0);
+                return 0L;
             }
 
             // Log the exception if it's not a unique constraint violation
             log.error("SQL Exception while adding TIM RSU: {}", e.getMessage(), e);
-            return Long.valueOf(0);
+            return 0L;
         }
     }
 }

@@ -30,25 +30,25 @@ public class TimRsuService extends BaseService {
 
         try {
             connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim_rsu",
-                    timDbTables.getTimRsuTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_rsu_id" });
+            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim_rsu", timDbTables.getTimRsuTable());
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_rsu_id"});
             int fieldNum = 1;
 
             for (String col : timDbTables.getTimRsuTable()) {
-                if (col.equals("TIM_ID"))
+                if (col.equals("TIM_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
-                else if (col.equals("RSU_ID"))
+                } else if (col.equals("RSU_ID")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuId);
-                else if (col.equals("RSU_INDEX"))
+                } else if (col.equals("RSU_INDEX")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, rsuIndex);
+                }
                 fieldNum++;
             }
             Long timRsuId = dbInteractions.executeAndLog(preparedStatement, "tim rsu");
             return timRsuId;
         } catch (SQLException e) {
             // java.sql.SQLIntegrityConstraintViolationException: ORA-00001: unique constraint (CVCOMMS.TIM_RSU_U) violated 
-            if(!(e instanceof SQLIntegrityConstraintViolationException)) {
+            if (!(e instanceof SQLIntegrityConstraintViolationException)) {
                 e.printStackTrace();
             }
 
@@ -56,11 +56,13 @@ public class TimRsuService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }

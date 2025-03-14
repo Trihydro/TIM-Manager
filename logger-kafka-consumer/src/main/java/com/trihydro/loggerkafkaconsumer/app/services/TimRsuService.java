@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Service class for handling TIM RSU operations.
+ */
 @Component
 @Slf4j
 public class TimRsuService {
@@ -19,6 +22,13 @@ public class TimRsuService {
     private final TimDbTables timDbTables;
     private final SQLNullHandler sqlNullHandler;
 
+    /**
+     * Constructor for TimRsuService.
+     *
+     * @param dbInteractions the database interactions helper
+     * @param timDbTables the TIM database tables helper
+     * @param sqlNullHandler the SQL null handler
+     */
     @Autowired
     public TimRsuService(DbInteractions dbInteractions, TimDbTables timDbTables, SQLNullHandler sqlNullHandler) {
         this.dbInteractions = dbInteractions;
@@ -26,6 +36,14 @@ public class TimRsuService {
         this.sqlNullHandler = sqlNullHandler;
     }
 
+    /**
+     * Adds a TIM RSU record to the database.
+     *
+     * @param timId the TIM ID
+     * @param rsuId the RSU ID
+     * @param rsuIndex the RSU index
+     * @return the ID of the inserted TIM RSU record, 0 if a duplicate record is detected, or -1 if an error occurs
+     */
     public Long AddTimRsu(Long timId, Integer rsuId, Integer rsuIndex) {
         String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim_rsu", timDbTables.getTimRsuTable());
 
@@ -51,7 +69,7 @@ public class TimRsuService {
 
             // Log the exception if it's not a unique constraint violation
             log.error("SQL Exception while adding TIM RSU: {}", e.getMessage(), e);
-            return 0L;
+            return -1L;
         }
     }
 }

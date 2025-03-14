@@ -57,13 +57,13 @@ public class TimRsuServiceTest {
         int rsuId = -2;
         int rsuIndex = 0;
 
-        when(mockDbInteractions.executeAndLog(any(PreparedStatement.class), anyString())).thenReturn(-1L);
+        when(mockDbInteractions.executeAndLog(any(PreparedStatement.class), anyString())).thenReturn(37L);
 
         // Act
         Long data = uut.AddTimRsu(timId, rsuId, rsuIndex);
 
         // Assert
-        assertEquals(Long.valueOf(-1), data);
+        assertEquals(Long.valueOf(37L), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId); // TIM_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 2, rsuId); // RSU_ID
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, rsuIndex); // RSU_INDEX
@@ -78,7 +78,7 @@ public class TimRsuServiceTest {
         int rsuId = -2;
         int rsuIndex = 0;
 
-        doThrow(new SQLException("unique constraint")).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);
+        doThrow(new SQLException("duplicate key value violates unique constraint \"tim_rsu_rsu_id_tim_id_rsu_index_key\"")).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);
 
         // Act
         Long data = uut.AddTimRsu(timId, rsuId, rsuIndex);
@@ -102,7 +102,7 @@ public class TimRsuServiceTest {
         Long data = uut.AddTimRsu(timId, rsuId, rsuIndex);
 
         // Assert
-        assertEquals(Long.valueOf(0), data);
+        assertEquals(Long.valueOf(-1), data);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

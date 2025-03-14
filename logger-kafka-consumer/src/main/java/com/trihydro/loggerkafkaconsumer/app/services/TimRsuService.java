@@ -3,7 +3,6 @@ package com.trihydro.loggerkafkaconsumer.app.services;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;

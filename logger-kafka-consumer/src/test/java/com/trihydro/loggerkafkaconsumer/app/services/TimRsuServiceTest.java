@@ -72,13 +72,31 @@ public class TimRsuServiceTest {
     }
 
     @Test
-    public void AddTimRsu_FAIL() throws SQLException {
+    public void AddTimRsu_FAIL_UniqueConstraint() throws SQLException {
         // Arrange
         Long timId = -1L;
         int rsuId = -2;
         int rsuIndex = 0;
 
         doThrow(new SQLException("unique constraint")).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);
+
+        // Act
+        Long data = uut.AddTimRsu(timId, rsuId, rsuIndex);
+
+        // Assert
+        assertEquals(Long.valueOf(0), data);
+        verify(mockPreparedStatement).close();
+        verify(mockConnection).close();
+    }
+
+    @Test
+    public void AddTimRsu_FAIL_OtherSQLException() throws SQLException {
+        // Arrange
+        Long timId = -1L;
+        int rsuId = -2;
+        int rsuIndex = 0;
+
+        doThrow(new SQLException("other sql exception")).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, timId);
 
         // Act
         Long data = uut.AddTimRsu(timId, rsuId, rsuIndex);

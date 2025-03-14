@@ -1,5 +1,6 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
+import com.trihydro.library.helpers.DbInteractions;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -13,12 +14,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class TimRsuService extends BaseService {
+public class TimRsuService {
+    private final DbInteractions dbInteractions;
     private final TimDbTables timDbTables;
     private final SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public TimRsuService(TimDbTables timDbTables, SQLNullHandler sqlNullHandler) {
+    public TimRsuService(DbInteractions dbInteractions, TimDbTables timDbTables, SQLNullHandler sqlNullHandler) {
+        this.dbInteractions = dbInteractions;
         this.timDbTables = timDbTables;
         this.sqlNullHandler = sqlNullHandler;
     }

@@ -190,8 +190,9 @@ public class SetItisCodes {
       }
     }
 
+    // If no incident problem is provided, default to "Incident" (ITIS code 531)
     if (items.isEmpty()) {
-      items.add("531");// 531 is "Incident"
+      items.add("531"); // 531 is "Incident"
     }
 
     return items;

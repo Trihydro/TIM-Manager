@@ -2,6 +2,7 @@ package com.trihydro.odewrapper.helpers;
 
 import static org.mockito.Mockito.doReturn;
 
+import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,6 +169,20 @@ public class SetItisCodesTest {
     // Assert
     Assertions.assertNotNull(result, "Resulting list should not be null.");
     Assertions.assertEquals(expectedCodes, result, "Default incident code should be returned.");
+  }
+
+  @Test
+  public void testSetItisCodesIncident_WithExistingProblemItisCode_ShouldReturnExistingItisCode() {
+    // Arrange
+    WydotTimIncident mockIncident = new WydotTimIncident(); // Mock incident object
+    List<String> expectedCodes = List.of("268"); // Expected ITIS code for the incident problem
+
+    // Act
+    List<String> result = uut.setItisCodesIncident(mockIncident);
+
+    // Assert
+    Assertions.assertNotNull(result, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedCodes, result, "The ITIS code for the incident problem should be returned.");
   }
 
 }

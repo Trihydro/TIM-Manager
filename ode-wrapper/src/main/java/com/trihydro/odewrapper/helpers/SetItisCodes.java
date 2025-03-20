@@ -177,13 +177,17 @@ public class SetItisCodes {
           .ifPresent(effectItisCode -> items.add(effectItisCode.getItisCode().toString()));
     }
 
-    // problem
-    IncidentChoice incidentProblem = getIncidentProblems().stream().filter(x -> x.getCode().equals(wydotTim.getProblem())).findFirst().orElse(null);
+    // Retrieve the matching incident problem based on the provided code
+    IncidentChoice incidentProblem =
+        getIncidentProblems().stream().filter(problem -> problem.getCode().equals(wydotTim.getProblem())).findFirst().orElse(null);
 
-    // if problem is not null and problem itis code exists
-    if (incidentProblem != null && incidentProblem.getItisCodeId() != null) {
-      getItisCodes().stream().filter(x -> x.getItisCodeId().equals(incidentProblem.getItisCodeId())).findFirst()
-          .ifPresent(problemItisCode -> items.add(problemItisCode.getItisCode().toString()));
+    // Add the ITIS code if the incident problem exists and has a valid ITIS code ID
+    if (incidentProblem != null) {
+      Integer itisCodeId = incidentProblem.getItisCodeId();
+      if (itisCodeId != null) {
+        getItisCodes().stream().filter(code -> code.getItisCodeId().equals(itisCodeId)).findFirst()
+            .ifPresent(problemItisCode -> items.add(problemItisCode.getItisCode().toString()));
+      }
     }
 
     if (items.isEmpty()) {

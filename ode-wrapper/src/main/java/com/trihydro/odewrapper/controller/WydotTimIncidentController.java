@@ -1,10 +1,7 @@
 package com.trihydro.odewrapper.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;

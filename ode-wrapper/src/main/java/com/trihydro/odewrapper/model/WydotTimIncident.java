@@ -32,6 +32,9 @@ public class WydotTimIncident extends WydotTim {
     @ApiModelProperty(value = "Optional. If not provided, a TIM will be generated extending 1 mile upstream from the startPoint", required = false)
     private transient Coordinate endPoint;
 
+    @ApiModelProperty()
+    private transient String problemOtherText;
+
     public WydotTimIncident() {
 
     }
@@ -51,6 +54,8 @@ public class WydotTimIncident extends WydotTim {
             this.itisCodes = new ArrayList<>(o.itisCodes);
         if (o.endPoint != null)
             this.endPoint = new Coordinate(o.endPoint.getLatitude(), o.endPoint.getLongitude());
+
+        this.problemOtherText = o.problemOtherText;
     }
 
     @Override
@@ -104,5 +109,13 @@ public class WydotTimIncident extends WydotTim {
 
     public void setAction(String action) {
         this.action = action;
+    }
+
+    public String getProblemOtherText() {
+        return this.problemOtherText;
+    }
+
+    public void setProblemOtherText(String problemOtherText) {
+        this.problemOtherText = problemOtherText;
     }
 }

@@ -1,6 +1,7 @@
 package com.trihydro.odewrapper.helpers;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.odewrapper.model.WydotTimIncident;
@@ -174,15 +175,27 @@ public class SetItisCodesTest {
   @Test
   public void testSetItisCodesIncident_WithExistingProblemItisCode_ShouldReturnExistingItisCode() {
     // Arrange
-    WydotTimIncident mockIncident = new WydotTimIncident(); // Mock incident object
-    List<String> expectedCodes = List.of("268"); // Expected ITIS code for the incident problem
+    WydotTimIncident incident = new WydotTimIncident();
+    incident.setProblem("268");
+    List<String> expectedItisCodes = List.of("268");
+
+    IncidentChoice mockIncidentChoice = new IncidentChoice();
+    mockIncidentChoice.setCode("268");
+    mockIncidentChoice.setItisCodeId(1);
+    mockIncidentChoice.setDescription("Speed Limit");
+    when(mockIncidentChoicesService.selectAllIncidentProblems()).thenReturn(List.of(mockIncidentChoice));
+
+    ItisCode mockItisCode = new ItisCode();
+    mockItisCode.setItisCode(268);
+    mockItisCode.setItisCodeId(1);
+    when(mockItisCodeService.selectAll()).thenReturn(List.of(mockItisCode));
 
     // Act
-    List<String> result = uut.setItisCodesIncident(mockIncident);
+    List<String> actualItisCodes = uut.setItisCodesIncident(incident);
 
     // Assert
-    Assertions.assertNotNull(result, "Resulting list should not be null.");
-    Assertions.assertEquals(expectedCodes, result, "The ITIS code for the incident problem should be returned.");
+    Assertions.assertNotNull(actualItisCodes, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The ITIS code for the incident problem should be returned.");
   }
 
 }

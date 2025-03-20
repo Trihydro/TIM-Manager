@@ -16,10 +16,12 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class SetItisCodes {
   private List<IncidentChoice> incidentProblems;
   private List<IncidentChoice> incidentEffects;
@@ -125,8 +127,8 @@ public class SetItisCodes {
 
     ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability())).findFirst().orElse(null);
 
-    utility.logWithDate("Availablity : " + wydotTim.getAvailability(), this.getClass());
-    utility.logWithDate("Exit : " + wydotTim.getExit(), this.getClass());
+    log.info("Availablity : {}", wydotTim.getAvailability());
+    log.info("Exit : {}", wydotTim.getExit());
 
     if (code != null) {
       items.add(wydotTim.getAvailability().toString());
@@ -148,7 +150,7 @@ public class SetItisCodes {
       }
     } else {
       items.add("7986");// Rest Area
-      utility.logWithDate("rest area", this.getClass());
+      log.info("rest area");
     }
 
     return items;

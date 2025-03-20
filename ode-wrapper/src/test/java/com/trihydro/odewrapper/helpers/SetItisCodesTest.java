@@ -2,6 +2,7 @@ package com.trihydro.odewrapper.helpers;
 
 import static org.mockito.Mockito.doReturn;
 
+import com.trihydro.odewrapper.model.WydotTimIncident;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,4 +155,19 @@ public class SetItisCodesTest {
     // Act & Assert
     Assertions.assertThrows(WeightNotSupportedException.class, () -> uut.setItisCodesBowr(tim));
   }
+
+  @Test
+  public void testSetItisCodesIncident_ReturnsDefaultIncidentCode() {
+    // Arrange
+    WydotTimIncident mockIncident = new WydotTimIncident(); // Mock incident object
+    List<String> expectedCodes = List.of("531"); // Expected default incident code
+
+    // Act
+    List<String> result = uut.setItisCodesIncident(mockIncident);
+
+    // Assert
+    Assertions.assertNotNull(result, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedCodes, result, "Default incident code should be returned.");
+  }
+
 }

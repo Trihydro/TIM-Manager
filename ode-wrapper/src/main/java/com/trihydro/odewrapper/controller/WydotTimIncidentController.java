@@ -59,17 +59,17 @@ public class WydotTimIncidentController extends WydotTimBaseController {
     String post = gson.toJson(timIncidentList);
     utility.logWithDate(post.toString(), this.getClass());
 
-    List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
+    List<WydotTimIncident> timsToSend = new ArrayList<>();
 
-    List<ControllerResult> resultList = new ArrayList<ControllerResult>();
-    ControllerResult resultTim = null;
+    List<ControllerResult> resultList = new ArrayList<>();
+    ControllerResult resultTim;
 
     // build TIM
     for (WydotTimIncident wydotTim : timIncidentList.getTimIncidentList()) {
 
       resultTim = validateInputIncident(wydotTim);
 
-      if (resultTim.getResultMessages().size() > 0) {
+      if (!resultTim.getResultMessages().isEmpty()) {
         resultList.add(resultTim);
         continue;
       }
@@ -95,7 +95,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
     utility.logWithDate(dateFormat.format(date) + " - Update Incident TIM", this.getClass());
     String post = gson.toJson(timIncidentList);
-    utility.logWithDate(post.toString(), this.getClass());
+    utility.logWithDate(post, this.getClass());
 
     List<ControllerResult> resultList = new ArrayList<ControllerResult>();
     ControllerResult resultTim = null;
@@ -106,7 +106,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
       resultTim = validateInputIncident(wydotTim);
 
-      if (resultTim.getResultMessages().size() > 0) {
+      if (!resultTim.getResultMessages().isEmpty()) {
         resultList.add(resultTim);
         continue;
       }
@@ -117,7 +117,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
       resultTim.getResultMessages().add("success");
       resultList.add(resultTim);
     }
-    if (timsToSend.size() > 0) {
+    if (!timsToSend.isEmpty()) {
       // make tims, expire existing ones, and send them
       makeTimsAsync(timsToSend);
     }
@@ -128,14 +128,12 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
   public void makeTimsAsync(List<WydotTimIncident> wydotTims) {
 
-    new Thread(new Runnable() {
-      public void run() {
-        var startTime = getStartTime();
-        for (WydotTimIncident wydotTim : wydotTims) {
-          // set route
-          wydotTim.setRoute(wydotTim.getHighway());
-          processRequest(wydotTim, getTimType(type), startTime, null, wydotTim.getPk(), ContentEnum.advisory, TravelerInfoType.advisory);
-        }
+    new Thread(() -> {
+      var startTime = getStartTime();
+      for (WydotTimIncident wydotTim : wydotTims) {
+        // set route
+        wydotTim.setRoute(wydotTim.getHighway());
+        processRequest(wydotTim, getTimType(type), startTime, null, wydotTim.getPk(), ContentEnum.advisory, TravelerInfoType.advisory);
       }
     }).start();
   }
@@ -159,16 +157,13 @@ public class WydotTimIncidentController extends WydotTimBaseController {
   public Collection<ActiveTim> getIncidentTims() {
 
     // get active TIMs
-    List<ActiveTim> activeTims = wydotTimService.selectTimsByType("I");
-
-    return activeTims;
+    return wydotTimService.selectTimsByType("I");
   }
 
   @RequestMapping(value = "/incident-tim/{incidentId}", method = RequestMethod.GET, headers = "Accept=application/json")
   public Collection<ActiveTim> getIncidentTimById(@PathVariable String incidentId) {
 
     // get active TIMs
-    List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("I", incidentId);
-    return activeTims;
+    return wydotTimService.selectTimByClientId("I", incidentId);
   }
 }

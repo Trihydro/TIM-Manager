@@ -21,6 +21,7 @@ import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @CrossOrigin
 @RestController
 @Api(description = "Incidents")
+@Slf4j
 public class WydotTimIncidentController extends WydotTimBaseController {
 
   private final String type = "I";
@@ -51,13 +53,9 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
   @RequestMapping(value = "/incident-tim", method = RequestMethod.POST, headers = "Accept=application/json")
   public ResponseEntity<String> createIncidentTim(@RequestBody TimIncidentList timIncidentList) {
-
-    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    Date date = new Date();
-
-    utility.logWithDate(dateFormat.format(date) + " - Create Incident TIM", this.getClass());
+    log.info("Create Incident TIM");
     String post = gson.toJson(timIncidentList);
-    utility.logWithDate(post.toString(), this.getClass());
+    log.info(post);
 
     List<WydotTimIncident> timsToSend = new ArrayList<>();
 
@@ -89,45 +87,36 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
   @RequestMapping(value = "/incident-tim", method = RequestMethod.PUT, headers = "Accept=application/json")
   public ResponseEntity<String> updateIncidentTim(@RequestBody TimIncidentList timIncidentList) {
-
-    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    Date date = new Date();
-
-    utility.logWithDate(dateFormat.format(date) + " - Update Incident TIM", this.getClass());
+    log.info("Update Incident TIM");
     String post = gson.toJson(timIncidentList);
-    utility.logWithDate(post, this.getClass());
+    log.info(post);
 
-    List<ControllerResult> resultList = new ArrayList<ControllerResult>();
-    ControllerResult resultTim = null;
-    List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
+    List<ControllerResult> resultList = new ArrayList<>();
+    ControllerResult resultTim;
+    List<WydotTimIncident> timsToSend = new ArrayList<>();
 
     // delete TIMs
     for (WydotTimIncident wydotTim : timIncidentList.getTimIncidentList()) {
-
       resultTim = validateInputIncident(wydotTim);
-
       if (!resultTim.getResultMessages().isEmpty()) {
         resultList.add(resultTim);
         continue;
       }
-
       // make tims
       timsToSend.add(wydotTim);
-
       resultTim.getResultMessages().add("success");
       resultList.add(resultTim);
     }
+
     if (!timsToSend.isEmpty()) {
       // make tims, expire existing ones, and send them
       makeTimsAsync(timsToSend);
     }
-
     String responseMessage = gson.toJson(resultList);
     return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
   }
 
   public void makeTimsAsync(List<WydotTimIncident> wydotTims) {
-
     new Thread(() -> {
       var startTime = getStartTime();
       for (WydotTimIncident wydotTim : wydotTims) {
@@ -140,29 +129,22 @@ public class WydotTimIncidentController extends WydotTimBaseController {
 
   @RequestMapping(value = "/incident-tim/{incidentId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
   public ResponseEntity<String> deleteIncidentTim(@PathVariable String incidentId) {
-
-    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    Date date = new Date();
-
-    utility.logWithDate(dateFormat.format(date) + " - Delete Incident TIM", this.getClass());
+    log.info("Delete Incident TIM");
 
     // expire and clear TIM
     wydotTimService.clearTimsById("I", incidentId, null);
-
     String responseMessage = "success";
     return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
   }
 
   @RequestMapping(value = "/incident-tim", method = RequestMethod.GET, headers = "Accept=application/json")
   public Collection<ActiveTim> getIncidentTims() {
-
     // get active TIMs
     return wydotTimService.selectTimsByType("I");
   }
 
   @RequestMapping(value = "/incident-tim/{incidentId}", method = RequestMethod.GET, headers = "Accept=application/json")
   public Collection<ActiveTim> getIncidentTimById(@PathVariable String incidentId) {
-
     // get active TIMs
     return wydotTimService.selectTimByClientId("I", incidentId);
   }

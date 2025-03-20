@@ -16,7 +16,6 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,27 +50,24 @@ public class SetItisCodes {
 
     // check to see if code exists
 
-    List<String> items = new ArrayList<String>();
+    List<String> items = new ArrayList<>();
     for (Integer item : wydotTim.getAdvisory()) {
 
-      ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(item)).findFirst().orElse(null);
+      getItisCodes().stream().filter(x -> x.getItisCode().equals(item)).findFirst().ifPresent(code -> items.add(item.toString()));
 
-      if (code != null) {
-        items.add(item.toString());
-      }
     }
     return items;
   }
 
   public List<String> setItisCodesRc(WydotTimRc wydotTim) {
 
-    List<String> items = new ArrayList<String>();
+    List<String> items = new ArrayList<>();
 
     if (wydotTim.getAdvisory() == null) {
       return items;
     }
 
-    ItisCode code = null;
+    ItisCode code;
 
     for (Integer item : wydotTim.getAdvisory()) {
 
@@ -106,23 +102,18 @@ public class SetItisCodes {
 
   public List<String> setItisCodesVsl(WydotTimVsl wydotTim) {
 
-    List<String> items = new ArrayList<String>();
+    List<String> items = new ArrayList<>();
 
     // speed limit itis code
-    ItisCode speedLimit = getItisCodes().stream().filter(x -> x.getDescription().equals("speed limit")).findFirst().orElse(null);
-    if (speedLimit != null) {
-      items.add(speedLimit.getItisCode().toString());
-    }
+    getItisCodes().stream().filter(x -> x.getDescription().equals("speed limit")).findFirst()
+        .ifPresent(speedLimit -> items.add(speedLimit.getItisCode().toString()));
 
     // number e.g 50, convert to ITIS code
-    Integer speed = wydotTim.getSpeed() + 12544;
-    items.add(speed.toString());
+    int speed = wydotTim.getSpeed() + 12544;
+    items.add(Integer.toString(speed));
 
     // mph itis code
-    ItisCode mph = getItisCodes().stream().filter(x -> x.getDescription().equals("mph")).findFirst().orElse(null);
-    if (mph != null) {
-      items.add(mph.getItisCode().toString());
-    }
+    getItisCodes().stream().filter(x -> x.getDescription().equals("mph")).findFirst().ifPresent(mph -> items.add(mph.getItisCode().toString()));
 
     return items;
   }
@@ -130,7 +121,7 @@ public class SetItisCodes {
   public List<String> setItisCodesParking(WydotTimParking wydotTim) {
 
     // check to see if code exists
-    List<String> items = new ArrayList<String>();
+    List<String> items = new ArrayList<>();
 
     ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability())).findFirst().orElse(null);
 
@@ -150,58 +141,14 @@ public class SetItisCodes {
       // the ODE translates a text value only if we start with a single quote to
       // denote this. No ending quote is used
       items.add("11794");// Exit Number
-      if (wydotTim.getExit().toLowerCase().equals("turnout") || wydotTim.getExit().toLowerCase().equals("parking")) {
-        items.add("'" + String.valueOf(((int) Math.round(wydotTim.getMileMarker()))));
+      if (wydotTim.getExit().equalsIgnoreCase("turnout") || wydotTim.getExit().equalsIgnoreCase("parking")) {
+        items.add("'" + (int) Math.round(wydotTim.getMileMarker()));
       } else {
         items.add("'" + wydotTim.getExit());
       }
     } else {
       items.add("7986");// Rest Area
       utility.logWithDate("rest area", this.getClass());
-    }
-
-    return items;
-  }
-
-  public List<String> splitExitNumberFromLetter(String exit) {
-
-    List<String> list = new ArrayList<String>();
-    String exitNumber = "";
-    String exitLetter = "";
-    for (int i = 0; i < exit.length(); i++) {
-      if (StringUtils.isNumeric(String.valueOf(exit.charAt(i)))) {
-        exitNumber += exit.charAt(i);
-      } else {
-        exitLetter += exit.charAt(i);
-      }
-    }
-
-    list.add(exitNumber);
-    if (exitLetter.length() > 0) {
-      list.add(exitLetter);
-    }
-
-    return list;
-  }
-
-  public List<String> setItisCodesFromAvailability(WydotTimParking wydotTim) {
-
-    // check to see if code exists
-    List<String> items = new ArrayList<String>();
-
-    utility.logWithDate("availability:" + wydotTim.getAvailability(), this.getClass());
-
-    ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability())).findFirst().orElse(null);
-
-    if (code != null) {
-      items.add(wydotTim.getAvailability().toString());
-    }
-
-    if (wydotTim.getExit() != null) {
-      items.add("11794");
-      items.add(wydotTim.getExit());
-    } else {
-      items.add("7986");
     }
 
     return items;
@@ -215,11 +162,8 @@ public class SetItisCodes {
 
     // if action is not null and action itis code exists
     if (incidentAction != null && incidentAction.getItisCodeId() != null) {
-      ItisCode actionItisCode =
-          getItisCodes().stream().filter(x -> x.getItisCodeId().equals(incidentAction.getItisCodeId())).findFirst().orElse(null);
-      if (actionItisCode != null) {
-        items.add(actionItisCode.getItisCode().toString());
-      }
+      getItisCodes().stream().filter(x -> x.getItisCodeId().equals(incidentAction.getItisCodeId())).findFirst()
+          .ifPresent(actionItisCode -> items.add(actionItisCode.getItisCode().toString()));
     }
 
     // effect
@@ -227,11 +171,8 @@ public class SetItisCodes {
 
     // if effect is not null and effect itis code exists
     if (incidentEffect != null && incidentEffect.getItisCodeId() != null) {
-      ItisCode effectItisCode =
-          getItisCodes().stream().filter(x -> x.getItisCodeId().equals(incidentEffect.getItisCodeId())).findFirst().orElse(null);
-      if (effectItisCode != null) {
-        items.add(effectItisCode.getItisCode().toString());
-      }
+      getItisCodes().stream().filter(x -> x.getItisCodeId().equals(incidentEffect.getItisCodeId())).findFirst()
+          .ifPresent(effectItisCode -> items.add(effectItisCode.getItisCode().toString()));
     }
 
     // problem
@@ -239,14 +180,11 @@ public class SetItisCodes {
 
     // if problem is not null and problem itis code exists
     if (incidentProblem != null && incidentProblem.getItisCodeId() != null) {
-      ItisCode problemItisCode =
-          getItisCodes().stream().filter(x -> x.getItisCodeId().equals(incidentProblem.getItisCodeId())).findFirst().orElse(null);
-      if (problemItisCode != null) {
-        items.add(problemItisCode.getItisCode().toString());
-      }
+      getItisCodes().stream().filter(x -> x.getItisCodeId().equals(incidentProblem.getItisCodeId())).findFirst()
+          .ifPresent(problemItisCode -> items.add(problemItisCode.getItisCode().toString()));
     }
 
-    if (items.size() == 0) {
+    if (items.isEmpty()) {
       items.add("531");// 531 is "Incident"
     }
 
@@ -290,7 +228,7 @@ public class SetItisCodes {
   }
 
   public List<String> setItisCodesBowr(WydotTimBowr tim) throws WeightNotSupportedException {
-    List<String> itisCodes = new ArrayList<String>();
+    List<String> itisCodes = new ArrayList<>();
 
     int weightInPounds = tim.getData();
 
@@ -310,7 +248,7 @@ public class SetItisCodes {
    * These are large number ITIS codes and do not abide by the standard translations used for other numbers such as mph.
    * Supported weights are 20000 to 30000 in increments of 1000 and 30000 to 70000 in increments of 5000
    *
-   * @throws WeightNotSupportedException
+   * @throws WeightNotSupportedException if the weight is not supported
    */
   private String translateWeightToItisCode(int weightInPounds) throws WeightNotSupportedException {
     switch (weightInPounds) {
@@ -357,7 +295,7 @@ public class SetItisCodes {
     }
   }
 
-  public class WeightNotSupportedException extends Exception {
+  public static class WeightNotSupportedException extends Exception {
     public WeightNotSupportedException(String message) {
       super(message);
     }

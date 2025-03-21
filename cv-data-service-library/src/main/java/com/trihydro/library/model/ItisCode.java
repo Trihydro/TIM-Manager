@@ -7,6 +7,17 @@ public class ItisCode
 	private String description;
 	private Integer categoryId;
 
+	public ItisCode() {
+
+	}
+
+	public ItisCode(Integer itisCodeId, Integer itisCode, String description, Integer categoryId) {
+		this.itisCodeId = itisCodeId;
+		this.itisCode = itisCode;
+		this.description = description;
+		this.categoryId = categoryId;
+	}
+
 	public Integer getItisCodeId() 
 	{
 		return this.itisCodeId;

@@ -22,16 +22,17 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class SetItisCodes {
+  private final IncidentChoicesService incidentChoicesService;
+  private final ItisCodeService itisCodeService;
+
   private List<IncidentChoice> incidentProblems;
   private List<IncidentChoice> incidentEffects;
   private List<IncidentChoice> incidentActions;
-  private IncidentChoicesService incidentChoicesService;
-  private ItisCodeService itisCodeService;
 
   private List<ItisCode> itisCodes;
 
   @Autowired
-  public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService) {
+  public SetItisCodes(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService) {
     itisCodeService = _itisCodeService;
     incidentChoicesService = _incidentChoicesService;
   }
@@ -174,7 +175,7 @@ public class SetItisCodes {
           .ifPresent(effectItisCode -> items.add(effectItisCode.getItisCode().toString()));
     }
 
-    if (!wydotTim.getProblem().equals("other")) {
+    if (wydotTim.getProblem() != null && !wydotTim.getProblem().equals("other")) {
       // Retrieve the matching incident problem based on the provided code
       IncidentChoice incidentProblem =
           getIncidentProblems().stream().filter(problem -> problem.getCode().equals(wydotTim.getProblem())).findFirst().orElse(null);

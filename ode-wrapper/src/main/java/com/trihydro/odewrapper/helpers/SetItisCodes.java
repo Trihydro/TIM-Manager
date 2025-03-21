@@ -3,7 +3,6 @@ package com.trihydro.odewrapper.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.CustomItisEnum;
 import com.trihydro.library.model.IncidentChoice;
 import com.trihydro.library.model.ItisCode;
@@ -28,15 +27,13 @@ public class SetItisCodes {
   private List<IncidentChoice> incidentActions;
   private IncidentChoicesService incidentChoicesService;
   private ItisCodeService itisCodeService;
-  private Utility utility;
 
   private List<ItisCode> itisCodes;
 
   @Autowired
-  public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService, Utility _utility) {
+  public void InjectDependencies(ItisCodeService _itisCodeService, IncidentChoicesService _incidentChoicesService) {
     itisCodeService = _itisCodeService;
     incidentChoicesService = _incidentChoicesService;
-    utility = _utility;
   }
 
   public List<ItisCode> getItisCodes() {

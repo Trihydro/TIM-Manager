@@ -214,4 +214,68 @@ public class SetItisCodesTest {
     Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The ITIS codes for a Gross Vehicle Weight restriction (60000 pounds) should be returned.");
   }
 
+  @Test
+  public void testSetItisCodesIncident_OtherProblemNoGVW_ShouldReturnDefaultIncidentCode() {
+    // Arrange
+    WydotTimIncident incident = new WydotTimIncident();
+    incident.setProblem("other");
+    incident.setProblemOtherText("Some other problem");
+    List<String> expectedItisCodes = List.of("531");
+
+    // Act
+    List<String> actualItisCodes = uut.setItisCodesIncident(incident);
+
+    // Assert
+    Assertions.assertNotNull(actualItisCodes, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The default incident code should be returned.");
+  }
+
+  @Test
+  public void testSetItisCodesIncident_OtherProblemNull_ShouldReturnDefaultIncidentCode() {
+    // Arrange
+    WydotTimIncident incident = new WydotTimIncident();
+    incident.setProblem("other");
+    incident.setProblemOtherText(null);
+    List<String> expectedItisCodes = List.of("531");
+
+    // Act
+    List<String> actualItisCodes = uut.setItisCodesIncident(incident);
+
+    // Assert
+    Assertions.assertNotNull(actualItisCodes, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The default incident code should be returned.");
+  }
+
+  @Test
+  public void testSetItisCodesIncident_WeightNotFoundInProblemOtherText_ShouldReturnDefaultIncidentCode() {
+    // Arrange
+    WydotTimIncident incident = new WydotTimIncident();
+    incident.setProblem("other");
+    incident.setProblemOtherText("Some GVW weight restriction");
+    List<String> expectedItisCodes = List.of("531");
+
+    // Act
+    List<String> actualItisCodes = uut.setItisCodesIncident(incident);
+
+    // Assert
+    Assertions.assertNotNull(actualItisCodes, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The default incident code should be returned.");
+  }
+
+  @Test
+  public void testSetItisCodesIncident_WeightNotSupported_ShouldReturnDefaultIncidentCode() {
+    // Arrange
+    WydotTimIncident incident = new WydotTimIncident();
+    incident.setProblem("other");
+    incident.setProblemOtherText("Weight limit of 1,000,000 GVW is in effect");
+    List<String> expectedItisCodes = List.of("531");
+
+    // Act
+    List<String> actualItisCodes = uut.setItisCodesIncident(incident);
+
+    // Assert
+    Assertions.assertNotNull(actualItisCodes, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The default incident code should be returned.");
+  }
+
 }

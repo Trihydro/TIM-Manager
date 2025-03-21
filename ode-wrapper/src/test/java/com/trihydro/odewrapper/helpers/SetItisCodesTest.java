@@ -206,20 +206,6 @@ public class SetItisCodesTest {
     incident.setProblemOtherText("Weight limit of 60,000 GVW is in effect");
     List<String> expectedItisCodes = List.of("2563", "2577", "11605", "8739");
 
-    IncidentChoice mockIncidentChoice = new IncidentChoice();
-    mockIncidentChoice.setCode("other");
-    mockIncidentChoice.setItisCodeId(1);
-    mockIncidentChoice.setDescription("Other");
-    when(mockIncidentChoicesService.selectAllIncidentProblems()).thenReturn(List.of(mockIncidentChoice));
-
-    List<ItisCode> mockItisCodes = new ArrayList<>(List.of(new ItisCode[] {
-        new ItisCode(1, 2563, "truck-restriction", 1),
-        new ItisCode(2, 2577, "gross-weight-limit", 1),
-        new ItisCode(3, 11605, "60000", 1),
-        new ItisCode(4, 8739, "pounds", 1)
-    }));
-    when(mockItisCodeService.selectAll()).thenReturn(mockItisCodes);
-
     // Act
     List<String> actualItisCodes = uut.setItisCodesIncident(incident);
 

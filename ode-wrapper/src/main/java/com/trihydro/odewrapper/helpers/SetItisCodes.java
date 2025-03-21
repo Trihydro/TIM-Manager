@@ -157,7 +157,7 @@ public class SetItisCodes {
   }
 
   public List<String> setItisCodesIncident(WydotTimIncident wydotTim) {
-    List<String> items = new ArrayList<String>();
+    List<String> items = new ArrayList<>();
 
     // action
     IncidentChoice incidentAction = getIncidentActions().stream().filter(x -> x.getCode().equals(wydotTim.getAction())).findFirst().orElse(null);
@@ -177,17 +177,21 @@ public class SetItisCodes {
           .ifPresent(effectItisCode -> items.add(effectItisCode.getItisCode().toString()));
     }
 
-    // Retrieve the matching incident problem based on the provided code
-    IncidentChoice incidentProblem =
-        getIncidentProblems().stream().filter(problem -> problem.getCode().equals(wydotTim.getProblem())).findFirst().orElse(null);
+    if (!wydotTim.getProblem().equals("other")) {
+      // Retrieve the matching incident problem based on the provided code
+      IncidentChoice incidentProblem =
+          getIncidentProblems().stream().filter(problem -> problem.getCode().equals(wydotTim.getProblem())).findFirst().orElse(null);
 
-    // Add the ITIS code if the incident problem exists and has a valid ITIS code ID
-    if (incidentProblem != null) {
-      Integer itisCodeId = incidentProblem.getItisCodeId();
-      if (itisCodeId != null) {
-        getItisCodes().stream().filter(code -> code.getItisCodeId().equals(itisCodeId)).findFirst()
-            .ifPresent(problemItisCode -> items.add(problemItisCode.getItisCode().toString()));
+      // Add the ITIS code if the incident problem exists and has a valid ITIS code ID
+      if (incidentProblem != null) {
+        Integer itisCodeId = incidentProblem.getItisCodeId();
+        if (itisCodeId != null) {
+          getItisCodes().stream().filter(code -> code.getItisCodeId().equals(itisCodeId)).findFirst()
+              .ifPresent(problemItisCode -> items.add(problemItisCode.getItisCode().toString()));
+        }
       }
+    } else {
+      items.addAll(handleOtherIncidentProblem(wydotTim));
     }
 
     // If no incident problem is provided, default to "Incident" (ITIS code 531)
@@ -196,6 +200,58 @@ public class SetItisCodes {
     }
 
     return items;
+  }
+
+  private List<String> handleOtherIncidentProblem(WydotTimIncident wydotTim) {
+    List<String> items = new ArrayList<>();
+    if (wydotTim.getProblemOtherText() == null) {
+      log.warn("problemOtherText is null for 'other' incident problem");
+      return items;
+    }
+    String problemOtherText = wydotTim.getProblemOtherText();
+
+    if (!problemOtherText.contains("GVW")) {
+      log.error("Unsupported problemOtherText: {}", problemOtherText);
+      return items;
+    }
+
+    // Extract the weight limit from the problemOtherText
+    String weightLimitInPounds = getWeightLimitFromProblemOtherText(problemOtherText);
+    if (weightLimitInPounds == null) {
+      log.warn("Weight limit not found in problemOtherText: {}", problemOtherText);
+      return items;
+    }
+
+    String weightLimitInItisCode = null;
+    try {
+      // Convert weight limit to ITIS code
+      weightLimitInItisCode = translateWeightToItisCode(Integer.parseInt(weightLimitInPounds));
+    } catch (WeightNotSupportedException e) {
+      log.warn("Weight limit not supported: {}", weightLimitInPounds);
+      return items;
+    }
+
+    items.add("2563"); // Truck restriction
+    items.add("2577"); // Gross-Weight-Limit
+    items.add(weightLimitInItisCode); // Weight limit in ITIS code
+    items.add("8739"); // Pounds
+
+    return items;
+  }
+
+  /**
+   * Given a problemOtherText string of the format "Weight limit of 60,000 GVW is in effect",
+   * return the weight limit (60000) in pounds as a string.
+   */
+  private String getWeightLimitFromProblemOtherText(String problemOtherText) {
+    problemOtherText = problemOtherText.replaceAll(",", "");
+    String[] parts = problemOtherText.split(" ");
+    for (String part : parts) {
+      if (part.matches("\\d{1,5}")) { // Match a number with 1 to 5 digits
+        return part;
+      }
+    }
+    return null; // Return null if no weight limit found
   }
 
   public List<IncidentChoice> getIncidentProblems() {

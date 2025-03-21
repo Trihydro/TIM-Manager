@@ -198,4 +198,39 @@ public class SetItisCodesTest {
     Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The ITIS code for the incident problem should be returned.");
   }
 
+  @Test
+  public void testSetItisCodesIncident_OtherProblemGVW_ShouldReturnGVWItisCodes() {
+    // Arrange
+    WydotTimIncident incident = new WydotTimIncident();
+    incident.setProblem("other");
+    incident.setProblemOtherText("Weight limit of 60,000 GVW is in effect");
+    List<String> expectedItisCodes = List.of("2563", "2577", "11605", "8739");
+
+    IncidentChoice mockIncidentChoice = new IncidentChoice();
+    mockIncidentChoice.setCode("other");
+    mockIncidentChoice.setItisCodeId(1);
+    mockIncidentChoice.setDescription("Other");
+    when(mockIncidentChoicesService.selectAllIncidentProblems()).thenReturn(List.of(mockIncidentChoice));
+
+    List<ItisCode> mockItisCodes = new ArrayList<>(List.of(new ItisCode[] {
+        new ItisCode(1, 2563, "truck-restriction", 1),
+        new ItisCode(2, 2577, "gross-weight-limit", 1),
+        new ItisCode(3, 11605, "60000", 1),
+        new ItisCode(4, 8739, "pounds", 1)
+    }));
+    when(mockItisCodeService.selectAll()).thenReturn(mockItisCodes);
+
+    ItisCode mockItisCode = new ItisCode();
+    mockItisCode.setItisCode(268);
+    mockItisCode.setItisCodeId(1);
+    when(mockItisCodeService.selectAll()).thenReturn(List.of(mockItisCode));
+
+    // Act
+    List<String> actualItisCodes = uut.setItisCodesIncident(incident);
+
+    // Assert
+    Assertions.assertNotNull(actualItisCodes, "Resulting list should not be null.");
+    Assertions.assertEquals(expectedItisCodes, actualItisCodes, "The ITIS codes for a Gross Vehicle Weight restriction (60000 pounds) should be returned.");
+  }
+
 }

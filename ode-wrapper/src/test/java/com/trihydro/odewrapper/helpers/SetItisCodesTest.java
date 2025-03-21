@@ -220,11 +220,6 @@ public class SetItisCodesTest {
     }));
     when(mockItisCodeService.selectAll()).thenReturn(mockItisCodes);
 
-    ItisCode mockItisCode = new ItisCode();
-    mockItisCode.setItisCode(268);
-    mockItisCode.setItisCodeId(1);
-    when(mockItisCodeService.selectAll()).thenReturn(List.of(mockItisCode));
-
     // Act
     List<String> actualItisCodes = uut.setItisCodesIncident(incident);
 

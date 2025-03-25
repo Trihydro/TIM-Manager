@@ -32,12 +32,12 @@ public class TimRefreshController {
     private final TimGenerationHelper timGenerationHelper;
 
     @Autowired
-    public TimRefreshController(TimRefreshConfiguration configurationRhs,
-                                ActiveTimService _activeTimService, EmailHelper _emailHelper, TimGenerationHelper _timGenerationHelper) {
-        configuration = configurationRhs;
-        activeTimService = _activeTimService;
-        emailHelper = _emailHelper;
-        timGenerationHelper = _timGenerationHelper;
+    public TimRefreshController(TimRefreshConfiguration configurationRhs, ActiveTimService activeTimService, EmailHelper emailHelper,
+                                TimGenerationHelper timGenerationHelper) {
+        this.configuration = configurationRhs;
+        this.activeTimService = activeTimService;
+        this.emailHelper = emailHelper;
+        this.timGenerationHelper = timGenerationHelper;
     }
 
     /**

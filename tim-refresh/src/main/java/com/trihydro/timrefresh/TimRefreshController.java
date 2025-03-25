@@ -1,5 +1,6 @@
 package com.trihydro.timrefresh;
 
+import com.trihydro.library.model.ActiveTim;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,10 +26,10 @@ public class TimRefreshController {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     public Gson gson = new Gson();
     protected TimRefreshConfiguration configuration;
-    private Utility utility;
-    private EmailHelper emailHelper;
-    private ActiveTimService activeTimService;
-    private TimGenerationHelper timGenerationHelper;
+    private final Utility utility;
+    private final EmailHelper emailHelper;
+    private final ActiveTimService activeTimService;
+    private final TimGenerationHelper timGenerationHelper;
 
     @Autowired
     public TimRefreshController(TimRefreshConfiguration configurationRhs, Utility _utility,
@@ -73,15 +74,15 @@ public class TimRefreshController {
         var resetSuccessful = true;
 
         // attempt to refresh TIMs and collect any exceptions
-        if (timsToRefresh.size() > 0) {
-            var activeTimIds = timsToRefresh.stream().map(x -> x.getActiveTimId()).collect(Collectors.toList());
+        if (!timsToRefresh.isEmpty()) {
+            var activeTimIds = timsToRefresh.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
             // Reset expiration dates so they'll be updated after messages are processed.
             // Success isn't critical to proceed. We'll just end up with redundant resubmissions later on.
             resetSuccessful = activeTimService.resetActiveTimsExpirationDate(activeTimIds);
             exceptionTims = timGenerationHelper.resetTimStartTimeAndResubmitToOde(activeTimIds);
         }
 
-        if (invalidTims.size() > 0 || exceptionTims.size() > 0 || !resetSuccessful) {
+        if (!invalidTims.isEmpty() || !exceptionTims.isEmpty() || !resetSuccessful) {
             String body = "";
 
             if (!resetSuccessful) {
@@ -89,23 +90,27 @@ public class TimRefreshController {
                 body += "<br/><br/>";
             }
 
-            if (invalidTims.size() > 0) {
+            if (!invalidTims.isEmpty()) {
                 body += "The Tim Refresh application found invalid TIM(s) while attempting to refresh.";
                 body += "<br/>";
                 body += "The associated ActiveTim records are: <br/>";
+                StringBuilder bodyBuilder = new StringBuilder(body);
                 for (Logging_TimUpdateModel timUpdateModel : invalidTims) {
-                    body += gson.toJson(timUpdateModel);
-                    body += "<br/><br/>";
+                    bodyBuilder.append(gson.toJson(timUpdateModel));
+                    bodyBuilder.append("<br/><br/>");
                 }
+                body = bodyBuilder.toString();
             }
 
-            if (exceptionTims.size() > 0) {
+            if (!exceptionTims.isEmpty()) {
                 body += "The TIM Refresh application ran into exceptions while attempting to resubmit TIMs. The following exceptions were found: ";
                 body += "<br/>";
+                StringBuilder bodyBuilder = new StringBuilder(body);
                 for (ResubmitTimException rte : exceptionTims) {
-                    body += gson.toJson(rte);
-                    body += "<br/>";
+                    bodyBuilder.append(gson.toJson(rte));
+                    bodyBuilder.append("<br/>");
                 }
+                body = bodyBuilder.toString();
             }
 
             try {

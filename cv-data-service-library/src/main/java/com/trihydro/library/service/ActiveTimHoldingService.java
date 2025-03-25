@@ -24,10 +24,23 @@ public class ActiveTimHoldingService extends CvDataServiceLibrary {
     }
 
     public List<ActiveTimHolding> getActiveTimHoldingForRsu(String ipv4Address) {
-        String url = String.format("%s/active-tim-holding/get-rsu/%s", config.getCvRestService(),
-            ipv4Address);
-        ResponseEntity<ActiveTimHolding[]> response =
-            restTemplateProvider.GetRestTemplate().getForEntity(url, ActiveTimHolding[].class);
+        String url = String.format("%s/active-tim-holding/get-rsu/%s", config.getCvRestService(), ipv4Address);
+        ResponseEntity<ActiveTimHolding[]> response = restTemplateProvider.GetRestTemplate().getForEntity(url, ActiveTimHolding[].class);
         return Arrays.asList(response.getBody());
+    }
+
+    public List<ActiveTimHolding> getAllRecords() {
+        String url = String.format("%s/active-tim-holding/get-all", config.getCvRestService());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<ActiveTimHolding[]> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.GET, entity, ActiveTimHolding[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    public boolean deleteActiveTimHolding(Long activeTimHoldingId) {
+        String url = String.format("%s/active-tim-holding/delete/%d", config.getCvRestService(), activeTimHoldingId);
+        ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, null, Boolean.class);
+        return response.getBody();
     }
 }

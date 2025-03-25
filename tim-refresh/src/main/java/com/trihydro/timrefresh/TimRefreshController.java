@@ -10,32 +10,31 @@ import java.util.stream.Collectors;
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.TimGenerationHelper;
-import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.Logging_TimUpdateModel;
 import com.trihydro.library.model.ResubmitTimException;
 import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class TimRefreshController {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     public Gson gson = new Gson();
     protected TimRefreshConfiguration configuration;
-    private final Utility utility;
     private final EmailHelper emailHelper;
     private final ActiveTimService activeTimService;
     private final TimGenerationHelper timGenerationHelper;
 
     @Autowired
-    public TimRefreshController(TimRefreshConfiguration configurationRhs, Utility _utility,
+    public TimRefreshController(TimRefreshConfiguration configurationRhs,
                                 ActiveTimService _activeTimService, EmailHelper _emailHelper, TimGenerationHelper _timGenerationHelper) {
         configuration = configurationRhs;
-        utility = _utility;
         activeTimService = _activeTimService;
         emailHelper = _emailHelper;
         timGenerationHelper = _timGenerationHelper;
@@ -48,12 +47,12 @@ public class TimRefreshController {
      */
     @Scheduled(cron = "${cron.expression}")
     public void performTaskUsingCron() {
-        utility.logWithDate("Regular task performed using Cron at " + dateFormat.format(new Date()));
+        log.info("Regular task performed using Cron at {}", dateFormat.format(new Date()));
 
         // fetch Active_TIM that are expiring within 24 hrs
         List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
-        utility.logWithDate(expiringTims.size() + " expiring TIMs found");
+        log.info("{} expiring TIMs found", expiringTims.size());
         List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
         List<ResubmitTimException> exceptionTims = new ArrayList<>();
         List<TimUpdateModel> timsToRefresh = new ArrayList<TimUpdateModel>();
@@ -114,12 +113,10 @@ public class TimRefreshController {
             }
 
             try {
-                utility.logWithDate(
-                    "Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
+                log.info("Sending error email. The following TIM exceptions were found: {}", gson.toJson(body));
                 emailHelper.SendEmail(configuration.getAlertAddresses(), "TIM Refresh Exceptions", body);
             } catch (Exception e) {
-                utility.logWithDate("Exception attempting to send email for invalid TIM:");
-                e.printStackTrace();
+                log.error("Exception attempting to send email for invalid TIM", e);
             }
         }
     }

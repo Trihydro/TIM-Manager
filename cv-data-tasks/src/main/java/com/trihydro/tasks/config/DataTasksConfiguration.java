@@ -17,8 +17,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
 
 @Component
 @ConfigurationProperties("config")
-public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps,
-        TimGenerationProps, OdeProps {
+public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CVRestServiceProps, TmddProps, EmailProps, TimGenerationProps, OdeProps {
 
     private String cvRestService;
     private String rsuDataServiceUrl;
@@ -39,7 +38,7 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private int rsuValidationDelaySeconds = 60;
     private int rsuValThreadPoolSize = 1;
     private int rsuValTimeoutSeconds = 300; // 76 RSUs, 20s timeout each... Could still finish processing with up to 20%
-                                            // of RSUs down in a pool w/ single thread
+    // of RSUs down in a pool w/ single thread
 
     private int removeExpiredPeriodMinutes = 1440;
     private boolean retention_removeTims = true;
@@ -58,6 +57,8 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
     private BigDecimal defaultLaneWidth = BigDecimal.valueOf(50);
     private String[] rsuRoutes;
     private Double pointIncidentBufferMiles;
+
+    private long cleanupStaleActiveTimHoldingRecordsPeriodMinutes = 60; // cleanup stale active tim holding records every hour
 
     /**
      * Returns the defaultLaneWidth / 2
@@ -358,5 +359,13 @@ public class DataTasksConfiguration implements SdwProps, RsuDataServiceProps, CV
 
     public void setRunHsmCheck(boolean runHsmCheck) {
         this.runHsmCheck = runHsmCheck;
+    }
+
+    public long getCleanupStaleActiveTimHoldingRecordsPeriodMinutes() {
+        return cleanupStaleActiveTimHoldingRecordsPeriodMinutes;
+    }
+
+    public void setCleanupStaleActiveTimHoldingRecordsPeriodMinutes(long cleanupStaleActiveTimHoldingRecordsPeriodMinutes) {
+        this.cleanupStaleActiveTimHoldingRecordsPeriodMinutes = cleanupStaleActiveTimHoldingRecordsPeriodMinutes;
     }
 }

@@ -40,7 +40,12 @@ public class TimRefreshController {
         timGenerationHelper = _timGenerationHelper;
     }
 
-    @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
+    /**
+     * This method is intended to be run once a day, but can be configured to run at
+     * any time. It will check for Active TIMs that are expiring within 24 hours and
+     * issue new TIMs to the ODE for those that are expiring.
+     */
+    @Scheduled(cron = "${cron.expression}")
     public void performTaskUsingCron() {
         utility.logWithDate("Regular task performed using Cron at " + dateFormat.format(new Date()));
 

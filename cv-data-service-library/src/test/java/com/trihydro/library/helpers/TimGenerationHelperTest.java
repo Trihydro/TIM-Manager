@@ -535,7 +535,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, "exception"), ex);
-
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verifyNoInteractions(mockPathNodeXYService);
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
@@ -571,7 +571,7 @@ public class TimGenerationHelperTest {
         Assertions.assertEquals(0, exceptions.size());
         verifyNoInteractions(mockPathNodeXYService);
         verify(mockOdeService).updateTimOnSdw(any());
-
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService,
@@ -608,6 +608,7 @@ public class TimGenerationHelperTest {
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         var timSent = timCaptor.getValue();
         var dataFrame = timSent.getTim().getDataframes()[0];
 
@@ -651,6 +652,7 @@ public class TimGenerationHelperTest {
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         var timSent = timCaptor.getValue();
         var dataFrame = timSent.getTim().getDataframes()[0];
 
@@ -691,6 +693,7 @@ public class TimGenerationHelperTest {
 
         // Assert
         verify(mockOdeService).updateTimOnSdw(timCaptor.capture());
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         var timSent = timCaptor.getValue();
         var dataFrame = timSent.getTim().getDataframes()[0];
 
@@ -732,7 +735,7 @@ public class TimGenerationHelperTest {
         var ex = exceptions.get(0);
         Assertions.assertEquals(new ResubmitTimException(activeTimId, "exception"), ex);
         verifyNoInteractions(mockPathNodeXYService);
-
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService,
@@ -766,7 +769,7 @@ public class TimGenerationHelperTest {
         // Assert
         Assertions.assertEquals(0, exceptions.size());
         verifyNoInteractions(mockPathNodeXYService);
-
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
         verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
         verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService,

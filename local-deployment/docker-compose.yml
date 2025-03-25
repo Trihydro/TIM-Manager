@@ -344,6 +344,7 @@ services:
       MAIL_HOST: 172.0.0.1
       MAIL_PORT: 123
       ENV: local
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"

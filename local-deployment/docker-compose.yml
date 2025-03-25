@@ -226,6 +226,7 @@ services:
       CONFIG_HTTP_LOGGING_MAX_SIZE: 2000
       CONFIG_RSU_ROUTES: ${RSU_ROUTES}
       CONFIG_POINT_INCIDENT_BUFFER_MILES: 1
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     ports:
       - "7777:7777"
     logging:
@@ -292,6 +293,7 @@ services:
       CONFIG_DEFAULT_LANE_WIDTH: 50
       CONFIG_RSU_ROUTES: ${RSU_ROUTES}
       CONFIG_POINT_INCIDENT_BUFFER_MILES: 1
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -365,6 +367,7 @@ services:
       CONFIG_ENVIRONMENT_NAME: local
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"

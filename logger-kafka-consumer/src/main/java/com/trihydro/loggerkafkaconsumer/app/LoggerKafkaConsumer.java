@@ -1,6 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app;
 
-import java.io.IOException;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -30,21 +29,20 @@ import us.dot.its.jpo.ode.model.OdeData;
 @Slf4j
 public class LoggerKafkaConsumer {
 
-    private ObjectMapper mapper;
-    private LoggerConfiguration loggerConfig;
-    private KafkaFactory kafkaFactory;
-    private ActiveTimService activeTimService;
-    private ActiveTimHoldingService activeTimHoldingService;
-    private TimService timService;
-    private TimDataConverter timDataConverter;
-    private Utility utility;
-    private EmailHelper emailHelper;
+    private final LoggerConfiguration loggerConfig;
+    private final KafkaFactory kafkaFactory;
+    private final ActiveTimService activeTimService;
+    private final ActiveTimHoldingService activeTimHoldingService;
+    private final TimService timService;
+    private final TimDataConverter timDataConverter;
+    private final Utility utility;
+    private final EmailHelper emailHelper;
 
     @Autowired
     public LoggerKafkaConsumer(LoggerConfiguration _loggerConfig, KafkaFactory _kafkaFactory,
                                ActiveTimService _activeTimService, TimService _timService,
                                TimDataConverter _timDataConverter, Utility _utility, EmailHelper _emailHelper,
-                               ActiveTimHoldingService _activeTimHoldingService) throws IOException, Exception {
+                               ActiveTimHoldingService _activeTimHoldingService) throws Exception {
         loggerConfig = _loggerConfig;
         kafkaFactory = _kafkaFactory;
         activeTimService = _activeTimService;
@@ -56,7 +54,7 @@ public class LoggerKafkaConsumer {
 
         log.info("Logger Kafka Consumer starting..............");
 
-        mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         startKafkaConsumer();
     }
@@ -65,8 +63,8 @@ public class LoggerKafkaConsumer {
 
         String endpoint = loggerConfig.getKafkaHostServer() + ":9092";
         var stringConsumer = kafkaFactory.createStringConsumer(endpoint, loggerConfig.getDepositGroup(),
-            loggerConfig.getDepositTopic(), Integer.valueOf(loggerConfig.getMaxPollIntervalMs()),
-            Integer.valueOf(loggerConfig.getMaxPollRecords()));
+            loggerConfig.getDepositTopic(), loggerConfig.getMaxPollIntervalMs(),
+            loggerConfig.getMaxPollRecords());
 
         Gson gson = new Gson();
 

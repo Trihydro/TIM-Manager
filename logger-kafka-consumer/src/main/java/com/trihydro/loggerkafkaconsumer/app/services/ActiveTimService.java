@@ -29,7 +29,7 @@ public class ActiveTimService extends BaseService {
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
-    private Calendar UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    private final Calendar UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     @Autowired
     public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
@@ -115,13 +115,12 @@ public class ActiveTimService extends BaseService {
                 fieldNum++;
             }
 
-            Long activeTimId = dbInteractions.executeAndLog(preparedStatement, "active tim");
-            return activeTimId;
+            return dbInteractions.executeAndLog(preparedStatement, "active tim");
         } catch (SQLException e) {
             log.error("Error inserting active_tim", e);
         }
 
-        return Long.valueOf(0);
+        return 0L;
     }
 
     public boolean updateActiveTim(ActiveTim activeTim) {

@@ -9,9 +9,11 @@ import java.sql.Statement;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ActiveTimHoldingService extends BaseService {
 
     public ActiveTimHolding getRsuActiveTimHolding(String clientId, String direction, String ipv4Address) {
@@ -37,7 +39,8 @@ public class ActiveTimHoldingService extends BaseService {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("SQL Exception while getting RSU ActiveTimHolding with clientId: {}, direction: {}, ipv4Address: {}",
+                clientId, direction, ipv4Address, e);
         } finally {
             try {
                 // close prepared statement
@@ -53,7 +56,9 @@ public class ActiveTimHoldingService extends BaseService {
                     rs.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error(
+                    "SQL Exception while closing resources after getting RSU ActiveTimHolding with clientId: {}, direction: {}, ipv4Address: {}",
+                    clientId, direction, ipv4Address, e);
             }
         }
 
@@ -83,7 +88,8 @@ public class ActiveTimHoldingService extends BaseService {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("SQL Exception while getting SDX ActiveTimHolding with clientId: {}, direction: {}, satRecordId: {}",
+                clientId, direction, satRecordId, e);
         } finally {
             try {
                 // close prepared statement
@@ -99,7 +105,9 @@ public class ActiveTimHoldingService extends BaseService {
                     rs.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error(
+                    "SQL Exception while closing resources after getting SDX ActiveTimHolding with clientId: {}, direction: {}, satRecordId: {}",
+                    clientId, direction, satRecordId, e);
             }
         }
 
@@ -122,7 +130,7 @@ public class ActiveTimHoldingService extends BaseService {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("SQL Exception while getting ActiveTimHolding with packetId: {}", packetId, e);
         } finally {
             try {
                 // close prepared statement
@@ -138,7 +146,8 @@ public class ActiveTimHoldingService extends BaseService {
                     rs.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("SQL Exception while closing resources after getting ActiveTimHolding with packetId: {}",
+                    packetId, e);
             }
         }
 
@@ -185,13 +194,13 @@ public class ActiveTimHoldingService extends BaseService {
             preparedStatement.setLong(1, activeTimHoldingId);
             var success = dbInteractions.updateOrDelete(preparedStatement);
             if (success) {
-                utility.logWithDate("Deleted ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+                log.info("Deleted ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
             } else {
-                utility.logWithDate("Failed to delete ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+                log.error("Failed to delete ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
             }
             return success;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("SQL Exception while deleting ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId, e);
             return false;
         } finally {
             try {
@@ -204,7 +213,8 @@ public class ActiveTimHoldingService extends BaseService {
                     connection.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("SQL Exception while closing resources after deleting ACTIVE_TIM_HOLDING with ID: {}",
+                    activeTimHoldingId, e);
             }
         }
     }
@@ -226,7 +236,7 @@ public class ActiveTimHoldingService extends BaseService {
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception while updating ACTIVE_TIM_HOLDING with packetID: {}", packetID, e);
             return false;
         } finally {
             try {
@@ -239,12 +249,12 @@ public class ActiveTimHoldingService extends BaseService {
                     connection.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("SQL Exception while closing resources after updating ACTIVE_TIM_HOLDING with packetID: {}",
+                    packetID, e);
             }
         }
-        utility.logWithDate(String.format(
-            "Called ActiveTimHolding UpdateTimExpiration with packetID: %s, expDate: %s. Successful: %s", packetID,
-            expDate, success));
+        log.info("Called ActiveTimHolding UpdateTimExpiration with packetID: {}, expDate: {}. Successful: {}", packetID,
+            expDate, success);
         return success;
     }
 

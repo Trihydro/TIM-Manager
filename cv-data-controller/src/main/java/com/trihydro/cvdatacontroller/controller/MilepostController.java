@@ -281,7 +281,7 @@ public class MilepostController extends BaseController {
 	 * @param wydotTim
 	 * @return Collection of Milepost objects representing the path
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/get-milepost-start-end")
+	@RequestMapping(method = RequestMethod.POST, produces = "application/json", value = "/get-milepost-start-end")
 	public ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> getMilepostsByStartEndPoint(
 			@RequestBody WydotTim wydotTim) {
 
@@ -350,7 +350,7 @@ public class MilepostController extends BaseController {
 		return ResponseEntity.ok(fc.toJson());
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/get-milepost-single-point")
+	@RequestMapping(method = RequestMethod.POST, produces = "application/json", value = "/get-milepost-single-point")
 	public ResponseEntity<Collection<com.trihydro.cvdatacontroller.model.Milepost>> getMilepostsByPointWithBuffer(
 			@RequestBody MilepostBuffer milepostBuffer) {
 		// check startPoint

@@ -74,7 +74,8 @@ public class TimService extends BaseService {
                                    ItisCodeService _itisCodesService, TimRsuService _timRsuService,
                                    DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
                                    NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService,
-                                   PathNodeLLService _pathNodeLLService, NodeLLService _nodeLLService) { // TODO: use constructor instead of InjectDependencies
+                                   PathNodeLLService _pathNodeLLService,
+                                   NodeLLService _nodeLLService) { // TODO: use constructor instead of InjectDependencies
         activeTimService = _ats;
         timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
@@ -341,37 +342,26 @@ public class TimService extends BaseService {
     }
 
     public Long getTimId(String packetId, Timestamp timeStamp) {
-        ResultSet rs = null;
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
         Long id = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection
                 .prepareStatement("select tim_id from tim where packet_id = ? and time_stamp = ?");
+        ) {
             preparedStatement.setString(1, packetId);
             preparedStatement.setTimestamp(2, timeStamp);
 
-            rs = preparedStatement.executeQuery();
-            if (rs.next()) {
-                id = rs.getLong("tim_id");
+            try (
+                ResultSet rs = preparedStatement.executeQuery();
+            ) {
+                if (rs.next()) {
+                    id = rs.getLong("tim_id");
+                }
             }
 
         } catch (Exception e) {
             log.info("Failed to get tim_id from database", e);
-        } finally {
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException ex) {
-                log.info("Failed to close prepared statement or connection", ex);
-            }
         }
         return id;
     }
@@ -379,15 +369,13 @@ public class TimService extends BaseService {
     public Long AddTim(OdeMsgMetadata odeTimMetadata, ReceivedMessageDetails receivedMessageDetails,
                        OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName,
                        SecurityResultCode securityResultCode, String satRecordId, String regionName) {
-        PreparedStatement preparedStatement = null;
-        Connection connection = null;
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim",
+            timDbTables.getTimTable());
 
-        try {
-
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim",
-                timDbTables.getTimTable());
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_id"});
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_id"});
+        ) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getTimTable()) {
@@ -534,19 +522,6 @@ public class TimService extends BaseService {
             return timId;
         } catch (SQLException e) {
             log.info("Failed to insert tim into database", e);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                log.info("Failed to close prepared statement or connection", e);
-            }
         }
         return Long.valueOf(0);
     }
@@ -611,29 +586,15 @@ public class TimService extends BaseService {
     }
 
     public boolean updateTimSatRecordId(Long timId, String satRecordId) {
-        PreparedStatement preparedStatement = null;
-        Connection connection = null;
-
-        try {
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement("update tim set sat_record_id = ? where tim_id = ?");
+        ) {
             preparedStatement.setString(1, satRecordId);
             preparedStatement.setLong(2, timId);
             return dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception ex) {
             return false;
-        } finally {
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (Exception e) {
-                log.info("Failed to close prepared statement or connection", e);
-            }
         }
     }
 

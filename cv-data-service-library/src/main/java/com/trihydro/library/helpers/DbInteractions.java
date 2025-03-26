@@ -87,17 +87,10 @@ public class DbInteractions {
         Long id = null;
         try {
             if (preparedStatement.executeUpdate() > 0) {
-                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                try {
+                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                     if (generatedKeys != null && generatedKeys.next()) {
                         id = generatedKeys.getLong(1);
                         log.trace("------ Generated {} {} --------------", type, id);
-                    }
-                } finally {
-                    try {
-                        generatedKeys.close();
-                    } catch (Exception e) {
-                        log.error("Error in executeAndLog", e);
                     }
                 }
             }

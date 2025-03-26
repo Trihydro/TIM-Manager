@@ -137,12 +137,9 @@ public class TimService extends BaseService {
             // if this is an RSU TIM
             if (activeTim != null && activeTim.getRsuTarget() != null) {
                 // save TIM RSU in DB
-                WydotRsu rsu = rsuService.getRsus().stream()
+                rsuService.getRsus().stream()
                     .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
-                    .orElse(null);
-                if (rsu != null) {
-                    timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
-                }
+                    .ifPresent(rsu -> timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex()));
             }
 
             addDataFrameItis(firstDataFrame, dataFrameId);
@@ -219,7 +216,7 @@ public class TimService extends BaseService {
         }
 
         // ensure we handle a new satRecordId
-        if (satRecordId != null && satRecordId != "") {
+        if (satRecordId != null && !satRecordId.isEmpty()) {
             updateTimSatRecordId(timId, satRecordId);
             log.info("Added sat_record_id of {} to TIM with tim_id {}", satRecordId, timId);
         }
@@ -279,7 +276,7 @@ public class TimService extends BaseService {
         // set end time if duration is not indefinite
         if (dframes[0].getDurationTime() != 32000) {
             ZonedDateTime zdt = ZonedDateTime.parse(dframes[0].getStartDateTime());
-            zdt = zdt.plus(dframes[0].getDurationTime(), ChronoUnit.MINUTES);
+            zdt = zdt.plusMinutes(dframes[0].getDurationTime());
             activeTim.setEndDateTime(zdt.toString());
         }
 
@@ -518,12 +515,11 @@ public class TimService extends BaseService {
                 fieldNum++;
             }
             // execute insert statement
-            Long timId = dbInteractions.executeAndLog(preparedStatement, "timID");
-            return timId;
+            return dbInteractions.executeAndLog(preparedStatement, "timID");
         } catch (SQLException e) {
             log.info("Failed to insert tim into database", e);
         }
-        return Long.valueOf(0);
+        return 0L;
     }
 
     /**
@@ -657,10 +653,8 @@ public class TimService extends BaseService {
 
     public TimType getTimType(String timTypeName) {
 
-        TimType timType = timTypeService.getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst()
+        return timTypeService.getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst()
             .orElse(null);
-
-        return timType;
     }
 
     public String getItisCodeId(String item) {

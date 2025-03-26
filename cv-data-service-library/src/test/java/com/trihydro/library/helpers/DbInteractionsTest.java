@@ -41,7 +41,7 @@ class DbInteractionsTest {
     }
 
     @Test
-    void updateOrDelete_executesUpdate() throws SQLException {
+    void testUpdateOrDelete_WhenExecuted_ShouldReturnTrue() throws SQLException {
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
         boolean result = uut.updateOrDelete(preparedStatement);
@@ -50,7 +50,7 @@ class DbInteractionsTest {
     }
 
     @Test
-    void deleteWithPossibleZero_executesUpdate() throws SQLException {
+    void testDeleteWithPossibleZero_WhenNoRowsAffected_ShouldReturnTrue() throws SQLException {
         when(preparedStatement.executeUpdate()).thenReturn(0);
 
         boolean result = uut.deleteWithPossibleZero(preparedStatement);
@@ -59,7 +59,7 @@ class DbInteractionsTest {
     }
 
     @Test
-    void executeAndLog_generatesKey() throws SQLException {
+    void testExecuteAndLog_WhenKeyGenerated_ShouldReturnGeneratedKey() throws SQLException {
         when(preparedStatement.executeUpdate()).thenReturn(1);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);

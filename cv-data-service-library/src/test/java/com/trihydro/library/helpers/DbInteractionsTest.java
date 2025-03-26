@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -15,21 +16,32 @@ import static org.mockito.Mockito.*;
 class DbInteractionsTest {
     private DbInteractions uut;
 
+    @Mock
+    private DbInteractionsProps dbConfig;
+
+    @Mock
+    private EmailHelper emailHelper;
+
+    @Mock
+    private PreparedStatement preparedStatement;
+
+    @Mock
+    private ResultSet resultSet;
+
     @BeforeEach
     void setUp() {
-        DbInteractionsProps dbConfig = mock(DbInteractionsProps.class);
+        MockitoAnnotations.initMocks(this);
+
         when(dbConfig.getDbUrl()).thenReturn("jdbc:postgresql://localhost:5432/test");
         when(dbConfig.getDbUsername()).thenReturn("test");
         when(dbConfig.getDbPassword()).thenReturn("test");
         when(dbConfig.getMaximumPoolSize()).thenReturn(10);
         when(dbConfig.getConnectionTimeout()).thenReturn(1000);
-        EmailHelper emailHelper = mock(EmailHelper.class);
         uut = new DbInteractions(dbConfig, emailHelper);
     }
 
     @Test
     void updateOrDelete_executesUpdate() throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
         boolean result = uut.updateOrDelete(preparedStatement);
@@ -39,7 +51,6 @@ class DbInteractionsTest {
 
     @Test
     void deleteWithPossibleZero_executesUpdate() throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(preparedStatement.executeUpdate()).thenReturn(0);
 
         boolean result = uut.deleteWithPossibleZero(preparedStatement);
@@ -49,8 +60,6 @@ class DbInteractionsTest {
 
     @Test
     void executeAndLog_generatesKey() throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        ResultSet resultSet = mock(ResultSet.class);
         when(preparedStatement.executeUpdate()).thenReturn(1);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);

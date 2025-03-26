@@ -27,7 +27,7 @@ public class DataFrameService extends BaseService {
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) { // TODO: use constructor instead of InjectDependencies
         timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }

@@ -38,8 +38,8 @@ public class DataFrameService extends BaseService {
 
             connection = dbInteractions.getConnectionPool();
             String insertQueryStatement = timDbTables.buildInsertQueryStatement("data_frame",
-                    timDbTables.getDataFrameTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "data_frame_id" });
+                timDbTables.getDataFrameTable());
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"data_frame_id"});
             int fieldNum = 1;
 
             for (String col : timDbTables.getDataFrameTable()) {
@@ -70,13 +70,12 @@ public class DataFrameService extends BaseService {
                 } else if (col.equals("START_DATE_TIME")) {
                     if (dFrame.getStartDateTime() == null) {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
-                    }
-                    else {
+                    } else {
                         Timestamp time = null;
                         try {
                             TimeZone tz = TimeZone.getTimeZone("UTC");
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no
-                                                                                           // timezone offset
+                            // timezone offset
                             df.setTimeZone(tz);
                             Date dt = df.parse(dFrame.getStartDateTime());
                             time = new Timestamp(dt.getTime());
@@ -96,11 +95,13 @@ public class DataFrameService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }

@@ -67,12 +67,12 @@ public class TimService extends BaseService {
 
     @Autowired
     public void InjectDependencies(ActiveTimService _ats, TimDbTables _timDbTables,
-            SQLNullHandler _sqlNullHandler, PathService _pathService, RegionService _regionService,
-            DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
-            ItisCodeService _itisCodesService, TimRsuService _timRsuService,
-            DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
-            NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService,
-            PathNodeLLService _pathNodeLLService, NodeLLService _nodeLLService) {
+                                   SQLNullHandler _sqlNullHandler, PathService _pathService, RegionService _regionService,
+                                   DataFrameService _dataFrameService, RsuService _rsuService, TimTypeService _tts,
+                                   ItisCodeService _itisCodesService, TimRsuService _timRsuService,
+                                   DataFrameItisCodeService _dataFrameItisCodeService, PathNodeXYService _pathNodeXYService,
+                                   NodeXYService _nodeXYService, Utility _utility, ActiveTimHoldingService _athService,
+                                   PathNodeLLService _pathNodeLLService, NodeLLService _nodeLLService) {
         activeTimService = _ats;
         timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
@@ -111,7 +111,7 @@ public class TimService extends BaseService {
             }
 
             Long timId = AddTim(odeData.getMetadata(), rxMsgDet, getTim((OdeTimPayload) odeData.getPayload()),
-                    recType, logFileName, secResCode, null, null);
+                recType, logFileName, secResCode, null, null);
 
             // return if TIM is not inserted
             if (timId == null) {
@@ -136,8 +136,8 @@ public class TimService extends BaseService {
             if (activeTim != null && activeTim.getRsuTarget() != null) {
                 // save TIM RSU in DB
                 WydotRsu rsu = rsuService.getRsus().stream()
-                        .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
-                        .orElse(null);
+                    .filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget())).findFirst()
+                    .orElse(null);
                 if (rsu != null) {
                     timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
                 }
@@ -160,28 +160,35 @@ public class TimService extends BaseService {
         ActiveTim activeTim;
 
         OdeTimPayload payload = (OdeTimPayload) odeData.getPayload();
-        if (payload == null)
+        if (payload == null) {
             return;
+        }
         OdeTravelerInformationMessage tim = getTim(payload);
-        if (tim == null)
+        if (tim == null) {
             return;
+        }
         DataFrame[] dframes = tim.getDataframes();
-        if (dframes == null || dframes.length == 0)
+        if (dframes == null || dframes.length == 0) {
             return;
+        }
         OdeTravelerInformationMessage.DataFrame.Region[] regions = dframes[0].getRegions();
-        if (regions == null || regions.length == 0)
+        if (regions == null || regions.length == 0) {
             return;
+        }
         String firstRegionName = regions[0].getName();
-        if (StringUtils.isEmpty(firstRegionName) || StringUtils.isBlank(firstRegionName))
+        if (StringUtils.isEmpty(firstRegionName) || StringUtils.isBlank(firstRegionName)) {
             return;
+        }
         OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
-        if (metaData == null)
+        if (metaData == null) {
             return;
+        }
 
         // get information from the region name, first check splitname length
         activeTim = setActiveTimByRegionName(firstRegionName);
-        if (activeTim == null)
+        if (activeTim == null) {
             return;
+        }
 
         String satRecordId = activeTim.getSatRecordId();
 
@@ -204,8 +211,8 @@ public class TimService extends BaseService {
             } else {
                 // failed to insert new tim and failed to fetch existing, log and return
                 utility.logWithDate(
-                        "Failed to insert tim, and failed to fetch existing tim. No data inserted for OdeData: "
-                                + gson.toJson(odeData));
+                    "Failed to insert tim, and failed to fetch existing tim. No data inserted for OdeData: "
+                        + gson.toJson(odeData));
                 return;
             }
         } else {
@@ -221,13 +228,14 @@ public class TimService extends BaseService {
         // TODO : Change to loop through RSU array - doing one rsu for now
         RSU firstRsu = null;
         if (metaData.getRequest() != null && metaData.getRequest().getRsus() != null
-                && metaData.getRequest().getRsus().length > 0) {
+            && metaData.getRequest().getRsus().length > 0) {
             firstRsu = metaData.getRequest().getRsus()[0];
             activeTim.setRsuTarget(firstRsu.getRsuTarget());
         }
 
-        if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null)
+        if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null) {
             activeTim.setSatRecordId(metaData.getRequest().getSdw().getRecordId());
+        }
 
         // the ODE now parses all dataframes to find the most recent and sets it
         // to this new OdeTimStartDateTime. We'll take advantage.
@@ -237,7 +245,7 @@ public class TimService extends BaseService {
         if (StringUtils.isEmpty(stDate)) {
             stDate = dframes[0].getStartDateTime();
             utility.logWithDate(String.format(
-                    "addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
+                "addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
         }
         activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);
@@ -248,27 +256,27 @@ public class TimService extends BaseService {
         if (activeTim.getRsuTarget() != null && firstRsu != null) {
             // save TIM RSU in DB
             WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
-                    .findFirst().orElse(null);
+                .findFirst().orElse(null);
             if (rsu != null) {
                 timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
             }
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
-                    activeTim.getRsuTarget());
+                activeTim.getRsuTarget());
 
             if (ath == null) {
                 utility.logWithDate(String.format(
-                        "Could not find active_tim_holding for client_id '%s', direction '%s', rsu_target '%s'",
-                        activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget()));
+                    "Could not find active_tim_holding for client_id '%s', direction '%s', rsu_target '%s'",
+                    activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget()));
             }
         } else {
             // SDX tim, fetch holding
             ath = activeTimHoldingService.getSdxActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
-                    activeTim.getSatRecordId());
+                activeTim.getSatRecordId());
 
             if (ath == null) {
                 utility.logWithDate(String.format(
-                        "Could not find active_tim_holding for client_id '%s', direction '%s', sat_record_id '%s'",
-                        activeTim.getClientId(), activeTim.getDirection(), activeTim.getSatRecordId()));
+                    "Could not find active_tim_holding for client_id '%s', direction '%s', sat_record_id '%s'",
+                    activeTim.getClientId(), activeTim.getDirection(), activeTim.getSatRecordId()));
             }
         }
 
@@ -300,10 +308,13 @@ public class TimService extends BaseService {
 
             // if RSU TIM
             if (activeTim.getRsuTarget() != null) // look for active RSU tim that matches incoming TIM
+            {
                 activeTimDb = activeTimService.getActiveRsuTim(activeTim.getClientId(), activeTim.getDirection(),
-                        activeTim.getRsuTarget());
-            else // else look for active SAT tim that matches incoming TIM
+                    activeTim.getRsuTarget());
+            } else // else look for active SAT tim that matches incoming TIM
+            {
                 activeTimDb = activeTimService.getActiveSatTim(activeTim.getSatRecordId(), activeTim.getDirection());
+            }
 
             // if there is no active TIM, insert new one
             if (activeTimDb == null) {
@@ -343,7 +354,7 @@ public class TimService extends BaseService {
         try {
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection
-                    .prepareStatement("select tim_id from tim where packet_id = ? and time_stamp = ?");
+                .prepareStatement("select tim_id from tim where packet_id = ? and time_stamp = ?");
             preparedStatement.setString(1, packetId);
             preparedStatement.setTimestamp(2, timeStamp);
 
@@ -356,11 +367,13 @@ public class TimService extends BaseService {
             e.printStackTrace();
         } finally {
             try {
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
 
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -369,49 +382,50 @@ public class TimService extends BaseService {
     }
 
     public Long AddTim(OdeMsgMetadata odeTimMetadata, ReceivedMessageDetails receivedMessageDetails,
-            OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName,
-            SecurityResultCode securityResultCode, String satRecordId, String regionName) {
+                       OdeTravelerInformationMessage j2735TravelerInformationMessage, RecordType recordType, String logFileName,
+                       SecurityResultCode securityResultCode, String satRecordId, String regionName) {
         PreparedStatement preparedStatement = null;
         Connection connection = null;
 
         try {
 
             String insertQueryStatement = timDbTables.buildInsertQueryStatement("tim",
-                    timDbTables.getTimTable());
+                timDbTables.getTimTable());
             connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "tim_id" });
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"tim_id"});
             int fieldNum = 1;
 
             for (String col : timDbTables.getTimTable()) {
                 // default to null
                 preparedStatement.setString(fieldNum, null);
                 if (j2735TravelerInformationMessage != null) {
-                    if (col.equals("MSG_CNT"))
+                    if (col.equals("MSG_CNT")) {
                         sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-                                j2735TravelerInformationMessage.getMsgCnt());
-                    else if (col.equals("PACKET_ID"))
+                            j2735TravelerInformationMessage.getMsgCnt());
+                    } else if (col.equals("PACKET_ID")) {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                j2735TravelerInformationMessage.getPacketID());
-                    else if (col.equals("URL_B"))
+                            j2735TravelerInformationMessage.getPacketID());
+                    } else if (col.equals("URL_B")) {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                j2735TravelerInformationMessage.getUrlB());
-                    else if (col.equals("TIME_STAMP")) {
+                            j2735TravelerInformationMessage.getUrlB());
+                    } else if (col.equals("TIME_STAMP")) {
                         String timeStamp = j2735TravelerInformationMessage.getTimeStamp();
                         java.sql.Timestamp ts = null;
                         if (StringUtils.isNotEmpty(timeStamp) && StringUtils.isNotBlank(timeStamp)) {
                             ts = java.sql.Timestamp
-                                    .valueOf(LocalDateTime.parse(timeStamp, DateTimeFormatter.ISO_DATE_TIME));
+                                .valueOf(LocalDateTime.parse(timeStamp, DateTimeFormatter.ISO_DATE_TIME));
                         }
                         sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
                     }
                 }
                 if (odeTimMetadata != null) {
                     if (col.equals("RECORD_GENERATED_BY")) {
-                        if (odeTimMetadata.getRecordGeneratedBy() != null)
+                        if (odeTimMetadata.getRecordGeneratedBy() != null) {
                             sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    odeTimMetadata.getRecordGeneratedBy().toString());
-                        else
+                                odeTimMetadata.getRecordGeneratedBy().toString());
+                        } else {
                             preparedStatement.setString(fieldNum, null);
+                        }
                     } else if (col.equals("RECORD_GENERATED_AT")) {
                         if (odeTimMetadata.getRecordGeneratedAt() != null) {
                             java.util.Date recordGeneratedAtDate = utility.convertDate(odeTimMetadata.getRecordGeneratedAt());
@@ -423,10 +437,11 @@ public class TimService extends BaseService {
                     } else if (col.equals("SCHEMA_VERSION")) {
                         sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, odeTimMetadata.getSchemaVersion());
                     } else if (col.equals("SANITIZED")) {
-                        if (odeTimMetadata.isSanitized())
+                        if (odeTimMetadata.isSanitized()) {
                             preparedStatement.setInt(fieldNum, 1);
-                        else
+                        } else {
                             preparedStatement.setInt(fieldNum, 0);
+                        }
                     } else if (col.equals("PAYLOAD_TYPE")) {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, odeTimMetadata.getPayloadType());
                     } else if (col.equals("ODE_RECEIVED_AT")) {
@@ -440,68 +455,66 @@ public class TimService extends BaseService {
                     }
 
                     if (odeTimMetadata.getSerialId() != null) {
-                        if (col.equals("SERIAL_ID_STREAM_ID"))
+                        if (col.equals("SERIAL_ID_STREAM_ID")) {
                             sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                    odeTimMetadata.getSerialId().getStreamId());
-                        else if (col.equals("SERIAL_ID_BUNDLE_SIZE"))
+                                odeTimMetadata.getSerialId().getStreamId());
+                        } else if (col.equals("SERIAL_ID_BUNDLE_SIZE")) {
                             sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-                                    odeTimMetadata.getSerialId().getBundleSize());
-                        else if (col.equals("SERIAL_ID_BUNDLE_ID"))
+                                odeTimMetadata.getSerialId().getBundleSize());
+                        } else if (col.equals("SERIAL_ID_BUNDLE_ID")) {
                             sqlNullHandler.setLongOrNull(preparedStatement, fieldNum,
-                                    odeTimMetadata.getSerialId().getBundleId());
-                        else if (col.equals("SERIAL_ID_RECORD_ID"))
+                                odeTimMetadata.getSerialId().getBundleId());
+                        } else if (col.equals("SERIAL_ID_RECORD_ID")) {
                             sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum,
-                                    odeTimMetadata.getSerialId().getRecordId());
-                        else if (col.equals("SERIAL_ID_SERIAL_NUMBER"))
+                                odeTimMetadata.getSerialId().getRecordId());
+                        } else if (col.equals("SERIAL_ID_SERIAL_NUMBER")) {
                             sqlNullHandler.setLongOrNull(preparedStatement, fieldNum,
-                                    odeTimMetadata.getSerialId().getSerialNumber());
+                                odeTimMetadata.getSerialId().getSerialNumber());
+                        }
                     }
                 }
                 if (receivedMessageDetails != null) {
                     if (receivedMessageDetails.getLocationData() != null) {
                         if (col.equals("RMD_LD_ELEVATION")) {
                             sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
-                                    Double.parseDouble(receivedMessageDetails.getLocationData().getElevation()));
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getElevation()));
                         } else if (col.equals("RMD_LD_HEADING")) {
                             sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
-                                    Double.parseDouble(receivedMessageDetails.getLocationData().getHeading()));
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getHeading()));
                         } else if (col.equals("RMD_LD_LATITUDE")) {
                             sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
-                                    Double.parseDouble(receivedMessageDetails.getLocationData().getLatitude()));
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getLatitude()));
                         } else if (col.equals("RMD_LD_LONGITUDE")) {
                             sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
-                                    Double.parseDouble(receivedMessageDetails.getLocationData().getLongitude()));
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getLongitude()));
                         } else if (col.equals("RMD_LD_SPEED")) {
                             sqlNullHandler.setDoubleOrNull(preparedStatement, fieldNum,
-                                    Double.parseDouble(receivedMessageDetails.getLocationData().getSpeed()));
+                                Double.parseDouble(receivedMessageDetails.getLocationData().getSpeed()));
                         }
-                    }
-                    else {
+                    } else {
                         // location data is null, set all to null (with correct type)
                         if (col.equals("RMD_LD_ELEVATION") || col.equals("RMD_LD_HEADING") || col.equals("RMD_LD_LATITUDE")
-                                || col.equals("RMD_LD_LONGITUDE") || col.equals("RMD_LD_SPEED")) {
+                            || col.equals("RMD_LD_LONGITUDE") || col.equals("RMD_LD_SPEED")) {
                             preparedStatement.setNull(fieldNum, java.sql.Types.NUMERIC);
                         }
                     }
                     if (col.equals("RMD_RX_SOURCE") && receivedMessageDetails.getRxSource() != null) {
                         sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                receivedMessageDetails.getRxSource().toString());
+                            receivedMessageDetails.getRxSource().toString());
                     } else if (col.equals("SECURITY_RESULT_CODE")) {
                         SecurityResultCodeType securityResultCodeType = GetSecurityResultCodeTypes().stream()
-                                .filter(x -> x.getSecurityResultCodeType().equals(securityResultCode.toString()))
-                                .findFirst().orElse(null);
+                            .filter(x -> x.getSecurityResultCodeType().equals(securityResultCode.toString()))
+                            .findFirst().orElse(null);
                         if (securityResultCodeType != null) {
                             preparedStatement.setInt(fieldNum, securityResultCodeType.getSecurityResultCodeTypeId());
-                        }
-                        else {
+                        } else {
                             preparedStatement.setNull(fieldNum, java.sql.Types.INTEGER);
                         }
                     }
-                }
-                else {
+                } else {
                     // message details are null, set all to null (with correct type)
                     if (col.equals("RMD_LD_ELEVATION") || col.equals("RMD_LD_HEADING") || col.equals("RMD_LD_LATITUDE")
-                            || col.equals("RMD_LD_LONGITUDE") || col.equals("RMD_LD_SPEED")) {
+                        || col.equals("RMD_LD_LONGITUDE") || col.equals("RMD_LD_SPEED")) {
                         preparedStatement.setNull(fieldNum, java.sql.Types.NUMERIC);
                     } else if (col.equals("RMD_RX_SOURCE")) {
                         preparedStatement.setString(fieldNum, null);
@@ -510,11 +523,11 @@ public class TimService extends BaseService {
                     }
                 }
 
-                if (col.equals("SAT_RECORD_ID"))
+                if (col.equals("SAT_RECORD_ID")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, satRecordId);
-                else if (col.equals("TIM_NAME"))
+                } else if (col.equals("TIM_NAME")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, regionName);
-                else if (col.equals("LOG_FILE_NAME")) {
+                } else if (col.equals("LOG_FILE_NAME")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, logFileName);
                 } else if (col.equals("RECORD_TYPE") && recordType != null) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, recordType.toString());
@@ -529,11 +542,13 @@ public class TimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -543,8 +558,8 @@ public class TimService extends BaseService {
 
     /**
      * Adds regions to the database for a given DataFrame.
-     * 
-     * @param dataFrame The DataFrame containing the regions to be added.
+     *
+     * @param dataFrame   The DataFrame containing the regions to be added.
      * @param dataFrameId The ID of the DataFrame.
      */
     public void addRegions(DataFrame dataFrame, Long dataFrameId) {
@@ -572,10 +587,10 @@ public class TimService extends BaseService {
                 regionService.AddRegion(dataFrameId, null, region);
             } else {
                 utility.logWithDate(
-                        "addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
-                                + dataFrameId + ")");
+                    "addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: "
+                        + dataFrameId + ")");
             }
-        }  
+        }
     }
 
     public void addDataFrameItis(DataFrame dataFrame, Long dataFrameId) {
@@ -592,8 +607,7 @@ public class TimService extends BaseService {
                 String itisCodeId = getItisCodeId(timItisCode);
                 if (itisCodeId != null) {
                     dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
-                }
-                else {
+                } else {
                     utility.logWithDate("Could not find corresponding itis code it for " + timItisCode);
                 }
             } else {
@@ -616,11 +630,13 @@ public class TimService extends BaseService {
             return false;
         } finally {
             try {
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
 
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -640,8 +656,7 @@ public class TimService extends BaseService {
 
         if (elements.route != null) {
             activeTim.setRoute(elements.route);
-        }
-        else {
+        } else {
             return activeTim;
         }
         if (elements.rsuOrSat != null) {
@@ -654,8 +669,9 @@ public class TimService extends BaseService {
                     activeTim.setRsuTarget(hyphen_array[1]);
                 }
             }
-        } else
+        } else {
             return activeTim;
+        }
         if (elements.timType != null) {
             TimType timType = getTimType(elements.timType);
             if (timType != null) {
@@ -668,8 +684,7 @@ public class TimService extends BaseService {
 
         if (elements.timId != null) {
             activeTim.setClientId(elements.timId);
-        }
-        else {
+        } else {
             return activeTim;
         }
 
@@ -688,7 +703,7 @@ public class TimService extends BaseService {
     public TimType getTimType(String timTypeName) {
 
         TimType timType = timTypeService.getTimTypes().stream().filter(x -> x.getType().equals(timTypeName)).findFirst()
-                .orElse(null);
+            .orElse(null);
 
         return timType;
     }
@@ -699,9 +714,10 @@ public class TimService extends BaseService {
 
         try {
             ItisCode itisCode = itisCodeService.selectAllItisCodes().stream()
-                    .filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst().orElse(null);
-            if (itisCode != null)
+                .filter(x -> x.getItisCode().equals(Integer.parseInt(item))).findFirst().orElse(null);
+            if (itisCode != null) {
                 itisCodeId = itisCode.getItisCodeId().toString();
+            }
         } catch (Exception ex) {
             // on rare occasions we see an unparsable Integer
             utility.logWithDate("Failed to parse ITIS integer(" + item + "): " + ex.getMessage());

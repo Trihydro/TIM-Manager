@@ -42,22 +42,22 @@ public class ActiveTimService extends BaseService {
 
         try {
             String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
-                    timDbTables.getActiveTimTable());
+                timDbTables.getActiveTimTable());
 
             // get connection
             connection = dbInteractions.getConnectionPool();
 
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "active_tim_id" });
+            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"active_tim_id"});
             int fieldNum = 1;
 
             for (String col : timDbTables.getActiveTimTable()) {
-                if (col.equals("TIM_ID"))
+                if (col.equals("TIM_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimId());
-                else if (col.equals("DIRECTION"))
+                } else if (col.equals("DIRECTION")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
-                else if (col.equals("TIM_START")) {
+                } else if (col.equals("TIM_START")) {
                     utility.logWithDate(
-                            String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
+                        String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
                     java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
                     Timestamp ts = new Timestamp(tim_start_date.getTime());
                     sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
@@ -66,8 +66,9 @@ public class ActiveTimService extends BaseService {
                         java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
                         Timestamp ts = new Timestamp(tim_end_date.getTime());
                         sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
-                    } else
+                    } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
+                    }
                 } else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTim.getExpirationDateTime() != null) {
                         java.util.Date tim_exp_date = utility.convertDate(activeTim.getExpirationDateTime());
@@ -76,35 +77,39 @@ public class ActiveTimService extends BaseService {
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
-                } else if (col.equals("TIM_TYPE_ID"))
+                } else if (col.equals("TIM_TYPE_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, activeTim.getTimTypeId());
-                else if (col.equals("ROUTE"))
+                } else if (col.equals("ROUTE")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getRoute());
-                else if (col.equals("CLIENT_ID"))
+                } else if (col.equals("CLIENT_ID")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getClientId());
-                else if (col.equals("SAT_RECORD_ID"))
+                } else if (col.equals("SAT_RECORD_ID")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getSatRecordId());
-                else if (col.equals("PK"))
+                } else if (col.equals("PK")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getPk());
-                else if (col.equals("START_LATITUDE")) {
+                } else if (col.equals("START_LATITUDE")) {
                     BigDecimal start_lat = null;
-                    if (activeTim.getStartPoint() != null)
+                    if (activeTim.getStartPoint() != null) {
                         start_lat = activeTim.getStartPoint().getLatitude();
+                    }
                     sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, start_lat);
                 } else if (col.equals("START_LONGITUDE")) {
                     BigDecimal start_lon = null;
-                    if (activeTim.getStartPoint() != null)
+                    if (activeTim.getStartPoint() != null) {
                         start_lon = activeTim.getStartPoint().getLongitude();
+                    }
                     sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, start_lon);
                 } else if (col.equals("END_LATITUDE")) {
                     BigDecimal end_lat = null;
-                    if (activeTim.getEndPoint() != null)
+                    if (activeTim.getEndPoint() != null) {
                         end_lat = activeTim.getEndPoint().getLatitude();
+                    }
                     sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lat);
                 } else if (col.equals("END_LONGITUDE")) {
                     BigDecimal end_lon = null;
-                    if (activeTim.getEndPoint() != null)
+                    if (activeTim.getEndPoint() != null) {
                         end_lon = activeTim.getEndPoint().getLongitude();
+                    }
                     sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, end_lon);
                 } else if (col.equals("PROJECT_KEY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTim.getProjectKey());
@@ -120,11 +125,13 @@ public class ActiveTimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -166,9 +173,9 @@ public class ActiveTimService extends BaseService {
             Timestamp ts = new Timestamp(tim_start_date.getTime());
             sqlNullHandler.setTimestampOrNull(preparedStatement, 6, ts);
 
-            if (activeTim.getEndDateTime() == null)
+            if (activeTim.getEndDateTime() == null) {
                 preparedStatement.setNull(7, java.sql.Types.TIMESTAMP);
-            else {
+            } else {
                 java.util.Date tim_end_date = utility.convertDate(activeTim.getEndDateTime());
                 Timestamp ts2 = new Timestamp(tim_end_date.getTime());
                 sqlNullHandler.setTimestampOrNull(preparedStatement, 7, ts2);
@@ -184,11 +191,13 @@ public class ActiveTimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -247,14 +256,17 @@ public class ActiveTimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -283,7 +295,7 @@ public class ActiveTimService extends BaseService {
             query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
             query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
             query += " where sat_record_id is null and ipv4_address = '" + ipv4Address + "' and client_id = '"
-                    + clientId + "' and atim.direction = '" + direction + "'";
+                + clientId + "' and atim.direction = '" + direction + "'";
 
             rs = statement.executeQuery(query);
 
@@ -322,14 +334,17 @@ public class ActiveTimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -348,7 +363,7 @@ public class ActiveTimService extends BaseService {
             connection = dbInteractions.getConnectionPool();
             statement = connection.createStatement();
             String query = "SELECT ACTIVE_TIM.* FROM ACTIVE_TIM JOIN TIM ON ACTIVE_TIM.TIM_ID = TIM.TIM_ID "
-                    + "WHERE TIM.PACKET_ID = '" + packetID + "'";
+                + "WHERE TIM.PACKET_ID = '" + packetID + "'";
 
             rs = statement.executeQuery(query);
 
@@ -387,14 +402,17 @@ public class ActiveTimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -423,7 +441,7 @@ public class ActiveTimService extends BaseService {
             Date dte = sdf.parse(expDate);
             Timestamp ts = new Timestamp(dte.getTime());
             preparedStatement.setTimestamp(1, ts);// expDate comes in as MST from previously called function
-                                                    // (GetMinExpiration)
+            // (GetMinExpiration)
             preparedStatement.setString(2, packetID);
 
             // execute update statement
@@ -434,17 +452,19 @@ public class ActiveTimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         utility.logWithDate(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
-                packetID, expDate, success));
+            packetID, expDate, success));
         return success;
     }
 
@@ -465,14 +485,14 @@ public class ActiveTimService extends BaseService {
             statement = connection.createStatement();
             String targetFormat = "DD-MON-YYYY HH12.MI.SS a";
             String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
-                    translateIso8601ToTimestampFormat(expDate), targetFormat);
+                translateIso8601ToTimestampFormat(expDate), targetFormat);
 
             String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
             minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
             minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
 
             String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
-                    selectTimestamp, minExpDate, selectTimestamp);
+                selectTimestamp, minExpDate, selectTimestamp);
             rs = statement.executeQuery(query);
             while (rs.next()) {
                 var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);
@@ -484,20 +504,23 @@ public class ActiveTimService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
-                packetID, expDate, minStart));
+            packetID, expDate, minStart));
         return minStart;
     }
 

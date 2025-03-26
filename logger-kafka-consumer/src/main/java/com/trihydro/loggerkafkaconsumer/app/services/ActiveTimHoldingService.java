@@ -41,14 +41,17 @@ public class ActiveTimHoldingService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -84,14 +87,17 @@ public class ActiveTimHoldingService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -120,14 +126,17 @@ public class ActiveTimHoldingService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
                 // close result set
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -146,9 +155,9 @@ public class ActiveTimHoldingService extends BaseService {
             activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
             activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
             activeTimHolding.setStartPoint(
-                    new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
             activeTimHolding
-                    .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
 
             int projectKey = rs.getInt("PROJECT_KEY");
             if (!rs.wasNull()) {
@@ -187,11 +196,13 @@ public class ActiveTimHoldingService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -209,7 +220,7 @@ public class ActiveTimHoldingService extends BaseService {
             connection = dbInteractions.getConnectionPool();
             preparedStatement = connection.prepareStatement(updateStatement);
             preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
-                                                    // (GetMinExpiration)
+            // (GetMinExpiration)
             preparedStatement.setObject(2, packetID);
 
             // execute update statement
@@ -220,18 +231,20 @@ public class ActiveTimHoldingService extends BaseService {
         } finally {
             try {
                 // close prepared statement
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
+                }
                 // return connection back to pool
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         utility.logWithDate(String.format(
-                "Called ActiveTimHolding UpdateTimExpiration with packetID: %s, expDate: %s. Successful: %s", packetID,
-                expDate, success));
+            "Called ActiveTimHolding UpdateTimExpiration with packetID: %s, expDate: %s. Successful: %s", packetID,
+            expDate, success));
         return success;
     }
 

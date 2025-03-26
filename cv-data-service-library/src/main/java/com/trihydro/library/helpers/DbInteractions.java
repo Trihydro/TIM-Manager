@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 public class DbInteractions {
     private static HikariDataSource dataSource;
 
-    protected final DbInteractionsProps dbConfig;
-    protected final EmailHelper emailHelper;
+    private final DbInteractionsProps dbConfig;
+    private final EmailHelper emailHelper;
 
     @Autowired
     public DbInteractions(DbInteractionsProps props, EmailHelper emailHelper) {

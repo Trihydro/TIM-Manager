@@ -48,7 +48,8 @@ public class RemoveExpiredActiveTimsTest {
         List<ActiveTim> expiredTims = new ArrayList<ActiveTim>();
         expiredTims.add(new ActiveTim());
         expiredTims.add(new ActiveTim());
-        when(mockActiveTimService.getExpiredActiveTims()).thenReturn(expiredTims);
+        when(mockActiveTimService.getExpiredActiveTims(500)).thenReturn(expiredTims).thenReturn(
+            new ArrayList<>());
     }
 
     @Test

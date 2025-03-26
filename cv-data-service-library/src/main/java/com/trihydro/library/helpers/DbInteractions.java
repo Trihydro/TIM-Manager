@@ -20,13 +20,13 @@ import org.springframework.stereotype.Component;
 public class DbInteractions {
     private static HikariDataSource dataSource;
 
-    protected DbInteractionsProps dbConfig;
-    protected EmailHelper emailHelper;
+    protected final DbInteractionsProps dbConfig;
+    protected final EmailHelper emailHelper;
 
     @Autowired
-    public void InjectDependencies(DbInteractionsProps props, EmailHelper _emailHelper) {
-        dbConfig = props;
-        emailHelper = _emailHelper;
+    public DbInteractions(DbInteractionsProps props, EmailHelper emailHelper) {
+        this.dbConfig = props;
+        this.emailHelper = emailHelper;
         log.info("A new DbInteractions instance has been created.");
         validateDbConfig();
     }

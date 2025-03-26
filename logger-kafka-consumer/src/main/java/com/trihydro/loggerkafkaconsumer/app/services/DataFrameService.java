@@ -33,15 +33,13 @@ public class DataFrameService extends BaseService {
     }
 
     public Long AddDataFrame(DataFrame dFrame, Long timId) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("data_frame",
+            timDbTables.getDataFrameTable());
 
-        try {
-
-            connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("data_frame",
-                timDbTables.getDataFrameTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"data_frame_id"});
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"data_frame_id"});
+        ) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getDataFrameTable()) {
@@ -94,19 +92,6 @@ public class DataFrameService extends BaseService {
             return dataFrameId;
         } catch (SQLException e) {
             log.error("Error adding data frame", e);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing connection", e);
-            }
         }
         return Long.valueOf(0);
     }

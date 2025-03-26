@@ -39,17 +39,13 @@ public class ActiveTimService extends BaseService {
 
     public Long insertActiveTim(ActiveTim activeTim) {
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
+            timDbTables.getActiveTimTable());
 
-        try {
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim",
-                timDbTables.getActiveTimTable());
-
-            // get connection
-            connection = dbInteractions.getConnectionPool();
-
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"active_tim_id"});
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"active_tim_id"});
+        ) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getActiveTimTable()) {
@@ -123,19 +119,6 @@ public class ActiveTimService extends BaseService {
             return activeTimId;
         } catch (SQLException e) {
             log.error("Error inserting active_tim", e);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing prepared statement or connection", e);
-            }
         }
 
         return Long.valueOf(0);
@@ -146,8 +129,6 @@ public class ActiveTimService extends BaseService {
         boolean activeTimIdResult = false;
         String updateTableSQL = "UPDATE ACTIVE_TIM SET TIM_ID = ?, START_LATITUDE = ?, START_LONGITUDE = ?, END_LATITUDE = ?,";
         updateTableSQL += "END_LONGITUDE = ?, TIM_START = ?, TIM_END = ?, PK = ?, PROJECT_KEY = ? WHERE ACTIVE_TIM_ID = ?";
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
 
         BigDecimal start_lat = null;
         BigDecimal start_lon = null;
@@ -161,9 +142,10 @@ public class ActiveTimService extends BaseService {
             end_lat = activeTim.getEndPoint().getLatitude();
             end_lon = activeTim.getEndPoint().getLongitude();
         }
-        try {
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement(updateTableSQL);
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(updateTableSQL);
+        ) {
             sqlNullHandler.setLongOrNull(preparedStatement, 1, activeTim.getTimId());
             sqlNullHandler.setBigDecimalOrNull(preparedStatement, 2, start_lat);
             sqlNullHandler.setBigDecimalOrNull(preparedStatement, 3, start_lon);
@@ -189,19 +171,6 @@ public class ActiveTimService extends BaseService {
             log.info("------ Updated active_tim with id: {} --------------", activeTim.getActiveTimId());
         } catch (SQLException e) {
             log.error("Error updating active_tim with id: {}", activeTim.getActiveTimId(), e);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing prepared statement or connection", e);
-            }
         }
 
         return activeTimIdResult;
@@ -210,18 +179,15 @@ public class ActiveTimService extends BaseService {
     public ActiveTim getActiveSatTim(String satRecordId, String direction) {
 
         ActiveTim activeTim = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "select * from active_tim";
-            query += " where sat_record_id = '" + satRecordId + "' and active_tim.direction = '" + direction + "'";
+        String query = "select * from active_tim";
+        query += " where sat_record_id = '" + satRecordId + "' and active_tim.direction = '" + direction + "'";
 
-            rs = statement.executeQuery(query);
-
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+        ) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTim = new ActiveTim();
@@ -254,23 +220,6 @@ public class ActiveTimService extends BaseService {
             }
         } catch (SQLException e) {
             log.error("Error getting active_sat_tim with satRecordId: {}, direction: {}", satRecordId, direction, e);
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null) {
-                    statement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-                // close result set
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing prepared statement, connection, or result set", e);
-            }
         }
 
         return activeTim;
@@ -279,27 +228,23 @@ public class ActiveTimService extends BaseService {
     public ActiveTim getActiveRsuTim(String clientId, String direction, String ipv4Address) {
 
         ActiveTim activeTim = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            //
-            String query = "select distinct atim.ACTIVE_TIM_ID, atim.TIM_ID, atim.SAT_RECORD_ID,";
-            query += " atim.CLIENT_ID, atim.DIRECTION, atim.TIM_END, atim.TIM_START,";
-            query += " atim.EXPIRATION_DATE, atim.ROUTE, atim.PK,";
-            query += " atim.START_LATITUDE, atim.START_LONGITUDE, atim.END_LATITUDE, atim.END_LONGITUDE";
-            query += " from active_tim atim";
-            query += " inner join tim_rsu on atim.tim_id = tim_rsu.tim_id";
-            query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
-            query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
-            query += " where sat_record_id is null and ipv4_address = '" + ipv4Address + "' and client_id = '"
-                + clientId + "' and atim.direction = '" + direction + "'";
+        String query = "select distinct atim.ACTIVE_TIM_ID, atim.TIM_ID, atim.SAT_RECORD_ID,";
+        query += " atim.CLIENT_ID, atim.DIRECTION, atim.TIM_END, atim.TIM_START,";
+        query += " atim.EXPIRATION_DATE, atim.ROUTE, atim.PK,";
+        query += " atim.START_LATITUDE, atim.START_LONGITUDE, atim.END_LATITUDE, atim.END_LONGITUDE";
+        query += " from active_tim atim";
+        query += " inner join tim_rsu on atim.tim_id = tim_rsu.tim_id";
+        query += " inner join rsu on tim_rsu.rsu_id = rsu.rsu_id";
+        query += " inner join rsu_view on rsu.deviceid = rsu_view.deviceid";
+        query += " where sat_record_id is null and ipv4_address = '" + ipv4Address + "' and client_id = '"
+            + clientId + "' and atim.direction = '" + direction + "'";
 
-            rs = statement.executeQuery(query);
-
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+        ) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTim = new ActiveTim();
@@ -333,23 +278,6 @@ public class ActiveTimService extends BaseService {
         } catch (SQLException e) {
             log.error("Error getting active_rsu_tim with clientId: {}, direction: {}, ipv4Address: {}", clientId,
                 direction, ipv4Address, e);
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null) {
-                    statement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-                // close result set
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing prepared statement, connection, or result set", e);
-            }
         }
 
         return activeTim;
@@ -357,18 +285,15 @@ public class ActiveTimService extends BaseService {
 
     public ActiveTim getActiveTimByPacketId(String packetID) {
         ActiveTim activeTim = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "SELECT ACTIVE_TIM.* FROM ACTIVE_TIM JOIN TIM ON ACTIVE_TIM.TIM_ID = TIM.TIM_ID "
-                + "WHERE TIM.PACKET_ID = '" + packetID + "'";
+        String query = "SELECT ACTIVE_TIM.* FROM ACTIVE_TIM JOIN TIM ON ACTIVE_TIM.TIM_ID = TIM.TIM_ID "
+            + "WHERE TIM.PACKET_ID = '" + packetID + "'";
 
-            rs = statement.executeQuery(query);
-
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+        ) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTim = new ActiveTim();
@@ -401,32 +326,13 @@ public class ActiveTimService extends BaseService {
             }
         } catch (SQLException e) {
             log.error("Error getting active_tim by packetId: {}", packetID, e);
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null) {
-                    statement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-                // close result set
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing prepared statement, connection, or result set", e);
-            }
         }
 
         return activeTim;
     }
 
     public boolean updateActiveTimExpiration(String packetID, String expDate) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        boolean success = false;
+        boolean success;
 
         String query = "SELECT ACTIVE_TIM_ID FROM ACTIVE_TIM atim";
         query += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
@@ -436,9 +342,10 @@ public class ActiveTimService extends BaseService {
         updateStatement += query;
         updateStatement += ")";
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement(updateStatement);
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(updateStatement);
+        ) {
             DateFormat sdf = new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a");
             Date dte = sdf.parse(expDate);
             Timestamp ts = new Timestamp(dte.getTime());
@@ -451,50 +358,35 @@ public class ActiveTimService extends BaseService {
         } catch (Exception e) {
             log.error("Error updating active_tim expiration date with packetID: {}, expDate: {}", packetID, expDate, e);
             return false;
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing prepared statement or connection", e);
-            }
         }
         log.info("Called UpdateExpiration with packetID: {}, expDate: {}. Successful: {}", packetID, expDate, success);
         return success;
     }
 
     public String getMinExpiration(String packetID, String expDate) throws ParseException {
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
+        String targetFormat = "DD-MON-YYYY HH12.MI.SS a";
+        String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
+            translateIso8601ToTimestampFormat(expDate), targetFormat);
+
+        String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
+        minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
+        minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
+
+        String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
+            selectTimestamp, minExpDate, selectTimestamp);
 
         String minStart = "";
 
-        try {
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+        ) {
             // Fetch the minimum of passed in expDate and database held
             // active_tim.expiration_date. To compare like values we convert the expDate
             // TO_TIMESTAMP. Without this it compares string length.
             // Also, there are some null values in the db. To get around these, we use the
             // coalesce function with the expDate passed in value.
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String targetFormat = "DD-MON-YYYY HH12.MI.SS a";
-            String selectTimestamp = String.format("SELECT TO_TIMESTAMP('%s', '%s')",
-                translateIso8601ToTimestampFormat(expDate), targetFormat);
-
-            String minExpDate = "SELECT MIN(EXPIRATION_DATE) FROM ACTIVE_TIM atim";
-            minExpDate += " INNER JOIN TIM ON atim.TIM_ID = TIM.TIM_ID";
-            minExpDate += " WHERE TIM.PACKET_ID = '" + packetID + "'";
-
-            String query = String.format("SELECT LEAST((%s), (COALESCE((%s),(%s)))) minStart",
-                selectTimestamp, minExpDate, selectTimestamp);
-            rs = statement.executeQuery(query);
             while (rs.next()) {
                 var tmpTs = rs.getTimestamp("MINSTART", UTCCalendar);
                 minStart = utility.timestampFormat.format(tmpTs);
@@ -502,23 +394,6 @@ public class ActiveTimService extends BaseService {
         } catch (SQLException e) {
             log.error("Error getting min expiration date with packetID: {}, expDate: {}", packetID, expDate, e);
             return null;
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null) {
-                    statement.close();
-                }
-                // return connection back to pool
-                if (connection != null) {
-                    connection.close();
-                }
-                // close result set
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing prepared statement, connection, or result set", e);
-            }
         }
         log.info("Called GetMinExpiration with packetID: {}, expDate: {}. Min start date: {}", packetID, expDate,
             minStart);

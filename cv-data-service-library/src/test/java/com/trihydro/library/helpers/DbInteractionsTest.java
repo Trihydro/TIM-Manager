@@ -47,6 +47,7 @@ class DbInteractionsTest {
         boolean result = uut.updateOrDelete(preparedStatement);
 
         assertTrue(result);
+        verify(preparedStatement, times(1)).executeUpdate();
     }
 
     @Test
@@ -56,6 +57,7 @@ class DbInteractionsTest {
         boolean result = uut.deleteWithPossibleZero(preparedStatement);
 
         assertTrue(result);
+        verify(preparedStatement, times(1)).executeUpdate();
     }
 
     @Test
@@ -69,5 +71,8 @@ class DbInteractionsTest {
 
         assertNotNull(id);
         assertEquals(1L, id);
+        verify(preparedStatement, times(1)).executeUpdate();
+        verify(preparedStatement, times(1)).getGeneratedKeys();
+        verify(resultSet, times(1)).next();
     }
 }

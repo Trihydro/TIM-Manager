@@ -32,7 +32,7 @@ public class ActiveTimService extends BaseService {
     private final Calendar UTCCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     @Autowired
-    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) { // TODO: use constructor instead of InjectDependencies
         timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }

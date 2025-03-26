@@ -88,12 +88,11 @@ public class DataFrameService extends BaseService {
                 fieldNum++;
             }
 
-            Long dataFrameId = dbInteractions.executeAndLog(preparedStatement, "dataframe");
-            return dataFrameId;
+            return dbInteractions.executeAndLog(preparedStatement, "dataframe");
         } catch (SQLException e) {
             log.error("Error adding data frame", e);
         }
-        return Long.valueOf(0);
+        return 0L;
     }
 
 }

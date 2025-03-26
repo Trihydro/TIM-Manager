@@ -21,13 +21,11 @@ public class DbInteractions {
     private static HikariDataSource dataSource;
 
     protected DbInteractionsProps dbConfig;
-    protected Utility utility;
     protected EmailHelper emailHelper;
 
     @Autowired
-    public void InjectDependencies(DbInteractionsProps props, Utility _utility, EmailHelper _emailHelper) {
+    public void InjectDependencies(DbInteractionsProps props, EmailHelper _emailHelper) {
         dbConfig = props;
-        utility = _utility;
         emailHelper = _emailHelper;
         log.info("A new DbInteractions instance has been created.");
         validateDbConfig();

@@ -3,9 +3,7 @@ package com.trihydro.library.helpers;
 import com.trihydro.library.model.DbInteractionsProps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,22 +13,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class DbInteractionsTest {
-
-    @Mock
-    private DbInteractionsProps dbConfig;
-
-    @Mock
-    private Utility utility;
-
-    @Mock
-    private EmailHelper emailHelper;
-
-    @InjectMocks
-    private DbInteractions dbInteractions;
+    private DbInteractions uut;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        DbInteractionsProps dbConfig = mock(DbInteractionsProps.class);
+        when(dbConfig.getDbUrl()).thenReturn("jdbc:postgresql://localhost:5432/test");
+        when(dbConfig.getDbUsername()).thenReturn("test");
+        when(dbConfig.getDbPassword()).thenReturn("test");
+        when(dbConfig.getMaximumPoolSize()).thenReturn(10);
+        when(dbConfig.getConnectionTimeout()).thenReturn(1000);
+        EmailHelper emailHelper = mock(EmailHelper.class);
+        uut = new DbInteractions(dbConfig, emailHelper);
     }
 
     @Test
@@ -38,7 +32,7 @@ class DbInteractionsTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        boolean result = dbInteractions.updateOrDelete(preparedStatement);
+        boolean result = uut.updateOrDelete(preparedStatement);
 
         assertTrue(result);
     }
@@ -48,7 +42,7 @@ class DbInteractionsTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        boolean result = dbInteractions.deleteWithPossibleZero(preparedStatement);
+        boolean result = uut.deleteWithPossibleZero(preparedStatement);
 
         assertTrue(result);
     }
@@ -62,7 +56,7 @@ class DbInteractionsTest {
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getLong(1)).thenReturn(1L);
 
-        Long id = dbInteractions.executeAndLog(preparedStatement, "type");
+        Long id = uut.executeAndLog(preparedStatement, "type");
 
         assertNotNull(id);
         assertEquals(1L, id);

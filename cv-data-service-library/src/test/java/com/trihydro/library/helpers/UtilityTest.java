@@ -254,10 +254,82 @@ public class UtilityTest {
     }
 
     @Test
-    public void calculateAnchorCoordinate_identicalPoints() {
+    public void calculateAnchorCoordinate_identicalPoints_zero() {
         // Arrange
         BigDecimal lat = BigDecimal.valueOf(0);
         BigDecimal lon = BigDecimal.valueOf(0);
+        Milepost firstMilepost = new Milepost();
+        firstMilepost.setLatitude(lat);
+        firstMilepost.setLongitude(lon);
+        Milepost secondMilepost = new Milepost();
+        secondMilepost.setLatitude(lat);
+        secondMilepost.setLongitude(lon);
+
+        // Act & Assert
+        Assertions.assertThrows(Utility.IdenticalPointsException.class, () -> {
+            uut.calculateAnchorCoordinate(firstMilepost, secondMilepost);
+        });
+    }
+
+    @Test
+    public void calculateAnchorCoordinate_identicalPoints_positiveLat_negativeLon() {
+        // Arrange
+        BigDecimal lat = BigDecimal.valueOf(40);
+        BigDecimal lon = BigDecimal.valueOf(-100);
+        Milepost firstMilepost = new Milepost();
+        firstMilepost.setLatitude(lat);
+        firstMilepost.setLongitude(lon);
+        Milepost secondMilepost = new Milepost();
+        secondMilepost.setLatitude(lat);
+        secondMilepost.setLongitude(lon);
+
+        // Act & Assert
+        Assertions.assertThrows(Utility.IdenticalPointsException.class, () -> {
+            uut.calculateAnchorCoordinate(firstMilepost, secondMilepost);
+        });
+    }
+
+    @Test
+    public void calculateAnchorCoordinate_identicalPoints_negativeLat_positiveLon() {
+        // Arrange
+        BigDecimal lat = BigDecimal.valueOf(-40);
+        BigDecimal lon = BigDecimal.valueOf(100);
+        Milepost firstMilepost = new Milepost();
+        firstMilepost.setLatitude(lat);
+        firstMilepost.setLongitude(lon);
+        Milepost secondMilepost = new Milepost();
+        secondMilepost.setLatitude(lat);
+        secondMilepost.setLongitude(lon);
+
+        // Act & Assert
+        Assertions.assertThrows(Utility.IdenticalPointsException.class, () -> {
+            uut.calculateAnchorCoordinate(firstMilepost, secondMilepost);
+        });
+    }
+
+    @Test
+    public void calculateAnchorCoordinate_identicalPoints_positiveLat_positiveLon() {
+        // Arrange
+        BigDecimal lat = BigDecimal.valueOf(-40);
+        BigDecimal lon = BigDecimal.valueOf(100);
+        Milepost firstMilepost = new Milepost();
+        firstMilepost.setLatitude(lat);
+        firstMilepost.setLongitude(lon);
+        Milepost secondMilepost = new Milepost();
+        secondMilepost.setLatitude(lat);
+        secondMilepost.setLongitude(lon);
+
+        // Act & Assert
+        Assertions.assertThrows(Utility.IdenticalPointsException.class, () -> {
+            uut.calculateAnchorCoordinate(firstMilepost, secondMilepost);
+        });
+    }
+
+    @Test
+    public void calculateAnchorCoordinate_identicalPoints_negativeLat_negativeLon() {
+        // Arrange
+        BigDecimal lat = BigDecimal.valueOf(-40);
+        BigDecimal lon = BigDecimal.valueOf(-100);
         Milepost firstMilepost = new Milepost();
         firstMilepost.setLatitude(lat);
         firstMilepost.setLongitude(lon);

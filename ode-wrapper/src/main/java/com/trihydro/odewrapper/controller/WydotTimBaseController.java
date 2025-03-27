@@ -713,7 +713,7 @@ public abstract class WydotTimBaseController {
         } catch (Utility.IdenticalPointsException e) {
             anchor = recoverFromIdenticalPointsException(milepostsAll);
             if (anchor == null) {
-                log.warn("Unable to recover from identical points exception for active TIM.");
+                log.error("Unable to recover from identical points exception for active TIM.");
                 return;
             }
 

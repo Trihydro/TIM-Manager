@@ -45,8 +45,8 @@ import com.trihydro.library.service.RsuService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.library.service.TimGenerationProps;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +57,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class TimGenerationHelperTest {
+class TimGenerationHelperTest {
     @Mock
     private Utility mockUtility;
     @Mock
@@ -96,12 +96,12 @@ public class TimGenerationHelperTest {
     @Captor
     private ArgumentCaptor<WydotTravelerInputData> timCaptor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         TimeZone.setDefault(TimeZone.getTimeZone(java.time.ZoneId.systemDefault()));
     }

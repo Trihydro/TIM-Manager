@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -86,6 +87,8 @@ class TimGenerationHelperTest {
     private SnmpHelper mockSnmpHelper;
     @Mock
     private RegionNameTrimmer mockRegionNameTrimmer;
+    @Mock
+    private IdenticalPointsExceptionHandler mockIdenticalPointsExceptionHandler;
 
     private static final Long activeTimId = -1L;
     private TimUpdateModel tum;
@@ -777,22 +780,54 @@ class TimGenerationHelperTest {
     }
 
     @Test
-    public void resubmitToOde_TwoIdenticalMileposts() throws Utility.IdenticalPointsException { // TODO: fix unit test failing after introduction of IdenticalPointsExceptionHandler class
+    public void resubmitToOde_IdenticalPointsException_SuccessfulRecovery() throws Utility.IdenticalPointsException {
         // Arrange
         List<Long> activeTimIds = new ArrayList<>();
         activeTimIds.add(-1L);
         setupActiveTimModel();
+        setupMilepostReturn();
+        tum.setRoute("I 80");
+        tum.setSatRecordId("satRecordId");
 
         List<Milepost> mps = new ArrayList<>();
-        Milepost mp = new Milepost();
-        mp.setLatitude(BigDecimal.valueOf(1));
-        mp.setLongitude(BigDecimal.valueOf(2));
-        mps.add(mp);
-        mps.add(mp); // identical milepost
-        doReturn(mps).when(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        mps.add(new Milepost());
+        doReturn(mps).when(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
+
+        doReturn(new String[] {"1234"}).when(mockDataFrameService)
+            .getItisCodesForDataFrameId(any());
+        doReturn("").when(mockOdeService).updateTimOnSdw(any());
 
         doThrow(new Utility.IdenticalPointsException()).when(mockUtility)
             .calculateAnchorCoordinate(any(), any());
+
+        Milepost anchor = new Milepost();
+        doReturn(anchor).when(mockIdenticalPointsExceptionHandler).recoverFromIdenticalPointsException(any());
+
+        // Act
+        var exceptions = uut.resubmitToOde(activeTimIds);
+
+        // Assert
+        Assertions.assertEquals(0, exceptions.size());
+        verifyNoInteractions(mockPathNodeXYService);
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
+        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
+        verify(mockMilepostReduction).applyMilepostReductionAlgorithm(any(), any());
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService,
+            mockRsuService, mockOdeService, mockActiveTimHoldingService);
+    }
+
+    @Test
+    public void resubmitToOde_IdenticalPointsException_FailureToRecover() throws Utility.IdenticalPointsException { // TODO: fix unit test failing after introduction of IdenticalPointsExceptionHandler class
+        // Arrange
+        List<Long> activeTimIds = new ArrayList<>();
+        activeTimIds.add(-1L);
+        setupActiveTimModel();
+        setupMilepostReturn();
+
+        doThrow(new Utility.IdenticalPointsException()).when(mockUtility)
+            .calculateAnchorCoordinate(any(), any());
+
+        doReturn(null).when(mockIdenticalPointsExceptionHandler).recoverFromIdenticalPointsException(any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -800,18 +835,10 @@ class TimGenerationHelperTest {
         // Assert
         Assertions.assertEquals(1, exceptions.size());
         var ex = exceptions.get(0);
-        String exMsg = String.format(
-            "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
-            activeTimId);
-        Assertions.assertEquals(activeTimId, ex.getActiveTimId());
-        Assertions.assertEquals(exMsg, ex.getExceptionMessage());
-
-        verify(mockMilepostService).getMilepostsByStartEndPointDirection(any());
-        verify(mockUtility).calculateAnchorCoordinate(any(), any());
-        verifyNoMoreInteractions(mockMilepostService);
-        verifyNoInteractions(mockDataFrameService, mockPathNodeXYService, mockMilepostReduction,
-            mockRegionService, mockRsuService, mockConfig, mockOdeService,
-            mockActiveTimHoldingService, mockSdwService);
+        Assertions.assertEquals(new ResubmitTimException(activeTimId, String.format("Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d", activeTimId)), ex);
+        verifyNoInteractions(mockPathNodeXYService);
+        verifyNoMoreInteractions(mockMilepostService, mockMilepostReduction, mockDataFrameService,
+            mockRsuService, mockOdeService, mockActiveTimHoldingService);
     }
 
     @Test

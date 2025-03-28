@@ -1,5 +1,7 @@
 package com.trihydro.odewrapper.controller;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
+import com.trihydro.library.model.TimUpdateModel;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -44,12 +46,14 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @Component
+@Slf4j
 public abstract class WydotTimBaseController {
 
     protected static BasicConfiguration configuration;
@@ -62,6 +66,7 @@ public abstract class WydotTimBaseController {
     MilepostReduction milepostReduction;
     protected Utility utility;
     protected TimGenerationHelper timGenerationHelper;
+    private final IdenticalPointsExceptionHandler identicalPointsExceptionHandler;
 
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
@@ -71,7 +76,7 @@ public abstract class WydotTimBaseController {
                                   SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
                                   RestTemplateProvider _restTemplateProvider,
                                   MilepostReduction _milepostReduction, Utility _utility,
-                                  TimGenerationHelper _timGenerationHelper) {
+                                  TimGenerationHelper _timGenerationHelper, IdenticalPointsExceptionHandler identicalPointsExceptionHandler) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
@@ -81,6 +86,7 @@ public abstract class WydotTimBaseController {
         milepostReduction = _milepostReduction;
         utility = _utility;
         timGenerationHelper = _timGenerationHelper;
+        this.identicalPointsExceptionHandler = identicalPointsExceptionHandler;
     }
 
     protected String getStartTime() {
@@ -708,9 +714,12 @@ public abstract class WydotTimBaseController {
         try {
             anchor = getAnchorPoint(firstPoint, secondPoint);
         } catch (Utility.IdenticalPointsException e) {
-            utility.logWithDate(
-                "Identical points found during anchor point calculation, unable to generate TIM.");
-            return;
+            anchor = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(milepostsAll);
+            if (anchor == null) {
+                log.error("Unable to recover from identical points exception for active TIM.");
+                return;
+            }
+
         }
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
             configuration.getPathDistanceLimit());

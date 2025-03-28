@@ -1,5 +1,6 @@
 package com.trihydro.library.helpers;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -76,6 +77,7 @@ public class TimGenerationHelper {
     private final SnmpHelper snmpHelper;
     private final RegionNameTrimmer regionNameTrimmer;
     private final CreateBaseTimUtil createBaseTimUtil;
+    private final IdenticalPointsExceptionHandler identicalPointsExceptionHandler;
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
@@ -84,7 +86,7 @@ public class TimGenerationHelper {
                                RsuService _rsuService, OdeService _odeService,
                                ActiveTimHoldingService _activeTimHoldingService,
                                SnmpHelper _snmpHelper, RegionNameTrimmer _regionNameTrimmer,
-                               CreateBaseTimUtil _createBaseTimUtil) {
+                               CreateBaseTimUtil _createBaseTimUtil, IdenticalPointsExceptionHandler identicalPointsExceptionHandler) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -98,6 +100,7 @@ public class TimGenerationHelper {
         snmpHelper = _snmpHelper;
         regionNameTrimmer = _regionNameTrimmer;
         createBaseTimUtil = _createBaseTimUtil;
+        this.identicalPointsExceptionHandler = identicalPointsExceptionHandler;
     }
 
     private String getIsoDateTimeString(ZonedDateTime date) {
@@ -169,7 +172,7 @@ public class TimGenerationHelper {
                 try {
                     anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -310,7 +313,7 @@ public class TimGenerationHelper {
             try {
                 anchorMp = getAnchorPoint(firstPoint, secondPoint);
             } catch (Utility.IdenticalPointsException e) {
-                anchorMp = recoverFromIdenticalPointsException(allMps);
+                anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                 if (anchorMp == null) {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -421,7 +424,7 @@ public class TimGenerationHelper {
                 try {
                     anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -514,7 +517,7 @@ public class TimGenerationHelper {
                 try {
                     anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -606,7 +609,7 @@ public class TimGenerationHelper {
                 try {
                     anchorMp = getAnchorPoint(firstPoint, secondPoint);
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -1221,35 +1224,6 @@ public class TimGenerationHelper {
         anchor.setMilepost(firstPoint.getMilepost());
         anchor.setDirection(firstPoint.getDirection());
         return anchor;
-    }
-
-    /**
-     * Attempts to recover from an identical points exception by removing the first milepost
-     * and re-evaluating the remaining mileposts. If recovery is not possible due to insufficient
-     * mileposts or repeated identical points, returns null.
-     *
-     * @param allMps   The list of Mileposts to process. The list must contain at least three mileposts
-     *                 to attempt recovery.
-     * @return The anchor point Milepost if recovery is successful, or null if recovery fails.
-     */
-    private Milepost recoverFromIdenticalPointsException(List<Milepost> allMps) {
-        log.info("Attempting to recover from identical points exception");
-        if (allMps.size() < 3) {
-            // if we only have 2 mileposts, we can't recover
-            log.warn(
-                "Unable to recover from identical points exception for active TIM, less than 3 mileposts found.");
-            return null;
-        }
-        // if we have more than 2 mileposts, we can remove the first milepost and try again
-        allMps.remove(0);
-        Milepost firstPoint = allMps.get(0);
-        Milepost secondPoint = allMps.get(1);
-        try {
-            return getAnchorPoint(firstPoint, secondPoint);
-        } catch (Utility.IdenticalPointsException e2) {
-            log.warn("Unable to recover from identical points exception for active TIM, first three mileposts are identical.");
-            return null;
-        }
     }
 
     /**

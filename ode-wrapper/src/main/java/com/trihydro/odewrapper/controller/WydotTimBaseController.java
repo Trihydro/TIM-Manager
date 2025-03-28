@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import com.trihydro.library.model.TimUpdateModel;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,6 +66,7 @@ public abstract class WydotTimBaseController {
     MilepostReduction milepostReduction;
     protected Utility utility;
     protected TimGenerationHelper timGenerationHelper;
+    private final IdenticalPointsExceptionHandler identicalPointsExceptionHandler;
 
     protected static Gson gson = new Gson();
     private List<TimType> timTypes;
@@ -74,7 +76,7 @@ public abstract class WydotTimBaseController {
                                   SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
                                   RestTemplateProvider _restTemplateProvider,
                                   MilepostReduction _milepostReduction, Utility _utility,
-                                  TimGenerationHelper _timGenerationHelper) {
+                                  TimGenerationHelper _timGenerationHelper, IdenticalPointsExceptionHandler identicalPointsExceptionHandler) {
         configuration = _basicConfiguration;
         wydotTimService = _wydotTimService;
         timTypeService = _timTypeService;
@@ -84,6 +86,7 @@ public abstract class WydotTimBaseController {
         milepostReduction = _milepostReduction;
         utility = _utility;
         timGenerationHelper = _timGenerationHelper;
+        this.identicalPointsExceptionHandler = identicalPointsExceptionHandler;
     }
 
     protected String getStartTime() {
@@ -711,7 +714,7 @@ public abstract class WydotTimBaseController {
         try {
             anchor = getAnchorPoint(firstPoint, secondPoint);
         } catch (Utility.IdenticalPointsException e) {
-            anchor = recoverFromIdenticalPointsException(milepostsAll);
+            anchor = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(milepostsAll);
             if (anchor == null) {
                 log.error("Unable to recover from identical points exception for active TIM.");
                 return;
@@ -779,34 +782,5 @@ public abstract class WydotTimBaseController {
         anchor.setMilepost(firstPoint.getMilepost());
         anchor.setDirection(firstPoint.getDirection());
         return anchor;
-    }
-
-    /**
-     * Attempts to recover from an identical points exception by removing the first milepost
-     * and re-evaluating the remaining mileposts. If recovery is not possible due to insufficient
-     * mileposts or repeated identical points, returns null.
-     *
-     * @param allMps   The list of Mileposts to process. The list must contain at least three mileposts
-     *                 to attempt recovery.
-     * @return The anchor point Milepost if recovery is successful, or null if recovery fails.
-     */
-    private Milepost recoverFromIdenticalPointsException(List<Milepost> allMps) {
-        log.info("Attempting to recover from identical points exception");
-        if (allMps.size() < 3) {
-            // if we only have 2 mileposts, we can't recover
-            log.warn(
-                "Unable to recover from identical points exception for active TIM, less than 3 mileposts found.");
-            return null;
-        }
-        // if we have more than 2 mileposts, we can remove the first milepost and try again
-        allMps.remove(0);
-        Milepost firstPoint = allMps.get(0);
-        Milepost secondPoint = allMps.get(1);
-        try {
-            return getAnchorPoint(firstPoint, secondPoint);
-        } catch (Utility.IdenticalPointsException e2) {
-            log.warn("Unable to recover from identical points exception for active TIM, first three mileposts are identical.");
-            return null;
-        }
     }
 }

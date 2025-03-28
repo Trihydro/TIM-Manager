@@ -1,5 +1,6 @@
 package com.trihydro.timrefresh.config;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import java.math.BigDecimal;
 
 import com.trihydro.library.helpers.EmailHelper;
@@ -39,7 +40,7 @@ import us.dot.its.jpo.ode.plugin.SituationDataWarehouse.SDW.TimeToLive;
         OdeService.class, PathNodeXYService.class, RegionService.class, RsuService.class, SdwService.class,
         Utility.class, RestTemplateProvider.class, MilepostReduction.class, JavaMailSenderImplProvider.class,
         EmailHelper.class, TimGenerationHelper.class, PathNodeLLService.class, SnmpHelper.class, 
-        RegionNameTrimmer.class, CreateBaseTimUtil.class })
+        RegionNameTrimmer.class, CreateBaseTimUtil.class, IdenticalPointsExceptionHandler.class })
 public class TimRefreshConfiguration implements CVRestServiceProps, SdwProps, EmailProps, OdeProps, TimGenerationProps {
 
     private TimeToLive sdwTtl;

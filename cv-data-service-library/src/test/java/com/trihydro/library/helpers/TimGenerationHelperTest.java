@@ -777,7 +777,7 @@ public class TimGenerationHelperTest {
     }
 
     @Test
-    public void resubmitToOde_TwoIdenticalMileposts() throws Utility.IdenticalPointsException {
+    public void resubmitToOde_TwoIdenticalMileposts() throws Utility.IdenticalPointsException { // TODO: fix unit test failing after introduction of IdenticalPointsExceptionHandler class
         // Arrange
         List<Long> activeTimIds = new ArrayList<>();
         activeTimIds.add(-1L);

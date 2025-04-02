@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.controller;
 
+import com.trihydro.library.model.ActiveTimHoldingDeleteModel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -206,16 +207,16 @@ public class ActiveTimHoldingController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/delete/{activeTimHoldingId}", produces = "application/json", method = RequestMethod.DELETE)
-    public ResponseEntity<Boolean> deleteActiveTimHolding(@PathVariable Long activeTimHoldingId) {
-        String deleteQueryStatement = "delete from active_tim_holding where active_tim_holding_id = ?";
+    @RequestMapping(value = "/delete", produces = "application/json", method = RequestMethod.DELETE)
+    public ResponseEntity<Boolean> deleteActiveTimHoldingRecords(@RequestBody ActiveTimHoldingDeleteModel activeTimHoldingDeleteModel) {
+        String deleteQueryStatement = "delete from active_tim_holding where active_tim_holding_id = ANY (?)";
 
         try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(deleteQueryStatement)) {
-            preparedStatement.setLong(1, activeTimHoldingId);
+            preparedStatement.setArray(1, connection.createArrayOf("long", activeTimHoldingDeleteModel.getIds().toArray()));
             dbInteractions.executeAndLog(preparedStatement, "active tim holding");
             return ResponseEntity.ok(true);
         } catch (SQLException e) {
-            log.error("Error deleting active tim holding", e);
+            log.error("Error deleting active tim holding records", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
     }

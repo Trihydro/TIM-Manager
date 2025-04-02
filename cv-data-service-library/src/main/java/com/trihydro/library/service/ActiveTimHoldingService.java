@@ -1,5 +1,6 @@
 package com.trihydro.library.service;
 
+import com.trihydro.library.model.ActiveTimHoldingDeleteModel;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,9 +39,12 @@ public class ActiveTimHoldingService extends CvDataServiceLibrary {
         return Arrays.asList(response.getBody());
     }
 
-    public boolean deleteActiveTimHolding(Long activeTimHoldingId) {
-        String url = String.format("%s/active-tim-holding/delete/%d", config.getCvRestService(), activeTimHoldingId);
-        ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, null, Boolean.class);
+    public boolean deleteActiveTimHoldingRecords(List<Long> activeTimHoldingIds) {
+        String url = String.format("%s/active-tim-holding/delete", config.getCvRestService());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ActiveTimHoldingDeleteModel> entity = new HttpEntity<>(new ActiveTimHoldingDeleteModel(activeTimHoldingIds), headers);
+        ResponseEntity<Boolean> response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, Boolean.class);
         return response.getBody();
     }
 }

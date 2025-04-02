@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
+import com.trihydro.library.model.ActiveTimHoldingDeleteModel;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -266,7 +267,7 @@ public class ActiveTimHoldingControllerTest extends TestBase<ActiveTimHoldingCon
     @Test
     void deleteActiveTimHolding_SuccessfulExecution_ShouldReturnTrue() {
         // execute
-        ResponseEntity<Boolean> response = uut.deleteActiveTimHolding(137L);
+        ResponseEntity<Boolean> response = uut.deleteActiveTimHoldingRecords(new ActiveTimHoldingDeleteModel(List.of(137L, 138L)));
 
         // verify
         Assertions.assertNotNull(response.getBody());

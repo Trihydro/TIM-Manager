@@ -75,8 +75,7 @@ class CleanupStaleActiveTimHoldingRecordsTest {
         // verify
         assertEquals(1, cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
         verify(activeTimService).getAllRecords();
-        verify(activeTimHoldingService).deleteActiveTimHolding(1L);
-        verify(activeTimHoldingService).deleteActiveTimHolding(2L);
+        verify(activeTimHoldingService).deleteActiveTimHoldingRecords(List.of(1L, 2L));
     }
 
     /**
@@ -105,8 +104,7 @@ class CleanupStaleActiveTimHoldingRecordsTest {
         // verify
         assertEquals(0, cleanupStaleActiveTimHoldingRecords.getStaleRecordsIdentifiedLastRun().size());
         verify(activeTimService).getAllRecords();
-        verify(activeTimHoldingService).deleteActiveTimHolding(1L);
-        verify(activeTimHoldingService).deleteActiveTimHolding(2L);
+        verify(activeTimHoldingService).deleteActiveTimHoldingRecords(List.of(1L, 2L));
         verify(activeTimService).deleteActiveTimsById(List.of(37L));
     }
 

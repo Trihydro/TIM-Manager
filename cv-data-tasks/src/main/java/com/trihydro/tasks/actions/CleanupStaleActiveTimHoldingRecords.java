@@ -86,9 +86,7 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
 
 
             // Delete likely stale active_tim_holding records
-            for (ActiveTimHolding record : likelyStaleRecords) {
-                removeActiveTimHoldingRecord(record);
-            }
+            removeActiveTimHoldingRecords(likelyStaleRecords);
             log.info("Deleted {} likely stale active_tim_holding records", likelyStaleRecords.size());
 
             // Clear staleRecords set
@@ -149,15 +147,20 @@ public class CleanupStaleActiveTimHoldingRecords implements Runnable {
         }
     }
 
-    private void removeActiveTimHoldingRecord(ActiveTimHolding record) throws CleanupStaleActiveTimHoldingRecordsException {
+    private void removeActiveTimHoldingRecords(List<ActiveTimHolding> records) throws CleanupStaleActiveTimHoldingRecordsException {
+        List<Long> activeTimHoldingIds = new ArrayList<>();
+        for (ActiveTimHolding record : records) {
+            activeTimHoldingIds.add(record.getActiveTimHoldingId());
+        }
         try {
-            boolean success = activeTimHoldingService.deleteActiveTimHolding(record.getActiveTimHoldingId());
+            boolean success = activeTimHoldingService.deleteActiveTimHoldingRecords(activeTimHoldingIds);
             if (!success) {
-                log.error("Failed to delete active_tim_holding record with id: {}", record.getActiveTimHoldingId());
+                log.error("Failed to delete active_tim_holding records with ids: {}", activeTimHoldingIds);
             }
         } catch (Exception e) {
             throw new CleanupStaleActiveTimHoldingRecordsException(
-                    String.format("Failed to delete active_tim_holding record with id: %d. Is the cv-data-controller service running?", record.getActiveTimHoldingId()),
+                String.format("Failed to delete active_tim_holding record with ids: %s. Is the cv-data-controller service running?",
+                    activeTimHoldingIds),
                     e
             );
         }

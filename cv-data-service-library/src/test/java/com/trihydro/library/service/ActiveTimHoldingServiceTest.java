@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import com.trihydro.library.model.ActiveTimHolding;
+import com.trihydro.library.model.ActiveTimHoldingDeleteModel;
 import com.trihydro.library.model.CVRestServiceProps;
 import java.sql.SQLException;
 import java.util.List;
@@ -54,40 +55,56 @@ class ActiveTimHoldingServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void deleteActiveTimHolding_SuccessfulDelete_ShouldReturnTrue() {
+    void deleteActiveTimHoldingRecords_SuccessfulDelete_ShouldReturnTrue() {
         // Arrange
-        Long mockId = 1L;
+        Long mockId1 = 1L;
+        Long mockId2 = 2L;
+        List<Long> mockIds = List.of(mockId1, mockId2);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ActiveTimHoldingDeleteModel> entity = new HttpEntity<>(new ActiveTimHoldingDeleteModel(mockIds), headers);
         ResponseEntity<Boolean> mockResponse = ResponseEntity.ok(true);
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId, HttpMethod.DELETE, null, Boolean.class)).thenReturn(mockResponse);
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete", HttpMethod.DELETE, entity, Boolean.class)).thenReturn(mockResponse);
 
         // Act
-        boolean result = uut.deleteActiveTimHolding(mockId);
+        boolean result = uut.deleteActiveTimHoldingRecords(mockIds);
 
         // Assert
         assertTrue(result);
     }
 
     @Test
-    void deleteActiveTimHolding_FailedDelete_ShouldReturnFalse() {
+    void deleteActiveTimHoldingRecords_FailedDelete_ShouldReturnFalse() {
         // Arrange
-        Long mockId = 1L;
+        Long mockId1 = 1L;
+        Long mockId2 = 2L;
+        List<Long> mockIds = List.of(mockId1, mockId2);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ActiveTimHoldingDeleteModel> entity = new HttpEntity<>(new ActiveTimHoldingDeleteModel(mockIds), headers);
         ResponseEntity<Boolean> mockResponse = ResponseEntity.ok(false);
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId, HttpMethod.DELETE, null, Boolean.class)).thenReturn(mockResponse);
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete", HttpMethod.DELETE, entity, Boolean.class)).thenReturn(mockResponse);
 
         // Act
-        boolean result = uut.deleteActiveTimHolding(mockId);
+        boolean result = uut.deleteActiveTimHoldingRecords(mockIds);
 
         // Assert
         assertFalse(result);
     }
 
     @Test
-    void deleteActiveTimHolding_WhenDatabaseConnectionFails_ShouldThrowException() {
+    void deleteActiveTimHoldingRecords_WhenDatabaseConnectionFails_ShouldThrowException() {
         // Arrange
-        Long mockId = 1L;
-        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/" + mockId, HttpMethod.DELETE, null, Boolean.class)).thenThrow(new RuntimeException("Database error"));
+        Long mockId1 = 1L;
+        Long mockId2 = 2L;
+        List<Long> mockIds = List.of(mockId1, mockId2);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ActiveTimHoldingDeleteModel> entity = new HttpEntity<>(new ActiveTimHoldingDeleteModel(mockIds), headers);
+        when(mockRestTemplate.exchange(baseUrl + "/active-tim-holding/delete/1,2", HttpMethod.DELETE, entity, Boolean.class)).thenThrow(
+            new RuntimeException("Database error"));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> uut.deleteActiveTimHolding(mockId));
+        assertThrows(RuntimeException.class, () -> uut.deleteActiveTimHoldingRecords(mockIds));
     }
 }

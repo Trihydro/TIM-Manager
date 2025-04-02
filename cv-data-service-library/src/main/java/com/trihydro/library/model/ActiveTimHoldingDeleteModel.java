@@ -2,7 +2,6 @@ package com.trihydro.library.model;
 
 import java.util.List;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data

@@ -242,17 +242,14 @@ public class JsonToJavaConverter {
         }
 
         if (regionDirectionNode != null) {
-            var direction = "";
+            StringBuilder directionBuilder = new StringBuilder();
             Iterator<Map.Entry<String, JsonNode>> fields = regionDirectionNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
-                var directionBool = field.getValue().toString();
-                if ("true".equals(directionBool))
-                    direction += "1";
-                else
-                    direction += "0";
+                boolean directionBool= Boolean.parseBoolean(field.getValue().toString());
+                directionBuilder.append(directionBool ? "1" : "0");
             }
-            region.setDirection(direction);
+            region.setDirection(directionBuilder.toString());
         }
 
         JsonNode descriptionNode = regionNode.get("description");

@@ -169,7 +169,7 @@ services:
       CONFIG_CONNECTION_TIMEOUT: 300000
       CONFIG_ODE_URL: http://ode:8080
       CONFIG_ENV: local
-      SPRING_DATA_NEO4J_URI: bolt://milepost-graph-db:7687
+      SPRING_DATA_NEO4J_URI: ${NEO4J_URI}
       CONFIG_ALERT_ADDRESSES: test@gmail.com
       CONFIG_FROM_EMAIL: test@gmail.com
       CONFIG_ENVIRONMENT_NAME: local

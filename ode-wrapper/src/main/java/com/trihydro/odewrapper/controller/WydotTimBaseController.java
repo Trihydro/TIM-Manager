@@ -712,7 +712,9 @@ public abstract class WydotTimBaseController {
 
         Milepost anchor;
         try {
-            anchor = getAnchorPoint(firstPoint, secondPoint);
+            Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+            anchor = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                anchorCoordinate.getLongitude());
         } catch (Utility.IdenticalPointsException e) {
             anchor = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(milepostsAll);
             if (anchor == null) {
@@ -763,24 +765,5 @@ public abstract class WydotTimBaseController {
         timToSend.getRequest().setRsus(null);
         wydotTimService.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, pk, endPoint,
             reducedMileposts);
-    }
-
-    /**
-     * This method returns the anchor point for the given mileposts.
-     *
-     * @param firstPoint  The first milepost.
-     * @param secondPoint The second milepost.
-     * @return The anchor point as a Milepost.
-     */
-    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint)
-        throws Utility.IdenticalPointsException {
-        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
-
-        Milepost anchor = new Milepost();
-        anchor.setLatitude(anchorCoordinate.getLatitude());
-        anchor.setLongitude(anchorCoordinate.getLongitude());
-        anchor.setMilepost(firstPoint.getMilepost());
-        anchor.setDirection(firstPoint.getDirection());
-        return anchor;
     }
 }

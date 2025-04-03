@@ -170,7 +170,9 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
                     anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
@@ -311,7 +313,9 @@ public class TimGenerationHelper {
 
             Milepost anchorMp;
             try {
-                anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                    anchorCoordinate.getLongitude());
             } catch (Utility.IdenticalPointsException e) {
                 anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                 if (anchorMp == null) {
@@ -422,7 +426,9 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
                     anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
@@ -515,7 +521,9 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
                     anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
@@ -607,7 +615,9 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
                     anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
                     if (anchorMp == null) {
@@ -1205,25 +1215,6 @@ public class TimGenerationHelper {
             System.out.println("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
-    }
-
-    /**
-     * This method returns the anchor point for the given mileposts.
-     *
-     * @param firstPoint  The first milepost.
-     * @param secondPoint The second milepost.
-     * @return The anchor point as a Milepost.
-     */
-    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint)
-        throws Utility.IdenticalPointsException {
-        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
-
-        Milepost anchor = new Milepost();
-        anchor.setLatitude(anchorCoordinate.getLatitude());
-        anchor.setLongitude(anchorCoordinate.getLongitude());
-        anchor.setMilepost(firstPoint.getMilepost());
-        anchor.setDirection(firstPoint.getDirection());
-        return anchor;
     }
 
     /**

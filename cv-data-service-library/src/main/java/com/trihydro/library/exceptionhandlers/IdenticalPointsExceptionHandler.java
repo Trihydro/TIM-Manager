@@ -21,8 +21,8 @@ public class IdenticalPointsExceptionHandler {
      * and re-evaluating the remaining mileposts. If recovery is not possible due to insufficient
      * mileposts or repeated identical points, returns null.
      *
-     * @param allMps   The list of Mileposts to process. The list must contain at least three mileposts
-     *                 to attempt recovery.
+     * @param allMps The list of Mileposts to process. The list must contain at least three mileposts
+     *               to attempt recovery.
      * @return The anchor point Milepost if recovery is successful, or null if recovery fails.
      */
     public Milepost recoverFromIdenticalPointsException(List<Milepost> allMps) {
@@ -38,29 +38,12 @@ public class IdenticalPointsExceptionHandler {
         Milepost firstPoint = allMps.get(0);
         Milepost secondPoint = allMps.get(1);
         try {
-            return getAnchorPoint(firstPoint, secondPoint);
+            Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+            return new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(),
+                anchorCoordinate.getLatitude(), anchorCoordinate.getLongitude());
         } catch (Utility.IdenticalPointsException e2) {
             log.warn("Unable to recover from identical points exception for active TIM, first three mileposts are identical.");
             return null;
         }
-    }
-
-    /**
-     * This method returns the anchor point for the given mileposts.
-     *
-     * @param firstPoint  The first milepost.
-     * @param secondPoint The second milepost.
-     * @return The anchor point as a Milepost.
-     */
-    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint)
-        throws Utility.IdenticalPointsException {
-        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
-
-        Milepost anchor = new Milepost();
-        anchor.setLatitude(anchorCoordinate.getLatitude());
-        anchor.setLongitude(anchorCoordinate.getLongitude());
-        anchor.setMilepost(firstPoint.getMilepost());
-        anchor.setDirection(firstPoint.getDirection());
-        return anchor;
     }
 }

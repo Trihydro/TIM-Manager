@@ -817,7 +817,7 @@ class TimGenerationHelperTest {
     }
 
     @Test
-    public void resubmitToOde_IdenticalPointsException_FailureToRecover() throws Utility.IdenticalPointsException { // TODO: fix unit test failing after introduction of IdenticalPointsExceptionHandler class
+    public void resubmitToOde_IdenticalPointsException_FailureToRecover() throws Utility.IdenticalPointsException {
         // Arrange
         List<Long> activeTimIds = new ArrayList<>();
         activeTimIds.add(-1L);

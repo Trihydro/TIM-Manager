@@ -1,5 +1,6 @@
 package com.trihydro.tasks;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,7 +57,7 @@ import org.springframework.context.annotation.Import;
                 TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class, MilepostReduction.class,
                 RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class,
                 WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class, TimRsuService.class,
-                SnmpHelper.class, RegionNameTrimmer.class })
+                SnmpHelper.class, RegionNameTrimmer.class, IdenticalPointsExceptionHandler.class })
 
 public class Application {
         protected static DataTasksConfiguration config;

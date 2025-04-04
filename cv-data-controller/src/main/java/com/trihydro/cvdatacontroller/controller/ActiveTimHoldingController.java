@@ -1,5 +1,6 @@
 package com.trihydro.cvdatacontroller.controller;
 
+import com.trihydro.library.model.ActiveTimHoldingDeleteModel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +15,8 @@ import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimDbTables;
 
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +33,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("active-tim-holding")
 @ApiIgnore
+@Slf4j
 public class ActiveTimHoldingController extends BaseController {
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -43,18 +47,12 @@ public class ActiveTimHoldingController extends BaseController {
     @RequestMapping(value = "/add", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<Long> InsertActiveTimHolding(@RequestBody ActiveTimHolding activeTimHolding) {
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        Long activeTimHoldingId = 0l;
-        try {
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim_holding",
-                    timDbTables.getActiveTimHoldingTable());
+        Long activeTimHoldingId = 0L;
 
-            // get connection
-            connection = dbInteractions.getConnectionPool();
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("active_tim_holding", timDbTables.getActiveTimHoldingTable());
 
-            preparedStatement = connection.prepareStatement(insertQueryStatement,
-                    new String[] { "active_tim_holding_id" });
+        try (Connection connection = dbInteractions.getConnectionPool();
+             PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"active_tim_holding_id"})) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getActiveTimHoldingTable()) {
@@ -70,23 +68,19 @@ public class ActiveTimHoldingController extends BaseController {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTimHolding.getSatRecordId());
                 } else if (col.equals("START_LATITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
-                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getStartPoint().getLatitude());
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, activeTimHolding.getStartPoint().getLatitude());
                     }
                 } else if (col.equals("START_LONGITUDE")) {
                     if (activeTimHolding.getStartPoint() != null) {
-                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getStartPoint().getLongitude());
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, activeTimHolding.getStartPoint().getLongitude());
                     }
                 } else if (col.equals("END_LATITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
-                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getEndPoint().getLatitude());
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, activeTimHolding.getEndPoint().getLatitude());
                     }
                 } else if (col.equals("END_LONGITUDE")) {
                     if (activeTimHolding.getEndPoint() != null) {
-                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                activeTimHolding.getEndPoint().getLongitude());
+                        sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, activeTimHolding.getEndPoint().getLongitude());
                     }
                 } else if (col.equals("RSU_INDEX")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, activeTimHolding.getRsuIndex());
@@ -99,8 +93,7 @@ public class ActiveTimHoldingController extends BaseController {
                 } else if (col.equals("EXPIRATION_DATE")) {
                     if (activeTimHolding.getExpirationDateTime() != null) {
                         java.util.Date tim_exp_date = utility.convertDate(activeTimHolding.getExpirationDateTime());
-                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum,
-                                utility.timestampFormat.format(tim_exp_date));
+                        sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, utility.timestampFormat.format(tim_exp_date));
                     } else {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
                     }
@@ -115,74 +108,46 @@ public class ActiveTimHoldingController extends BaseController {
 
             if (activeTimHoldingId == null) {
                 // this already exists, fetch it and return the id
-                Statement statement = null;
-                ResultSet rs = null;
-                try {
-                    statement = connection.createStatement();
-                    String query = "select active_tim_holding_id from active_tim_holding";
-                    if (activeTimHolding.getSatRecordId() != null && activeTimHolding.getSatRecordId() != "") {
-                        // sat tim
-                        query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() + "' and client_id = '"
-                                + activeTimHolding.getClientId() + "' and direction = '"
-                                + activeTimHolding.getDirection() + "'";
-                    } else {
-                        // rsu tim
-                        query += " where rsu_target = '" + activeTimHolding.getRsuTarget() + "' and client_id = '"
-                                + activeTimHolding.getClientId() + "' and direction = '"
-                                + activeTimHolding.getDirection() + "'";
-                    }
 
-                    rs = statement.executeQuery(query);
+                String query = "select active_tim_holding_id from active_tim_holding";
+                if (activeTimHolding.getSatRecordId() != null && !Objects.equals(activeTimHolding.getSatRecordId(), "")) {
+                    // sat tim
+                    query += " where sat_record_id = '" + activeTimHolding.getSatRecordId() + "' and client_id = '" + activeTimHolding.getClientId() + "' and direction = '" +
+                        activeTimHolding.getDirection() + "'";
+                } else {
+                    // rsu tim
+                    query +=
+                        " where rsu_target = '" + activeTimHolding.getRsuTarget() + "' and client_id = '" + activeTimHolding.getClientId() + "' and direction = '" + activeTimHolding.getDirection() +
+                            "'";
+                }
+
+                try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
+
                     while (rs.next()) {
                         activeTimHoldingId = rs.getLong("ACTIVE_TIM_HOLDING_ID");
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Error getting active tim holding id", e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
-                } finally {
-                    try {
-                        if (statement != null)
-                            statement.close();
-                        if (rs != null)
-                            rs.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
             return ResponseEntity.ok(activeTimHoldingId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error inserting active tim holding", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     @RequestMapping(value = "/get-rsu/{ipv4Address}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<List<ActiveTimHolding>> getActiveTimHoldingForRsu(@PathVariable String ipv4Address) {
-        ActiveTimHolding activeTimHolding = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
+        ActiveTimHolding activeTimHolding;
+
         List<ActiveTimHolding> holdings = new ArrayList<>();
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "select * from active_tim_holding ";
-            query += " where rsu_target = '" + ipv4Address + "'";
-            rs = statement.executeQuery(query);
+        String query = "select * from active_tim_holding ";
+        query += " where rsu_target = '" + ipv4Address + "'";
 
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             // convert to ActiveTim object
             while (rs.next()) {
                 activeTimHolding = new ActiveTimHolding();
@@ -191,10 +156,8 @@ public class ActiveTimHoldingController extends BaseController {
                 activeTimHolding.setDirection(rs.getString("DIRECTION"));
                 activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
                 activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-                activeTimHolding.setStartPoint(
-                        new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
-                activeTimHolding.setEndPoint(
-                        new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                activeTimHolding.setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
                 activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
                 int rsu_index = rs.getInt("RSU_INDEX");
                 if (!rs.wasNull()) {
@@ -206,22 +169,55 @@ public class ActiveTimHoldingController extends BaseController {
             }
             return ResponseEntity.ok(holdings);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error getting active tim holding for rsu", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null)
-                    statement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-                // close result set
-                if (rs != null)
-                    rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        }
+    }
+
+    @RequestMapping(value = "/get-all", produces = "application/json", method = RequestMethod.GET)
+    public ResponseEntity<List<ActiveTimHolding>> getAllRecords() {
+        List<ActiveTimHolding> holdings = new ArrayList<>();
+
+        String query = "select * from active_tim_holding";
+
+        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
+            // convert to ActiveTim object
+            while (rs.next()) {
+                ActiveTimHolding activeTimHolding = new ActiveTimHolding();
+                activeTimHolding.setActiveTimHoldingId(rs.getLong("ACTIVE_TIM_HOLDING_ID"));
+                activeTimHolding.setClientId(rs.getString("CLIENT_ID"));
+                activeTimHolding.setDirection(rs.getString("DIRECTION"));
+                activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
+                activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+                activeTimHolding.setStartPoint(new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                activeTimHolding.setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                activeTimHolding.setDateCreated(rs.getString("DATE_CREATED"));
+                int rsu_index = rs.getInt("RSU_INDEX");
+                if (!rs.wasNull()) {
+                    activeTimHolding.setRsuIndex(rsu_index);
+                }
+                activeTimHolding.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+                activeTimHolding.setPacketId(rs.getString("PACKET_ID"));
+                holdings.add(activeTimHolding);
             }
+            return ResponseEntity.ok(holdings);
+        } catch (SQLException e) {
+            log.error("Error getting all active tim holdings", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
+        }
+    }
+
+    @RequestMapping(value = "/delete", produces = "application/json", method = RequestMethod.DELETE)
+    public ResponseEntity<Boolean> deleteActiveTimHoldingRecords(@RequestBody ActiveTimHoldingDeleteModel activeTimHoldingDeleteModel) {
+        String deleteQueryStatement = "delete from active_tim_holding where active_tim_holding_id = ANY (?)";
+
+        try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(deleteQueryStatement)) {
+            preparedStatement.setArray(1, connection.createArrayOf("long", activeTimHoldingDeleteModel.getIds().toArray()));
+            dbInteractions.executeAndLog(preparedStatement, "active tim holding");
+            return ResponseEntity.ok(true);
+        } catch (SQLException e) {
+            log.error("Error deleting active tim holding records", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
     }
 }

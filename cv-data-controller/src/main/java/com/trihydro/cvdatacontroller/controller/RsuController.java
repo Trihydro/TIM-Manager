@@ -118,7 +118,7 @@ public class RsuController extends BaseController {
 		return ResponseEntity.ok(rsus);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/rsus-for-tim/{timId}")
+	@RequestMapping(method = RequestMethod.GET, produces = "application/json", value = "/rsus-for-tim/{timId}")
 	public ResponseEntity<List<WydotRsuTim>> GetFullRsusTimIsOn(@PathVariable Long timId) {
 		List<WydotRsuTim> rsus = new ArrayList<WydotRsuTim>();
 		Connection connection = null;
@@ -168,7 +168,7 @@ public class RsuController extends BaseController {
 		return ResponseEntity.ok(rsus);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/rsus-by-route/{route}")
+	@RequestMapping(method = RequestMethod.GET, produces = "application/json", value = "/rsus-by-route/{route}")
 	public ResponseEntity<ArrayList<WydotRsu>> SelectRsusByRoute(@PathVariable String route) {
 		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
 		Connection connection = null;
@@ -215,7 +215,7 @@ public class RsuController extends BaseController {
 		return ResponseEntity.ok(rsus);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/active-rsu-tim-indexes/{rsuId}")
+	@RequestMapping(method = RequestMethod.GET, produces = "application/json", value = "/active-rsu-tim-indexes/{rsuId}")
 	public ResponseEntity<List<Integer>> GetActiveRsuTimIndexes(@PathVariable Integer rsuId) {
 		List<Integer> indexes = new ArrayList<Integer>();
 

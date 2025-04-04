@@ -151,19 +151,20 @@ public class DbInteractions {
      * - Logs an error and exits the program if any required configuration value is missing.
      */
     private void validateDbConfig() {
-        if (dataSource == null) {
-            TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
-            TimeZone.setDefault(timeZone);
+        if (dataSource != null) {
+            return;
+        }
+        TimeZone timeZone = TimeZone.getTimeZone("America/Denver");
+        TimeZone.setDefault(timeZone);
 
-            // check dbconfig for null values
-            if (dbConfig.getDbUrl() == null ||
-                dbConfig.getDbUsername() == null ||
-                dbConfig.getDbPassword() == null ||
-                dbConfig.getMaximumPoolSize() == 0 ||
-                dbConfig.getConnectionTimeout() == 0) {
-                log.error("One or more database configuration values are undefined. Exiting.");
-                System.exit(1);
-            }
+        // check dbconfig for null values
+        if (dbConfig.getDbUrl() == null ||
+            dbConfig.getDbUsername() == null ||
+            dbConfig.getDbPassword() == null ||
+            dbConfig.getMaximumPoolSize() == 0 ||
+            dbConfig.getConnectionTimeout() == 0) {
+            log.error("One or more database configuration values are undefined. Exiting.");
+            System.exit(1);
         }
     }
 

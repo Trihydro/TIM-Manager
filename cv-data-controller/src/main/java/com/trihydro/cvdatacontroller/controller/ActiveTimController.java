@@ -111,6 +111,12 @@ public class ActiveTimController extends BaseController {
 				if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
 					activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
 				}
+				else {
+					utility.logWithDate("Could not set frame type from value " + frameTypeValue
+						+ " for active tim id " + activeTim.getActiveTimId() + ". Assuming Advisory.");
+					// assume advisory
+					activeTim.setFrameType(TravelerInfoType.advisory);
+				}
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,
 				// assume Advisory
@@ -182,6 +188,12 @@ public class ActiveTimController extends BaseController {
 				int frameTypeValue = rs.getInt("FRAME_TYPE");
 				if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
 					activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
+				}
+				else {
+					utility.logWithDate("Could not set frame type from value " + frameTypeValue
+							+ " for active tim id " + activeTimId + ". Assuming Advisory.");
+					// assume advisory
+					activeTim.setFrameType(TravelerInfoType.advisory);
 				}
 
 				// set dataFrame content. it's required for the ODE, so if we didn't record it,

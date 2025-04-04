@@ -357,7 +357,7 @@ public class TimService extends BaseService {
             }
 
         } catch (Exception e) {
-            log.info("Failed to get tim_id from database", e);
+            log.error("Failed to get tim_id from database", e);
         }
         return id;
     }
@@ -516,7 +516,7 @@ public class TimService extends BaseService {
             // execute insert statement
             return dbInteractions.executeAndLog(preparedStatement, "timID");
         } catch (SQLException e) {
-            log.info("Failed to insert tim into database", e);
+            log.error("Failed to insert tim into database", e);
         }
         return 0L;
     }
@@ -551,7 +551,7 @@ public class TimService extends BaseService {
             } else if (geometry != null) {
                 regionService.AddRegion(dataFrameId, null, region);
             } else {
-                log.info("addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: {})",
+                log.warn("addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: {})",
                     dataFrameId);
             }
         }
@@ -561,7 +561,7 @@ public class TimService extends BaseService {
         // save DataFrame ITIS codes
         String[] items = dataFrame.getItems();
         if (items == null || items.length == 0) {
-            log.info("No itis codes found to associate with data_frame {}", dataFrameId);
+            log.warn("No itis codes found to associate with data_frame {}", dataFrameId);
             return;
         }
         for (var i = 0; i < items.length; i++) {
@@ -572,7 +572,7 @@ public class TimService extends BaseService {
                 if (itisCodeId != null) {
                     dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
                 } else {
-                    log.info("Could not find corresponding itis code it for {}", timItisCode);
+                    log.warn("Could not find corresponding itis code it for {}", timItisCode);
                 }
             } else {
                 dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
@@ -668,7 +668,7 @@ public class TimService extends BaseService {
             }
         } catch (Exception ex) {
             // on rare occasions we see an unparsable Integer
-            log.info("Failed to parse ITIS integer({}): {}", item, ex.getMessage());
+            log.error("Failed to parse ITIS integer({}): {}", item, ex.getMessage());
         }
 
         return itisCodeId;

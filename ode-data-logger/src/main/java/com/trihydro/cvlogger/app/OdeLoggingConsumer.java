@@ -111,8 +111,8 @@ public class OdeLoggingConsumer {
 				for (ConsumerRecord<String, String> record : records) {
 					String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
 							record.topic(), producerTopic);
-					utility.logWithDate(logTxt);
-					TopicDataWrapper tdw = new TopicDataWrapper();
+                    System.out.println(logTxt);
+                    TopicDataWrapper tdw = new TopicDataWrapper();
 					tdw.setTopic(record.topic());
 					tdw.setData(record.value());
 					ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(
@@ -121,8 +121,8 @@ public class OdeLoggingConsumer {
 				}
 			}
 		} catch (Exception ex) {
-			utility.logWithDate(ex.getMessage());
-			emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
+            System.out.println(ex.getMessage());
+            emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
 					configProperties.getMailHost(), configProperties.getFromEmail(), consumerTopic + " Consumer");
 			throw (ex);
 		} finally {

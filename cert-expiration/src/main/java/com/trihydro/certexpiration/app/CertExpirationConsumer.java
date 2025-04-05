@@ -36,8 +36,8 @@ public class CertExpirationConsumer {
 	}
 
 	public void startKafkaConsumer() throws Exception {
-		utility.logWithDate("starting..............");
-		var stringConsumer = kafkaFactory.createStringConsumer(configProperties.getKafkaHostServer() + ":9092",
+        System.out.println("starting..............");
+        var stringConsumer = kafkaFactory.createStringConsumer(configProperties.getKafkaHostServer() + ":9092",
 				configProperties.getDepositGroup(), configProperties.getDepositTopic());
 		var stringProducer = kafkaFactory.createStringProducer(configProperties.getKafkaHostServer() + ":9092");
 
@@ -51,9 +51,9 @@ public class CertExpirationConsumer {
 				for (var record : records) {
 					String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
 							record.topic(), producerTopic);
-					utility.logWithDate(logTxt);
+                    System.out.println(logTxt);
 
-					TopicDataWrapper tdw = new TopicDataWrapper();
+                    TopicDataWrapper tdw = new TopicDataWrapper();
 					tdw.setTopic(record.topic());
 					tdw.setData(record.value());
 					ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(producerTopic,
@@ -62,8 +62,8 @@ public class CertExpirationConsumer {
 				}
 			}
 		} catch (Exception ex) {
-			utility.logWithDate(ex.getMessage());
-			emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
+            System.out.println(ex.getMessage());
+            emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
 					configProperties.getMailHost(), configProperties.getFromEmail(), "Logger Kafka Consumer");
 			// Re-throw exception to cause container to exit and restart
 			throw ex;

@@ -57,7 +57,7 @@ public class VerifyHSMFunctional implements Runnable {
                     HttpMethod.POST, entity, HsmResponse.class);
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                utility.logWithDate("HSM is not responsive! If an email should be sent, it will be shortly.");
+                System.out.println("HSM is not responsive! If an email should be sent, it will be shortly.");
             }
 
             if (response.getStatusCode() == HttpStatus.OK) {
@@ -65,9 +65,9 @@ public class VerifyHSMFunctional implements Runnable {
                     // send an email telling us its back up
                     String email = "HSM Functional Tester was successful in attempting to sign a TIM";
                     mailHelper.SendEmail(config.getAlertAddresses(), "HSM Back Up", email);
-                    utility.logWithDate("HSM is back up! Email sent.");
+                    System.out.println("HSM is back up! Email sent.");
                 } else {
-                    utility.logWithDate("HSM is up!");
+                    System.out.println("HSM is up!");
                 }
                 errorLastSent = null;
             } else if (shouldSendEmail(errorLastSent)) {
@@ -111,7 +111,7 @@ public class VerifyHSMFunctional implements Runnable {
             return true;
         }
 
-        utility.logWithDate("Email should not be sent at this time");
+        System.out.println("Email should not be sent at this time");
         return false;
     }
 }

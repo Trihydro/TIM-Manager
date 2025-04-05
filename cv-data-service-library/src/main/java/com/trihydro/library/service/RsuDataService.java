@@ -42,7 +42,7 @@ public class RsuDataService {
             response = restTemplateProvider.GetRestTemplate().getForEntity(url, RsuIndexInfo[].class);
         } catch (HttpClientErrorException ex) {
             if (ex.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
-                utility.logWithDate("RSU " + ipv4Address + " is unresponsive");
+                System.out.println("RSU " + ipv4Address + " is unresponsive");
                 return null;
             }
 

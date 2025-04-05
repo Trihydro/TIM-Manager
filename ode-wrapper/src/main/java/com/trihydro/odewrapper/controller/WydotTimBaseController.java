@@ -698,7 +698,7 @@ public abstract class WydotTimBaseController {
         // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
         // PER-encode TIM if we supply less than 2.
         if (milepostsAll.size() < 2) {
-            utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
+            System.out.println("Found less than 2 mileposts, unable to generate TIM.");
             return;
         }
         Milepost firstPoint = milepostsAll.get(0);
@@ -708,8 +708,7 @@ public abstract class WydotTimBaseController {
         try {
             anchor = getAnchorPoint(firstPoint, secondPoint);
         } catch (Utility.IdenticalPointsException e) {
-            utility.logWithDate(
-                "Identical points found during anchor point calculation, unable to generate TIM.");
+            System.out.println("Identical points found during anchor point calculation, unable to generate TIM.");
             return;
         }
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,

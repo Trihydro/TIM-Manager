@@ -44,13 +44,13 @@ public class RsuTimController {
         try {
             results = rsuService.getAllDeliveryStartTimes(ipv4Address);
         } catch (Exception ex) {
-            utility.logWithDate("Error invoking or reading from SNMP process: ");
+            System.out.println("Error invoking or reading from SNMP process: ");
             ex.printStackTrace();
             return ResponseEntity.status(500).body(null);
         }
 
         if (results == null) {
-            utility.logWithDate("Responding with HTTP 422 (RSU: " + ipv4Address + ")");
+            System.out.println("Responding with HTTP 422 (RSU: " + ipv4Address + ")");
             return ResponseEntity.unprocessableEntity().body(null);
         }
 

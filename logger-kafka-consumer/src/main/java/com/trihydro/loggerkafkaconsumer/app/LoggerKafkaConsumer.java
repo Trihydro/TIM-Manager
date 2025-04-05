@@ -75,7 +75,7 @@ public class LoggerKafkaConsumer {
                 ConsumerRecords<String, String> records = stringConsumer.poll(100);
                 recordCount = records.count();
                 if (recordCount > 0) {
-                    utility.logWithDate(String.format("Found %d records to parse", recordCount));
+                    System.out.println(String.format("Found %d records to parse", recordCount));
                 }
                 for (ConsumerRecord<String, String> record : records) {
                     TopicDataWrapper tdw = null;
@@ -86,24 +86,24 @@ public class LoggerKafkaConsumer {
                         e.printStackTrace();
                     }
                     if (tdw != null && tdw.getData() != null) {
-                        utility.logWithDate(String.format("Found data for topic: %s", tdw.getTopic()));
+                        System.out.println(String.format("Found data for topic: %s", tdw.getTopic()));
                         switch (tdw.getTopic()) {
                         case "topic.OdeTimJson":
-                            utility.logWithDate("Before processing JSON: " + tdw.getData());
+                            System.out.println("Before processing JSON: " + tdw.getData());
                             odeData = timDataConverter.processTimJson(tdw.getData());
-                            utility.logWithDate(String.format("Parsed TIM: %s", gson.toJson(odeData)));
+                            System.out.println(String.format("Parsed TIM: %s", gson.toJson(odeData)));
                             if (odeData != null) {
                                 if (odeData.getMetadata()
                                         .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
                                     timService.addActiveTimToDatabase(odeData);
                                 } else if (odeData.getMetadata().getRecordGeneratedBy() == null) {
                                     // we shouldn't get here...log it
-                                    utility.logWithDate("Failed to get recordGeneratedBy, continuing...");
+                                    System.out.println("Failed to get recordGeneratedBy, continuing...");
                                 } else {
                                     timService.addTimToDatabase(odeData);
                                 }
                             } else {
-                                utility.logWithDate("Failed to parse topic.OdeTimJson, insert fails");
+                                System.out.println("Failed to parse topic.OdeTimJson, insert fails");
                             }
                             break;
 
@@ -113,7 +113,7 @@ public class LoggerKafkaConsumer {
                                         CertExpirationModel.class);
                                 var success = timService.updateActiveTimExpiration(certExpirationModel);
                                 if (success) {
-                                    utility.logWithDate("Successfully updated expiration date");
+                                    System.out.println("Successfully updated expiration date");
                                 } else {
                                     // Check for issues
                                     var activeTim = activeTimService
@@ -133,15 +133,15 @@ public class LoggerKafkaConsumer {
                                         }
                                     } else if (messageSuperseded(certExpirationModel.getStartDateTime(), activeTim)) {
                                         // Message superseded
-                                        utility.logWithDate(String.format(
-                                                "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
-                                                activeTim.getActiveTimId(), certExpirationModel.getPacketID()));
+                                        System.out.println(String.format(
+                                                                                "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
+                                                                                activeTim.getActiveTimId(), certExpirationModel.getPacketID()));
                                     }
 
                                     if (!success) {
                                         // Message either not superseded, or not found in active_tim nor holding tables. error case
-                                        utility.logWithDate(String.format("Failed to update expiration for data: %s",
-                                                tdw.getData()));
+                                        System.out.println(String.format("Failed to update expiration for data: %s",
+                                                                                tdw.getData()));
 
                                         String body = "logger-kafka-consumer failed attempting to update the expiration for an ActiveTim record";
                                         body += "<br/>";
@@ -157,15 +157,15 @@ public class LoggerKafkaConsumer {
                             break;
                         }
                     } else {
-                        utility.logWithDate("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
+                        System.out.println("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
                         if (tdw != null) {
-                            utility.logWithDate(gson.toJson(tdw));
+                            System.out.println(gson.toJson(tdw));
                         }
                     }
                 }
             }
         } catch (Exception ex) {
-            utility.logWithDate(ex.getMessage());
+            System.out.println(ex.getMessage());
             emailHelper.ContainerRestarted(loggerConfig.getAlertAddresses(), loggerConfig.getMailPort(),
                     loggerConfig.getMailHost(), loggerConfig.getFromEmail(), "Logger Kafka Consumer");
             throw ex;
@@ -193,7 +193,7 @@ public class LoggerKafkaConsumer {
             // currently processing has been superseded.
             return expectedStart.getTime() < dbRecord.getStartTimestamp().getTime();
         } catch (Exception ex) {
-            utility.logWithDate("Error while checking if message was superseded: " + ex.getMessage());
+            System.out.println("Error while checking if message was superseded: " + ex.getMessage());
             return false;
         }
     }

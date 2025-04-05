@@ -41,7 +41,7 @@ public class OdeService {
     }
 
     public String sendNewTimToRsu(WydotTravelerInputData timToSend) {
-        utility.logWithDate("Sending the following new TIM to ODE for processing: " + gson.toJson(timToSend));
+        System.out.println("Sending the following new TIM to ODE for processing: " + gson.toJson(timToSend));
         String exMsg = "";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -50,7 +50,7 @@ public class OdeService {
                 .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.POST, entity, String.class);
         if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
             exMsg = "Failed to send new TIM to RSU: " + response.getBody();
-            utility.logWithDate(exMsg);
+            System.out.println(exMsg);
         }
         return exMsg;
     }
@@ -65,7 +65,7 @@ public class OdeService {
                 .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.POST, entity, String.class);
         if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
             exMsg = "Failed to send new TIM to SDX: " + response.getBody();
-            utility.logWithDate(exMsg);
+            System.out.println(exMsg);
         }
         return exMsg;
     }
@@ -80,7 +80,7 @@ public class OdeService {
                 .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.PUT, entity, String.class);
         if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
             exMsg = "Failed to update TIM on SDX: " + response.getBody();
-            utility.logWithDate(exMsg);
+            System.out.println(exMsg);
         }
         return exMsg;
     }
@@ -157,7 +157,7 @@ public class OdeService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        utility.logWithDate("Deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+        System.out.println("Deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
 
         try {
             // ODE response is misleading due to poor interpretation of SNMP results. If we
@@ -167,7 +167,7 @@ public class OdeService {
                     odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
         } catch (RestClientException ex) {
             exMsg = "Failed to contact ODE to delete message from index " + index + " on RSU " + rsu.getRsuTarget();
-            utility.logWithDate(exMsg);
+            System.out.println(exMsg);
         }
 
         return exMsg;

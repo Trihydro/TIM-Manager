@@ -99,13 +99,11 @@ public class JsonToJavaConverter {
                     ((ObjectNode) metaDataNode).replace("receivedMessageDetails", receivedMessageDetailsNode);
                 }
             }
-            // System.out.println(metaDataNode);
             odeTimMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadata.class);
         } catch (IOException e) {
-            log.info("IOException");
-            System.out.println(e.getStackTrace());
+            log.error("IOException", e);
         } catch (NullPointerException e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return odeTimMetadata;
@@ -170,8 +168,7 @@ public class JsonToJavaConverter {
             }
 
         } catch (IOException e) {
-            log.info("IOException");
-            System.out.println(e.getStackTrace());
+            log.error("IOException", e);
         } catch (NullPointerException e) {
             log.info(e.getMessage());
         }
@@ -366,7 +363,7 @@ public class JsonToJavaConverter {
             odeTimPayload = new OdeTimPayload();
             odeTimPayload.setData(tim);
         } catch (IOException e) {
-            System.out.println(e.getStackTrace());
+            log.error("IOException", e);
         } catch (NullPointerException e) {
             log.info(e.getMessage());
         }
@@ -598,7 +595,7 @@ public class JsonToJavaConverter {
             odeTimPayload = new OdeTimPayload();
             odeTimPayload.setData(tim);
         } catch (IOException e) {
-            System.out.println(e.getStackTrace());
+            log.error("IOException", e);
         } catch (NullPointerException e) {
             log.info(e.getMessage());
         }
@@ -614,7 +611,7 @@ public class JsonToJavaConverter {
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data");
             odeTim = mapper.treeToValue(timNode, OdeTravelerInformationMessage.class);
         } catch (IOException e) {
-            System.out.println(e.getStackTrace());
+            log.error("IOException", e);
         } catch (NullPointerException e) {
             log.info(e.getMessage());
         }

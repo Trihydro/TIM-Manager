@@ -402,8 +402,9 @@ public class WydotTimServiceTest {
         uut.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, 0, endPoint, reducedMileposts);
 
         // Assert
-        verify(mockUtility);
-        log.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+        verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
+        verify(mockActiveTimService).resetActiveTimsExpirationDate(any());
+        verify(mockTimService).getTim(any());
     }
 
     @Test
@@ -424,8 +425,6 @@ public class WydotTimServiceTest {
         // Assert
         verify(mockSdwService).getNewRecordId();
         verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
-        verify(mockUtility, never());
-        log.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -449,8 +448,6 @@ public class WydotTimServiceTest {
         verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verify(mockActiveTimService).resetActiveTimsExpirationDate(any());
         verify(mockTimService).getTim(any());
-        verify(mockUtility, never());
-        log.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -470,8 +467,7 @@ public class WydotTimServiceTest {
         uut.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, 0, endDateTime, endPoint);
 
         // Assert
-        verify(mockUtility);
-        log.info("No RSUs found to place TIM on, returning");
+        verify(mockActiveTimService, never()).getActiveRsuTim(any());
     }
 
     @Test
@@ -547,8 +543,6 @@ public class WydotTimServiceTest {
         uut.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, 0, endDateTime, endPoint);
 
         // Assert
-        verify(mockUtility);
-        log.info("Deleting TIM on index {} from rsu {}", rsu.getRsuIndex(), rsu.getRsuTarget());
         verify(mockOdeService).sendNewTimToRsu(any());
     }
 

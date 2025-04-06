@@ -74,8 +74,6 @@ public class SdwServiceTest extends BaseServiceTest {
     public void deleteSdxDataBySatRecordId_nullRecordIds() {
         setupApiKey();
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(null);
-        verify(mockUtility);
-        log.info("Attempting to delete satellite records failed due to no satRecordIds passed in");
         Assertions.assertNull(results);
     }
 
@@ -83,8 +81,6 @@ public class SdwServiceTest extends BaseServiceTest {
     public void deleteSdxDataBySatRecordId_emptyRecordIds() {
         setupApiKey();
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(new ArrayList<String>());
-        verify(mockUtility);
-        log.info("Attempting to delete satellite records failed due to no satRecordIds passed in");
         Assertions.assertNull(results);
     }
 
@@ -94,8 +90,6 @@ public class SdwServiceTest extends BaseServiceTest {
         satNames.add("A9184436");
         when(mockConfig.getSdwApiKey()).thenReturn(null);
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
-        verify(mockUtility);
-        log.info("Attempting to delete satellite records failed due to null apiKey");
         Assertions.assertNull(results);
     }
 
@@ -153,10 +147,6 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility);
-        log.info("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
-        verify(mockUtility);
-        log.info("Is the SDX API key valid?");
     }
 
     @Test
@@ -183,10 +173,6 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility);
-        log.info("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
-        verify(mockUtility);
-        log.info("Is the SDX API key valid?");
     }
 
     @Test
@@ -314,10 +300,6 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(result);
-        verify(mockUtility);
-        log.info("An exception occurred while attempting to decode message: something went wrong...");
-        verify(mockUtility);
-        log.info("Is the SDX API key valid?");
     }
 
     @Test
@@ -355,9 +337,5 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility);
-        log.info("An exception occurred while attempting to get messages from SDX: something went wrong...");
-        verify(mockUtility);
-        log.info("Is the SDX API key valid?");
     }
 }

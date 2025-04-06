@@ -156,7 +156,7 @@
         <dependencies>
           <dependency>
             <groupId>org.openrewrite.recipe</groupId>
-            <artifactId>rewrite-logging-frameworks</artifactId>
+            <artifactId>rewrite-migrate-java</artifactId>
             <version>3.5.0</version>
           </dependency>
         </dependencies>

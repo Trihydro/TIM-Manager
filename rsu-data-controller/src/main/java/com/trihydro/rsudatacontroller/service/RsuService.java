@@ -15,11 +15,14 @@ import com.trihydro.rsudatacontroller.config.BasicConfiguration;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.process.ProcessFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RsuService {
+    private static final Logger LOG = LoggerFactory.getLogger(RsuService.class);
     private static final String oid_rsuSRMDeliveryStart = "1.0.15628.4.1.4.1.7";
     private static final DateTimeFormatter rsuDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -51,7 +54,7 @@ public class RsuService {
 
         // If timeout occurred, return null
         if (snmpWalkOutput.matches("snmpwalk: Timeout")) {
-            System.out.println("SNMP Timeout occurred (RSU: " + rsuIpv4Address + ")");
+            LOG.info("SNMP Timeout occurred (RSU: {})", rsuIpv4Address);
             return null;
         }
 

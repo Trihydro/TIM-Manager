@@ -11,11 +11,14 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KafkaFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaFactory.class);
     private Utility utility;
 
     @Autowired
@@ -112,8 +115,8 @@ public class KafkaFactory {
         var consumer = new KafkaConsumer<String, String>(props);
         consumer.subscribe(topics);
 
-        System.out.println(String.format("Created consumer for consumer group %s, subscribed to topic(s) %s",
-                consumerGroup, String.join(", ", topics)));
+        LOG.info(String.format("Created consumer for consumer group %s, subscribed to topic(s) %s",
+            consumerGroup, String.join(", ", topics)));
 
         return consumer;
     }

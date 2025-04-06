@@ -23,13 +23,16 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OdeLoggingConsumer {
+    private static final Logger LOG = LoggerFactory.getLogger(OdeLoggingConsumer.class);
 
-	static PreparedStatement preparedStatement = null;
+    static PreparedStatement preparedStatement = null;
 	static Statement statement = null;
 	private DataLoggerConfiguration configProperties;
 	private Utility utility;
@@ -41,7 +44,7 @@ public class OdeLoggingConsumer {
 		this.configProperties = configProperties;
 		utility = _utility;
 		emailHelper = _emailHelper;
-		System.out.println("starting..............");
+        LOG.info("starting..............");
 		setupTopic();
 		startKafkaConsumer();
 	}
@@ -69,10 +72,10 @@ public class OdeLoggingConsumer {
 
 			}
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return;
 		} catch (ExecutionException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return;
 		} finally {
 			admin.close();
@@ -93,7 +96,7 @@ public class OdeLoggingConsumer {
 		KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(consumerProps);
 		String consumerTopic = configProperties.getDepositTopic();
 		stringConsumer.subscribe(Arrays.asList(consumerTopic));
-		System.out.println("Subscribed to topic " + consumerTopic);
+        LOG.info("Subscribed to topic {}", consumerTopic);
 
 		Properties producerProps = new Properties();
 		producerProps.put("bootstrap.servers", endpoint);
@@ -111,7 +114,7 @@ public class OdeLoggingConsumer {
 				for (ConsumerRecord<String, String> record : records) {
 					String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
 							record.topic(), producerTopic);
-                    System.out.println(logTxt);
+                    LOG.info(logTxt);
                     TopicDataWrapper tdw = new TopicDataWrapper();
 					tdw.setTopic(record.topic());
 					tdw.setData(record.value());
@@ -121,7 +124,7 @@ public class OdeLoggingConsumer {
 				}
 			}
 		} catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            LOG.info(ex.getMessage());
             emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
 					configProperties.getMailHost(), configProperties.getFromEmail(), consumerTopic + " Consumer");
 			throw (ex);
@@ -129,12 +132,12 @@ public class OdeLoggingConsumer {
 			try {
 				stringConsumer.close();
 			} catch (Exception consumerEx) {
-				consumerEx.printStackTrace();
+                LOG.error("Exception", consumerEx);
 			}
 			try {
 				stringProducer.close();
 			} catch (Exception producerEx) {
-				producerEx.printStackTrace();
+                LOG.error("Exception", producerEx);
 			}
 		}
 	}

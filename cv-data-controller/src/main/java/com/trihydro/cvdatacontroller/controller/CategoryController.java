@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.trihydro.library.model.Category;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,9 +25,10 @@ import springfox.documentation.annotations.ApiIgnore;
 @ApiIgnore
 @RequestMapping("category")
 public class CategoryController extends BaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(CategoryController.class);
 
-	// select all ITIS codes
-	@RequestMapping(value = "/all", method = RequestMethod.GET, headers = "Accept=application/json")
+    // select all ITIS codes
+    @RequestMapping(value = "/all", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<Category>> SelectAllCategories() {
 		List<Category> categories = new ArrayList<Category>();
 		Connection connection = null;
@@ -48,7 +51,7 @@ public class CategoryController extends BaseController {
 				categories.add(category);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(categories);
 		} finally {
 			try {
@@ -62,7 +65,7 @@ public class CategoryController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(categories);

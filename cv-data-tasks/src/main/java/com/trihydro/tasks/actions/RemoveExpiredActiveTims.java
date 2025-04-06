@@ -9,6 +9,8 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RemoveExpiredActiveTims implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(RemoveExpiredActiveTims.class);
     private DataTasksConfiguration configuration;
     private Utility utility;
     private ActiveTimService activeTimService;
@@ -33,12 +36,12 @@ public class RemoveExpiredActiveTims implements Runnable {
     }
 
     public void run() {
-        System.out.println("Running...");
+        LOG.info("Running...");
 
         try {
             // select active tims
             List<ActiveTim> activeTims = activeTimService.getExpiredActiveTims();
-            System.out.println("Found " + activeTims.size() + " expired Active TIMs");
+            LOG.info("Found {} expired Active TIMs", activeTims.size());
 
             // delete active tims from rsus
             HttpHeaders headers = new HttpHeaders();
@@ -54,12 +57,12 @@ public class RemoveExpiredActiveTims implements Runnable {
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
                 String msg = "Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }";
-                System.out.println(msg);
+                LOG.info(msg);
                 restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
         }

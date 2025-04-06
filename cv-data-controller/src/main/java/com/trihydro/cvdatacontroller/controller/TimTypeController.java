@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.trihydro.library.model.TimType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("tim-type")
 public class TimTypeController extends BaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(TimTypeController.class);
 
     @RequestMapping(value = "/tim-types")
     public ResponseEntity<List<TimType>> SelectAll() {
@@ -42,7 +45,7 @@ public class TimTypeController extends BaseController {
                 timTypes.add(timType);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(timTypes);
         } finally {
             try {
@@ -56,7 +59,7 @@ public class TimTypeController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
         return ResponseEntity.ok(timTypes);

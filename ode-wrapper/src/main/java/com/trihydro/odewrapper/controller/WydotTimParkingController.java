@@ -21,7 +21,8 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimParkingList;
 import com.trihydro.odewrapper.model.WydotTimParking;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @RestController
 @Api(description = "Parking")
 public class WydotTimParkingController extends WydotTimBaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(WydotTimParkingController.class);
 
     private final String type = "P";
 
@@ -58,9 +60,9 @@ public class WydotTimParkingController extends WydotTimBaseController {
         Date date = new Date();
 
         String msg = dateFormat.format(date) + " - Create Parking TIM";
-        System.out.println(msg);
+        LOG.info(msg);
         String post = gson.toJson(timParkingList);
-        System.out.println(post.toString());
+        LOG.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -128,7 +130,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
         Date date = new Date();
 
         String msg = dateFormat.format(date) + " - Delete Parking TIM";
-        System.out.println(msg);
+        LOG.info(msg);
         // expire and clear TIM
         wydotTimService.clearTimsById("P", id, null);
 

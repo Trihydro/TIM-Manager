@@ -8,11 +8,14 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataFrameItisCodeService extends BaseService {
+    private static final Logger LOG = LoggerFactory.getLogger(DataFrameItisCodeService.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -59,7 +62,7 @@ public class DataFrameItisCodeService extends BaseService {
             Long dataFrameItisCodeId = dbInteractions.executeAndLog(preparedStatement, "dataFrameItisCode");
             return dataFrameItisCodeId;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             return Long.valueOf(0);
         } finally {
             try {
@@ -70,7 +73,7 @@ public class DataFrameItisCodeService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
     }

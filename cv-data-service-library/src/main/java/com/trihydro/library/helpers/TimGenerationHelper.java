@@ -1184,7 +1184,7 @@ public class TimGenerationHelper {
             serviceRegion.setNwCorner(nwCorner);
             serviceRegion.setSeCorner(seCorner);
         } else {
-            System.out.println("getServiceRegion fails due to no mileposts");
+            LOG.info("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
     }

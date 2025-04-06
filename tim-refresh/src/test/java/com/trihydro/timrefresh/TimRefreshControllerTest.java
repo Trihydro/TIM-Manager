@@ -33,10 +33,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 
 @ExtendWith(MockitoExtension.class)
 public class TimRefreshControllerTest {
+    private static final Logger LOG = LoggerFactory.getLogger(TimRefreshControllerTest.class);
     private long timID = 1l;
 
     @Mock
@@ -57,7 +60,7 @@ public class TimRefreshControllerTest {
 
     @BeforeEach
     public void setup(TestInfo testInfo) {
-        System.out.println("Executing " + testInfo.getTestMethod().get().getName());
+        LOG.info("Executing {}", testInfo.getTestMethod().get().getName());
     }
 
     @Test

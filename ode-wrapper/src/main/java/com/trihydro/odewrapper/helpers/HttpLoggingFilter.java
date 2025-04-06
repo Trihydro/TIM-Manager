@@ -22,12 +22,15 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.BufferedRequestWrapper;
 import com.trihydro.odewrapper.model.BufferedResponseWrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 // Adapted from https://stackoverflow.com/a/39137815
 @Component
 public class HttpLoggingFilter implements Filter {
+    private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingFilter.class);
 
     private LoggingService loggingService;
     private BasicConfiguration basicConfiguration;
@@ -98,14 +101,14 @@ public class HttpLoggingFilter implements Filter {
                     logMessage.append(" [RESPONSE:").append(serverResponse).append("]");
                 }
             }
-            System.out.println(logMessage.toString());
+            LOG.info(logMessage.toString());
             HttpLoggingModel httpLoggingModel = new HttpLoggingModel();
             httpLoggingModel.setRequest(logMessage.toString());
             httpLoggingModel.setRequestTime(requestTime);
             httpLoggingModel.setResponseTime(new Timestamp(System.currentTimeMillis()));
             loggingService.LogHttpRequest(httpLoggingModel);
         } catch (Throwable a) {
-            System.out.println(a.getMessage());
+            LOG.info(a.getMessage());
         }
     }
 

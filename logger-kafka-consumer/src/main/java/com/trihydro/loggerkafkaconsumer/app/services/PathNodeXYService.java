@@ -7,11 +7,14 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PathNodeXYService extends BaseService {
+    private static final Logger LOG = LoggerFactory.getLogger(PathNodeXYService.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -46,7 +49,7 @@ public class PathNodeXYService extends BaseService {
             return pathNodeXYId;
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -56,7 +59,7 @@ public class PathNodeXYService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
         return Long.valueOf(0);

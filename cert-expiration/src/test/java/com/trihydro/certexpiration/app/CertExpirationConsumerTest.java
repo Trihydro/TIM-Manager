@@ -35,9 +35,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class CertExpirationConsumerTest {
+    private static final Logger LOG = LoggerFactory.getLogger(CertExpirationConsumerTest.class);
     private static final String TOPIC = "topic";
     private static final String PRODUCERTOPIC = "producerTopic";
     private static final int PARTITION = 0;
@@ -117,9 +120,9 @@ public class CertExpirationConsumerTest {
         Assertions.assertEquals(1, mockProducer.history().size());
 
         verify(mockUtility);
-        System.out.println("starting..............");
+        LOG.info("starting..............");
         verify(mockUtility);
-        System.out.println("Found topic topic, submitting to producerTopic for later consumption");
+        LOG.info("Found topic topic, submitting to producerTopic for later consumption");
 
         verifyNoMoreInteractions(mockUtility);
         Assertions.assertTrue(mockConsumer.closed());
@@ -137,10 +140,10 @@ public class CertExpirationConsumerTest {
         // Assert
         Assertions.assertEquals("Network error", ex.getMessage());
         verify(mockUtility);
-        System.out.println("starting..............");
+        LOG.info("starting..............");
 
         verify(mockUtility);
-        System.out.println("Network error");
+        LOG.info("Network error");
         verify(mockEmailHelper).ContainerRestarted(any(), any(), any(), any(), any());
 
         verifyNoMoreInteractions(mockUtility);
@@ -161,10 +164,10 @@ public class CertExpirationConsumerTest {
         Assertions.assertEquals("Mail Exception", ex.getMessage());
 
         verify(mockUtility);
-        System.out.println("starting..............");
+        LOG.info("starting..............");
 
         verify(mockUtility);
-        System.out.println("Network error");
+        LOG.info("Network error");
         verify(mockEmailHelper).ContainerRestarted(any(), any(), any(), any(), any());
 
         verifyNoMoreInteractions(mockUtility);

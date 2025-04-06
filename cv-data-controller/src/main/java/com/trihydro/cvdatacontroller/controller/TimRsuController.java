@@ -12,6 +12,8 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.TimRsu;
 import com.trihydro.library.tables.TimDbTables;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("tim-rsu")
 public class TimRsuController extends BaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(TimRsuController.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -62,11 +65,11 @@ public class TimRsuController extends BaseController {
             return ResponseEntity.ok(timRsuId);
         } catch (SQLException e) {
             if (e.getMessage() != null && e.getMessage().contains("duplicate key value violates unique constraint")) {
-                System.out.println("Record already exists in 'tim_rsu' table for tim_id " + timId + ", rsu_id " + rsuId + ", rsu_index " + rsuIndex);
+                LOG.info("Record already exists in 'tim_rsu' table for tim_id {}, rsu_id {}, rsu_index {}", timId, rsuId, rsuIndex);
             }
             else {
                 String msg = "Error adding record to 'tim_rsu' table for tim_id " + timId + ", rsu_id " + rsuId + ", rsu_index " + rsuIndex + ": " + e.getMessage();
-                System.out.println(msg);
+                LOG.info(msg);
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Long.valueOf(0));
         } finally {
@@ -78,7 +81,7 @@ public class TimRsuController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
     }
@@ -110,7 +113,7 @@ public class TimRsuController extends BaseController {
             }
             return ResponseEntity.ok(timRsus);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(timRsus);
         } finally {
             try {
@@ -124,7 +127,7 @@ public class TimRsuController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
     }
@@ -152,7 +155,7 @@ public class TimRsuController extends BaseController {
             }
             return ResponseEntity.ok(timRsu);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         } finally {
             try {
@@ -166,7 +169,7 @@ public class TimRsuController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
     }

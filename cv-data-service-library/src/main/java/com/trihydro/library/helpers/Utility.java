@@ -11,6 +11,8 @@ import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -19,6 +21,7 @@ import com.trihydro.library.model.Milepost;
 
 @Component
 public class Utility {
+    private static final Logger LOG = LoggerFactory.getLogger(Utility.class);
     private final DateFormat utcFormatMilliSec =
         new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final DateFormat utcFormatSec = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -47,7 +50,7 @@ public class Utility {
                 }
             }
         } catch (ParseException e1) {
-            e1.printStackTrace();
+            LOG.error("Exception", e1);
         }
         return convertedDate;
     }
@@ -66,8 +69,7 @@ public class Utility {
             try {
                 startDateTimeInZonedDateTime = translateToZonedDateTime(startDateTime);
             } catch (UnrecognizedDateFormatException e) {
-                System.out.println("Failed to parse dates when getting minutes between: " + startDateTime +
-                            " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
+                LOG.info("Failed to parse dates when getting minutes between: {} and {}. Unrecognized date format: {}", startDateTime, endDateTime, startDateTime);
                 return -1;
             }
 
@@ -75,8 +77,7 @@ public class Utility {
             try {
                 endDateTimeInZonedDateTime = translateToZonedDateTime(endDateTime);
             } catch (UnrecognizedDateFormatException e) {
-                System.out.println("Failed to parse dates when getting minutes between: " + startDateTime +
-                            " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
+                LOG.info("Failed to parse dates when getting minutes between: {} and {}. Unrecognized date format: {}", startDateTime, endDateTime, startDateTime);
                 return -1;
             }
 
@@ -84,8 +85,7 @@ public class Utility {
                 endDateTimeInZonedDateTime);
         }
         if (duration == -1) {
-            System.out.println("Failed to parse dates when getting minutes between: " + startDateTime + " and " +
-                        endDateTime);
+            LOG.info("Failed to parse dates when getting minutes between: {} and {}", startDateTime, endDateTime);
         }
         return duration;
     }

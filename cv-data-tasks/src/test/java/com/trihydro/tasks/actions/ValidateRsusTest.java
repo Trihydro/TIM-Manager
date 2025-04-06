@@ -45,11 +45,14 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestClientException;
 
 @ExtendWith(MockitoExtension.class)
 public class ValidateRsusTest {
+    private static final Logger LOG = LoggerFactory.getLogger(ValidateRsusTest.class);
     @Mock
     private DataTasksConfiguration mockConfig;
     @Mock
@@ -145,7 +148,7 @@ public class ValidateRsusTest {
 
         // Assert
         verify(mockUtility);
-        System.out.println("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
+        LOG.info("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
     }
 
     @Test

@@ -1,21 +1,8 @@
 ---
 type: specs.openrewrite.org/v1beta/recipe
-name: org.openrewrite.java.logging.CustomSystemPrintToLogging
-displayName: Use logger instead of system print statements (custom)
-description: Replace `System.out` and `System.err` print statements with a logger.
+name: org.mcook42.Slf4J
+displayName: Use @Slf4 instead of explicit fields
 recipeList:
-  - org.openrewrite.java.logging.SystemErrToLogging:
-      addLogger: "True"
-      loggerName: LOG
-      loggingFramework: SLF4J
-      level: info
-  - org.openrewrite.java.logging.SystemOutToLogging:
-      addLogger: "True"
-      loggerName: LOG
-      loggingFramework: SLF4J
-      level: info
-  - org.openrewrite.java.logging.PrintStackTraceToLogError:
-      addLogger: "True"
-      loggerName: LOG
-      loggingFramework: SLF4J
-      level: info
+  - org.openrewrite.java.migrate.lombok.log.UseSlf4j:
+      fieldName: LOG
+

@@ -7,16 +7,16 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
 @Component
+@Slf4j
 public class NodeLLService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(NodeLLService.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -68,7 +68,7 @@ public class NodeLLService extends BaseService {
             Long nodeLLId = dbInteractions.executeAndLog(preparedStatement, "nodell");
             return nodeLLId;
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -78,7 +78,7 @@ public class NodeLLService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
         return Long.valueOf(0);

@@ -8,6 +8,8 @@ import java.util.List;
 import com.grum.geocalc.Coordinate;
 import com.grum.geocalc.EarthCalc;
 import com.grum.geocalc.Point;
+import lombok.extern.slf4j.Slf4j;
+
 import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.WydotTim;
@@ -16,7 +18,6 @@ import com.trihydro.library.service.TimGenerationProps;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,8 +31,8 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 @Component
+@Slf4j
 public class CreateBaseTimUtil {
-    private static final Logger LOG = LoggerFactory.getLogger(CreateBaseTimUtil.class);
 
     private Utility utility;
 
@@ -122,13 +123,13 @@ public class CreateBaseTimUtil {
      */
     protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
-            LOG.info("Less than 63 mileposts, building a single region.");
+            log.info("Less than 63 mileposts, building a single region.");
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
             OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegion(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
             regions.add(singleRegion);
             return regions;
         } else {
-            LOG.info("More than 63 mileposts, building multiple regions.");
+            log.info("More than 63 mileposts, building multiple regions.");
             return buildMultipleRegions(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         }
     }
@@ -161,7 +162,7 @@ public class CreateBaseTimUtil {
             }
         }
 
-        LOG.info("Built {} regions.", regions.size());
+        log.info("Built {} regions.", regions.size());
         return regions;
     }
 

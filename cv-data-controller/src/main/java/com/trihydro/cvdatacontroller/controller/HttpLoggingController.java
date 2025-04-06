@@ -8,8 +8,8 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.model.HttpLoggingModel;
 import com.trihydro.library.tables.LoggingTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +23,10 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @RequestMapping("http-logging")
 @ApiIgnore
 public class HttpLoggingController extends BaseController {
-    private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingController.class);
 
     private LoggingTables loggingTables;
     private SQLNullHandler sqlNullHandler;
@@ -64,7 +64,7 @@ public class HttpLoggingController extends BaseController {
             Long httpLoggingId = dbInteractions.executeAndLog(preparedStatement, "http_logging");
             return ResponseEntity.ok(httpLoggingId);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Long.valueOf(0));
         } finally {
             try {
@@ -75,7 +75,7 @@ public class HttpLoggingController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
     }

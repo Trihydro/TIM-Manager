@@ -16,15 +16,15 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class SetItisCodes {
-    private static final Logger LOG = LoggerFactory.getLogger(SetItisCodes.class);
     private List<IncidentChoice> incidentProblems;
     private List<IncidentChoice> incidentEffects;
     private List<IncidentChoice> incidentActions;
@@ -139,9 +139,9 @@ public class SetItisCodes {
                 .findFirst().orElse(null);
 
         String msg1 = "Availablity : " + wydotTim.getAvailability();
-        LOG.info(msg1);
+        log.info(msg1);
         String msg = "Exit : " + wydotTim.getExit();
-        LOG.info(msg);
+        log.info(msg);
 
         if (code != null)
             items.add(wydotTim.getAvailability().toString());
@@ -163,7 +163,7 @@ public class SetItisCodes {
             }
         } else {
             items.add("7986");// Rest Area
-            LOG.info("rest area");
+            log.info("rest area");
         }
 
         return items;
@@ -195,7 +195,7 @@ public class SetItisCodes {
         List<String> items = new ArrayList<String>();
 
         String msg = "availability:" + wydotTim.getAvailability();
-        LOG.info(msg);
+        log.info(msg);
 
         ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
                 .findFirst().orElse(null);

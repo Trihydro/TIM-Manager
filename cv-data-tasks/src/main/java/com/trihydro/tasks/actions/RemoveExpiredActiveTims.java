@@ -9,8 +9,8 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,8 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class RemoveExpiredActiveTims implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(RemoveExpiredActiveTims.class);
     private DataTasksConfiguration configuration;
     private Utility utility;
     private ActiveTimService activeTimService;
@@ -36,12 +36,12 @@ public class RemoveExpiredActiveTims implements Runnable {
     }
 
     public void run() {
-        LOG.info("Running...");
+        log.info("Running...");
 
         try {
             // select active tims
             List<ActiveTim> activeTims = activeTimService.getExpiredActiveTims();
-            LOG.info("Found {} expired Active TIMs", activeTims.size());
+            log.info("Found {} expired Active TIMs", activeTims.size());
 
             // delete active tims from rsus
             HttpHeaders headers = new HttpHeaders();
@@ -57,12 +57,12 @@ public class RemoveExpiredActiveTims implements Runnable {
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
                 String msg = "Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }";
-                LOG.info(msg);
+                log.info(msg);
                 restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
         }

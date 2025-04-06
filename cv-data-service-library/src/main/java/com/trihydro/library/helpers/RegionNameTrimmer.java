@@ -1,15 +1,15 @@
 package com.trihydro.library.helpers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.trihydro.library.model.RegionNameElementCollection;
 
 @Component
+@Slf4j
 public class RegionNameTrimmer {
-    private static final Logger LOG = LoggerFactory.getLogger(RegionNameTrimmer.class);
     private static final int MAX_REGION_NAME_LENGTH = 63;
     
     private Utility utility;
@@ -55,7 +55,7 @@ public class RegionNameTrimmer {
             throw new IllegalArgumentException("Region name is too long and cannot be trimmed without unacceptable data loss");
         }
 
-        LOG.info("Trimming 'route' part of region name of TIM to fit within 63 characters.");
+        log.info("Trimming 'route' part of region name of TIM to fit within 63 characters.");
         elements.route = elements.route.substring(0, elements.route.length() - (charactersToTrim + 3));
         return elements.direction + "_" + elements.route + "..." + "_" + elements.rsuOrSat + "_" + elements.timType + "_" + elements.timId;
     }

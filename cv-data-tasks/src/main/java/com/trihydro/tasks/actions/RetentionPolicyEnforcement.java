@@ -5,14 +5,14 @@ import com.trihydro.library.service.StatusLogService;
 import com.trihydro.library.service.TimService;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class RetentionPolicyEnforcement implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(RetentionPolicyEnforcement.class);
     private Utility utility;
     private StatusLogService statusLogService;
     private TimService timService;
@@ -28,7 +28,7 @@ public class RetentionPolicyEnforcement implements Runnable {
     }
 
     public void run() {
-        LOG.info("Running...");
+        log.info("Running...");
 
         try {
             // delete all older than a month:
@@ -43,7 +43,7 @@ public class RetentionPolicyEnforcement implements Runnable {
             }
 
         } catch (Exception e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
         }

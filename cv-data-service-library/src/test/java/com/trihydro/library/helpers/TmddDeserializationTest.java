@@ -17,13 +17,13 @@ import com.trihydro.library.model.tmdd.FullEventUpdate;
 import com.trihydro.library.model.tmdd.LinkLocation;
 import com.trihydro.library.model.tmdd.MessageHeader;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class TmddDeserializationTest {
-    private static final Logger LOG = LoggerFactory.getLogger(TmddDeserializationTest.class);
 
     @Test
     public void deserializes_realData() {
@@ -113,7 +113,7 @@ public class TmddDeserializationTest {
         try {
             contents = CharStreams.toString(isr);
         } catch (IOException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         }
 
         return contents;

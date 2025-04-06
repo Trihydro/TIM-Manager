@@ -11,16 +11,16 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.TopicDataWrapper;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class CertExpirationConsumer {
-    private static final Logger LOG = LoggerFactory.getLogger(CertExpirationConsumer.class);
     private CertExpirationConfiguration configProperties;
 	private Utility utility;
 	private EmailHelper emailHelper;
@@ -39,7 +39,7 @@ public class CertExpirationConsumer {
 	}
 
 	public void startKafkaConsumer() throws Exception {
-        LOG.info("starting..............");
+        log.info("starting..............");
 		var stringConsumer = kafkaFactory.createStringConsumer(configProperties.getKafkaHostServer() + ":9092",
 				configProperties.getDepositGroup(), configProperties.getDepositTopic());
 		var stringProducer = kafkaFactory.createStringProducer(configProperties.getKafkaHostServer() + ":9092");
@@ -54,7 +54,7 @@ public class CertExpirationConsumer {
 				for (var record : records) {
 					String logTxt = String.format("Found topic %s, submitting to %s for later consumption",
 							record.topic(), producerTopic);
-                    LOG.info(logTxt);
+                    log.info(logTxt);
 
 					TopicDataWrapper tdw = new TopicDataWrapper();
 					tdw.setTopic(record.topic());
@@ -65,7 +65,7 @@ public class CertExpirationConsumer {
 				}
 			}
 		} catch (Exception ex) {
-            LOG.info(ex.getMessage());
+            log.info(ex.getMessage());
 			emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
 					configProperties.getMailHost(), configProperties.getFromEmail(), "Logger Kafka Consumer");
 			// Re-throw exception to cause container to exit and restart
@@ -75,7 +75,7 @@ public class CertExpirationConsumer {
 				stringConsumer.close();
 				stringProducer.close();
 			} catch (Exception consumerEx) {
-                LOG.error("Exception", consumerEx);
+                log.error("Exception", consumerEx);
 			}
 		}
 	}

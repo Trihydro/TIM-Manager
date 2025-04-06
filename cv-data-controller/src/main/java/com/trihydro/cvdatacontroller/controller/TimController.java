@@ -15,9 +15,9 @@ import com.trihydro.library.model.TimInsertModel;
 import com.trihydro.library.model.WydotOdeTravelerInformationMessage;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +34,8 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 
 @CrossOrigin
 @RestController
+@Slf4j
 public class TimController extends BaseController {
-    private static final Logger LOG = LoggerFactory.getLogger(TimController.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -73,7 +73,7 @@ public class TimController extends BaseController {
             }
 
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(tim);
         } finally {
             try {
@@ -87,7 +87,7 @@ public class TimController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
@@ -251,7 +251,7 @@ public class TimController extends BaseController {
             Long timId = dbInteractions.executeAndLog(preparedStatement, "timID");
             return timId;
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -261,7 +261,7 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
         return Long.valueOf(0);
@@ -280,49 +280,49 @@ public class TimController extends BaseController {
             // 1. delete old tim_rsu records
             deleteResult = deleteOldTimRsus(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                LOG.info("Failed to cleanup old tim_rsu records");
+                log.info("Failed to cleanup old tim_rsu records");
                 return ResponseEntity.ok(false);
             }
 
             // 2. delete old data_frame_itis_code records
             deleteResult &= deleteOldDataFrameItisCodes(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                LOG.info("Failed to cleanup old data_frame_itis_code records");
+                log.info("Failed to cleanup old data_frame_itis_code records");
                 return ResponseEntity.ok(false);
             }
 
             // 3. delete old region records
             deleteResult &= deleteOldRegions(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                LOG.info("Failed to cleanup old region records");
+                log.info("Failed to cleanup old region records");
                 return ResponseEntity.ok(false);
             }
 
             // 4. delete old path_node_ll records
             deleteResult &= deleteOldPathNodeLL(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                LOG.info("Failed to cleanup old path_node_ll records");
+                log.info("Failed to cleanup old path_node_ll records");
                 return ResponseEntity.ok(false);
             }
 
             // 5. delete old path records
             deleteResult &= deleteOldPaths(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                LOG.info("Failed to cleanup old path records");
+                log.info("Failed to cleanup old path records");
                 return ResponseEntity.ok(false);
             }
 
             // 6. delete old node_ll records
             deleteResult &= deleteOldNodeLL(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                LOG.info("Failed to cleanup old node_ll records");
+                log.info("Failed to cleanup old node_ll records");
                 return ResponseEntity.ok(false);
             }
 
             // 7. delete old data_frame records
             deleteResult &= deleteOldDataFrames(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                LOG.info("Failed to cleanup old data_frame records");
+                log.info("Failed to cleanup old data_frame records");
                 return ResponseEntity.ok(false);
             }
 
@@ -335,7 +335,7 @@ public class TimController extends BaseController {
             // execute delete SQL statement
             deleteResult &= dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         } finally {
             try {
@@ -346,7 +346,7 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
@@ -368,7 +368,7 @@ public class TimController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -378,12 +378,12 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
         if (!deleteResult) {
-            LOG.info("Failed to delete data_frame");
+            log.info("Failed to delete data_frame");
         }
         return deleteResult;
     }
@@ -404,7 +404,7 @@ public class TimController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -414,12 +414,12 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
         if (!deleteResult) {
-            LOG.info("Failed to delete DATA_FRAME_ITIS_CODE");
+            log.info("Failed to delete DATA_FRAME_ITIS_CODE");
         }
         return deleteResult;
     }
@@ -440,7 +440,7 @@ public class TimController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -450,12 +450,12 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
         if (!deleteResult) {
-            LOG.info("Failed to delete region");
+            log.info("Failed to delete region");
         }
         return deleteResult;
     }
@@ -476,7 +476,7 @@ public class TimController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -486,12 +486,12 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
         if (!deleteResult) {
-            LOG.info("Failed to delete path");
+            log.info("Failed to delete path");
         }
         return deleteResult;
     }
@@ -512,7 +512,7 @@ public class TimController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -522,12 +522,12 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
         if (!deleteResult) {
-            LOG.info("Failed to delete path_node_ll");
+            log.info("Failed to delete path_node_ll");
         }
         return deleteResult;
     }
@@ -549,7 +549,7 @@ public class TimController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -559,12 +559,12 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
         if (!deleteResult) {
-            LOG.info("Failed to delete node_ll");
+            log.info("Failed to delete node_ll");
         }
         return deleteResult;
     }
@@ -584,7 +584,7 @@ public class TimController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.deleteWithPossibleZero(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -594,12 +594,12 @@ public class TimController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
         if (!deleteResult) {
-            LOG.info("Failed to delete tim_rsus");
+            log.info("Failed to delete tim_rsus");
         }
         return deleteResult;
     }

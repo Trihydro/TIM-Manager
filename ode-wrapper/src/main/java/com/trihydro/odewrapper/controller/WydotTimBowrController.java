@@ -18,8 +18,8 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimBowrList;
 import com.trihydro.odewrapper.model.WydotTimBowr;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +35,9 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @Api(description = "Blow Over Weight Restrictions")
 public class WydotTimBowrController extends WydotTimBaseController {
-    private static final Logger LOG = LoggerFactory.getLogger(WydotTimBowrController.class);
 
     private final String type = "BOWR";
 
@@ -52,7 +52,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
 
     @RequestMapping(value = "/create-or-update-bowr-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createOrUpdateBowrTim(@RequestBody TimBowrList timBowrList) {
-        LOG.info("Create Or Update Blow Over Weight Restriction TIM");
+        log.info("Create Or Update Blow Over Weight Restriction TIM");
 
         List<ControllerResult> results = new ArrayList<ControllerResult>();
         List<ControllerResult> errors = new ArrayList<ControllerResult>();
@@ -79,7 +79,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
         String responseMessage = gson.toJson(results);
         if (errors.size() > 0) {
             String msg = "Failed to send TIMs: " + gson.toJson(errors);
-            LOG.info(msg);
+            log.info(msg);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -87,7 +87,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
 
     @RequestMapping(value = "/submit-bowr-clear/{clientId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> submitBowrClear(@PathVariable String clientId) {
-        LOG.info("Submit Blow Over Weight Restriction Clear");
+        log.info("Submit Blow Over Weight Restriction Clear");
 
         List<Long> existingTimIds = new ArrayList<Long>();
 
@@ -102,7 +102,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
         List<ActiveTim> existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timTypeId, null);
         if (existingActiveTims.size() == 0) {
-            LOG.info("No active TIMs found for client id: {}", clientId);
+            log.info("No active TIMs found for client id: {}", clientId);
             String responseMessage = "No active TIMs found for client id: " + clientId;
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
         }

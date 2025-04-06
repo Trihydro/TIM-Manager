@@ -11,14 +11,14 @@ import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.SecurityResultCodeType;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(BaseService.class);
 
     protected DbInteractions dbInteractions;
     protected Utility utility;
@@ -50,7 +50,7 @@ public class BaseService {
                 securityResultCodeTypes.add(securityResultCodeType);
             }
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -63,7 +63,7 @@ public class BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 

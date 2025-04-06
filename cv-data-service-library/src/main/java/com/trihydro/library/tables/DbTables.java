@@ -6,12 +6,12 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class DbTables {
-    private static final Logger LOG = LoggerFactory.getLogger(DbTables.class);
 
     public String buildInsertQueryStatement(String tableName, List<String> table) {
 
@@ -63,8 +63,8 @@ public class DbTables {
             preparedStatement.setObject(index, id);
             return preparedStatement;
         } catch (SQLException ex) {
-            LOG.info("Error creating update statement");
-            LOG.error("Exception", ex);
+            log.info("Error creating update statement");
+            log.error("Exception", ex);
         }
 
         return null;

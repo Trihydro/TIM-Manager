@@ -33,6 +33,7 @@ import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,14 +45,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.web.client.RestClientException;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class ValidateTmddTest {
-    private static final Logger LOG = LoggerFactory.getLogger(ValidateTmddTest.class);
     @Mock
     private TmddService mockTmddService;
 
@@ -276,7 +276,7 @@ public class ValidateTmddTest {
         verify(mockUtility, times(2));
         String msg = logMessageCaptor.capture();
         eq(ValidateTmdd.class);
-        LOG.info(msg);
+        log.info(msg);
         Assertions.assertEquals("Error fetching Active Tims:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
@@ -293,7 +293,7 @@ public class ValidateTmddTest {
         verify(mockUtility, times(2));
         String msg = logMessageCaptor.capture();
         eq(ValidateTmdd.class);
-        LOG.info(msg);
+        log.info(msg);
         Assertions.assertEquals("Error fetching FEUs from TMDD:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
@@ -310,7 +310,7 @@ public class ValidateTmddTest {
         verify(mockUtility, times(2));
         String msg = logMessageCaptor.capture();
         eq(ValidateTmdd.class);
-        LOG.info(msg);
+        log.info(msg);
         Assertions.assertEquals("Unable to initialize TMDD ITIS Code cache:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
@@ -342,7 +342,7 @@ public class ValidateTmddTest {
         verify(mockUtility, times(3));
         String msg = logMessageCaptor.capture();
         eq(ValidateTmdd.class);
-        LOG.info(msg);
+        log.info(msg);
         Assertions.assertEquals("Error sending summary email:", logMessageCaptor.getAllValues().get(1));
         Assertions.assertEquals("Failed to send error summary email:", logMessageCaptor.getAllValues().get(2));
     }

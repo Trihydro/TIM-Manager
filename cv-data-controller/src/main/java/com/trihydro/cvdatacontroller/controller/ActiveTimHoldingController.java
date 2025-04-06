@@ -14,8 +14,8 @@ import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +30,10 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @RequestMapping("active-tim-holding")
 @ApiIgnore
 public class ActiveTimHoldingController extends BaseController {
-    private static final Logger LOG = LoggerFactory.getLogger(ActiveTimHoldingController.class);
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
@@ -140,7 +140,7 @@ public class ActiveTimHoldingController extends BaseController {
                         activeTimHoldingId = rs.getLong("ACTIVE_TIM_HOLDING_ID");
                     }
                 } catch (Exception e) {
-                    LOG.error("Exception", e);
+                    log.error("Exception", e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
                 } finally {
                     try {
@@ -149,13 +149,13 @@ public class ActiveTimHoldingController extends BaseController {
                         if (rs != null)
                             rs.close();
                     } catch (SQLException e) {
-                        LOG.error("Exception", e);
+                        log.error("Exception", e);
                     }
                 }
             }
             return ResponseEntity.ok(activeTimHoldingId);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimHoldingId);
         } finally {
             try {
@@ -166,7 +166,7 @@ public class ActiveTimHoldingController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
     }
@@ -209,7 +209,7 @@ public class ActiveTimHoldingController extends BaseController {
             }
             return ResponseEntity.ok(holdings);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(holdings);
         } finally {
             try {
@@ -223,7 +223,7 @@ public class ActiveTimHoldingController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
     }

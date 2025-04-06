@@ -9,6 +9,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import lombok.extern.slf4j.Slf4j;
+
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.mongologger.app.MongoLoggerConfiguration;
@@ -16,13 +18,12 @@ import com.trihydro.mongologger.app.MongoLoggerConfiguration;
 import java.util.List;
 import org.bson.Document;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class MongoLogger {
-    private static final Logger LOG = LoggerFactory.getLogger(MongoLogger.class);
     private final Utility utility;
     private final EmailHelper emailHelper;
     private final String databaseName;
@@ -72,7 +73,7 @@ public class MongoLogger {
                 MongoCollection<Document> collection = database.getCollection(collectionName);
                 collection.insertMany(docs);
             } catch (Exception ex) {
-                LOG.info("Error logging to mongo collection: {}", ex.getMessage());
+                log.info("Error logging to mongo collection: {}", ex.getMessage());
 
                 String body = "The MongoLogger failed attempting to insert a record to ";
                 body += collectionName;
@@ -82,8 +83,8 @@ public class MongoLogger {
                 try {
                     emailHelper.SendEmail(alertAddresses, "MongoLogger Failed to Connect to MongoDB", body);
                 } catch (Exception e) {
-                    LOG.info("Error sending email: {}", e.getMessage());
-                    LOG.error("Exception", e);
+                    log.info("Error sending email: {}", e.getMessage());
+                    log.error("Exception", e);
                 }
             }
         }

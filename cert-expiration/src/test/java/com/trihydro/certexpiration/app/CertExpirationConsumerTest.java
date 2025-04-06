@@ -20,6 +20,7 @@ import com.trihydro.library.factory.KafkaFactory;
 import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
@@ -36,11 +37,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class CertExpirationConsumerTest {
-    private static final Logger LOG = LoggerFactory.getLogger(CertExpirationConsumerTest.class);
     private static final String TOPIC = "topic";
     private static final String PRODUCERTOPIC = "producerTopic";
     private static final int PARTITION = 0;
@@ -120,9 +120,9 @@ public class CertExpirationConsumerTest {
         Assertions.assertEquals(1, mockProducer.history().size());
 
         verify(mockUtility);
-        LOG.info("starting..............");
+        log.info("starting..............");
         verify(mockUtility);
-        LOG.info("Found topic topic, submitting to producerTopic for later consumption");
+        log.info("Found topic topic, submitting to producerTopic for later consumption");
 
         verifyNoMoreInteractions(mockUtility);
         Assertions.assertTrue(mockConsumer.closed());
@@ -140,10 +140,10 @@ public class CertExpirationConsumerTest {
         // Assert
         Assertions.assertEquals("Network error", ex.getMessage());
         verify(mockUtility);
-        LOG.info("starting..............");
+        log.info("starting..............");
 
         verify(mockUtility);
-        LOG.info("Network error");
+        log.info("Network error");
         verify(mockEmailHelper).ContainerRestarted(any(), any(), any(), any(), any());
 
         verifyNoMoreInteractions(mockUtility);
@@ -164,10 +164,10 @@ public class CertExpirationConsumerTest {
         Assertions.assertEquals("Mail Exception", ex.getMessage());
 
         verify(mockUtility);
-        LOG.info("starting..............");
+        log.info("starting..............");
 
         verify(mockUtility);
-        LOG.info("Network error");
+        log.info("Network error");
         verify(mockEmailHelper).ContainerRestarted(any(), any(), any(), any(), any());
 
         verifyNoMoreInteractions(mockUtility);

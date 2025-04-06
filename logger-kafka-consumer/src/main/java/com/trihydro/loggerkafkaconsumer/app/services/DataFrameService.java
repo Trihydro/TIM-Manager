@@ -13,16 +13,16 @@ import java.util.TimeZone;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
 @Component
+@Slf4j
 public class DataFrameService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(DataFrameService.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -84,7 +84,7 @@ public class DataFrameService extends BaseService {
                             Date dt = df.parse(dFrame.getStartDateTime());
                             time = new Timestamp(dt.getTime());
                         } catch (ParseException ex) {
-                            LOG.info("Unable to parse startdate: {}", dFrame.getStartDateTime());
+                            log.info("Unable to parse startdate: {}", dFrame.getStartDateTime());
                         }
                         sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, time);
                     }
@@ -95,7 +95,7 @@ public class DataFrameService extends BaseService {
             Long dataFrameId = dbInteractions.executeAndLog(preparedStatement, "dataframe");
             return dataFrameId;
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -105,7 +105,7 @@ public class DataFrameService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
         return Long.valueOf(0);

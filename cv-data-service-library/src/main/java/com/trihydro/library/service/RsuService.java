@@ -11,19 +11,19 @@ import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 
+import lombok.extern.slf4j.Slf4j;
 import org.gavaghan.geodesy.Ellipsoid;
 import org.gavaghan.geodesy.GeodeticCalculator;
 import org.gavaghan.geodesy.GeodeticCurve;
 import org.gavaghan.geodesy.GlobalCoordinates;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class RsuService extends CvDataServiceLibrary {
-    private static final Logger LOG = LoggerFactory.getLogger(RsuService.class);
 
     private Utility utility;
 
@@ -70,10 +70,10 @@ public class RsuService extends CvDataServiceLibrary {
 		// if there are no rsus on this route
 		List<WydotRsu> mainRsus = getRsusByRouteWithRetryAndTimeout(route);
 		if (mainRsus.size() == 0) {
-            LOG.info("No RSUs found for route {}", route);
+            log.info("No RSUs found for route {}", route);
 			return rsus;
 		} else {
-            LOG.info("Found {} RSUs for route {}", mainRsus.size(), route);
+            log.info("Found {} RSUs for route {}", mainRsus.size(), route);
 		}
 
 		Ellipsoid reference = Ellipsoid.WGS84;
@@ -149,7 +149,7 @@ public class RsuService extends CvDataServiceLibrary {
 				}
 
 				if (rsusHigher.size() == 0) {
-                    LOG.info("No RSUs found higher than 'low' point");
+                    log.info("No RSUs found higher than 'low' point");
 				}
 
 			} else {

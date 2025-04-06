@@ -24,9 +24,9 @@ import com.trihydro.library.model.TimType;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,8 +46,8 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region.Path;
 
 @Component
+@Slf4j
 public class TimService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(TimService.class);
 
     public Gson gson = new Gson();
     private ActiveTimService activeTimService;
@@ -99,7 +99,7 @@ public class TimService extends BaseService {
 
         try {
 
-            LOG.info("Called addTimToDatabase");
+            log.info("Called addTimToDatabase");
 
             ReceivedMessageDetails rxMsgDet = null;
             RecordType recType = null;
@@ -123,7 +123,7 @@ public class TimService extends BaseService {
 
             DataFrame[] dFrames = getTim((OdeTimPayload) odeData.getPayload()).getDataframes();
             if (dFrames.length == 0) {
-                LOG.info("addTimToDatabase - No dataframes found in TIM (tim_id: {})", timId);
+                log.info("addTimToDatabase - No dataframes found in TIM (tim_id: {})", timId);
                 return;
             }
             OdeTravelerInformationMessage.DataFrame firstDataFrame = dFrames[0];
@@ -149,7 +149,7 @@ public class TimService extends BaseService {
             addDataFrameItis(firstDataFrame, dataFrameId);
 
         } catch (NullPointerException e) {
-            LOG.info("Null pointer exception encountered in TimService.addTimToDatabase() method: {}", e.getMessage());
+            log.info("Null pointer exception encountered in TimService.addTimToDatabase() method: {}", e.getMessage());
         }
     }
 
@@ -158,7 +158,7 @@ public class TimService extends BaseService {
      */
     public void addActiveTimToDatabase(OdeData odeData) {
 
-        LOG.info("Called addActiveTimToDatabase");
+        log.info("Called addActiveTimToDatabase");
 
         ActiveTim activeTim;
 
@@ -206,17 +206,17 @@ public class TimService extends BaseService {
                 addDataFrameItis(dframes[0], dataFrameId);
             } else {
                 // failed to insert new tim and failed to fetch existing, log and return
-                LOG.info("Failed to insert tim, and failed to fetch existing tim. No data inserted for OdeData: {}", gson.toJson(odeData));
+                log.info("Failed to insert tim, and failed to fetch existing tim. No data inserted for OdeData: {}", gson.toJson(odeData));
                 return;
             }
         } else {
-            LOG.info("TIM already exists, tim_id {}", timId);
+            log.info("TIM already exists, tim_id {}", timId);
         }
 
         // ensure we handle a new satRecordId
         if (satRecordId != null && satRecordId != "") {
             updateTimSatRecordId(timId, satRecordId);
-            LOG.info("Added sat_record_id of {} to TIM with tim_id {}", satRecordId, timId);
+            log.info("Added sat_record_id of {} to TIM with tim_id {}", satRecordId, timId);
         }
 
         // TODO : Change to loop through RSU array - doing one rsu for now
@@ -237,7 +237,7 @@ public class TimService extends BaseService {
         var stDate = metaData.getOdeTimStartDateTime();
         if (StringUtils.isEmpty(stDate)) {
             stDate = dframes[0].getStartDateTime();
-            LOG.info(String.format(
+            log.info(String.format(
                 "addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
         }
         activeTim.setStartDateTime(stDate);
@@ -257,7 +257,7 @@ public class TimService extends BaseService {
                     activeTim.getRsuTarget());
 
             if (ath == null) {
-                LOG.info(String.format(
+                log.info(String.format(
                     "Could not find active_tim_holding for client_id '%s', direction '%s', rsu_target '%s'",
                     activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget()));
             }
@@ -267,7 +267,7 @@ public class TimService extends BaseService {
                     activeTim.getSatRecordId());
 
             if (ath == null) {
-                LOG.info(String.format(
+                log.info(String.format(
                     "Could not find active_tim_holding for client_id '%s', direction '%s', sat_record_id '%s'",
                     activeTim.getClientId(), activeTim.getDirection(), activeTim.getSatRecordId()));
             }
@@ -325,7 +325,7 @@ public class TimService extends BaseService {
         } else {
             // not from WYDOT application
             // just log for now
-            LOG.info("Inserting new active_tim, no TimType found - not from WYDOT application");
+            log.info("Inserting new active_tim, no TimType found - not from WYDOT application");
             activeTimService.insertActiveTim(activeTim);
         }
 
@@ -354,7 +354,7 @@ public class TimService extends BaseService {
             }
 
         } catch (Exception e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 if (preparedStatement != null)
@@ -363,7 +363,7 @@ public class TimService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException ex) {
-                LOG.error("Exception", ex);
+                log.error("Exception", ex);
             }
         }
         return id;
@@ -526,7 +526,7 @@ public class TimService extends BaseService {
             Long timId = dbInteractions.executeAndLog(preparedStatement, "timID");
             return timId;
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -536,7 +536,7 @@ public class TimService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
         return Long.valueOf(0);
@@ -572,7 +572,7 @@ public class TimService extends BaseService {
             } else if (geometry != null) {
                 regionService.AddRegion(dataFrameId, null, region);
             } else {
-                LOG.info("addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: {})", dataFrameId);
+                log.info("addActiveTimToDatabase - Unable to insert region, no path or geometry found (data_frame_id: {})", dataFrameId);
             }
         }  
     }
@@ -581,7 +581,7 @@ public class TimService extends BaseService {
         // save DataFrame ITIS codes
         String[] items = dataFrame.getItems();
         if (items == null || items.length == 0) {
-            LOG.info("No itis codes found to associate with data_frame {}", dataFrameId);
+            log.info("No itis codes found to associate with data_frame {}", dataFrameId);
             return;
         }
         for (var i = 0; i < items.length; i++) {
@@ -593,7 +593,7 @@ public class TimService extends BaseService {
                     dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, itisCodeId, i);
                 }
                 else {
-                    LOG.info("Could not find corresponding itis code it for {}", timItisCode);
+                    log.info("Could not find corresponding itis code it for {}", timItisCode);
                 }
             } else {
                 dataFrameItisCodeService.insertDataFrameItisCode(dataFrameId, timItisCode, i);
@@ -621,7 +621,7 @@ public class TimService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (Exception e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
     }
@@ -703,7 +703,7 @@ public class TimService extends BaseService {
                 itisCodeId = itisCode.getItisCodeId().toString();
         } catch (Exception ex) {
             // on rare occasions we see an unparsable Integer
-            LOG.info("Failed to parse ITIS integer({}): {}", item, ex.getMessage());
+            log.info("Failed to parse ITIS integer({}): {}", item, ex.getMessage());
         }
 
         return itisCodeId;

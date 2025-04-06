@@ -8,14 +8,14 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class TimRsuService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(TimRsuService.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -52,7 +52,7 @@ public class TimRsuService extends BaseService {
         } catch (SQLException e) {
             // java.sql.SQLIntegrityConstraintViolationException: ORA-00001: unique constraint (CVCOMMS.TIM_RSU_U) violated 
             if(!(e instanceof SQLIntegrityConstraintViolationException)) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
 
             return Long.valueOf(0);
@@ -65,7 +65,7 @@ public class TimRsuService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
     }

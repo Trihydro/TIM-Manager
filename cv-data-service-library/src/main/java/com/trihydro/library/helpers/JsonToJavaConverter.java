@@ -15,8 +15,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.trihydro.library.model.ContentEnum;
 
@@ -43,8 +43,8 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.util.JsonUtils;
 
 @Component
+@Slf4j
 public class JsonToJavaConverter {
-    private static final Logger LOG = LoggerFactory.getLogger(JsonToJavaConverter.class);
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -59,7 +59,7 @@ public class JsonToJavaConverter {
         try {
             spve = mapper.treeToValue(part2Node, J2735SpecialVehicleExtensions.class);
         } catch (JsonProcessingException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         }
         return spve;
     }
@@ -71,7 +71,7 @@ public class JsonToJavaConverter {
         try {
             suve = mapper.treeToValue(part2Node, J2735SupplementalVehicleExtensions.class);
         } catch (JsonProcessingException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         }
         return suve;
     }
@@ -102,10 +102,10 @@ public class JsonToJavaConverter {
             // System.out.println(metaDataNode);
             odeTimMetadata = mapper.treeToValue(metaDataNode, OdeLogMetadata.class);
         } catch (IOException e) {
-            LOG.info("IOException");
+            log.info("IOException");
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
-            LOG.info(e.getMessage());
+            log.info(e.getMessage());
         }
 
         return odeTimMetadata;
@@ -170,10 +170,10 @@ public class JsonToJavaConverter {
             }
 
         } catch (IOException e) {
-            LOG.info("IOException");
+            log.info("IOException");
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
-            LOG.info(e.getMessage());
+            log.info(e.getMessage());
         }
         return odeTimMetadata;
     }
@@ -356,7 +356,7 @@ public class JsonToJavaConverter {
                     regions.add(region);
                 }
             } else {
-                LOG.info("warning: geographicalPathNode is not an object or an array");
+                log.info("warning: geographicalPathNode is not an object or an array");
             }
 
             dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
@@ -368,7 +368,7 @@ public class JsonToJavaConverter {
         } catch (IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
-            LOG.info(e.getMessage());
+            log.info(e.getMessage());
         }
 
         return odeTimPayload;
@@ -588,7 +588,7 @@ public class JsonToJavaConverter {
                     regions.add(region);
                 }
             } else {
-                LOG.info("warning: geographicalPathNode is not an object or an array");
+                log.info("warning: geographicalPathNode is not an object or an array");
             }
 
             dataFrame.setRegions(regions.toArray(new OdeTravelerInformationMessage.DataFrame.Region[regions.size()]));
@@ -600,7 +600,7 @@ public class JsonToJavaConverter {
         } catch (IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
-            LOG.info(e.getMessage());
+            log.info(e.getMessage());
         }
 
         return odeTimPayload;
@@ -616,7 +616,7 @@ public class JsonToJavaConverter {
         } catch (IOException e) {
             System.out.println(e.getStackTrace());
         } catch (NullPointerException e) {
-            LOG.info(e.getMessage());
+            log.info(e.getMessage());
         }
 
         return odeTim;

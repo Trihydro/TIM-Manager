@@ -8,13 +8,13 @@ import java.util.ArrayList;
 
 import com.trihydro.library.model.WydotRsu;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class RsuService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(RsuService.class);
 
     public ArrayList<WydotRsu> getRsus() {
 
@@ -43,7 +43,7 @@ public class RsuService extends BaseService {
 			}
 
 		} catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
 		} finally {
 			try {
 				// close prepared statement
@@ -56,7 +56,7 @@ public class RsuService extends BaseService {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
 			}
 		}
 

@@ -24,9 +24,9 @@ import com.trihydro.tasks.models.RsuInformation;
 import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +34,8 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 
 @Component
+@Slf4j
 public class ValidateRsus implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(ValidateRsus.class);
     private DataTasksConfiguration config;
     private ActiveTimService activeTimService;
     private RsuService rsuService;
@@ -71,19 +71,19 @@ public class ValidateRsus implements Runnable {
     }
 
     public void run() {
-        LOG.info("Running...");
+        log.info("Running...");
 
         try {
             validateRsus();
         } catch (Exception ex) {
             var msg = "An unexpected error occurred that prevented RSU validation from completing.\n";
             msg += ex.getMessage();
-            LOG.info(msg);
+            log.info(msg);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Error", msg);
             } catch (Exception mailException) {
-                LOG.error("Exception", mailException);
+                log.error("Exception", mailException);
             }
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
@@ -112,7 +112,7 @@ public class ValidateRsus implements Runnable {
                 }
             }
         } catch (Exception ex) {
-            LOG.info("Unable to fetch all RSUs - will proceed with partial validation");
+            log.info("Unable to fetch all RSUs - will proceed with partial validation");
 
             unexpectedErrors.add("Error occurred while fetching all RSUs - "
                     + "unable to validate any RSUs that don't have an existing, active TIM. Error:\n" + ex.toString());
@@ -121,12 +121,12 @@ public class ValidateRsus implements Runnable {
         // If there isn't anything to verify, exit early.
         if (rsusToValidate.size() == 0) {
             var msg = "Unable to find any RSUs to validate.";
-            LOG.info(msg);
+            log.info(msg);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Error", msg);
             } catch (Exception ex) {
-                LOG.error("Exception", ex);
+                log.error("Exception", ex);
             }
 
             return;
@@ -205,7 +205,7 @@ public class ValidateRsus implements Runnable {
             for (var error : resubmitErrors) {
                 String message = String.format("Error resubmitting Active TIM %d. Error: %s", error.getActiveTimId(),
                         error.getExceptionMessage());
-                LOG.info(message);
+                log.info(message);
                 unexpectedErrors.add(message);
             }
         }
@@ -231,7 +231,7 @@ public class ValidateRsus implements Runnable {
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Results", email);
             } catch (Exception ex) {
-                LOG.error("Exception", ex);
+                log.error("Exception", ex);
             }
         }
     }
@@ -255,7 +255,7 @@ public class ValidateRsus implements Runnable {
             tasks.add(new ValidateRsu(rsu.getRsuInformation(), rsuDataService));
         }
 
-        LOG.info("Validating {} RSUs...", tasks.size());
+        log.info("Validating {} RSUs...", tasks.size());
 
         List<Future<RsuValidationResult>> futureResults = null;
         try {
@@ -263,8 +263,8 @@ public class ValidateRsus implements Runnable {
             futureResults = workerThreadPool.invokeAll(tasks, config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS);
             shutDownThreadPool(workerThreadPool);
         } catch (InterruptedException e) {
-            LOG.info("Error while executing validation tasks:");
-            LOG.error("Exception", e);
+            log.info("Error while executing validation tasks:");
+            log.error("Exception", e);
         }
 
         if (futureResults == null || futureResults.size() != rsusToValidate.size()) {
@@ -280,7 +280,7 @@ public class ValidateRsus implements Runnable {
                 // Something went wrong, and the validation task for this RSU wasn't completed.
                 String rsuIpv4Address = tasks.get(i).getIpv4Address();
                 String message = "Error while validating RSU " + rsuIpv4Address + ":\n" + e.toString();
-                LOG.info(message);
+                log.info(message);
                 rsusToValidate.get(i).setError(message);
             }
         }
@@ -307,8 +307,8 @@ public class ValidateRsus implements Runnable {
             // Fetch records for prod
             activeTims = activeTimService.getActiveRsuTims(config.getCvRestService());
         } catch (Exception ex) {
-            LOG.info("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
-            LOG.error("Exception", ex);
+            log.info("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
+            log.error("Exception", ex);
             return null;
         }
 

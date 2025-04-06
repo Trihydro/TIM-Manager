@@ -115,8 +115,8 @@ public class KafkaFactory {
         var consumer = new KafkaConsumer<String, String>(props);
         consumer.subscribe(topics);
 
-        log.info(String.format("Created consumer for consumer group %s, subscribed to topic(s) %s",
-            consumerGroup, String.join(", ", topics)));
+        log.info("Created consumer for consumer group {}, subscribed to topic(s) {}",
+            consumerGroup, String.join(", ", topics));
 
         return consumer;
     }

@@ -69,7 +69,7 @@ public class OdeMongoLoggingConsumer {
 				}
 
 				if (recStrings.size() > 0) {
-                    log.info(String.format("Found %d %s records to parse", recStrings.size(), topic));
+                    log.info("Found {} {} records to parse", recStrings.size(), topic);
 					String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
 
 					if (topic.equals("topic.OdeTimJson")) {
@@ -82,7 +82,7 @@ public class OdeMongoLoggingConsumer {
 				}
 			}
 		} catch (Exception ex) {
-            log.info("Exception in mongo logger application {}", ex.getMessage());
+            log.error("Exception in mongo logger application {}", ex.getMessage(), ex);
 			emailHelper.ContainerRestarted(mongoLoggerConfig.getAlertAddresses(), mongoLoggerConfig.getMailPort(),
 					mongoLoggerConfig.getMailHost(), mongoLoggerConfig.getFromEmail(), topic + " Mongo Consumer");
 			throw (ex);

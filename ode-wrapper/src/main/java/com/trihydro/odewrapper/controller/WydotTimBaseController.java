@@ -711,7 +711,7 @@ public abstract class WydotTimBaseController {
         try {
             anchor = getAnchorPoint(firstPoint, secondPoint);
         } catch (Utility.IdenticalPointsException e) {
-            log.info("Identical points found during anchor point calculation, unable to generate TIM.");
+            log.warn("Identical points found during anchor point calculation, unable to generate TIM.");
             return;
         }
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,

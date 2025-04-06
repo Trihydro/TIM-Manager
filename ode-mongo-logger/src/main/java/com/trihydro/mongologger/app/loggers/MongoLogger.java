@@ -73,7 +73,7 @@ public class MongoLogger {
                 MongoCollection<Document> collection = database.getCollection(collectionName);
                 collection.insertMany(docs);
             } catch (Exception ex) {
-                log.info("Error logging to mongo collection: {}", ex.getMessage());
+                log.error("Error logging to mongo collection: {}", ex.getMessage(), ex);
 
                 String body = "The MongoLogger failed attempting to insert a record to ";
                 body += collectionName;
@@ -83,7 +83,7 @@ public class MongoLogger {
                 try {
                     emailHelper.SendEmail(alertAddresses, "MongoLogger Failed to Connect to MongoDB", body);
                 } catch (Exception e) {
-                    log.info("Error sending email: {}", e.getMessage());
+                    log.error("Error sending email: {}", e.getMessage(), e);
                     log.error("Exception", e);
                 }
             }

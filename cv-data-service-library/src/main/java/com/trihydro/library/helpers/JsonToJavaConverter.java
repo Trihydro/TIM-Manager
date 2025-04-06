@@ -170,7 +170,7 @@ public class JsonToJavaConverter {
         } catch (IOException e) {
             log.error("IOException", e);
         } catch (NullPointerException e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         }
         return odeTimMetadata;
     }
@@ -365,7 +365,7 @@ public class JsonToJavaConverter {
         } catch (IOException e) {
             log.error("IOException", e);
         } catch (NullPointerException e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return odeTimPayload;
@@ -597,7 +597,7 @@ public class JsonToJavaConverter {
         } catch (IOException e) {
             log.error("IOException", e);
         } catch (NullPointerException e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return odeTimPayload;
@@ -613,7 +613,7 @@ public class JsonToJavaConverter {
         } catch (IOException e) {
             log.error("IOException", e);
         } catch (NullPointerException e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return odeTim;

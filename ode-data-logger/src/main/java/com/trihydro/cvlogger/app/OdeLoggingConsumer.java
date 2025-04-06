@@ -124,7 +124,7 @@ public class OdeLoggingConsumer {
 				}
 			}
 		} catch (Exception ex) {
-            log.info(ex.getMessage());
+            log.error("", ex);
 			emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
 					configProperties.getMailHost(), configProperties.getFromEmail(), consumerTopic + " Consumer");
 			throw (ex);

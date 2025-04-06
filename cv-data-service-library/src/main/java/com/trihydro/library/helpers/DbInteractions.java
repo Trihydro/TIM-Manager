@@ -52,7 +52,7 @@ public class DbInteractions {
             try {
                 emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
             } catch (Exception exception) {
-                log.info("Failed to open connection to {}, then failed to send email", dbConfig.getDbUrl());
+                log.warn("Failed to open connection to {}, then failed to send email", dbConfig.getDbUrl());
                 log.error("Exception", exception);
             }
             throw ex;

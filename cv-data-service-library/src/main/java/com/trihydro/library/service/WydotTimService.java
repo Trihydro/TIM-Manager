@@ -226,7 +226,7 @@ public class WydotTimService {
         try {
             regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
         } catch (IllegalArgumentException e) {
-            log.info("Failed to trim region name: {}", e.getMessage());
+            log.error("Failed to trim region name: {}", e.getMessage(), e);
             return;
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
@@ -280,7 +280,7 @@ public class WydotTimService {
             try {
                 regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
             } catch (IllegalArgumentException e) {
-                log.info("Failed to trim region name: {}", e.getMessage());
+                log.error("Failed to trim region name: {}", e.getMessage(), e);
                 return;
             }
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
@@ -429,7 +429,7 @@ public class WydotTimService {
                     try {
                         emailHelper.SendEmail(emailProps.getAlertAddresses(), "SDX Delete Fail", body);
                     } catch (Exception ex) {
-                        log.info("{}, and the email failed to send to support", body);
+                        log.warn("{}, and the email failed to send to support", body);
                         log.error("Exception", ex);
                     }
                 }
@@ -557,7 +557,7 @@ public class WydotTimService {
             restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
                     String.class);
         } catch (RuntimeException targetException) {
-            log.info("Failed to send new TIM to SDW");
+            log.warn("Failed to send new TIM to SDW");
             log.error("Exception", targetException);
         }
     }
@@ -582,7 +582,7 @@ public class WydotTimService {
             deleteTimFromRsu(rsu, timRsu.getRsuIndex());
             odeService.sendNewTimToRsu(updatedTim);
         } catch (Exception ex) {
-            log.info("Failed to send update to RSU.");
+            log.warn("Failed to send update to RSU.");
         }
     }
 
@@ -613,7 +613,7 @@ public class WydotTimService {
             restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
                     String.class);
         } catch (RuntimeException targetException) {
-            log.info("exception updating tim on SDW");
+            log.warn("exception updating tim on SDW");
             log.error("Exception", targetException);
         }
     }

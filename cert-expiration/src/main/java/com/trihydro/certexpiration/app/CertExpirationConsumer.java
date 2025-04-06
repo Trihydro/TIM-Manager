@@ -65,7 +65,7 @@ public class CertExpirationConsumer {
 				}
 			}
 		} catch (Exception ex) {
-            log.info(ex.getMessage());
+            log.error("", ex);
 			emailHelper.ContainerRestarted(configProperties.getAlertAddresses(), configProperties.getMailPort(),
 					configProperties.getMailHost(), configProperties.getFromEmail(), "Logger Kafka Consumer");
 			// Re-throw exception to cause container to exit and restart

@@ -149,7 +149,7 @@ public class TimService extends BaseService {
             addDataFrameItis(firstDataFrame, dataFrameId);
 
         } catch (NullPointerException e) {
-            log.info("Null pointer exception encountered in TimService.addTimToDatabase() method: {}", e.getMessage());
+            log.error("Null pointer exception encountered in TimService.addTimToDatabase() method: {}", e.getMessage());
         }
     }
 
@@ -237,8 +237,8 @@ public class TimService extends BaseService {
         var stDate = metaData.getOdeTimStartDateTime();
         if (StringUtils.isEmpty(stDate)) {
             stDate = dframes[0].getStartDateTime();
-            log.info(String.format(
-                "addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value %s", stDate));
+            log.info(
+                "addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value {}", stDate);
         }
         activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);
@@ -257,9 +257,9 @@ public class TimService extends BaseService {
                     activeTim.getRsuTarget());
 
             if (ath == null) {
-                log.info(String.format(
-                    "Could not find active_tim_holding for client_id '%s', direction '%s', rsu_target '%s'",
-                    activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget()));
+                log.info(
+                    "Could not find active_tim_holding for client_id '{}', direction '{}', rsu_target '{}'",
+                    activeTim.getClientId(), activeTim.getDirection(), activeTim.getRsuTarget());
             }
         } else {
             // SDX tim, fetch holding
@@ -267,9 +267,9 @@ public class TimService extends BaseService {
                     activeTim.getSatRecordId());
 
             if (ath == null) {
-                log.info(String.format(
-                    "Could not find active_tim_holding for client_id '%s', direction '%s', sat_record_id '%s'",
-                    activeTim.getClientId(), activeTim.getDirection(), activeTim.getSatRecordId()));
+                log.info(
+                    "Could not find active_tim_holding for client_id '{}', direction '{}', sat_record_id '{}'",
+                    activeTim.getClientId(), activeTim.getDirection(), activeTim.getSatRecordId());
             }
         }
 
@@ -703,7 +703,7 @@ public class TimService extends BaseService {
                 itisCodeId = itisCode.getItisCodeId().toString();
         } catch (Exception ex) {
             // on rare occasions we see an unparsable Integer
-            log.info("Failed to parse ITIS integer({}): {}", item, ex.getMessage());
+            log.error("Failed to parse ITIS integer({}): {}", item, ex.getMessage(), ex);
         }
 
         return itisCodeId;

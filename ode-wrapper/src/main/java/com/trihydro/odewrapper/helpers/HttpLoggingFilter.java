@@ -108,7 +108,7 @@ public class HttpLoggingFilter implements Filter {
             httpLoggingModel.setResponseTime(new Timestamp(System.currentTimeMillis()));
             loggingService.LogHttpRequest(httpLoggingModel);
         } catch (Throwable a) {
-            log.info(a.getMessage());
+            log.error("", a);
         }
     }
 

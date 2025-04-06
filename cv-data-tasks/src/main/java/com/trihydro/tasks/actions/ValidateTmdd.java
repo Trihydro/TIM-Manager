@@ -77,7 +77,7 @@ public class ValidateTmdd implements Runnable {
         try {
             validateTmdd();
         } catch (Exception ex) {
-            log.info("Error while validating Database with TMDD:");
+            log.warn("Error while validating Database with TMDD:");
             log.error("Exception", ex);
             errors.add(ex.getMessage());
 
@@ -92,7 +92,7 @@ public class ValidateTmdd implements Runnable {
 
                 mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Error(s)", email);
             } catch (Exception ex) {
-                log.info("Failed to send error summary email:");
+                log.warn("Failed to send error summary email:");
                 log.error("Exception", ex);
             }
         }
@@ -104,7 +104,7 @@ public class ValidateTmdd implements Runnable {
         try {
             feus = tmddService.getTmddEvents();
         } catch (Exception ex) {
-            log.info("Error fetching FEUs from TMDD:");
+            log.warn("Error fetching FEUs from TMDD:");
             log.error("Exception", ex);
             errors.add("Error fetching FEUs from TMDD: " + ex.getMessage());
 
@@ -116,7 +116,7 @@ public class ValidateTmdd implements Runnable {
         try {
             activeTims = activeTimService.getActiveTimsWithItisCodes(true);
         } catch (Exception ex) {
-            log.info("Error fetching Active Tims:");
+            log.warn("Error fetching Active Tims:");
             log.error("Exception", ex);
             errors.add("Error fetching Active Tims: " + ex.getMessage());
 
@@ -128,7 +128,7 @@ public class ValidateTmdd implements Runnable {
             try {
                 initializeTmddItisCodes();
             } catch (Exception ex) {
-                log.info("Unable to initialize TMDD ITIS Code cache:");
+                log.warn("Unable to initialize TMDD ITIS Code cache:");
                 log.error("Exception", ex);
                 errors.add("Unable to initialize TMDD ITIS Code cache: " + ex.getMessage());
 
@@ -232,7 +232,7 @@ public class ValidateTmdd implements Runnable {
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Results", email);
             } catch (Exception ex) {
-                log.info("Error sending summary email:");
+                log.warn("Error sending summary email:");
                 log.error("Exception", ex);
                 errors.add("Error sending summary email: " + ex.getMessage());
             }

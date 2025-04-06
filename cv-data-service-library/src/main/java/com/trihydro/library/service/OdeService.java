@@ -170,7 +170,7 @@ public class OdeService {
                     odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
         } catch (RestClientException ex) {
             exMsg = "Failed to contact ODE to delete message from index " + index + " on RSU " + rsu.getRsuTarget();
-            log.info(exMsg);
+            log.warn(exMsg);
         }
 
         return exMsg;

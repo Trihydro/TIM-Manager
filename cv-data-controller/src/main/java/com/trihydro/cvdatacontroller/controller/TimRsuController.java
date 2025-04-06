@@ -65,11 +65,11 @@ public class TimRsuController extends BaseController {
             return ResponseEntity.ok(timRsuId);
         } catch (SQLException e) {
             if (e.getMessage() != null && e.getMessage().contains("duplicate key value violates unique constraint")) {
-                log.info("Record already exists in 'tim_rsu' table for tim_id {}, rsu_id {}, rsu_index {}", timId, rsuId, rsuIndex);
+                log.warn("Record already exists in 'tim_rsu' table for tim_id {}, rsu_id {}, rsu_index {}", timId, rsuId, rsuIndex);
             }
             else {
                 String msg = "Error adding record to 'tim_rsu' table for tim_id " + timId + ", rsu_id " + rsuId + ", rsu_index " + rsuIndex + ": " + e.getMessage();
-                log.info(msg);
+                log.warn(msg);
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Long.valueOf(0));
         } finally {

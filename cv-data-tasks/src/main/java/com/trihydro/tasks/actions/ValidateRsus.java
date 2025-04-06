@@ -78,7 +78,7 @@ public class ValidateRsus implements Runnable {
         } catch (Exception ex) {
             var msg = "An unexpected error occurred that prevented RSU validation from completing.\n";
             msg += ex.getMessage();
-            log.info(msg);
+            log.warn(msg);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Error", msg);
@@ -112,7 +112,7 @@ public class ValidateRsus implements Runnable {
                 }
             }
         } catch (Exception ex) {
-            log.info("Unable to fetch all RSUs - will proceed with partial validation");
+            log.warn("Unable to fetch all RSUs - will proceed with partial validation");
 
             unexpectedErrors.add("Error occurred while fetching all RSUs - "
                     + "unable to validate any RSUs that don't have an existing, active TIM. Error:\n" + ex.toString());
@@ -263,7 +263,7 @@ public class ValidateRsus implements Runnable {
             futureResults = workerThreadPool.invokeAll(tasks, config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS);
             shutDownThreadPool(workerThreadPool);
         } catch (InterruptedException e) {
-            log.info("Error while executing validation tasks:");
+            log.warn("Error while executing validation tasks:");
             log.error("Exception", e);
         }
 
@@ -280,7 +280,7 @@ public class ValidateRsus implements Runnable {
                 // Something went wrong, and the validation task for this RSU wasn't completed.
                 String rsuIpv4Address = tasks.get(i).getIpv4Address();
                 String message = "Error while validating RSU " + rsuIpv4Address + ":\n" + e.toString();
-                log.info(message);
+                log.warn(message);
                 rsusToValidate.get(i).setError(message);
             }
         }
@@ -307,7 +307,7 @@ public class ValidateRsus implements Runnable {
             // Fetch records for prod
             activeTims = activeTimService.getActiveRsuTims(config.getCvRestService());
         } catch (Exception ex) {
-            log.info("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
+            log.warn("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
             log.error("Exception", ex);
             return null;
         }

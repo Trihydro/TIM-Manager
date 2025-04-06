@@ -63,7 +63,7 @@ public class DbTables {
             preparedStatement.setObject(index, id);
             return preparedStatement;
         } catch (SQLException ex) {
-            log.info("Error creating update statement");
+            log.warn("Error creating update statement");
             log.error("Exception", ex);
         }
 

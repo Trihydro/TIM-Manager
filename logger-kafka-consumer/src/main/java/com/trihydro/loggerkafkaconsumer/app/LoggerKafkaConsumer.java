@@ -79,7 +79,7 @@ public class LoggerKafkaConsumer {
                 ConsumerRecords<String, String> records = stringConsumer.poll(100);
                 recordCount = records.count();
                 if (recordCount > 0) {
-                    log.info(String.format("Found %d records to parse", recordCount));
+                    log.info("Found {} records to parse", recordCount);
                 }
                 for (ConsumerRecord<String, String> record : records) {
                     TopicDataWrapper tdw = null;
@@ -90,12 +90,12 @@ public class LoggerKafkaConsumer {
                         log.error("Exception", e);
                     }
                     if (tdw != null && tdw.getData() != null) {
-                        log.info(String.format("Found data for topic: %s", tdw.getTopic()));
+                        log.info("Found data for topic: {}", tdw.getTopic());
                         switch (tdw.getTopic()) {
                         case "topic.OdeTimJson":
                             log.info("Before processing JSON: {}", tdw.getData());
                             odeData = timDataConverter.processTimJson(tdw.getData());
-                            log.info(String.format("Parsed TIM: %s", gson.toJson(odeData)));
+                            log.info("Parsed TIM: {}", gson.toJson(odeData));
                             if (odeData != null) {
                                 if (odeData.getMetadata()
                                         .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
@@ -137,15 +137,15 @@ public class LoggerKafkaConsumer {
                                         }
                                     } else if (messageSuperseded(certExpirationModel.getStartDateTime(), activeTim)) {
                                         // Message superseded
-                                        log.info(String.format(
-                                            "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
-                                            activeTim.getActiveTimId(), certExpirationModel.getPacketID()));
+                                        log.info(
+                                            "Unable to update expiration date for Active Tim {} (Packet ID: {}). Message superseded.",
+                                            activeTim.getActiveTimId(), certExpirationModel.getPacketID());
                                     }
 
                                     if (!success) {
                                         // Message either not superseded, or not found in active_tim nor holding tables. error case
-                                        log.info(String.format("Failed to update expiration for data: %s",
-                                            tdw.getData()));
+                                        log.info("Failed to update expiration for data: {}",
+                                            tdw.getData());
 
                                         String body = "logger-kafka-consumer failed attempting to update the expiration for an ActiveTim record";
                                         body += "<br/>";
@@ -169,7 +169,7 @@ public class LoggerKafkaConsumer {
                 }
             }
         } catch (Exception ex) {
-            log.info(ex.getMessage());
+            log.error("", ex);
             emailHelper.ContainerRestarted(loggerConfig.getAlertAddresses(), loggerConfig.getMailPort(),
                     loggerConfig.getMailHost(), loggerConfig.getFromEmail(), "Logger Kafka Consumer");
             throw ex;
@@ -197,7 +197,7 @@ public class LoggerKafkaConsumer {
             // currently processing has been superseded.
             return expectedStart.getTime() < dbRecord.getStartTimestamp().getTime();
         } catch (Exception ex) {
-            log.info("Error while checking if message was superseded: {}", ex.getMessage());
+            log.error("Error while checking if message was superseded: {}", ex.getMessage(), ex);
             return false;
         }
     }

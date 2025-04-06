@@ -43,7 +43,7 @@ public class SnmpHelper {
                 endDateTime = df.format(endDate);
             } catch (IllegalArgumentException illArg) {
                 // if we failed here, set the endDateTime for 2 weeks from current time
-                log.info("Illegal Argument exception for endDate: {}", illArg.getMessage());
+                log.error("Illegal Argument exception for endDate: {}", illArg.getMessage(), illArg);
                 endDateTime = java.time.Clock.systemUTC().instant().plus(2, ChronoUnit.WEEKS).toString();
             }
         }

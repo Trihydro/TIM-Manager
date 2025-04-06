@@ -232,9 +232,9 @@ public class ActiveTimHoldingService extends BaseService {
                 log.error("Exception", e);
             }
         }
-        log.info(String.format(
-            "Called ActiveTimHolding UpdateTimExpiration with packetID: %s, expDate: %s. Successful: %s", packetID,
-            expDate, success));
+        log.info(
+            "Called ActiveTimHolding UpdateTimExpiration with packetID: {}, expDate: {}. Successful: {}", packetID,
+            expDate, success);
         return success;
     }
 

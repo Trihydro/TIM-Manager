@@ -1499,8 +1499,8 @@ public class ActiveTimController extends BaseController {
                 log.error("Exception", e);
 			}
 		}
-        log.info(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
-            packetID, expDate, success));
+        log.info("Called UpdateExpiration with packetID: {}, expDate: {}. Successful: {}",
+            packetID, expDate, success);
         return ResponseEntity.ok(success);
 	}
 
@@ -1554,8 +1554,8 @@ public class ActiveTimController extends BaseController {
                 log.error("Exception", e);
 			}
 		}
-        log.info(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
-            packetID, expDate, minStart));
+        log.info("Called GetMinExpiration with packetID: {}, expDate: {}. Min start date: {}",
+            packetID, expDate, minStart);
         return ResponseEntity.ok(minStart);
 	}
 
@@ -1590,7 +1590,7 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 		if (!success) {
-            log.info(String.format("Failed to mark active tim for deletion with activeTimId: %s", activeTimId));
+            log.info("Failed to mark active tim for deletion with activeTimId: {}", activeTimId);
         }
 		return ResponseEntity.ok(success);
 	}

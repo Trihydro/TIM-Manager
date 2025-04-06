@@ -47,7 +47,7 @@ public class RsuTimController {
         try {
             results = rsuService.getAllDeliveryStartTimes(ipv4Address);
         } catch (Exception ex) {
-            log.info("Error invoking or reading from SNMP process: ");
+            log.warn("Error invoking or reading from SNMP process: ");
             log.error("Exception", ex);
             return ResponseEntity.status(500).body(null);
         }

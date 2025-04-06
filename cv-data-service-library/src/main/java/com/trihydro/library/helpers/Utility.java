@@ -69,7 +69,7 @@ public class Utility {
             try {
                 startDateTimeInZonedDateTime = translateToZonedDateTime(startDateTime);
             } catch (UnrecognizedDateFormatException e) {
-                log.info("Failed to parse dates when getting minutes between: {} and {}. Unrecognized date format: {}", startDateTime, endDateTime, startDateTime);
+                log.warn("Failed to parse dates when getting minutes between: {} and {}. Unrecognized date format: {}", startDateTime, endDateTime, startDateTime);
                 return -1;
             }
 
@@ -77,7 +77,7 @@ public class Utility {
             try {
                 endDateTimeInZonedDateTime = translateToZonedDateTime(endDateTime);
             } catch (UnrecognizedDateFormatException e) {
-                log.info("Failed to parse dates when getting minutes between: {} and {}. Unrecognized date format: {}", startDateTime, endDateTime, startDateTime);
+                log.warn("Failed to parse dates when getting minutes between: {} and {}. Unrecognized date format: {}", startDateTime, endDateTime, startDateTime);
                 return -1;
             }
 

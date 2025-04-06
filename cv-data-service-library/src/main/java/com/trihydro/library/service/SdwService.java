@@ -68,8 +68,8 @@ public class SdwService {
 
             results = Arrays.asList(response.getBody());
         } catch (RestClientException ex) {
-            log.info("An exception occurred while attempting to get messages from SDX: {}", ex.getMessage());
-            log.info("Is the SDX API key valid?");
+            log.error("An exception occurred while attempting to get messages from SDX: {}", ex.getMessage());
+            log.warn("Is the SDX API key valid?");
             log.error("Exception", ex);
         }
 
@@ -110,8 +110,8 @@ public class SdwService {
 
             decodeResponse = response.getBody();
         } catch (RestClientException ex) {
-            log.info("An exception occurred while attempting to decode message: {}", ex.getMessage());
-            log.info("Is the SDX API key valid?");
+            log.error("An exception occurred while attempting to decode message: {}", ex.getMessage());
+            log.warn("Is the SDX API key valid?");
             log.error("Exception", ex);
             return null;
         }
@@ -177,8 +177,8 @@ public class SdwService {
         try {
             response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
         } catch (HttpClientErrorException ex) {
-            log.info("An exception occurred while attempting to delete satellite records: {}", ex.getMessage());
-            log.info("Is the SDX API key valid?");
+            log.error("An exception occurred while attempting to delete satellite records: {}", ex.getMessage());
+            log.warn("Is the SDX API key valid?");
             log.error("Exception", ex);
             response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
         }
@@ -211,8 +211,8 @@ public class SdwService {
         try {
             response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
         } catch (HttpClientErrorException ex) {
-            log.info("An exception occurred while attempting to delete satellite records: {}", ex.getMessage());
-            log.info("Is the SDX API key valid?");
+            log.error("An exception occurred while attempting to delete satellite records: {}", ex.getMessage());
+            log.warn("Is the SDX API key valid?");
             log.error("Exception", ex);
             response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
         }

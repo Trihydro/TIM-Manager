@@ -57,7 +57,7 @@ public class ValidateSdx implements Runnable {
         try {
             validateSdx();
         } catch (Exception ex) {
-            log.info("Error while validating SDX:");
+            log.warn("Error while validating SDX:");
             log.error("Exception", ex);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.

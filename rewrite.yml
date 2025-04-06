@@ -1,8 +1,0 @@
----
-type: specs.openrewrite.org/v1beta/recipe
-name: org.mcook42.Slf4J
-displayName: Use @Slf4 instead of explicit fields
-recipeList:
-  - org.openrewrite.java.migrate.lombok.log.UseSlf4j:
-      fieldName: LOG
-

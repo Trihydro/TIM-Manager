@@ -1,0 +1,21 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.java.logging.CustomSystemPrintToLogging
+displayName: Use logger instead of system print statements (custom)
+description: Replace `System.out` and `System.err` print statements with a logger.
+recipeList:
+  - org.openrewrite.java.logging.SystemErrToLogging:
+      addLogger: "True"
+      loggerName: LOG
+      loggingFramework: SLF4J
+      level: info
+  - org.openrewrite.java.logging.SystemOutToLogging:
+      addLogger: "True"
+      loggerName: LOG
+      loggingFramework: SLF4J
+      level: info
+  - org.openrewrite.java.logging.PrintStackTraceToLogError:
+      addLogger: "True"
+      loggerName: LOG
+      loggingFramework: SLF4J
+      level: info

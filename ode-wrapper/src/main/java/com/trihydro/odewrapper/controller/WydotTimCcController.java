@@ -55,10 +55,11 @@ public class WydotTimCcController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - CHAIN CONTROL TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - CHAIN CONTROL TIM";
+        System.out.println(msg);
 
         String post = gson.toJson(timRcList);
-        utility.logWithDate(post.toString(), this.getClass());
+        System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;

@@ -56,9 +56,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Create Incident TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - Create Incident TIM";
+        System.out.println(msg);
         String post = gson.toJson(timIncidentList);
-        utility.logWithDate(post.toString(), this.getClass());
+        System.out.println(post.toString());
 
         List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
 
@@ -94,9 +95,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Update Incident TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - Update Incident TIM";
+        System.out.println(msg);
         String post = gson.toJson(timIncidentList);
-        utility.logWithDate(post.toString(), this.getClass());
+        System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -148,7 +150,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Delete Incident TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - Delete Incident TIM";
+        System.out.println(msg);
 
         // expire and clear TIM
         wydotTimService.clearTimsById("I", incidentId, null);

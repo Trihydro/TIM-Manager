@@ -59,9 +59,9 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
-        utility.logWithDate("Create/Update RW TIM", this.getClass());
+        System.out.println("Create/Update RW TIM");
         String post = gson.toJson(timRwList);
-        utility.logWithDate(post.toString(), this.getClass());
+        System.out.println(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -274,7 +274,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
-        utility.logWithDate("Delete RW TIM", this.getClass());
+        System.out.println("Delete RW TIM");
         // expire and clear TIM
         wydotTimService.clearTimsById(type, id, null, true);
 

@@ -52,10 +52,6 @@ public class Utility {
         return convertedDate;
     }
 
-    public <T> void logWithDate(String msg, Class<T> clazz) {
-        System.out.println(clazz.getSimpleName() + ": " + msg);
-    }
-
     public int getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime) {
         int duration = getMinutesDurationWithSimpleDateFormat(startDateTime, endDateTime);
         if (duration == -1) {

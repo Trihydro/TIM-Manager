@@ -27,7 +27,7 @@ public class DbInteractions {
         dbConfig = props;
         utility = _utility;
         emailHelper = _emailHelper;
-        utility.logWithDate("A new DbInteractions instance has been created.", this.getClass());
+        System.out.println("A new DbInteractions instance has been created.");
         validateDbConfig();
     }
 

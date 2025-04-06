@@ -25,7 +25,7 @@ public class RetentionPolicyEnforcement implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("Running...", this.getClass());
+        System.out.println("Running...");
 
         try {
             // delete all older than a month:

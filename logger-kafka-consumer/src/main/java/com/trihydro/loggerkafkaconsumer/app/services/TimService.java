@@ -155,7 +155,7 @@ public class TimService extends BaseService {
      */
     public void addActiveTimToDatabase(OdeData odeData) {
 
-        utility.logWithDate("Called addActiveTimToDatabase", TimService.class);
+        System.out.println("Called addActiveTimToDatabase");
 
         ActiveTim activeTim;
 

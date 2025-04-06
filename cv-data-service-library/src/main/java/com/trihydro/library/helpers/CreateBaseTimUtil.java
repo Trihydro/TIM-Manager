@@ -119,13 +119,13 @@ public class CreateBaseTimUtil {
      */
     protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
-            utility.logWithDate("Less than 63 mileposts, building a single region.", CreateBaseTimUtil.class);
+            System.out.println("Less than 63 mileposts, building a single region.");
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
             OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegion(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
             regions.add(singleRegion);
             return regions;
         } else {
-            utility.logWithDate("More than 63 mileposts, building multiple regions.", CreateBaseTimUtil.class);
+            System.out.println("More than 63 mileposts, building multiple regions.");
             return buildMultipleRegions(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         }
     }
@@ -158,7 +158,7 @@ public class CreateBaseTimUtil {
             }
         }
 
-        utility.logWithDate("Built " + regions.size() + " regions.", CreateBaseTimUtil.class);
+        System.out.println("Built " + regions.size() + " regions.");
         return regions;
     }
 

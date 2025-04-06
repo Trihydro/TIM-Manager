@@ -50,7 +50,7 @@ public class VerifyHSMFunctional implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("Running...", this.getClass());
+        System.out.println("Running...");
         try {
             // ping HSM
             var response = restTemplateProvider.GetRestTemplate_NoErrors().exchange(config.getHsmUrl() + "/signtim/",

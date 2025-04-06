@@ -146,24 +146,6 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>2.22.2</version>
       </plugin>
-      <plugin>
-        <groupId>org.openrewrite.maven</groupId>
-        <artifactId>rewrite-maven-plugin</artifactId>
-        <version>6.4.0</version>
-        <configuration>
-          <exportDatatables>true</exportDatatables>
-          <activeRecipes>
-            <recipe>org.openrewrite.java.logging.slf4j.Slf4jBestPractices</recipe>
-          </activeRecipes>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.openrewrite.recipe</groupId>
-            <artifactId>rewrite-logging-frameworks</artifactId>
-            <version>3.5.0</version>
-          </dependency>
-        </dependencies>
-      </plugin>
     </plugins>
   </build>
 </project>

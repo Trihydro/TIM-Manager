@@ -119,11 +119,6 @@ public class CertExpirationConsumerTest {
         // Assert
         Assertions.assertEquals(1, mockProducer.history().size());
 
-        verify(mockUtility);
-        log.info("starting..............");
-        verify(mockUtility);
-        log.info("Found topic topic, submitting to producerTopic for later consumption");
-
         verifyNoMoreInteractions(mockUtility);
         Assertions.assertTrue(mockConsumer.closed());
         Assertions.assertTrue(mockProducer.closed());
@@ -139,11 +134,6 @@ public class CertExpirationConsumerTest {
 
         // Assert
         Assertions.assertEquals("Network error", ex.getMessage());
-        verify(mockUtility);
-        log.info("starting..............");
-
-        verify(mockUtility);
-        log.info("Network error");
         verify(mockEmailHelper).ContainerRestarted(any(), any(), any(), any(), any());
 
         verifyNoMoreInteractions(mockUtility);
@@ -163,14 +153,8 @@ public class CertExpirationConsumerTest {
         // Assert
         Assertions.assertEquals("Mail Exception", ex.getMessage());
 
-        verify(mockUtility);
-        log.info("starting..............");
-
-        verify(mockUtility);
-        log.info("Network error");
         verify(mockEmailHelper).ContainerRestarted(any(), any(), any(), any(), any());
 
-        verifyNoMoreInteractions(mockUtility);
         Assertions.assertTrue(mockConsumer.closed());
         Assertions.assertTrue(mockProducer.closed());
     }

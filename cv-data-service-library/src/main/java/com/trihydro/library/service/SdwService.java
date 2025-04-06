@@ -18,6 +18,8 @@ import com.trihydro.library.model.SDXQuery;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.SemiDialogID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -32,6 +34,7 @@ import org.springframework.web.client.RestClientException;
 
 @Component
 public class SdwService {
+    private static final Logger LOG = LoggerFactory.getLogger(SdwService.class);
     public Gson gson = new Gson();
     private SdwProps configProperties;
     private Utility utility;
@@ -65,9 +68,9 @@ public class SdwService {
 
             results = Arrays.asList(response.getBody());
         } catch (RestClientException ex) {
-            System.out.println("An exception occurred while attempting to get messages from SDX: " + ex.getMessage());
-            System.out.println("Is the SDX API key valid?");
-            ex.printStackTrace();
+            LOG.info("An exception occurred while attempting to get messages from SDX: {}", ex.getMessage());
+            LOG.info("Is the SDX API key valid?");
+            LOG.error("Exception", ex);
         }
 
         return results;
@@ -107,9 +110,9 @@ public class SdwService {
 
             decodeResponse = response.getBody();
         } catch (RestClientException ex) {
-            System.out.println("An exception occurred while attempting to decode message: " + ex.getMessage());
-            System.out.println("Is the SDX API key valid?");
-            ex.printStackTrace();
+            LOG.info("An exception occurred while attempting to decode message: {}", ex.getMessage());
+            LOG.info("Is the SDX API key valid?");
+            LOG.error("Exception", ex);
             return null;
         }
 
@@ -123,7 +126,7 @@ public class SdwService {
             try {
                 results.add(Integer.parseInt(itisCode));
             } catch (NumberFormatException ex) {
-                ex.printStackTrace();
+                LOG.error("Exception", ex);
             }
         }
 
@@ -153,9 +156,9 @@ public class SdwService {
         HashMap<Integer, Boolean> results = null;
         if (satRecordIds == null || satRecordIds.size() == 0 || configProperties.getSdwApiKey() == null) {
             if (configProperties.getSdwApiKey() == null) {
-                System.out.println("Attempting to delete satellite records failed due to null apiKey");
+                LOG.info("Attempting to delete satellite records failed due to null apiKey");
             } else {
-                System.out.println("Attempting to delete satellite records failed due to no satRecordIds passed in");
+                LOG.info("Attempting to delete satellite records failed due to no satRecordIds passed in");
             }
             return results;
         }
@@ -174,14 +177,14 @@ public class SdwService {
         try {
             response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
         } catch (HttpClientErrorException ex) {
-            System.out.println("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
-            System.out.println("Is the SDX API key valid?");
-            ex.printStackTrace();
+            LOG.info("An exception occurred while attempting to delete satellite records: {}", ex.getMessage());
+            LOG.info("Is the SDX API key valid?");
+            LOG.error("Exception", ex);
             response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
         }
 
         if (response.getStatusCode() != HttpStatus.OK) {
-            System.out.println("Failed to call delete-multiple-by-id on SDX api");
+            LOG.info("Failed to call delete-multiple-by-id on SDX api");
         }
         return response.getBody();
     }
@@ -190,9 +193,9 @@ public class SdwService {
         HashMap<Integer, Boolean> results = null;
         if (satRecordInts == null || satRecordInts.size() == 0 || configProperties.getSdwApiKey() == null) {
             if (configProperties.getSdwApiKey() == null) {
-                System.out.println("Attempting to delete satellite records failed due to null apiKey");
+                LOG.info("Attempting to delete satellite records failed due to null apiKey");
             } else {
-                System.out.println("Attempting to delete satellite records failed due to no satRecordIds passed in");
+                LOG.info("Attempting to delete satellite records failed due to no satRecordIds passed in");
             }
             return results;
         }
@@ -208,14 +211,14 @@ public class SdwService {
         try {
             response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
         } catch (HttpClientErrorException ex) {
-            System.out.println("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
-            System.out.println("Is the SDX API key valid?");
-            ex.printStackTrace();
+            LOG.info("An exception occurred while attempting to delete satellite records: {}", ex.getMessage());
+            LOG.info("Is the SDX API key valid?");
+            LOG.error("Exception", ex);
             response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
         }
 
         if (response.getStatusCode() != HttpStatus.OK) {
-            System.out.println("Failed to call delete-multiple-by-id on SDX api");
+            LOG.info("Failed to call delete-multiple-by-id on SDX api");
         }
         return response.getBody();
     }

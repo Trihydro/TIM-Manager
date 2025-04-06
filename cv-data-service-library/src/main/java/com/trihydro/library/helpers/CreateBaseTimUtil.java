@@ -15,6 +15,8 @@ import com.trihydro.library.model.WydotTravelerInputData;
 import com.trihydro.library.service.TimGenerationProps;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.MutcdCode.MutcdCodeEnum;
 
 @Component
 public class CreateBaseTimUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(CreateBaseTimUtil.class);
 
     private Utility utility;
 
@@ -119,13 +122,13 @@ public class CreateBaseTimUtil {
      */
     protected List<OdeTravelerInformationMessage.DataFrame.Region> buildRegions(BigDecimal defaultLaneWidth, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
         if (reducedMileposts.size() <= 63) {
-            System.out.println("Less than 63 mileposts, building a single region.");
+            LOG.info("Less than 63 mileposts, building a single region.");
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<OdeTravelerInformationMessage.DataFrame.Region>();
             OdeTravelerInformationMessage.DataFrame.Region singleRegion = buildSingleRegion(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
             regions.add(singleRegion);
             return regions;
         } else {
-            System.out.println("More than 63 mileposts, building multiple regions.");
+            LOG.info("More than 63 mileposts, building multiple regions.");
             return buildMultipleRegions(defaultLaneWidth, allMileposts, reducedMileposts, anchor);
         }
     }
@@ -158,7 +161,7 @@ public class CreateBaseTimUtil {
             }
         }
 
-        System.out.println("Built " + regions.size() + " regions.");
+        LOG.info("Built {} regions.", regions.size());
         return regions;
     }
 

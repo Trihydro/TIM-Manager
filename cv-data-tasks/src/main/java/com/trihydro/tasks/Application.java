@@ -43,6 +43,8 @@ import com.trihydro.tasks.actions.ValidateTmdd;
 import com.trihydro.tasks.actions.VerifyHSMFunctional;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -59,7 +61,8 @@ import org.springframework.context.annotation.Import;
                 SnmpHelper.class, RegionNameTrimmer.class })
 
 public class Application {
-        protected static DataTasksConfiguration config;
+    private static final Logger LOG = LoggerFactory.getLogger(Application.class);
+    protected static DataTasksConfiguration config;
 
         private RemoveExpiredActiveTims removeExpiredActiveTims;
         private CleanupActiveTims cleanupActiveTims;
@@ -109,11 +112,11 @@ public class Application {
 
                 // HSM Check
                 if (config.getRunHsmCheck()) {
-                    System.out.println("HSM check configured, scheduling...");
+                    LOG.info("HSM check configured, scheduling...");
                     scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
                                         config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
                 } else {
-                    System.out.println("HSM check not configured, skipping...");
+                    LOG.info("HSM check not configured, skipping...");
                 }
 
                 // RSU Validator

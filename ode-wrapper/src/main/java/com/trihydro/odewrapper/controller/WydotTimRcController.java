@@ -21,7 +21,8 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTimRc;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @RestController
 @Api(description = "Road Conditions")
 public class WydotTimRcController extends WydotTimBaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(WydotTimRcController.class);
 
     private final String type = "RC";
     protected static BasicConfiguration configuration;
@@ -59,9 +61,9 @@ public class WydotTimRcController extends WydotTimBaseController {
         Date date = new Date();
 
         String msg1 = dateFormat.format(date) + " - Create Update RC TIM";
-        System.out.println(msg1);
+        LOG.info(msg1);
         String post = gson.toJson(timRcList);
-        System.out.println(post.toString());
+        LOG.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
@@ -91,7 +93,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         String responseMessage = gson.toJson(resultList);
         if (errList.size() > 0) {
             String msg = "Failed to send TIMs: " + gson.toJson(errList);
-            System.out.println(msg);
+            LOG.info(msg);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
@@ -105,9 +107,9 @@ public class WydotTimRcController extends WydotTimBaseController {
         Date date = new Date();
 
         String msg = dateFormat.format(date) + " - All Clear";
-        System.out.println(msg);
+        LOG.info(msg);
         String post = gson.toJson(timRcList);
-        System.out.println(post.toString());
+        LOG.info(post.toString());
 
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;

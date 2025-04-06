@@ -26,9 +26,12 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class RsuServiceTest {
+    private static final Logger LOG = LoggerFactory.getLogger(RsuServiceTest.class);
     @Mock
     ProcessFactory mockProcessFactory;
     ArgumentCaptor<String> factoryArgs = ArgumentCaptor.forClass(String.class);
@@ -136,7 +139,7 @@ public class RsuServiceTest {
         // Assert
         Assertions.assertNull(results);
         verify(mockUtility);
-        System.out.println(ArgumentMatchers.<String>any());
+        LOG.info(ArgumentMatchers.<String>any());
     }
 
     @Test

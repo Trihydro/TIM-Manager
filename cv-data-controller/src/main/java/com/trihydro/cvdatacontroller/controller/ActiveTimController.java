@@ -29,6 +29,8 @@ import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +50,9 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @RequestMapping("active-tim")
 @ApiIgnore
 public class ActiveTimController extends BaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(ActiveTimController.class);
 
-	private TimDbTables timDbTables;
+    private TimDbTables timDbTables;
 	private SQLNullHandler sqlNullHandler;
 	protected Calendar UTCCalendar;
 
@@ -187,7 +190,7 @@ public class ActiveTimController extends BaseController {
 				activeTims.add(activeTim);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -201,7 +204,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -316,7 +319,7 @@ public class ActiveTimController extends BaseController {
 				activeTim.setDfContent(contentType);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
 		} finally {
 			try {
@@ -330,7 +333,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -354,7 +357,7 @@ public class ActiveTimController extends BaseController {
 			// execute update statement
 			success = dbInteractions.updateOrDelete(preparedStatement);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
 		} finally {
 			try {
@@ -365,7 +368,7 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(success);
@@ -415,7 +418,7 @@ public class ActiveTimController extends BaseController {
 
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -429,7 +432,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(activeTims);
@@ -456,7 +459,7 @@ public class ActiveTimController extends BaseController {
 
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -470,7 +473,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(activeTims);
@@ -494,7 +497,7 @@ public class ActiveTimController extends BaseController {
 			rs = statement.executeQuery(selectStatement);
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -508,7 +511,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -543,7 +546,7 @@ public class ActiveTimController extends BaseController {
 				indices.add(rs.getInt("RSU_INDEX"));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(indices);
 		} finally {
 			try {
@@ -557,7 +560,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -590,7 +593,7 @@ public class ActiveTimController extends BaseController {
 			rs = statement.executeQuery(query);
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -604,7 +607,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -627,7 +630,7 @@ public class ActiveTimController extends BaseController {
 			rs = statement.executeQuery(query);
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -641,7 +644,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -672,7 +675,7 @@ public class ActiveTimController extends BaseController {
 				itisCodes.add(rs.getInt("ITIS_CODE"));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(itisCodes);
 		} finally {
 			try {
@@ -686,7 +689,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(itisCodes);
@@ -711,10 +714,10 @@ public class ActiveTimController extends BaseController {
 			// execute delete SQL stetement
 			deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
 
-			System.out.println("Active Tim (active_tim_id " + activeTimId + ") is deleted!");
+            LOG.info("Active Tim (active_tim_id {}) is deleted!", activeTimId);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(deleteActiveTimResult);
 		} finally {
 			try {
@@ -725,7 +728,7 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -757,11 +760,10 @@ public class ActiveTimController extends BaseController {
 			// execute delete SQL stetement
 			deleteActiveTimResult = dbInteractions.updateOrDelete(preparedStatement);
 
-			System.out.println("Active Tims (active_tim_ids "
-					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") deleted!");
+            LOG.info("Active Tims (active_tim_ids {}) deleted!", activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(deleteActiveTimResult);
 		} finally {
 			try {
@@ -772,7 +774,7 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -807,7 +809,7 @@ public class ActiveTimController extends BaseController {
 			rs = ps.executeQuery();
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -819,7 +821,7 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -879,7 +881,7 @@ public class ActiveTimController extends BaseController {
 			rs = ps.executeQuery();
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -891,7 +893,7 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -911,7 +913,7 @@ public class ActiveTimController extends BaseController {
 			rs = statement.executeQuery("select * from active_tim where TIM_TYPE_ID = " + timTypeId);
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -925,7 +927,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -949,7 +951,7 @@ public class ActiveTimController extends BaseController {
 			rs = statement.executeQuery(selectStatement);
 			activeTims = getActiveTimFromRS(rs, false);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
 		} finally {
 			try {
@@ -963,7 +965,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -1088,7 +1090,7 @@ public class ActiveTimController extends BaseController {
 				results.add(activeTim);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		} finally {
 			try {
@@ -1102,7 +1104,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -1171,7 +1173,7 @@ public class ActiveTimController extends BaseController {
 				results.add(activeTim);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		} finally {
 			try {
@@ -1185,7 +1187,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -1216,7 +1218,7 @@ public class ActiveTimController extends BaseController {
 				activeTim = activeTims.get(activeTims.size() - 1);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTim);
 		} finally {
 			try {
@@ -1230,7 +1232,7 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -1317,7 +1319,7 @@ public class ActiveTimController extends BaseController {
 			activeTimId = dbInteractions.executeAndLog(preparedStatement, "active tim");
 			return ResponseEntity.ok(activeTimId);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTimId);
 		} finally {
 			try {
@@ -1328,7 +1330,7 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 	}
@@ -1436,11 +1438,10 @@ public class ActiveTimController extends BaseController {
 				result &= dbInteractions.updateOrDelete(preparedStatement);
 			}
 
-			System.out.println("Reset expiration date for Active Tims (active_tim_ids "
-					+ activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+            LOG.info("Reset expiration date for Active Tims (active_tim_ids {})", activeTimIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
 		} finally {
 			try {
@@ -1451,7 +1452,7 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 
@@ -1484,7 +1485,7 @@ public class ActiveTimController extends BaseController {
 			// execute update statement
 			success = dbInteractions.updateOrDelete(preparedStatement);
 		} catch (Exception e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
 		} finally {
 			try {
@@ -1495,11 +1496,11 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
-        System.out.println(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
-				packetID, expDate, success));
+        LOG.info(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
+            packetID, expDate, success));
         return ResponseEntity.ok(success);
 	}
 
@@ -1536,7 +1537,7 @@ public class ActiveTimController extends BaseController {
 				minStart = utility.timestampFormat.format(tmpTs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(minStart);
 		} finally {
 			try {
@@ -1550,11 +1551,11 @@ public class ActiveTimController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
-        System.out.println(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
-				packetID, expDate, minStart));
+        LOG.info(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
+            packetID, expDate, minStart));
         return ResponseEntity.ok(minStart);
 	}
 
@@ -1574,7 +1575,7 @@ public class ActiveTimController extends BaseController {
 			// execute update statement
 			success = dbInteractions.updateOrDelete(preparedStatement);
 		} catch (Exception e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
 		} finally {
 			try {
@@ -1585,11 +1586,11 @@ public class ActiveTimController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 		if (!success) {
-            System.out.println(String.format("Failed to mark active tim for deletion with activeTimId: %s", activeTimId));
+            LOG.info(String.format("Failed to mark active tim for deletion with activeTimId: %s", activeTimId));
         }
 		return ResponseEntity.ok(success);
 	}

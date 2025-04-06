@@ -10,6 +10,8 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CleanupActiveTims implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(CleanupActiveTims.class);
     private DataTasksConfiguration configuration;
     private Utility utility;
     private ActiveTimService activeTimService;
@@ -34,7 +37,7 @@ public class CleanupActiveTims implements Runnable {
     }
 
     public void run() {
-        System.out.println("Running...");
+        LOG.info("Running...");
 
         try {
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -43,19 +46,19 @@ public class CleanupActiveTims implements Runnable {
             // select active tims missing ITIS codes
             tmp = activeTimService.getActiveTimsMissingItisCodes();
             if (tmp.size() > 0) {
-                System.out.println("Found " + tmp.size() + " Active TIMs missing ITIS Codes");
+                LOG.info("Found {} Active TIMs missing ITIS Codes", tmp.size());
                 activeTims.addAll(tmp);
             }
 
             // add active tims that weren't sent to the SDX or any RSUs
             tmp = activeTimService.getActiveTimsNotSent();
             if (tmp.size() > 0) {
-                System.out.println("Found " + tmp.size() + " Active TIMs that weren't distributed");
+                LOG.info("Found {} Active TIMs that weren't distributed", tmp.size());
                 activeTims.addAll(tmp);
             }
 
             if (activeTims.size() == 0) {
-                System.out.println("Found 0 Active TIMs");
+                LOG.info("Found 0 Active TIMs");
             }
 
             // delete from rsus and the SDX
@@ -72,12 +75,12 @@ public class CleanupActiveTims implements Runnable {
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
                 String msg = "CleanupActiveTims - Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }";
-                System.out.println(msg);
+                LOG.info(msg);
                 restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
         }

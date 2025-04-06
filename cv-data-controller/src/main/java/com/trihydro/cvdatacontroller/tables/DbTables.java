@@ -7,8 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DbTables {
+    private static final Logger LOG = LoggerFactory.getLogger(DbTables.class);
 
     public String buildInsertQueryStatement(String tableName, List<String> table) {
 
@@ -60,8 +63,8 @@ public class DbTables {
             preparedStatement.setObject(index, id);
             return preparedStatement;
         } catch (SQLException ex) {
-            System.out.println("Error creating update statement");
-            ex.printStackTrace();
+            LOG.info("Error creating update statement");
+            LOG.error("Exception", ex);
         }
 
         return null;

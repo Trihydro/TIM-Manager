@@ -8,6 +8,8 @@ import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("data-frame-itis-code")
 @ApiIgnore
 public class DataFrameItisCodeController extends BaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(DataFrameItisCodeController.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -71,7 +74,7 @@ public class DataFrameItisCodeController extends BaseController {
             Long dataFrameItisCodeId = dbInteractions.executeAndLog(preparedStatement, "dataFrameItisCode");
             return ResponseEntity.ok(dataFrameItisCodeId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Long.valueOf(0));
         } finally {
             try {
@@ -82,7 +85,7 @@ public class DataFrameItisCodeController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
     }

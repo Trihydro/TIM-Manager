@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 
 @Component
 public class RegionService extends BaseService {
+    private static final Logger LOG = LoggerFactory.getLogger(RegionService.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -112,7 +115,7 @@ public class RegionService extends BaseService {
             Long regionId = dbInteractions.executeAndLog(preparedStatement, "regionID");
             return regionId;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -122,7 +125,7 @@ public class RegionService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
         return Long.valueOf(0);

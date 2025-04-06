@@ -15,14 +15,17 @@ import org.gavaghan.geodesy.Ellipsoid;
 import org.gavaghan.geodesy.GeodeticCalculator;
 import org.gavaghan.geodesy.GeodeticCurve;
 import org.gavaghan.geodesy.GlobalCoordinates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RsuService extends CvDataServiceLibrary {
+    private static final Logger LOG = LoggerFactory.getLogger(RsuService.class);
 
-	private Utility utility;
+    private Utility utility;
 
 	@Autowired
 	public void InjectDependencies(Utility _utility) {
@@ -67,10 +70,10 @@ public class RsuService extends CvDataServiceLibrary {
 		// if there are no rsus on this route
 		List<WydotRsu> mainRsus = getRsusByRouteWithRetryAndTimeout(route);
 		if (mainRsus.size() == 0) {
-			System.out.println("No RSUs found for route " + route);
+            LOG.info("No RSUs found for route {}", route);
 			return rsus;
 		} else {
-			System.out.println("Found " + mainRsus.size() + " RSUs for route " + route);
+            LOG.info("Found {} RSUs for route {}", mainRsus.size(), route);
 		}
 
 		Ellipsoid reference = Ellipsoid.WGS84;
@@ -146,7 +149,7 @@ public class RsuService extends CvDataServiceLibrary {
 				}
 
 				if (rsusHigher.size() == 0) {
-					System.out.println("No RSUs found higher than 'low' point");
+                    LOG.info("No RSUs found higher than 'low' point");
 				}
 
 			} else {

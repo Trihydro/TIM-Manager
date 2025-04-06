@@ -22,11 +22,14 @@ import com.trihydro.tasks.models.CActiveTim;
 import com.trihydro.tasks.models.CAdvisorySituationDataDeposit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ValidateSdx implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(ValidateSdx.class);
     private DataTasksConfiguration config;
     private SdwService sdwService;
     private ActiveTimService activeTimService;
@@ -49,13 +52,13 @@ public class ValidateSdx implements Runnable {
     }
 
     public void run() {
-        System.out.println("Running...");
+        LOG.info("Running...");
 
         try {
             validateSdx();
         } catch (Exception ex) {
-            System.out.println("Error while validating SDX:");
-            ex.printStackTrace();
+            LOG.info("Error while validating SDX:");
+            LOG.error("Exception", ex);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
         }
@@ -157,7 +160,7 @@ public class ValidateSdx implements Runnable {
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "SDX Validation Results", email);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOG.error("Exception", ex);
             }
         }
     }

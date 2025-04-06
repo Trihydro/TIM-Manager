@@ -10,6 +10,8 @@ import java.util.List;
 import com.trihydro.library.model.ItisCode;
 import com.trihydro.library.model.TmddItisCode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,7 +25,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @ApiIgnore
 public class ItisCodeController extends BaseController {
-	@RequestMapping(value = "/itiscodes", method = RequestMethod.GET, headers = "Accept=application/json")
+    private static final Logger LOG = LoggerFactory.getLogger(ItisCodeController.class);
+
+    @RequestMapping(value = "/itiscodes", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<ItisCode>> selectAllItisCodes() {
 		List<ItisCode> itisCodes = new ArrayList<ItisCode>();
 		Connection connection = null;
@@ -45,7 +49,7 @@ public class ItisCodeController extends BaseController {
 			}
 			return ResponseEntity.ok(itisCodes);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(itisCodes);
 		} finally {
 
@@ -56,7 +60,7 @@ public class ItisCodeController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException ex) {
-				ex.printStackTrace();
+                LOG.error("Exception", ex);
 			}
 		}
 	}
@@ -85,7 +89,7 @@ public class ItisCodeController extends BaseController {
 				results.add(result);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(results);
 		} finally {
 			try {
@@ -99,7 +103,7 @@ public class ItisCodeController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                LOG.error("Exception", e);
 			}
 		}
 

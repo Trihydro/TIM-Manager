@@ -10,6 +10,8 @@ import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.models.SignTimModel;
 import com.trihydro.tasks.models.hsmresponse.HsmResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VerifyHSMFunctional implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(VerifyHSMFunctional.class);
     private DataTasksConfiguration config;
     private Utility utility;
     private RestTemplateProvider restTemplateProvider;
@@ -50,14 +53,14 @@ public class VerifyHSMFunctional implements Runnable {
     }
 
     public void run() {
-        System.out.println("Running...");
+        LOG.info("Running...");
         try {
             // ping HSM
             var response = restTemplateProvider.GetRestTemplate_NoErrors().exchange(config.getHsmUrl() + "/signtim/",
                     HttpMethod.POST, entity, HsmResponse.class);
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                System.out.println("HSM is not responsive! If an email should be sent, it will be shortly.");
+                LOG.info("HSM is not responsive! If an email should be sent, it will be shortly.");
             }
 
             if (response.getStatusCode() == HttpStatus.OK) {
@@ -65,9 +68,9 @@ public class VerifyHSMFunctional implements Runnable {
                     // send an email telling us its back up
                     String email = "HSM Functional Tester was successful in attempting to sign a TIM";
                     mailHelper.SendEmail(config.getAlertAddresses(), "HSM Back Up", email);
-                    System.out.println("HSM is back up! Email sent.");
+                    LOG.info("HSM is back up! Email sent.");
                 } else {
-                    System.out.println("HSM is up!");
+                    LOG.info("HSM is up!");
                 }
                 errorLastSent = null;
             } else if (shouldSendEmail(errorLastSent)) {
@@ -83,7 +86,7 @@ public class VerifyHSMFunctional implements Runnable {
                 mailHelper.SendEmail(config.getAlertAddresses(), "HSM Error", email);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Exception", e);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
 
@@ -94,7 +97,7 @@ public class VerifyHSMFunctional implements Runnable {
                 email += e.getMessage();
                 mailHelper.SendEmail(config.getAlertAddresses(), "HSM Error", email);
             } catch (Exception subEx) {
-                e.printStackTrace();
+                LOG.error("Exception", e);
             }
         }
     }
@@ -111,7 +114,7 @@ public class VerifyHSMFunctional implements Runnable {
             return true;
         }
 
-        System.out.println("Email should not be sent at this time");
+        LOG.info("Email should not be sent at this time");
         return false;
     }
 }

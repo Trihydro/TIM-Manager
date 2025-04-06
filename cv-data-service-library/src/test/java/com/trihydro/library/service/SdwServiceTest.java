@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +35,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 public class SdwServiceTest extends BaseServiceTest {
+    private static final Logger LOG = LoggerFactory.getLogger(SdwServiceTest.class);
 
     @Mock
     SdwProps mockConfig;
@@ -72,7 +75,7 @@ public class SdwServiceTest extends BaseServiceTest {
         setupApiKey();
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(null);
         verify(mockUtility);
-        System.out.println("Attempting to delete satellite records failed due to no satRecordIds passed in");
+        LOG.info("Attempting to delete satellite records failed due to no satRecordIds passed in");
         Assertions.assertNull(results);
     }
 
@@ -81,7 +84,7 @@ public class SdwServiceTest extends BaseServiceTest {
         setupApiKey();
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(new ArrayList<String>());
         verify(mockUtility);
-        System.out.println("Attempting to delete satellite records failed due to no satRecordIds passed in");
+        LOG.info("Attempting to delete satellite records failed due to no satRecordIds passed in");
         Assertions.assertNull(results);
     }
 
@@ -92,7 +95,7 @@ public class SdwServiceTest extends BaseServiceTest {
         when(mockConfig.getSdwApiKey()).thenReturn(null);
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
         verify(mockUtility);
-        System.out.println("Attempting to delete satellite records failed due to null apiKey");
+        LOG.info("Attempting to delete satellite records failed due to null apiKey");
         Assertions.assertNull(results);
     }
 
@@ -151,9 +154,9 @@ public class SdwServiceTest extends BaseServiceTest {
         // Assert
         Assertions.assertNull(results);
         verify(mockUtility);
-        System.out.println("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
+        LOG.info("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
         verify(mockUtility);
-        System.out.println("Is the SDX API key valid?");
+        LOG.info("Is the SDX API key valid?");
     }
 
     @Test
@@ -181,9 +184,9 @@ public class SdwServiceTest extends BaseServiceTest {
         // Assert
         Assertions.assertNull(results);
         verify(mockUtility);
-        System.out.println("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
+        LOG.info("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
         verify(mockUtility);
-        System.out.println("Is the SDX API key valid?");
+        LOG.info("Is the SDX API key valid?");
     }
 
     @Test
@@ -312,9 +315,9 @@ public class SdwServiceTest extends BaseServiceTest {
         // Assert
         Assertions.assertNull(result);
         verify(mockUtility);
-        System.out.println("An exception occurred while attempting to decode message: something went wrong...");
+        LOG.info("An exception occurred while attempting to decode message: something went wrong...");
         verify(mockUtility);
-        System.out.println("Is the SDX API key valid?");
+        LOG.info("Is the SDX API key valid?");
     }
 
     @Test
@@ -353,8 +356,8 @@ public class SdwServiceTest extends BaseServiceTest {
         // Assert
         Assertions.assertNull(results);
         verify(mockUtility);
-        System.out.println("An exception occurred while attempting to get messages from SDX: something went wrong...");
+        LOG.info("An exception occurred while attempting to get messages from SDX: something went wrong...");
         verify(mockUtility);
-        System.out.println("Is the SDX API key valid?");
+        LOG.info("Is the SDX API key valid?");
     }
 }

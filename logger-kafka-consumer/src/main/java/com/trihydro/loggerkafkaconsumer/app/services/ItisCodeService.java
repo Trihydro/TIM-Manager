@@ -9,12 +9,15 @@ import java.util.List;
 
 import com.trihydro.library.model.ItisCode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ItisCodeService extends BaseService {
+    private static final Logger LOG = LoggerFactory.getLogger(ItisCodeService.class);
 
-	public List<ItisCode> selectAllItisCodes() {
+    public List<ItisCode> selectAllItisCodes() {
 		List<ItisCode> itisCodes = new ArrayList<ItisCode>();
 		Connection connection = null;
 		Statement statement = null;
@@ -38,7 +41,7 @@ public class ItisCodeService extends BaseService {
 				itisCodes.add(itisCode);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            LOG.error("Exception", e);
 		} finally {
 
 			try {
@@ -48,7 +51,7 @@ public class ItisCodeService extends BaseService {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException ex) {
-				ex.printStackTrace();
+                LOG.error("Exception", ex);
 			}
 		}
 		return itisCodes;

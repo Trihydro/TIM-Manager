@@ -27,6 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.gavaghan.geodesy.Ellipsoid;
 import org.gavaghan.geodesy.GeodeticCalculator;
 import org.gavaghan.geodesy.GlobalCoordinates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +46,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 @RestController
 @Api(description = "Road Construction")
 public class WydotTimRwController extends WydotTimBaseController {
+    private static final Logger LOG = LoggerFactory.getLogger(WydotTimRwController.class);
 
     private final String type = "RW";
     List<WydotTimRw> timsToSend;
@@ -59,9 +62,9 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
-        System.out.println("Create/Update RW TIM");
+        LOG.info("Create/Update RW TIM");
         String post = gson.toJson(timRwList);
-        System.out.println(post.toString());
+        LOG.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -274,7 +277,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
-        System.out.println("Delete RW TIM");
+        LOG.info("Delete RW TIM");
         // expire and clear TIM
         wydotTimService.clearTimsById(type, id, null, true);
 

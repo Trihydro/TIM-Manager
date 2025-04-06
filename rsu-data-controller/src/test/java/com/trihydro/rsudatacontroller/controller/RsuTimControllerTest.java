@@ -18,11 +18,14 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class RsuTimControllerTest {
+    private static final Logger LOG = LoggerFactory.getLogger(RsuTimControllerTest.class);
     @Mock
     RsuService mockRsuService;
 
@@ -66,7 +69,7 @@ public class RsuTimControllerTest {
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
         verify(mockUtility);
-        System.out.println(ArgumentMatchers.<String>any());
+        LOG.info(ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -81,6 +84,6 @@ public class RsuTimControllerTest {
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
         verify(mockUtility);
-        System.out.println(ArgumentMatchers.<String>any());
+        LOG.info(ArgumentMatchers.<String>any());
     }
 }

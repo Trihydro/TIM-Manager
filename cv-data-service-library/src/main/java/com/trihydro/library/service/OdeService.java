@@ -15,6 +15,8 @@ import com.trihydro.library.model.WydotTravelerInputData;
 import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +29,7 @@ import org.springframework.web.client.RestClientException;
 
 @Component
 public class OdeService {
+    private static final Logger LOG = LoggerFactory.getLogger(OdeService.class);
 
     private Gson gson = new Gson();
     private RestTemplateProvider restTemplateProvider;
@@ -41,7 +44,7 @@ public class OdeService {
     }
 
     public String sendNewTimToRsu(WydotTravelerInputData timToSend) {
-        System.out.println("Sending the following new TIM to ODE for processing: " + gson.toJson(timToSend));
+        LOG.info("Sending the following new TIM to ODE for processing: {}", gson.toJson(timToSend));
         String exMsg = "";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -50,7 +53,7 @@ public class OdeService {
                 .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.POST, entity, String.class);
         if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
             exMsg = "Failed to send new TIM to RSU: " + response.getBody();
-            System.out.println(exMsg);
+            LOG.info(exMsg);
         }
         return exMsg;
     }
@@ -65,7 +68,7 @@ public class OdeService {
                 .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.POST, entity, String.class);
         if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
             exMsg = "Failed to send new TIM to SDX: " + response.getBody();
-            System.out.println(exMsg);
+            LOG.info(exMsg);
         }
         return exMsg;
     }
@@ -80,7 +83,7 @@ public class OdeService {
                 .exchange(odeProps.getOdeUrl() + "/tim", HttpMethod.PUT, entity, String.class);
         if (response.getStatusCode().series() != HttpStatus.Series.SUCCESSFUL) {
             exMsg = "Failed to update TIM on SDX: " + response.getBody();
-            System.out.println(exMsg);
+            LOG.info(exMsg);
         }
         return exMsg;
     }
@@ -157,7 +160,7 @@ public class OdeService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        System.out.println("Deleting TIM on index " + index.toString() + " from rsu " + rsu.getRsuTarget());
+        LOG.info("Deleting TIM on index {} from rsu {}", index.toString(), rsu.getRsuTarget());
 
         try {
             // ODE response is misleading due to poor interpretation of SNMP results. If we
@@ -167,7 +170,7 @@ public class OdeService {
                     odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
         } catch (RestClientException ex) {
             exMsg = "Failed to contact ODE to delete message from index " + index + " on RSU " + rsu.getRsuTarget();
-            System.out.println(exMsg);
+            LOG.info(exMsg);
         }
 
         return exMsg;

@@ -18,7 +18,11 @@ import java.io.*;
 import java.nio.channels.*;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MavenWrapperDownloader {
+    private static final Logger LOG = LoggerFactory.getLogger(MavenWrapperDownloader.class);
 
     private static final String WRAPPER_VERSION = "0.5.6";
     /**
@@ -46,9 +50,9 @@ public class MavenWrapperDownloader {
     private static final String PROPERTY_NAME_WRAPPER_URL = "wrapperUrl";
 
     public static void main(String args[]) {
-        System.out.println("- Downloader started");
+        LOG.info("- Downloader started");
         File baseDirectory = new File(args[0]);
-        System.out.println("- Using base directory: " + baseDirectory.getAbsolutePath());
+        LOG.info("- Using base directory: {}", baseDirectory.getAbsolutePath());
 
         // If the maven-wrapper.properties exists, read it and check if it contains a custom
         // wrapperUrl parameter.
@@ -62,7 +66,7 @@ public class MavenWrapperDownloader {
                 mavenWrapperProperties.load(mavenWrapperPropertyFileInputStream);
                 url = mavenWrapperProperties.getProperty(PROPERTY_NAME_WRAPPER_URL, url);
             } catch (IOException e) {
-                System.out.println("- ERROR loading '" + MAVEN_WRAPPER_PROPERTIES_PATH + "'");
+                LOG.info("- ERROR loading '{}'", MAVEN_WRAPPER_PROPERTIES_PATH);
             } finally {
                 try {
                     if(mavenWrapperPropertyFileInputStream != null) {
@@ -73,23 +77,22 @@ public class MavenWrapperDownloader {
                 }
             }
         }
-        System.out.println("- Downloading from: " + url);
+        LOG.info("- Downloading from: {}", url);
 
         File outputFile = new File(baseDirectory.getAbsolutePath(), MAVEN_WRAPPER_JAR_PATH);
         if(!outputFile.getParentFile().exists()) {
             if(!outputFile.getParentFile().mkdirs()) {
-                System.out.println(
-                        "- ERROR creating output directory '" + outputFile.getParentFile().getAbsolutePath() + "'");
+                LOG.info("- ERROR creating output directory '{}'", outputFile.getParentFile().getAbsolutePath());
             }
         }
-        System.out.println("- Downloading to: " + outputFile.getAbsolutePath());
+        LOG.info("- Downloading to: {}", outputFile.getAbsolutePath());
         try {
             downloadFileFromURL(url, outputFile);
-            System.out.println("Done");
+            LOG.info("Done");
             System.exit(0);
         } catch (Throwable e) {
-            System.out.println("- Error downloading");
-            e.printStackTrace();
+            LOG.info("- Error downloading");
+            LOG.error("Exception", e);
             System.exit(1);
         }
     }

@@ -144,11 +144,7 @@ public class ValidateRsusTest {
         when(mockActiveTimService.getActiveRsuTims(any())).thenThrow(new RestClientException("timeout"));
 
         // Act (error should be handled in runnable)
-        uut.run();
-
-        // Assert
-        verify(mockUtility);
-        log.info("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
+        Assertions.assertDoesNotThrow(() -> uut.run());
     }
 
     @Test

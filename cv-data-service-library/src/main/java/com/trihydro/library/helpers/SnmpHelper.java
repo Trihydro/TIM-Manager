@@ -9,16 +9,16 @@ import java.util.TimeZone;
 
 import com.trihydro.library.model.WydotTravelerInputData;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.SNMP;
 
 @Component
+@Slf4j
 public class SnmpHelper {
-    private static final Logger LOG = LoggerFactory.getLogger(SnmpHelper.class);
 
     public SNMP getSnmp(String startDateTime, String endDateTime, WydotTravelerInputData timToSend) {
         SNMP snmp = new SNMP();
@@ -43,7 +43,7 @@ public class SnmpHelper {
                 endDateTime = df.format(endDate);
             } catch (IllegalArgumentException illArg) {
                 // if we failed here, set the endDateTime for 2 weeks from current time
-                LOG.info("Illegal Argument exception for endDate: {}", illArg.getMessage());
+                log.info("Illegal Argument exception for endDate: {}", illArg.getMessage());
                 endDateTime = java.time.Clock.systemUTC().instant().plus(2, ChronoUnit.WEEKS).toString();
             }
         }

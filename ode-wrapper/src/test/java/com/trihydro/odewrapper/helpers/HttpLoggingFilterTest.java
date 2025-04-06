@@ -21,6 +21,7 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.BufferedRequestWrapper;
 import com.trihydro.odewrapper.model.BufferedResponseWrapper;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,11 +29,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class HttpLoggingFilterTest {
-    private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingFilterTest.class);
     @Mock
     HttpServletRequest mockHttpServletRequest;
     @Mock
@@ -127,7 +127,7 @@ public class HttpLoggingFilterTest {
         // Assert
         verify(mockLoggingService).LogHttpRequest(any());
         verify(mockUtility);
-        LOG.info("REST Request - [HTTP METHOD:null] [PATH INFO:/] [REQUEST PARAMETERS:{}] [REQUEST BODY:this is a long request...] [RESPONSE CODE:200] [RESPONSE:thi...]");
+        log.info("REST Request - [HTTP METHOD:null] [PATH INFO:/] [REQUEST PARAMETERS:{}] [REQUEST BODY:this is a long request...] [RESPONSE CODE:200] [RESPONSE:thi...]");
     }
 
 }

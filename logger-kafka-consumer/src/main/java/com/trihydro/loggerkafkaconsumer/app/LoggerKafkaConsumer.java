@@ -5,6 +5,8 @@ import java.util.Date;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+
 import com.google.gson.Gson;
 import com.trihydro.library.factory.KafkaFactory;
 import com.trihydro.library.helpers.EmailHelper;
@@ -21,15 +23,14 @@ import com.trihydro.loggerkafkaconsumer.config.LoggerConfiguration;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.model.OdeData;
 
 @Component
+@Slf4j
 public class LoggerKafkaConsumer {
-    private static final Logger LOG = LoggerFactory.getLogger(LoggerKafkaConsumer.class);
 
     private ObjectMapper mapper;
     private LoggerConfiguration loggerConfig;
@@ -55,7 +56,7 @@ public class LoggerKafkaConsumer {
         emailHelper = _emailHelper;
         activeTimHoldingService = _activeTimHoldingService;
 
-        LOG.info("starting..............");
+        log.info("starting..............");
 
         mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -78,7 +79,7 @@ public class LoggerKafkaConsumer {
                 ConsumerRecords<String, String> records = stringConsumer.poll(100);
                 recordCount = records.count();
                 if (recordCount > 0) {
-                    LOG.info(String.format("Found %d records to parse", recordCount));
+                    log.info(String.format("Found %d records to parse", recordCount));
                 }
                 for (ConsumerRecord<String, String> record : records) {
                     TopicDataWrapper tdw = null;
@@ -86,27 +87,27 @@ public class LoggerKafkaConsumer {
                         tdw = gson.fromJson(record.value(), TopicDataWrapper.class);
                     } catch (Exception e) {
                         // Could be ioException, JsonParseException, JsonMappingException
-                        LOG.error("Exception", e);
+                        log.error("Exception", e);
                     }
                     if (tdw != null && tdw.getData() != null) {
-                        LOG.info(String.format("Found data for topic: %s", tdw.getTopic()));
+                        log.info(String.format("Found data for topic: %s", tdw.getTopic()));
                         switch (tdw.getTopic()) {
                         case "topic.OdeTimJson":
-                            LOG.info("Before processing JSON: {}", tdw.getData());
+                            log.info("Before processing JSON: {}", tdw.getData());
                             odeData = timDataConverter.processTimJson(tdw.getData());
-                            LOG.info(String.format("Parsed TIM: %s", gson.toJson(odeData)));
+                            log.info(String.format("Parsed TIM: %s", gson.toJson(odeData)));
                             if (odeData != null) {
                                 if (odeData.getMetadata()
                                         .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
                                     timService.addActiveTimToDatabase(odeData);
                                 } else if (odeData.getMetadata().getRecordGeneratedBy() == null) {
                                     // we shouldn't get here...log it
-                                    LOG.info("Failed to get recordGeneratedBy, continuing...");
+                                    log.info("Failed to get recordGeneratedBy, continuing...");
                                 } else {
                                     timService.addTimToDatabase(odeData);
                                 }
                             } else {
-                                LOG.info("Failed to parse topic.OdeTimJson, insert fails");
+                                log.info("Failed to parse topic.OdeTimJson, insert fails");
                             }
                             break;
 
@@ -116,7 +117,7 @@ public class LoggerKafkaConsumer {
                                         CertExpirationModel.class);
                                 var success = timService.updateActiveTimExpiration(certExpirationModel);
                                 if (success) {
-                                    LOG.info("Successfully updated expiration date");
+                                    log.info("Successfully updated expiration date");
                                 } else {
                                     // Check for issues
                                     var activeTim = activeTimService
@@ -136,14 +137,14 @@ public class LoggerKafkaConsumer {
                                         }
                                     } else if (messageSuperseded(certExpirationModel.getStartDateTime(), activeTim)) {
                                         // Message superseded
-                                        LOG.info(String.format(
+                                        log.info(String.format(
                                             "Unable to update expiration date for Active Tim %s (Packet ID: %s). Message superseded.",
                                             activeTim.getActiveTimId(), certExpirationModel.getPacketID()));
                                     }
 
                                     if (!success) {
                                         // Message either not superseded, or not found in active_tim nor holding tables. error case
-                                        LOG.info(String.format("Failed to update expiration for data: %s",
+                                        log.info(String.format("Failed to update expiration for data: %s",
                                             tdw.getData()));
 
                                         String body = "logger-kafka-consumer failed attempting to update the expiration for an ActiveTim record";
@@ -155,20 +156,20 @@ public class LoggerKafkaConsumer {
                                     }
                                 }
                             } catch (Exception ex) {
-                                LOG.error("Exception", ex);
+                                log.error("Exception", ex);
                             }
                             break;
                         }
                     } else {
-                        LOG.info("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
+                        log.info("Logger Kafka Consumer failed to deserialize proper TopicDataWrapper");
                         if (tdw != null) {
-                            LOG.info(gson.toJson(tdw));
+                            log.info(gson.toJson(tdw));
                         }
                     }
                 }
             }
         } catch (Exception ex) {
-            LOG.info(ex.getMessage());
+            log.info(ex.getMessage());
             emailHelper.ContainerRestarted(loggerConfig.getAlertAddresses(), loggerConfig.getMailPort(),
                     loggerConfig.getMailHost(), loggerConfig.getFromEmail(), "Logger Kafka Consumer");
             throw ex;
@@ -176,7 +177,7 @@ public class LoggerKafkaConsumer {
             try {
                 stringConsumer.close();
             } catch (Exception consumerEx) {
-                LOG.error("Exception", consumerEx);
+                log.error("Exception", consumerEx);
             }
         }
     }
@@ -196,7 +197,7 @@ public class LoggerKafkaConsumer {
             // currently processing has been superseded.
             return expectedStart.getTime() < dbRecord.getStartTimestamp().getTime();
         } catch (Exception ex) {
-            LOG.info("Error while checking if message was superseded: {}", ex.getMessage());
+            log.info("Error while checking if message was superseded: {}", ex.getMessage());
             return false;
         }
     }

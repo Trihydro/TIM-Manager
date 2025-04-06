@@ -8,12 +8,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import us.dot.its.jpo.ode.model.OdeLogMetadata;
 import us.dot.its.jpo.ode.model.OdeLogMetadata.RecordType;
@@ -34,8 +33,8 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.DistanceUnits.DistanceUnitsEnu
 /**
  * Unit tests for JSON to Java Object Converters.
  */
+@Slf4j
 public class JsonToJavaConverterTest {
-    private static final Logger LOG = LoggerFactory.getLogger(JsonToJavaConverterTest.class);
 
     private JsonToJavaConverter jsonToJava;
 
@@ -146,7 +145,7 @@ public class JsonToJavaConverterTest {
         String value = new String(
                 Files.readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput.json").toURI())));
         OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
-        LOG.info("PACKETID: {}", getTim(odeTimPayload).getPacketID());
+        log.info("PACKETID: {}", getTim(odeTimPayload).getPacketID());
         for (int i = 0; i < 2; i++) {
             Assertions.assertEquals(
                     getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat(),
@@ -222,7 +221,7 @@ public class JsonToJavaConverterTest {
         String value = new String(
                 Files.readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput_MultipleRegions.json").toURI())));
         OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
-        LOG.info("PACKETID: {}", getTim(odeTimPayload).getPacketID());
+        log.info("PACKETID: {}", getTim(odeTimPayload).getPacketID());
         for (int i = 0; i < 2; i++) {
             Assertions.assertEquals(
                     getTim(odeTimPayload).getDataframes()[0].getRegions()[0].getPath().getNodes()[i].getNodeLat(),
@@ -313,7 +312,7 @@ public class JsonToJavaConverterTest {
         String value = new String(
                 Files.readAllBytes(Paths.get(getClass().getResource("/rxMsg_TIM_OdeOutput_Geometry.json").toURI())));
         OdeTimPayload odeTimPayloadTest = jsonToJava.convertTimPayloadJsonToJava(value);
-        LOG.info("PACKETID: {}", getTim(odeTimPayload).getPacketID());
+        log.info("PACKETID: {}", getTim(odeTimPayload).getPacketID());
 
         // test geometry properties
         // direction
@@ -365,7 +364,7 @@ public class JsonToJavaConverterTest {
 
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
-        LOG.info("Current relative path is: {}", s);
+        log.info("Current relative path is: {}", s);
 
         String value = new String(Files.readAllBytes(Paths.get("src/test/resources/broadcastTim_OdeOutput.json")));
         // String value = new

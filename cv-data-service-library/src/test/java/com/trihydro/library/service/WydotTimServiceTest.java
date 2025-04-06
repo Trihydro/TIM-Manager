@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +33,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -68,8 +68,8 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class WydotTimServiceTest {
-    private static final Logger LOG = LoggerFactory.getLogger(WydotTimServiceTest.class);
 
     @Mock
     EmailProps mockEmailProps;
@@ -403,7 +403,7 @@ public class WydotTimServiceTest {
 
         // Assert
         verify(mockUtility);
-        LOG.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+        log.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -425,7 +425,7 @@ public class WydotTimServiceTest {
         verify(mockSdwService).getNewRecordId();
         verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verify(mockUtility, never());
-        LOG.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+        log.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -450,7 +450,7 @@ public class WydotTimServiceTest {
         verify(mockActiveTimService).resetActiveTimsExpirationDate(any());
         verify(mockTimService).getTim(any());
         verify(mockUtility, never());
-        LOG.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+        log.info("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -471,7 +471,7 @@ public class WydotTimServiceTest {
 
         // Assert
         verify(mockUtility);
-        LOG.info("No RSUs found to place TIM on, returning");
+        log.info("No RSUs found to place TIM on, returning");
     }
 
     @Test
@@ -548,7 +548,7 @@ public class WydotTimServiceTest {
 
         // Assert
         verify(mockUtility);
-        LOG.info("Deleting TIM on index {} from rsu {}", rsu.getRsuIndex(), rsu.getRsuTarget());
+        log.info("Deleting TIM on index {} from rsu {}", rsu.getRsuIndex(), rsu.getRsuTarget());
         verify(mockOdeService).sendNewTimToRsu(any());
     }
 

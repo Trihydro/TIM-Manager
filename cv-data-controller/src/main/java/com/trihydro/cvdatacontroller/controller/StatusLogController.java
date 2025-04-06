@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,10 +17,10 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @RequestMapping("status-log")
 @ApiIgnore
 public class StatusLogController extends BaseController {
-    private static final Logger LOG = LoggerFactory.getLogger(StatusLogController.class);
 
     @RequestMapping(value = "/delete-old", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<Boolean> DeleteOldStatusLogs() {
@@ -39,7 +39,7 @@ public class StatusLogController extends BaseController {
             // execute delete SQL stetement
             deleteResult = dbInteractions.updateOrDelete(preparedStatement);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         } finally {
             try {
@@ -50,7 +50,7 @@ public class StatusLogController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 

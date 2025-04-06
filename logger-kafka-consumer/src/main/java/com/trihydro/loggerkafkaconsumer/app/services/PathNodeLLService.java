@@ -7,14 +7,14 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class PathNodeLLService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(PathNodeLLService.class);
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
@@ -49,7 +49,7 @@ public class PathNodeLLService extends BaseService {
             return pathNodeLLId;
 
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -59,7 +59,7 @@ public class PathNodeLLService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
         return Long.valueOf(0);

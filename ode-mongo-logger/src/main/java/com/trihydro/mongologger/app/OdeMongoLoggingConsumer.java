@@ -12,17 +12,17 @@ import com.trihydro.library.helpers.EmailHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.mongologger.app.loggers.MongoLogger;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class OdeMongoLoggingConsumer {
-    private static final Logger LOG = LoggerFactory.getLogger(OdeMongoLoggingConsumer.class);
 
     PreparedStatement preparedStatement = null;
 	Statement statement = null;
@@ -39,7 +39,7 @@ public class OdeMongoLoggingConsumer {
 		utility = _utility;
 		emailHelper = _emailHelper;
 
-        LOG.info("starting..............");
+        log.info("starting..............");
         startKafkaConsumer();
 	}
 
@@ -59,7 +59,7 @@ public class OdeMongoLoggingConsumer {
 		String topic = mongoLoggerConfig.getDepositTopic();
 
 		stringConsumer.subscribe(Arrays.asList(topic));
-        LOG.info("Subscribed to topic {}", topic);
+        log.info("Subscribed to topic {}", topic);
 		try {
 			while (true) {
 				ConsumerRecords<String, String> records = stringConsumer.poll(100);
@@ -69,7 +69,7 @@ public class OdeMongoLoggingConsumer {
 				}
 
 				if (recStrings.size() > 0) {
-                    LOG.info(String.format("Found %d %s records to parse", recStrings.size(), topic));
+                    log.info(String.format("Found %d %s records to parse", recStrings.size(), topic));
                     String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
 
 					if (topic.equals("topic.OdeTimJson")) {
@@ -82,7 +82,7 @@ public class OdeMongoLoggingConsumer {
 				}
 			}
 		} catch (Exception ex) {
-            LOG.info("Exception in mongo logger application {}", ex.getMessage());
+            log.info("Exception in mongo logger application {}", ex.getMessage());
             emailHelper.ContainerRestarted(mongoLoggerConfig.getAlertAddresses(), mongoLoggerConfig.getMailPort(),
 					mongoLoggerConfig.getMailHost(), mongoLoggerConfig.getFromEmail(), topic + " Mongo Consumer");
 			throw (ex);
@@ -90,7 +90,7 @@ public class OdeMongoLoggingConsumer {
 			try {
 				stringConsumer.close();
 			} catch (Exception consumerEx) {
-                LOG.error("Exception", consumerEx);
+                log.error("Exception", consumerEx);
 			}
 		}
 	}

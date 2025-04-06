@@ -36,6 +36,7 @@ import com.trihydro.tasks.helpers.ExecutorFactory;
 import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,13 +47,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestClientException;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class ValidateRsusTest {
-    private static final Logger LOG = LoggerFactory.getLogger(ValidateRsusTest.class);
     @Mock
     private DataTasksConfiguration mockConfig;
     @Mock
@@ -148,7 +148,7 @@ public class ValidateRsusTest {
 
         // Assert
         verify(mockUtility);
-        LOG.info("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
+        log.info("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
     }
 
     @Test

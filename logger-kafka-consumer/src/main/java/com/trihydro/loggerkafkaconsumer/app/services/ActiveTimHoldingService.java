@@ -9,13 +9,13 @@ import java.sql.Statement;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ActiveTimHoldingService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(ActiveTimHoldingService.class);
 
     public ActiveTimHolding getRsuActiveTimHolding(String clientId, String direction, String ipv4Address) {
         ActiveTimHolding activeTimHolding = null;
@@ -40,7 +40,7 @@ public class ActiveTimHoldingService extends BaseService {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -53,7 +53,7 @@ public class ActiveTimHoldingService extends BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
@@ -83,7 +83,7 @@ public class ActiveTimHoldingService extends BaseService {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -96,7 +96,7 @@ public class ActiveTimHoldingService extends BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
@@ -119,7 +119,7 @@ public class ActiveTimHoldingService extends BaseService {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -132,7 +132,7 @@ public class ActiveTimHoldingService extends BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
 
@@ -179,13 +179,13 @@ public class ActiveTimHoldingService extends BaseService {
             preparedStatement.setLong(1, activeTimHoldingId);
             var success = dbInteractions.updateOrDelete(preparedStatement);
             if (success) {
-                LOG.info("Deleted ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
+                log.info("Deleted ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
             } else {
-                LOG.info("Failed to delete ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
+                log.info("Failed to delete ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
             }
             return success;
         } catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return false;
         } finally {
             try {
@@ -196,7 +196,7 @@ public class ActiveTimHoldingService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
     }
@@ -218,7 +218,7 @@ public class ActiveTimHoldingService extends BaseService {
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
             return false;
         } finally {
             try {
@@ -229,10 +229,10 @@ public class ActiveTimHoldingService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
             }
         }
-        LOG.info(String.format(
+        log.info(String.format(
             "Called ActiveTimHolding UpdateTimExpiration with packetID: %s, expDate: %s. Successful: %s", packetID,
             expDate, success));
         return success;

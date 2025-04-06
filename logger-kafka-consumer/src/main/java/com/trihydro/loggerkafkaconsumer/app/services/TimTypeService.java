@@ -9,13 +9,13 @@ import java.util.List;
 
 import com.trihydro.library.model.TimType;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class TimTypeService extends BaseService {
-    private static final Logger LOG = LoggerFactory.getLogger(TimTypeService.class);
 
     public List<TimType> getTimTypes() {
 		List<TimType> timTypes = new ArrayList<TimType>();
@@ -38,7 +38,7 @@ public class TimTypeService extends BaseService {
 				timTypes.add(timType);
 			}
 		} catch (SQLException e) {
-            LOG.error("Exception", e);
+            log.error("Exception", e);
 		} finally {
 			try {
 				// close prepared statement
@@ -51,7 +51,7 @@ public class TimTypeService extends BaseService {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-                LOG.error("Exception", e);
+                log.error("Exception", e);
 			}
 		}
 		return timTypes;

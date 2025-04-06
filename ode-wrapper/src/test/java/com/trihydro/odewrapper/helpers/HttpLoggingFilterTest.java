@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.trihydro.library.helpers.Utility;
+import com.trihydro.library.model.HttpLoggingModel;
 import com.trihydro.library.service.LoggingService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.BufferedRequestWrapper;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -125,9 +127,11 @@ public class HttpLoggingFilterTest {
         uut.doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
 
         // Assert
-        verify(mockLoggingService).LogHttpRequest(any());
-        verify(mockUtility);
-        log.info("REST Request - [HTTP METHOD:null] [PATH INFO:/] [REQUEST PARAMETERS:{}] [REQUEST BODY:this is a long request...] [RESPONSE CODE:200] [RESPONSE:thi...]");
+        HttpLoggingModel expectedLoggingModel = new HttpLoggingModel();
+        expectedLoggingModel.setRequest("REST Request - [HTTP METHOD:null] [PATH INFO:/] [REQUEST PARAMETERS:{}] [REQUEST BODY:this is a long request...] [RESPONSE CODE:200] [RESPONSE:thi...]");
+        verify(mockLoggingService).LogHttpRequest(
+                ArgumentMatchers.argThat(argument -> argument.getRequest().equals(expectedLoggingModel.getRequest()))
+        );
     }
 
 }

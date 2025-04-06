@@ -138,8 +138,6 @@ public class RsuServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility);
-        log.info(ArgumentMatchers.<String>any());
     }
 
     @Test

@@ -68,8 +68,6 @@ public class RsuTimControllerTest {
         // Assert
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
-        verify(mockUtility);
-        log.info(ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -83,7 +81,5 @@ public class RsuTimControllerTest {
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
-        verify(mockUtility);
-        log.info(ArgumentMatchers.<String>any());
     }
 }

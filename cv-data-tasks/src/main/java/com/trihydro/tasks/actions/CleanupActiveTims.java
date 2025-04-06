@@ -34,7 +34,7 @@ public class CleanupActiveTims implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("Running...", this.getClass());
+        System.out.println("Running...");
 
         try {
             List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
@@ -43,19 +43,19 @@ public class CleanupActiveTims implements Runnable {
             // select active tims missing ITIS codes
             tmp = activeTimService.getActiveTimsMissingItisCodes();
             if (tmp.size() > 0) {
-                utility.logWithDate("Found " + tmp.size() + " Active TIMs missing ITIS Codes", this.getClass());
+                System.out.println("Found " + tmp.size() + " Active TIMs missing ITIS Codes");
                 activeTims.addAll(tmp);
             }
 
             // add active tims that weren't sent to the SDX or any RSUs
             tmp = activeTimService.getActiveTimsNotSent();
             if (tmp.size() > 0) {
-                utility.logWithDate("Found " + tmp.size() + " Active TIMs that weren't distributed", this.getClass());
+                System.out.println("Found " + tmp.size() + " Active TIMs that weren't distributed");
                 activeTims.addAll(tmp);
             }
 
             if (activeTims.size() == 0) {
-                utility.logWithDate("Found 0 Active TIMs", this.getClass());
+                System.out.println("Found 0 Active TIMs");
             }
 
             // delete from rsus and the SDX
@@ -71,9 +71,8 @@ public class CleanupActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                utility.logWithDate(
-                        "CleanupActiveTims - Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }",
-                        this.getClass());
+                String msg = "CleanupActiveTims - Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }";
+                System.out.println(msg);
                 restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }

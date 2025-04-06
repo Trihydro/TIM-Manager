@@ -56,8 +56,7 @@ public class ActiveTimService extends BaseService {
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
                 else if (col.equals("TIM_START")) {
-                    utility.logWithDate(
-                            String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
+                    System.out.println(String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
                     java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
                     Timestamp ts = new Timestamp(tim_start_date.getTime());
                     sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
@@ -443,7 +442,7 @@ public class ActiveTimService extends BaseService {
                 e.printStackTrace();
             }
         }
-        utility.logWithDate(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
+        System.out.println(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
                 packetID, expDate, success));
         return success;
     }
@@ -496,7 +495,7 @@ public class ActiveTimService extends BaseService {
                 e.printStackTrace();
             }
         }
-        utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
+        System.out.println(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
                 packetID, expDate, minStart));
         return minStart;
     }

@@ -187,8 +187,8 @@ public class WydotTimService {
         int numberOfSatTims = activeSatTims != null ? activeSatTims.size() : 0;
         if (numberOfSatTims > 1) {
             // inform user that there are multiple active SAT TIMs for this client, when we expected zero or one
-            utility.logWithDate("Multiple active SAT TIMs found for client " + wydotTim.getClientId() + " and direction "
-                    + wydotTim.getDirection() + ". Expected zero or one. Using the first one found.");
+            System.out.println("Multiple active SAT TIMs found for client " + wydotTim.getClientId() + " and direction "
+                        + wydotTim.getDirection() + ". Expected zero or one. Using the first one found.");
         }
 
         // retrieve first record if it exists
@@ -224,7 +224,7 @@ public class WydotTimService {
         try {
             regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
         } catch (IllegalArgumentException e) {
-            utility.logWithDate("Failed to trim region name: " + e.getMessage());
+            System.out.println("Failed to trim region name: " + e.getMessage());
             return;
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
@@ -247,7 +247,7 @@ public class WydotTimService {
 
         // if no RSUs found
         if (rsus.size() == 0) {
-            utility.logWithDate("No RSUs found to place TIM on, returning");
+            System.out.println("No RSUs found to place TIM on, returning");
             return;
         }
 
@@ -278,7 +278,7 @@ public class WydotTimService {
             try {
                 regionNameTemp = regionNameTrimmer.trimRegionNameIfTooLong(regionNameTemp);
             } catch (IllegalArgumentException e) {
-                utility.logWithDate("Failed to trim region name: " + e.getMessage());
+                System.out.println("Failed to trim region name: " + e.getMessage());
                 return;
             }
             timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionNameTemp);
@@ -318,8 +318,7 @@ public class WydotTimService {
                 // if query failed, don't send TIM,
                 // log the error and continue
                 if (timQuery == null) {
-                    utility.logWithDate(
-                            "Returning without sending TIM to RSU. submitTimQuery failed for RSU " + gson.toJson(rsu));
+                    System.out.println("Returning without sending TIM to RSU. submitTimQuery failed for RSU " + gson.toJson(rsu));
                     continue;
                 }
 
@@ -340,7 +339,7 @@ public class WydotTimService {
                 // if unable to find next available index,
                 // log error and continue
                 if (nextRsuIndex == null) {
-                    utility.logWithDate("Unable to find an available index for RSU " + gson.toJson(rsu));
+                    System.out.println("Unable to find an available index for RSU " + gson.toJson(rsu));
                     continue;
                 }
 
@@ -385,7 +384,7 @@ public class WydotTimService {
                 for (TimRsu timRsu : timRsus) {
                     rsu = getRsu(timRsu.getRsuId());
                     // delete tim off rsu
-                    utility.logWithDate("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
+                    System.out.println("Deleting TIM from RSU. Corresponding tim_id: " + activeTim.getTimId());
                     if (!deleteTimFromRsu(rsu, timRsu.getRsuIndex())) {
                         returnValue.addfailedRsuTimJson(gson.toJson(timRsu));
                     }
@@ -428,7 +427,7 @@ public class WydotTimService {
                     try {
                         emailHelper.SendEmail(emailProps.getAlertAddresses(), "SDX Delete Fail", body);
                     } catch (Exception ex) {
-                        utility.logWithDate(body + ", and the email failed to send to support");
+                        System.out.println(body + ", and the email failed to send to support");
                         ex.printStackTrace();
                     }
                 }
@@ -456,7 +455,7 @@ public class WydotTimService {
             activeTims.addAll(activeTimService.getBufferTimsByClientId(clientId));
         }
 
-        utility.logWithDate(activeTims.size() + " active_tim found for deletion");
+        System.out.println(activeTims.size() + " active_tim found for deletion");
 
         List<Long> activeTimIds = activeTims.stream()
             .map(ActiveTim::getActiveTimId)
@@ -552,7 +551,7 @@ public class WydotTimService {
         String timToSendJson = gson.toJson(timToSend);
 
         try {
-            utility.logWithDate("Sending new TIM to SDW. sat_record_id: " + recordId);
+            System.out.println("Sending new TIM to SDW. sat_record_id: " + recordId);
             restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
                     String.class);
         } catch (RuntimeException targetException) {
@@ -574,15 +573,15 @@ public class WydotTimService {
 
         try {
             var rsu = getRsu(timRsu.getRsuId());
-            utility.logWithDate("Preparing to submit updated TIM. Clearing index " + timRsu.getRsuIndex() + " on RSU "
-                    + timRsu.getRsuId());
+            System.out.println("Preparing to submit updated TIM. Clearing index " + timRsu.getRsuIndex() + " on RSU "
+                        + timRsu.getRsuId());
             // The ODE response code is misleading. If there is a failure in this step or
             // the next, the issue should get addressed when the RSU Validation task is
             // ran.
             deleteTimFromRsu(rsu, timRsu.getRsuIndex());
             odeService.sendNewTimToRsu(updatedTim);
         } catch (Exception ex) {
-            utility.logWithDate("Failed to send update to RSU.");
+            System.out.println("Failed to send update to RSU.");
         }
     }
 
@@ -609,11 +608,11 @@ public class WydotTimService {
 
         // send TIM
         try {
-            utility.logWithDate("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
+            System.out.println("Updating TIM on SDW. tim_id: " + timId + ", sat_record_id: " + recordId);
             restTemplateProvider.GetRestTemplate().postForObject(odeProps.getOdeUrl() + "/tim", timToSendJson,
                     String.class);
         } catch (RuntimeException targetException) {
-            utility.logWithDate("exception updating tim on SDW");
+            System.out.println("exception updating tim on SDW");
             targetException.printStackTrace();
         }
     }
@@ -648,7 +647,7 @@ public class WydotTimService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(rsuJson, headers);
 
-        utility.logWithDate("Deleting TIM on index " + index.toString() + " from rsu " + odeRsu.getRsuTarget());
+        System.out.println("Deleting TIM on index " + index.toString() + " from rsu " + odeRsu.getRsuTarget());
         var response = restTemplateProvider.GetRestTemplate_NoErrors().exchange(
                 odeProps.getOdeUrl() + "/tim?index=" + index.toString(), HttpMethod.DELETE, entity, String.class);
 

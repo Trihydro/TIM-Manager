@@ -98,14 +98,14 @@ public class HttpLoggingFilter implements Filter {
                     logMessage.append(" [RESPONSE:").append(serverResponse).append("]");
                 }
             }
-            utility.logWithDate(logMessage.toString());
+            System.out.println(logMessage.toString());
             HttpLoggingModel httpLoggingModel = new HttpLoggingModel();
             httpLoggingModel.setRequest(logMessage.toString());
             httpLoggingModel.setRequestTime(requestTime);
             httpLoggingModel.setResponseTime(new Timestamp(System.currentTimeMillis()));
             loggingService.LogHttpRequest(httpLoggingModel);
         } catch (Throwable a) {
-            utility.logWithDate(a.getMessage());
+            System.out.println(a.getMessage());
         }
     }
 

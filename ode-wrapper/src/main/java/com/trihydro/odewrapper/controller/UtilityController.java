@@ -67,7 +67,7 @@ public class UtilityController extends WydotTimBaseController {
     public ResponseEntity<String> allRsusTimCheck() {
 
         // String url = configuration.getOdeUrl();
-        utility.logWithDate("RSU TIM Check", this.getClass());
+        System.out.println("RSU TIM Check");
 
         List<RsuCheckResults> rsuCheckResultsList = new ArrayList<RsuCheckResults>();
 
@@ -102,7 +102,7 @@ public class UtilityController extends WydotTimBaseController {
     @RequestMapping(value = "/rsu-tim-check/{address:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     public ResponseEntity<String> rsuTimCheck(@PathVariable String address) {
 
-        utility.logWithDate("RSU TIM Check", this.getClass());
+        System.out.println("RSU TIM Check");
 
         List<RsuCheckResults> rsuCheckResultsList = new ArrayList<RsuCheckResults>();
 
@@ -116,7 +116,8 @@ public class UtilityController extends WydotTimBaseController {
         rsuCheckResults.rsuIndexList = new ArrayList<Integer>();
         rsuCheckResults.activeTimIndicesList = new ArrayList<Integer>();
 
-        utility.logWithDate(rsu.getRsuTarget(), this.getClass());
+        String msg = rsu.getRsuTarget();
+        System.out.println(msg);
         rsuCheckResults.rsuTarget = rsu.getRsuTarget();
 
         com.trihydro.library.model.TimQuery timQuery = odeService.submitTimQuery(rsu, 0);

@@ -36,7 +36,7 @@ public class OdeMongoLoggingConsumer {
 		utility = _utility;
 		emailHelper = _emailHelper;
 
-		utility.logWithDate("starting..............");
+		System.out.println("starting..............");
 		startKafkaConsumer();
 	}
 
@@ -66,7 +66,7 @@ public class OdeMongoLoggingConsumer {
 				}
 
 				if (recStrings.size() > 0) {
-					utility.logWithDate(String.format("Found %d %s records to parse", recStrings.size(), topic));
+					System.out.println(String.format("Found %d %s records to parse", recStrings.size(), topic));
 					String[] recStringArr = recStrings.toArray(new String[recStrings.size()]);
 
 					if (topic.equals("topic.OdeTimJson")) {
@@ -79,7 +79,7 @@ public class OdeMongoLoggingConsumer {
 				}
 			}
 		} catch (Exception ex) {
-			utility.logWithDate("Exception in mongo logger application " + ex.getMessage());
+			System.out.println("Exception in mongo logger application " + ex.getMessage());
 			emailHelper.ContainerRestarted(mongoLoggerConfig.getAlertAddresses(), mongoLoggerConfig.getMailPort(),
 					mongoLoggerConfig.getMailHost(), mongoLoggerConfig.getFromEmail(), topic + " Mongo Consumer");
 			throw (ex);

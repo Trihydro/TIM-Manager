@@ -399,7 +399,8 @@ public class WydotTimServiceTest {
         uut.sendTimToSDW(wydotTim, timToSend, regionNamePrev, timType, 0, endPoint, reducedMileposts);
 
         // Assert
-        verify(mockUtility).logWithDate("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+        verify(mockUtility);
+        System.out.println("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -420,7 +421,8 @@ public class WydotTimServiceTest {
         // Assert
         verify(mockSdwService).getNewRecordId();
         verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
-        verify(mockUtility, never()).logWithDate("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+        verify(mockUtility, never());
+        System.out.println("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -444,7 +446,8 @@ public class WydotTimServiceTest {
         verify(mockActiveTimHoldingService).insertActiveTimHolding(any());
         verify(mockActiveTimService).resetActiveTimsExpirationDate(any());
         verify(mockTimService).getTim(any());
-        verify(mockUtility, never()).logWithDate("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
+        verify(mockUtility, never());
+        System.out.println("Multiple active SAT TIMs found for client testclientid and direction D. Expected zero or one. Using the first one found.");
     }
 
     @Test
@@ -464,7 +467,8 @@ public class WydotTimServiceTest {
         uut.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, 0, endDateTime, endPoint);
 
         // Assert
-        verify(mockUtility).logWithDate("No RSUs found to place TIM on, returning");
+        verify(mockUtility);
+        System.out.println("No RSUs found to place TIM on, returning");
     }
 
     @Test
@@ -540,7 +544,8 @@ public class WydotTimServiceTest {
         uut.sendTimToRsus(wydotTim, timToSend, regionNamePrev, timType, 0, endDateTime, endPoint);
 
         // Assert
-        verify(mockUtility).logWithDate("Deleting TIM on index " + rsu.getRsuIndex() + " from rsu " + rsu.getRsuTarget());
+        verify(mockUtility);
+        System.out.println("Deleting TIM on index " + rsu.getRsuIndex() + " from rsu " + rsu.getRsuTarget());
         verify(mockOdeService).sendNewTimToRsu(any());
     }
 

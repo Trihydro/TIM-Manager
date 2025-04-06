@@ -68,14 +68,14 @@ public class ValidateRsus implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("Running...", this.getClass());
+        System.out.println("Running...");
 
         try {
             validateRsus();
         } catch (Exception ex) {
             var msg = "An unexpected error occurred that prevented RSU validation from completing.\n";
             msg += ex.getMessage();
-            utility.logWithDate(msg, this.getClass());
+            System.out.println(msg);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Error", msg);
@@ -109,7 +109,7 @@ public class ValidateRsus implements Runnable {
                 }
             }
         } catch (Exception ex) {
-            utility.logWithDate("Unable to fetch all RSUs - will proceed with partial validation", this.getClass());
+            System.out.println("Unable to fetch all RSUs - will proceed with partial validation");
 
             unexpectedErrors.add("Error occurred while fetching all RSUs - "
                     + "unable to validate any RSUs that don't have an existing, active TIM. Error:\n" + ex.toString());
@@ -118,7 +118,7 @@ public class ValidateRsus implements Runnable {
         // If there isn't anything to verify, exit early.
         if (rsusToValidate.size() == 0) {
             var msg = "Unable to find any RSUs to validate.";
-            utility.logWithDate(msg, this.getClass());
+            System.out.println(msg);
 
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "RSU Validation Error", msg);
@@ -202,7 +202,7 @@ public class ValidateRsus implements Runnable {
             for (var error : resubmitErrors) {
                 String message = String.format("Error resubmitting Active TIM %d. Error: %s", error.getActiveTimId(),
                         error.getExceptionMessage());
-                utility.logWithDate(message, this.getClass());
+                System.out.println(message);
                 unexpectedErrors.add(message);
             }
         }
@@ -252,7 +252,7 @@ public class ValidateRsus implements Runnable {
             tasks.add(new ValidateRsu(rsu.getRsuInformation(), rsuDataService));
         }
 
-        utility.logWithDate("Validating " + tasks.size() + " RSUs...", this.getClass());
+        System.out.println("Validating " + tasks.size() + " RSUs...");
 
         List<Future<RsuValidationResult>> futureResults = null;
         try {
@@ -260,7 +260,7 @@ public class ValidateRsus implements Runnable {
             futureResults = workerThreadPool.invokeAll(tasks, config.getRsuValTimeoutSeconds(), TimeUnit.SECONDS);
             shutDownThreadPool(workerThreadPool);
         } catch (InterruptedException e) {
-            utility.logWithDate("Error while executing validation tasks:", this.getClass());
+            System.out.println("Error while executing validation tasks:");
             e.printStackTrace();
         }
 
@@ -277,7 +277,7 @@ public class ValidateRsus implements Runnable {
                 // Something went wrong, and the validation task for this RSU wasn't completed.
                 String rsuIpv4Address = tasks.get(i).getIpv4Address();
                 String message = "Error while validating RSU " + rsuIpv4Address + ":\n" + e.toString();
-                utility.logWithDate(message, this.getClass());
+                System.out.println(message);
                 rsusToValidate.get(i).setError(message);
             }
         }
@@ -304,8 +304,7 @@ public class ValidateRsus implements Runnable {
             // Fetch records for prod
             activeTims = activeTimService.getActiveRsuTims(config.getCvRestService());
         } catch (Exception ex) {
-            utility.logWithDate("Unable to validate RSUs - error occurred while fetching Database records from PROD:",
-                    this.getClass());
+            System.out.println("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
             ex.printStackTrace();
             return null;
         }

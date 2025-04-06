@@ -270,7 +270,10 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
+        verify(mockUtility, times(2));
+        String msg = logMessageCaptor.capture();
+        eq(ValidateTmdd.class);
+        System.out.println(msg);
         Assertions.assertEquals("Error fetching Active Tims:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
@@ -284,7 +287,10 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
+        verify(mockUtility, times(2));
+        String msg = logMessageCaptor.capture();
+        eq(ValidateTmdd.class);
+        System.out.println(msg);
         Assertions.assertEquals("Error fetching FEUs from TMDD:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
@@ -298,7 +304,10 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
+        verify(mockUtility, times(2));
+        String msg = logMessageCaptor.capture();
+        eq(ValidateTmdd.class);
+        System.out.println(msg);
         Assertions.assertEquals("Unable to initialize TMDD ITIS Code cache:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
@@ -327,7 +336,10 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(3)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
+        verify(mockUtility, times(3));
+        String msg = logMessageCaptor.capture();
+        eq(ValidateTmdd.class);
+        System.out.println(msg);
         Assertions.assertEquals("Error sending summary email:", logMessageCaptor.getAllValues().get(1));
         Assertions.assertEquals("Failed to send error summary email:", logMessageCaptor.getAllValues().get(2));
     }

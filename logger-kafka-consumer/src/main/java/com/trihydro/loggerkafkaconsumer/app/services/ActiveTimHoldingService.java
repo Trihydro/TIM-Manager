@@ -176,9 +176,9 @@ public class ActiveTimHoldingService extends BaseService {
             preparedStatement.setLong(1, activeTimHoldingId);
             var success = dbInteractions.updateOrDelete(preparedStatement);
             if (success) {
-                utility.logWithDate("Deleted ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+                System.out.println("Deleted ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
             } else {
-                utility.logWithDate("Failed to delete ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+                System.out.println("Failed to delete ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
             }
             return success;
         } catch (SQLException e) {
@@ -229,7 +229,7 @@ public class ActiveTimHoldingService extends BaseService {
                 e.printStackTrace();
             }
         }
-        utility.logWithDate(String.format(
+        System.out.println(String.format(
                 "Called ActiveTimHolding UpdateTimExpiration with packetID: %s, expDate: %s. Successful: %s", packetID,
                 expDate, success));
         return success;

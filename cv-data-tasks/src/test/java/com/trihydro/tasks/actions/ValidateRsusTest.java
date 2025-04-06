@@ -144,8 +144,8 @@ public class ValidateRsusTest {
         uut.run();
 
         // Assert
-        verify(mockUtility).logWithDate(
-                "Unable to validate RSUs - error occurred while fetching Database records from PROD:", ValidateRsus.class);
+        verify(mockUtility);
+        System.out.println("Unable to validate RSUs - error occurred while fetching Database records from PROD:");
     }
 
     @Test

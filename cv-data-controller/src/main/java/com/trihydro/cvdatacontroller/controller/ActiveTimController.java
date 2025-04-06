@@ -1498,9 +1498,9 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		utility.logWithDate(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
+        System.out.println(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
 				packetID, expDate, success));
-		return ResponseEntity.ok(success);
+        return ResponseEntity.ok(success);
 	}
 
 	@RequestMapping(value = "/get-min-expiration/{packetID}/{expDate}")
@@ -1553,9 +1553,9 @@ public class ActiveTimController extends BaseController {
 				e.printStackTrace();
 			}
 		}
-		utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
+        System.out.println(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
 				packetID, expDate, minStart));
-		return ResponseEntity.ok(minStart);
+        return ResponseEntity.ok(minStart);
 	}
 
 	@RequestMapping(value = "/mark-for-deletion/{activeTimId}", method = RequestMethod.PUT)
@@ -1589,8 +1589,8 @@ public class ActiveTimController extends BaseController {
 			}
 		}
 		if (!success) {
-			utility.logWithDate(String.format("Failed to mark active tim for deletion with activeTimId: %s", activeTimId));
-		}
+            System.out.println(String.format("Failed to mark active tim for deletion with activeTimId: %s", activeTimId));
+        }
 		return ResponseEntity.ok(success);
 	}
 }

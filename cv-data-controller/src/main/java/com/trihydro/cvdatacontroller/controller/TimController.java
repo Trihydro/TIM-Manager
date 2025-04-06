@@ -277,49 +277,49 @@ public class TimController extends BaseController {
             // 1. delete old tim_rsu records
             deleteResult = deleteOldTimRsus(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old tim_rsu records");
+                System.out.println("Failed to cleanup old tim_rsu records");
                 return ResponseEntity.ok(false);
             }
 
             // 2. delete old data_frame_itis_code records
             deleteResult &= deleteOldDataFrameItisCodes(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old data_frame_itis_code records");
+                System.out.println("Failed to cleanup old data_frame_itis_code records");
                 return ResponseEntity.ok(false);
             }
 
             // 3. delete old region records
             deleteResult &= deleteOldRegions(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old region records");
+                System.out.println("Failed to cleanup old region records");
                 return ResponseEntity.ok(false);
             }
 
             // 4. delete old path_node_ll records
             deleteResult &= deleteOldPathNodeLL(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old path_node_ll records");
+                System.out.println("Failed to cleanup old path_node_ll records");
                 return ResponseEntity.ok(false);
             }
 
             // 5. delete old path records
             deleteResult &= deleteOldPaths(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old path records");
+                System.out.println("Failed to cleanup old path records");
                 return ResponseEntity.ok(false);
             }
 
             // 6. delete old node_ll records
             deleteResult &= deleteOldNodeLL(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old node_ll records");
+                System.out.println("Failed to cleanup old node_ll records");
                 return ResponseEntity.ok(false);
             }
 
             // 7. delete old data_frame records
             deleteResult &= deleteOldDataFrames(oneMonthPriorTimestamp);
             if (!deleteResult) {
-                utility.logWithDate("Failed to cleanup old data_frame records");
+                System.out.println("Failed to cleanup old data_frame records");
                 return ResponseEntity.ok(false);
             }
 
@@ -380,7 +380,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete data_frame");
+            System.out.println("Failed to delete data_frame");
         }
         return deleteResult;
     }
@@ -416,7 +416,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete DATA_FRAME_ITIS_CODE");
+            System.out.println("Failed to delete DATA_FRAME_ITIS_CODE");
         }
         return deleteResult;
     }
@@ -452,7 +452,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete region");
+            System.out.println("Failed to delete region");
         }
         return deleteResult;
     }
@@ -488,7 +488,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete path");
+            System.out.println("Failed to delete path");
         }
         return deleteResult;
     }
@@ -524,7 +524,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete path_node_ll");
+            System.out.println("Failed to delete path_node_ll");
         }
         return deleteResult;
     }
@@ -561,7 +561,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete node_ll");
+            System.out.println("Failed to delete node_ll");
         }
         return deleteResult;
     }
@@ -596,7 +596,7 @@ public class TimController extends BaseController {
         }
 
         if (!deleteResult) {
-            utility.logWithDate("Failed to delete tim_rsus");
+            System.out.println("Failed to delete tim_rsus");
         }
         return deleteResult;
     }

@@ -33,12 +33,12 @@ public class RemoveExpiredActiveTims implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("Running...", this.getClass());
+        System.out.println("Running...");
 
         try {
             // select active tims
             List<ActiveTim> activeTims = activeTimService.getExpiredActiveTims();
-            utility.logWithDate("Found " + activeTims.size() + " expired Active TIMs", this.getClass());
+            System.out.println("Found " + activeTims.size() + " expired Active TIMs");
 
             // delete active tims from rsus
             HttpHeaders headers = new HttpHeaders();
@@ -53,8 +53,8 @@ public class RemoveExpiredActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                utility.logWithDate("Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }",
-                        this.getClass());
+                String msg = "Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }";
+                System.out.println(msg);
                 restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }

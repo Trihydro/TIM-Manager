@@ -109,11 +109,11 @@ public class Application {
 
                 // HSM Check
                 if (config.getRunHsmCheck()) {
-                        utility.logWithDate("HSM check configured, scheduling...");
-                        scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
+                    System.out.println("HSM check configured, scheduling...");
+                    scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
                                         config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
                 } else {
-                        utility.logWithDate("HSM check not configured, skipping...");
+                    System.out.println("HSM check not configured, skipping...");
                 }
 
                 // RSU Validator

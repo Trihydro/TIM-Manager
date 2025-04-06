@@ -51,7 +51,7 @@ public class RsuService {
 
         // If timeout occurred, return null
         if (snmpWalkOutput.matches("snmpwalk: Timeout")) {
-            utility.logWithDate("SNMP Timeout occurred (RSU: " + rsuIpv4Address + ")");
+            System.out.println("SNMP Timeout occurred (RSU: " + rsuIpv4Address + ")");
             return null;
         }
 

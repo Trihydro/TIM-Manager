@@ -112,7 +112,7 @@ public class KafkaFactory {
         var consumer = new KafkaConsumer<String, String>(props);
         consumer.subscribe(topics);
 
-        utility.logWithDate(String.format("Created consumer for consumer group %s, subscribed to topic(s) %s",
+        System.out.println(String.format("Created consumer for consumer group %s, subscribed to topic(s) %s",
                 consumerGroup, String.join(", ", topics)));
 
         return consumer;

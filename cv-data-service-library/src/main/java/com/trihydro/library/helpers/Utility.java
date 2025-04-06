@@ -52,15 +52,6 @@ public class Utility {
         return convertedDate;
     }
 
-    public <T> void logWithDate(String msg, Class<T> clazz) {
-        logWithDate(clazz.getSimpleName() + ": " + msg);
-    }
-
-    public void logWithDate(String msg) {
-        Date date = new Date();
-        System.out.println(date + " " + msg);
-    }
-
     public int getMinutesDurationBetweenTwoDates(String startDateTime, String endDateTime) {
         int duration = getMinutesDurationWithSimpleDateFormat(startDateTime, endDateTime);
         if (duration == -1) {
@@ -75,8 +66,8 @@ public class Utility {
             try {
                 startDateTimeInZonedDateTime = translateToZonedDateTime(startDateTime);
             } catch (UnrecognizedDateFormatException e) {
-                logWithDate("Failed to parse dates when getting minutes between: " + startDateTime +
-                    " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
+                System.out.println("Failed to parse dates when getting minutes between: " + startDateTime +
+                            " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
                 return -1;
             }
 
@@ -84,8 +75,8 @@ public class Utility {
             try {
                 endDateTimeInZonedDateTime = translateToZonedDateTime(endDateTime);
             } catch (UnrecognizedDateFormatException e) {
-                logWithDate("Failed to parse dates when getting minutes between: " + startDateTime +
-                    " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
+                System.out.println("Failed to parse dates when getting minutes between: " + startDateTime +
+                            " and " + endDateTime + ". Unrecognized date format: " + startDateTime);
                 return -1;
             }
 
@@ -93,9 +84,8 @@ public class Utility {
                 endDateTimeInZonedDateTime);
         }
         if (duration == -1) {
-            logWithDate(
-                "Failed to parse dates when getting minutes between: " + startDateTime + " and " +
-                    endDateTime);
+            System.out.println("Failed to parse dates when getting minutes between: " + startDateTime + " and " +
+                        endDateTime);
         }
         return duration;
     }

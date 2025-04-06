@@ -65,8 +65,8 @@ public class SdwService {
 
             results = Arrays.asList(response.getBody());
         } catch (RestClientException ex) {
-            utility.logWithDate("An exception occurred while attempting to get messages from SDX: " + ex.getMessage());
-            utility.logWithDate("Is the SDX API key valid?");
+            System.out.println("An exception occurred while attempting to get messages from SDX: " + ex.getMessage());
+            System.out.println("Is the SDX API key valid?");
             ex.printStackTrace();
         }
 
@@ -107,8 +107,8 @@ public class SdwService {
 
             decodeResponse = response.getBody();
         } catch (RestClientException ex) {
-            utility.logWithDate("An exception occurred while attempting to decode message: " + ex.getMessage());
-            utility.logWithDate("Is the SDX API key valid?");
+            System.out.println("An exception occurred while attempting to decode message: " + ex.getMessage());
+            System.out.println("Is the SDX API key valid?");
             ex.printStackTrace();
             return null;
         }
@@ -153,9 +153,9 @@ public class SdwService {
         HashMap<Integer, Boolean> results = null;
         if (satRecordIds == null || satRecordIds.size() == 0 || configProperties.getSdwApiKey() == null) {
             if (configProperties.getSdwApiKey() == null) {
-                utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
+                System.out.println("Attempting to delete satellite records failed due to null apiKey");
             } else {
-                utility.logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
+                System.out.println("Attempting to delete satellite records failed due to no satRecordIds passed in");
             }
             return results;
         }
@@ -174,14 +174,14 @@ public class SdwService {
         try {
             response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
         } catch (HttpClientErrorException ex) {
-            utility.logWithDate("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
-            utility.logWithDate("Is the SDX API key valid?");
+            System.out.println("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
+            System.out.println("Is the SDX API key valid?");
             ex.printStackTrace();
             response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
         }
 
         if (response.getStatusCode() != HttpStatus.OK) {
-            utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
+            System.out.println("Failed to call delete-multiple-by-id on SDX api");
         }
         return response.getBody();
     }
@@ -190,9 +190,9 @@ public class SdwService {
         HashMap<Integer, Boolean> results = null;
         if (satRecordInts == null || satRecordInts.size() == 0 || configProperties.getSdwApiKey() == null) {
             if (configProperties.getSdwApiKey() == null) {
-                utility.logWithDate("Attempting to delete satellite records failed due to null apiKey");
+                System.out.println("Attempting to delete satellite records failed due to null apiKey");
             } else {
-                utility.logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
+                System.out.println("Attempting to delete satellite records failed due to no satRecordIds passed in");
             }
             return results;
         }
@@ -208,14 +208,14 @@ public class SdwService {
         try {
             response = restTemplateProvider.GetRestTemplate().exchange(url, HttpMethod.DELETE, entity, responseType);
         } catch (HttpClientErrorException ex) {
-            utility.logWithDate("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
-            utility.logWithDate("Is the SDX API key valid?");
+            System.out.println("An exception occurred while attempting to delete satellite records: " + ex.getMessage());
+            System.out.println("Is the SDX API key valid?");
             ex.printStackTrace();
             response = new ResponseEntity<HashMap<Integer, Boolean>>(ex.getStatusCode());
         }
 
         if (response.getStatusCode() != HttpStatus.OK) {
-            utility.logWithDate("Failed to call delete-multiple-by-id on SDX api");
+            System.out.println("Failed to call delete-multiple-by-id on SDX api");
         }
         return response.getBody();
     }

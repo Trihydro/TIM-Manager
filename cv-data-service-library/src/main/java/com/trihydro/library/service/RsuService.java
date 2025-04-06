@@ -67,10 +67,10 @@ public class RsuService extends CvDataServiceLibrary {
 		// if there are no rsus on this route
 		List<WydotRsu> mainRsus = getRsusByRouteWithRetryAndTimeout(route);
 		if (mainRsus.size() == 0) {
-			utility.logWithDate("No RSUs found for route " + route);
+			System.out.println("No RSUs found for route " + route);
 			return rsus;
 		} else {
-			utility.logWithDate("Found " + mainRsus.size() + " RSUs for route " + route);
+			System.out.println("Found " + mainRsus.size() + " RSUs for route " + route);
 		}
 
 		Ellipsoid reference = Ellipsoid.WGS84;
@@ -146,7 +146,7 @@ public class RsuService extends CvDataServiceLibrary {
 				}
 
 				if (rsusHigher.size() == 0) {
-					utility.logWithDate("No RSUs found higher than 'low' point");
+					System.out.println("No RSUs found higher than 'low' point");
 				}
 
 			} else {

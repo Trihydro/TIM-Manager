@@ -42,12 +42,12 @@ public class TimRefreshController {
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
     public void performTaskUsingCron() {
-        utility.logWithDate("Regular task performed using Cron at " + dateFormat.format(new Date()));
+        System.out.println("Regular task performed using Cron at " + dateFormat.format(new Date()));
 
         // fetch Active_TIM that are expiring within 24 hrs
         List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
-        utility.logWithDate(expiringTims.size() + " expiring TIMs found");
+        System.out.println(expiringTims.size() + " expiring TIMs found");
         List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
         List<ResubmitTimException> exceptionTims = new ArrayList<>();
         List<TimUpdateModel> timsToRefresh = new ArrayList<TimUpdateModel>();
@@ -104,11 +104,10 @@ public class TimRefreshController {
             }
 
             try {
-                utility.logWithDate(
-                        "Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
+                System.out.println("Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
                 emailHelper.SendEmail(configuration.getAlertAddresses(), "TIM Refresh Exceptions", body);
             } catch (Exception e) {
-                utility.logWithDate("Exception attempting to send email for invalid TIM:");
+                System.out.println("Exception attempting to send email for invalid TIM:");
                 e.printStackTrace();
             }
         }

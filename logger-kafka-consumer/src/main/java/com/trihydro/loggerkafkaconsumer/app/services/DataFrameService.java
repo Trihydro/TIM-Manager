@@ -81,7 +81,7 @@ public class DataFrameService extends BaseService {
                             Date dt = df.parse(dFrame.getStartDateTime());
                             time = new Timestamp(dt.getTime());
                         } catch (ParseException ex) {
-                            utility.logWithDate("Unable to parse startdate: " + dFrame.getStartDateTime());
+                            System.out.println("Unable to parse startdate: " + dFrame.getStartDateTime());
                         }
                         sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, time);
                     }

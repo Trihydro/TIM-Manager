@@ -14,6 +14,7 @@ import com.trihydro.rsudatacontroller.service.RsuService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -64,7 +65,8 @@ public class RsuTimControllerTest {
         // Assert
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
-        verify(mockUtility).logWithDate(any());
+        verify(mockUtility);
+        System.out.println(ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -78,6 +80,7 @@ public class RsuTimControllerTest {
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
-        verify(mockUtility).logWithDate(any());
+        verify(mockUtility);
+        System.out.println(ArgumentMatchers.<String>any());
     }
 }

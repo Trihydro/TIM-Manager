@@ -50,7 +50,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
 
     @RequestMapping(value = "/create-or-update-bowr-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createOrUpdateBowrTim(@RequestBody TimBowrList timBowrList) {
-        utility.logWithDate("Create Or Update Blow Over Weight Restriction TIM", this.getClass());
+        System.out.println("Create Or Update Blow Over Weight Restriction TIM");
 
         List<ControllerResult> results = new ArrayList<ControllerResult>();
         List<ControllerResult> errors = new ArrayList<ControllerResult>();
@@ -76,7 +76,8 @@ public class WydotTimBowrController extends WydotTimBaseController {
         processRequestAsync(timsToSend);
         String responseMessage = gson.toJson(results);
         if (errors.size() > 0) {
-            utility.logWithDate("Failed to send TIMs: " + gson.toJson(errors), this.getClass());
+            String msg = "Failed to send TIMs: " + gson.toJson(errors);
+            System.out.println(msg);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -84,7 +85,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
 
     @RequestMapping(value = "/submit-bowr-clear/{clientId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> submitBowrClear(@PathVariable String clientId) {
-        utility.logWithDate("Submit Blow Over Weight Restriction Clear", this.getClass());
+        System.out.println("Submit Blow Over Weight Restriction Clear");
 
         List<Long> existingTimIds = new ArrayList<Long>();
 
@@ -99,7 +100,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
         List<ActiveTim> existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timTypeId, null);
         if (existingActiveTims.size() == 0) {
-            utility.logWithDate("No active TIMs found for client id: " + clientId, this.getClass());
+            System.out.println("No active TIMs found for client id: " + clientId);
             String responseMessage = "No active TIMs found for client id: " + clientId;
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
         }

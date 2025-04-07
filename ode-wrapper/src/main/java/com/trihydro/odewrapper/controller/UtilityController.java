@@ -1,5 +1,6 @@
 package com.trihydro.odewrapper.controller;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,9 +58,9 @@ public class UtilityController extends WydotTimBaseController {
     public UtilityController(BasicConfiguration _basicConfiguration, WydotTimService _wydotTimService,
             TimTypeService _timTypeService, SetItisCodes _setItisCodes, ActiveTimService _activeTimService,
             OdeService _odeService, RestTemplateProvider _restTemplateProvider, MilepostReduction _milepostReduction,
-            Utility _utility, TimGenerationHelper _timGenerationHelper) {
+            Utility _utility, TimGenerationHelper _timGenerationHelper, IdenticalPointsExceptionHandler identicalPointsExceptionHandler) {
         super(_basicConfiguration, _wydotTimService, _timTypeService, _setItisCodes, _activeTimService,
-                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper);
+                _restTemplateProvider, _milepostReduction, _utility, _timGenerationHelper, identicalPointsExceptionHandler);
         this.odeService = _odeService;
     }
 

@@ -111,6 +111,10 @@ You may configure these values in `cv-data-controller/src/main/resources/applica
 | SERVER_SSL_KEY_STORE_TYPE | CONTROLLER_SERVER_SSL_KEY_STORE_TYPE | server.ssl.keyStoreType | **PROD ONLY** Keystore type (JKS) | JKS |
 | SERVER_SSL_KEY_ALIAS | CONTROLLER_SERVER_SSL_KEY_ALIAS | server.ssl.keyAlias | **PROD ONLY** Alias for Keystore | example.alias |
 
+## Note on Neo4j Database
+The system expects a Neo4j database to be running and accessible at the address specified in the `application.properties` file or the `sample.env` file. The 
+database should be populated with the necessary data for the system to function properly. The database should be running before starting the application.
+
 ## Testing
 To run the unit tests, follow these steps:
 1. Reopen the project in the provided dev container by clicking on the blue button in the bottom left corner of the window and selecting "Reopen in Container"

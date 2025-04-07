@@ -383,7 +383,7 @@ public class ActiveTimController extends BaseController {
 				return ResponseEntity.ok(getActiveTimFromRS(rs, false));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Error retrieving expired active tims", e);
 			throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving expired active tims");
 		}
 	}

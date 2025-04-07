@@ -106,8 +106,8 @@ public class ActiveTimController extends BaseController {
                     activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
                 }
 				else {
-					utility.logWithDate("Could not set frame type from value " + frameTypeValue
-						+ " for active tim id " + activeTim.getActiveTimId() + ". Assuming Advisory.");
+                    log.warn("Could not set frame type from value {} for active tim id {}. Assuming Advisory.", frameTypeValue,
+                        activeTim.getActiveTimId());
 					// assume advisory
 					activeTim.setFrameType(TravelerInfoType.advisory);
 				}
@@ -163,8 +163,7 @@ public class ActiveTimController extends BaseController {
                     activeTim.setFrameType(TravelerInfoType.values()[frameTypeValue]);
                 }
 				else {
-					utility.logWithDate("Could not set frame type from value " + frameTypeValue
-							+ " for active tim id " + activeTimId + ". Assuming Advisory.");
+                    log.warn("Could not set frame type from value {} for active tim id {}. Assuming Advisory.", frameTypeValue, activeTimId);
 					// assume advisory
 					activeTim.setFrameType(TravelerInfoType.advisory);
 				}

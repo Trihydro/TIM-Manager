@@ -3,68 +3,76 @@ package com.trihydro.library.helpers;
 import com.trihydro.library.model.DbInteractionsProps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class DbInteractionsTest {
+    private DbInteractions uut;
 
     @Mock
     private DbInteractionsProps dbConfig;
 
     @Mock
-    private Utility utility;
-
-    @Mock
     private EmailHelper emailHelper;
 
-    @InjectMocks
-    private DbInteractions dbInteractions;
+    @Mock
+    private PreparedStatement preparedStatement;
+
+    @Mock
+    private ResultSet resultSet;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        when(dbConfig.getDbUrl()).thenReturn("jdbc:postgresql://localhost:5432/test");
+        when(dbConfig.getDbUsername()).thenReturn("test");
+        when(dbConfig.getDbPassword()).thenReturn("test");
+        when(dbConfig.getMaximumPoolSize()).thenReturn(10);
+        when(dbConfig.getConnectionTimeout()).thenReturn(1000);
+        uut = new DbInteractions(dbConfig, emailHelper);
     }
 
     @Test
-    void updateOrDelete_executesUpdate() throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+    void testUpdateOrDelete_WhenExecuted_ShouldReturnTrue() throws SQLException {
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        boolean result = dbInteractions.updateOrDelete(preparedStatement);
+        boolean result = uut.updateOrDelete(preparedStatement);
 
         assertTrue(result);
+        verify(preparedStatement, times(1)).executeUpdate();
     }
 
     @Test
-    void deleteWithPossibleZero_executesUpdate() throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+    void testDeleteWithPossibleZero_WhenNoRowsAffected_ShouldReturnTrue() throws SQLException {
         when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        boolean result = dbInteractions.deleteWithPossibleZero(preparedStatement);
+        boolean result = uut.deleteWithPossibleZero(preparedStatement);
 
         assertTrue(result);
+        verify(preparedStatement, times(1)).executeUpdate();
     }
 
     @Test
-    void executeAndLog_generatesKey() throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        ResultSet resultSet = mock(ResultSet.class);
+    void testExecuteAndLog_WhenKeyGenerated_ShouldReturnGeneratedKey() throws SQLException {
         when(preparedStatement.executeUpdate()).thenReturn(1);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getLong(1)).thenReturn(1L);
 
-        Long id = dbInteractions.executeAndLog(preparedStatement, "type");
+        Long id = uut.executeAndLog(preparedStatement, "type");
 
         assertNotNull(id);
         assertEquals(1L, id);
+        verify(preparedStatement, times(1)).executeUpdate();
+        verify(preparedStatement, times(1)).getGeneratedKeys();
+        verify(resultSet, times(1)).next();
     }
 }

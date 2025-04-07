@@ -25,7 +25,7 @@ public class IdenticalPointsExceptionHandler {
      *               to attempt recovery.
      * @return The anchor point Milepost if recovery is successful, or null if recovery fails.
      */
-    public Milepost recoverFromIdenticalPointsException(List<Milepost> allMps) {
+    public Milepost recover(List<Milepost> allMps) {
         log.info("Attempting to recover from identical points exception");
         if (allMps.size() < 3) {
             // if we only have 2 mileposts, we can't recover

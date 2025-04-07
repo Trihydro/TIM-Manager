@@ -544,13 +544,9 @@ public class JsonToJavaConverter {
 
                 // TravelerInfoType.valueOf();
                 JsonNode frameTypeNode = travelerDataFrame.get("frameType");
-                if (frameTypeNode != null) {
-                    if (frameTypeNode.fieldNames().hasNext()) {
-                        TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
-                        if (frameType != null) {
-                            dataFrame.setFrameType(frameType);
-                        }
-                    }
+                if (frameTypeNode != null && frameTypeNode.fieldNames().hasNext()) {
+                    TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
+                    dataFrame.setFrameType(frameType);
                 }
 
                 JsonNode startTimeNode = travelerDataFrame.get("startTime");
@@ -572,9 +568,7 @@ public class JsonToJavaConverter {
                 // it as a region
                 if (geographicalPathNode.isObject()) {
                     // single region
-                    JsonNode regionNode = geographicalPathNode;
-                    Region region = getRegion(regionNode);
-                    regions.add(region);
+                    regions.add(getRegion(geographicalPathNode));
                 } else if (geographicalPathNode.isArray()) {
                     // multiple regions
                     for (final JsonNode regionNode : geographicalPathNode) {

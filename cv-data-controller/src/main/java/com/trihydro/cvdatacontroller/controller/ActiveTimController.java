@@ -99,7 +99,7 @@ public class ActiveTimController extends BaseController {
         try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
             // convert to ActiveTim object
             while (rs.next()) {
-                var activeTim = setPropertiesForActiveTim(rs, new TimUpdateModel());
+                var activeTim = buildTimUpdateModelFromResultSet(rs);
 
                 int frameTypeValue = rs.getInt("FRAME_TYPE");
                 if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
@@ -156,7 +156,7 @@ public class ActiveTimController extends BaseController {
             // convert to ActiveTim object
             while (rs.next()) {
                 // Active_Tim properties
-				activeTim = setPropertiesForActiveTim(rs, new TimUpdateModel());
+				activeTim = buildTimUpdateModelFromResultSet(rs);
 
                 int frameTypeValue = rs.getInt("FRAME_TYPE");
                 if (!rs.wasNull() && frameTypeValue >= 0 && frameTypeValue < TravelerInfoType.values().length) {
@@ -1027,16 +1027,17 @@ public class ActiveTimController extends BaseController {
         return ResponseEntity.ok(success);
     }
 
-	public TimUpdateModel setPropertiesForActiveTim(ResultSet rs, TimUpdateModel activeTim) throws SQLException {
-		activeTim.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
-		activeTim.setTimId(rs.getLong("TIM_ID"));
-		activeTim.setDirection(rs.getString("DIRECTION"));
-		activeTim.setStartDateTime(rs.getString("TIM_START"));
-		activeTim.setEndDateTime(rs.getString("TIM_END"));
-		activeTim.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
-		activeTim.setSatRecordId(rs.getString("SAT_RECORD_ID"));
-		activeTim.setClientId(rs.getString("CLIENT_ID"));
-		activeTim.setRoute(rs.getString("ROUTE"));
+	private TimUpdateModel buildTimUpdateModelFromResultSet(ResultSet rs) throws SQLException {
+        TimUpdateModel timUpdateModel = new TimUpdateModel();
+		timUpdateModel.setActiveTimId(rs.getLong("ACTIVE_TIM_ID"));
+		timUpdateModel.setTimId(rs.getLong("TIM_ID"));
+		timUpdateModel.setDirection(rs.getString("DIRECTION"));
+		timUpdateModel.setStartDateTime(rs.getString("TIM_START"));
+		timUpdateModel.setEndDateTime(rs.getString("TIM_END"));
+		timUpdateModel.setExpirationDateTime(rs.getString("EXPIRATION_DATE"));
+		timUpdateModel.setSatRecordId(rs.getString("SAT_RECORD_ID"));
+		timUpdateModel.setClientId(rs.getString("CLIENT_ID"));
+		timUpdateModel.setRoute(rs.getString("ROUTE"));
 
 		Coordinate startPoint = null;
 		Coordinate endPoint = null;
@@ -1045,43 +1046,43 @@ public class ActiveTimController extends BaseController {
 		if (!rs.wasNull()) {
 			startPoint = new Coordinate(startLat, startLon);
 		}
-		activeTim.setStartPoint(startPoint);
+		timUpdateModel.setStartPoint(startPoint);
 
 		BigDecimal endLat = rs.getBigDecimal("END_LATITUDE");
 		BigDecimal endLon = rs.getBigDecimal("END_LONGITUDE");
 		if (!rs.wasNull()) {
 			endPoint = new Coordinate(endLat, endLon);
 		}
-		activeTim.setEndPoint(endPoint);
+		timUpdateModel.setEndPoint(endPoint);
 
-		activeTim.setStartDate_Timestamp(rs.getTimestamp("TIM_START", UTCCalendar));
-		activeTim.setEndDate_Timestamp(rs.getTimestamp("TIM_END", UTCCalendar));
+		timUpdateModel.setStartDate_Timestamp(rs.getTimestamp("TIM_START", UTCCalendar));
+		timUpdateModel.setEndDate_Timestamp(rs.getTimestamp("TIM_END", UTCCalendar));
 
 		// Tim properties
-		activeTim.setMsgCnt(rs.getInt("MSG_CNT"));
-		activeTim.setUrlB(rs.getString("URL_B"));
-		activeTim.setPacketId(rs.getString("PACKET_ID"));
+		timUpdateModel.setMsgCnt(rs.getInt("MSG_CNT"));
+		timUpdateModel.setUrlB(rs.getString("URL_B"));
+		timUpdateModel.setPacketId(rs.getString("PACKET_ID"));
 
 		// Tim Type properties
-		activeTim.setTimTypeName(rs.getString("TIM_TYPE_NAME"));
-		activeTim.setTimTypeDescription(rs.getString("TIM_TYPE_DESCRIPTION"));
+		timUpdateModel.setTimTypeName(rs.getString("TIM_TYPE_NAME"));
+		timUpdateModel.setTimTypeDescription(rs.getString("TIM_TYPE_DESCRIPTION"));
 
 		// Region Properties
-		activeTim.setRegionId(rs.getInt("REGION_ID"));
-		activeTim.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
-		activeTim.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
+		timUpdateModel.setRegionId(rs.getInt("REGION_ID"));
+		timUpdateModel.setAnchorLat(rs.getBigDecimal("ANCHOR_LAT"));
+		timUpdateModel.setAnchorLong(rs.getBigDecimal("ANCHOR_LONG"));
 
-		activeTim.setLaneWidth(rs.getBigDecimal("LANE_WIDTH"));
-		activeTim.setRegionDirection(rs.getString("REGION_DIRECTION"));
-		activeTim.setDirectionality(rs.getString("DIRECTIONALITY"));
-		activeTim.setClosedPath(rs.getBoolean("CLOSED_PATH"));
-		activeTim.setPathId(rs.getInt("PATH_ID"));
-		activeTim.setRegionDescription(rs.getString("REGION_DESCRIPTION"));
+		timUpdateModel.setLaneWidth(rs.getBigDecimal("LANE_WIDTH"));
+		timUpdateModel.setRegionDirection(rs.getString("REGION_DIRECTION"));
+		timUpdateModel.setDirectionality(rs.getString("DIRECTIONALITY"));
+		timUpdateModel.setClosedPath(rs.getBoolean("CLOSED_PATH"));
+		timUpdateModel.setPathId(rs.getInt("PATH_ID"));
+		timUpdateModel.setRegionDescription(rs.getString("REGION_DESCRIPTION"));
 
 		// DataFrame properties
-		activeTim.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
-		activeTim.setDurationTime(rs.getInt("DURATION_TIME"));
-		activeTim.setUrl(rs.getString("URL"));
-		return activeTim;
+		timUpdateModel.setDataFrameId(rs.getInt("DATA_FRAME_ID"));
+		timUpdateModel.setDurationTime(rs.getInt("DURATION_TIME"));
+		timUpdateModel.setUrl(rs.getString("URL"));
+		return timUpdateModel;
 	}
 }

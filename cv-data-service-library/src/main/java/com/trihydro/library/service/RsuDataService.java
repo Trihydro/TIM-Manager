@@ -8,6 +8,8 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.RsuDataServiceProps;
 import com.trihydro.library.model.RsuIndexInfo;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 @Component
+@Slf4j
 public class RsuDataService {
     private RsuDataServiceProps config;
     private Utility utility;
@@ -42,7 +45,7 @@ public class RsuDataService {
             response = restTemplateProvider.GetRestTemplate().getForEntity(url, RsuIndexInfo[].class);
         } catch (HttpClientErrorException ex) {
             if (ex.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
-                utility.logWithDate("RSU " + ipv4Address + " is unresponsive");
+                log.warn("RSU {} is unresponsive", ipv4Address);
                 return null;
             }
 

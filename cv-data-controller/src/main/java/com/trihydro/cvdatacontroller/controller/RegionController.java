@@ -10,8 +10,10 @@ import java.util.List;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +30,12 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.R
 
 @CrossOrigin
 @RestController
+@Slf4j
 @RequestMapping("region")
 @ApiIgnore
 public class RegionController extends BaseController {
 
-	private TimDbTables timDbTables;
+    private TimDbTables timDbTables;
 	private SQLNullHandler sqlNullHandler;
 
 	@Autowired
@@ -56,7 +59,7 @@ public class RegionController extends BaseController {
 			Boolean success = dbInteractions.updateOrDelete(preparedStatement);
 			return ResponseEntity.ok(success);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 		} finally {
 			try {
 				// close prepared statement
@@ -66,7 +69,7 @@ public class RegionController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
@@ -165,7 +168,7 @@ public class RegionController extends BaseController {
 			Long regionId = dbInteractions.executeAndLog(preparedStatement, "regionID");
 			return ResponseEntity.ok(regionId);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 		} finally {
 			try {
 				// close prepared statement
@@ -175,7 +178,7 @@ public class RegionController extends BaseController {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Long.valueOf(0));

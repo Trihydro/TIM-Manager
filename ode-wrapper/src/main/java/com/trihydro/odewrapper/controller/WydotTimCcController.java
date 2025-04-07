@@ -20,7 +20,8 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTimRc;
-
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @Api(description = "Chain Controls")
 public class WydotTimCcController extends WydotTimBaseController {
 
@@ -55,10 +57,11 @@ public class WydotTimCcController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - CHAIN CONTROL TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - CHAIN CONTROL TIM";
+        log.info(msg);
 
         String post = gson.toJson(timRcList);
-        utility.logWithDate(post.toString(), this.getClass());
+        log.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;

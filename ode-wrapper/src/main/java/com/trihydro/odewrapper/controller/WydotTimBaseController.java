@@ -44,12 +44,15 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @Component
+@Slf4j
 public abstract class WydotTimBaseController {
 
     protected static BasicConfiguration configuration;
@@ -252,7 +255,7 @@ public abstract class WydotTimBaseController {
             } catch (DateTimeParseException e) {
                 resultMessages.add(
                     "Bad value supplied for schedStart. Should follow the format: yyyy-MM-dd");
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
         if (tim.getSchedEnd() != null) {
@@ -267,7 +270,7 @@ public abstract class WydotTimBaseController {
             } catch (DateTimeParseException e) {
                 resultMessages.add(
                     "Bad value supplied for schedEnd. Should follow the format: yyyy-MM-dd");
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
         if (tim.getBuffers() != null) {
@@ -698,7 +701,7 @@ public abstract class WydotTimBaseController {
         // Per J2735, NodeSetLL's must contain at least 2 nodes. ODE will fail to
         // PER-encode TIM if we supply less than 2.
         if (milepostsAll.size() < 2) {
-            utility.logWithDate("Found less than 2 mileposts, unable to generate TIM.");
+            log.info("Found less than 2 mileposts, unable to generate TIM.");
             return;
         }
         Milepost firstPoint = milepostsAll.get(0);
@@ -708,8 +711,7 @@ public abstract class WydotTimBaseController {
         try {
             anchor = getAnchorPoint(firstPoint, secondPoint);
         } catch (Utility.IdenticalPointsException e) {
-            utility.logWithDate(
-                "Identical points found during anchor point calculation, unable to generate TIM.");
+            log.warn("Identical points found during anchor point calculation, unable to generate TIM.");
             return;
         }
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,

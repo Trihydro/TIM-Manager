@@ -14,6 +14,9 @@ import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.FeatureCollection;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.models.Position;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+
 import com.trihydro.cvdatacontroller.services.MilepostService;
 import com.trihydro.library.model.Milepost;
 import com.trihydro.library.model.MilepostBuffer;
@@ -33,10 +36,11 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @ApiIgnore
 public class MilepostController extends BaseController {
 
-	private MilepostService milepostService;
+    private MilepostService milepostService;
 
 	@Autowired
 	public void InjectDependencies(MilepostService _milepostService) {
@@ -63,7 +67,7 @@ public class MilepostController extends BaseController {
 			}
 			return ResponseEntity.ok(routes);
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(routes);
 		} finally {
 			try {
@@ -77,7 +81,7 @@ public class MilepostController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 	}
@@ -122,7 +126,7 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
@@ -136,7 +140,7 @@ public class MilepostController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(mileposts);
@@ -178,10 +182,10 @@ public class MilepostController extends BaseController {
 			}
 
 			if (mileposts.size() == 0) {
-				System.out.println("Unable to find mileposts with query: " + statementStr);
+                log.info("Unable to find mileposts with query: {}", statementStr);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
@@ -195,7 +199,7 @@ public class MilepostController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(mileposts);
@@ -234,7 +238,7 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mileposts);
 		} finally {
 			try {
@@ -248,7 +252,7 @@ public class MilepostController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(mileposts);
@@ -401,7 +405,7 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 		} finally {
 			try {
 				// close prepared statement
@@ -414,7 +418,7 @@ public class MilepostController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return mileposts;
@@ -463,7 +467,7 @@ public class MilepostController extends BaseController {
 				mileposts.add(milepost);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 		} finally {
 			try {
 				// close prepared statement
@@ -476,7 +480,7 @@ public class MilepostController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return mileposts;

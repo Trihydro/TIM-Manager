@@ -11,16 +11,20 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.service.RsuService;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class RsuTimControllerTest {
     @Mock
     RsuService mockRsuService;
@@ -64,7 +68,6 @@ public class RsuTimControllerTest {
         // Assert
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
-        verify(mockUtility).logWithDate(any());
     }
 
     @Test
@@ -78,6 +81,5 @@ public class RsuTimControllerTest {
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
         Assertions.assertEquals(null, result.getBody());
-        verify(mockUtility).logWithDate(any());
     }
 }

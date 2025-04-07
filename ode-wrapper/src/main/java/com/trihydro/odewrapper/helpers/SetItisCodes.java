@@ -16,11 +16,14 @@ import com.trihydro.odewrapper.model.WydotTimParking;
 import com.trihydro.odewrapper.model.WydotTimRc;
 import com.trihydro.odewrapper.model.WydotTimVsl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class SetItisCodes {
     private List<IncidentChoice> incidentProblems;
     private List<IncidentChoice> incidentEffects;
@@ -135,8 +138,10 @@ public class SetItisCodes {
         ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
                 .findFirst().orElse(null);
 
-        utility.logWithDate("Availablity : " + wydotTim.getAvailability(), this.getClass());
-        utility.logWithDate("Exit : " + wydotTim.getExit(), this.getClass());
+        String msg1 = "Availablity : " + wydotTim.getAvailability();
+        log.info(msg1);
+        String msg = "Exit : " + wydotTim.getExit();
+        log.info(msg);
 
         if (code != null)
             items.add(wydotTim.getAvailability().toString());
@@ -158,7 +163,7 @@ public class SetItisCodes {
             }
         } else {
             items.add("7986");// Rest Area
-            utility.logWithDate("rest area", this.getClass());
+            log.info("rest area");
         }
 
         return items;
@@ -189,7 +194,8 @@ public class SetItisCodes {
         // check to see if code exists
         List<String> items = new ArrayList<String>();
 
-        utility.logWithDate("availability:" + wydotTim.getAvailability(), this.getClass());
+        String msg = "availability:" + wydotTim.getAvailability();
+        log.info(msg);
 
         ItisCode code = getItisCodes().stream().filter(x -> x.getItisCode().equals(wydotTim.getAvailability()))
                 .findFirst().orElse(null);

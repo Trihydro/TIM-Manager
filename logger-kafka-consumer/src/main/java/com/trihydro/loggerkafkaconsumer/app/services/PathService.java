@@ -7,10 +7,13 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class PathService extends BaseService {
 
     private TimDbTables timDbTables;
@@ -43,7 +46,7 @@ public class PathService extends BaseService {
             Long pathId = dbInteractions.executeAndLog(preparedStatement, "pathId");
             return pathId;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -53,7 +56,7 @@ public class PathService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
         // if we got here, its an error

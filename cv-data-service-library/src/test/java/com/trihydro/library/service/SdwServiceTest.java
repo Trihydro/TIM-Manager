@@ -18,10 +18,12 @@ import com.trihydro.library.model.SDXDecodeResponse;
 import com.trihydro.library.model.SdwProps;
 import com.trihydro.library.model.SemiDialogID;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.slf4j.Logger;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
+@Slf4j
 public class SdwServiceTest extends BaseServiceTest {
 
     @Mock
@@ -71,8 +74,6 @@ public class SdwServiceTest extends BaseServiceTest {
     public void deleteSdxDataBySatRecordId_nullRecordIds() {
         setupApiKey();
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(null);
-        verify(mockUtility)
-                .logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
         Assertions.assertNull(results);
     }
 
@@ -80,8 +81,6 @@ public class SdwServiceTest extends BaseServiceTest {
     public void deleteSdxDataBySatRecordId_emptyRecordIds() {
         setupApiKey();
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(new ArrayList<String>());
-        verify(mockUtility)
-                .logWithDate("Attempting to delete satellite records failed due to no satRecordIds passed in");
         Assertions.assertNull(results);
     }
 
@@ -91,7 +90,6 @@ public class SdwServiceTest extends BaseServiceTest {
         satNames.add("A9184436");
         when(mockConfig.getSdwApiKey()).thenReturn(null);
         HashMap<Integer, Boolean> results = sdwService.deleteSdxDataBySatRecordId(satNames);
-        verify(mockUtility).logWithDate("Attempting to delete satellite records failed due to null apiKey");
         Assertions.assertNull(results);
     }
 
@@ -149,8 +147,6 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility).logWithDate("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
-        verify(mockUtility).logWithDate("Is the SDX API key valid?");
     }
 
     @Test
@@ -177,8 +173,6 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility).logWithDate("An exception occurred while attempting to delete satellite records: 400 something went wrong...");
-        verify(mockUtility).logWithDate("Is the SDX API key valid?");
     }
 
     @Test
@@ -306,8 +300,6 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(result);
-        verify(mockUtility).logWithDate("An exception occurred while attempting to decode message: something went wrong...");
-        verify(mockUtility).logWithDate("Is the SDX API key valid?");
     }
 
     @Test
@@ -345,7 +337,5 @@ public class SdwServiceTest extends BaseServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility).logWithDate("An exception occurred while attempting to get messages from SDX: something went wrong...");
-        verify(mockUtility).logWithDate("Is the SDX API key valid?");
     }
 }

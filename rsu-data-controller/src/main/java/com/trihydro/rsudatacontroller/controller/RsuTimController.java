@@ -6,6 +6,8 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.service.RsuService;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Slf4j
 @RequestMapping("rsu")
 public class RsuTimController {
     private RsuService rsuService;
@@ -44,13 +47,13 @@ public class RsuTimController {
         try {
             results = rsuService.getAllDeliveryStartTimes(ipv4Address);
         } catch (Exception ex) {
-            utility.logWithDate("Error invoking or reading from SNMP process: ");
-            ex.printStackTrace();
+            log.warn("Error invoking or reading from SNMP process: ");
+            log.error("Exception", ex);
             return ResponseEntity.status(500).body(null);
         }
 
         if (results == null) {
-            utility.logWithDate("Responding with HTTP 422 (RSU: " + ipv4Address + ")");
+            log.info("Responding with HTTP 422 (RSU: {})", ipv4Address);
             return ResponseEntity.unprocessableEntity().body(null);
         }
 

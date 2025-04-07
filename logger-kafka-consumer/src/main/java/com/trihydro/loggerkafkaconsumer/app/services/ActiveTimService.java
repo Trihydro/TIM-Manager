@@ -19,10 +19,13 @@ import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ActiveTimService extends BaseService {
 
     private TimDbTables timDbTables;
@@ -56,8 +59,7 @@ public class ActiveTimService extends BaseService {
                 else if (col.equals("DIRECTION"))
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, activeTim.getDirection());
                 else if (col.equals("TIM_START")) {
-                    utility.logWithDate(
-                            String.format("Converting %s for TIM_START value", activeTim.getStartDateTime()));
+                    log.info("Converting {} for TIM_START value", activeTim.getStartDateTime());
                     java.util.Date tim_start_date = utility.convertDate(activeTim.getStartDateTime());
                     Timestamp ts = new Timestamp(tim_start_date.getTime());
                     sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, ts);
@@ -116,7 +118,7 @@ public class ActiveTimService extends BaseService {
             Long activeTimId = dbInteractions.executeAndLog(preparedStatement, "active tim");
             return activeTimId;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -126,7 +128,7 @@ public class ActiveTimService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
 
@@ -178,9 +180,9 @@ public class ActiveTimService extends BaseService {
             sqlNullHandler.setIntegerOrNull(preparedStatement, 9, activeTim.getProjectKey());
             sqlNullHandler.setLongOrNull(preparedStatement, 10, activeTim.getActiveTimId());
             activeTimIdResult = dbInteractions.updateOrDelete(preparedStatement);
-            System.out.println("------ Updated active_tim with id: " + activeTim.getActiveTimId() + " --------------");
+            log.info("------ Updated active_tim with id: {} --------------", activeTim.getActiveTimId());
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -190,7 +192,7 @@ public class ActiveTimService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
 
@@ -243,7 +245,7 @@ public class ActiveTimService extends BaseService {
                 activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -256,7 +258,7 @@ public class ActiveTimService extends BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
 
@@ -318,7 +320,7 @@ public class ActiveTimService extends BaseService {
                 activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -331,7 +333,7 @@ public class ActiveTimService extends BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
 
@@ -383,7 +385,7 @@ public class ActiveTimService extends BaseService {
                 activeTim.setEndPoint(endPoint);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -396,7 +398,7 @@ public class ActiveTimService extends BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
 
@@ -429,7 +431,7 @@ public class ActiveTimService extends BaseService {
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception", e);
             return false;
         } finally {
             try {
@@ -440,11 +442,11 @@ public class ActiveTimService extends BaseService {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
-        utility.logWithDate(String.format("Called UpdateExpiration with packetID: %s, expDate: %s. Successful: %s",
-                packetID, expDate, success));
+        log.info("Called UpdateExpiration with packetID: {}, expDate: {}. Successful: {}",
+            packetID, expDate, success);
         return success;
     }
 
@@ -479,7 +481,7 @@ public class ActiveTimService extends BaseService {
                 minStart = utility.timestampFormat.format(tmpTs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
             return null;
         } finally {
             try {
@@ -493,11 +495,11 @@ public class ActiveTimService extends BaseService {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
-        utility.logWithDate(String.format("Called GetMinExpiration with packetID: %s, expDate: %s. Min start date: %s",
-                packetID, expDate, minStart));
+        log.info("Called GetMinExpiration with packetID: {}, expDate: {}. Min start date: {}",
+            packetID, expDate, minStart);
         return minStart;
     }
 

@@ -22,7 +22,8 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimVslList;
 import com.trihydro.odewrapper.model.WydotTimVsl;
-
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @Api(description = "Variable Speed Limits")
 public class WydotTimVslController extends WydotTimBaseController {
 
@@ -57,9 +59,10 @@ public class WydotTimVslController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Create/Update VSL TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - Create/Update VSL TIM";
+        log.info(msg);
         String post = gson.toJson(timVslList);
-        utility.logWithDate(post.toString(), this.getClass());
+        log.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;

@@ -17,16 +17,20 @@ import com.trihydro.rsudatacontroller.config.BasicConfiguration;
 import com.trihydro.rsudatacontroller.model.RsuTim;
 import com.trihydro.rsudatacontroller.process.ProcessFactory;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class RsuServiceTest {
     @Mock
     ProcessFactory mockProcessFactory;
@@ -134,7 +138,6 @@ public class RsuServiceTest {
 
         // Assert
         Assertions.assertNull(results);
-        verify(mockUtility).logWithDate(any());
     }
 
     @Test

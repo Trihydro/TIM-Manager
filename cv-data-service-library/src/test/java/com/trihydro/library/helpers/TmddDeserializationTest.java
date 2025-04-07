@@ -17,10 +17,14 @@ import com.trihydro.library.model.tmdd.FullEventUpdate;
 import com.trihydro.library.model.tmdd.LinkLocation;
 import com.trihydro.library.model.tmdd.MessageHeader;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
+@Slf4j
 public class TmddDeserializationTest {
+
     @Test
     public void deserializes_realData() {
         // Arrange
@@ -109,7 +113,7 @@ public class TmddDeserializationTest {
         try {
             contents = CharStreams.toString(isr);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         }
 
         return contents;

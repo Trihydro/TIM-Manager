@@ -11,6 +11,7 @@ import java.util.List;
 import com.trihydro.library.model.WydotRsu;
 import com.trihydro.library.model.WydotRsuTim;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,10 +24,11 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @ApiIgnore
 public class RsuController extends BaseController {
 
-	@RequestMapping(value = "/rsus", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/rsus", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<List<WydotRsu>> SelectAllRsus() {
 		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
 		Connection connection = null;
@@ -53,7 +55,7 @@ public class RsuController extends BaseController {
 			}
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(rsus);
 		} finally {
 			try {
@@ -67,7 +69,7 @@ public class RsuController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 
@@ -98,7 +100,7 @@ public class RsuController extends BaseController {
 				rsus.add(rsu);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(rsus);
 		} finally {
 			try {
@@ -112,7 +114,7 @@ public class RsuController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(rsus);
@@ -148,7 +150,7 @@ public class RsuController extends BaseController {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(rsus);
 		} finally {
 			try {
@@ -162,7 +164,7 @@ public class RsuController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(rsus);
@@ -195,7 +197,7 @@ public class RsuController extends BaseController {
 				rsus.add(rsu);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(rsus);
 		} finally {
 			try {
@@ -209,7 +211,7 @@ public class RsuController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(rsus);
@@ -238,7 +240,7 @@ public class RsuController extends BaseController {
 				indexes.add(rs.getInt("RSU_INDEX"));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(indexes);
 		} finally {
 			try {
@@ -252,7 +254,7 @@ public class RsuController extends BaseController {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 		return ResponseEntity.ok(indexes);

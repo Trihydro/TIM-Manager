@@ -33,8 +33,11 @@ import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -43,11 +46,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.web.client.RestClientException;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class ValidateTmddTest {
     @Mock
     private TmddService mockTmddService;
@@ -84,9 +89,6 @@ public class ValidateTmddTest {
 
     @Captor
     private ArgumentCaptor<List<ActiveTimValidationResult>> validationResultsCaptor;
-
-    @Captor
-    private ArgumentCaptor<String> logMessageCaptor;
 
     @Captor
     private ArgumentCaptor<String> exceptionMessageCaptor;
@@ -270,8 +272,6 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        Assertions.assertEquals("Error fetching Active Tims:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
@@ -284,8 +284,6 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        Assertions.assertEquals("Error fetching FEUs from TMDD:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
@@ -298,12 +296,11 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(2)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        Assertions.assertEquals("Unable to initialize TMDD ITIS Code cache:", logMessageCaptor.getValue());
         verify(mockEmailHelper).SendEmail(any(), any(), any());
     }
 
     @Test
+    @Disabled("Cannot easily inspect log messages for verification. Test is low-value as it only verifies log messages get written in specific error condition.")
     public void validateTmdd_run_emailSendError() throws Exception {
         // Arrange
         // Load in fake data so we can accumulate validation errors
@@ -327,8 +324,6 @@ public class ValidateTmddTest {
         uut.run();
 
         // Assert
-        verify(mockUtility, times(3)).logWithDate(logMessageCaptor.capture(), eq(ValidateTmdd.class));
-        Assertions.assertEquals("Error sending summary email:", logMessageCaptor.getAllValues().get(1));
-        Assertions.assertEquals("Failed to send error summary email:", logMessageCaptor.getAllValues().get(2));
+        // TODO: how to assert behavior without inspecting logs
     }
 }

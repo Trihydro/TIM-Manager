@@ -9,6 +9,8 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.tasks.config.DataTasksConfiguration;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class RemoveExpiredActiveTims implements Runnable {
     private DataTasksConfiguration configuration;
     private Utility utility;
@@ -33,12 +36,12 @@ public class RemoveExpiredActiveTims implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("Running...", this.getClass());
+        log.info("Running...");
 
         try {
             // select active tims
             List<ActiveTim> activeTims = activeTimService.getExpiredActiveTims();
-            utility.logWithDate("Found " + activeTims.size() + " expired Active TIMs", this.getClass());
+            log.info("Found {} expired Active TIMs", activeTims.size());
 
             // delete active tims from rsus
             HttpHeaders headers = new HttpHeaders();
@@ -53,13 +56,13 @@ public class RemoveExpiredActiveTims implements Runnable {
                 activeTimJson = gson.toJson(activeTim);
                 entity = new HttpEntity<String>(activeTimJson, headers);
 
-                utility.logWithDate("Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }",
-                        this.getClass());
+                String msg = "Deleting ActiveTim: { activeTimId: " + activeTim.getActiveTimId() + " }";
+                log.info(msg);
                 restTemplateProvider.GetRestTemplate().exchange(configuration.getWrapperUrl() + "/delete-tim/",
                         HttpMethod.DELETE, entity, String.class);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception", e);
             // don't rethrow error, or the task won't be reran until the service is
             // restarted.
         }

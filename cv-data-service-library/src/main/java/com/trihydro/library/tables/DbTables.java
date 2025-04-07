@@ -6,8 +6,11 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
 
+@Slf4j
 public class DbTables {
 
     public String buildInsertQueryStatement(String tableName, List<String> table) {
@@ -60,8 +63,8 @@ public class DbTables {
             preparedStatement.setObject(index, id);
             return preparedStatement;
         } catch (SQLException ex) {
-            System.out.println("Error creating update statement");
-            ex.printStackTrace();
+            log.warn("Error creating update statement");
+            log.error("Exception", ex);
         }
 
         return null;

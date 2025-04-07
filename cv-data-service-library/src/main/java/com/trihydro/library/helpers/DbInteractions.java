@@ -9,12 +9,14 @@ import java.util.TimeZone;
 import com.trihydro.library.model.DbInteractionsProps;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class DbInteractions {
     private static HikariDataSource dataSource;
 
@@ -27,7 +29,7 @@ public class DbInteractions {
         dbConfig = props;
         utility = _utility;
         emailHelper = _emailHelper;
-        utility.logWithDate("A new DbInteractions instance has been created.", this.getClass());
+        log.info("A new DbInteractions instance has been created.");
         validateDbConfig();
     }
 
@@ -50,9 +52,8 @@ public class DbInteractions {
             try {
                 emailHelper.SendEmail(dbConfig.getAlertAddresses(), "Failed To Get Connection", body);
             } catch (Exception exception) {
-                utility.logWithDate("Failed to open connection to " + dbConfig.getDbUrl()
-                    + ", then failed to send email");
-                exception.printStackTrace();
+                log.warn("Failed to open connection to {}, then failed to send email", dbConfig.getDbUrl());
+                log.error("Exception", exception);
             }
             throw ex;
         }
@@ -67,7 +68,7 @@ public class DbInteractions {
                 result = true;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         }
 
         return result;
@@ -79,7 +80,7 @@ public class DbInteractions {
             preparedStatement.executeUpdate();
             result = true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         }
 
         return result;
@@ -93,18 +94,18 @@ public class DbInteractions {
                 try {
                     if (generatedKeys != null && generatedKeys.next()) {
                         id = generatedKeys.getLong(1);
-                        utility.logWithDate("------ Generated " + type + " " + id + " --------------");
+                        log.info("------ Generated {} {} --------------", type, id);
                     }
                 } finally {
                     try {
                         generatedKeys.close();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Exception", e);
                     }
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         }
         return id;
     }
@@ -120,7 +121,7 @@ public class DbInteractions {
                 dbConfig.getDbPassword() == null ||
                 dbConfig.getMaximumPoolSize() == 0 ||
                 dbConfig.getConnectionTimeout() == 0) {
-                utility.logWithDate("DbInteractions: One or more database configuration values are undefined. Exiting.");
+                log.info("DbInteractions: One or more database configuration values are undefined. Exiting.");
                 System.exit(1);
             }
         }
@@ -136,14 +137,14 @@ public class DbInteractions {
         config.setMaximumPoolSize(dbConfig.getMaximumPoolSize());
 
         // log the configuration of the connection pool
-        utility.logWithDate("DbInteractions: Creating connection pool with the following configuration:");
-        utility.logWithDate("DbInteractions: driverClassName: " + config.getDriverClassName());
-        utility.logWithDate("DbInteractions: dbUrl: " + dbConfig.getDbUrl());
-        utility.logWithDate("DbInteractions: dbUsername: " + dbConfig.getDbUsername());
-        utility.logWithDate("DbInteractions: connectionTimeout: " + config.getConnectionTimeout());
-        utility.logWithDate("DbInteractions: maximumPoolSize: " + config.getMaximumPoolSize());
+        log.info("DbInteractions: Creating connection pool with the following configuration:");
+        log.info("DbInteractions: driverClassName: {}", config.getDriverClassName());
+        log.info("DbInteractions: dbUrl: {}", dbConfig.getDbUrl());
+        log.info("DbInteractions: dbUsername: {}", dbConfig.getDbUsername());
+        log.info("DbInteractions: connectionTimeout: {}", config.getConnectionTimeout());
+        log.info("DbInteractions: maximumPoolSize: {}", config.getMaximumPoolSize());
 
         dataSource = new HikariDataSource(config);
-        utility.logWithDate("DbInteractions: Successfully initialized connection pool");
+        log.info("DbInteractions: Successfully initialized connection pool");
     }
 }

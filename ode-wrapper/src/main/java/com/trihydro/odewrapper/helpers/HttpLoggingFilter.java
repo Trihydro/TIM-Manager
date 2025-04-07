@@ -22,11 +22,14 @@ import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.model.BufferedRequestWrapper;
 import com.trihydro.odewrapper.model.BufferedResponseWrapper;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 // Adapted from https://stackoverflow.com/a/39137815
 @Component
+@Slf4j
 public class HttpLoggingFilter implements Filter {
 
     private LoggingService loggingService;
@@ -98,14 +101,14 @@ public class HttpLoggingFilter implements Filter {
                     logMessage.append(" [RESPONSE:").append(serverResponse).append("]");
                 }
             }
-            utility.logWithDate(logMessage.toString());
+            log.info(logMessage.toString());
             HttpLoggingModel httpLoggingModel = new HttpLoggingModel();
             httpLoggingModel.setRequest(logMessage.toString());
             httpLoggingModel.setRequestTime(requestTime);
             httpLoggingModel.setResponseTime(new Timestamp(System.currentTimeMillis()));
             loggingService.LogHttpRequest(httpLoggingModel);
         } catch (Throwable a) {
-            utility.logWithDate(a.getMessage());
+            log.error("", a);
         }
     }
 

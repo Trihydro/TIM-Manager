@@ -26,6 +26,7 @@ import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.SdwService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -33,9 +34,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.mail.MailException;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class TimRefreshControllerTest {
     private long timID = 1l;
 
@@ -57,7 +60,7 @@ public class TimRefreshControllerTest {
 
     @BeforeEach
     public void setup(TestInfo testInfo) {
-        System.out.println("Executing " + testInfo.getTestMethod().get().getName());
+        log.info("Executing {}", testInfo.getTestMethod().get().getName());
     }
 
     @Test

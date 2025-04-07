@@ -36,6 +36,7 @@ import com.trihydro.tasks.helpers.ExecutorFactory;
 import com.trihydro.tasks.models.RsuValidationRecord;
 import com.trihydro.tasks.models.RsuValidationResult;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,10 +46,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.mail.MailException;
 import org.springframework.web.client.RestClientException;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class ValidateRsusTest {
     @Mock
     private DataTasksConfiguration mockConfig;
@@ -141,11 +144,7 @@ public class ValidateRsusTest {
         when(mockActiveTimService.getActiveRsuTims(any())).thenThrow(new RestClientException("timeout"));
 
         // Act (error should be handled in runnable)
-        uut.run();
-
-        // Assert
-        verify(mockUtility).logWithDate(
-                "Unable to validate RSUs - error occurred while fetching Database records from PROD:", ValidateRsus.class);
+        Assertions.assertDoesNotThrow(() -> uut.run());
     }
 
     @Test

@@ -22,11 +22,12 @@ import com.trihydro.library.service.WydotTimService;
 import com.trihydro.odewrapper.config.BasicConfiguration;
 import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.gavaghan.geodesy.Ellipsoid;
 import org.gavaghan.geodesy.GeodeticCalculator;
 import org.gavaghan.geodesy.GlobalCoordinates;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @Api(description = "Road Construction")
 public class WydotTimRwController extends WydotTimBaseController {
 
@@ -59,9 +61,9 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim", method = RequestMethod.POST, headers = "Accept=application/json")
     public ResponseEntity<String> createRoadContructionTim(@RequestBody TimRwList timRwList) {
-        utility.logWithDate("Create/Update RW TIM", this.getClass());
+        log.info("Create/Update RW TIM");
         String post = gson.toJson(timRwList);
-        utility.logWithDate(post.toString(), this.getClass());
+        log.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -274,7 +276,7 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     @RequestMapping(value = "/rw-tim/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     public ResponseEntity<String> deleteRoadContructionTim(@PathVariable String id) {
-        utility.logWithDate("Delete RW TIM", this.getClass());
+        log.info("Delete RW TIM");
         // expire and clear TIM
         wydotTimService.clearTimsById(type, id, null, true);
 

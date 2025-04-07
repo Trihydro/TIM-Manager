@@ -6,15 +6,18 @@ import java.util.Properties;
 
 import com.trihydro.library.helpers.Utility;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class KafkaFactory {
     private Utility utility;
 
@@ -112,8 +115,8 @@ public class KafkaFactory {
         var consumer = new KafkaConsumer<String, String>(props);
         consumer.subscribe(topics);
 
-        utility.logWithDate(String.format("Created consumer for consumer group %s, subscribed to topic(s) %s",
-                consumerGroup, String.join(", ", topics)));
+        log.info("Created consumer for consumer group {}, subscribed to topic(s) {}",
+            consumerGroup, String.join(", ", topics));
 
         return consumer;
     }

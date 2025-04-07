@@ -21,7 +21,8 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimRcList;
 import com.trihydro.odewrapper.model.WydotTimRc;
-
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @Api(description = "Road Conditions")
 public class WydotTimRcController extends WydotTimBaseController {
 
@@ -58,9 +60,10 @@ public class WydotTimRcController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Create Update RC TIM", this.getClass());
+        String msg1 = dateFormat.format(date) + " - Create Update RC TIM";
+        log.info(msg1);
         String post = gson.toJson(timRcList);
-        utility.logWithDate(post.toString(), this.getClass());
+        log.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
@@ -89,7 +92,8 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         String responseMessage = gson.toJson(resultList);
         if (errList.size() > 0) {
-            utility.logWithDate("Failed to send TIMs: " + gson.toJson(errList), this.getClass());
+            String msg = "Failed to send TIMs: " + gson.toJson(errList);
+            log.info(msg);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
@@ -102,9 +106,10 @@ public class WydotTimRcController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - All Clear", this.getClass());
+        String msg = dateFormat.format(date) + " - All Clear";
+        log.info(msg);
         String post = gson.toJson(timRcList);
-        utility.logWithDate(post.toString(), this.getClass());
+        log.info(post.toString());
 
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;

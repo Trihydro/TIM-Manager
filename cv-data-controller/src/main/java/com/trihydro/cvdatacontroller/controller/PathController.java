@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import com.trihydro.library.helpers.SQLNullHandler;
 import com.trihydro.library.tables.TimDbTables;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @RequestMapping("path")
 @ApiIgnore
 public class PathController extends BaseController {
@@ -54,7 +57,7 @@ public class PathController extends BaseController {
             Long pathId = dbInteractions.executeAndLog(preparedStatement, "pathId");
             return ResponseEntity.ok(pathId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         } finally {
             try {
                 // close prepared statement
@@ -64,7 +67,7 @@ public class PathController extends BaseController {
                 if (connection != null)
                     connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
         // if we got here, its an error

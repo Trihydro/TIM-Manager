@@ -7,6 +7,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +22,7 @@ import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.NodeXY;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @RequestMapping("path-node-ll")
 @ApiIgnore
 public class PathNodeLLController extends BaseController {
@@ -54,7 +57,7 @@ public class PathNodeLLController extends BaseController {
             }
             return ResponseEntity.ok(nodeXYs.toArray(new NodeXY[nodeXYs.size()]));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(nodeXYs.toArray(new NodeXY[nodeXYs.size()]));
         } finally {
@@ -69,7 +72,7 @@ public class PathNodeLLController extends BaseController {
                 if (rs != null)
                     rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("Exception", e);
             }
         }
     }

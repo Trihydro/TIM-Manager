@@ -20,7 +20,8 @@ import com.trihydro.odewrapper.helpers.SetItisCodes;
 import com.trihydro.odewrapper.model.ControllerResult;
 import com.trihydro.odewrapper.model.TimIncidentList;
 import com.trihydro.odewrapper.model.WydotTimIncident;
-
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
+@Slf4j
 @Api(description = "Incidents")
 public class WydotTimIncidentController extends WydotTimBaseController {
 
@@ -56,9 +58,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Create Incident TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - Create Incident TIM";
+        log.info(msg);
         String post = gson.toJson(timIncidentList);
-        utility.logWithDate(post.toString(), this.getClass());
+        log.info(post.toString());
 
         List<WydotTimIncident> timsToSend = new ArrayList<WydotTimIncident>();
 
@@ -94,9 +97,10 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Update Incident TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - Update Incident TIM";
+        log.info(msg);
         String post = gson.toJson(timIncidentList);
-        utility.logWithDate(post.toString(), this.getClass());
+        log.info(post.toString());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -148,7 +152,8 @@ public class WydotTimIncidentController extends WydotTimBaseController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        utility.logWithDate(dateFormat.format(date) + " - Delete Incident TIM", this.getClass());
+        String msg = dateFormat.format(date) + " - Delete Incident TIM";
+        log.info(msg);
 
         // expire and clear TIM
         wydotTimService.clearTimsById("I", incidentId, null);

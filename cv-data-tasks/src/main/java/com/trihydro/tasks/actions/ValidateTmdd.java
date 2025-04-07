@@ -30,15 +30,14 @@ import com.trihydro.tasks.config.DataTasksConfiguration;
 import com.trihydro.tasks.helpers.EmailFormatter;
 import com.trihydro.tasks.helpers.IdNormalizer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-//import org.gavaghan.geodesy.Ellipsoid;
-//import org.gavaghan.geodesy.GeodeticCalculator;
-//import org.gavaghan.geodesy.GeodeticCurve;
-//import org.gavaghan.geodesy.GlobalCoordinates;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ValidateTmdd implements Runnable {
     private DataTasksConfiguration config;
     private TmddService tmddService;
@@ -72,14 +71,14 @@ public class ValidateTmdd implements Runnable {
     }
 
     public void run() {
-        utility.logWithDate("Running...", this.getClass());
+        log.info("Running...");
         errors = new ArrayList<>();
 
         try {
             validateTmdd();
         } catch (Exception ex) {
-            utility.logWithDate("Error while validating Database with TMDD:", this.getClass());
-            ex.printStackTrace();
+            log.warn("Error while validating Database with TMDD:");
+            log.error("Exception", ex);
             errors.add(ex.getMessage());
 
             // don't rethrow error, or the task won't be reran until the service is
@@ -93,8 +92,8 @@ public class ValidateTmdd implements Runnable {
 
                 mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Error(s)", email);
             } catch (Exception ex) {
-                utility.logWithDate("Failed to send error summary email:", this.getClass());
-                ex.printStackTrace();
+                log.warn("Failed to send error summary email:");
+                log.error("Exception", ex);
             }
         }
     }
@@ -105,8 +104,8 @@ public class ValidateTmdd implements Runnable {
         try {
             feus = tmddService.getTmddEvents();
         } catch (Exception ex) {
-            utility.logWithDate("Error fetching FEUs from TMDD:", this.getClass());
-            ex.printStackTrace();
+            log.warn("Error fetching FEUs from TMDD:");
+            log.error("Exception", ex);
             errors.add("Error fetching FEUs from TMDD: " + ex.getMessage());
 
             return;
@@ -117,8 +116,8 @@ public class ValidateTmdd implements Runnable {
         try {
             activeTims = activeTimService.getActiveTimsWithItisCodes(true);
         } catch (Exception ex) {
-            utility.logWithDate("Error fetching Active Tims:", this.getClass());
-            ex.printStackTrace();
+            log.warn("Error fetching Active Tims:");
+            log.error("Exception", ex);
             errors.add("Error fetching Active Tims: " + ex.getMessage());
 
             return;
@@ -129,8 +128,8 @@ public class ValidateTmdd implements Runnable {
             try {
                 initializeTmddItisCodes();
             } catch (Exception ex) {
-                utility.logWithDate("Unable to initialize TMDD ITIS Code cache:", this.getClass());
-                ex.printStackTrace();
+                log.warn("Unable to initialize TMDD ITIS Code cache:");
+                log.error("Exception", ex);
                 errors.add("Unable to initialize TMDD ITIS Code cache: " + ex.getMessage());
 
                 return;
@@ -233,8 +232,8 @@ public class ValidateTmdd implements Runnable {
             try {
                 mailHelper.SendEmail(config.getAlertAddresses(), "TMDD Validation Results", email);
             } catch (Exception ex) {
-                utility.logWithDate("Error sending summary email:", this.getClass());
-                ex.printStackTrace();
+                log.warn("Error sending summary email:");
+                log.error("Exception", ex);
                 errors.add("Error sending summary email: " + ex.getMessage());
             }
         }

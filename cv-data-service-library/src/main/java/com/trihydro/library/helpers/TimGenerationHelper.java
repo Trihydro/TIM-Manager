@@ -667,8 +667,7 @@ public class TimGenerationHelper {
         // check to see if we have any itis codes
         // if not, just continue on
         if (dataFrame.getItems() == null || dataFrame.getItems().length == 0) {
-            log.info(
-                "No itis codes found for data_frame " + aTim.getDataFrameId() + ". Skipping...");
+            log.info("No itis codes found for data_frame {}. Skipping...", aTim.getDataFrameId());
             return null;
         }
         List<OdeTravelerInformationMessage.DataFrame.Region> regions =
@@ -1035,7 +1034,7 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    log.error("Failed to trim region name: {}", e.getMessage());
+                    log.error("Failed to trim region name: {}", e.getMessage(), e);
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 log.info("Sending TIM to RSU for refresh: {}", gson.toJson(timToSend));
@@ -1060,7 +1059,7 @@ public class TimGenerationHelper {
                 try {
                     regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
                 } catch (IllegalArgumentException e) {
-                    log.error("Failed to trim region name: {}", e.getMessage());
+                    log.error("Failed to trim region name: {}", e.getMessage(), e);
                 }
                 timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
                 rsus[0] = rsu;
@@ -1142,7 +1141,7 @@ public class TimGenerationHelper {
         try {
             regionName = regionNameTrimmer.trimRegionNameIfTooLong(regionName);
         } catch (IllegalArgumentException e) {
-            log.error("Failed to trim region name: {}", e.getMessage());
+            log.error("Failed to trim region name: {}", e.getMessage(), e);
         }
         timToSend.getTim().getDataframes()[0].getRegions()[0].setName(regionName);
 
@@ -1184,7 +1183,7 @@ public class TimGenerationHelper {
             serviceRegion.setNwCorner(nwCorner);
             serviceRegion.setSeCorner(seCorner);
         } else {
-            System.out.println("getServiceRegion fails due to no mileposts");
+            log.info("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
     }

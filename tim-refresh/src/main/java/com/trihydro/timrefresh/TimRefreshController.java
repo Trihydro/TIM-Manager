@@ -16,11 +16,14 @@ import com.trihydro.library.model.TimUpdateModel;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.timrefresh.config.TimRefreshConfiguration;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class TimRefreshController {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     public Gson gson = new Gson();
@@ -42,12 +45,12 @@ public class TimRefreshController {
 
     @Scheduled(cron = "${cron.expression}") // run at 1:00am every day
     public void performTaskUsingCron() {
-        utility.logWithDate("Regular task performed using Cron at " + dateFormat.format(new Date()));
+        log.info("Regular task performed using Cron at {}", dateFormat.format(new Date()));
 
         // fetch Active_TIM that are expiring within 24 hrs
         List<TimUpdateModel> expiringTims = activeTimService.getExpiringActiveTims();
 
-        utility.logWithDate(expiringTims.size() + " expiring TIMs found");
+        log.info("{} expiring TIMs found", expiringTims.size());
         List<Logging_TimUpdateModel> invalidTims = new ArrayList<Logging_TimUpdateModel>();
         List<ResubmitTimException> exceptionTims = new ArrayList<>();
         List<TimUpdateModel> timsToRefresh = new ArrayList<TimUpdateModel>();
@@ -104,12 +107,11 @@ public class TimRefreshController {
             }
 
             try {
-                utility.logWithDate(
-                        "Sending error email. The following TIM exceptions were found: " + gson.toJson(body));
+                log.info("Sending error email. The following TIM exceptions were found: {}", gson.toJson(body));
                 emailHelper.SendEmail(configuration.getAlertAddresses(), "TIM Refresh Exceptions", body);
             } catch (Exception e) {
-                utility.logWithDate("Exception attempting to send email for invalid TIM:");
-                e.printStackTrace();
+                log.warn("Exception attempting to send email for invalid TIM:");
+                log.error("Exception", e);
             }
         }
     }

@@ -8,12 +8,15 @@ import java.util.ArrayList;
 
 import com.trihydro.library.model.WydotRsu;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class RsuService extends BaseService {
 
-	public ArrayList<WydotRsu> getRsus() {
+    public ArrayList<WydotRsu> getRsus() {
 
 		ArrayList<WydotRsu> rsus = new ArrayList<WydotRsu>();
 		Connection connection = null;
@@ -40,7 +43,7 @@ public class RsuService extends BaseService {
 			}
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+            log.error("Exception", e);
 		} finally {
 			try {
 				// close prepared statement
@@ -53,7 +56,7 @@ public class RsuService extends BaseService {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+                log.error("Exception", e);
 			}
 		}
 

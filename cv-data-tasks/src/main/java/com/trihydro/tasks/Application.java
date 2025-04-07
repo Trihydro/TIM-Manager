@@ -52,11 +52,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import({SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class, ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
-    TmddService.class, GsonFactory.class, StatusLogService.class, TimService.class, DataFrameService.class, TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class,
-    MilepostReduction.class, RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class, WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class,
-    TimRsuService.class, SnmpHelper.class, RegionNameTrimmer.class})
-
+@Import({SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
+    ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
+    TmddService.class, GsonFactory.class,
+    StatusLogService.class, TimService.class, DataFrameService.class,
+    TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class, MilepostReduction.class,
+    RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class,
+    WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class, TimRsuService.class,
+    SnmpHelper.class, RegionNameTrimmer.class})
 @Slf4j
 public class Application {
     protected static DataTasksConfiguration config;
@@ -105,12 +108,13 @@ public class Application {
         log.info("Scheduling SDX Validator...");
         scheduledExecutorService.scheduleAtFixedRate(sdxValidator, 15, config.getSdxValidationPeriodMinutes(), TimeUnit.MINUTES);
 
-        // HSM Check
-        if (config.getRunHsmCheck()) {
-            log.info("HSM check configured, scheduling...");
-            scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0, config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
-        } else {
-            log.info("HSM check not configured, skipping...");
+                // HSM Check
+                if (config.getRunHsmCheck()) {
+                    log.info("HSM check configured, scheduling...");
+                    scheduledExecutorService.scheduleAtFixedRate(hsmFunctional, 0,
+                                        config.getHsmFunctionalityMinutes(), TimeUnit.MINUTES);
+                } else {
+                    log.info("HSM check not configured, skipping...");
         }
 
         // RSU Validator

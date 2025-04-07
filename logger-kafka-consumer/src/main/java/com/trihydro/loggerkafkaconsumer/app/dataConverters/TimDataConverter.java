@@ -3,6 +3,9 @@ package com.trihydro.loggerkafkaconsumer.app.dataConverters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+
 import com.google.gson.Gson;
 import com.trihydro.library.helpers.JsonToJavaConverter;
 
@@ -16,6 +19,7 @@ import us.dot.its.jpo.ode.model.OdeTimPayload;
 import us.dot.its.jpo.ode.util.JsonUtils;
 
 @Component
+@Slf4j
 public class TimDataConverter {
 
     public Gson gson = new Gson();
@@ -41,7 +45,7 @@ public class TimDataConverter {
         try {
             recordGeneratedByStr = mapper.treeToValue(recordGeneratedBy, String.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Exception", e);
         }
 
         // if broadcast tim, translate accordingly, else translate as received TIM

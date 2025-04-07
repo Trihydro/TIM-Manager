@@ -16,6 +16,35 @@ public class Milepost {
     private BigDecimal longitude;
 
     public Milepost() {
+
+    }
+
+    /**
+     * Constructor to create a new Milepost object with specified attributes.
+     *
+     * @param commonName common name of the milepost
+     * @param milepost   milepost value
+     * @param direction  direction of the milepost
+     * @param latitude   latitude of the milepost
+     * @param longitude  longitude of the milepost
+     */
+    public Milepost(String commonName, Double milepost, String direction, BigDecimal latitude, BigDecimal longitude) {
+        this.commonName = commonName;
+        this.milepost = milepost;
+        this.direction = direction;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    /**
+     * Constructor to create a new Milepost object with specified latitude
+     * and longitude. Dummy values are used for the other attributes.
+     *
+     * @param latitude   latitude of the milepost
+     * @param longitude  longitude of the milepost
+     */
+    public Milepost(BigDecimal latitude, BigDecimal longitude) {
+        this("Unknown", 0.0, "Unknown", latitude, longitude);
     }
 
     /**

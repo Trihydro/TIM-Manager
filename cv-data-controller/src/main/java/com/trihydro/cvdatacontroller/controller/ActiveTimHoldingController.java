@@ -31,7 +31,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
-@Slf4j
 @RequestMapping("active-tim-holding")
 @ApiIgnore
 @Slf4j

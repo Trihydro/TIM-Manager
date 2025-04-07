@@ -61,8 +61,6 @@ import org.springframework.context.annotation.Import;
     WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class, TimRsuService.class,
     SnmpHelper.class, RegionNameTrimmer.class})
 @Slf4j
-
-@Slf4j
 public class Application {
     protected static DataTasksConfiguration config;
 

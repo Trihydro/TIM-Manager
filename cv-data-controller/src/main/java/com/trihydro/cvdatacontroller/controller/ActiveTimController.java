@@ -47,7 +47,6 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
-@Slf4j
 @RequestMapping("active-tim")
 @ApiIgnore
 @Slf4j

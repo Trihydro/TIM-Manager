@@ -283,25 +283,6 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  milepost-graph-db:
-    build: milepost-graph-db
-    restart: always
-    ports:
-      - "6474:7474"
-      - "6473:7473"
-      - "6687:7687"
-    volumes:
-      - ./milepost-graph-db/neo-data/plugins:/var/lib/neo4j/plugins
-      - ./milepost-graph-db/neo-data/import:/var/lib/neo4j/import
-      - ./milepost-graph-db/neo-data/conf:/var/lib/neo4j/conf
-      - ./milepost-graph-db/neo-data/data:/var/lib/neo4j/data
-    environment:
-      NEO4J_AUTH: none
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
   cert-expiration:
     build: cert-expiration
     restart: always

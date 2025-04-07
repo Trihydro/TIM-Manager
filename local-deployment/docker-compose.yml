@@ -23,7 +23,7 @@ services:
       KAFKA_CFG_LOG_RETENTION_HOURS: 2
     logging:
       options:
-        max-size: "10m"  
+        max-size: "10m"
         max-file: "5"
 
   kafka_init:
@@ -33,8 +33,8 @@ services:
         condition: service_started
     volumes:
       - ./docker-scripts/kafka/kafka_init.sh:/kafka_init.sh
-    entrypoint: ["/bin/sh", "kafka_init.sh"]
-    
+    entrypoint: [ "/bin/sh", "kafka_init.sh" ]
+
   ode:
     image: usdotjpoode/jpo-ode:2024-q2
     ports:
@@ -68,7 +68,7 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
-    
+
   adm:
     image: usdotjpoode/asn1_codec:2024-q2
     environment:
@@ -175,6 +175,7 @@ services:
       CONFIG_ENVIRONMENT_NAME: local
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -226,6 +227,7 @@ services:
       CONFIG_SNMP_AUTH_PASSPHRASE: testpassword
       CONFIG_SNMP_AUTH_PROTOCOL: SHA
       CONFIG_SNMP_SECURITY_LEVEL: authNoPriv
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -272,6 +274,7 @@ services:
       CONFIG_DEFAULT_LANE_WIDTH: 50
       CONFIG_RSU_ROUTES: ${RSU_ROUTES}
       CONFIG_POINT_INCIDENT_BUFFER_MILES: 1
+      CONFIG_CLEANUP_STALE_ACTIVE_TIM_HOLDING_RECORDS_PERIOD_MINUTES: ${TASKS_CONFIG_CLEANUP_STALE_ACTIVE_TIM_HOLDING_RECORDS_PERIOD_MINUTES}
       LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
@@ -297,6 +300,7 @@ services:
       CV_REST_SERVICE: http://cv-data-controller:8888
       PRODUCER_TOPIC: topic.OracleDataLogger
       ENV: local
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -322,6 +326,7 @@ services:
       MAIL_HOST: 172.0.0.1
       MAIL_PORT: 123
       ENV: local
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -366,6 +371,7 @@ services:
       DEPOSIT_GROUP: certExpirationGroup
       CV_REST_SERVICE: http://cv-data-controller:8888
       PRODUCER_TOPIC: topic.OracleDataLogger
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -388,6 +394,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -410,6 +417,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -432,6 +440,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -441,7 +450,7 @@ services:
 # volumes ---------------------------------------------------------------------
 volumes:
   kafka:
-    {}
+    { }
   pgdb:
     driver: local
   mongodb_data_container:

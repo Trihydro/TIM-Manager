@@ -140,6 +140,7 @@ services:
       SERVER_SSL_KEY_STORE_PASSWORD: ${CONTROLLER_SERVER_SSL_KEY_STORE_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: ${CONTROLLER_SERVER_SSL_KEY_STORE_TYPE}
       SERVER_SSL_KEY_ALIAS: ${CONTROLLER_SERVER_SSL_KEY_ALIAS}
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     volumes:
       - /home/timmadmin/timm/cv-data-controller:/keystore
     logging:
@@ -160,6 +161,7 @@ services:
       CONFIG_SNMP_AUTH_PASSPHRASE: ${RSUCONTROLLER_CONFIG_SNMP_AUTH_PASSPHRASE}
       CONFIG_SNMP_AUTH_PROTOCOL: ${RSUCONTROLLER_CONFIG_SNMP_AUTH_PROTOCOL}
       CONFIG_SNMP_SECURITY_LEVEL: ${RSUCONTROLLER_CONFIG_SNMP_SECURITY_LEVEL}
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -182,6 +184,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
       MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
       MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -204,6 +207,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
       MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
       MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -226,6 +230,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: ${ENVIRONMENT_NAME}
       MONGOLOGGER_MAIL_HOST: ${MAIL_HOST}
       MONGOLOGGER_MAIL_PORT: ${MAIL_PORT}
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -246,6 +251,7 @@ services:
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
       PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
       ENV: ${LOGGER_ENV}
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -277,25 +283,6 @@ services:
         max-size: "20m"
         max-file: "3"
 
-  milepost-graph-db:
-    build: milepost-graph-db
-    restart: always
-    ports:
-      - "6474:7474"
-      - "6473:7473"
-      - "6687:7687"
-    volumes:
-      - ./milepost-graph-db/neo-data/plugins:/var/lib/neo4j/plugins
-      - ./milepost-graph-db/neo-data/import:/var/lib/neo4j/import
-      - ./milepost-graph-db/neo-data/conf:/var/lib/neo4j/conf
-      - ./milepost-graph-db/neo-data/data:/var/lib/neo4j/data
-    environment:
-      NEO4J_AUTH: none
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-
   cert-expiration:
     build: cert-expiration
     restart: always
@@ -311,6 +298,7 @@ services:
       DEPOSIT_GROUP: ${EXP_GROUP}
       CV_REST_SERVICE: ${LOGGER_CV_REST_SERVICE}
       PRODUCER_TOPIC: ${DBCONSUMER_DEPOSIT_TOPIC}
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"

@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.client.HttpServerErrorException;
 import springfox.documentation.annotations.ApiIgnore;
 import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
@@ -373,22 +374,19 @@ public class ActiveTimController extends BaseController {
         return ResponseEntity.ok(activeTims);
     }
 
-    @RequestMapping(value = "/expired", method = RequestMethod.GET)
-    public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims() {
-        List<ActiveTim> activeTims = new ArrayList<ActiveTim>();
-
-        String selectStatement = "select * from ACTIVE_TIM";
-        selectStatement += " WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC')";
-
-        try (Connection connection = dbInteractions.getConnectionPool(); Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(selectStatement)) {
-            activeTims = getActiveTimFromRS(rs, false);
-        } catch (SQLException e) {
-            log.error("Error getting expired active tims", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(activeTims);
-        }
-
-        return ResponseEntity.ok(activeTims);
-    }
+	@RequestMapping(value = "/expired", method = RequestMethod.GET)
+	public ResponseEntity<List<ActiveTim>> GetExpiredActiveTims(@RequestParam(required = false, defaultValue = "100") Integer limit) {
+		String query = "SELECT * FROM ACTIVE_TIM WHERE TIM_END <= (NOW() AT TIME ZONE 'UTC') LIMIT ?";
+		try (Connection connection = dbInteractions.getConnectionPool(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+			preparedStatement.setInt(1, limit);
+			try (ResultSet rs = preparedStatement.executeQuery()) {
+				return ResponseEntity.ok(getActiveTimFromRS(rs, false));
+			}
+		} catch (SQLException e) {
+            log.error("Error retrieving expired active tims", e);
+			throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving expired active tims");
+		}
+	}
 
     @RequestMapping(value = "/indices-rsu/{rsuTarget}", method = RequestMethod.GET)
     public ResponseEntity<List<Integer>> GetActiveTimIndicesByRsu(@PathVariable String rsuTarget) {

@@ -801,7 +801,7 @@ class TimGenerationHelperTest {
             .calculateAnchorCoordinate(any(), any());
 
         Milepost anchor = new Milepost();
-        doReturn(anchor).when(mockIdenticalPointsExceptionHandler).recoverFromIdenticalPointsException(any());
+        doReturn(anchor).when(mockIdenticalPointsExceptionHandler).recover(any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);
@@ -827,7 +827,7 @@ class TimGenerationHelperTest {
         doThrow(new Utility.IdenticalPointsException()).when(mockUtility)
             .calculateAnchorCoordinate(any(), any());
 
-        doReturn(null).when(mockIdenticalPointsExceptionHandler).recoverFromIdenticalPointsException(any());
+        doReturn(null).when(mockIdenticalPointsExceptionHandler).recover(any());
 
         // Act
         var exceptions = uut.resubmitToOde(activeTimIds);

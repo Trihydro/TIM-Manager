@@ -174,7 +174,7 @@ public class TimGenerationHelper {
                     anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
                         anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -317,7 +317,7 @@ public class TimGenerationHelper {
                 anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
                     anchorCoordinate.getLongitude());
             } catch (Utility.IdenticalPointsException e) {
-                anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
+                anchorMp = identicalPointsExceptionHandler.recover(allMps);
                 if (anchorMp == null) {
                     String exMsg = String.format(
                         "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -430,7 +430,7 @@ public class TimGenerationHelper {
                     anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
                         anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -525,7 +525,7 @@ public class TimGenerationHelper {
                     anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
                         anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
@@ -619,7 +619,7 @@ public class TimGenerationHelper {
                     anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
                         anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    anchorMp = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(allMps);
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
                     if (anchorMp == null) {
                         String exMsg = String.format(
                             "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",

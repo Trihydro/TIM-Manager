@@ -716,7 +716,7 @@ public abstract class WydotTimBaseController {
             anchor = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
                 anchorCoordinate.getLongitude());
         } catch (Utility.IdenticalPointsException e) {
-            anchor = identicalPointsExceptionHandler.recoverFromIdenticalPointsException(milepostsAll);
+            anchor = identicalPointsExceptionHandler.recover(milepostsAll);
             if (anchor == null) {
                 log.error("Unable to recover from identical points exception for active TIM.");
                 return;

@@ -1,5 +1,6 @@
 package com.trihydro.library.helpers;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -76,6 +77,7 @@ public class TimGenerationHelper {
     private final SnmpHelper snmpHelper;
     private final RegionNameTrimmer regionNameTrimmer;
     private final CreateBaseTimUtil createBaseTimUtil;
+    private final IdenticalPointsExceptionHandler identicalPointsExceptionHandler;
 
     @Autowired
     public TimGenerationHelper(Utility _utility, DataFrameService _dataFrameService,
@@ -84,7 +86,7 @@ public class TimGenerationHelper {
                                RsuService _rsuService, OdeService _odeService,
                                ActiveTimHoldingService _activeTimHoldingService,
                                SnmpHelper _snmpHelper, RegionNameTrimmer _regionNameTrimmer,
-                               CreateBaseTimUtil _createBaseTimUtil) {
+                               CreateBaseTimUtil _createBaseTimUtil, IdenticalPointsExceptionHandler identicalPointsExceptionHandler) {
         gson = new Gson();
         utility = _utility;
         dataFrameService = _dataFrameService;
@@ -98,6 +100,7 @@ public class TimGenerationHelper {
         snmpHelper = _snmpHelper;
         regionNameTrimmer = _regionNameTrimmer;
         createBaseTimUtil = _createBaseTimUtil;
+        this.identicalPointsExceptionHandler = identicalPointsExceptionHandler;
     }
 
     private String getIsoDateTimeString(ZonedDateTime date) {
@@ -167,14 +170,19 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    String exMsg = String.format(
-                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
-                        tum.getActiveTimId());
-                    log.error(exMsg);
-                    exceptions.add(new ResubmitTimException(activeTimId, exMsg));
-                    continue;
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
+                    if (anchorMp == null) {
+                        String exMsg = String.format(
+                            "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
+                            tum.getActiveTimId());
+                        log.error(exMsg, e);
+                        exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                        continue;
+                    }
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -305,14 +313,19 @@ public class TimGenerationHelper {
 
             Milepost anchorMp;
             try {
-                anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                    anchorCoordinate.getLongitude());
             } catch (Utility.IdenticalPointsException e) {
-                String exMsg = String.format(
-                    "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
-                    tum.getActiveTimId());
-                log.error(exMsg, e);
-                exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
-                return null;
+                anchorMp = identicalPointsExceptionHandler.recover(allMps);
+                if (anchorMp == null) {
+                    String exMsg = String.format(
+                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
+                        tum.getActiveTimId());
+                    log.error(exMsg, e);
+                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                    return null;
+                }
             }
             List<Milepost> mps = milepostReduction.applyMilepostReductionAlgorithm(allMps,
                 config.getPathDistanceLimit());
@@ -413,14 +426,19 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    String exMsg = String.format(
-                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
-                        tum.getActiveTimId());
-                    log.error(exMsg, e);
-                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
-                    continue;
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
+                    if (anchorMp == null) {
+                        String exMsg = String.format(
+                            "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
+                            tum.getActiveTimId());
+                        log.error(exMsg, e);
+                        exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                        continue;
+                    }
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -503,14 +521,19 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    String exMsg = String.format(
-                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
-                        tum.getActiveTimId());
-                    log.error(exMsg, e);
-                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
-                    continue;
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
+                    if (anchorMp == null) {
+                        String exMsg = String.format(
+                            "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
+                            tum.getActiveTimId());
+                        log.error(exMsg, e);
+                        exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                        continue;
+                    }
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -592,14 +615,19 @@ public class TimGenerationHelper {
 
                 Milepost anchorMp;
                 try {
-                    anchorMp = getAnchorPoint(firstPoint, secondPoint);
+                    Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
+                    anchorMp = new Milepost(null, firstPoint.getMilepost(), firstPoint.getDirection(), anchorCoordinate.getLatitude(),
+                        anchorCoordinate.getLongitude());
                 } catch (Utility.IdenticalPointsException e) {
-                    String exMsg = String.format(
-                        "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
-                        tum.getActiveTimId());
-                    log.error(exMsg, e);
-                    exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
-                    continue;
+                    anchorMp = identicalPointsExceptionHandler.recover(allMps);
+                    if (anchorMp == null) {
+                        String exMsg = String.format(
+                            "Unable to resubmit TIM, identical points found while calculating anchor point for Active_Tim %d",
+                            tum.getActiveTimId());
+                        log.error(exMsg, e);
+                        exceptions.add(new ResubmitTimException(tum.getActiveTimId(), exMsg));
+                        continue;
+                    }
                 }
 
                 // reduce the mileposts by removing straight away posts
@@ -1183,25 +1211,6 @@ public class TimGenerationHelper {
             System.out.println("getServiceRegion fails due to no mileposts");
         }
         return serviceRegion;
-    }
-
-    /**
-     * This method returns the anchor point for the given mileposts.
-     *
-     * @param firstPoint  The first milepost.
-     * @param secondPoint The second milepost.
-     * @return The anchor point as a Milepost.
-     */
-    private Milepost getAnchorPoint(Milepost firstPoint, Milepost secondPoint)
-        throws Utility.IdenticalPointsException {
-        Coordinate anchorCoordinate = utility.calculateAnchorCoordinate(firstPoint, secondPoint);
-
-        Milepost anchor = new Milepost();
-        anchor.setLatitude(anchorCoordinate.getLatitude());
-        anchor.setLongitude(anchorCoordinate.getLongitude());
-        anchor.setMilepost(firstPoint.getMilepost());
-        anchor.setDirection(firstPoint.getDirection());
-        return anchor;
     }
 
     /**

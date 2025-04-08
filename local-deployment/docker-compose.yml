@@ -36,7 +36,7 @@ services:
     entrypoint: [ "/bin/sh", "kafka_init.sh" ]
 
   ode:
-    image: usdotjpoode/jpo-ode:2024-q2
+    image: usdotjpoode/jpo-ode:2025-q1
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -52,13 +52,28 @@ services:
       - "6666:6666/udp"
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
-      ZK: ${DOCKER_HOST_IP}:2181
+      ODE_KAFKA_BROKERS: ${DOCKER_HOST_IP}:9092
       ODE_SECURITY_SVCS_SIGNATURE_URI: http://notused
       ODE_RSU_USERNAME: testusername
       ODE_RSU_PASSWORD: testpassword
       DATA_SIGNING_ENABLED_RSU: false
       DATA_SIGNING_ENABLED_SDW: false
       DEFAULT_SNMP_PROTOCOL: NTCIP1218
+      KAFKA_TYPE: local
+      CONFLUENT_KEY: notused
+      CONFLUENT_SECRET: notused
+      KAFKA_LINGER_MS: 1
+      KAFKA_ACKS: all
+      KAFKA_RETRIES: 0
+      KAFKA_BATCH_SIZE: 16384
+      KAFKA_BUFFER_MEMORY: 33554432
+      KAFKA_COMPRESSION_TYPE: zstd
+      KAFKA_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      KAFKA_VALUE_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      KAFKA_PARTITIONER_CLASS: org.apache.kafka.clients.producer.internals.DefaultPartitioner
+      ODE_TIM_INGEST_MONITORING_ENABLED: false
+      ODE_TIM_INGEST_MONITORING_INTERVAL: 10000
+
     depends_on:
       - kafka
     volumes:
@@ -70,7 +85,7 @@ services:
         max-file: "5"
 
   adm:
-    image: usdotjpoode/asn1_codec:2024-q2
+    image: usdotjpoode/asn1_codec:2025-q1
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       ACM_CONFIG_FILE: adm.properties
@@ -88,7 +103,7 @@ services:
     restart: on-failure
   
   aem:
-    image: usdotjpoode/asn1_codec:2024-q2
+    image: usdotjpoode/asn1_codec:2025-q1
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       ACM_CONFIG_FILE: aem.properties
@@ -107,7 +122,7 @@ services:
 
   # Note: the SDX does not accept unsigned data, so this is commented out for now
   # sdw_depositor:
-  #   image: usdotjpoode/jpo-sdw-depositor:2024-q2
+  #   image: usdotjpoode/jpo-sdw-depositor:2025-q1
   #   environment:
   #     DOCKER_HOST_IP: ${DOCKER_HOST_IP}
   #     SDW_EMAIL_LIST: test@gmail.com

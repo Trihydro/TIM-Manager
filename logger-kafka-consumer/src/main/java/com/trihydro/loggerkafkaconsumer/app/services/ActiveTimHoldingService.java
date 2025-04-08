@@ -9,49 +9,35 @@ import java.sql.Statement;
 import com.trihydro.library.model.ActiveTimHolding;
 import com.trihydro.library.model.Coordinate;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ActiveTimHoldingService extends BaseService {
 
     public ActiveTimHolding getRsuActiveTimHolding(String clientId, String direction, String ipv4Address) {
         ActiveTimHolding activeTimHolding = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "select * from active_tim_holding";
-            query += " where rsu_target = '" + ipv4Address;
-            if (clientId != null) {
-                query += "' and client_id = '" + clientId + "'";
-            } else {
-                query += "' and client_id is null";
-            }
-            query += " and direction = '" + direction + "'";
+        String query = "select * from active_tim_holding";
+        query += " where rsu_target = '" + ipv4Address;
+        if (clientId != null) {
+            query += "' and client_id = '" + clientId + "'";
+        } else {
+            query += "' and client_id is null";
+        }
+        query += " and direction = '" + direction + "'";
 
-            rs = statement.executeQuery(query);
-
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+        ) {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null)
-                    statement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-                // close result set
-                if (rs != null)
-                    rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            log.error("SQL Exception while getting RSU ActiveTimHolding with clientId: {}, direction: {}, ipv4Address: {}",
+                clientId, direction, ipv4Address, e);
         }
 
         return activeTimHolding;
@@ -59,42 +45,26 @@ public class ActiveTimHoldingService extends BaseService {
 
     public ActiveTimHolding getSdxActiveTimHolding(String clientId, String direction, String satRecordId) {
         ActiveTimHolding activeTimHolding = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "select * from active_tim_holding";
-            query += " where sat_record_id = '" + satRecordId;
-            if (clientId != null) {
-                query += "' and client_id = '" + clientId + "'";
-            } else {
-                query += "' and client_id is null";
-            }
-            query += " and direction = '" + direction + "'";
+        String query = "select * from active_tim_holding";
+        query += " where sat_record_id = '" + satRecordId;
+        if (clientId != null) {
+            query += "' and client_id = '" + clientId + "'";
+        } else {
+            query += "' and client_id is null";
+        }
+        query += " and direction = '" + direction + "'";
 
-            rs = statement.executeQuery(query);
-
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+        ) {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null)
-                    statement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-                // close result set
-                if (rs != null)
-                    rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            log.error("SQL Exception while getting SDX ActiveTimHolding with clientId: {}, direction: {}, satRecordId: {}",
+                clientId, direction, satRecordId, e);
         }
 
         return activeTimHolding;
@@ -102,35 +72,19 @@ public class ActiveTimHoldingService extends BaseService {
 
     public ActiveTimHolding getActiveTimHoldingByPacketId(String packetId) {
         ActiveTimHolding activeTimHolding = null;
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            statement = connection.createStatement();
-            String query = "select * from active_tim_holding";
-            query += " where packet_id = '" + packetId + "'";
-            rs = statement.executeQuery(query);
+        String query = "select * from active_tim_holding";
+        query += " where packet_id = '" + packetId + "'";
 
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+        ) {
             // convert to ActiveTim object
             activeTimHolding = getSingleActiveTimHoldingFromResultSet(rs);
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // close prepared statement
-                if (statement != null)
-                    statement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-                // close result set
-                if (rs != null)
-                    rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            log.error("SQL Exception while getting ActiveTimHolding with packetId: {}", packetId, e);
         }
 
         return activeTimHolding;
@@ -146,9 +100,9 @@ public class ActiveTimHoldingService extends BaseService {
             activeTimHolding.setRsuTargetId(rs.getString("RSU_TARGET"));
             activeTimHolding.setSatRecordId(rs.getString("SAT_RECORD_ID"));
             activeTimHolding.setStartPoint(
-                    new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
+                new Coordinate(rs.getBigDecimal("START_LATITUDE"), rs.getBigDecimal("START_LONGITUDE")));
             activeTimHolding
-                    .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
+                .setEndPoint(new Coordinate(rs.getBigDecimal("END_LATITUDE"), rs.getBigDecimal("END_LONGITUDE")));
 
             int projectKey = rs.getInt("PROJECT_KEY");
             if (!rs.wasNull()) {
@@ -167,71 +121,46 @@ public class ActiveTimHoldingService extends BaseService {
         }
 
         String updateTableSQL = "DELETE FROM ACTIVE_TIM_HOLDING WHERE ACTIVE_TIM_HOLDING_ID = ?";
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement(updateTableSQL);
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(updateTableSQL);
+        ) {
             preparedStatement.setLong(1, activeTimHoldingId);
             var success = dbInteractions.updateOrDelete(preparedStatement);
             if (success) {
-                utility.logWithDate("Deleted ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+                log.info("Deleted ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
             } else {
-                utility.logWithDate("Failed to delete ACTIVE_TIM_HOLDING with ID: " + activeTimHoldingId);
+                log.error("Failed to delete ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId);
             }
             return success;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("SQL Exception while deleting ACTIVE_TIM_HOLDING with ID: {}", activeTimHoldingId, e);
             return false;
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     public boolean updateTimExpiration(String packetID, String expDate) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        boolean success = false;
+        boolean success;
 
         String updateStatement = "UPDATE ACTIVE_TIM_HOLDING SET EXPIRATION_DATE = ? WHERE PACKET_ID = ?";
 
-        try {
-            connection = dbInteractions.getConnectionPool();
-            preparedStatement = connection.prepareStatement(updateStatement);
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(updateStatement);
+        ) {
             preparedStatement.setObject(1, expDate);// expDate comes in as MST from previously called function
-                                                    // (GetMinExpiration)
+            // (GetMinExpiration)
             preparedStatement.setObject(2, packetID);
 
             // execute update statement
             success = dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception while updating ACTIVE_TIM_HOLDING with packetID: {}", packetID, e);
             return false;
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
-        utility.logWithDate(String.format(
-                "Called ActiveTimHolding UpdateTimExpiration with packetID: %s, expDate: %s. Successful: %s", packetID,
-                expDate, success));
+        log.info("Called ActiveTimHolding UpdateTimExpiration with packetID: {}, expDate: {}. Successful: {}", packetID,
+            expDate, success);
         return success;
     }
 

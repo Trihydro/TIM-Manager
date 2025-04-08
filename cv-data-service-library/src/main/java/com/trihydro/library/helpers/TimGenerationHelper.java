@@ -817,7 +817,7 @@ public class TimGenerationHelper {
         return exceptions;
     }
 
-    private int getMsgCnt(int currentCnt) {
+    protected int getMsgCnt(int currentCnt) {
         if (currentCnt == 127) {
             return 1;
         }

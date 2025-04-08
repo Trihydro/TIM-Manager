@@ -1307,6 +1307,32 @@ class TimGenerationHelperTest {
         Assertions.assertFalse(success);
     }
 
+    @Test
+    public void getMsgCnt_ShouldIncrementFrom2To3() {
+        // Arrange
+        int currentMsgCnt = 2;
+        int expectedMsgCnt = 3;
+
+        // Act
+        var msgCnt = uut.getMsgCnt(currentMsgCnt);
+
+        // Assert
+        Assertions.assertEquals(expectedMsgCnt, msgCnt);
+    }
+
+    @Test
+    public void getMsgCnt_ShouldRollOverFrom127To1() {
+        // Arrange
+        int currentMsgCnt = 127;
+        int expectedMsgCnt = 1;
+
+        // Act
+        var msgCnt = uut.getMsgCnt(currentMsgCnt);
+
+        // Assert
+        Assertions.assertEquals(expectedMsgCnt, msgCnt);
+    }
+
     private void setupActiveTimModel() {
         tum = new TimUpdateModel();
         tum.setActiveTimId(activeTimId);

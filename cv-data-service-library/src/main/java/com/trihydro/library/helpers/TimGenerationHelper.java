@@ -709,7 +709,7 @@ public class TimGenerationHelper {
 
         OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
         tim.setDataframes(dataframes);
-        tim.setMsgCnt(getMsgCnt(aTim.getMsgCnt()));
+        tim.setMsgCnt(getNextMessageCount(aTim.getMsgCnt()));
         tim.setPacketID(aTim.getPacketId());
 
         tim.setTimeStamp(nowAsISO);
@@ -817,14 +817,11 @@ public class TimGenerationHelper {
         return exceptions;
     }
 
-    private int getMsgCnt(int currentCnt) {
-        if (currentCnt == 127) {
-            return 1;
+    protected int getNextMessageCount(int currentCount) {
+        if (currentCount == 127) {
+            currentCount = 0;
         }
-        // else increment msgCnt
-        else {
-            return currentCnt++;
-        }
+        return ++currentCount;
     }
 
     private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes,

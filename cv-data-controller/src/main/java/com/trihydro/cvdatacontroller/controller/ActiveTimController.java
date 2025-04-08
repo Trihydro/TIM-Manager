@@ -74,7 +74,7 @@ public class ActiveTimController extends BaseController {
      *
      * @return List of ActiveTim objects
      */
-    @RequestMapping(value = "/expiring", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/expiring", method = RequestMethod.GET, produces = "application/json", headers = "Accept=application/json")
     public ResponseEntity<List<TimUpdateModel>> GetExpiringActiveTims() {
         List<TimUpdateModel> activeTims = new ArrayList<>();
 
@@ -134,7 +134,7 @@ public class ActiveTimController extends BaseController {
         return ResponseEntity.ok(activeTims);
     }
 
-    @RequestMapping(value = "/update-model/{activeTimId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/update-model/{activeTimId}", method = RequestMethod.GET, produces = "application/json", headers = "Accept=application/json")
     public ResponseEntity<TimUpdateModel> GetUpdateModelFromActiveTimId(@PathVariable Long activeTimId) {
         TimUpdateModel activeTim = null;
 
@@ -896,7 +896,7 @@ public class ActiveTimController extends BaseController {
         return returnValues;
     }
 
-    @RequestMapping(value = "/reset-expiration-date", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/reset-expiration-date", method = RequestMethod.PUT, produces = "application/json", headers = "Accept=application/json")
     public ResponseEntity<Boolean> ResetExpirationDate(@RequestBody List<Long> activeTimIds) {
         if (activeTimIds == null || activeTimIds.isEmpty()) {
             return ResponseEntity.ok(true);

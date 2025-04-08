@@ -287,17 +287,17 @@ public class Utility {
         BigDecimal secondPointLongitude =
             secondPoint.getLongitude().round(new java.math.MathContext(precision));
 
+        // Check if the first and second points are identical
+        if (firstPointLatitude.equals(secondPointLatitude) &&
+            firstPointLongitude.equals(secondPointLongitude)) {
+            throw new IdenticalPointsException();
+        }
+
         // 1) Get the difference in latitude between the first and second points.
         BigDecimal differenceInLatitude = firstPointLatitude.subtract(secondPointLatitude);
 
         // 2) Get the difference in longitude between the first and second points.
         BigDecimal differenceInLongitude = firstPointLongitude.subtract(secondPointLongitude);
-
-        // Check if the first and second points are identical
-        if (differenceInLatitude.equals(BigDecimal.ZERO) &&
-            differenceInLongitude.equals(BigDecimal.ZERO)) {
-            throw new IdenticalPointsException();
-        }
 
         // 3) Multiply the difference in latitude by the meters per surface degree to get d0Latitude.
         BigDecimal d0Latitude =

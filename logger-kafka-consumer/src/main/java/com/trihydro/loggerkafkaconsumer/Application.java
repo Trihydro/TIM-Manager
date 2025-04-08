@@ -1,5 +1,6 @@
 package com.trihydro.loggerkafkaconsumer;
 
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import com.trihydro.library.factory.KafkaFactory;
 import com.trihydro.library.helpers.DbInteractions;
 import com.trihydro.library.helpers.EmailHelper;
@@ -18,7 +19,7 @@ import org.springframework.context.annotation.Import;
 
 @Import({ Utility.class, DbInteractions.class, JsonToJavaConverter.class, TimDbTables.class,
 		SQLNullHandler.class, EmailHelper.class, JavaMailSenderImplProvider.class,
-		KafkaFactory.class, RegionNameElementCollection.class })
+		KafkaFactory.class, RegionNameElementCollection.class, IdenticalPointsExceptionHandler.class })
 @SpringBootApplication
 @EnableConfigurationProperties(LoggerConfiguration.class)
 public class Application {

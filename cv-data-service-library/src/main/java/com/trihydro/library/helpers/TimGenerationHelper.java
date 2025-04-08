@@ -709,7 +709,7 @@ public class TimGenerationHelper {
 
         OdeTravelerInformationMessage tim = new OdeTravelerInformationMessage();
         tim.setDataframes(dataframes);
-        tim.setMsgCnt(getMsgCnt(aTim.getMsgCnt()));
+        tim.setMsgCnt(getNextMessageCount(aTim.getMsgCnt()));
         tim.setPacketID(aTim.getPacketId());
 
         tim.setTimeStamp(nowAsISO);
@@ -817,13 +817,14 @@ public class TimGenerationHelper {
         return exceptions;
     }
 
-    protected int getMsgCnt(int currentCnt) {
-        if (currentCnt == 127) {
+    protected int getNextMessageCount(int currentCount) {
+        if (currentCount == 127) {
+            // reset to 1
             return 1;
         }
-        // else increment msgCnt
         else {
-            return ++currentCnt;
+            // increment by 1
+            return ++currentCount;
         }
     }
 

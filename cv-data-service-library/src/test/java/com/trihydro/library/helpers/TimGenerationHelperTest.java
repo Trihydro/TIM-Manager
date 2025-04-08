@@ -1308,26 +1308,26 @@ class TimGenerationHelperTest {
     }
 
     @Test
-    public void getMsgCnt_ShouldIncrementFrom2To3() {
+    public void getNextMessageCount_ShouldIncrementFrom2To3() {
         // Arrange
         int currentMsgCnt = 2;
         int expectedMsgCnt = 3;
 
         // Act
-        var msgCnt = uut.getMsgCnt(currentMsgCnt);
+        var msgCnt = uut.getNextMessageCount(currentMsgCnt);
 
         // Assert
         Assertions.assertEquals(expectedMsgCnt, msgCnt);
     }
 
     @Test
-    public void getMsgCnt_ShouldRollOverFrom127To1() {
+    public void getNextMessageCount_ShouldRollOverFrom127To1() {
         // Arrange
         int currentMsgCnt = 127;
         int expectedMsgCnt = 1;
 
         // Act
-        var msgCnt = uut.getMsgCnt(currentMsgCnt);
+        var msgCnt = uut.getNextMessageCount(currentMsgCnt);
 
         // Assert
         Assertions.assertEquals(expectedMsgCnt, msgCnt);

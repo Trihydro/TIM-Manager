@@ -823,7 +823,7 @@ public class TimGenerationHelper {
         }
         // else increment msgCnt
         else {
-            return currentCnt++;
+            return ++currentCnt;
         }
     }
 

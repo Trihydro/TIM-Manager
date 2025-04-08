@@ -819,13 +819,9 @@ public class TimGenerationHelper {
 
     protected int getNextMessageCount(int currentCount) {
         if (currentCount == 127) {
-            // reset to 1
-            return 1;
+            currentCount = 0;
         }
-        else {
-            // increment by 1
-            return ++currentCount;
-        }
+        return ++currentCount;
     }
 
     private DataFrame getDataFrame(TimUpdateModel aTim, Milepost anchor, boolean resetStartTimes,

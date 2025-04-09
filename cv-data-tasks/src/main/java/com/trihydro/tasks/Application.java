@@ -2,6 +2,7 @@
 package com.trihydro.tasks;
 
 import com.trihydro.tasks.actions.CleanupStaleActiveTimHoldingRecords;
+import com.trihydro.library.exceptionhandlers.IdenticalPointsExceptionHandler;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,10 +53,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import({SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class, ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
-    TmddService.class, GsonFactory.class, StatusLogService.class, TimService.class, DataFrameService.class, TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class,
-    MilepostReduction.class, RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class, WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class,
-    TimRsuService.class, SnmpHelper.class, RegionNameTrimmer.class})
+@Import({ SdwService.class, Utility.class, EmailHelper.class, JavaMailSenderImplProvider.class, ActiveTimService.class,
+                ItisCodeService.class, RsuDataService.class, RestTemplateProvider.class,
+                TmddService.class, GsonFactory.class,
+                StatusLogService.class, TimService.class, DataFrameService.class,
+                TimGenerationHelper.class, PathNodeLLService.class, MilepostService.class, MilepostReduction.class,
+                RegionService.class, RsuService.class, OdeService.class, ActiveTimHoldingService.class,
+                WydotTimService.class, TimTypeService.class, CreateBaseTimUtil.class, TimRsuService.class,
+                SnmpHelper.class, RegionNameTrimmer.class, IdenticalPointsExceptionHandler.class })
 
 @Slf4j
 public class Application {

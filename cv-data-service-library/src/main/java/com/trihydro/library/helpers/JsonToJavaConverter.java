@@ -30,8 +30,6 @@ import us.dot.its.jpo.ode.plugin.RoadSideUnit.RSU;
 import us.dot.its.jpo.ode.plugin.SNMP;
 import us.dot.its.jpo.ode.plugin.ServiceRequest;
 import us.dot.its.jpo.ode.plugin.SnmpProtocol;
-import us.dot.its.jpo.ode.plugin.j2735.J2735SpecialVehicleExtensions;
-import us.dot.its.jpo.ode.plugin.j2735.J2735SupplementalVehicleExtensions;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame.Region;
@@ -48,37 +46,6 @@ public class JsonToJavaConverter {
 
     public JsonToJavaConverter() {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
-    public J2735SpecialVehicleExtensions convertJ2735SpecialVehicleExtensionsJsonToJava(String value, int i) {
-
-        JsonNode part2Node = getPart2Node(value, i);
-        J2735SpecialVehicleExtensions spve = null;
-        try {
-            spve = mapper.treeToValue(part2Node, J2735SpecialVehicleExtensions.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return spve;
-    }
-
-    public J2735SupplementalVehicleExtensions convertJ2735SupplementalVehicleExtensionsJsonToJava(String value, int i) {
-
-        JsonNode part2Node = getPart2Node(value, i);
-        J2735SupplementalVehicleExtensions suve = null;
-        try {
-            suve = mapper.treeToValue(part2Node, J2735SupplementalVehicleExtensions.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return suve;
-    }
-
-    public JsonNode getPart2Node(String value, int i) {
-        JsonNode part2 = JsonUtils.getJsonNode(value, "payload").get("data").get("partII");
-        if (part2 != null)
-            return part2.get(i).get("value");
-        return null;
     }
 
     public OdeLogMetadata convertTimMetadataJsonToJava(String value) {

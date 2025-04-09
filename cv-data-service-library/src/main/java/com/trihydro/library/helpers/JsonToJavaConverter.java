@@ -540,10 +540,13 @@ public class JsonToJavaConverter {
 
                 // ADD NON ARRAY ELEMENT
                 if (sequenceArrNode != null && !sequenceArrNode.isArray()) {
-                    if (sequenceArrNode.get("item").get("itis") != null)
+                    if (sequenceArrNode.get("item").get("itis") != null) {
                         item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
-                    else if (sequenceArrNode.get("item").get("text") != null)
+                    } else if (sequenceArrNode.get("item").get("text") != null) {
                         item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+                    } else {
+                        log.warn("'itis' or 'text' not found in item when converting TMC TIM");
+                    }
 
                     itemsList.add(item);
                 }

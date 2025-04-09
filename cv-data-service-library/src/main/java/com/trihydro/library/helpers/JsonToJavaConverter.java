@@ -556,6 +556,9 @@ public class JsonToJavaConverter {
                 if (frameTypeNode != null && frameTypeNode.fieldNames().hasNext()) {
                     TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
                     dataFrame.setFrameType(frameType);
+                } else {
+                    log.warn("frameType not found in TravelerDataFrame when converting TMC TIM. Defaulting to 'advisory'");
+                    dataFrame.setFrameType(TravelerInfoType.advisory);
                 }
 
                 JsonNode startTimeNode = travelerDataFrame.get("startTime");

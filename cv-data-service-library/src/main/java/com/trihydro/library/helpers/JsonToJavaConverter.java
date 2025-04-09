@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,6 +41,7 @@ import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 import us.dot.its.jpo.ode.util.JsonUtils;
 
 @Component
+@Slf4j
 public class JsonToJavaConverter {
 
     private ObjectMapper mapper = new ObjectMapper();
@@ -523,12 +525,16 @@ public class JsonToJavaConverter {
                 String item = null;
                 if (sequenceArrNode != null && sequenceArrNode.isArray()) {
                     for (final JsonNode objNode : sequenceArrNode) {
-                        if (objNode.get("item").get("itis") != null)
+                        if (objNode.get("item").get("itis") != null) {
                             item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
-                        else if (objNode.get("item").get("text") != null)
+                        } else if (objNode.get("item").get("text") != null) {
                             item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
-                        if (!itemsList.contains(item))
+                        } else {
+                            log.warn("'itis' or 'text' not found in item when converting TMC TIM");
+                        }
+                        if (!itemsList.contains(item)) {
                             itemsList.add(item);
+                        }
                     }
                 }
 

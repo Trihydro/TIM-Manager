@@ -42,7 +42,7 @@ import us.dot.its.jpo.ode.util.JsonUtils;
 @Slf4j
 public class JsonToJavaConverter {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public JsonToJavaConverter() {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

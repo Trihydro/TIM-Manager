@@ -243,7 +243,7 @@ public class JsonToJavaConverter {
             OdeTravelerInformationMessage.DataFrame dataFrame = new OdeTravelerInformationMessage.DataFrame();
             List<OdeTravelerInformationMessage.DataFrame.Region> regions = new ArrayList<>();
 
-            // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload");
+            // JsonNode payloadNode = JsonUtils.getJsonNode(value, "payload"); // TODO: remove
             JsonNode timNode = JsonUtils.getJsonNode(value, "payload").get("data").get("MessageFrame").get("value")
                     .get("TravelerInformation");
             JsonNode travelerDataFrame = timNode.get("dataFrames").get("TravelerDataFrame");
@@ -266,7 +266,7 @@ public class JsonToJavaConverter {
             } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
                 dataFrame.setContent(ContentEnum.workZone.getStringValue());
-            }
+            } // TODO: add logging for else case
 
             LocalDate now = LocalDate.now();
             LocalDate firstDay = now.with(firstDayOfYear());
@@ -293,6 +293,7 @@ public class JsonToJavaConverter {
                         item = mapper.treeToValue(objNode.get("item").get("itis"), String.class);
                     else if (objNode.get("item").get("text") != null)
                         item = mapper.treeToValue(objNode.get("item").get("text"), String.class);
+                    // TODO: add logging for else case
 
                     itemsList.add(item);
                 }
@@ -304,6 +305,7 @@ public class JsonToJavaConverter {
                     item = mapper.treeToValue(sequenceArrNode.get("item").get("itis"), String.class);
                 else if (sequenceArrNode.get("item").get("text") != null)
                     item = mapper.treeToValue(sequenceArrNode.get("item").get("text"), String.class);
+                // TODO: add logging for else case
 
                 itemsList.add(item);
             }
@@ -348,6 +350,7 @@ public class JsonToJavaConverter {
     public OdeTravelerInformationMessage.DataFrame.Region.Path GetPathData(JsonNode pathNode) {
         try {
             if (pathNode == null)
+                // TODO: add logging
                 return null;
             JsonNode xyNode = pathNode.get("offset").get("xy");
             Boolean isXy = true;
@@ -359,10 +362,12 @@ public class JsonToJavaConverter {
             }
 
             if (xyNode == null)
+                // TODO: add logging
                 return null;
 
             JsonNode nodesNode = xyNode.get("nodes");
             if (nodesNode == null)
+                // TODO: add logging
                 return null;
 
             JsonNode nodeXYArrNode = isXy ? nodesNode.get("NodeXY") : nodesNode;
@@ -393,6 +398,7 @@ public class JsonToJavaConverter {
             path.setNodes(nodeXYArr);
             return path;
         } catch (Exception ex) {
+            // TODO: add logging
             return null;
         }
     }
@@ -400,6 +406,7 @@ public class JsonToJavaConverter {
     public OdeTravelerInformationMessage.DataFrame.Region.Geometry GetGeometryData(JsonNode geometryNode) {
         try {
             if (geometryNode == null)
+                // TODO: add logging
                 return null;
 
             OdeTravelerInformationMessage.DataFrame.Region.Geometry geometry = new OdeTravelerInformationMessage.DataFrame.Region.Geometry();
@@ -412,7 +419,7 @@ public class JsonToJavaConverter {
 
             Circle circle = new Circle();
 
-            // circle.setCenter(OdePosition3D);
+            // circle.setCenter(OdePosition3D); // TODO: remove
             BigDecimal latitude = mapper.treeToValue(circleCenterNode.get("lat"), BigDecimal.class);
             BigDecimal longitude = mapper.treeToValue(circleCenterNode.get("long"), BigDecimal.class);
             BigDecimal elevation = mapper.treeToValue(circleCenterNode.get("elevation"), BigDecimal.class);
@@ -436,6 +443,7 @@ public class JsonToJavaConverter {
             geometry.setCircle(circle);
             return geometry;
         } catch (Exception e) {
+            // TODO: add logging
             return null;
         }
     }
@@ -486,6 +494,7 @@ public class JsonToJavaConverter {
                     sequenceArrNode = contentNode.get("workZone");
                     dataFrame.setContent(ContentEnum.workZone.getStringValue());
                 }
+                // TODO: add logging for else case
 
                 List<String> itemsList = new ArrayList<>();
                 String item = null;

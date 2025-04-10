@@ -95,11 +95,13 @@ public class LoggerKafkaConsumer {
                                 if (odeData != null) {
                                     if (odeData.getMetadata()
                                         .getRecordGeneratedBy() == us.dot.its.jpo.ode.model.OdeMsgMetadata.GeneratedBy.TMC) {
+                                        // TODO: add trace logging
                                         timService.addActiveTimToDatabase(odeData);
                                     } else if (odeData.getMetadata().getRecordGeneratedBy() == null) {
                                         // we shouldn't get here...log it
                                         log.error("Failed to get recordGeneratedBy, continuing...");
                                     } else {
+                                        // TODO: add trace logging
                                         timService.addTimToDatabase(odeData);
                                     }
                                 } else {

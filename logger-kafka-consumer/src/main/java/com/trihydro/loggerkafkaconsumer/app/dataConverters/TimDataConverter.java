@@ -30,6 +30,7 @@ public class TimDataConverter {
 
         var metadata = JsonUtils.getJsonNode(value, "metadata");
         if (metadata == null) {
+            // TODO: add logging
             return null;
         }
         JsonNode recordGeneratedBy = metadata.get("recordGeneratedBy");
@@ -41,6 +42,7 @@ public class TimDataConverter {
         try {
             recordGeneratedByStr = mapper.treeToValue(recordGeneratedBy, String.class);
         } catch (JsonProcessingException e) {
+            // TODO: add logging
             e.printStackTrace();
         }
 

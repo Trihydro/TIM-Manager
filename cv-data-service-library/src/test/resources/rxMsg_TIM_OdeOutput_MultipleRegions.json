@@ -126,10 +126,10 @@
                   ]
                 },
                 "durationTime": 32000,
-                "notUsed2": 0,
-                "notUsed3": 0,
-                "notUsed": 0,
-                "notUsed1": 0,
+                "doNotUse3": 0,
+                "doNotUse4": 0,
+                "doNotUse1": 0,
+                "doNotUse2": 0,
                 "frameType": {
                   "roadSignage": ""
                 },

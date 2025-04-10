@@ -1,8 +1,5 @@
 package com.trihydro.loggerkafkaconsumer.app.services;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -11,14 +8,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimDbTables;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import org.mockito.Spy;
+
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimDbTables;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
@@ -51,13 +50,13 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         // Assert
         Assertions.assertEquals(Long.valueOf(-1), data);
         verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// TIM_ID
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 2, dFrame.getNotUsed());// SSP_TIM_RIGHTS
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 2, dFrame.getDoNotUse1());// SSP_TIM_RIGHTS & NotUsed
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, null);// FRAME_TYPE
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 4, dFrame.getDurationTime());// DURATION_TIME
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 5, dFrame.getPriority());// PRIORITY
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 6, dFrame.getNotUsed1());// SSP_LOCATION_RIGHTS
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 7, dFrame.getNotUsed3());// SSP_MSG_TYPES
-        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 8, dFrame.getNotUsed2());// SSP_MSG_CONTENT
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 6, dFrame.getDoNotUse2());// SSP_LOCATION_RIGHTS & NotUsed1
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 7, dFrame.getDoNotUse4());// SSP_MSG_TYPES & NotUsed3
+        verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 8, dFrame.getDoNotUse3());// SSP_MSG_CONTENT & NotUsed2
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 9, dFrame.getContent());// CONTENT
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 10, dFrame.getUrl());// URL
         verify(mockSqlNullHandler).setTimestampOrNull(mockPreparedStatement, 11, time);// START_DATE_TIME

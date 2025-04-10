@@ -56,19 +56,19 @@ public class NodeXYController extends BaseController {
                 else if (col.equals("NODE_LONG"))
                     sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, nodeXY.getNodeLong());
                 else if (col.equals("X"))
-                    sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, nodeXY.getX());
+                    sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, nodeXY.getXpos());
                 else if (col.equals("Y"))
-                    sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, nodeXY.getY());
+                    sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum, nodeXY.getYpos());
                 else if (col.equals("ATTRIBUTES_DWIDTH"))
                     if (nodeXY.getAttributes() != null)
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                nodeXY.getAttributes().getdWidth());
+                                nodeXY.getAttributes().getDwidth());
                     else
                         preparedStatement.setString(fieldNum, null);
                 else if (col.equals("ATTRIBUTES_DELEVATION"))
                     if (nodeXY.getAttributes() != null)
                         sqlNullHandler.setBigDecimalOrNull(preparedStatement, fieldNum,
-                                nodeXY.getAttributes().getdElevation());
+                                nodeXY.getAttributes().getDelevation());
                     else
                         preparedStatement.setString(fieldNum, null);
                 fieldNum++;

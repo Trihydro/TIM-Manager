@@ -32,10 +32,10 @@ public class TimUpdateModel extends ActiveTim {
     private int dataFrameId;
     private TravelerInfoType frameType;
     private int durationTime;
-    private short notUsed1;
-    private short notUsed;
-    private short notUsed3;
-    private short notUsed2;
+    private short doNotUse2;
+    private short doNotUse1;
+    private short doNotUse4;
+    private short doNotUse3;
     private ContentEnum dfContent;
     private String url;
 
@@ -172,12 +172,12 @@ public class TimUpdateModel extends ActiveTim {
         this.frameType = frameType;
     }
 
-    public short getNotUsed() {
-        return notUsed;
+    public short getDoNotUse1() {
+        return doNotUse1;
     }
 
-    public void setNotUsed(short notUsed) {
-        this.notUsed = notUsed;
+    public void setDoNotUse1(short doNotUse1) {
+        this.doNotUse1 = doNotUse1;
     }
 
     public ContentEnum getDfContent() {
@@ -188,28 +188,28 @@ public class TimUpdateModel extends ActiveTim {
         this.dfContent = dfContent;
     }
 
-    public short getNotUsed2() {
-        return notUsed2;
+    public short getDoNotUse3() {
+        return doNotUse3;
     }
 
-    public void setNotUsed2(short notUsed2) {
-        this.notUsed2 = notUsed2;
+    public void setDoNotUse3(short doNotUse3) {
+        this.doNotUse3 = doNotUse3;
     }
 
-    public short getNotUsed3() {
-        return notUsed3;
+    public short getDoNotUse4() {
+        return doNotUse4;
     }
 
-    public void setNotUsed3(short notUsed3) {
-        this.notUsed3 = notUsed3;
+    public void setDoNotUse4(short doNotUse4) {
+        this.doNotUse4 = doNotUse4;
     }
 
-    public short getNotUsed1() {
-        return notUsed1;
+    public short getDoNotUse2() {
+        return doNotUse2;
     }
 
-    public void setNotUsed1(short notUsed1) {
-        this.notUsed1 = notUsed1;
+    public void setDoNotUse2(short doNotUse2) {
+        this.doNotUse2 = doNotUse2;
     }
 
     public BigDecimal getAnchorLong() {

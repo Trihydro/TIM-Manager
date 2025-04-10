@@ -10,43 +10,43 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimDbTables;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimDbTables;
 
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
 
 @Component
+@Slf4j
 public class DataFrameService extends BaseService {
 
     private TimDbTables timDbTables;
     private SQLNullHandler sqlNullHandler;
 
     @Autowired
-    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) {
+    public void InjectDependencies(TimDbTables _timDbTables, SQLNullHandler _sqlNullHandler) { // TODO: use constructor instead of InjectDependencies
         timDbTables = _timDbTables;
         sqlNullHandler = _sqlNullHandler;
     }
 
     public Long AddDataFrame(DataFrame dFrame, Long timId) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
+        String insertQueryStatement = timDbTables.buildInsertQueryStatement("data_frame",
+            timDbTables.getDataFrameTable());
 
-        try {
-
-            connection = dbInteractions.getConnectionPool();
-            String insertQueryStatement = timDbTables.buildInsertQueryStatement("data_frame",
-                    timDbTables.getDataFrameTable());
-            preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] { "data_frame_id" });
+        try (
+            Connection connection = dbInteractions.getConnectionPool();
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQueryStatement, new String[] {"data_frame_id"});
+        ) {
             int fieldNum = 1;
 
             for (String col : timDbTables.getDataFrameTable()) {
                 if (col.equals("TIM_ID")) {
                     sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
                 } else if (col.equals("SSP_TIM_RIGHTS")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse1());
                 } else if (col.equals("FRAME_TYPE")) {
                     Integer ordinal = null;
                     if (dFrame.getFrameType() != null) {
@@ -58,11 +58,11 @@ public class DataFrameService extends BaseService {
                 } else if (col.equals("PRIORITY")) {
                     sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getPriority());
                 } else if (col.equals("SSP_LOCATION_RIGHTS")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed1());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse2());
                 } else if (col.equals("SSP_MSG_TYPES")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed3());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse4());
                 } else if (col.equals("SSP_MSG_CONTENT")) {
-                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed2());
+                    sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getDoNotUse3());
                 } else if (col.equals("CONTENT")) {
                     sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getContent());
                 } else if (col.equals("URL")) {
@@ -70,18 +70,17 @@ public class DataFrameService extends BaseService {
                 } else if (col.equals("START_DATE_TIME")) {
                     if (dFrame.getStartDateTime() == null) {
                         preparedStatement.setNull(fieldNum, java.sql.Types.TIMESTAMP);
-                    }
-                    else {
+                    } else {
                         Timestamp time = null;
                         try {
                             TimeZone tz = TimeZone.getTimeZone("UTC");
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no
-                                                                                           // timezone offset
+                            // timezone offset
                             df.setTimeZone(tz);
                             Date dt = df.parse(dFrame.getStartDateTime());
                             time = new Timestamp(dt.getTime());
                         } catch (ParseException ex) {
-                            utility.logWithDate("Unable to parse startdate: " + dFrame.getStartDateTime());
+                            log.error("Unable to parse startdate: {}", dFrame.getStartDateTime());
                         }
                         sqlNullHandler.setTimestampOrNull(preparedStatement, fieldNum, time);
                     }
@@ -89,23 +88,11 @@ public class DataFrameService extends BaseService {
                 fieldNum++;
             }
 
-            Long dataFrameId = dbInteractions.executeAndLog(preparedStatement, "dataframe");
-            return dataFrameId;
+            return dbInteractions.executeAndLog(preparedStatement, "dataframe");
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // close prepared statement
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                // return connection back to pool
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            log.error("Error adding data frame", e);
         }
-        return Long.valueOf(0);
+        return 0L;
     }
 
 }

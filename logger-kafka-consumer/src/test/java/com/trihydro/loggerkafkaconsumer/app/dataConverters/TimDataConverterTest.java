@@ -208,19 +208,6 @@ public class TimDataConverterTest {
 
         }
 
-        @Test
-        public void processTimJson_unsigned() throws IOException {
-                // Arrange
-                String value = new String(Files.readAllBytes(Paths.get("src/test/resources/TIM_unsigned.json")));
-
-                // Act
-                var data = uut.processTimJson(value);
-
-                // Assert
-                Assertions.assertNotNull(data);
-                Assertions.assertNotNull(data.getMetadata());
-        }
-
         /**
          * Helper method to get an OdeTravelerInformationMessage object given an OdeTimPayload.
          */

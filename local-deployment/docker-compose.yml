@@ -91,7 +91,7 @@ services:
       ACM_CONFIG_FILE: adm.properties
       ACM_LOG_TO_CONSOLE: "true"
       ACM_LOG_TO_FILE: "false"
-      ACM_LOG_LEVEL: ERROR
+      ACM_LOG_LEVEL: ${ACM_LOG_LEVEL}
     depends_on:
       - kafka
     volumes:
@@ -109,7 +109,7 @@ services:
       ACM_CONFIG_FILE: aem.properties
       ACM_LOG_TO_CONSOLE: "true"
       ACM_LOG_TO_FILE: "false"
-      ACM_LOG_LEVEL: ERROR
+      ACM_LOG_LEVEL: ${ACM_LOG_LEVEL}
     depends_on:
       - kafka
     volumes:

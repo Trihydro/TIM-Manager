@@ -15,7 +15,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -142,14 +146,14 @@ public class WydotTimServiceTest {
         return activeTims;
     }
 
-    private OdeTravelerInformationMessage getMockOdeTravelerInformationMessage() {
-        String timJson = "{\"msgCnt\":\"1\",\"timeStamp\":\"2017-08-03T22:25:36.297Z\",\"urlB\":\"null\",\"packetID\":\"EC9C236B0000000000\",\"dataframes\":[{\"startDateTime\":\"2017-08-02T22:25:00.000Z\",\"durationTime\":1,\"sspTimRights\":\"0\",\"frameType\":\"advisory\",\"msgId\":{\"roadSignID\":{\"position\":{\"latitude\":\"41.678473\",\"longitude\":\"-108.782775\",\"elevation\":\"917.1432\"},\"viewAngle\":\"1010101010101010\",\"mutcdCode\":\"warning\",\"crc\":\"0000\"}},\"priority\":\"0\",\"sspLocationRights\":\"3\",\"regions\":[{\"name\":\"Testing TIM\",\"regulatorID\":\"0\",\"segmentID\":\"33\",\"anchorPosition\":{\"latitude\":\"41.2500807\",\"longitude\":\"-111.0093847\",\"elevation\":\"2020.6969900289998\"},\"laneWidth\":\"7\",\"directionality\":\"3\",\"closedPath\":\"false\",\"description\":\"path\",\"path\":{\"scale\":\"0\",\"type\":\"ll\",\"nodes\":[{\"nodeLong\":\"0.0030982\",\"nodeLat\":\"0.0014562\",\"delta\":\"node-LL3\"},{\"nodeLong\":\"-111.0093847\",\"nodeLat\":\"41.2500807\",\"delta\":\"node-LatLon\"}]},\"direction\":\"0000000000001010\"}],\"sspMsgTypes\":\"2\",\"sspMsgContent\":\"3\",\"content\":\"Advisory\",\"items\":[\"125\",\"some text\",\"250\",\"'98765\"],\"url\":\"null\"}]}";
+    private OdeTravelerInformationMessage getMockOdeTravelerInformationMessage() throws IOException {
+        String timJson =
+            new String(Files.readAllBytes(Paths.get("src/test/resources/com/trihydro/library/service/mockOdeTravelerInformationMessage.json")));
         Gson gson = new Gson();
-        OdeTravelerInformationMessage mockOdeTravelerInformationMessage = gson.fromJson(timJson, OdeTravelerInformationMessage.class);
-        return mockOdeTravelerInformationMessage;
+        return gson.fromJson(timJson, OdeTravelerInformationMessage.class);
     }
 
-    private WydotOdeTravelerInformationMessage getMockWydotOdeTravelerInformationMessage() {
+    private WydotOdeTravelerInformationMessage getMockWydotOdeTravelerInformationMessage() throws IOException {
         OdeTravelerInformationMessage mockOdeTravelerInformationMessage = getMockOdeTravelerInformationMessage();
         WydotOdeTravelerInformationMessage mockWydotOdeTravelerInformationMessage = new WydotOdeTravelerInformationMessage();
         mockWydotOdeTravelerInformationMessage.setMsgCnt(mockOdeTravelerInformationMessage.getMsgCnt());
@@ -191,7 +195,7 @@ public class WydotTimServiceTest {
         return wydotTim;
     }
 
-    private WydotTravelerInputData getMockWydotTravelerInputDataWithServiceRequest() {
+    private WydotTravelerInputData getMockWydotTravelerInputDataWithServiceRequest() throws IOException {
         WydotTravelerInputData wydotTravelerInputData = new WydotTravelerInputData();
         wydotTravelerInputData.setTim(getMockOdeTravelerInformationMessage());
         ServiceRequest serviceRequest = new ServiceRequest();
@@ -379,7 +383,7 @@ public class WydotTimServiceTest {
     }
 
     @Test
-    public void sendTimToSDW_MultipleActiveSatTimsFound() {
+    public void sendTimToSDW_MultipleActiveSatTimsFound() throws IOException {
         // Arrange
         List<ActiveTim> activeSatTims = getActiveTims(true);
         when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeSatTims);
@@ -403,7 +407,7 @@ public class WydotTimServiceTest {
     }
 
     @Test
-    public void sendTimToSDW_NoActiveSatTimsFound() {
+    public void sendTimToSDW_NoActiveSatTimsFound() throws IOException {
         // Arrange
         when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(new ArrayList<>());
         WydotTim wydotTim = getMockWydotTim();
@@ -424,7 +428,7 @@ public class WydotTimServiceTest {
     }
 
     @Test
-    public void sendTimToSDW_SingleActiveSatTimFound() {
+    public void sendTimToSDW_SingleActiveSatTimFound() throws IOException {
         // Arrange
         List<ActiveTim> activeSatTims = getActiveTims(true).subList(0, 1);
         when(mockActiveTimService.getActiveTimsByClientIdDirection(any(), any(), any())).thenReturn(activeSatTims);
@@ -448,7 +452,7 @@ public class WydotTimServiceTest {
     }
 
     @Test
-    public void sendTimToRsus_NoRsusFound() {
+    public void sendTimToRsus_NoRsusFound() throws IOException {
         // Arrange
         when(mockRsuService.getRsusByLatLong(any(), any(), any(), any())).thenReturn(new ArrayList<>());
 
@@ -468,7 +472,7 @@ public class WydotTimServiceTest {
     }
 
     @Test
-    public void sendTimToRsus_RsusFound_NoActiveTIMs() {
+    public void sendTimToRsus_RsusFound_NoActiveTIMs() throws IOException {
         // Arrange
         List<WydotRsu> rsus = new ArrayList<>();
         WydotRsu rsu = new WydotRsu();
@@ -499,7 +503,7 @@ public class WydotTimServiceTest {
     }
 
     @Test
-    public void sendTimToRsus_RsusFound_ActiveTIMsExist() {
+    public void sendTimToRsus_RsusFound_ActiveTIMsExist() throws IOException {
         // Arrange
         List<WydotRsu> rsus = new ArrayList<>();
         WydotRsu rsu = new WydotRsu();

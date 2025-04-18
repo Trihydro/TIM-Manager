@@ -62,8 +62,8 @@ public class PathNodeXYController extends BaseController {
 				nodexy.setDelta(rs.getString("DELTA"));
 				nodexy.setNodeLat(rs.getBigDecimal("NODE_LAT"));
 				nodexy.setNodeLong(rs.getBigDecimal("NODE_LONG"));
-				nodexy.setX(rs.getBigDecimal("X"));
-				nodexy.setY(rs.getBigDecimal("Y"));
+				nodexy.setXpos(rs.getBigDecimal("X"));
+				nodexy.setYpos(rs.getBigDecimal("Y"));
 
 				nodeXYs.add(nodexy);
 			}

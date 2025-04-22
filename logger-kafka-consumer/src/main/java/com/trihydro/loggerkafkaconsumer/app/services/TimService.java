@@ -158,32 +158,39 @@ public class TimService extends BaseService {
 
         OdeTimPayload payload = (OdeTimPayload) odeData.getPayload();
         if (payload == null) {
+            // TODO: add logging
             return;
         }
         OdeTravelerInformationMessage tim = getTim(payload);
         if (tim == null) {
+            // TODO: add logging
             return;
         }
         DataFrame[] dframes = tim.getDataframes();
         if (dframes == null || dframes.length == 0) {
+            // TODO: add logging
             return;
         }
         OdeTravelerInformationMessage.DataFrame.Region[] regions = dframes[0].getRegions();
         if (regions == null || regions.length == 0) {
+            // TODO: add logging
             return;
         }
         String firstRegionName = regions[0].getName();
         if (StringUtils.isEmpty(firstRegionName) || StringUtils.isBlank(firstRegionName)) {
+            // TODO: add logging
             return;
         }
         OdeRequestMsgMetadata metaData = (OdeRequestMsgMetadata) odeData.getMetadata();
         if (metaData == null) {
+            // TODO: add logging
             return;
         }
 
         // get information from the region name, first check splitname length
         activeTim = setActiveTimByRegionName(firstRegionName);
         if (activeTim == null) {
+            // TODO: add logging
             return;
         }
 
@@ -193,15 +200,17 @@ public class TimService extends BaseService {
         java.sql.Timestamp ts = null;
         if (StringUtils.isNotEmpty(tim.getTimeStamp()) && StringUtils.isNotBlank(tim.getTimeStamp())) {
             ts = java.sql.Timestamp.valueOf(LocalDateTime.parse(tim.getTimeStamp(), DateTimeFormatter.ISO_DATE_TIME));
-        }
+        } // TODO: add logging for else case
         Long timId = getTimId(tim.getPacketID(), ts);
 
         if (timId == null) {
             // TIM doesn't currently exist. Add it.
+            // TODO: add trace logging
             timId = AddTim(metaData, null, tim, null, null, null, satRecordId, firstRegionName);
 
             if (timId != null) {
                 // we inserted a new TIM, add additional data
+                // TODO: add trace logging
                 Long dataFrameId = dataFrameService.AddDataFrame(dframes[0], timId);
                 addRegions(dframes[0], dataFrameId);
                 addDataFrameItis(dframes[0], dataFrameId);
@@ -226,11 +235,11 @@ public class TimService extends BaseService {
             && metaData.getRequest().getRsus().length > 0) {
             firstRsu = metaData.getRequest().getRsus()[0];
             activeTim.setRsuTarget(firstRsu.getRsuTarget());
-        }
+        } // TODO: add logging for else case
 
         if (metaData.getRequest() != null && metaData.getRequest().getSdw() != null) {
             activeTim.setSatRecordId(metaData.getRequest().getSdw().getRecordId());
-        }
+        } // TODO: add logging for else case
 
         // the ODE now parses all dataframes to find the most recent and sets it
         // to this new OdeTimStartDateTime. We'll take advantage.
@@ -240,7 +249,7 @@ public class TimService extends BaseService {
         if (StringUtils.isEmpty(stDate)) {
             stDate = dframes[0].getStartDateTime();
             log.info("addActiveTimToDatabase did not find odeTimStartDateTime, setting to dataframe value {}", stDate);
-        }
+        } // TODO: add logging for else case
         activeTim.setStartDateTime(stDate);
         activeTim.setTimId(timId);
 
@@ -249,11 +258,13 @@ public class TimService extends BaseService {
         // if this is an RSU TIM
         if (activeTim.getRsuTarget() != null && firstRsu != null) {
             // save TIM RSU in DB
+            // TODO: add trace logging
             WydotRsu rsu = rsuService.getRsus().stream().filter(x -> x.getRsuTarget().equals(activeTim.getRsuTarget()))
                 .findFirst().orElse(null);
             if (rsu != null) {
+                // TODO: add trace logging
                 timRsuService.AddTimRsu(timId, rsu.getRsuId(), rsu.getRsuIndex());
-            }
+            } // TODO: add logging for else case
             ath = activeTimHoldingService.getRsuActiveTimHolding(activeTim.getClientId(), activeTim.getDirection(),
                 activeTim.getRsuTarget());
 
@@ -274,13 +285,15 @@ public class TimService extends BaseService {
 
         // set end time if duration is not indefinite
         if (dframes[0].getDurationTime() != 32000) {
+            // TODO: add trace logging
             ZonedDateTime zdt = ZonedDateTime.parse(dframes[0].getStartDateTime());
             zdt = zdt.plusMinutes(dframes[0].getDurationTime());
             activeTim.setEndDateTime(zdt.toString());
-        }
+        } // TODO: add logging for else case
 
         if (ath != null) {
             // set activeTim start/end points from holding table
+            // TODO: add trace logging
             activeTim.setStartPoint(ath.getStartPoint());
             activeTim.setEndPoint(ath.getEndPoint());
 
@@ -290,7 +303,7 @@ public class TimService extends BaseService {
             // set expiration time if found
             if (StringUtils.isNotBlank(ath.getExpirationDateTime())) {
                 activeTim.setExpirationDateTime(ath.getExpirationDateTime());
-            }
+            } // TODO: add logging for else case
         }
 
         // if true, TIM came from WYDOT
@@ -310,16 +323,18 @@ public class TimService extends BaseService {
 
             // if there is no active TIM, insert new one
             if (activeTimDb == null) {
+                // TODO: add trace logging
                 activeTimService.insertActiveTim(activeTim);
             } else { // else update active TIM
                 // If we couldn't find an Active TIM Holding record, we should persist the
                 // existing values
                 // for startPoint, endPoint, and projectKey
                 if (ath == null) {
+                    // TODO: add trace logging
                     activeTim.setStartPoint(activeTimDb.getStartPoint());
                     activeTim.setEndPoint(activeTimDb.getEndPoint());
                     activeTim.setProjectKey(activeTimDb.getProjectKey());
-                }
+                } // TODO: add logging for else case
                 activeTim.setActiveTimId(activeTimDb.getActiveTimId());
                 activeTimService.updateActiveTim(activeTim);
             }
@@ -333,6 +348,7 @@ public class TimService extends BaseService {
 
         // remove active_tim_holding now that we've saved its values
         if (ath != null) {
+            // TODO: add trace logging
             activeTimHoldingService.deleteActiveTimHolding(ath.getActiveTimHoldingId());
         }
     }
@@ -589,6 +605,7 @@ public class TimService extends BaseService {
             preparedStatement.setLong(2, timId);
             return dbInteractions.updateOrDelete(preparedStatement);
         } catch (Exception ex) {
+            // TODO: add logging
             return false;
         }
     }
@@ -596,6 +613,7 @@ public class TimService extends BaseService {
     public ActiveTim setActiveTimByRegionName(String regionName) {
 
         if (StringUtils.isBlank(regionName) || StringUtils.isEmpty(regionName)) {
+            // TODO: add logging
             return null;
         }
 
@@ -644,6 +662,7 @@ public class TimService extends BaseService {
                 activeTim.setPk(pk);
             } catch (NumberFormatException ex) {
                 // the pk won't get set here
+                // TODO: add trace logging
             }
         }
 

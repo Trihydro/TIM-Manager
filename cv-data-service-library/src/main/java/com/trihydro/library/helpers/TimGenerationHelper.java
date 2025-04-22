@@ -846,13 +846,9 @@ public class TimGenerationHelper {
 
         // DataFrame
         DataFrame df = new DataFrame();
-        df.setNotUsed(aTim.getNotUsed());
         df.setFrameType(aTim.getFrameType());
         df.setMsgId(msgId);
         df.setPriority(5);// 0-7, 0 being least important, 7 being most
-        df.setNotUsed1(aTim.getNotUsed1());
-        df.setNotUsed3(aTim.getNotUsed3());
-        df.setNotUsed2(aTim.getNotUsed2());
         if (aTim.getDfContent() != null) {
             df.setContent(aTim.getDfContent().getStringValue());
         }

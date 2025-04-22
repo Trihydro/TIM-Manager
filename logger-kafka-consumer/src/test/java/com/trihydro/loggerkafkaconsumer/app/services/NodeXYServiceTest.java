@@ -43,11 +43,11 @@ public class NodeXYServiceTest extends TestBase<NodeXYService> {
         verify(mockSqlNullHandler).setStringOrNull(mockPreparedStatement, 1, nodeXY.getDelta());// DELTA
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 2, nodeXY.getNodeLat());// NODE_LAT
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 3, nodeXY.getNodeLong());// NODE_LONG
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, nodeXY.getX());// X
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 5, nodeXY.getY());// Y
-        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 6, nodeXY.getAttributes().getdWidth());// ATTRIBUTES_DWIDTH
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 4, nodeXY.getXpos());// X
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 5, nodeXY.getYpos());// Y
+        verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 6, nodeXY.getAttributes().getDwidth());// ATTRIBUTES_DWIDTH
         verify(mockSqlNullHandler).setBigDecimalOrNull(mockPreparedStatement, 7,
-                nodeXY.getAttributes().getdElevation());// ATTRIBUTES_DELEVATION
+                nodeXY.getAttributes().getDelevation());// ATTRIBUTES_DELEVATION
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }

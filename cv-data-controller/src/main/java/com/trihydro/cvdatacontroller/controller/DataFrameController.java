@@ -14,9 +14,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.trihydro.library.helpers.SQLNullHandler;
-import com.trihydro.library.tables.TimDbTables;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.trihydro.library.helpers.SQLNullHandler;
+import com.trihydro.library.tables.TimDbTables;
 
 import springfox.documentation.annotations.ApiIgnore;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
@@ -111,8 +111,6 @@ public class DataFrameController extends BaseController {
 			for (String col : timDbTables.getDataFrameTable()) {
 				if (col.equals("TIM_ID")) {
 					sqlNullHandler.setLongOrNull(preparedStatement, fieldNum, timId);
-				} else if (col.equals("SSP_TIM_RIGHTS")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed());
 				} else if (col.equals("FRAME_TYPE")) {
 					Integer ordinal = null;
 					if (dFrame.getFrameType() != null) {
@@ -123,12 +121,6 @@ public class DataFrameController extends BaseController {
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getDurationTime());
 				} else if (col.equals("PRIORITY")) {
 					sqlNullHandler.setIntegerOrNull(preparedStatement, fieldNum, dFrame.getPriority());
-				} else if (col.equals("SSP_LOCATION_RIGHTS")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed1());
-				} else if (col.equals("SSP_MSG_TYPES")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed3());
-				} else if (col.equals("SSP_MSG_CONTENT")) {
-					sqlNullHandler.setShortOrNull(preparedStatement, fieldNum, dFrame.getNotUsed2());
 				} else if (col.equals("CONTENT")) {
 					sqlNullHandler.setStringOrNull(preparedStatement, fieldNum, dFrame.getContent());
 				} else if (col.equals("URL")) {

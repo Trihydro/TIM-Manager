@@ -22,7 +22,7 @@
         "urlB": "null",
         "dataframes": [
           {
-            "notUsed": 1,
+            "doNotUse1": 0,
             "frameType": "advisory",
             "msgId": {
               "furtherInfoID": "CDEF"
@@ -30,7 +30,7 @@
             "startDateTime": "2018-03-15T21:18:46.719-07:00",
             "durationTime": 32000,
             "priority": 5,
-            "notUsed1": 1,
+            "doNotUse2": 0,
             "regions": [
               {
                 "name": "westbound_I80_370.0_365.0_RSU-10.145.1.100_VSL",
@@ -179,8 +179,8 @@
                 }
               }
             ],
-            "notUsed3": 0,
-            "notUsed2": 1,
+            "doNotUse4": 0,
+            "doNotUse3": 0,
             "content": "Advisory",
             "items": [
               "268",

@@ -23,7 +23,7 @@ services:
       KAFKA_CFG_LOG_RETENTION_HOURS: 2
     logging:
       options:
-        max-size: "10m"  
+        max-size: "10m"
         max-file: "5"
 
   kafka_init:
@@ -33,10 +33,10 @@ services:
         condition: service_started
     volumes:
       - ./docker-scripts/kafka/kafka_init.sh:/kafka_init.sh
-    entrypoint: ["/bin/sh", "kafka_init.sh"]
-    
+    entrypoint: [ "/bin/sh", "kafka_init.sh" ]
+
   ode:
-    image: usdotjpoode/jpo-ode:2024-q2
+    image: usdotjpoode/jpo-ode:2025-q1
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -52,13 +52,28 @@ services:
       - "6666:6666/udp"
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
-      ZK: ${DOCKER_HOST_IP}:2181
+      ODE_KAFKA_BROKERS: ${DOCKER_HOST_IP}:9092
       ODE_SECURITY_SVCS_SIGNATURE_URI: http://notused
       ODE_RSU_USERNAME: testusername
       ODE_RSU_PASSWORD: testpassword
       DATA_SIGNING_ENABLED_RSU: false
       DATA_SIGNING_ENABLED_SDW: false
       DEFAULT_SNMP_PROTOCOL: NTCIP1218
+      KAFKA_TYPE: local
+      CONFLUENT_KEY: notused
+      CONFLUENT_SECRET: notused
+      KAFKA_LINGER_MS: 1
+      KAFKA_ACKS: all
+      KAFKA_RETRIES: 0
+      KAFKA_BATCH_SIZE: 16384
+      KAFKA_BUFFER_MEMORY: 33554432
+      KAFKA_COMPRESSION_TYPE: zstd
+      KAFKA_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      KAFKA_VALUE_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      KAFKA_PARTITIONER_CLASS: org.apache.kafka.clients.producer.internals.DefaultPartitioner
+      ODE_TIM_INGEST_MONITORING_ENABLED: false
+      ODE_TIM_INGEST_MONITORING_INTERVAL: 10000
+
     depends_on:
       - kafka
     volumes:
@@ -68,15 +83,15 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
-    
+
   adm:
-    image: usdotjpoode/asn1_codec:2024-q2
+    image: usdotjpoode/asn1_codec:2025-q1
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       ACM_CONFIG_FILE: adm.properties
       ACM_LOG_TO_CONSOLE: "true"
       ACM_LOG_TO_FILE: "false"
-      ACM_LOG_LEVEL: ERROR
+      ACM_LOG_LEVEL: ${ACM_LOG_LEVEL}
     depends_on:
       - kafka
     volumes:
@@ -88,13 +103,13 @@ services:
     restart: on-failure
   
   aem:
-    image: usdotjpoode/asn1_codec:2024-q2
+    image: usdotjpoode/asn1_codec:2025-q1
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       ACM_CONFIG_FILE: aem.properties
       ACM_LOG_TO_CONSOLE: "true"
       ACM_LOG_TO_FILE: "false"
-      ACM_LOG_LEVEL: ERROR
+      ACM_LOG_LEVEL: ${ACM_LOG_LEVEL}
     depends_on:
       - kafka
     volumes:
@@ -107,7 +122,7 @@ services:
 
   # Note: the SDX does not accept unsigned data, so this is commented out for now
   # sdw_depositor:
-  #   image: usdotjpoode/jpo-sdw-depositor:2024-q2
+  #   image: usdotjpoode/jpo-sdw-depositor:2025-q1
   #   environment:
   #     DOCKER_HOST_IP: ${DOCKER_HOST_IP}
   #     SDW_EMAIL_LIST: test@gmail.com
@@ -154,27 +169,6 @@ services:
         max-size: '10m'
   # end of external dependencies ----------------------------------------------
 
-  # internal dependencies ------------------------------------------------------
-  milepost-graph-db:
-    build: ../milepost-graph-db
-    restart: always
-    ports:
-      - "6474:7474"
-      - "6473:7473"
-      - "6687:7687"
-    volumes:
-      - ../milepost-graph-db/neo-data/plugins:/var/lib/neo4j/plugins
-      - ../milepost-graph-db/neo-data/import:/var/lib/neo4j/import
-      - ../milepost-graph-db/neo-data/conf:/var/lib/neo4j/conf
-      - ../milepost-graph-db/neo-data/data:/var/lib/neo4j/data
-    environment:
-      NEO4J_AUTH: none
-    logging:
-      options:
-        max-size: "20m"
-        max-file: "3"
-  # end of internal dependencies ------------------------------------------------
-
   # timm apps --------------------------------------------------------------
   cv-data-controller:
     build: ../cv-data-controller
@@ -190,12 +184,13 @@ services:
       CONFIG_CONNECTION_TIMEOUT: 300000
       CONFIG_ODE_URL: http://ode:8080
       CONFIG_ENV: local
-      SPRING_DATA_NEO4J_URI: bolt://milepost-graph-db:7687
+      SPRING_DATA_NEO4J_URI: ${NEO4J_URI}
       CONFIG_ALERT_ADDRESSES: test@gmail.com
       CONFIG_FROM_EMAIL: test@gmail.com
       CONFIG_ENVIRONMENT_NAME: local
       CONFIG_MAIL_HOST: 172.0.0.1
       CONFIG_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -247,6 +242,7 @@ services:
       CONFIG_SNMP_AUTH_PASSPHRASE: testpassword
       CONFIG_SNMP_AUTH_PROTOCOL: SHA
       CONFIG_SNMP_SECURITY_LEVEL: authNoPriv
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -319,6 +315,7 @@ services:
       CV_REST_SERVICE: http://cv-data-controller:8888
       PRODUCER_TOPIC: topic.OracleDataLogger
       ENV: local
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -362,7 +359,7 @@ services:
       CONFIG_DEFAULT_LANE_WIDTH: 50
       CONFIG_RSU_ROUTES: ${RSU_ROUTES}
       CONFIG_POINT_INCIDENT_BUFFER_MILES: 1
-      CRON_EXPRESSION: "0 0 * * * ?"
+      CRON_EXPRESSION: ${REFRESH_CRON_EXPRESSION}
       CONFIG_ENV: local
       CONFIG_ALERT_ADDRESSES: test@gmail.com
       CONFIG_FROM_EMAIL: test@gmail.com
@@ -389,6 +386,7 @@ services:
       DEPOSIT_GROUP: certExpirationGroup
       CV_REST_SERVICE: http://cv-data-controller:8888
       PRODUCER_TOPIC: topic.OracleDataLogger
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -411,6 +409,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -433,6 +432,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -455,6 +455,7 @@ services:
       MONGOLOGGER_ENVIRONMENT_NAME: local
       MONGOLOGGER_MAIL_HOST: 172.0.0.1
       MONGOLOGGER_MAIL_PORT: 123
+      LOGGING_LEVEL_COM_TRIHYDRO: ${LOGGING_LEVEL_COM_TRIHYDRO}
     logging:
       options:
         max-size: "20m"
@@ -464,7 +465,7 @@ services:
 # volumes ---------------------------------------------------------------------
 volumes:
   kafka:
-    {}
+    { }
   pgdb:
     driver: local
   mongodb_data_container:

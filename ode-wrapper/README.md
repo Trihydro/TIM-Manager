@@ -110,21 +110,22 @@ You may configure these values in `ode-wrapper/src/main/resources/application.pr
 
 **IMPORTANT** When using the env file method, you must You must rename or duplicate the `sample.env` file to `.env`. If using the application.properties method, you must pass in the name of the environment to use with the `--spring.profiles.active` parameter.
 
-| Environment Variable | Variable name in `sample.env` | Property name in `application.properties` | Description                               | Example Value                                                  |
-| -------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| SERVER_PORT          | WRAPPER_SERVER_PORT            | server.port                               | Server port to run on                     | 7777                                                           |
-| CONFIG_ODE_URL       | WRAPPER_CONFIG_ODE_URL         | config.odeUrl                             | URL pointing to the ODE                   | https://example.com:8443                                |
-| CONFIG_DB_URL        | WRAPPER_CONFIG_DB_URL           | config.dbUrl                              | Database URL                              | jdbc:postgresql://example.com:5432/dbname                        |
-| CONFIG_DB_USERNAME   | WRAPPER_CONFIG_DB_USERNAME      | config.dbUsername                         | Database username                         | dbuser                                                         |
-| CONFIG_DB_PASSWORD   | WRAPPER_CONFIG_DB_PASSWORD      | config.dbPassword                         | Password for database user                | dbpassword                                                     |
-| CONFIG_MAXIMUM_POOL_SIZE | WRAPPER_CONFIG_MAXIMUM_POOL_SIZE | config.maximumPoolSize                  | Number of threads in ThreadPool           | 7                                                              |
-| CONFIG_CONNECTION_TIMEOUT | WRAPPER_CONFIG_CONNECTION_TIMEOUT | config.connectionTimeout               | Connection timeout in milliseconds        | 10000                                                          |
-| CONFIG_ENV           | WRAPPER_CONFIG_ENV              | config.env                                | Configuration environment                 | dev                                                            |
-| CONFIG_SDW_TTL       | WRAPPER_CONFIG_SDW_TTL          | config.sdwTtl                             | SDW time to live default                  | oneday                                                         |
-| CONFIG_SDW_REST_URL  | SDW_REST_URL                    | config.sdwRestUrl                         | REST endpoint for SDX                     | https://sdx-endpoint.com                           |
-| CONFIG_SDW_API_KEY   | SDW_API_KEY                     | config.sdwApiKey                          | API Key for accessing SDX                 | asdf                                                           |
-| CONFIG_ALERT_ADDRESSES | WRAPPER_CONFIG_ALERT_ADDRESSES | config.alertAddresses                    | List of email addresses to send alerts to | user@example.com,user2@example.com                    |
-| CONFIG_FROM_EMAIL    | WRAPPER_CONFIG_FROM_EMAIL       | config.fromEmail                          | Email to send alerts from                 | support@example.com                                           |
+| Environment Variable | Variable name in `sample.env` | Property name in `application.properties` | Description                               | Example Value                                                 |
+| -------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
+| SERVER_PORT          | WRAPPER_SERVER_PORT            | server.port                               | Server port to run on                     | 7777                                                          |
+| CONFIG_ODE_URL       | WRAPPER_CONFIG_ODE_URL         | config.odeUrl                             | URL pointing to the ODE                   | https://example.com:8443                               |
+| CONFIG_DB_URL        | WRAPPER_CONFIG_DB_URL           | config.dbUrl                              | Database URL                              | jdbc:postgresql://example.com:5432/dbname                       |
+| CONFIG_DB_USERNAME   | WRAPPER_CONFIG_DB_USERNAME      | config.dbUsername                         | Database username                         | dbuser                                                        |
+| CONFIG_DB_PASSWORD   | WRAPPER_CONFIG_DB_PASSWORD      | config.dbPassword                         | Password for database user                | dbpassword                                                    |
+| CONFIG_MAXIMUM_POOL_SIZE | WRAPPER_CONFIG_MAXIMUM_POOL_SIZE | config.maximumPoolSize                  | Number of threads in ThreadPool           | 7                                                             |
+| CONFIG_CONNECTION_TIMEOUT | WRAPPER_CONFIG_CONNECTION_TIMEOUT | config.connectionTimeout               | Connection timeout in milliseconds        | 10000                                                         |
+| CONFIG_ENV           | WRAPPER_CONFIG_ENV              | config.env                                | Configuration environment                 | dev                                                           |
+| CONFIG_DOT_GNIS_ID   | WRAPPER_CONFIG_DOT_GNIS_ID      | config.dotGnisId                          | GNIS ID of the DOT used for the packetID  | CDOT: 1B2843, UDOT: 163775, WYDOT: 1B285F                     |                  
+| CONFIG_SDW_TTL       | WRAPPER_CONFIG_SDW_TTL          | config.sdwTtl                             | SDW time to live default                  | oneday                                                        |
+| CONFIG_SDW_REST_URL  | SDW_REST_URL                    | config.sdwRestUrl                         | REST endpoint for SDX                     | https://sdx-endpoint.com                          |
+| CONFIG_SDW_API_KEY   | SDW_API_KEY                     | config.sdwApiKey                          | API Key for accessing SDX                 | asdf                                                          |
+| CONFIG_ALERT_ADDRESSES | WRAPPER_CONFIG_ALERT_ADDRESSES | config.alertAddresses                    | List of email addresses to send alerts to | user@example.com,user2@example.com                   |
+| CONFIG_FROM_EMAIL    | WRAPPER_CONFIG_FROM_EMAIL       | config.fromEmail                          | Email to send alerts from                 | support@example.com                                          |
 | CONFIG_MAIL_HOST | MAIL_HOST | config.mailHost | IP of mail host | example.com |
 | CONFIG_MAIL_PORT | MAIL_PORT | config.mailPort | Port for mail host | 25 |
 | CONFIG_ENVIRONMENT_NAME | ENVIRONMENT_NAME | config.environmentName | Name of environment (for email subject) | DEV |

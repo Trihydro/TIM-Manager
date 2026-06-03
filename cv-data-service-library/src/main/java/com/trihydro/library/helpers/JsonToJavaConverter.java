@@ -256,16 +256,16 @@ public class JsonToJavaConverter {
                 dataFrame.setContent(ContentEnum.advisory.getStringValue());
             } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.speedLimit.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
             } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.exitService.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.exitService.getStringValue());
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
             } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.genericSign.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.genericSign.getStringValue());
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
             } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
                 sequenceArrNode = contentNode.get(ContentEnum.workZone.getStringValue()).get("SEQUENCE");
-                dataFrame.setContent(ContentEnum.workZone.getStringValue());
+                dataFrame.setContent(ContentEnum.advisory.getStringValue());
             }
 
             LocalDate now = LocalDate.now();
@@ -475,16 +475,16 @@ public class JsonToJavaConverter {
                     dataFrame.setContent(ContentEnum.advisory.getStringValue());
                 } else if (contentNode.has(ContentEnum.speedLimit.getStringValue())) {
                     sequenceArrNode = contentNode.get("speedLimit");
-                    dataFrame.setContent(ContentEnum.speedLimit.getStringValue());
+                    dataFrame.setContent(ContentEnum.advisory.getStringValue());
                 } else if (contentNode.has(ContentEnum.exitService.getStringValue())) {
                     sequenceArrNode = contentNode.get("exitService");
-                    dataFrame.setContent(ContentEnum.exitService.getStringValue());
+                    dataFrame.setContent(ContentEnum.advisory.getStringValue());
                 } else if (contentNode.has(ContentEnum.genericSign.getStringValue())) {
                     sequenceArrNode = contentNode.get("genericSign");
-                    dataFrame.setContent(ContentEnum.genericSign.getStringValue());
+                    dataFrame.setContent(ContentEnum.advisory.getStringValue());
                 } else if (contentNode.has(ContentEnum.workZone.getStringValue())) {
                     sequenceArrNode = contentNode.get("workZone");
-                    dataFrame.setContent(ContentEnum.workZone.getStringValue());
+                    dataFrame.setContent(ContentEnum.advisory.getStringValue());
                 }
 
                 List<String> itemsList = new ArrayList<>();

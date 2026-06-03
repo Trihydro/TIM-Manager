@@ -29,7 +29,6 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.Milepost;
@@ -113,11 +112,11 @@ public class WydotTimService {
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public WydotTravelerInputData createTim(WydotTim wydotTim, String timTypeStr, String startDateTime,
-            String endDateTime, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
+            String endDateTime, TravelerInfoType frameType, List<Milepost> allMileposts,
             List<Milepost> reducedMileposts, Milepost anchor) {
 
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps, content, frameType,
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps, frameType,
                 allMileposts, reducedMileposts, anchor);
 
         if (timToSend == null) {
@@ -246,7 +245,7 @@ public class WydotTimService {
                 wydotTim.getRoute());
 
         // if no RSUs found
-        if (rsus.size() == 0) {
+        if (rsus.isEmpty()) {
             utility.logWithDate("No RSUs found to place TIM on, returning");
             return;
         }
@@ -381,7 +380,7 @@ public class WydotTimService {
             List<TimRsu> timRsus = timRsuService.getTimRsusByTimId(activeTim.getTimId());
             // get full RSU
 
-            if (timRsus.size() > 0) {
+            if (!timRsus.isEmpty()) {
                 for (TimRsu timRsu : timRsus) {
                     rsu = getRsu(timRsu.getRsuId());
                     // delete tim off rsu
@@ -399,7 +398,7 @@ public class WydotTimService {
             }
         }
 
-        if (satTims != null && satTims.size() > 0) {
+        if (satTims != null && !satTims.isEmpty()) {
             // Get the sat_record_id values and active_tim_id values
             List<String> satRecordIds = satTims.stream().map(ActiveTim::getSatRecordId).collect(Collectors.toList());
             List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());

@@ -945,6 +945,6 @@ public class WydotTimServiceTest {
         Integer[] result = uut.setBufferItisCodes(action);
 
         // Assert
-        Assertions.assertEquals(null, result);
+        Assertions.assertNull(result);
     }
 }

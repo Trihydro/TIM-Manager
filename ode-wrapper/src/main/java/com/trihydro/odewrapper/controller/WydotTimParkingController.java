@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
-import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -93,18 +92,14 @@ public class WydotTimParkingController extends WydotTimBaseController {
     public Collection<ActiveTim> getParkingTims() {
 
         // clear TIM
-        List<ActiveTim> activeTims = wydotTimService.selectTimsByType("P");
-
-        return activeTims;
+        return wydotTimService.selectTimsByType("P");
     }
 
     @RequestMapping(value = "/parking-tim/{clientId}", method = RequestMethod.GET, headers = "Accept=application/json")
     public Collection<ActiveTim> getParkingTimById(@PathVariable String clientId) {
 
         // clear TIM
-        List<ActiveTim> activeTims = wydotTimService.selectTimByClientId("P", clientId);
-
-        return activeTims;
+        return wydotTimService.selectTimByClientId("P", clientId);
     }
 
     @RequestMapping(value = "/parking-tim/itis-codes/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -140,8 +135,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
             public void run() {
                 var startTime = getStartTime();
                 for (WydotTimParking wydotTim : wydotTims) {
-                    processRequest(wydotTim, getTimType(type), startTime, null, null, ContentEnum.exitService,
-                            TravelerInfoType.advisory);
+                    processRequest(wydotTim, getTimType(type), startTime, null, null, ContentEnum.exitService);
                 }
             }
         }).start();

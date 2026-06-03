@@ -59,7 +59,7 @@ public class JsonToJavaConverter {
             // check for null rxSource for Distress Notifications
             if (receivedMessageDetailsNode != null) {
                 String rxSource = mapper.treeToValue(receivedMessageDetailsNode.get("rxSource"), String.class);
-                if (rxSource.equals("")) {
+                if (rxSource.isEmpty()) {
                     ((ObjectNode) receivedMessageDetailsNode).remove("rxSource");
                     ((ObjectNode) metaDataNode).replace("receivedMessageDetails", receivedMessageDetailsNode);
                 }
@@ -463,7 +463,7 @@ public class JsonToJavaConverter {
             JsonNode timeStampNode = timNode.get("timeStamp");
             if (timeStampNode != null) {
                 LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timeStampNode.asInt(), ChronoUnit.MINUTES);
-                tim.setTimeStamp(timeStampDate.toString() + "Z");
+                tim.setTimeStamp(timeStampDate + "Z");
             }
 
             JsonNode travelerDataFrameArray = timNode.findValue("dataFrames");
@@ -533,9 +533,10 @@ public class JsonToJavaConverter {
 
                 LocalDateTime startDate = firstDay.atStartOfDay().plus(startTimeNode.asInt(), ChronoUnit.MINUTES);
 
-                dataFrame.setStartDateTime(startDate.toString() + "Z");
+                dataFrame.setStartDateTime(startDate + "Z");
                 dataFrame.setDurationTime(durationNode.asInt());
                 dataFrame.setPriority(priorityNode.asInt());
+                dataFrame.setFrameType(TravelerInfoType.roadSignage);
 
                 String[] items = new String[itemsList.size()];
                 items = itemsList.toArray(items);

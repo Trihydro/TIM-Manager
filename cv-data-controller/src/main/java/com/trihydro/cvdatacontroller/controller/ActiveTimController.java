@@ -109,8 +109,8 @@ public class ActiveTimController extends BaseController {
 				else {
                     log.warn("Could not set frame type from value {} for active tim id {}. Assuming Advisory.", frameTypeValue,
                         activeTim.getActiveTimId());
-					// assume advisory
-					activeTim.setFrameType(TravelerInfoType.advisory);
+					// assume roadSignage
+					activeTim.setFrameType(TravelerInfoType.roadSignage);
 				}
 
                 // set dataFrame content. it's required for the ODE, so if we didn't record it,
@@ -165,8 +165,8 @@ public class ActiveTimController extends BaseController {
                 }
 				else {
                     log.warn("Could not set frame type from value {} for active tim id {}. Assuming Advisory.", frameTypeValue, activeTimId);
-					// assume advisory
-					activeTim.setFrameType(TravelerInfoType.advisory);
+					// assume roadSignage
+					activeTim.setFrameType(TravelerInfoType.roadSignage);
 				}
 
                 // set dataFrame content. it's required for the ODE, so if we didn't record it,

@@ -52,7 +52,6 @@ import us.dot.its.jpo.ode.plugin.SnmpProtocol;
 import us.dot.its.jpo.ode.plugin.j2735.OdeGeoRegion;
 import us.dot.its.jpo.ode.plugin.j2735.OdePosition3D;
 import us.dot.its.jpo.ode.plugin.j2735.OdeTravelerInformationMessage.DataFrame;
-import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @Component
 public class WydotTimService {
@@ -113,11 +112,11 @@ public class WydotTimService {
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public WydotTravelerInputData createTim(WydotTim wydotTim, String timTypeStr, String startDateTime,
-            String endDateTime, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
+            String endDateTime, ContentEnum content, List<Milepost> allMileposts,
             List<Milepost> reducedMileposts, Milepost anchor) {
 
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps, content, frameType,
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps, content,
                 allMileposts, reducedMileposts, anchor);
 
         if (timToSend == null) {

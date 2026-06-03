@@ -236,10 +236,10 @@ public class WydotTimServiceTest {
         List<Milepost> reducedMileposts = new ArrayList<>();
         Milepost anchor = new Milepost();
 
-        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(null);
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any())).thenReturn(null);
 
         // Act
-        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, allMileposts, reducedMileposts, anchor);
 
         // Assert
         assertNull(result);
@@ -252,17 +252,16 @@ public class WydotTimServiceTest {
         String startDateTime = "2023-01-01T00:00:00.000Z";
         String endDateTime = "2023-01-01T01:00:00.000Z";
         ContentEnum content = ContentEnum.workZone;
-        TravelerInfoType frameType = TravelerInfoType.advisory;
         List<Milepost> allMileposts = new ArrayList<>();
         List<Milepost> reducedMileposts = new ArrayList<>();
         Milepost anchor = new Milepost();
 
         WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
 
-        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
 
         // Act
-        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, allMileposts, reducedMileposts, anchor);
 
         // Assert
         assertEquals(startDateTime, result.getTim().getDataframes()[0].getStartDateTime());
@@ -275,18 +274,17 @@ public class WydotTimServiceTest {
         String startDateTime = "2023-01-01T00:00:00.000Z";
         String endDateTime = "2023-01-01T01:00:00.000Z";
         ContentEnum content = ContentEnum.workZone;
-        TravelerInfoType frameType = TravelerInfoType.advisory;
         List<Milepost> allMileposts = new ArrayList<>();
         List<Milepost> reducedMileposts = new ArrayList<>();
         Milepost anchor = new Milepost();
 
         WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
 
-        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
         when(mockUtility.getMinutesDurationBetweenTwoDates(anyString(), anyString())).thenReturn(60);
 
         // Act
-        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, allMileposts, reducedMileposts, anchor);
 
         // Assert
         assertEquals(60, result.getTim().getDataframes()[0].getDurationTime());
@@ -306,10 +304,10 @@ public class WydotTimServiceTest {
 
         WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
 
-        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
 
         // Act
-        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, allMileposts, reducedMileposts, anchor);
 
         // Assert
         assertEquals(120, result.getTim().getDataframes()[0].getDurationTime());
@@ -322,17 +320,16 @@ public class WydotTimServiceTest {
         String startDateTime = "2023-01-01T00:00:00.000Z";
         String endDateTime = "2023-01-01T01:00:00.000Z";
         ContentEnum content = ContentEnum.workZone;
-        TravelerInfoType frameType = TravelerInfoType.advisory;
         List<Milepost> allMileposts = new ArrayList<>();
         List<Milepost> reducedMileposts = new ArrayList<>();
         Milepost anchor = new Milepost();
 
         WydotTravelerInputData timToSend = getMockWydotTravelerInputDataWithDataFrame();
 
-        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
+        when(mockCreateBaseTimUtil.buildTim(any(), any(), any(), any(), any(), any())).thenReturn(timToSend);
 
         // Act
-        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, frameType, allMileposts, reducedMileposts, anchor);
+        WydotTravelerInputData result = uut.createTim(new WydotTim(), timTypeStr, startDateTime, endDateTime, content, allMileposts, reducedMileposts, anchor);
 
         // Assert
         assertNotNull(result.getTim().getPacketID());

@@ -114,7 +114,7 @@ public class WydotTimService {
 
     public WydotTravelerInputData createTim(WydotTim wydotTim, String timTypeStr, String startDateTime,
             String endDateTime, ContentEnum content, TravelerInfoType frameType, List<Milepost> allMileposts,
-            List<Milepost> reducedMileposts, Milepost anchor) {
+            List<Milepost> reducedMileposts, Milepost anchor, String dotGnisId) {
 
         // build base TIM
         WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps, content, frameType,
@@ -147,13 +147,17 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].setDurationTime(120);
         }
 
-        // set PacketId to a random 18 character hex value
+        // Set PacketId as an 18-character hex string: DOT GNIS ID + random hex suffix
         Random rand = new Random();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
+        if (dotGnisId.equals("000000")) {
+            throw new IllegalStateException("DOT GNIS ID is set to default value of 000000. This is not a valid GNIS ID and should be changed in the configuration.");
+        }
+        sb.append(dotGnisId);
         while (sb.length() < 18) {
             sb.append(Integer.toHexString(rand.nextInt()));
         }
-        timToSend.getTim().setPacketID(sb.toString().substring(0, 18).toUpperCase());
+        timToSend.getTim().setPacketID(sb.substring(0, 18).toUpperCase());
 
         return timToSend;
     }

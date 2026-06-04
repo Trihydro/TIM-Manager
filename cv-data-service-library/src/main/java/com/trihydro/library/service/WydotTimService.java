@@ -628,9 +628,9 @@ public class WydotTimService {
         // set TIM packetId
         timToSend.getTim().setPacketID(tim.getPacketID());
 
-        // roll msgCnt over to 1 if at 127
+        // roll msgCnt over to 0 if at 127
         if (tim.getMsgCnt() == 127)
-            timToSend.getTim().setMsgCnt(1);
+            timToSend.getTim().setMsgCnt(0);
         // else increment msgCnt
         else
             timToSend.getTim().setMsgCnt(tim.getMsgCnt() + 1);

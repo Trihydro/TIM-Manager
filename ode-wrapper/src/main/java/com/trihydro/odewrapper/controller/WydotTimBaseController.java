@@ -737,7 +737,7 @@ public abstract class WydotTimBaseController {
         // create TIM
         WydotTravelerInputData timToSend =
             wydotTimService.createTim(wydotTim, timType.getType(), startDateTime, endDateTime,
-                frameType, allMileposts, reducedMileposts, anchor);
+                frameType, allMileposts, reducedMileposts, anchor, configuration.getDotGnisId());
 
         if (timToSend == null) {
             return;

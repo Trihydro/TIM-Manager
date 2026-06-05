@@ -517,16 +517,6 @@ public class JsonToJavaConverter {
                     itemsList.add(item);
                 }
 
-                // TravelerInfoType.valueOf();
-                JsonNode frameTypeNode = travelerDataFrame.get("frameType");
-                if (frameTypeNode != null && frameTypeNode.fieldNames().hasNext()) {
-                    TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
-                    dataFrame.setFrameType(frameType);
-                } else {
-                    log.warn("frameType not found in TravelerDataFrame when converting TMC TIM. Defaulting to 'advisory'");
-                    dataFrame.setFrameType(TravelerInfoType.advisory);
-                }
-
                 JsonNode startTimeNode = travelerDataFrame.get("startTime");
                 JsonNode durationNode = travelerDataFrame.get("durationTime");
                 JsonNode priorityNode = travelerDataFrame.get("priority");

@@ -252,7 +252,7 @@ public class JsonToJavaConverterTest {
         // Assert
         Assertions.assertNotNull(odeTimPayloadTest);
         Assertions.assertTrue(getTim(odeTimPayloadTest).getDataframes()[0].getItems().length > 0);
-        Assertions.assertEquals("speedLimit", getTim(odeTimPayloadTest).getDataframes()[0].getContent());
+        Assertions.assertEquals("advisory", getTim(odeTimPayloadTest).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "13609", "268", "12554", "8720" },
                 getTim(odeTimPayloadTest).getDataframes()[0].getItems());
     }
@@ -388,7 +388,7 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_vsl);
-        Assertions.assertEquals("speedLimit", getTim(tim_vsl).getDataframes()[0].getContent());
+        Assertions.assertEquals("advisory", getTim(tim_vsl).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "268", "12604", "8720" },
                 getTim(tim_vsl).getDataframes()[0].getItems());
         
@@ -406,7 +406,7 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_vsl);
-        Assertions.assertEquals("speedLimit", getTim(tim_vsl).getDataframes()[0].getContent());
+        Assertions.assertEquals("advisory", getTim(tim_vsl).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "268", "12604", "8720" },
                 getTim(tim_vsl).getDataframes()[0].getItems());
         
@@ -424,7 +424,7 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_parking);
-        Assertions.assertEquals("exitService", getTim(tim_parking).getDataframes()[0].getContent());
+        Assertions.assertEquals("advisory", getTim(tim_parking).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "4104", "11794", "345" },
                 getTim(tim_parking).getDataframes()[0].getItems());
         
@@ -442,7 +442,7 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_parking);
-        Assertions.assertEquals("exitService", getTim(tim_parking).getDataframes()[0].getContent());
+        Assertions.assertEquals("advisory", getTim(tim_parking).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "4104", "11794", "345" },
                 getTim(tim_parking).getDataframes()[0].getItems());
         
@@ -461,7 +461,7 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_construction);
-        Assertions.assertEquals("workZone", getTim(tim_construction).getDataframes()[0].getContent());
+        Assertions.assertEquals("advisory", getTim(tim_construction).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "1537", "12554", "8728" },
                 getTim(tim_construction).getDataframes()[0].getItems());
         
@@ -480,7 +480,7 @@ public class JsonToJavaConverterTest {
 
         // Assert
         Assertions.assertNotNull(tim_construction);
-        Assertions.assertEquals("workZone", getTim(tim_construction).getDataframes()[0].getContent());
+        Assertions.assertEquals("advisory", getTim(tim_construction).getDataframes()[0].getContent());
         Assertions.assertArrayEquals(new String[] { "1537", "12554", "8728" },
                 getTim(tim_construction).getDataframes()[0].getItems());
         

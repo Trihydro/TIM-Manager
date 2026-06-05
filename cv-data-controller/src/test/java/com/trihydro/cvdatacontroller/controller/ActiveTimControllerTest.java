@@ -57,7 +57,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetExpiringActiveTims_SUCCESS() throws SQLException {
         // Arrange
         // we only set one property to verify its returned
-        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999L);
         when(mockRs.getInt(any())).thenReturn(0);
         when(mockRs.getInt("FRAME_TYPE")).thenReturn(FrameType.TravelerInfoType.advisory.ordinal());
         String selectStatement = "SELECT atim.*, tt.type as tim_type_name, tt.description as tim_type_description";
@@ -108,8 +108,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetExpiringActiveTims_CorrectContentType() throws SQLException {
         // Arrange
         when(mockRs.getString(any())).thenReturn("");
-        when(mockRs.getString("DF_CONTENT")).thenReturn("workZone");
-        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999L);
 
         // Act
         ResponseEntity<List<TimUpdateModel>> tums = uut.GetExpiringActiveTims();
@@ -117,14 +116,14 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Assert
         Assertions.assertEquals(HttpStatus.OK, tums.getStatusCode());
         Assertions.assertEquals(1, tums.getBody().size());
-        Assertions.assertEquals(ContentEnum.workZone, tums.getBody().get(0).getDfContent());
+        Assertions.assertEquals(ContentEnum.advisory, tums.getBody().get(0).getDfContent());
     }
 
     @Test
     public void GetUpdateModelFromActiveTimId_SUCCESS() throws SQLException {
         // Arrange
         // we only set one property to verify its returned
-        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999L);
         when(mockRs.getInt(any())).thenReturn(0);
         when(mockRs.getInt("FRAME_TYPE")).thenReturn(FrameType.TravelerInfoType.roadSignage.ordinal());
 
@@ -140,10 +139,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         selectStatement += " LEFT JOIN data_frame df on atim.tim_id = df.tim_id";
         selectStatement += " LEFT JOIN region r on df.data_frame_id = r.data_frame_id";
         selectStatement += " LEFT JOIN tim_type tt ON atim.tim_type_id = tt.tim_type_id";
-        selectStatement += " WHERE atim.active_tim_id = " + 999l;
+        selectStatement += " WHERE atim.active_tim_id = " + 999L;
 
         // Act
-        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999l);
+        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999L);
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, tum.getStatusCode());
@@ -159,7 +158,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         when(mockRs.getLong("ACTIVE_TIM_ID")).thenThrow(new SQLException());
 
         // Act
-        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999l);
+        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999L);
 
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, tum.getStatusCode());
@@ -172,16 +171,15 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetUpdateModelFromActiveTimId_CorrectContentType() throws SQLException {
         // Arrange
         when(mockRs.getString(any())).thenReturn("");
-        when(mockRs.getString("DF_CONTENT")).thenReturn("workZone");
-        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999l);
+        when(mockRs.getLong("ACTIVE_TIM_ID")).thenReturn(999L);
 
         // Act
-        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999l);
+        ResponseEntity<TimUpdateModel> tum = uut.GetUpdateModelFromActiveTimId(999L);
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, tum.getStatusCode());
         Assertions.assertNotNull(tum.getBody());
-        Assertions.assertEquals(ContentEnum.workZone, tum.getBody().getDfContent());
+        Assertions.assertEquals(ContentEnum.advisory, tum.getBody().getDfContent());
     }
 
     @Test
@@ -191,7 +189,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         doReturn(false).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
 
         // Act
-        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
+        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1L, "asdf");
 
         // Assert
         Assertions.assertFalse(success.getBody(), "UpdateActiveTim_SatRecordId succeeded when it should have failed");
@@ -204,7 +202,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         doReturn(true).when(mockDbInteractions).updateOrDelete(mockPreparedStatement);
 
         // Act
-        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
+        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1L, "asdf");
 
         // Assert
         Assertions.assertTrue(success.getBody(), "UpdateActiveTim_SatRecordId failed when it should have succeeded");
@@ -216,7 +214,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         doThrow(new SQLException()).when(mockDbInteractions).getConnectionPool();
 
         // Act
-        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1l, "asdf");
+        ResponseEntity<Boolean> success = uut.updateActiveTim_SatRecordId(-1L, "asdf");
 
         // Assert
         Assertions.assertFalse(success.getBody(), "UpdateActiveTim_SatRecordId was successful during an error");
@@ -431,7 +429,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetActiveTimsByClientIdDirection_SUCCESS() throws SQLException {
         // Arrange
         String clientId = "clientId";
-        Long timTypeId = -1l;
+        Long timTypeId = -1L;
         String direction = "eastward";
         String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = " + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
@@ -465,7 +463,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetActiveTimsByClientIdDirection_FAIL() throws SQLException {
         // Arrange
         String clientId = "clientId";
-        Long timTypeId = -1l;
+        Long timTypeId = -1L;
         String direction = "eastward";
         String selectStatement = "select * from active_tim where CLIENT_ID like '" + clientId + "' and TIM_TYPE_ID = " + timTypeId;
         selectStatement += " and DIRECTION = '" + direction + "'";
@@ -536,7 +534,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetItisCodesForActiveTim_SUCCESS() throws SQLException {
         // Arrange
-        Long activeTimId = -1l;
+        Long activeTimId = -1L;
         String selectStatement = "select itis_code from active_tim ";
         selectStatement += "inner join tim on tim.tim_id = active_tim.tim_id ";
         selectStatement += "inner join data_frame on tim.tim_id = data_frame.tim_id ";
@@ -560,7 +558,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetItisCodesForActiveTim_FAIL() throws SQLException {
         // Arrange
-        Long activeTimId = -1l;
+        Long activeTimId = -1L;
         String selectStatement =
             "select itis_code from active_tim inner join tim on tim.tim_id = active_tim.tim_id inner join data_frame on tim.tim_id = data_frame.tim_id inner join data_frame_itis_code on data_frame_itis_code.data_frame_id = data_frame.data_frame_id inner join itis_code on data_frame_itis_code.itis_code_id = itis_code.itis_code_id where active_tim_id = " +
                 activeTimId + " order by data_frame_itis_code.position asc";
@@ -580,7 +578,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void DeleteActiveTim_SUCCESS() throws SQLException {
         // Arrange
-        Long activeTimId = -1l;
+        Long activeTimId = -1L;
         // Act
         ResponseEntity<Boolean> data = uut.DeleteActiveTim(activeTimId);
 
@@ -596,7 +594,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void DeleteActiveTim_FAIL() throws SQLException {
         // Arrange
-        Long activeTimId = -1l;
+        Long activeTimId = -1L;
         doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, activeTimId);
 
         // Act
@@ -624,7 +622,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         Assertions.assertTrue(data.getBody(), "Fail return on success");
         verify(mockConnection).prepareStatement("DELETE FROM ACTIVE_TIM WHERE ACTIVE_TIM_ID in (?)");
-        verify(mockPreparedStatement).setLong(1, -1l);
+        verify(mockPreparedStatement).setLong(1, -1L);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -634,7 +632,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Arrange
         List<Long> activeTimIds = new ArrayList<>();
         activeTimIds.add(Long.valueOf(-1));
-        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1l);
+        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1L);
 
         // Act
         ResponseEntity<Boolean> data = uut.DeleteActiveTimsById(activeTimIds);
@@ -653,7 +651,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         String query = "select * from active_tim where active_tim_id in (?, ?)";
 
         // Act
-        var response = uut.GetActiveTimsByIds(Arrays.asList(-1l, -2l));
+        var response = uut.GetActiveTimsByIds(Arrays.asList(-1L, -2L));
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -666,10 +664,10 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     public void GetActiveTimsByIds_FAIL() throws SQLException {
         // Arrange
         String query = "select * from active_tim where active_tim_id in (?, ?)";
-        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1l);
+        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1L);
 
         // Act
-        var response = uut.GetActiveTimsByIds(Arrays.asList(-1l, -2l));
+        var response = uut.GetActiveTimsByIds(Arrays.asList(-1L, -2L));
 
         // Assert
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -697,7 +695,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         wydotTim.setClientId("clientId");
         wydotTim.setDirection("westward");
         wydotTims.add(wydotTim);
-        Long timTypeId = -1l;
+        Long timTypeId = -1L;
         String query = "select * from active_tim where TIM_TYPE_ID = ? and ((CLIENT_ID like ? and DIRECTION = ?))";
 
         // Act
@@ -735,7 +733,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         wydotTim.setClientId("clientId");
         wydotTim.setDirection("B");
         wydotTims.add(wydotTim);
-        Long timTypeId = -1l;
+        Long timTypeId = -1L;
         String query = "select * from active_tim where TIM_TYPE_ID = ? and ((CLIENT_ID like ?))";
 
         // Act
@@ -772,7 +770,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         wydotTim.setClientId("clientId");
         wydotTim.setDirection("westward");
         wydotTims.add(wydotTim);
-        Long timTypeId = -1l;
+        Long timTypeId = -1L;
         String query = "select * from active_tim where TIM_TYPE_ID = ? and ((CLIENT_ID like ? and DIRECTION = ?))";
         doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, timTypeId);
 
@@ -790,7 +788,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetActivesTimByType_SUCCESS() throws SQLException {
         // Arrange
-        Long timTypeId = -1l;
+        Long timTypeId = -1L;
         String query = "select * from active_tim where TIM_TYPE_ID = " + timTypeId;
 
         // Act
@@ -822,7 +820,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
     @Test
     public void GetActivesTimByType_FAIL() throws SQLException {
         // Arrange
-        Long timTypeId = -1l;
+        Long timTypeId = -1L;
         String query = "select * from active_tim where TIM_TYPE_ID = " + timTypeId;
         doThrow(new SQLException()).when(mockRs).getLong("ACTIVE_TIM_ID");
 
@@ -1189,7 +1187,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         Assertions.assertEquals(HttpStatus.OK, data.getStatusCode());
         Assertions.assertTrue(data.getBody(), "Fail return on success");
         verify(mockConnection).prepareStatement("UPDATE ACTIVE_TIM SET EXPIRATION_DATE = NULL WHERE ACTIVE_TIM_ID IN (?)");
-        verify(mockPreparedStatement).setLong(1, -1l);
+        verify(mockPreparedStatement).setLong(1, -1L);
         verify(mockPreparedStatement).close();
         verify(mockConnection).close();
     }
@@ -1239,7 +1237,7 @@ public class ActiveTimControllerTest extends TestBase<ActiveTimController> {
         // Arrange
         List<Long> activeTimIds = new ArrayList<>();
         activeTimIds.add(Long.valueOf(-1));
-        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1l);
+        doThrow(new SQLException()).when(mockPreparedStatement).setLong(1, -1L);
 
         // Act
         ResponseEntity<Boolean> data = uut.ResetExpirationDate(activeTimIds);

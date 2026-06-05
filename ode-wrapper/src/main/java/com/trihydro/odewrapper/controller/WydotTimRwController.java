@@ -252,8 +252,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         new Thread(new Runnable() {
             public void run() {
                 for (WydotTimRw tim : timsToSend) {
-                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                            ContentEnum.speedLimit);
+                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
                 }
             }
         }).start();

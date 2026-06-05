@@ -29,7 +29,6 @@ import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveRsuTimQueryModel;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.ActiveTimHolding;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.EmailProps;
 import com.trihydro.library.model.Milepost;
@@ -112,11 +111,11 @@ public class WydotTimService {
     DateTimeFormatter utcformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public WydotTravelerInputData createTim(WydotTim wydotTim, String timTypeStr, String startDateTime,
-            String endDateTime, ContentEnum content, List<Milepost> allMileposts,
-            List<Milepost> reducedMileposts, Milepost anchor) {
+            String endDateTime, List<Milepost> allMileposts,
+            List<Milepost> reducedMileposts, Milepost anchor, String dotGnisId) {
 
         // build base TIM
-        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps, content,
+        WydotTravelerInputData timToSend = createBaseTimUtil.buildTim(wydotTim, genProps,
                 allMileposts, reducedMileposts, anchor);
 
         if (timToSend == null) {
@@ -146,13 +145,17 @@ public class WydotTimService {
             timToSend.getTim().getDataframes()[0].setDurationTime(120);
         }
 
-        // set PacketId to a random 18 character hex value
+        // Set PacketId as an 18-character hex string: DOT GNIS ID + random hex suffix
         Random rand = new Random();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
+        if (dotGnisId.equals("000000")) {
+            throw new IllegalStateException("DOT GNIS ID is set to default value of 000000. This is not a valid GNIS ID and should be changed in the configuration.");
+        }
+        sb.append(dotGnisId);
         while (sb.length() < 18) {
             sb.append(Integer.toHexString(rand.nextInt()));
         }
-        timToSend.getTim().setPacketID(sb.toString().substring(0, 18).toUpperCase());
+        timToSend.getTim().setPacketID(sb.substring(0, 18).toUpperCase());
 
         return timToSend;
     }
@@ -245,7 +248,7 @@ public class WydotTimService {
                 wydotTim.getRoute());
 
         // if no RSUs found
-        if (rsus.size() == 0) {
+        if (rsus.isEmpty()) {
             utility.logWithDate("No RSUs found to place TIM on, returning");
             return;
         }
@@ -380,7 +383,7 @@ public class WydotTimService {
             List<TimRsu> timRsus = timRsuService.getTimRsusByTimId(activeTim.getTimId());
             // get full RSU
 
-            if (timRsus.size() > 0) {
+            if (!timRsus.isEmpty()) {
                 for (TimRsu timRsu : timRsus) {
                     rsu = getRsu(timRsu.getRsuId());
                     // delete tim off rsu
@@ -398,7 +401,7 @@ public class WydotTimService {
             }
         }
 
-        if (satTims != null && satTims.size() > 0) {
+        if (satTims != null && !satTims.isEmpty()) {
             // Get the sat_record_id values and active_tim_id values
             List<String> satRecordIds = satTims.stream().map(ActiveTim::getSatRecordId).collect(Collectors.toList());
             List<Long> activeSatTimIds = satTims.stream().map(ActiveTim::getActiveTimId).collect(Collectors.toList());
@@ -623,9 +626,9 @@ public class WydotTimService {
         // set TIM packetId
         timToSend.getTim().setPacketID(tim.getPacketID());
 
-        // roll msgCnt over to 1 if at 127
+        // roll msgCnt over to 0 if at 127
         if (tim.getMsgCnt() == 127)
-            timToSend.getTim().setMsgCnt(1);
+            timToSend.getTim().setMsgCnt(0);
         // else increment msgCnt
         else
             timToSend.getTim().setMsgCnt(tim.getMsgCnt() + 1);

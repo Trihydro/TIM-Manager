@@ -42,14 +42,15 @@ public class CreateBaseTimUtil {
      *
      * @param wydotTim The WydotTim object containing the data for the TIM.
      * @param genProps The TimGenerationProps object containing the generation properties.
-     * @param content The ContentEnum object representing the content of the TIM.
      * @param allMileposts The list of Milepost objects representing all mileposts.
      * @param reducedMileposts The list of Milepost objects representing reduced mileposts.
      * @param anchor The Milepost object representing the anchor milepost.
      * @return The WydotTravelerInputData object containing the built TIM.
      */
-    public WydotTravelerInputData buildTim(WydotTim wydotTim, TimGenerationProps genProps, ContentEnum content,
+    public WydotTravelerInputData buildTim(WydotTim wydotTim, TimGenerationProps genProps,
             List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+
+        ContentEnum content = ContentEnum.advisory;
 
         // build TIM object with data
         WydotTravelerInputData timToSend = new WydotTravelerInputData();
@@ -196,7 +197,7 @@ public class CreateBaseTimUtil {
         region.setDirection(directionString); // heading slice
 
         // set path nodes
-        if (reducedMileposts != null && reducedMileposts.size() > 0) {
+        if (reducedMileposts != null && !reducedMileposts.isEmpty()) {
             OdeTravelerInformationMessage.NodeXY[] nodes = buildNodePathFromMileposts(reducedMileposts, anchor);
             OdeTravelerInformationMessage.DataFrame.Region.Path path = new OdeTravelerInformationMessage.DataFrame.Region.Path();
             path.setScale(0);
@@ -244,7 +245,7 @@ public class CreateBaseTimUtil {
         int timDirection = 0;
         // this is a regular tim, so we need to set the direction normally
         // path list - change later
-        if (allMileposts != null && allMileposts.size() > 0) {
+        if (allMileposts != null && !allMileposts.isEmpty()) {
             double startLat = anchorPosition.getLatitude().doubleValue();
             double startLon = anchorPosition.getLongitude().doubleValue();
             for (int j = 0; j < allMileposts.size(); j++) {

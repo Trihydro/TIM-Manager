@@ -8,7 +8,6 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
@@ -119,7 +118,7 @@ public class WydotTimIncidentController extends WydotTimBaseController {
       for (WydotTimIncident wydotTim : wydotTims) {
         // set route
         wydotTim.setRoute(wydotTim.getHighway());
-        processRequest(wydotTim, getTimType(type), startTime, null, wydotTim.getPk(), ContentEnum.advisory);
+        processRequest(wydotTim, getTimType(type), startTime, null, wydotTim.getPk());
       }
     }).start();
   }

@@ -249,11 +249,9 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     public void processRequestAsync() {
         // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                for (WydotTimRw tim : timsToSend) {
-                    processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
-                }
+        new Thread(() -> {
+            for (WydotTimRw tim : timsToSend) {
+                processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
             }
         }).start();
 

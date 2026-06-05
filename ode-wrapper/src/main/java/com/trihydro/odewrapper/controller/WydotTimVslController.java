@@ -87,12 +87,10 @@ public class WydotTimVslController extends WydotTimBaseController {
 
     public void processRequestAsync(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                var startTime = getStartTime();
-                for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null);
-                }
+        new Thread(() -> {
+            var startTime = getStartTime();
+            for (WydotTim tim : wydotTims) {
+                processRequest(tim, getTimType(type), startTime, null, null);
             }
         }).start();
     }

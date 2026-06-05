@@ -8,7 +8,6 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -62,7 +61,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
             
             timResult = validateInputBowr(wydotTimBowr);
 
-            if (timResult.getResultMessages().size() > 0) {
+            if (!timResult.getResultMessages().isEmpty()) {
                 results.add(timResult);
                 errors.add(timResult);
                 continue;
@@ -76,7 +75,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
 
         processRequestAsync(timsToSend);
         String responseMessage = gson.toJson(results);
-        if (errors.size() > 0) {
+        if (!errors.isEmpty()) {
             utility.logWithDate("Failed to send TIMs: " + gson.toJson(errors), this.getClass());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
         }
@@ -90,7 +89,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
         List<Long> existingTimIds = new ArrayList<Long>();
 
         // validate client id
-        if (clientId == null || clientId.length() == 0) {
+        if (clientId == null || clientId.isEmpty()) {
             String responseMessage = "Null or empty value for client id";
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
         }
@@ -99,7 +98,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
         var timType = getTimType(type);
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
         List<ActiveTim> existingActiveTims = activeTimService.getActiveTimsByClientIdDirection(clientId, timTypeId, null);
-        if (existingActiveTims.size() == 0) {
+        if (existingActiveTims.isEmpty()) {
             utility.logWithDate("No active TIMs found for client id: " + clientId, this.getClass());
             String responseMessage = "No active TIMs found for client id: " + clientId;
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
@@ -111,9 +110,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
         }
 
         // expire existing tims
-        if (existingTimIds.size() > 0) {
-            timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
-        }
+        timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
 
         String responseMessage = "success";
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -135,7 +132,7 @@ public class WydotTimBowrController extends WydotTimBaseController {
                     // get end time
                     String endTime = wydotTimBowr.getEndDateTime();
                     
-                    processRequest(tim, getTimType(type), startTime, endTime, null, ContentEnum.advisory,
+                    processRequest(tim, getTimType(type), startTime, endTime, null,
                             TravelerInfoType.advisory);
                 }
             }

@@ -12,7 +12,6 @@ import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Buffer;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimRwList;
 import com.trihydro.library.model.WydotTimRw;
@@ -250,24 +249,9 @@ public class WydotTimRwController extends WydotTimBaseController {
 
     public void processRequestAsync() {
         // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                for (WydotTimRw tim : timsToSend) {
-                    // check for reduce speed, itis code 7443
-                    if (tim.getItisCodes() != null && tim.getItisCodes().size() == 3
-                            && tim.getItisCodes().get(0).equals("7443")) {
-                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.speedLimit, TravelerInfoType.advisory);
-                    } else if (tim.getItisCodes() != null && tim.getItisCodes().get(0).equals("7186")) {
-                        // prepare to stop
-                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.advisory, TravelerInfoType.advisory);
-                    } else {
-                        // the rest are content=workZone
-                        processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null,
-                                ContentEnum.workZone, TravelerInfoType.advisory);
-                    }
-                }
+        new Thread(() -> {
+            for (WydotTimRw tim : timsToSend) {
+                processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null, TravelerInfoType.advisory);
             }
         }).start();
 

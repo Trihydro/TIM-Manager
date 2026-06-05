@@ -10,7 +10,6 @@ import java.util.List;
 import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -59,7 +58,7 @@ public class WydotTimCcController extends WydotTimBaseController {
         utility.logWithDate(dateFormat.format(date) + " - CHAIN CONTROL TIM", this.getClass());
 
         String post = gson.toJson(timRcList);
-        utility.logWithDate(post.toString(), this.getClass());
+        utility.logWithDate(post, this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -75,7 +74,7 @@ public class WydotTimCcController extends WydotTimBaseController {
 
             resultTim = validateInputCc(wydotTim);
 
-            if (resultTim.getResultMessages().size() > 0) {
+            if (!resultTim.getResultMessages().isEmpty()) {
                 resultList.add(resultTim);
                 continue;
             }
@@ -99,7 +98,7 @@ public class WydotTimCcController extends WydotTimBaseController {
             public void run() {
                 var startTime = getStartTime();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
+                    processRequest(tim, getTimType(type), startTime, null, null,
                             TravelerInfoType.advisory);
                 }
             }

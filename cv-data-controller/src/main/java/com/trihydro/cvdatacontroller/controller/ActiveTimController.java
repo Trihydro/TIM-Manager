@@ -113,17 +113,7 @@ public class ActiveTimController extends BaseController {
 					activeTim.setFrameType(TravelerInfoType.advisory);
 				}
 
-                // set dataFrame content. it's required for the ODE, so if we didn't record it,
-                // assume Advisory
-                String serializedContent = rs.getString("DF_CONTENT");
-                ContentEnum contentType;
-                if (serializedContent == null || serializedContent.isEmpty()) {
-                    contentType = ContentEnum.advisory;
-                } else {
-                    contentType = ContentEnum.fromString(serializedContent);
-                }
-                activeTim.setDfContent(contentType);
-
+                activeTim.setDfContent(ContentEnum.advisory);
                 activeTims.add(activeTim);
             }
         } catch (Exception e) {
@@ -169,16 +159,7 @@ public class ActiveTimController extends BaseController {
 					activeTim.setFrameType(TravelerInfoType.advisory);
 				}
 
-                // set dataFrame content. it's required for the ODE, so if we didn't record it,
-                // assume Advisory
-                String serializedContent = rs.getString("DF_CONTENT");
-                ContentEnum contentType;
-                if (serializedContent == null || serializedContent.isEmpty()) {
-                    contentType = ContentEnum.advisory;
-                } else {
-                    contentType = ContentEnum.fromString(serializedContent);
-                }
-                activeTim.setDfContent(contentType);
+                activeTim.setDfContent(ContentEnum.advisory);
             }
         } catch (Exception e) {
             log.error("Error getting active tim", e);

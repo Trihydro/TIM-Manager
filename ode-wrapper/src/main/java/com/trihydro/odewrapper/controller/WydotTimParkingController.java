@@ -12,7 +12,6 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
 import com.trihydro.library.service.TimTypeService;
@@ -60,7 +59,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
         utility.logWithDate(dateFormat.format(date) + " - Create Parking TIM", this.getClass());
         String post = gson.toJson(timParkingList);
-        utility.logWithDate(post.toString(), this.getClass());
+        utility.logWithDate(post, this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -71,7 +70,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
 
             resultTim = validateInputParking(wydotTim);
 
-            if (resultTim.getResultMessages().size() > 0) {
+            if (!resultTim.getResultMessages().isEmpty()) {
                 resultList.add(resultTim);
                 continue;
             }
@@ -140,7 +139,7 @@ public class WydotTimParkingController extends WydotTimBaseController {
             public void run() {
                 var startTime = getStartTime();
                 for (WydotTimParking wydotTim : wydotTims) {
-                    processRequest(wydotTim, getTimType(type), startTime, null, null, ContentEnum.exitService,
+                    processRequest(wydotTim, getTimType(type), startTime, null, null,
                             TravelerInfoType.advisory);
                 }
             }

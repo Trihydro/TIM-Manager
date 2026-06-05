@@ -11,7 +11,6 @@ import com.trihydro.library.helpers.MilepostReduction;
 import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
-import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.WydotTim;
 import com.trihydro.library.service.ActiveTimService;
 import com.trihydro.library.service.RestTemplateProvider;
@@ -61,7 +60,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         utility.logWithDate(dateFormat.format(date) + " - Create Update RC TIM", this.getClass());
         String post = gson.toJson(timRcList);
-        utility.logWithDate(post.toString(), this.getClass());
+        utility.logWithDate(post, this.getClass());
 
         List<ControllerResult> resultList = new ArrayList<ControllerResult>();
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
@@ -73,7 +72,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
             resultTim = validateInputRc(wydotTim);
 
-            if (resultTim.getResultMessages().size() > 0) {
+            if (!resultTim.getResultMessages().isEmpty()) {
                 resultList.add(resultTim);
                 errList.add(resultTim);
                 continue;
@@ -89,7 +88,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         processRequestAsync(timsToSend);
 
         String responseMessage = gson.toJson(resultList);
-        if (errList.size() > 0) {
+        if (!errList.isEmpty()) {
             utility.logWithDate("Failed to send TIMs: " + gson.toJson(errList), this.getClass());
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
@@ -105,7 +104,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         utility.logWithDate(dateFormat.format(date) + " - All Clear", this.getClass());
         String post = gson.toJson(timRcList);
-        utility.logWithDate(post.toString(), this.getClass());
+        utility.logWithDate(post, this.getClass());
 
         List<ControllerResult> errList = new ArrayList<ControllerResult>();
         ControllerResult resultTim = null;
@@ -113,7 +112,7 @@ public class WydotTimRcController extends WydotTimBaseController {
 
         for (WydotTimRc wydotTim : timRcList.getTimRcList()) {
             resultTim = validateRcAc(wydotTim);
-            if (resultTim.getResultMessages().size() > 0) {
+            if (!resultTim.getResultMessages().isEmpty()) {
                 resultList.add(resultTim);
                 errList.add(resultTim);
                 continue;
@@ -144,7 +143,7 @@ public class WydotTimRcController extends WydotTimBaseController {
         }
 
         // Expire existing tims
-        if (existingTimIds.size() > 0) {
+        if (!existingTimIds.isEmpty()) {
             timGenerationHelper.expireTimAndResubmitToOde(existingTimIds);
         }
 
@@ -158,7 +157,7 @@ public class WydotTimRcController extends WydotTimBaseController {
             public void run() {
                 var startTime = getStartTime();
                 for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null, ContentEnum.advisory,
+                    processRequest(tim, getTimType(type), startTime, null, null,
                             TravelerInfoType.advisory);
                 }
             }

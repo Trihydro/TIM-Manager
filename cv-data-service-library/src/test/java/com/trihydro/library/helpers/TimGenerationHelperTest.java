@@ -1340,7 +1340,7 @@ class TimGenerationHelperTest {
         tum.setEndPoint(new Coordinate(BigDecimal.valueOf(-3L), BigDecimal.valueOf(-4L)));
 
         // TIM Props
-        tum.setMsgCnt(1);// int
+        tum.setMsgCnt(0);// int
         tum.setUrlB("urlb");// String
         tum.setStartDate_Timestamp(Timestamp.from(Instant.now()));// Timestamp
         tum.setEndDate_Timestamp(Timestamp.from(Instant.now()));// Timestamp

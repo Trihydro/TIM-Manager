@@ -1131,8 +1131,8 @@ public class TimGenerationHelper {
                 createNewActiveTimHoldingRecord(timToSend.getTim().getPacketID(), aTim,
                     rsu.getRsuTarget(), nextRsuIndex, null);
 
-                // set msgCnt to 1 and create new packetId
-                timToSend.getTim().setMsgCnt(1);
+                // set msgCnt to 0 and create new packetId
+                timToSend.getTim().setMsgCnt(0);
                 timToSend.getRequest().getRsus()[0].setRsuIndex(nextRsuIndex);
 
                 var newRsuEx = odeService.sendNewTimToRsu(timToSend);

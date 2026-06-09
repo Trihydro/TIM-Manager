@@ -356,8 +356,8 @@ public class WydotTimService {
                 var df = timToSend.getTim().getDataframes()[0];
                 timToSend.getRequest().setSnmp(snmpHelper.getSnmp(df.getStartDateTime(), endDateTime, timToSend));
 
-                // set msgCnt to 1
-                timToSend.getTim().setMsgCnt(1);
+                // set msgCnt to 0
+                timToSend.getTim().setMsgCnt(0);
                 odeService.sendNewTimToRsu(timToSend);
             }
         }
@@ -533,8 +533,8 @@ public class WydotTimService {
 
     private void sendNewTimToSdw(WydotTravelerInputData timToSend, String recordId, List<Milepost> reducedMileposts) {
 
-        // set msgCnt to 1 and create new packetId
-        timToSend.getTim().setMsgCnt(1);
+        // set msgCnt to 0 and create new packetId
+        timToSend.getTim().setMsgCnt(0);
 
         SDW sdw = new SDW();
 

@@ -41,7 +41,6 @@ public class TimUpdateModel extends ActiveTim {
 
     public BigDecimal getLaneWidth() {
         return laneWidth;
-        // DataFrame df;df.setFrameType(frameType);
     }
 
     public String getRegionDirection() {

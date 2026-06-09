@@ -105,10 +105,8 @@ public class CreateBaseTimUtilTest {
         wydotTim.setItisCodes(itisCodes);
         wydotTim.setClientId("testclientid");
 
-        var frameType = TravelerInfoType.advisory;
-
         // Act
-        var data = uut.buildTim(wydotTim, genProps, frameType, allMileposts, milepostsReduced, anchor);
+        var data = uut.buildTim(wydotTim, genProps, allMileposts, milepostsReduced, anchor);
 
         // Assert
         // validate dataFrame
@@ -116,6 +114,7 @@ public class CreateBaseTimUtilTest {
         Assertions.assertNotNull(dataFrame);
         Assertions.assertEquals("advisory", dataFrame.getContent());
         Assertions.assertEquals(32000, dataFrame.getDurationTime());
+        Assertions.assertEquals(TravelerInfoType.roadSignage, dataFrame.getFrameType());
 
         var region = dataFrame.getRegions()[0];
         Assertions.assertNotNull(region);
@@ -123,8 +122,6 @@ public class CreateBaseTimUtilTest {
         // validate anchor
         var anchor = region.getAnchorPosition();
         Assertions.assertNotNull(anchor);
-        Assertions.assertEquals(anchor.getLatitude(), anchor.getLatitude());
-        Assertions.assertEquals(anchor.getLongitude(), anchor.getLongitude());
 
         // validate path
         var path = region.getPath();
@@ -153,10 +150,8 @@ public class CreateBaseTimUtilTest {
         wydotTim.setItisCodes(itisCodes);
         wydotTim.setClientId("testclientid");
 
-        var frameType = TravelerInfoType.advisory;
-
         // Act
-        var data = uut.buildTim(wydotTim, genProps, frameType, allMileposts, milepostsReduced, anchor);
+        var data = uut.buildTim(wydotTim, genProps, allMileposts, milepostsReduced, anchor);
 
         // Assert
         // validate dataFrame
@@ -164,6 +159,7 @@ public class CreateBaseTimUtilTest {
         Assertions.assertNotNull(dataFrame);
         Assertions.assertEquals("advisory", dataFrame.getContent());
         Assertions.assertEquals(32000, dataFrame.getDurationTime());
+        Assertions.assertEquals(TravelerInfoType.roadSignage, dataFrame.getFrameType());
 
         var region = dataFrame.getRegions()[0];
         Assertions.assertNotNull(region);
@@ -171,8 +167,6 @@ public class CreateBaseTimUtilTest {
         // validate anchor
         var anchor = region.getAnchorPosition();
         Assertions.assertNotNull(anchor);
-        Assertions.assertEquals(anchor.getLatitude(), anchor.getLatitude());
-        Assertions.assertEquals(anchor.getLongitude(), anchor.getLongitude());
 
         // validate path
         var path = region.getPath();
@@ -201,10 +195,8 @@ public class CreateBaseTimUtilTest {
         wydotTim.setItisCodes(itisCodes);
         wydotTim.setClientId("testclientid");
 
-        var frameType = TravelerInfoType.advisory;
-
         // Act
-        var data = uut.buildTim(wydotTim, genProps, frameType, allMileposts, milepostsReduced, anchor);
+        var data = uut.buildTim(wydotTim, genProps, allMileposts, milepostsReduced, anchor);
 
         // Assert
         Assertions.assertEquals(1, data.getTim().getDataframes()[0].getRegions().length);
@@ -231,10 +223,8 @@ public class CreateBaseTimUtilTest {
         wydotTim.setItisCodes(itisCodes);
         wydotTim.setClientId("testclientid");
 
-        var frameType = TravelerInfoType.advisory;
-
         // Act
-        var data = uut.buildTim(wydotTim, genProps, frameType, allMileposts, milepostsReduced, anchor);
+        var data = uut.buildTim(wydotTim, genProps, allMileposts, milepostsReduced, anchor);
 
         // Assert
         Assertions.assertEquals(2, data.getTim().getDataframes()[0].getRegions().length);
@@ -273,10 +263,8 @@ public class CreateBaseTimUtilTest {
         wydotTim.setItisCodes(itisCodes);
         wydotTim.setClientId("testclientid");
 
-        var frameType = TravelerInfoType.advisory;
-
         // Act
-        var data = uut.buildTim(wydotTim, genProps, frameType, allMileposts, milepostsReduced, anchor);
+        var data = uut.buildTim(wydotTim, genProps, allMileposts, milepostsReduced, anchor);
 
         // Assert
         Assertions.assertEquals(3, data.getTim().getDataframes()[0].getRegions().length);

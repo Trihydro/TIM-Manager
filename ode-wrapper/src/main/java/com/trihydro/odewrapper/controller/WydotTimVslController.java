@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
-import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -88,13 +87,10 @@ public class WydotTimVslController extends WydotTimBaseController {
 
     public void processRequestAsync(List<WydotTim> wydotTims) {
         // An Async task always executes in new thread
-        new Thread(new Runnable() {
-            public void run() {
-                var startTime = getStartTime();
-                for (WydotTim tim : wydotTims) {
-                    processRequest(tim, getTimType(type), startTime, null, null,
-                            TravelerInfoType.roadSignage);
-                }
+        new Thread(() -> {
+            var startTime = getStartTime();
+            for (WydotTim tim : wydotTims) {
+                processRequest(tim, getTimType(type), startTime, null, null);
             }
         }).start();
     }

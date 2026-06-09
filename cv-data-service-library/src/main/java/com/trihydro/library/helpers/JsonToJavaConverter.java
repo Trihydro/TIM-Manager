@@ -59,7 +59,7 @@ public class JsonToJavaConverter {
             // check for null rxSource for Distress Notifications
             if (receivedMessageDetailsNode != null) {
                 String rxSource = mapper.treeToValue(receivedMessageDetailsNode.get("rxSource"), String.class);
-                if (rxSource.equals("")) {
+                if (rxSource.isEmpty()) {
                     ((ObjectNode) receivedMessageDetailsNode).remove("rxSource");
                     ((ObjectNode) metaDataNode).replace("receivedMessageDetails", receivedMessageDetailsNode);
                 }
@@ -463,7 +463,7 @@ public class JsonToJavaConverter {
             JsonNode timeStampNode = timNode.get("timeStamp");
             if (timeStampNode != null) {
                 LocalDateTime timeStampDate = firstDay.atStartOfDay().plus(timeStampNode.asInt(), ChronoUnit.MINUTES);
-                tim.setTimeStamp(timeStampDate.toString() + "Z");
+                tim.setTimeStamp(timeStampDate + "Z");
             }
 
             JsonNode travelerDataFrameArray = timNode.findValue("dataFrames");
@@ -517,25 +517,16 @@ public class JsonToJavaConverter {
                     itemsList.add(item);
                 }
 
-                // TravelerInfoType.valueOf();
-                JsonNode frameTypeNode = travelerDataFrame.get("frameType");
-                if (frameTypeNode != null && frameTypeNode.fieldNames().hasNext()) {
-                    TravelerInfoType frameType = TravelerInfoType.valueOf(frameTypeNode.fieldNames().next());
-                    dataFrame.setFrameType(frameType);
-                } else {
-                    log.warn("frameType not found in TravelerDataFrame when converting TMC TIM. Defaulting to 'advisory'");
-                    dataFrame.setFrameType(TravelerInfoType.advisory);
-                }
-
                 JsonNode startTimeNode = travelerDataFrame.get("startTime");
                 JsonNode durationNode = travelerDataFrame.get("durationTime");
                 JsonNode priorityNode = travelerDataFrame.get("priority");
 
                 LocalDateTime startDate = firstDay.atStartOfDay().plus(startTimeNode.asInt(), ChronoUnit.MINUTES);
 
-                dataFrame.setStartDateTime(startDate.toString() + "Z");
+                dataFrame.setStartDateTime(startDate + "Z");
                 dataFrame.setDurationTime(durationNode.asInt());
                 dataFrame.setPriority(priorityNode.asInt());
+                dataFrame.setFrameType(TravelerInfoType.roadSignage);
 
                 String[] items = new String[itemsList.size()];
                 items = itemsList.toArray(items);

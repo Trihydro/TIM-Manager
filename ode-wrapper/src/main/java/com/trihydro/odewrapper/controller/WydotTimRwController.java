@@ -12,6 +12,7 @@ import com.trihydro.library.helpers.TimGenerationHelper;
 import com.trihydro.library.helpers.Utility;
 import com.trihydro.library.model.ActiveTim;
 import com.trihydro.library.model.Buffer;
+import com.trihydro.library.model.ContentEnum;
 import com.trihydro.library.model.Coordinate;
 import com.trihydro.library.model.TimRwList;
 import com.trihydro.library.model.WydotTimRw;
@@ -38,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
-import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
 
 @CrossOrigin
 @RestController
@@ -251,7 +251,7 @@ public class WydotTimRwController extends WydotTimBaseController {
         // An Async task always executes in new thread
         new Thread(() -> {
             for (WydotTimRw tim : timsToSend) {
-                processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null, TravelerInfoType.advisory);
+                processRequest(tim, getTimType(type), tim.getSchedStart(), tim.getSchedEnd(), null);
             }
         }).start();
 

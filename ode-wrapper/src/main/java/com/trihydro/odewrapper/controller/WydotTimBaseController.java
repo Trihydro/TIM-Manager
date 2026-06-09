@@ -48,8 +48,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import us.dot.its.jpo.ode.plugin.j2735.timstorage.FrameType.TravelerInfoType;
-
 @Component
 @Slf4j
 public abstract class WydotTimBaseController {
@@ -637,23 +635,18 @@ public abstract class WydotTimBaseController {
     }
 
     public void processRequest(WydotTim wydotTim, TimType timType, String startDateTime,
-                               String endDateTime, Integer pk,
-                               TravelerInfoType frameType) {
-
+                               String endDateTime, Integer pk) {
         if (wydotTim.getDirection().equalsIgnoreCase("b")) {
             var iTim = wydotTim.copy();
             var dTim = wydotTim.copy();
             iTim.setDirection("I");
             dTim.setDirection("D");
             // I
-            expireReduceCreateSendTims(iTim, timType, startDateTime, endDateTime, pk,
-                frameType);
+            expireReduceCreateSendTims(iTim, timType, startDateTime, endDateTime, pk);
             // D
-            expireReduceCreateSendTims(dTim, timType, startDateTime, endDateTime, pk,
-                frameType);
+            expireReduceCreateSendTims(dTim, timType, startDateTime, endDateTime, pk);
         } else {
-            expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk,
-                frameType);
+            expireReduceCreateSendTims(wydotTim, timType, startDateTime, endDateTime, pk);
         }
     }
 
@@ -681,8 +674,7 @@ public abstract class WydotTimBaseController {
     }
 
     protected void expireReduceCreateSendTims(WydotTim wydotTim, TimType timType,
-                                              String startDateTime, String endDateTime, Integer pk,
-                                              TravelerInfoType frameType) {
+                                              String startDateTime, String endDateTime, Integer pk) {
         // Clear any existing TIMs with the same client id
         Long timTypeId = timType != null ? timType.getTimTypeId() : null;
         var existingTims =
@@ -724,20 +716,20 @@ public abstract class WydotTimBaseController {
         var reducedMileposts = milepostReduction.applyMilepostReductionAlgorithm(milepostsAll,
             configuration.getPathDistanceLimit());
 
-        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk, frameType,
+        createSendTims(wydotTim, timType, startDateTime, endDateTime, pk,
             milepostsAll, reducedMileposts, anchor);
     }
 
     // creates a TIM and sends it to RSUs and Satellite
     protected void createSendTims(WydotTim wydotTim, TimType timType, String startDateTime,
                                   String endDateTime, Integer pk,
-                                  TravelerInfoType frameType, List<Milepost> allMileposts,
+                                  List<Milepost> allMileposts,
                                   List<Milepost> reducedMileposts, Milepost anchor) {
 
         // create TIM
         WydotTravelerInputData timToSend =
             wydotTimService.createTim(wydotTim, timType.getType(), startDateTime, endDateTime,
-                frameType, allMileposts, reducedMileposts, anchor, configuration.getDotGnisId());
+                allMileposts, reducedMileposts, anchor, configuration.getDotGnisId());
 
         if (timToSend == null) {
             return;

@@ -45,11 +45,11 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         Timestamp time = new Timestamp(dt.getTime());
 
         // Act
-        Long data = uut.AddDataFrame(dFrame, -1l);
+        Long data = uut.AddDataFrame(dFrame, -1L);
 
         // Assert
         Assertions.assertEquals(Long.valueOf(-1), data);
-        verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);// TIM_ID
+        verify(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1L);// TIM_ID
         verify(mockSqlNullHandler).setShortOrNull(mockPreparedStatement, 2, dFrame.getDoNotUse1());// SSP_TIM_RIGHTS & NotUsed
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 3, null);// FRAME_TYPE
         verify(mockSqlNullHandler).setIntegerOrNull(mockPreparedStatement, 4, dFrame.getDurationTime());// DURATION_TIME
@@ -69,10 +69,10 @@ public class DataFrameServiceTest extends TestBase<DataFrameService> {
         // Arrange
         DataFrame dFrame = new DataFrame();
         dFrame.setStartDateTime("2020-02-03T16:00Z");
-        doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1l);
+        doThrow(new SQLException()).when(mockSqlNullHandler).setLongOrNull(mockPreparedStatement, 1, -1L);
         
         // Act
-        Long data = uut.AddDataFrame(dFrame, -1l);
+        Long data = uut.AddDataFrame(dFrame, -1L);
 
         // Assert
         Assertions.assertEquals(Long.valueOf(0), data);

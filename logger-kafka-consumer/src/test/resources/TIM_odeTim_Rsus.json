@@ -58,7 +58,7 @@
             ]
           },
           "durationTime": 32000,
-          "frameType": "advisory",
+          "frameType": "roadSignage",
           "msgId": {
             "roadSignID": {
               "mutcdCode": "warning",

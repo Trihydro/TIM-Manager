@@ -23,7 +23,7 @@
         "dataframes": [
           {
             "doNotUse1": 0,
-            "frameType": "advisory",
+            "frameType": "roadSignage",
             "msgId": {
               "furtherInfoID": "CDEF"
             },

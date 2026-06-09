@@ -37,7 +37,7 @@
 			"dataFrames": [
 				{
 					"doNotUse1": 0,
-					"frameType": "advisory",
+					"frameType": "roadSignage",
 					"msgId": {
 						"roadSignID": {
                             "position": { "lat": 417732928, "long": -1071000312 },

@@ -42,14 +42,13 @@ public class CreateBaseTimUtil {
      *
      * @param wydotTim The WydotTim object containing the data for the TIM.
      * @param genProps The TimGenerationProps object containing the generation properties.
-     * @param frameType The TravelerInfoType object representing the frame type of the TIM.
      * @param allMileposts The list of Milepost objects representing all mileposts.
      * @param reducedMileposts The list of Milepost objects representing reduced mileposts.
      * @param anchor The Milepost object representing the anchor milepost.
      * @return The WydotTravelerInputData object containing the built TIM.
      */
     public WydotTravelerInputData buildTim(WydotTim wydotTim, TimGenerationProps genProps,
-            TravelerInfoType frameType, List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
+            List<Milepost> allMileposts, List<Milepost> reducedMileposts, Milepost anchor) {
 
         ContentEnum content = ContentEnum.advisory;
 
@@ -73,7 +72,9 @@ public class CreateBaseTimUtil {
         dataFrame.setPriority(5);
 
         dataFrame.setContent(content.getStringValue());
-        dataFrame.setFrameType(frameType);
+        // Per CTW, FrameType should be set to roadSignage when state or local deployment agency is generating the message
+        // which is all messages coming through the TIMM so always set to roadSignage
+        dataFrame.setFrameType(TravelerInfoType.roadSignage);
         dataFrame.setUrl("null");
         // add itis codes to tim
         dataFrame.setItems(wydotTim.getItisCodes().toArray(new String[wydotTim.getItisCodes().size()]));
@@ -84,7 +85,7 @@ public class CreateBaseTimUtil {
         anchorPosition.setLongitude(anchor.getLongitude());
         
         // build msgId
-        MsgId msgId = buildMsgId(anchorPosition, content, frameType);
+        MsgId msgId = buildMsgId(anchorPosition, content, TravelerInfoType.roadSignage);
         dataFrame.setMsgId(msgId);
 
         // set regions. note that we now support multiple regions in a single TIM package
